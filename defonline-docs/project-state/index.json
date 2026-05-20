@@ -1,19 +1,260 @@
 {
   "version": 1,
-  "generated_at": "2026-05-20T00:00:00Z",
+  "generated_at": "2026-05-20T21:00:00Z",
   "project": {
     "name": "DEFOnline",
-    "current_wave": null,
+    "current_wave": "WAVE-2026-01",
     "current_sprint": null
   },
-  "waves": [],
-  "epics": [],
-  "stories": [],
+  "product": {
+    "vision": {
+      "path": "product/vision.md",
+      "version": "1.0",
+      "updated_at": "2026-05-20"
+    },
+    "personas": {
+      "path": "product/personas.md",
+      "version": "1.0",
+      "updated_at": "2026-05-20",
+      "primary_persona": "Roberto (dono de pequena indústria, EPP)"
+    },
+    "north_star": {
+      "path": "product/north-star.md",
+      "version": "1.0",
+      "updated_at": "2026-05-20",
+      "metric": "MPEs ativas com ≥1 diagnóstico concluído nos últimos 90 dias",
+      "target_12m_post_golive": 500,
+      "calibration_pdr_due": "after_first_3_months_of_production"
+    }
+  },
+  "waves": [
+    {
+      "id": "WAVE-2026-01",
+      "title": "Hipótese do Roberto",
+      "status": "active",
+      "goal": "Validar que o DEFOnline entrega valor real ao dono de pequena indústria, entregando em homologação o ciclo cadastro → diagnóstico → histórico no setor Indústria, sem cobrança.",
+      "start_date": "2026-05-20",
+      "target_end_date": "2026-08-26",
+      "epic_ids": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
+      "path": "roadmap/current-wave.md",
+      "related_pdr": "PDR-001"
+    },
+    {
+      "id": "WAVE-2026-02",
+      "title": "Comercialização + cobertura de setores (rascunho)",
+      "status": "planned",
+      "goal": "(rascunho — a confirmar após retro da WAVE-2026-01)",
+      "path": "roadmap/next-wave.md"
+    }
+  ],
+  "epics": [
+    {
+      "id": "EPIC-000",
+      "slug": "foundation",
+      "title": "Foundation técnica do projeto pós-reset",
+      "wave": "WAVE-2026-01",
+      "status": "ready",
+      "path": "epics/EPIC-000-foundation/epic.md",
+      "story_ids": ["STORY-001", "STORY-002", "STORY-003", "STORY-004", "STORY-005", "STORY-006", "STORY-007", "STORY-008"],
+      "validation_report": null,
+      "created_at": "2026-05-20",
+      "updated_at": "2026-05-20"
+    },
+    {
+      "id": "EPIC-001",
+      "slug": "cadastro-minimo",
+      "title": "Cadastro mínimo de Usuário e Empresa Analisada",
+      "wave": "WAVE-2026-01",
+      "status": "draft",
+      "path": "epics/EPIC-001-cadastro-minimo/epic.md",
+      "story_ids": [],
+      "validation_report": null,
+      "blocked_by_epics": ["EPIC-000"],
+      "created_at": "2026-05-20",
+      "updated_at": "2026-05-20"
+    },
+    {
+      "id": "EPIC-002",
+      "slug": "diagnostico-industria",
+      "title": "Diagnóstico Econômico-Financeiro para Indústria",
+      "wave": "WAVE-2026-01",
+      "status": "draft",
+      "path": "epics/EPIC-002-diagnostico-industria/epic.md",
+      "story_ids": [],
+      "validation_report": null,
+      "blocked_by_epics": ["EPIC-000", "EPIC-001"],
+      "created_at": "2026-05-20",
+      "updated_at": "2026-05-20"
+    },
+    {
+      "id": "EPIC-003",
+      "slug": "historico-basico",
+      "title": "Histórico básico de diagnósticos",
+      "wave": "WAVE-2026-01",
+      "status": "draft",
+      "path": "epics/EPIC-003-historico-basico/epic.md",
+      "story_ids": [],
+      "validation_report": null,
+      "blocked_by_epics": ["EPIC-002"],
+      "created_at": "2026-05-20",
+      "updated_at": "2026-05-20"
+    }
+  ],
+  "stories": [
+    {
+      "id": "STORY-001",
+      "epic_id": "EPIC-000",
+      "title": "SPIKE — Decisão de stack",
+      "type": "spike",
+      "target_role": "arquiteto",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": null,
+      "path": "epics/EPIC-000-foundation/stories/STORY-001-spike-stack.md",
+      "blocked_by": [],
+      "blocks": ["STORY-007"],
+      "estimated_session_size": "L",
+      "created_at": "2026-05-20",
+      "updated_at": "2026-05-20"
+    },
+    {
+      "id": "STORY-002",
+      "epic_id": "EPIC-000",
+      "title": "SPIKE — Topologia macro do sistema",
+      "type": "spike",
+      "target_role": "arquiteto",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": null,
+      "path": "epics/EPIC-000-foundation/stories/STORY-002-spike-topologia.md",
+      "blocked_by": [],
+      "blocks": ["STORY-007"],
+      "estimated_session_size": "M",
+      "created_at": "2026-05-20",
+      "updated_at": "2026-05-20"
+    },
+    {
+      "id": "STORY-003",
+      "epic_id": "EPIC-000",
+      "title": "SPIKE — Persistência (migrations, multi-tenancy, audit, LGPD)",
+      "type": "spike",
+      "target_role": "arquiteto",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": null,
+      "path": "epics/EPIC-000-foundation/stories/STORY-003-spike-persistencia.md",
+      "blocked_by": [],
+      "blocks": ["STORY-007"],
+      "estimated_session_size": "M",
+      "created_at": "2026-05-20",
+      "updated_at": "2026-05-20"
+    },
+    {
+      "id": "STORY-004",
+      "epic_id": "EPIC-000",
+      "title": "SPIKE — Infra (cloud, IaC, 3 ambientes, Docker, custo)",
+      "type": "spike",
+      "target_role": "arquiteto",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": null,
+      "path": "epics/EPIC-000-foundation/stories/STORY-004-spike-infra.md",
+      "blocked_by": [],
+      "blocks": ["STORY-007"],
+      "estimated_session_size": "M",
+      "created_at": "2026-05-20",
+      "updated_at": "2026-05-20"
+    },
+    {
+      "id": "STORY-005",
+      "epic_id": "EPIC-000",
+      "title": "SPIKE — CI/CD (pipeline, branching, deploy, rollback)",
+      "type": "spike",
+      "target_role": "arquiteto",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": null,
+      "path": "epics/EPIC-000-foundation/stories/STORY-005-spike-cicd.md",
+      "blocked_by": [],
+      "blocks": ["STORY-007"],
+      "estimated_session_size": "M",
+      "created_at": "2026-05-20",
+      "updated_at": "2026-05-20"
+    },
+    {
+      "id": "STORY-006",
+      "epic_id": "EPIC-000",
+      "title": "SPIKE — Observabilidade + captura de eventos de produto",
+      "type": "spike",
+      "target_role": "arquiteto",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": null,
+      "path": "epics/EPIC-000-foundation/stories/STORY-006-spike-observabilidade.md",
+      "blocked_by": [],
+      "blocks": ["STORY-007"],
+      "estimated_session_size": "M",
+      "created_at": "2026-05-20",
+      "updated_at": "2026-05-20"
+    },
+    {
+      "id": "STORY-007",
+      "epic_id": "EPIC-000",
+      "title": "Hello world deployado em homologação via pipeline",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "draft",
+      "owner_agent": null,
+      "sprint_id": null,
+      "path": "epics/EPIC-000-foundation/stories/STORY-007-hello-world-deployado.md",
+      "blocked_by": ["STORY-001", "STORY-002", "STORY-003", "STORY-004", "STORY-005", "STORY-006"],
+      "blocks": ["STORY-008"],
+      "estimated_session_size": "L",
+      "created_at": "2026-05-20",
+      "updated_at": "2026-05-20",
+      "note": "Promover para 'ready' quando todas as 6 ADRs do EPIC-000 estiverem 'accepted'."
+    },
+    {
+      "id": "STORY-008",
+      "epic_id": "EPIC-000",
+      "title": "Validação final do EPIC-000 Foundation",
+      "type": "validation",
+      "target_role": "validador",
+      "status": "draft",
+      "owner_agent": null,
+      "sprint_id": null,
+      "path": "epics/EPIC-000-foundation/stories/STORY-008-validacao-epic-000.md",
+      "blocked_by": ["STORY-007"],
+      "blocks": [],
+      "estimated_session_size": "M",
+      "created_at": "2026-05-20",
+      "updated_at": "2026-05-20",
+      "note": "Promover para 'ready' quando STORY-007 estiver 'in_review'."
+    }
+  ],
   "sprints": [],
   "decisions": {
-    "pdr": [],
+    "pdr": [
+      {
+        "id": "PDR-001",
+        "slug": "escopo-wave-2026-01",
+        "title": "Escopo da WAVE-2026-01 — Hipótese do Roberto",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-001-escopo-wave-2026-01.md",
+        "decided_at": "2026-05-20",
+        "decided_by": "PO (Alexandro / Claude)",
+        "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"]
+      }
+    ],
     "adr": [],
     "idr": []
   },
-  "reports": []
+  "reports": [
+    {
+      "date": "2026-05-20",
+      "type": "wave_opening",
+      "wave": "WAVE-2026-01",
+      "path": "reports/status-2026-05-20.md"
+    }
+  ]
 }
