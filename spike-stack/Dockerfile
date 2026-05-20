@@ -1,4 +1,4 @@
-FROM php:8.3-cli-alpine
+FROM php:8.5-cli-alpine
 
 RUN apk add --no-cache \
     bash git curl unzip \
@@ -7,8 +7,7 @@ RUN apk add --no-cache \
     chromium chromium-chromedriver \
     nodejs npm
 
-RUN docker-php-ext-install \
-    pdo pdo_pgsql mbstring zip exif pcntl bcmath intl opcache
+RUN docker-php-ext-install pdo_pgsql zip bcmath
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

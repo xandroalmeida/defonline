@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
-# Spike POC bootstrapper — "1 comando" para subir Laravel 11 + Livewire 3 + Postgres 16 + Pest + Dusk.
+# Spike POC bootstrapper — "1 comando" para subir Laravel 13 + Livewire 4 + Postgres 18 + Pest 4 + Dusk 8.
 # Idempotente: na primeira execução scaffolda Laravel; nas seguintes só sobe os serviços.
 
 set -euo pipefail
 cd "$(dirname "$0")"
 
 if [ ! -f app/composer.json ]; then
-  echo "==> [1/6] Scaffolding Laravel 11 (primeira execução)..."
+  echo "==> [1/6] Scaffolding Laravel 13 (primeira execução)..."
   mkdir -p app
   rm -f app/.gitkeep
   docker compose run --rm --no-deps app \
-    composer create-project laravel/laravel:^11.0 . --no-interaction --prefer-dist
+    composer create-project laravel/laravel:^13.0 . --no-interaction --prefer-dist
 
-  echo "==> [2/6] Instalando Livewire 3, Pest 3 e Laravel Dusk 8..."
+  echo "==> [2/6] Instalando Livewire 4, Pest 4 e Laravel Dusk 8..."
   docker compose run --rm --no-deps app sh -c "\
-    composer require livewire/livewire:^3.0 --no-interaction && \
-    composer require --dev pestphp/pest:^3.0 pestphp/pest-plugin-laravel:^3.0 laravel/dusk:^8.0 --no-interaction -W && \
+    composer require livewire/livewire:^4.0 --no-interaction && \
+    composer require --dev pestphp/pest:^4.0 pestphp/pest-plugin-laravel:^4.0 laravel/dusk:^8.0 --no-interaction -W && \
     php artisan dusk:install --no-interaction"
 
   echo "==> [3/6] Configurando .env (Postgres como conexão padrão)..."
