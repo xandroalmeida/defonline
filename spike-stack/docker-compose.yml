@@ -1,0 +1,49 @@
+name: defonline-spike-stack
+
+services:
+  app:
+    build: .
+    container_name: spike-app
+    working_dir: /var/www/html
+    volumes:
+      - ./app:/var/www/html
+    ports:
+      - "8090:8000"
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8090
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: defonline_spike
+      DB_USERNAME: defonline
+      DB_PASSWORD: defonline
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "php artisan serve --host=0.0.0.0 --port=8000"
+
+  db:
+    image: postgres:16-alpine
+    container_name: spike-db
+    environment:
+      POSTGRES_DB: defonline_spike
+      POSTGRES_USER: defonline
+      POSTGRES_PASSWORD: defonline
+    ports:
+      - "5436:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U defonline -d defonline_spike"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  dbdata:
