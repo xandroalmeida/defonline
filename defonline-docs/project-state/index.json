@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "generated_at": "2026-05-20T00:00:00Z",
+  "project": {
+    "name": "DEFOnline",
+    "current_wave": null,
+    "current_sprint": null
+  },
+  "waves": [],
+  "epics": [],
+  "stories": [],
+  "sprints": [],
+  "decisions": {
+    "pdr": [],
+    "adr": [],
+    "idr": []
+  },
+  "reports": []
+}

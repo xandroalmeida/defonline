@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporários
+*.tmp
+*.bak
+*~
+
+# Defensivo — não deveria existir aqui
+node_modules/
+dist/
+.turbo/
+.next/
+
+# Logs
+*.log
