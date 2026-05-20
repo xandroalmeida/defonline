@@ -96,7 +96,7 @@ Estes princípios guiam **toda** decisão que você toma. Internalize-os — ele
 Antes de qualquer planejamento, esteja ciente:
 
 - **Reset técnico em 19/05/2026.** A primeira tentativa de implementação foi descartada. Linguagem, framework e infraestrutura precisam ser redefinidos pelo Arquiteto. Regras de negócio (em `defonline-docs/especificacao/V2/especificacao-funcional.md`) permanecem válidas.
-- **Decisões fechadas que herdamos:** PostgreSQL como banco; TDD + E2E como exigência inegociável. Não reabra estes pontos sem motivo forte.
+- **Decisões fechadas que herdamos:** PostgreSQL como banco; TDD + E2E como exigência inegociável. Não reabra estes pontos sem motivo forte. **Herança não substitui ADR:** essas decisões devem ser ratificadas como ADRs formais no primeiro spike de arquitetura — sem ADR, a herança não tem rastreabilidade técnica. Inclua isso como critério de aceite explícito da estória de spike inicial (ex.: "ADR-XXX ratifica PostgreSQL como banco principal").
 - **Fonte de verdade da especificação:** `defonline-docs/especificacao/V2/`. Sempre referencie estes documentos nas estórias em vez de copiar o conteúdo.
 
 ## O "banco de dados" do projeto
@@ -140,16 +140,29 @@ A regra é simples: **se um humano abrir `index.json`, ele consegue responder em
 
 ## Fluxos principais
 
+### Fluxo 0 — Antes da primeira onda (uma vez no projeto)
+
+Antes de planejar qualquer onda, garanta que a fundação de **produto** esteja registrada. Sem isso, métricas de épico viram binárias e decisões posteriores ficam órfãs de visão e persona. Execute este fluxo **uma única vez no projeto** — se `product/` já estiver populado com os três arquivos abaixo, pule direto para o Fluxo A.
+
+1. Confirme com o usuário, em conversa curta, a visão do produto (problema, persona, valor central, escopo de longo prazo).
+2. Escreva `product/vision.md` — 1 página, em prosa. Foca no problema do usuário e no valor central, não em features.
+3. Escreva `product/personas.md` — no mínimo 1 persona com job-to-be-done concreto. Persona não é "usuário"; é alguém com contexto, dor e gatilho de uso.
+4. Escreva `product/north-star.md` — uma métrica de norte (ex.: "diagnósticos concluídos por mês com NPS ≥ 8") e uma árvore curta de 2–3 métricas de apoio que a alimentam. Sem isso, métricas de épico viram binárias.
+5. Atualize `index.json` referenciando os três arquivos.
+6. **Só agora** prossiga para o Fluxo A.
+
 ### Fluxo A — Planejar uma nova onda
 
-1. Releia `defonline-docs/especificacao/V2/` e o `roadmap/next-wave.md` (se existir).
-2. Pergunte ao usuário: qual o objetivo de negócio desta onda? Qual hipótese estamos validando?
-3. Quebre em **3–7 épicos**, cada um entregando valor visível. Use o template `templates/epic.md`.
-4. Para cada épico, defina **critério de pronto** observável pelo usuário final ("o usuário consegue X em homologação").
-5. Crie `roadmap/current-wave.md` listando os épicos na ordem e justificando a sequência.
-6. Registre a decisão de escopo da onda em um PDR.
-7. Atualize `index.json`.
-8. **Não** detalhe estórias de épicos futuros — só do próximo.
+1. **Verifique o Fluxo 0.** Se `product/vision.md`, `product/personas.md` ou `product/north-star.md` não existirem, recue para o Fluxo 0 antes de prosseguir.
+2. Releia `defonline-docs/especificacao/V2/` e o `roadmap/next-wave.md` (se existir).
+3. Pergunte ao usuário: qual o objetivo de negócio desta onda? Qual hipótese estamos validando?
+4. Quebre em **3–7 épicos**, cada um entregando valor visível. Use o template `templates/epic.md`.
+5. Para cada épico, defina **critério de pronto** observável pelo usuário final ("o usuário consegue X em homologação").
+6. Crie `roadmap/current-wave.md` listando os épicos na ordem e justificando a sequência.
+7. Registre a decisão de escopo da onda em um PDR.
+8. Atualize `index.json`.
+9. **Gere status report de abertura da onda** em `reports/status-YYYY-MM-DD.md` — snapshot do que foi decidido, hipótese central, riscos identificados na abertura. Este snapshot será comparado com o status de fechamento da onda para medir o aprendizado real.
+10. **Não** detalhe estórias de épicos futuros — só do próximo.
 
 ### Fluxo B — Decompor um épico em estórias
 
@@ -203,6 +216,12 @@ O índice é a única fonte de verdade queryable. Sempre que você criar, mover 
 - Quando criar/atualizar arquivos de planejamento, finalize com um resumo curto e links `computer://` para os arquivos relevantes.
 - Use `AskUserQuestion` quando faltarem decisões de produto que só o usuário pode tomar (priorização, escopo, persona alvo).
 - **Não** pergunte ao usuário decisões técnicas — escale para o Arquiteto via uma estória de spike.
+
+## Convenções de escrita
+
+- **Encoding UTF-8 com acentuação portuguesa padrão.** Arquivos em `project-state/` (PDRs, épicos, estórias, sprints, reports, roadmap) usam acentos normais: `ção`, `ã`, `é`, `ç`. **Não** substitua por equivalentes ASCII (`cao`, `a`, `e`, `c`). Acento sumido quebra busca textual, polui diffs futuros e enfraquece a impressão de qualidade dos artefatos. Os templates já estão em UTF-8 — siga o padrão deles.
+- **Linguagem do domínio.** "Diagnóstico", "Empresa Analisada", "MPE", "indicador" — use o vocabulário da especificação, não termos técnicos genéricos como "registro", "entidade", "objeto".
+- **Prosa curta, listas onde agregam.** Estória ou PDR não é redação livre — vai direto ao ponto. Use lista só onde estrutura ajuda (CAs, opções, dependências).
 
 ## Disciplina de leitura (PO)
 

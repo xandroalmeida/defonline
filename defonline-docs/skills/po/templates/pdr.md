@@ -4,7 +4,7 @@ slug: nome-curto
 title: Título humano da decisão de produto
 status: proposed  # proposed | accepted | superseded | rejected
 decided_at: YYYY-MM-DD
-decided_by: PO (Alexandro/Claude)
+decided_by: PO (<humano que aprovou> / <agente que redigiu>)  # ex.: PO (Alexandro / Claude) ou PO (Alexandro / Codex)
 supersedes: null  # PDR-YYY se aplicável
 superseded_by: null
 related_epics: []

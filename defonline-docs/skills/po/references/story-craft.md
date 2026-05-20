@@ -174,6 +174,43 @@ Só faça isso quando a primeira estória ainda entrega valor sozinha — caso c
 
 ---
 
+## Spike: como dimensionar (1 ADR = 1 spike)
+
+Estória de spike (`type: spike`, `target_role: arquiteto`) tem regra de dimensionamento própria, **mais estrita** que estória de implementação. Spike grande costuma esconder múltiplas decisões heterogêneas que deveriam estar separadas.
+
+### Regra dura
+
+> **Uma estória de spike concentra no máximo 1 ADR — ou 2 ADRs fortemente correlatas.**
+
+ADRs **fortemente correlatas** são as que decidem o mesmo subsistema e cuja decisão de uma trava a decisão da outra:
+
+- ✅ "autenticação" e "estratégia de sessão" — uma decide a outra; cabem juntas.
+- ✅ "fila de jobs" e "broker de mensagens" — acoplamento direto; cabem juntas.
+
+ADRs **heterogêneas** são as que decidem subsistemas diferentes e podem rodar em paralelo:
+
+- ❌ "stack principal" + "CI/CD" + "observabilidade" + "testes" — quatro subsistemas, quatro spikes.
+- ❌ "autenticação" + "e-mail transacional" + "consulta CNPJ" — três áreas, três spikes.
+
+ADRs heterogêneas viram **estórias de spike separadas**, executáveis em paralelo. Concentrá-las viola o princípio "tarefa autocontida em uma sessão" e cria gargalo artificial: tudo que depende da spike espera **todas** as ADRs em vez de só a sua.
+
+### Sinais de spike inchada
+
+- CA-1 e CA-2 pedem ADRs sobre áreas que um humano descreveria como "assuntos diferentes".
+- A estimativa saiu "L" mesmo o trabalho sendo "só deliberar".
+- O título usa plural genérico: "ADRs de fundação", "ADRs de auth e mais coisas".
+- A justificativa para juntar é "tudo é arquitetura mesmo" — não é.
+
+### Quando faz sentido manter junto
+
+Quando as ADRs são tão acopladas que decidir uma sem a outra produz inconsistência (raro). Mesmo nesses casos, considere se não é melhor uma **ADR composta** (uma decisão arquitetural única cobrindo o par) em vez de uma **estória composta** (uma spike concentrando decisões separáveis).
+
+### Spikes e cobertura de testes
+
+Spike não exige cobertura unitária nem E2E — não escreve código de produção. Declare a exceção explicitamente na seção "Padrões de qualidade exigidos" da estória, citando `quality-standards.md`.
+
+---
+
 ## Definition of Ready (DoR) — quando a estória pode entrar em sprint
 
 Estória pronta para entrar em sprint atende:
