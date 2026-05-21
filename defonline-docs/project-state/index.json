@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-20T23:00:00Z",
+  "generated_at": "2026-05-21T16:00:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -123,15 +123,15 @@
       "title": "SPIKE — Topologia macro do sistema",
       "type": "spike",
       "target_role": "arquiteto",
-      "status": "ready",
-      "owner_agent": null,
+      "status": "done",
+      "owner_agent": "arquiteto (claude-opus-4-7)",
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-002-spike-topologia.md",
       "blocked_by": [],
       "blocks": ["STORY-007"],
       "estimated_session_size": "M",
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-20"
+      "updated_at": "2026-05-21"
     },
     {
       "id": "STORY-003",
@@ -139,15 +139,15 @@
       "title": "SPIKE — Persistência (migrations, multi-tenancy, audit, LGPD)",
       "type": "spike",
       "target_role": "arquiteto",
-      "status": "ready",
-      "owner_agent": null,
+      "status": "done",
+      "owner_agent": "arquiteto (claude-opus-4-7)",
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-003-spike-persistencia.md",
       "blocked_by": [],
       "blocks": ["STORY-007"],
       "estimated_session_size": "M",
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-20"
+      "updated_at": "2026-05-21"
     },
     {
       "id": "STORY-004",
@@ -264,6 +264,40 @@
         "spike_commit": "3fc1bb4",
         "created_at": "2026-05-20",
         "updated_at": "2026-05-20"
+      },
+      {
+        "id": "ADR-002",
+        "slug": "topologia",
+        "title": "Topologia do DEFOnline — monolito modular único Laravel com worker e scheduler auxiliares",
+        "type": "topologico",
+        "status": "accepted",
+        "path": "decisions/adr/ADR-002-topologia.md",
+        "decided_at": "2026-05-21",
+        "decided_by": "arquiteto",
+        "approved_by": "Alexandro",
+        "related_adrs": ["ADR-001"],
+        "related_pdrs": ["PDR-001"],
+        "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
+        "related_stories": ["STORY-002"],
+        "created_at": "2026-05-21",
+        "updated_at": "2026-05-21"
+      },
+      {
+        "id": "ADR-003",
+        "slug": "persistencia",
+        "title": "Persistência do DEFOnline — Eloquent + migrations Laravel, multi-tenancy via FK + Global Scope, audit log app-side, soft delete + purga LGPD",
+        "type": "persistencia",
+        "status": "accepted",
+        "path": "decisions/adr/ADR-003-persistencia.md",
+        "decided_at": "2026-05-21",
+        "decided_by": "arquiteto",
+        "approved_by": "Alexandro",
+        "related_adrs": ["ADR-001", "ADR-002"],
+        "related_pdrs": ["PDR-001"],
+        "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
+        "related_stories": ["STORY-003"],
+        "created_at": "2026-05-21",
+        "updated_at": "2026-05-21"
       }
     ],
     "idr": []
