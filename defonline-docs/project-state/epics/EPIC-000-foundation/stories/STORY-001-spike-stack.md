@@ -6,8 +6,8 @@ epic_id: EPIC-000
 sprint_id: null
 type: spike
 target_role: arquiteto
-status: ready
-owner_agent: null
+status: done
+owner_agent: arquiteto (claude-opus-4-7)
 created_at: 2026-05-20
 updated_at: 2026-05-20
 estimated_session_size: L
@@ -127,17 +127,40 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Em resumo:
 ## Notas do agente (preenchido durante/após execução)
 
 ### Decisões tomadas
-- <data> — <decisão tomada na spike, ex: "framework escolhido X porque Y">
+
+- **2026-05-20** — Stack escolhida: **Laravel 13 + Livewire 4 + PostgreSQL 18 + Pest 4 + Laravel Dusk 8 (PHP 8.5)**. Razões principais documentadas na ADR-001:
+  - Cobertura máxima do princípio #4 (frameworks opinativos) com FE+BE no mesmo framework via Livewire — área logada e hotsite vivem no mesmo app.
+  - Familiaridade declarada do PO (PHP/Laravel — confirmada via AskUserQuestion) — decisor sob F6.
+  - Auth padrão via Laravel Breeze (sessão cookie HttpOnly + bcrypt + throttle nativo) atende RNF §4.3/§4.4 sem código extra.
+  - Postgres-first preservado em sessão, cache, queue (driver `database`).
+- **2026-05-20** — Ratificadas como exigências da stack (decisões herdadas do pré-reset, agora formalizadas em ADR):
+  - **PostgreSQL** como banco principal, versão piso 16.
+  - **TDD (Pest 4) + E2E em browser real (Laravel Dusk 8)** como obrigatórios — comprovados no spike.
 
 ### Descobertas
-- <data> — <surpresa, gotcha, item relevante para PO/outros agentes>
+
+- **2026-05-20** — Pest + Laravel exigem flag `-W` no `composer require` porque Pest tem restrição mais apertada de PHPUnit que o Laravel default (Laravel 13 ships PHPUnit 11.5.55; Pest 4.7 requer PHPUnit 12.x — downgrade resolve). Trivial via Composer.
+- **2026-05-20** — Dusk no container Alpine ARM exige sobrescrever `DuskTestCase::prepare()` para não chamar `startChromeDriver()` (que tenta achar binário Linux x86); rodamos `chromedriver` separadamente em background dentro do container.
+- **2026-05-20** — Chrome dentro de container precisa de flags `--no-sandbox` e `--disable-dev-shm-usage`. Documentado no stub `stubs/DuskTestCase.php`.
+- **2026-05-20** — `APP_URL` no `.env` é a URL **externa** (host) — para Dusk **dentro** do container, é preciso `.env.dusk.local` com `APP_URL=http://localhost:8000` (porta interna onde `artisan serve` escuta).
+- **2026-05-20** — A spike NÃO requer `php artisan pest:install` — esse comando não existe no Pest 4; basta instalar via Composer e criar `tests/Pest.php` extendendo `Tests\TestCase` em Feature/Unit.
+- **2026-05-20 (re-bump p/ versões mais recentes)** — **PHP 8.5** mudou o que vem built-in: `opcache`, `mbstring`, `intl`, `pcntl`, `exif` agora estão compilados de fábrica e dão erro no `docker-php-ext-install`. No nosso Dockerfile, ficaram apenas `pdo_pgsql`, `zip`, `bcmath` como ext-install.
+- **2026-05-20 (re-bump)** — **PostgreSQL 18** mudou a convenção de mount: o volume agora monta em `/var/lib/postgresql` (não mais `/var/lib/postgresql/data`). Volumes herdados de PG ≤ 17 não sobem — precisam ser recriados. Ver `docker compose down -v` antes de bump.
+- **2026-05-20 (re-bump)** — **Pest 4** trouxe **browser testing nativo** (concorrente do Dusk). Mantivemos Dusk no spike por ser omakase histórico, mas a transição para o runner Pest 4 fica como IDR aberto do Programador (princípio "automatizável > documentável" + simplicidade).
 
 ### Bloqueios encontrados
-- <data> — <bloqueio> — <como foi resolvido ou está aberto>
+
+- Nenhum bloqueio que exigisse escalonamento ao PO. Pequenos pitfalls técnicos da spike (Pest version conflict, Chrome sandbox, internal URL para Dusk) foram resolvidos diretamente no spike — todos documentados acima.
 
 ### ADR produzida
-- ADR-XXX — <título> — `decisions/adr/ADR-XXX-<slug>.md`
+
+- **ADR-001 — Stack do DEFOnline — Laravel 13 + Livewire 4 + PostgreSQL 18 + Pest + Dusk** — `decisions/adr/ADR-001-stack.md` (status: `proposed`).
 
 ### Links de evidência
-- Spike de prova de conceito: <branch / repositório / commit>
-- ADR aceita: <link após aceite do PO>
+
+- **Spike de prova de conceito:** branch `spike/STORY-001-stack`, commit `3fc1bb4`. Diretório `spike-stack/` no repo. Reprodução: `git checkout spike/STORY-001-stack && cd spike-stack && ./up.sh && ./test.sh`.
+- **Resultado do spike** (gravado nesta sessão):
+  - Pest Feature: **4 testes, 7 asserções, 0,34s, todos PASS** (inclui `select now()` em PostgreSQL 18 real + componente Livewire 4 isolado).
+  - Laravel Dusk E2E: **1 teste, 5 asserções, 0,87s, PASS** em Chromium 148 headless real dentro do container, navegando `/`, clicando `+1` duas vezes, observando `0 → 1 → 2`, validando driver `pgsql`.
+  - Versões efetivamente exercitadas: Laravel 13.11.2 / Livewire 4.3.0 / Pest 4.7.0 / Dusk 8.6.0 / PostgreSQL 18.4 / PHP 8.5.6.
+- **ADR aceita:** ✅ aceita pelo PO Alexandro em chat em 2026-05-20. ADR-001 movida de `proposed` para `accepted`; estória fechada como `done`.

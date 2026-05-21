@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-20T21:00:00Z",
+  "generated_at": "2026-05-20T23:00:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -107,8 +107,8 @@
       "title": "SPIKE — Decisão de stack",
       "type": "spike",
       "target_role": "arquiteto",
-      "status": "ready",
-      "owner_agent": null,
+      "status": "done",
+      "owner_agent": "arquiteto (claude-opus-4-7)",
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-001-spike-stack.md",
       "blocked_by": [],
@@ -246,7 +246,26 @@
         "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"]
       }
     ],
-    "adr": [],
+    "adr": [
+      {
+        "id": "ADR-001",
+        "slug": "stack",
+        "title": "Stack do DEFOnline — Laravel 13 + Livewire 4 + PostgreSQL 18 + Pest 4 + Dusk 8",
+        "type": "stack",
+        "status": "accepted",
+        "path": "decisions/adr/ADR-001-stack.md",
+        "decided_at": "2026-05-20",
+        "decided_by": "arquiteto",
+        "approved_by": "Alexandro",
+        "related_pdrs": ["PDR-001"],
+        "related_epics": ["EPIC-000"],
+        "related_stories": ["STORY-001"],
+        "spike_branch": "spike/STORY-001-stack",
+        "spike_commit": "3fc1bb4",
+        "created_at": "2026-05-20",
+        "updated_at": "2026-05-20"
+      }
+    ],
     "idr": []
   },
   "reports": [
