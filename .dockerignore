@@ -1,0 +1,40 @@
+# Excluído do contexto Docker — reduz tamanho do build + evita sobrescrever artefatos
+# do stage `composer-deps` quando o `COPY app/` corre.
+
+# Diretórios pesados que vendor/ resolve no stage de composer
+app/vendor/
+app/node_modules/
+app/storage/logs/
+app/storage/framework/cache/
+app/storage/framework/sessions/
+app/storage/framework/views/
+app/storage/pail/
+
+# Caches que serão regerados no build (--no-dev)
+app/bootstrap/cache/
+
+# Estado runtime que não pertence à imagem
+app/.phpunit.cache/
+app/.phpunit.result.cache
+app/database/database.sqlite
+
+# Local-only — env/segredos
+app/.env
+app/.env.*
+!app/.env.example
+
+# Repositório / IDE / sistema
+.git/
+.github/
+.idea/
+.vscode/
+.DS_Store
+secrets/
+infra/ansible/
+defonline-docs/
+**/__pycache__/
+**/*.log
+
+# Testes não vão para imagem de produção
+app/tests/Browser/screenshots/
+app/tests/Browser/console/

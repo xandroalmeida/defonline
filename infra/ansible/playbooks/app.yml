@@ -7,9 +7,13 @@
 # - postgres initdb copiado do repo
 # - docker compose pull + up + migrate
 
+# Roda como `deploy_user` (default do inventário). `/opt/defonline` já foi
+# criado pelo bootstrap.yml com chown deploy:deploy, então não precisamos de
+# `become: true` no play. Tasks que exigem root estão isoladas com become por
+# task (atualmente, apenas o copy do init script do Postgres, que vai para
+# diretório controlado pelo deploy).
 - name: Provisionar aplicação DEFOnline
   hosts: homolog
-  become: true
   gather_facts: true
   vars:
     image_tag: "{{ app_version | default('latest') }}"
@@ -78,23 +82,17 @@
         username: "{{ ghcr_pull_username | default('xandroalmeida') }}"
         password: "{{ ghcr_pull_token }}"
       when: ghcr_pull_token | length > 0
-      become: true
-      become_user: "{{ deploy_user }}"
 
     - name: Docker compose pull (imagem da tag alvo)
       ansible.builtin.command:
         cmd: docker compose pull
         chdir: "{{ deploy_dir }}"
-      become: true
-      become_user: "{{ deploy_user }}"
       changed_when: false
 
     - name: Docker compose up (sobe topologia)
       ansible.builtin.command:
         cmd: docker compose up -d --remove-orphans
         chdir: "{{ deploy_dir }}"
-      become: true
-      become_user: "{{ deploy_user }}"
       register: compose_up
       changed_when: "'Started' in compose_up.stderr or 'Created' in compose_up.stderr"
 
@@ -102,8 +100,6 @@
       ansible.builtin.command:
         cmd: docker compose exec -T db pg_isready -U {{ postgres_superuser }} -d {{ postgres_db }}
         chdir: "{{ deploy_dir }}"
-      become: true
-      become_user: "{{ deploy_user }}"
       register: pg_ready
       retries: 30
       delay: 2
@@ -114,8 +110,6 @@
       ansible.builtin.command:
         cmd: docker compose exec -T web php artisan migrate --force
         chdir: "{{ deploy_dir }}"
-      become: true
-      become_user: "{{ deploy_user }}"
       register: migrate_result
       changed_when: "'Nothing to migrate' not in migrate_result.stdout"
 
@@ -123,8 +117,6 @@
       ansible.builtin.command:
         cmd: docker compose exec -T web wget -qO- http://localhost:8000/health
         chdir: "{{ deploy_dir }}"
-      become: true
-      become_user: "{{ deploy_user }}"
       register: smoke
       retries: 10
       delay: 3

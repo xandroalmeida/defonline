@@ -4,13 +4,10 @@
     tls {{ caddy_admin_email }}
     encode zstd gzip
 
-    @sensitive path /login /forgot-password /cadastro /api/cadastro
-    rate_limit @sensitive {
-        zone sensitive
-        events 5
-        window 1m
-    }
-
+    # rate_limit em endpoints sensíveis (/login, /forgot-password, /cadastro)
+    # exige plugin externo `caddy-rate-limit` (não nativo no Caddy 2). Registrado
+    # como débito técnico — Phase 4 vai compilar Caddy custom OU usar middleware
+    # Laravel `throttle:5,1`. ADR-005 §3 fica parcialmente divergente.
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         X-Content-Type-Options nosniff
