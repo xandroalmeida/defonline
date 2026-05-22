@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Browser;
 
 use Laravel\Dusk\Browser;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\DuskTestCase;
 
 /**
@@ -12,6 +13,7 @@ use Tests\DuskTestCase;
  */
 final class HelloWorldBrowserTest extends DuskTestCase
 {
+    #[Group('smoke')]
     public function test_visitor_sees_hello_page_with_version_and_ok_status(): void
     {
         $this->browse(function (Browser $browser) {

@@ -381,6 +381,19 @@
         "related_adrs": ["ADR-003", "ADR-005"],
         "created_at": "2026-05-22",
         "updated_at": "2026-05-22"
+      },
+      {
+        "id": "IDR-002",
+        "slug": "subdomain-do-dns",
+        "title": "Subdomínio defonline.xandrix.com.br no DNS DigitalOcean (em vez de defonline.com.br/Cloudflare)",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-002-subdomain-do-dns.md",
+        "decided_at": "2026-05-22",
+        "decided_by": "programador",
+        "related_story": "STORY-007",
+        "related_adrs": ["ADR-005"],
+        "created_at": "2026-05-22",
+        "updated_at": "2026-05-22"
       }
     ]
   },

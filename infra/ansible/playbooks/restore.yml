@@ -1,0 +1,62 @@
+---
+# Restore de backup (ADR-005 §4.2 — RTO ~4h, exercitado trimestralmente).
+# Uso: ansible-playbook -i inventories/homolog playbooks/restore.yml -e dump_date=YYYYMMDD-HHMM
+#
+# CUIDADO: este playbook DROPA o banco atual antes de restaurar. Confirmação manual obrigatória.
+
+- name: Restaurar backup Postgres
+  hosts: homolog
+  become: true
+  gather_facts: true
+  vars_prompt:
+    - name: confirm
+      prompt: "Vai DROPAR a base atual do ambiente alvo. Digite 'RESTAURAR' para confirmar"
+      private: false
+
+  pre_tasks:
+    - name: Abortar se confirmação não bate
+      ansible.builtin.fail:
+        msg: "Confirmação inválida."
+      when: confirm != 'RESTAURAR'
+
+    - name: Validar que dump_date foi passado
+      ansible.builtin.fail:
+        msg: "Passe -e dump_date=YYYYMMDD-HHMM"
+      when: dump_date is not defined
+
+  tasks:
+    - name: Calcular ano/mês a partir de dump_date
+      ansible.builtin.set_fact:
+        dump_year: "{{ dump_date[:4] }}"
+        dump_month: "{{ dump_date[4:6] }}"
+
+    - name: Download do dump cifrado de B2
+      ansible.builtin.command:
+        cmd: >-
+          rclone copyto
+          b2:{{ b2_bucket }}/postgres/{{ env_name }}/{{ dump_year }}/{{ dump_month }}/dump-{{ dump_date }}.sql.gz.gpg
+          {{ deploy_dir }}/backups/dump-{{ dump_date }}.sql.gz.gpg
+      become: true
+      become_user: "{{ deploy_user }}"
+      changed_when: true
+
+    - name: Decifrar + descomprimir + restaurar
+      ansible.builtin.shell: |
+        set -euo pipefail
+        cd {{ deploy_dir }}
+        gpg --batch --yes --decrypt \
+            --passphrase-file /home/{{ deploy_user }}/.backup-gpg-pass \
+            backups/dump-{{ dump_date }}.sql.gz.gpg \
+          | gunzip \
+          | docker compose exec -T db pg_restore \
+              --username={{ postgres_superuser }} \
+              --dbname={{ postgres_db }} \
+              --clean \
+              --if-exists \
+              --no-owner \
+              --no-acl
+      args:
+        executable: /bin/bash
+      become: true
+      become_user: "{{ deploy_user }}"
+      changed_when: true

@@ -1,0 +1,54 @@
+---
+# Variáveis públicas (não-secretas) do ambiente homologação.
+# Senhas, tokens e chaves vivem em `vault.yml` (cifrado por Ansible Vault).
+
+env_name: homolog
+app_domain: defonline.xandrix.com.br
+app_url: "https://{{ app_domain }}"
+app_version: "rc-placeholder"          # sobrescrito por -e image_tag=... no CI
+app_env: staging
+app_debug: false
+log_level: debug                       # RNF §6.1 — debug em staging
+app_locale: pt_BR
+
+# Topologia (ADR-002 + ADR-005)
+deploy_user: deploy
+deploy_dir: /opt/defonline
+repo_url: "git@github.com:xandroalmeida/defonline.git"
+repo_branch: main                      # imagem vem de tag git; código só serve para compose/Caddyfile
+container_registry: ghcr.io
+container_image: xandroalmeida/defonline/app
+
+# Postgres (ADR-001 + ADR-003 + ADR-005)
+postgres_image: postgres:18-alpine
+postgres_db: defonline
+postgres_user: defonline_app           # role da app (least privilege — ADR-005 §7.4)
+postgres_backup_user: defonline_backup
+postgres_superuser: postgres
+
+# Caddy (ADR-005 §3)
+caddy_image: caddy:2-alpine
+caddy_admin_email: "alex@xandrix.com.br"
+
+# Mail (futuramente — provedor SMTP é decisão de ADR jurídica/infra de produção)
+mail_mailer: log                       # homol: log apenas; sem provedor SMTP real ainda
+
+# Backblaze B2 (ADR-005 §4.2 — backup off-site)
+b2_bucket: defonline-backups-homolog
+backup_retention_daily: 30
+backup_retention_monthly: 12
+backup_cron_minute: "0"
+backup_cron_hour: "3"                  # 03:00 BRT
+
+# Heartbeat / observabilidade (ADR-004)
+telegram_chat_id: "{{ vault_telegram_chat_id_homolog }}"
+telegram_bot_token: "{{ vault_telegram_bot_token }}"
+
+# Segredos referenciados aqui — definidos em `group_vars/vault.yml` (cifrado).
+db_app_password: "{{ vault_db_app_password }}"
+db_backup_password: "{{ vault_db_backup_password }}"
+db_superuser_password: "{{ vault_db_superuser_password }}"
+b2_app_key_id: "{{ vault_b2_app_key_id }}"
+b2_app_key: "{{ vault_b2_app_key }}"
+backup_gpg_passphrase: "{{ vault_backup_gpg_passphrase }}"
+ghcr_pull_token: "{{ vault_ghcr_pull_token }}"

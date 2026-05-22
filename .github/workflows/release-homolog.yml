@@ -3,11 +3,9 @@ name: release-homolog — deploy automático em homologação
 # ADR-006 §3.3 — Tag `vX.Y.Z-rc.N` dispara este workflow:
 #  1. Re-roda jobs leves do PR contra o SHA da tag.
 #  2. Build + push da imagem com tag git como tag Docker.
-#  3. Ansible deploy contra `homolog.defonline.com.br`.  ← PLACEHOLDER PHASE 3
+#  3. Ansible deploy contra a VPS de homologação.
 #  4. Smoke test pós-deploy (curl /health + /ready + 1 Dusk leve).
 #  5. Notifica Telegram.
-#
-# Phase 2: step de deploy está stubbed (echo de TODO). Phase 3 conecta Ansible.
 
 on:
   push:
@@ -57,37 +55,44 @@ jobs:
     runs-on: ubuntu-24.04
     environment:
       name: homolog
-      url: https://homolog.defonline.com.br
+      url: https://defonline.xandrix.com.br
     steps:
       - uses: actions/checkout@v4
 
-      # ─── PHASE 3 (TODO): Ansible deploy ─────────────────────────────────────
-      # - name: Setup Ansible + SSH key
-      #   run: |
-      #     pipx install ansible
-      #     mkdir -p ~/.ssh
-      #     echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
-      #     chmod 600 ~/.ssh/id_ed25519
-      #     echo "${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
-      # - name: ansible-playbook deploy.yml
-      #   working-directory: infra/ansible
-      #   env:
-      #     ANSIBLE_VAULT_PASS: ${{ secrets.ANSIBLE_VAULT_PASS }}
-      #   run: |
-      #     ansible-playbook -i inventories/homolog playbooks/deploy.yml \
-      #       --vault-password-file <(echo "$ANSIBLE_VAULT_PASS") \
-      #       -e image_tag=${{ github.ref_name }}
-      # ────────────────────────────────────────────────────────────────────────
-
-      - name: Phase 2 placeholder
+      - name: Instalar Ansible + community.docker
         run: |
-          echo "::warning::Deploy real em homol fica para Phase 3 (Ansible)."
-          echo "Imagem publicada: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}"
+          python3 -m pip install --upgrade pip
+          python3 -m pip install "ansible-core>=2.16"
+          ansible-galaxy collection install -r infra/ansible/requirements.yml
+
+      - name: Configurar chave SSH e known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Ansible Vault password file
+        run: |
+          printf '%s' "${{ secrets.ANSIBLE_VAULT_PASS }}" > ~/.vault-pass
+          chmod 600 ~/.vault-pass
+
+      - name: ansible-playbook deploy.yml (homolog)
+        working-directory: infra/ansible
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "True"
+        run: |
+          ansible-playbook \
+            -i inventories/homolog/hosts.yml \
+            playbooks/deploy.yml \
+            --vault-password-file ~/.vault-pass \
+            -e image_tag=${{ github.ref_name }}
 
   smoke:
     needs: deploy
     runs-on: ubuntu-24.04
-    if: false # PHASE 3: remover esta linha quando deploy real estiver wired.
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -95,26 +100,43 @@ jobs:
           php-version: '8.5'
           extensions: pdo_pgsql, zip, bcmath, intl, mbstring
           coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: app/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
       - uses: browser-actions/setup-chrome@v1
-      - name: HTTP smoke
+
+      - name: HTTP smoke (curl /health + /ready)
         run: |
-          curl -fsSL https://homolog.defonline.com.br/health
-          curl -fsSL https://homolog.defonline.com.br/ready
+          set -e
+          for endpoint in health ready; do
+              echo "→ GET https://defonline.xandrix.com.br/${endpoint}"
+              curl -fsSL "https://defonline.xandrix.com.br/${endpoint}" | grep -E '"status":"ok"'
+          done
+
+      - name: Composer install (para Dusk smoke)
+        working-directory: app
+        run: composer install --prefer-dist --no-progress --no-interaction
+
       - name: Dusk smoke (1 cenário crítico contra URL real)
         working-directory: app
         env:
-          APP_URL: https://homolog.defonline.com.br
+          APP_URL: https://defonline.xandrix.com.br
+          DUSK_DRIVER_URL: http://localhost:9515
         run: |
-          composer install --no-progress --no-interaction
-          php artisan dusk --group=smoke
+          # Inicia chromedriver standalone do setup-chrome
+          chromedriver --port=9515 --whitelisted-ips='' >/tmp/chromedriver.log 2>&1 &
+          sleep 3
+          php artisan dusk --group=smoke || (cat /tmp/chromedriver.log && exit 1)
 
   notify:
     needs: [deploy, smoke]
     if: always()
     runs-on: ubuntu-24.04
     steps:
-      - run: |
-          STATUS="${{ needs.deploy.result == 'success' && '✅' || '❌' }}"
+      - name: Status do deploy
+        run: |
+          STATUS="${{ (needs.deploy.result == 'success' && needs.smoke.result == 'success') && '✅' || '❌' }}"
           MSG="${STATUS} DEFOnline homol: ${{ github.ref_name }} — deploy=${{ needs.deploy.result }} smoke=${{ needs.smoke.result }}"
           echo "$MSG"
           if [ -n "${{ secrets.TELEGRAM_BOT_TOKEN }}" ] && [ -n "${{ secrets.TELEGRAM_CHAT_ID_HOMOLOG }}" ]; then

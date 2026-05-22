@@ -2,7 +2,7 @@
 
 Plataforma SaaS de Diagnóstico Econômico-Financeiro para Micro e Pequenas Empresas.
 
-> **STORY-007 Phase 2 (2026-05-22):** Phase 1 entregou o app local; Phase 2 entregou CI/CD em GitHub Actions + pre-push hook + Larastan + Pint + Pennant. Phase 3 (Ansible + VPS) fecha o EPIC-000.
+> **STORY-007 Phase 3 (2026-05-22):** código de Ansible + workflows de deploy + runbook prontos. Para ativar homologação ao vivo, siga `defonline-docs/project-state/epics/EPIC-000-foundation/RUNBOOK-homolog-phase3.md`.
 
 ## Estrutura
 
@@ -23,11 +23,18 @@ Plataforma SaaS de Diagnóstico Econômico-Financeiro para Micro e Pequenas Empr
 │
 ├── infra/
 │   ├── docker/Dockerfile               imagem única para web/worker/scheduler (ADR-002)
-│   └── postgres/initdb/                roles e GRANTs (ADR-005 §7.4)
+│   ├── postgres/initdb/                roles e GRANTs (ADR-005 §7.4)
+│   └── ansible/                        playbooks deploy/backup (ADR-005 §2 — Phase 3)
+│       ├── ansible.cfg
+│       ├── requirements.yml            community.docker/general/crypto + ansible.posix
+│       ├── inventories/homolog/        hosts.yml + group_vars/all.yml + vault.yml.example
+│       └── playbooks/                  site / bootstrap / docker / app / deploy / backup / restore
 │
 ├── scripts/
 │   ├── git-hooks/pre-push.sh           gates locais (Pint + Larastan + Pest + Dusk) — ADR-006 §4
-│   └── install-hooks.sh                instala pre-push (rodado por up.sh)
+│   ├── install-hooks.sh                instala pre-push (rodado por up.sh)
+│   ├── gen-deploy-ssh-key.sh           gera par SSH dedicado ao deploy (Phase 3)
+│   └── gen-backup-gpg-key.sh           gera passphrase GPG para backup (Phase 3)
 │
 ├── .github/workflows/              CI/CD GitHub Actions (ADR-006)
 │   ├── pr.yml                          lint + segurança + Unit puros (~2-3 min)
@@ -98,8 +105,8 @@ docker compose exec web php artisan pennant:list-overdue --fail-on-overdue
 
 | Ambiente | Status | Como acessar |
 |---|---|---|
-| **local** | ✅ funcional (esta fase) | `./up.sh` → http://localhost:8090 |
-| **homologação** | 🛠️ Phase 2 — Ansible + CI/CD + VPS BR | (em breve) `https://homolog.defonline.com.br` |
+| **local** | ✅ funcional | `./up.sh` → http://localhost:8090 |
+| **homologação** | 🛠️ código pronto, aguardando provisionamento humano (VPS + DNS + Secrets) — siga RUNBOOK | `https://defonline.xandrix.com.br` (após Phase 3) |
 | **produção** | 📦 código pronto, não provisionada | (gatilho de promoção em ADR-005 §Decisão 6) |
 
 ## Documentação canônica
@@ -118,6 +125,5 @@ Antes de mexer em código, ler os documentos a seguir:
 
 ## Próximos passos
 
-1. **STORY-007 Phase 2** — CI/CD (GHA workflows + pre-push hook + Pennant).
-2. **STORY-007 Phase 3** — Ansible playbooks + contratar VPS BR + DNS Cloudflare + deploy real em homologação.
-3. **STORY-008** — validação do EPIC-000 (ver `epics/EPIC-000-foundation/validation/`).
+1. **STORY-007 Phase 3 — provisionamento humano** (PO): siga `defonline-docs/project-state/epics/EPIC-000-foundation/RUNBOOK-homolog-phase3.md` (60-90 min): contratar VPS, configurar DNS DigitalOcean, criar bot Telegram, criar bucket B2, gerar chaves, preencher Ansible Vault, adicionar GitHub Secrets, disparar primeira tag `v0.1.0-rc.1`.
+2. **STORY-008** — validação do EPIC-000 (ver `epics/EPIC-000-foundation/validation/`).

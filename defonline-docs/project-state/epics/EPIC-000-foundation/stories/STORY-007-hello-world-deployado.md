@@ -132,10 +132,20 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Em resumo:
 A execução está **em curso** e foi quebrada em três fases por alinhamento com o PO no início da sessão (estória `L`, escopo absorvendo 6 ADRs simultâneas).
 
 - **Phase 1 — skeleton local rodando (concluída em 2026-05-22):** app Laravel + Livewire + Docker Compose com 5 containers (web/worker/scheduler/db/mailpit), migrations base, observability cross-process, página viva, /health, /ready, suíte Pest + Dusk verde, README + `up.sh`. **Status atual da estória após Phase 1: `in_progress` ainda** — a estória só vai para `in_review` após Phase 3.
-- **Phase 2 — CI/CD (concluída em 2026-05-22):** 6 workflows GHA (pr/main/bump-rc/release-homolog/release-production/deploy-by-tag), pre-push hook + script de instalação rodado pelo `up.sh`, Laravel Pennant + feature flag de exemplo + comando `pennant:list-overdue`, lints (Pint, Larastan nível 6, commitlint, trivy, gitleaks, composer audit). Workflows de deploy ficam como **placeholders** com TODOs explícitos — Phase 3 conecta o `ansible-playbook deploy.yml`.
-- **Phase 3 — Ansible + deploy real (pendente):** playbooks Ansible (bootstrap, docker, app, deploy, backup, restore), contratar VPS BR, configurar DNS Cloudflare, criar bot Telegram, gerar GPG key, criar bucket Backblaze B2, deploy automatizado em `homolog.defonline.com.br` com TLS via Caddy.
+- **Phase 2 — CI/CD (concluída em 2026-05-22):** 6 workflows GHA (pr/main/bump-rc/release-homolog/release-production/deploy-by-tag), pre-push hook + script de instalação rodado pelo `up.sh`, Laravel Pennant + feature flag de exemplo + comando `pennant:list-overdue`, lints (Pint, Larastan nível 6, commitlint, trivy, gitleaks, composer audit).
+- **Phase 3 — Ansible + deploy real (código concluído em 2026-05-22, provisionamento humano pendente):** 7 playbooks Ansible (`site.yml`, `bootstrap.yml`, `docker.yml`, `app.yml`, `deploy.yml`, `backup.yml`, `restore.yml`) + templates Jinja para `.env`/`Caddyfile`/`docker-compose.production.yml`/`pg-backup.sh`. `release-homolog.yml` agora conectado ao `ansible-playbook deploy.yml` com smoke test ativo contra URL real. Scripts `gen-deploy-ssh-key.sh` e `gen-backup-gpg-key.sh`. **RUNBOOK** de provisionamento (`RUNBOOK-homolog-phase3.md`) documentando todos os passos humanos: contratar VPS, configurar DNS DigitalOcean, criar bot Telegram, criar bucket Backblaze B2, gerar chaves, preencher Ansible Vault, adicionar GitHub Secrets, disparar tag. **Ansible-lint passou no perfil `production` (0 failures)**; syntax-check verde em 7/7 playbooks. Validação local ao vivo (URL pública) depende da execução do RUNBOOK pelo PO.
 
 ### Decisões tomadas
+
+#### Phase 3 (Ansible + deploy real)
+
+- **2026-05-22 — IDR-002:** subdomínio `defonline.xandrix.com.br` (subdomínio em zona que o PO já controla) + DNS no DigitalOcean em vez do `defonline.com.br` + Cloudflare previsto em ADR-005 §5. Custo zero hoje vs. R$ 40/ano. Variabilizado via Ansible (`app_domain` em `group_vars`) para troca futura.
+- **2026-05-22 — Backup encriptado com GPG **simétrico** (passphrase em arquivo), não par RSA.** ADR-005 §4.2 menciona "encripta com GPG" sem amarrar. Simétrico AES-256 + passphrase forte elimina overhead de keyring/key rotation no time pequeno. Passphrase guardada em `Ansible Vault` + cofre externo do PO; sem essas duas cópias, backups são bytes opacos na Backblaze.
+- **2026-05-22 — Larastan nível 6 + `tests/` excluído** (já documentado em Phase 2). Manteve-se assim em Phase 3.
+- **2026-05-22 — Ansible-lint perfil `production` como gate** (default em `ansible-lint`). Forçou disciplina de naming (Capital First, sem Jinja em `name`), `become: true` sempre acompanha `become_user`, `set -euo pipefail` em shell tasks.
+- **2026-05-22 — Smoke test do CI usa `--group=smoke` no Dusk** para selecionar 1 cenário leve (login/home/logout equivalente — atualmente "ver hello world page"). Annotation `#[Group('smoke')]` adicionada no `HelloWorldBrowserTest`.
+- **2026-05-22 — Imagem Docker é construída no GHA (não no VPS).** ADR-005 §2 previa essa possibilidade; Phase 3 confirmou: pipeline produz **uma** imagem na tag, VPS apenas `docker pull` no deploy. Reduz uso de CPU/RAM na VPS modesta.
+- **2026-05-22 — `app.yml` gera `APP_KEY` ad-hoc se vault não tem.** Vault aceito vazio para essa key; idempotente porque o `set_fact` só cria se não há prévia, e o `.env` é template (re-roda mantém o mesmo).
 
 #### Phase 2 (CI/CD)
 
