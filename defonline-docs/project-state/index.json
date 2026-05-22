@@ -203,7 +203,7 @@
       "title": "Hello world deployado em homologação via pipeline",
       "type": "implementation",
       "target_role": "programador",
-      "status": "in_review",
+      "status": "done",
       "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-007-hello-world-deployado.md",
@@ -215,7 +215,7 @@
       "live_url": "https://defonline.xandrix.com.br",
       "merged_pr": "https://github.com/xandroalmeida/defonline/pull/1",
       "last_released_tag": "v0.1.0-rc.5",
-      "note": "Execução concluída em 3 fases (skeleton local → CI/CD → Ansible + deploy real). https://defonline.xandrix.com.br/health 200 com v0.1.0-rc.5. release-homolog.yml verde end-to-end. Validador (STORY-008) confirma fechamento."
+      "note": "Concluída em 3 fases (skeleton local → CI/CD → Ansible + deploy real). PO validou os testes manuais em 2026-05-22; https://defonline.xandrix.com.br vivo com v0.1.0-rc.5; release-homolog.yml verde end-to-end; CA-1 a CA-9 satisfeitos."
     },
     {
       "id": "STORY-008",
