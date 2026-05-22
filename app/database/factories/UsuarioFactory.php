@@ -33,7 +33,16 @@ final class UsuarioFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'senha_hash' => self::$senhaCache ??= Hash::make('senha-de-teste-1234'),
             'telefone' => '11'.fake()->numerify('9########'),
+            // Factory cria conta JÁ confirmada por default — os testes de fluxo
+            // herdam o caso "ok" da STORY-013. Use ->unconfirmed() para o caso
+            // explícito de email pendente.
+            'email_confirmed_at' => now(),
         ];
+    }
+
+    public function unconfirmed(): self
+    {
+        return $this->state(fn () => ['email_confirmed_at' => null]);
     }
 
     /**

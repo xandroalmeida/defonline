@@ -6,6 +6,7 @@ namespace App\Livewire;
 
 use App\Domain\Cpf;
 use App\Domain\TermoTipo;
+use App\Jobs\EnviarEmailConfirmacao;
 use App\Models\TermAcceptance;
 use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
@@ -179,7 +180,14 @@ final class Cadastro extends Component
             'action' => 'cadastrar',
         ]);
 
-        session()->flash('cadastro_sucesso', 'Conta criada com sucesso. Faça login para continuar.');
+        // STORY-013 CA-2 — enfileira o envio do email de confirmação. NUNCA síncrono
+        // no submit (UX + risco se SMTP cair). O worker consome a fila Postgres.
+        EnviarEmailConfirmacao::dispatch($usuario->id);
+
+        session()->flash(
+            'cadastro_sucesso',
+            'Conta criada. Enviamos um link de confirmação para seu email — confirme antes de fazer login.',
+        );
 
         return $this->redirect('/login', navigate: false);
     }

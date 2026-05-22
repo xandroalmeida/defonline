@@ -16,6 +16,11 @@ use Tests\DuskTestCase;
  * NÃO está no grupo `smoke` por design — ele faz writes (cria usuário no banco
  * sob teste). Smoke pós-deploy precisa ser read-only para não contaminar dados
  * em homologação. Veja `CadastroLoginSmokeBrowserTest` para o smoke leve.
+ *
+ * STORY-013 mudou o fluxo: agora login só passa após confirmar o email. Aqui
+ * o cadastro acontece via UI e a confirmação é simulada via update direto no
+ * banco — o fluxo "cadastro → Mailpit → click" tem teste próprio em
+ * EmailConfirmacaoBrowserTest.
  */
 final class CadastroLoginHomeBrowserTest extends DuskTestCase
 {
@@ -39,7 +44,13 @@ final class CadastroLoginHomeBrowserTest extends DuskTestCase
                 ->check('@cadastro-aceite-lgpd')
                 ->press('@cadastro-submit')
                 ->waitForLocation('/login')
-                ->assertSee('Conta criada com sucesso');
+                ->assertSee('link de confirmação');
+
+            // STORY-013 — confirmar o email programaticamente para destravar o
+            // login neste teste de walking skeleton. O E2E completo do link
+            // assinado vive em EmailConfirmacaoBrowserTest.
+            Usuario::where('email', 'roberto.dusk@exemplo.com.br')
+                ->update(['email_confirmed_at' => now()]);
 
             $browser->type('@login-email', 'roberto.dusk@exemplo.com.br')
                 ->type('@login-senha', 'Senha1234')

@@ -17,6 +17,10 @@
         <button type="submit" class="primary" dusk="login-submit">Entrar</button>
     </form>
 
+    <p style="margin-top: 1rem; text-align: center;">
+        <a href="{{ route('email.confirmar-erro') }}" wire:navigate dusk="login-reenviar-email">Reenviar email de confirmação</a>
+    </p>
+
     <p style="margin-top: 1.5rem; text-align: center;">
         Ainda não tem conta? <a href="/cadastro" wire:navigate>Criar conta</a>
     </p>

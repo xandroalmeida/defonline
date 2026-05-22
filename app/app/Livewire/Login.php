@@ -6,6 +6,7 @@ namespace App\Livewire;
 
 use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
+use App\Observabilidade\LogSanitizer;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -53,6 +54,24 @@ final class Login extends Component
             // Defesa: provider mal configurado.
             Auth::logout();
             throw ValidationException::withMessages(['email' => 'Credenciais inválidas.']);
+        }
+
+        // STORY-013 CA-4 — bloqueia login enquanto email não foi confirmado.
+        if (! $usuario->emailConfirmado()) {
+            Auth::logout();
+
+            Log::info('usuario.login_bloqueado_email_nao_confirmado', [
+                'usuario_id' => $usuario->id,
+                'email' => $usuario->email,
+                'module' => 'login',
+                'action' => 'bloqueio_email_nao_confirmado',
+            ]);
+
+            $mascarado = LogSanitizer::maskByCategory($usuario->email, 'email');
+
+            throw ValidationException::withMessages([
+                'email' => "Confirme seu email antes de fazer login. Verifique sua caixa de entrada — enviamos um link para {$mascarado}.",
+            ]);
         }
 
         session()->regenerate();

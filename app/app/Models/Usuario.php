@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 
 /**
  * Usuário (ADR-003 §Agregado Usuario): pessoa física raiz do tenant.
@@ -29,8 +30,9 @@ use Illuminate\Notifications\Notifiable;
  * @property string $email
  * @property string $senha_hash
  * @property string $telefone
+ * @property Carbon|null $email_confirmed_at
  */
-#[Fillable(['cpf', 'nome', 'email', 'senha_hash', 'telefone'])]
+#[Fillable(['cpf', 'nome', 'email', 'senha_hash', 'telefone', 'email_confirmed_at'])]
 #[Hidden(['senha_hash', 'remember_token'])]
 final class Usuario extends Authenticatable
 {
@@ -42,6 +44,7 @@ final class Usuario extends Authenticatable
     protected $casts = [
         'deleted_at' => 'datetime',
         'anonimizado_at' => 'datetime',
+        'email_confirmed_at' => 'datetime',
         'senha_hash' => 'hashed',
     ];
 
@@ -53,6 +56,11 @@ final class Usuario extends Authenticatable
     public function primeiroNome(): string
     {
         return explode(' ', trim($this->nome))[0];
+    }
+
+    public function emailConfirmado(): bool
+    {
+        return $this->email_confirmed_at !== null;
     }
 
     protected static function newFactory(): UsuarioFactory

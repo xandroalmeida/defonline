@@ -6,6 +6,8 @@ use App\Http\Middleware\MeasureRequest;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Exceptions\InvalidSignatureException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -21,5 +23,15 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // STORY-013 CA-3 — link de confirmação inválido/expirado vai pra tela
+        // amigável de erro com o motivo, em vez do 403 padrão do middleware `signed`.
+        $exceptions->render(function (InvalidSignatureException $e, Request $request) {
+            if ($request->routeIs('email.confirmar')) {
+                return redirect()
+                    ->route('email.confirmar-erro')
+                    ->with('email_confirmar_erro_motivo', 'expirado');
+            }
+
+            return null;
+        });
     })->create();
