@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-22T12:00:00Z",
+  "generated_at": "2026-05-22T20:00:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -53,17 +53,20 @@
       "slug": "foundation",
       "title": "Foundation técnica do projeto pós-reset",
       "wave": "WAVE-2026-01",
-      "status": "in_review",
+      "status": "done",
       "path": "epics/EPIC-000-foundation/epic.md",
       "story_ids": ["STORY-001", "STORY-002", "STORY-003", "STORY-004", "STORY-005", "STORY-006", "STORY-007", "STORY-009", "STORY-008", "STORY-010"],
       "validation_report": {
         "path": "epics/EPIC-000-foundation/validation/report.md",
-        "verdict": "rejected",
-        "blocking": false,
+        "verdict": "approved",
         "validated_at": "2026-05-22",
         "validated_by": "validador (claude-opus-4-7)",
+        "verdict_history": [
+          { "at": "2026-05-22", "verdict": "rejected", "blocking": false, "reason": "F-NB-1 — gate de cobertura prescrito não implementado" },
+          { "at": "2026-05-22", "verdict": "approved", "reason": "STORY-010 entregou PCOV + gate --min=80 no pre-push e no PR; cobertura medida ao vivo 92.4% ≥ 80%" }
+        ],
         "remediation_story": "STORY-010",
-        "revalidation_pending": true
+        "revalidation_pending": false
       },
       "created_at": "2026-05-20",
       "updated_at": "2026-05-22"
@@ -266,7 +269,7 @@
       "title": "Habilitar gate de cobertura no pre-push e no PR (PCOV + --min=80)",
       "type": "bugfix",
       "target_role": "programador",
-      "status": "in_review",
+      "status": "done",
       "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-010-gate-cobertura-pest-pcov.md",
@@ -447,6 +450,13 @@
       "type": "wave_opening",
       "wave": "WAVE-2026-01",
       "path": "reports/status-2026-05-20.md"
+    },
+    {
+      "date": "2026-05-22",
+      "type": "epic_closing",
+      "wave": "WAVE-2026-01",
+      "related_epic": "EPIC-000",
+      "path": "reports/status-2026-05-22.md"
     }
   ]
 }

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DEFOnline — Relatório a Investidores — 22/05/2026</title>
+    <style>
+        /* Design system herdado da plataforma viva (defonline.xandrix.com.br).
+           Tokens: system-ui / #1f2937 / #6b7280 / #9ca3af / #2563eb
+                   #f9fafb (card) / #e5e7eb (borda) / #dcfce7+#166534 (OK)
+                   / #fee2e2+#991b1b (alerta) / ui-monospace (números).
+           Radius: 8px cards / 6px botões / 999px pills. */
+        * { box-sizing: border-box; }
+        html { -webkit-font-smoothing: antialiased; }
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            background: #ffffff;
+            color: #1f2937;
+            margin: 0;
+            line-height: 1.55;
+        }
+        .container {
+            max-width: 880px;
+            margin: 3rem auto;
+            padding: 0 1.5rem 4rem;
+        }
+        header.brand {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem 1.5rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 2.5rem;
+        }
+        header.brand .wordmark {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: #1f2937;
+        }
+        header.brand .wordmark span.dot { color: #2563eb; }
+        header.brand .meta {
+            color: #6b7280;
+            font-size: 0.85rem;
+            font-family: ui-monospace, SFMono-Regular, monospace;
+        }
+        h1 {
+            font-size: 2rem;
+            line-height: 1.2;
+            letter-spacing: -0.015em;
+            margin: 0 0 0.5rem;
+        }
+        h1 + .subtitle {
+            color: #6b7280;
+            margin: 0 0 2.5rem;
+            font-size: 1.05rem;
+        }
+        h2 {
+            font-size: 1.35rem;
+            margin: 2.75rem 0 1rem;
+            letter-spacing: -0.01em;
+        }
+        h3 {
+            font-size: 1.05rem;
+            margin: 1.75rem 0 0.5rem;
+            color: #1f2937;
+        }
+        p { margin: 0 0 1rem; }
+        a { color: #2563eb; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Cards */
+        .card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            margin: 1rem 0;
+        }
+        .card.tldr {
+            border-left: 4px solid #2563eb;
+            padding-left: 1.25rem;
+        }
+        .card.tldr p:last-child { margin-bottom: 0; }
+
+        /* Status pill */
+        .pill {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            vertical-align: 1px;
+        }
+        .pill.ok      { background: #dcfce7; color: #166534; }
+        .pill.warn    { background: #fef3c7; color: #92400e; }
+        .pill.error   { background: #fee2e2; color: #991b1b; }
+        .pill.neutral { background: #e5e7eb; color: #374151; }
+
+        /* Metric grid */
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin: 1.25rem 0 0.5rem;
+        }
+        .metric {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+        }
+        .metric .label {
+            font-size: 0.78rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.35rem;
+        }
+        .metric .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            font-family: ui-monospace, SFMono-Regular, monospace;
+            letter-spacing: -0.01em;
+        }
+        .metric .value.accent { color: #2563eb; }
+        .metric .hint {
+            font-size: 0.82rem;
+            color: #6b7280;
+            margin-top: 0.35rem;
+        }
+
+        /* Definition list — kv summary like a hero card */
+        dl.kv {
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            gap: 0.5rem 1.5rem;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+        }
+        dl.kv dt { font-weight: 600; color: #1f2937; }
+        dl.kv dd { margin: 0; color: #374151; }
+        dl.kv dd.mono {
+            font-family: ui-monospace, SFMono-Regular, monospace;
+            font-size: 0.92em;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+        }
+        thead th {
+            text-align: left;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #6b7280;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+            background: transparent;
+        }
+        tbody td {
+            padding: 0.65rem 0.75rem;
+            border-bottom: 1px solid #f1f3f5;
+            color: #1f2937;
+            vertical-align: top;
+        }
+        tbody tr:last-child td { border-bottom: none; }
+        td.mono { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 0.9em; color: #4b5563; }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            margin: 1.5rem 0 0.5rem;
+            padding-left: 1.5rem;
+        }
+        .timeline::before {
+            content: "";
+            position: absolute;
+            left: 5px;
+            top: 6px;
+            bottom: 6px;
+            width: 2px;
+            background: #e5e7eb;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 1.25rem;
+        }
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            left: -1.5rem;
+            top: 0.45rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 0 1px #e5e7eb;
+        }
+        .timeline-item.done::before    { background: #166534; box-shadow: 0 0 0 1px #166534; }
+        .timeline-item.current::before { background: #2563eb; box-shadow: 0 0 0 1px #2563eb; }
+        .timeline-item .when {
+            font-family: ui-monospace, SFMono-Regular, monospace;
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-right: 0.5rem;
+        }
+        .timeline-item .what {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .timeline-item .desc {
+            color: #4b5563;
+            font-size: 0.95rem;
+            margin-top: 0.2rem;
+        }
+
+        /* Ul lists */
+        ul.bullet { padding-left: 1.25rem; margin: 0.5rem 0 1rem; }
+        ul.bullet li { margin-bottom: 0.4rem; color: #1f2937; }
+        ul.bullet li small { color: #6b7280; }
+
+        /* Callout — decision needed */
+        .callout {
+            border: 1px solid #fde68a;
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+        }
+        .callout .callout-label {
+            display: inline-block;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 0.4rem;
+        }
+
+        /* Footer */
+        footer.legal {
+            margin-top: 4rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.82rem;
+            color: #9ca3af;
+        }
+        footer.legal a { color: #6b7280; }
+
+        @media print {
+            body { background: #fff; }
+            .container { margin: 0; max-width: none; }
+            .card, .metric, dl.kv, .callout { break-inside: avoid; }
+            a { color: #1f2937; text-decoration: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header class="brand">
+        <div class="wordmark">DEFOnline<span class="dot">.</span></div>
+        <div class="meta">v0.1.0-rc.5 · Relatório executivo · 22/05/2026</div>
+    </header>
+
+    <h1>Relatório de Situação — WAVE 2026‑01</h1>
+    <p class="subtitle">Como a plataforma chegou de um reset técnico em 19/05/2026 a uma fundação completa e ao vivo em homologação em pouco mais de duas semanas — e o que vem nas próximas 14.</p>
+
+    <!-- ============ TL;DR ============ -->
+    <div class="card tldr">
+        <p>
+            <span class="pill ok">FUNDAÇÃO CONCLUÍDA</span>
+            <strong> A primeira etapa da plataforma (EPIC‑000 — Foundation técnica) foi entregue, validada de forma independente e está rodando em homologação pública.</strong>
+        </p>
+        <p>
+            A página inicial da plataforma é acessível em
+            <a href="https://defonline.xandrix.com.br" target="_blank" rel="noopener">defonline.xandrix.com.br</a>
+            e responde com versão deployada, status de saúde e identificador de requisição únicos. As 6 decisões arquiteturais essenciais (stack, topologia, persistência, infra, observabilidade, CI/CD) estão registradas, aceitas e indexadas. A próxima etapa — primeira interação real de um cliente com o produto — começa agora.
+        </p>
+    </div>
+
+    <!-- ============ Métricas principais ============ -->
+    <h2>Onde estamos hoje</h2>
+
+    <div class="metrics">
+        <div class="metric">
+            <div class="label">Progresso da onda</div>
+            <div class="value accent">25%</div>
+            <div class="hint">1 de 4 épicos concluído · WAVE 2026‑01</div>
+        </div>
+        <div class="metric">
+            <div class="label">Estórias entregues</div>
+            <div class="value">10 / 10</div>
+            <div class="hint">EPIC‑000 · 100% done · validado independente</div>
+        </div>
+        <div class="metric">
+            <div class="label">Cobertura de testes</div>
+            <div class="value">92,4%</div>
+            <div class="hint">Piso contratual ≥ 80% · medido ao vivo</div>
+        </div>
+        <div class="metric">
+            <div class="label">Plataforma viva</div>
+            <div class="value"><span class="pill ok" style="font-size: 1rem;">OK</span></div>
+            <div class="hint">healthcheck respondendo · TLS válido</div>
+        </div>
+        <div class="metric">
+            <div class="label">Pipeline de entrega</div>
+            <div class="value"><span class="pill ok" style="font-size: 1rem;">verde</span></div>
+            <div class="hint">últimos 8 deploys consecutivos · zero falha em main</div>
+        </div>
+        <div class="metric">
+            <div class="label">Custo de infra</div>
+            <div class="value">R$ 95–135</div>
+            <div class="hint">por mês · homologação · onda 1</div>
+        </div>
+    </div>
+
+    <dl class="kv">
+        <dt>Onda em execução</dt>     <dd>WAVE‑2026‑01 — “Hipótese do Roberto”</dd>
+        <dt>Hipótese central</dt>     <dd>O dono de pequena indústria extrai valor real de um diagnóstico econômico‑financeiro automatizado em 15 minutos — a ponto de voltar para um segundo em até 6 meses.</dd>
+        <dt>Persona alvo</dt>         <dd>Roberto — dono de pequena indústria (EPP)</dd>
+        <dt>North Star</dt>           <dd>MPEs ativas com ≥ 1 diagnóstico concluído nos últimos 90 dias · meta 12 meses pós go‑live: <strong>500</strong></dd>
+        <dt>Plataforma</dt>           <dd class="mono"><a href="https://defonline.xandrix.com.br" target="_blank" rel="noopener">defonline.xandrix.com.br</a></dd>
+        <dt>Versão em homologação</dt><dd class="mono">v0.1.0‑rc.5</dd>
+    </dl>
+
+    <!-- ============ O que foi feito ============ -->
+    <h2>O que foi feito (EPIC‑000 · Fundação técnica)</h2>
+
+    <p>
+        Toda plataforma sustentável precisa de fundação invisível antes da primeira tela: ambientes, pipelines, observabilidade, padrões de qualidade e segurança. O EPIC‑000 entrega exatamente isso — sem ele, qualquer feature de produto seria construída em terreno instável.
+    </p>
+
+    <h3>Entregas concretas e auditáveis</h3>
+    <ul class="bullet">
+        <li>
+            <strong>Plataforma pública em homologação</strong> — primeira página da DEFOnline acessível com TLS válido, identificador de requisição rastreável fim‑a‑fim e endpoints técnicos de saúde (<a href="https://defonline.xandrix.com.br/health" target="_blank" rel="noopener">/health</a>, <a href="https://defonline.xandrix.com.br/ready" target="_blank" rel="noopener">/ready</a>).
+        </li>
+        <li>
+            <strong>Esteira de entrega automatizada</strong> — cada candidata a release (tag <span class="mono" style="font-family:ui-monospace,SFMono-Regular,monospace;">rc.N</span>) dispara deploy automático em homologação em menos de 10 minutos, sem intervenção manual. Produção segue o mesmo padrão com aprovação humana de 1 clique.
+        </li>
+        <li>
+            <strong>Gate de qualidade ativo</strong> — código abaixo de 80% de cobertura é bloqueado antes mesmo de chegar ao servidor; código que tocar regra de negócio (<span class="mono">app/Domain</span>) será bloqueado abaixo de 98% automaticamente quando essa pasta nascer no EPIC‑001.
+        </li>
+        <li>
+            <strong>Observabilidade básica</strong> — logs estruturados em JSON, métricas de requisição e de jobs persistidas, identificadores únicos por requisição, mascaramento de dados pessoais (LGPD) em todos os logs e eventos.
+        </li>
+        <li>
+            <strong>6 decisões arquiteturais</strong> formalizadas, aceitas e indexadas (stack PHP/Laravel, topologia monolítica modular, persistência PostgreSQL multi‑tenant, infraestrutura como código via Ansible/Caddy, CI/CD GitHub Actions, observabilidade Postgres‑first). Cada decisão tem alternativas analisadas, custo orientativo e plano de evolução.
+        </li>
+        <li>
+            <strong>Validação independente</strong> — um agente Validador (papel separado de quem implementou) percorreu uma bateria de 25+ itens e produziu relatório auditável. Primeiro passe encontrou 1 inconsistência não‑bloqueante (gate de cobertura prescrito mas ainda não cabeado); correção entregue no mesmo dia; segundo passe aprovado.
+        </li>
+    </ul>
+
+    <h3>Indicadores de governança</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Indicador</th>
+                <th>Resultado</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Estórias entregues / planejadas (EPIC‑000)</td><td class="mono">10 / 10</td><td><span class="pill ok">100%</span></td></tr>
+            <tr><td>Decisões arquiteturais aceitas</td><td class="mono">6 ADRs + 3 IDRs</td><td><span class="pill ok">indexadas</span></td></tr>
+            <tr><td>Cobertura de testes medida</td><td class="mono">92,4%</td><td><span class="pill ok">≥ 80% (gate)</span></td></tr>
+            <tr><td>Testes E2E em browser real</td><td class="mono">2 ativos + smoke pós‑deploy</td><td><span class="pill ok">automatizados</span></td></tr>
+            <tr><td>Esteira de CI/CD em verde (main)</td><td class="mono">últimos 8 / 8 runs</td><td><span class="pill ok">verde</span></td></tr>
+            <tr><td>Validação independente</td><td>2 passes · veredito final APROVADO</td><td><span class="pill ok">aprovado</span></td></tr>
+            <tr><td>Cronograma vs. plano</td><td>EPIC‑000 fechou ~1 mês adiantado</td><td><span class="pill ok">adiantado</span></td></tr>
+            <tr><td>Custo mensal de infra (homologação)</td><td class="mono">R$ 95–135</td><td><span class="pill neutral">dentro do orçado</span></td></tr>
+        </tbody>
+    </table>
+
+    <h3>Achado honesto da validação</h3>
+    <p>
+        O exercício de ativar o gate de cobertura revelou que a cobertura real do código era <strong>57,7%</strong>, não os ≥80% que o time vinha declarando “de cabeça”. O time escreveu os testes faltantes — sem alterar lógica do produto — e a cobertura subiu para <strong>92,4%</strong>. Esse tipo de descoberta é exatamente o motivo de existir uma camada de validação independente: declarar uma métrica é diferente de medi‑la. A partir deste ponto, qualquer regressão é bloqueada automaticamente pelo gate, em dois momentos (antes do código sair da máquina do dev e antes do pull‑request fundir na base).
+    </p>
+
+    <!-- ============ Próximos passos ============ -->
+    <h2>O que está planejado</h2>
+
+    <p>
+        Com a fundação no ar, a onda atual segue para três épicos de produto, em ordem: cadastrar o cliente, entregar o primeiro diagnóstico e dar histórico para comparação no tempo.
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Etapa</th>
+                <th>O que o cliente passa a poder fazer</th>
+                <th>Janela orientativa</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>EPIC‑001</strong> — Cadastro mínimo</td>
+                <td>Roberto cria conta, cadastra a indústria dele, aceita Termo de Adesão / LGPD.</td>
+                <td class="mono">~15/07/2026</td>
+                <td><span class="pill neutral">próximo a abrir</span></td>
+            </tr>
+            <tr>
+                <td><strong>EPIC‑002</strong> — Diagnóstico Indústria</td>
+                <td>Roberto recebe um diagnóstico econômico‑financeiro em ≤ 15 min, com recomendações específicas para o setor.</td>
+                <td class="mono">~12/08/2026</td>
+                <td><span class="pill neutral">draft</span></td>
+            </tr>
+            <tr>
+                <td><strong>EPIC‑003</strong> — Histórico básico</td>
+                <td>Roberto compara diagnósticos ao longo do tempo (gatilho do segundo diagnóstico — métrica north star).</td>
+                <td class="mono">~26/08/2026</td>
+                <td><span class="pill neutral">draft</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Critério de sucesso da onda</h3>
+    <p>
+        Ao fim da WAVE‑2026‑01 (orientativo 26/08/2026), um Roberto real deve conseguir, em homologação, percorrer o ciclo completo <strong>cadastro → diagnóstico → histórico</strong> no setor Indústria, sem cobrança. O fechamento da onda inclui retro e abertura da WAVE‑2026‑02 (comercialização + cobertura de outros setores).
+    </p>
+
+    <!-- ============ Cronograma ============ -->
+    <h2>Cronograma mínimo</h2>
+
+    <div class="timeline">
+        <div class="timeline-item done">
+            <span class="when">19/05/2026</span>
+            <span class="what">Reset técnico</span>
+            <div class="desc">Estado zero pós‑reset. Decisão de refazer a fundação com critérios mais rigorosos.</div>
+        </div>
+        <div class="timeline-item done">
+            <span class="when">20/05/2026</span>
+            <span class="what">Abertura da WAVE 2026‑01</span>
+            <div class="desc">Visão, persona, north star e PDR de escopo registrados. 4 épicos abertos em draft.</div>
+        </div>
+        <div class="timeline-item done">
+            <span class="when">20–21/05/2026</span>
+            <span class="what">6 decisões arquiteturais aceitas</span>
+            <div class="desc">Stack, topologia, persistência, infraestrutura, CI/CD e observabilidade definidas em paralelo.</div>
+        </div>
+        <div class="timeline-item done">
+            <span class="when">22/05/2026</span>
+            <span class="what">Plataforma viva em homologação</span>
+            <div class="desc">Primeira tag de release deployada automaticamente. URL pública acessível. Gate de qualidade ativo. Validação independente aprovada.</div>
+        </div>
+        <div class="timeline-item current">
+            <span class="when">22–27/05/2026</span>
+            <span class="what">Preparação do EPIC‑001 (em curso)</span>
+            <div class="desc">Decomposição em estórias, mobilização da revisão jurídica (Termo de Adesão / LGPD), abertura do primeiro sprint.</div>
+        </div>
+        <div class="timeline-item">
+            <span class="when">~15/07/2026</span>
+            <span class="what">EPIC‑001 entregue</span>
+            <div class="desc">Primeiro cliente real consegue se cadastrar em homologação. Marco visual: telas de cadastro funcionando.</div>
+        </div>
+        <div class="timeline-item">
+            <span class="when">~12/08/2026</span>
+            <span class="what">EPIC‑002 entregue</span>
+            <div class="desc">Primeiro diagnóstico de Indústria emitido em homologação. Marco visual: relatório de diagnóstico gerado.</div>
+        </div>
+        <div class="timeline-item">
+            <span class="when">~26/08/2026</span>
+            <span class="what">Fechamento da WAVE 2026‑01</span>
+            <div class="desc">Ciclo completo cadastro → diagnóstico → histórico em homologação. Retro da onda e abertura da próxima (comercialização).</div>
+        </div>
+    </div>
+
+    <p style="color:#6b7280; font-size: 0.9rem; margin-top: 1rem;">
+        Datas orientativas baseadas no plano da WAVE 2026‑01. EPIC‑000 fechou aproximadamente 1 mês adiantado em relação ao alvo conservador de 24/06; esse buffer é folga, não compromisso de antecipar datas dos demais épicos — produto exige cadência diferente de fundação técnica.
+    </p>
+
+    <!-- ============ Riscos ============ -->
+    <h2>Riscos abertos</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Risco</th>
+                <th>Probabilidade</th>
+                <th>Impacto</th>
+                <th>Mitigação</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Termo de Adesão / LGPD ainda não revisado juridicamente — bloqueia fechamento do EPIC‑001 com aceite real.</td>
+                <td><span class="pill warn">média</span></td>
+                <td><span class="pill warn">médio</span></td>
+                <td>Disparar revisão jurídica até <strong>27/05/2026</strong>.</td>
+            </tr>
+            <tr>
+                <td>Roberto pode precisar de cobrança/captação para se engajar; beta gratuito dá falso positivo.</td>
+                <td><span class="pill warn">média</span></td>
+                <td><span class="pill error">alto</span></td>
+                <td>Pesquisa qualitativa estruturada com cada um dos primeiros usuários do beta.</td>
+            </tr>
+            <tr>
+                <td>EPIC‑002 (diagnóstico) é o épico mais denso da onda e pode estourar estimativa.</td>
+                <td><span class="pill error">alta</span></td>
+                <td><span class="pill warn">médio</span></td>
+                <td>Quebra vertical em estórias menores se ultrapassar 6 semanas.</td>
+            </tr>
+            <tr>
+                <td>API externa da Receita Federal instável compromete enriquecimento de CNPJ.</td>
+                <td><span class="pill warn">média</span></td>
+                <td><span class="pill warn">médio</span></td>
+                <td>Fallback manual de cadastro já previsto no EPIC‑001.</td>
+            </tr>
+            <tr>
+                <td>Velocidade da fundação cria expectativa de cadência irreal para épicos de produto.</td>
+                <td><span class="pill warn">média</span></td>
+                <td><span class="pill warn">médio</span></td>
+                <td>Comunicação explícita: fundação técnica permite paralelismo; produto não. Este relatório já endereça.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- ============ Decisões pendentes ============ -->
+    <h2>Pontos para conversa com o board</h2>
+
+    <div class="callout">
+        <div class="callout-label">Decisão recomendada nos próximos 5 dias</div>
+        <p style="margin: 0;">
+            <strong>Disparar a revisão jurídica do Termo de Adesão e tratamento LGPD.</strong>
+            É a única dependência externa do EPIC‑001 (cadastro). Se essa frente não andar em paralelo, o EPIC‑001 chega ao fim sem condições legais de aceitar usuários reais. Recomendação operacional: iniciar até <strong>27/05/2026</strong>.
+        </p>
+    </div>
+
+    <div class="callout">
+        <div class="callout-label">Conversa estratégica (sem urgência hoje)</div>
+        <p style="margin: 0;">
+            <strong>Modelo de monetização do beta.</strong> A onda 1 fecha sem cobrança por desenho — o objetivo é validar valor, não receita. A decisão sobre <em>trial gratuito de 7 dias</em> vs. <em>beta aberto indefinido</em> precisa estar tomada antes da abertura da WAVE 2026‑02 (comercialização). Material de apoio: PDR‑001.
+        </p>
+    </div>
+
+    <!-- ============ Apêndice ============ -->
+    <h2>Apêndice — para leitores técnicos</h2>
+    <p style="color:#6b7280;">
+        Detalhes operacionais e rastreabilidade. Pode ser ignorado por leitores não‑técnicos.
+    </p>
+
+    <ul class="bullet">
+        <li>
+            <strong>Stack:</strong> Laravel 13 + Livewire 4 + PostgreSQL 18 + Pest 4 + Dusk 8 (PHP 8.5). Container único Docker para web/worker/scheduler. Reverse proxy Caddy 2. Deploy via Ansible em VPS BR genérica (fornecedor‑agnóstico).
+        </li>
+        <li>
+            <strong>Esteira:</strong> trunk‑based, tags duais — <span class="mono">vX.Y.Z-rc.N</span> dispara homologação automática, <span class="mono">vX.Y.Z</span> dispara produção com gate humano de 1 clique. Pre‑push hook local roda lint + análise estática + Pest + Dusk + cobertura antes de aceitar <span class="mono">git push</span>.
+        </li>
+        <li>
+            <strong>Observabilidade:</strong> logs JSON via Laravel, métricas persistidas em PostgreSQL, alertas via canal Telegram privado, mascaramento de PII em 3 camadas (sanitizer, exception em <span class="mono">EventLogger</span>, teste arquitetural).
+        </li>
+        <li>
+            <strong>Documentação viva:</strong>
+            <a href="../index.json">índice do projeto</a> ·
+            <a href="../epics/EPIC-000-foundation/validation/report.md">relatório de validação do EPIC‑000</a> ·
+            <a href="status-2026-05-22.md">status report interno</a> ·
+            <a href="../decisions/adr/">decisões arquiteturais (ADRs)</a>.
+        </li>
+        <li>
+            <strong>Repositório:</strong> <a href="https://github.com/xandroalmeida/defonline" target="_blank" rel="noopener">github.com/xandroalmeida/defonline</a>.
+        </li>
+    </ul>
+
+    <footer class="legal">
+        <p>
+            DEFOnline · Relatório a Investidores · 22/05/2026 · WAVE 2026‑01 · Versão da plataforma em homologação: <span class="mono">v0.1.0-rc.5</span>.<br>
+            Documento gerado a partir do estado vivo do projeto (<a href="../index.json">index.json</a> + <a href="status-2026-05-22.md">status report interno de 22/05/2026</a>). Datas orientativas; qualquer ajuste é comunicado em revisão deste relatório.
+        </p>
+    </footer>
+
+</div>
+</body>
+</html>

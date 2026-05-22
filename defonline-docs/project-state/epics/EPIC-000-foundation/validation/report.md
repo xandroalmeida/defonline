@@ -3,7 +3,10 @@ epic_id: EPIC-000
 type: validation-report
 validated_at: 2026-05-22
 validated_by: validador (claude-opus-4-7)
-verdict: rejected
+verdict: approved
+verdict_history:
+  - { at: 2026-05-22, verdict: rejected, blocking: false, reason: "F-NB-1 — gate de cobertura prescrito não implementado" }
+  - { at: 2026-05-22, verdict: approved, reason: "STORY-010 entregou PCOV + gate --min=80 no pre-push e no PR; cobertura medida ao vivo 92.4% ≥ 80%" }
 checklist_source: epics/EPIC-000-foundation/validation/checklist.md
 ---
 
@@ -11,9 +14,10 @@ checklist_source: epics/EPIC-000-foundation/validation/checklist.md
 
 ## TL;DR
 
-> **Veredito:** **REJECTED** — 1 fail não-bloqueante (gate de cobertura prescrito pela ADR-006 + quality-standards §1.1 / §2.2 não está implementado no pre-push hook nem no CI; sem isso, o item 2.1 do checklist fica sem evidência verificável).
-> **Contagem:** 16 passes, 3 passes com ressalva, 1 fail (0 bloqueante, 1 não-bloqueante), 4 n/a justificados.
-> **Próximo passo recomendado:** abrir estória curta de correção que (i) habilita PCOV/Xdebug no container `web`, (ii) altera pre-push para `php artisan test --coverage --min=80` (e `--min=98` em `app/Domain/**` quando passar a existir) e (iii) adiciona artefato de cobertura à evidência do CI. Restante do épico está vivo, observável e reproducível — pode ser fechado **com pendência** se o PO julgar que a correção encaixa naturalmente na abertura do EPIC-001.
+> **Veredito:** **APPROVED** (2026-05-22, segundo passe).
+> Primeiro passe (mesma data): REJECTED não-bloqueante — F-NB-1 (gate de cobertura prescrito não implementado). PO abriu STORY-010; Programador entregou em `in_review`; Validador re-executou Bloco 2.1 e validou os artefatos. F-NB-1 está **resolvido** (ver Apêndice A.9 — Adendum da re-validação).
+> **Contagem final:** 17 passes, 3 passes com ressalva, 0 fail, 4 n/a justificados.
+> **Próximo passo recomendado:** mover EPIC-000 para `done` no `index.json`; promover STORY-010 para `done`; destravar EPIC-001 para `ready` quando o PO decidir abrir.
 
 ---
 
@@ -40,12 +44,12 @@ O único `fail` legítimo é o **gate de cobertura prescrito mas não implementa
 
 | Item | Status | Evidência |
 |---|---|---|
-| 2.1 — Cobertura unitária do código novo do EPIC-000 ≥ 80% | ❌ | Sem evidência numérica. Pre-push hook (`scripts/git-hooks/pre-push.sh`) roda `php artisan test --testsuite=All` sem `--coverage --min`. Todos os jobs de `pr.yml` setam `coverage: none`. `quality-standards.md §1.1` e ADR-006 §2.2 exigem o gate; STORY-007 declara "≥ 80%" sem produzir relatório. Ver **F-NB-1**. |
+| 2.1 — Cobertura unitária do código novo do EPIC-000 ≥ 80% | ✅ | **Resolvido pela STORY-010** (re-validação 2026-05-22, segundo passe). PCOV habilitado no container `web` (`docker compose exec -T web php -m \| grep -i pcov` → `pcov`). Pre-push (`scripts/git-hooks/pre-push.sh:51`) e job `test-coverage` do `pr.yml` rodam `./vendor/bin/pest --testsuite=All --coverage --min=80`. Medição ao vivo no container nesta re-validação: **92.4 % geral, 56 testes 132 assertions passed**. Artefato `coverage-summary.txt` publicado no PR via `actions/upload-artifact@v4` com retenção 30 dias. `app/Domain/**` estruturado (`phpunit-domain.xml` + `--min=98` condicional no pre-push e no CI via `hashFiles('app/Domain/**/*.php')`) e dispara automaticamente quando a pasta nascer no EPIC-001. Detalhes em Apêndice A.9. |
 | 2.2 — `n/a justificado`: cobertura 98% núcleo de regras de negócio | 🚫 | N/A justificado: EPIC-000 é Foundation técnica, não introduz regras de negócio. `app/Domain/**` ainda não existe (vai aparecer no EPIC-001+). Item alinhado com o próprio checklist do épico. |
 | 2.3 — ≥ 1 teste E2E rodando contra homologação real (não mock) | ⚠️ | Pass com ressalva: smoke pós-deploy do `playbooks/deploy.yml` (`ansible.builtin.uri` contra `https://defonline.xandrix.com.br/health`, retry 30×2s) cobre homologação real. Porém é HTTP, não browser. Dusk (`tests/Browser/HelloWorldBrowserTest.php`) cobre browser real **mas local** (`localhost:8000`). Ver passes com ressalva. |
 | 2.4 — Testes E2E rodam em browser real via automação | ✅ | Dusk 4 + Chromium 148 no container `web`. `HelloWorldBrowserTest` (2 testes, 6 asserções) cobre carregamento da página + Livewire click → fila → worker. Roda no pre-push (`step "Dusk E2E"` em `scripts/git-hooks/pre-push.sh:53`). |
 
-**Resultado do bloco: FAIL no 2.1 (não-bloqueante).**
+**Resultado do bloco (segundo passe): PASS** — F-NB-1 resolvido pela STORY-010. Primeiro passe: FAIL no 2.1 (não-bloqueante).
 
 ### Bloco 3 — Automação
 
@@ -102,7 +106,7 @@ Nenhum fail bloqueante. A Foundation está observavelmente em pé, com pipeline 
 
 ### Não-bloqueantes
 
-#### F-NB-1 — Gate de cobertura prescrito não está implementado
+#### F-NB-1 — Gate de cobertura prescrito não está implementado  ✅ **RESOLVIDO no segundo passe (2026-05-22) — ver Apêndice A.9**
 
 - **Bloco:** Bloco 2 — item 2.1 (e tangencialmente ADR-006 §2.2 + `quality-standards.md` §1.1 + §2.2).
 - **Critério esperado:** "Cobertura geral ≥ 80% no código novo de cada estória. (...) Cobertura é medida no PR. Se cair abaixo da meta, o PR não merge." (`quality-standards.md` §1.1) — e pre-push hook "Pest UnitPure + Pest Feature + Dusk + cobertura (gate 80% geral / 98% núcleo `app/Domain/**`)" (`quality-standards.md` §2.2 + ADR-006 §Decisão 4).
@@ -130,21 +134,19 @@ Nenhum fail bloqueante. A Foundation está observavelmente em pé, com pipeline 
 
 ## Recomendação ao PO
 
-### Sobre o épico
+### Sobre o épico (segundo passe — APPROVED)
 
-REJECTED **não-bloqueante**. A Foundation cumpre o que prometeu: pipeline tag→deploy verde, página viva em homologação, observabilidade básica + mascaramento PII, 6 ADRs aceitas. O único item realmente faltando é o **gate de cobertura prescrito pela própria ADR-006** — ele não impede a entrega da Foundation funcionar, mas impede que o EPIC-001 (que vai exigir 98% em `app/Domain`) comece em cima do trilho técnico completo que o EPIC-000 deveria fornecer.
+EPIC-000 está pronto para ser declarado `done`. O F-NB-1 do primeiro passe foi resolvido pela STORY-010: PCOV no container, gate `--coverage --min=80` ativo no pre-push **e** no `pr.yml` (job `test-coverage`), artefato `coverage-summary.txt` publicado no GHA com retenção de 30 dias, e estrutura `phpunit-domain.xml` pronta para disparar `--min=98` quando `app/Domain/**` nascer no EPIC-001 (detecção via `hashFiles('app/Domain/**/*.php')`). Cobertura medida ao vivo nesta re-validação: **92.4 %** (folga confortável sobre o piso de 80 %).
 
-Duas opções razoáveis:
+Como sub-produto bom: o exercício de habilitar o gate revelou que a cobertura real do EPIC-000 era **57.7 %** antes dos testes adicionais (PennantListOverdue 0 %, HelloWorldEmail Job 3.6 %, BaseJob 11.1 %, HelloWorldMessage 0 %, Features/HelloWorldEmailHabilitado 0 %, CollectJobMetrics 0 %). O Programador escreveu os testes faltantes — sem mexer em lógica de produto — e subiu para 92.4 %. **Isso confirma que o gate é necessário**: declarar "≥ 80 %" sem medir é diferente de medir e ver 80 %.
 
-1. **Aceitar como APPROVED com pendência** (PO sobrescreve veredito) e abrir a estória corretiva como **primeira estória do EPIC-001**, antes de qualquer coisa de cadastro. Custo: ~1h de programador. Risco: zero, contanto que a estória vire de fato a primeira.
-2. **Manter como REJECTED** e abrir a estória corretiva ainda no EPIC-000, retomando a validação depois. Custo: pequeno overhead processual, ganho: épico fecha "limpo".
+### Estórias de correção (resolvidas no segundo passe)
 
-Minha leitura factual: a Foundation entrega valor real (todas as outras coisas funcionam), e o gap é **mecânico** (não conceitual). A opção 1 é defensável se o PO se compromete a tratar a correção como primeira estória do EPIC-001. **A decisão é sua.**
+- **STORY-010** — *Habilitar gate de cobertura no pre-push e no PR (PCOV + --min=80).* **Done** após esta re-validação. Endereçou F-NB-1. Entregou PCOV via `pecl install pcov`, gate ativo nos dois pontos, IDR-003 (`pcov-vs-xdebug`) registrado, e descobriu pelo caminho que `php artisan test` engole o exit code do gate de cobertura do Pest 4.7 — daí o uso de `./vendor/bin/pest` direto (decisão técnica documentada em "Notas do agente" da STORY-010).
 
-### Estórias de correção sugeridas (decisão final do PO)
+### Estórias de correção sugeridas (ainda em aberto — decisão do PO)
 
-- **STORY-CORR-001 (sugerido)** — *Habilitar gate de cobertura no pre-push e no PR.* Endereça F-NB-1. Escopo: PCOV no Dockerfile, `--coverage --min=80` no pre-push, job de cobertura no `pr.yml`, artefato `coverage.txt`. Tamanho estimado: **S**. Dependência: zero.
-- **STORY-CORR-002 (sugerido, opcional)** — *Atualizar `validation/checklist.md` da Foundation para alinhar com ADR-006.* Substituir "deploy a cada merge na main" por "deploy a cada tag rc.N". Tamanho estimado: **XS** (1 commit de docs). Pode ser feito junto com a abertura do EPIC-001 ou descartado se o PO considerar que o `epic.md` atualizado é suficiente.
+- **STORY-OPT-001 (opcional, decisão final do PO)** — *Atualizar `validation/checklist.md` da Foundation para alinhar com ADR-006.* Substituir "deploy a cada merge na main" por "deploy a cada tag rc.N". Tamanho estimado: **XS** (1 commit de docs). Pode ser descartado se o PO considerar que o `epic.md` atualizado é suficiente. Não impede o fechamento do EPIC-000.
 
 ### Observações de processo (input para retrospectiva)
 
@@ -258,11 +260,96 @@ gh run list --workflow="release-homolog — deploy automático em homologação"
 
 Esta validação não anexou artefatos pesados separados — toda evidência está acessível por comando reproducível no Apêndice A. Caso o PO queira artefatos persistidos:
 
-- Recomendado anexar `coverage.txt` (saída de `php artisan test --testsuite=All --coverage`) quando a STORY-CORR-001 for executada.
+- Recomendado anexar `coverage-summary.txt` (artefato GHA do job `test-coverage`) ao próximo PR que tocar gates de qualidade — útil para auditoria longitudinal.
 - Recomendado anexar screenshot do dashboard de logs estruturados quando observabilidade ganhar UI (provavelmente EPIC seguinte).
+
+---
+
+## Apêndice A.9 — Adendum da re-validação (2026-05-22, segundo passe)
+
+**Contexto:** Re-validação focada em Bloco 2.1 após a entrega da STORY-010 (`in_review`). Escopo da re-execução: artefatos da STORY-010 + medição ao vivo de cobertura no container `web` + impactos colaterais (Dockerfile mudou → confirmar que imagem ainda sobe).
+
+**Comandos usados e resultado observado:**
+
+```
+$ docker compose exec -T web php -m | grep -i pcov
+pcov
+
+$ grep -n "coverage\|min\|pest" scripts/git-hooks/pre-push.sh
+50:step "Pest (All, coverage ≥80%)" \
+51:    docker compose exec -T web ./vendor/bin/pest --testsuite=All --coverage --min=80
+57:    step "Pest Domain coverage ≥98%" \
+58:        docker compose exec -T web ./vendor/bin/pest --configuration=phpunit-domain.xml --coverage --min=98
+
+$ grep -n "test-coverage\|upload-artifact\|coverage-summary\|--min=80\|--min=98\|hashFiles" .github/workflows/pr.yml
+111:  test-coverage:
+121:    name: Pest All (coverage ≥80%)
+153:          coverage: pcov
+212:    ./vendor/bin/pest --testsuite=All --coverage --min=80 | tee coverage-summary.txt
+215:    if: hashFiles('app/Domain/**/*.php') != ''
+218:    ./vendor/bin/pest --configuration=phpunit-domain.xml --coverage --min=98 | tee -a coverage-summary.txt
+220:  - name: Upload coverage-summary
+222:    uses: actions/upload-artifact@v4
+224:    name: coverage-summary
+225:    path: app/coverage-summary.txt
+227:    retention-days: 30
+
+$ ls app/phpunit-domain.xml
+app/phpunit-domain.xml                                        ← existe, configurado para <source><directory>app/Domain</directory>
+
+$ ls defonline-docs/project-state/decisions/idr/IDR-003-pcov-vs-xdebug.md
+IDR-003-pcov-vs-xdebug.md                                     ← existe, status: accepted, indexado no index.json
+
+$ docker compose exec -T web ./vendor/bin/pest --testsuite=All --coverage --min=80
+Tests:    56 passed (132 assertions)
+Duration: 1.01s
+
+Console/Commands/PennantListOverdue ........................... 30..32, 44 / 92.1%
+Features/HelloWorldEmailHabilitado .................................. 100.0%
+Http/Controllers/HealthController ............... 41, 47, 75..76 / 88.6%
+Http/Middleware/AssignRequestId ..................................... 100.0%
+Http/Middleware/EnrichLogContext .................................... 100.0%
+Http/Middleware/MeasureRequest .................. 45, 59..61, 62 / 76.2%
+Jobs/BaseJob ........................................................ 100.0%
+Jobs/HelloWorldEmail ................................................ 100.0%
+Livewire/HelloWorld ......................................... 65..66 / 88.9%
+Mail/HelloWorldMessage .............................................. 100.0%
+Models/AuditLog ..................................................... 100.0%
+Models/EventoProduto ................................................ 100.0%
+Observabilidade/AuditLogger ......................................... 100.0%
+Observabilidade/EventLogger ......................................... 100.0%
+Observabilidade/Excecoes/PiiEmEventoException ....................... 100.0%
+Observabilidade/Listeners/CollectJobMetrics ......................... 100.0%
+Observabilidade/LogSanitizer ........... 122, 147, 158, 168, 182..188 / 85.5%
+Providers/AppServiceProvider ........................................ 100.0%
+Support/RequestId ................................................... 100.0%
+Support/helpers .................................................. 7 / 50.0%
+Total: 92.4 %                                                  ← gate ≥ 80 % atendido
+```
+
+**Verificação extra do gate funcionando (não rodada nesta sessão; tomada como evidência confiável o experimento documentado pelo Programador em "Notas do agente" da STORY-010):**
+
+> Classe `App\Support\BigUncovered` com ~50 linhas sem cobertura → `Total: 79.4 %` → `FAIL  Code coverage below expected 80.0 %, currently 79.4 %.` → `$? = 1`. Sem o arquivo: `Total: 92.4 %` → `$? = 0`.
+
+**Conexão com critério:**
+- Bloco 2.1 do `validation/checklist.md` exige "Cobertura unitária do código novo do EPIC-000 ≥ 80% (evidência: relatório do CI da STORY-007)." Critério agora atendido com evidência **numérica e reproducível**, e — mais importante — com gate **executável** nos dois pontos certos: pre-push (protege o histórico local) e PR (protege a `main`).
+- `quality-standards.md §1.1` ("Cobertura é medida no PR. Se cair abaixo da meta, o PR não merge") agora descreve a realidade.
+- `quality-standards.md §2.2` + ADR-006 §Decisão 4 ("Hook falha = `git push` abortado") idem.
+- Cobertura adicional honesta: o exercício revelou que a cobertura efetiva **antes** dos testes adicionais era 57.7 %, não os ≥ 95 % otimistas que a STORY-007 implicitamente assumia. O Programador escreveu os testes faltantes em vez de relaxar o gate. **Esse é o tipo de descoberta que justifica o gate existir.**
+
+**Impactos colaterais avaliados:**
+- Dockerfile mudou (adicionou `pecl install pcov`) → container `web` continua subindo (`docker compose ps` mostra `web` em `running`); 56 testes verdes; não há impacto observado no runtime do app (PCOV vem com `pcov.enabled=0` por padrão; só ativa sob `--coverage`).
+- README §"Cobertura de testes" adicionado (CA-7) — instruções de como rodar localmente.
+- IDR-003 (`pcov-vs-xdebug`) adicionado ao `index.json` em `decisions.idr[2]`.
+- STORY-010 referenciada em `index.json` (em `stories[]` e em `EPIC-000.story_ids`) + ganhou campos `coverage_geral: "92.4%"` e `related_idrs: ["IDR-003"]`.
+
+**Outros blocos:** não re-executados. Premissa: STORY-010 toca apenas pipeline/tooling, não toca runtime do app, ADRs, infra, observabilidade ou os outros itens do checklist. Verificação rápida: pipeline `main` continua verde (último run: success); homologação continua viva (não re-verifiquei nesta passada — o deploy não foi disparado pela STORY-010, então o estado de homol é o mesmo do primeiro passe, ver Apêndice A.2).
 
 ---
 
 ## Histórico
 
-- 2026-05-22 — Relatório inicial submetido por validador (sessão claude-opus-4-7). Veredito: REJECTED não-bloqueante (1 fail em Bloco 2.1: gate de cobertura prescrito não implementado). Decisão de fechar com pendência ou abrir estória corretiva ainda no EPIC-000 fica com o PO.
+- 2026-05-22 — **Primeiro passe** submetido por validador (sessão claude-opus-4-7). Veredito: **REJECTED não-bloqueante** (1 fail em Bloco 2.1: gate de cobertura prescrito não implementado). Decisão de fechar com pendência ou abrir estória corretiva ainda no EPIC-000 fica com o PO.
+- 2026-05-22 — PO escolheu **manter EPIC-000 em `in_review`** e abrir **STORY-010** (corretiva, S) no próprio EPIC-000 — opção 2 da recomendação anterior.
+- 2026-05-22 — Programador entregou STORY-010 em `in_review`: PCOV no Dockerfile, gate `--coverage --min=80` no pre-push e em novo job `test-coverage` do `pr.yml`, artefato `coverage-summary.txt` (retenção 30 dias), `phpunit-domain.xml` para gate de 98% em `app/Domain/**` quando essa pasta existir, IDR-003 (`pcov-vs-xdebug`). Cobertura medida: **92.4 %** (subiu de 57.7 % no caminho, sem alterar lógica do app — só adicionou testes faltantes para PennantListOverdue, HelloWorldEmail Job, BaseJob, HelloWorldMessage, Features/HelloWorldEmailHabilitado, CollectJobMetrics, helper).
+- 2026-05-22 — **Segundo passe** do validador (sessão claude-opus-4-7) re-executou o Bloco 2.1 + verificou impactos colaterais. Veredito final: **APPROVED**. F-NB-1 resolvido (Apêndice A.9). EPIC-000 pronto para `done`.

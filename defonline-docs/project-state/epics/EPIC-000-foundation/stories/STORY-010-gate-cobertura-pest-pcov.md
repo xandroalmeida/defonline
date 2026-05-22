@@ -6,8 +6,9 @@ epic_id: EPIC-000
 sprint_id: null
 type: bugfix
 target_role: programador
-status: in_review
+status: done
 owner_agent: programador (claude-opus-4-7)
+validated_by: validador (claude-opus-4-7) em 2026-05-22 (Apêndice A.9 do report.md)
 created_at: 2026-05-22
 updated_at: 2026-05-22
 estimated_session_size: S
