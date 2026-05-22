@@ -6,10 +6,10 @@ epic_id: EPIC-000
 sprint_id: null
 type: spike
 target_role: arquiteto
-status: ready
-owner_agent: null
+status: done
+owner_agent: arquiteto (claude-opus-4-7)
 created_at: 2026-05-20
-updated_at: 2026-05-20
+updated_at: 2026-05-21
 estimated_session_size: M
 ---
 
@@ -89,4 +89,42 @@ Você decide stack de observabilidade + modelo de eventos. Você **não decide**
 Siga `agent-task-format.md`. Igual à STORY-001.
 
 ## Notas do agente
-(preenchido durante/após execução)
+
+### Decisões tomadas
+
+- **2026-05-21** — Trilho de observabilidade técnica: **Postgres-first puro** (logs JSON via Laravel Monolog em canal `stack` com `stdout` + `daily` 90d; métricas em tabelas `request_metrics`, `job_metrics`, `business_metrics`; fila/conexões consultadas ao vivo em `jobs` e `pg_stat_activity`). Decisor sob F1 (Postgres-first + custo R$0) e F6 (operável por time pequeno). Confirmado pelo PO via `AskUserQuestion`. Opções B (self-hosted lite) e C (cloud SaaS free tier) rejeitadas com sinais de revisão explícitos no ADR.
+- **2026-05-21** — Destino dos 6 eventos do north star: **tabela `evento_produto` própria** no Postgres, append-only, schema dedicado (independente de `audit_logs`). `EventLogger::emit(...)` síncrono inline na transação do agregado. Latência alvo < 1s entre ato e disponibilidade na query do PO. Confirmado pelo PO via `AskUserQuestion`.
+- **2026-05-21** — Canal de alerta: **Telegram** (bot privado). Em dev/local, canal vira `log` (sem internet). 7 alertas mínimos definidos (5 do RNF §6.4 + worker travado + scheduler down). Cooldown de 30 min por tipo. Confirmado pelo PO via `AskUserQuestion`.
+- **2026-05-21** — Schema concreto dos 6 eventos do north star fixado (nome, quando emitir, `usuario_id`/`empresa_id` obrigatoriedade, propriedades obrigatórias) — ver Decisão 2 da ADR-004.
+- **2026-05-21** — Política de PII em três camadas: `LogSanitizer` reaproveitado de ADR-003 para logs; `EventLogger::emit()` lança exceção se chave proibida; teste arquitetural Pest bloqueia merge. Princípio #9 (automatizável > documentável).
+- **2026-05-21** — `request_id` UUID v7 da ADR-002 é a chave de correlação cruzando `request_metrics`, `job_metrics`, `business_metrics`, `evento_produto`, `audit_logs` e log estruturado. Esta ADR **consome** a convenção; não cria nova.
+- **2026-05-21** — Health checks: `/health` (liveness, < 100ms, sem DB) + `/ready` (readiness com `SELECT 1` + checks de cache/queue). Heartbeat de worker e scheduler em tabelas próprias.
+- **2026-05-21** — Tracing distribuído: **fora do MVP**. `request_id` cobre o monolito. Sinais de revisão explícitos: serviço externo síncrono crítico OU > 100k requests/dia sustentado.
+
+### Descobertas
+
+- **2026-05-21** — O RNF §6.4 lista 5 alertas mas **não nomeia canal** (item explicitamente `[A DEFINIR]` na §3.4 da especificação). A escolha de Telegram preenche essa lacuna; e-mail tinha latência alta (minutos) e webhook genérico era um nó extra agora sem destino concreto.
+- **2026-05-21** — `pg_partman` aparece em ADR-003 como extensão **não no MVP** (`audit_logs` cabe em tabela única). Esta ADR herda a mesma postura para `request_metrics`/`evento_produto` — particionamento vira IDR do Programador quando volume ultrapassar ~50M linhas.
+- **2026-05-21** — Volume estimado no MVP (~100 empresas ativas × 4 sessões/mês × 50 reqs/sessão ≈ 20k req/mês) é **3 ordens de grandeza** abaixo do que justifica Loki/Prometheus dedicado. Postgres aguenta com folga, justificando F1 (Postgres-first) por número, não por preferência.
+- **2026-05-21** — `LogSanitizer` da ADR-003 cobre exatamente o que o RNF §6.1 exige (PII proibida em log); esta ADR só **estende a lista de chaves** redigidas (adiciona `cnae_principal` parcial, `nome_completo`, dados financeiros do quiz por regex). Não cria mecanismo paralelo.
+- **2026-05-21** — `diagnostico_visualizado` é o único dos 6 eventos do north star que **exige idempotência de aplicação** (`(usuario_id, diagnostico_id, dia, via)`), porque GET é trivialmente repetível e poderia inflar a contagem. Documentado no schema 2.2.
+
+### Bloqueios encontrados
+
+- Nenhum bloqueio que exigisse escalonamento. Decisões 1–3 (trilho técnico, destino de eventos, canal de alerta) foram confirmadas pelo PO via `AskUserQuestion` antes da redação da ADR — princípio do SKILL.md ("ofereça as opções primeiro, antes de escrever o ADR").
+
+### ADR produzida
+
+- **ADR-004 — Observabilidade do DEFOnline — logs JSON via Laravel + métricas e eventos no Postgres + alertas via Telegram** — `decisions/adr/ADR-004-observabilidade.md` (status: `proposed`).
+
+### Links de evidência
+
+- ADR cobre integralmente o mini-checklist Tipo 6 de `adr-types.md` (CA-2): stack de observabilidade, formato de log estruturado, health checks (`/health` + `/ready`), métricas RED automáticas via middleware, política PII automatizada, 7 alertas mínimos (5 do RNF + 2 da topologia), estimativa de custo (~R$0 delta).
+- ADR define explicitamente, para os 6 eventos do north star (CA-3), o nome final, propriedades obrigatórias, destino (`evento_produto`), latência aceitável (< 1s) — ver Decisão 2.
+- ADR explicita política de PII em três camadas (CA-4): helper com exceção, teste arquitetural Pest, opcionalmente trigger Postgres. Mascaramento via `LogSanitizer` único.
+- Alternativas reais (CA-5): A (Postgres-first), B (self-hosted lite Loki/Sentry), C (cloud SaaS free), D (status quo) — todas com prós/contras e veredito.
+- `index.json` atualizado com entrada `ADR-004` em `decisions.adr[]` (CA-6).
+
+### Aprovação humana
+
+- **2026-05-21** — ADR-004 **aceita pelo PO Alexandro em chat**. Status `proposed` → `accepted`. Estória fechada como `done`. Sem condicionantes.

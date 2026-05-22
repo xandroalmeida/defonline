@@ -6,7 +6,7 @@ wave: WAVE-2026-01
 status: ready
 owner_role: po
 created_at: 2026-05-20
-updated_at: 2026-05-20
+updated_at: 2026-05-21
 target_completion: 2026-06-24
 ---
 
@@ -16,23 +16,23 @@ target_completion: 2026-06-24
 
 Não é um épico de funcionalidade. É a fundação técnica que **todos os outros épicos da WAVE-2026-01 exigem para existir**. Sem pipeline em verde, ambiente de homologação acessível e ADRs essenciais ratificadas, qualquer trabalho subsequente do time de implementação fica fingindo: código sem destino reprodutível, deploy artesanal, decisões arquiteturais implícitas que apodrecem ao longo do projeto.
 
-O "usuário" deste épico é o próprio time de implementação (PO + Arquiteto + Programador + Validador). O valor entregue é: a partir daqui, qualquer estória futura tem um trilho técnico em que rodar — main → CI → deploy automático em homologação, com observabilidade básica, testes automatizados e ambiente local subindo com um comando.
+O "usuário" deste épico é o próprio time de implementação (PO + Arquiteto + Programador + Validador). O valor entregue é: a partir daqui, qualquer estória futura tem um trilho técnico em que rodar — pre-push hook local cobrando testes pesados → CI leve em verde → tag rc.N dispara deploy automático em homologação → tag semver dispara deploy em produção com gate humano de 1 clique. Observabilidade básica, testes automatizados e ambiente local subindo com um comando.
 
 ## Resultado esperado (outcome)
 
-Ao fim deste épico, merge na branch principal dispara deploy automático de uma página viva em ambiente de homologação acessível por URL (`homolog.defonline.com.br` ou equivalente decidido pelo Arquiteto via ADR), e todas as ADRs essenciais (stack, hospedagem, banco PostgreSQL ratificado, CI/CD, observabilidade, testes, autenticação, captura de eventos para o north star, ambiente de desenvolvimento local) estão `accepted` e referenciadas neste épico.
+Ao fim deste épico, a criação de uma tag git `vX.Y.Z-rc.N` (release candidate) dispara deploy automático de uma página viva em ambiente de homologação acessível por URL pública (`homolog.defonline.com.br` ou equivalente decidido pelo Arquiteto via ADR), e todas as ADRs essenciais (stack, topologia, persistência, infra, observabilidade, CI/CD) estão `accepted` e referenciadas neste épico. O critério "merge em main = deploy em homologação" foi substituído por "tag rc.N = deploy em homologação" pela ADR-006 — promoção é ato explícito, não efeito colateral de merge.
 
 ## Métrica de sucesso (como saberemos que funcionou)
 
-- **Métrica primária:** "merge na main faz deploy" — observável: commit aprovado em PR vai automaticamente para homologação em menos de 10 minutos, sem intervenção manual.
-- **Métrica de qualidade:** pipeline tem cobertura de testes ativada (mesmo que com 1 teste único no hello-world) e bloqueia merge quando pipeline está vermelho.
+- **Métrica primária:** "tag rc.N faz deploy" — observável: criação da tag `vX.Y.Z-rc.N` aciona deploy automático em homologação em menos de 10 minutos, sem intervenção manual (ADR-006).
+- **Métrica de qualidade:** pre-push hook local cobra cobertura de testes (gate 80% geral / 98% núcleo `app/Domain/**` conforme `quality-standards.md §1.1`) e impede `git push` quando vermelho; CI remoto leve bloqueia merge em main quando lint/audit/trivy/gitleaks/build falham.
 - **Métrica de fundação técnica:** todas as ADRs candidatas listadas em PDR-001 estão em status `accepted` (ou explicitamente justificadas como "não necessárias para a WAVE-2026-01") no `index.json`.
 
 ## Entregável visível no fim do épico
 
 - [ ] Página viva ("hello DEFOnline") rodando em URL pública de homologação, exibindo número da versão deployada e indicador de healthcheck.
 - [ ] Repositório de código no estado em que **qualquer agente programador da skill `programador`** consegue subir o ambiente local com um comando documentado e rodar a suíte de testes.
-- [ ] Pipeline CI/CD ativo bloqueando merges vermelhos.
+- [ ] Pipeline CI/CD ativo: pre-push hook local cobrando Pest/Dusk/cobertura, e CI remoto (GitHub Actions) bloqueando merges com lint/audit/trivy/gitleaks/build vermelhos (ADR-006).
 - [ ] ADRs essenciais publicadas em `decisions/adr/` com status `accepted`.
 - [ ] Eventos básicos (`usuario_cadastrado`, `empresa_cadastrada`, `quiz_iniciado`, `diagnostico_concluido`, `diagnostico_visualizado`, `comparativo_aberto`) com instrumentação definida em ADR — sem precisar estar emitindo ainda, mas com o caminho técnico de captação pronto para o EPIC-001 começar a emitir.
 
@@ -69,7 +69,7 @@ Decompostas no Fluxo B em 6 spikes paralelizáveis (todas `ready`) + 1 implement
 - [ ] **STORY-004** (spike, arquiteto, `ready`) — Infra (cloud, IaC, 3 ambientes, Docker, custo).
 - [ ] **STORY-005** (spike, arquiteto, `ready`) — CI/CD (pipeline, branching, rollback, gates).
 - [ ] **STORY-006** (spike, arquiteto, `ready`) — Observabilidade + captura de eventos de produto.
-- [ ] **STORY-007** (implementation, programador, `draft`) — Hello world deployado em homologação via pipeline. Promove para `ready` quando todas as 6 ADRs estiverem `accepted`.
+- [x] **STORY-007** (implementation, programador, `ready`) — Hello world deployado em homologação via pipeline (tag rc.N). Destravada em 2026-05-21: todas as 6 ADRs prerrequisitas (ADR-001 a ADR-006) estão `accepted`.
 - [ ] **STORY-008** (validation, validador, `draft`) — Validação final do EPIC-000. Promove para `ready` quando STORY-007 estiver `in_review`.
 
 ## Validação final
@@ -81,3 +81,4 @@ Critérios em `validation/checklist.md` (criado no Fluxo B). Relatório do valid
 ## Histórico
 
 - 2026-05-20 — Criado como draft junto com a abertura da WAVE-2026-01.
+- 2026-05-21 — Métrica primária e critérios ajustados pela ADR-006 (`accepted`): tag rc.N substitui merge em main como gatilho de deploy em homologação; pre-push hook local entra no fluxo. STORY-001..006 todas `done`; STORY-007 promovida para `ready`.

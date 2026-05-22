@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T16:00:00Z",
+  "generated_at": "2026-05-21T20:00:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -155,15 +155,15 @@
       "title": "SPIKE — Infra (cloud, IaC, 3 ambientes, Docker, custo)",
       "type": "spike",
       "target_role": "arquiteto",
-      "status": "ready",
-      "owner_agent": null,
+      "status": "done",
+      "owner_agent": "arquiteto (claude-opus-4-7)",
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-004-spike-infra.md",
       "blocked_by": [],
       "blocks": ["STORY-007"],
       "estimated_session_size": "M",
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-20"
+      "updated_at": "2026-05-21"
     },
     {
       "id": "STORY-005",
@@ -171,15 +171,15 @@
       "title": "SPIKE — CI/CD (pipeline, branching, deploy, rollback)",
       "type": "spike",
       "target_role": "arquiteto",
-      "status": "ready",
-      "owner_agent": null,
+      "status": "done",
+      "owner_agent": "arquiteto (claude-opus-4-7)",
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-005-spike-cicd.md",
       "blocked_by": [],
       "blocks": ["STORY-007"],
       "estimated_session_size": "M",
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-20"
+      "updated_at": "2026-05-21"
     },
     {
       "id": "STORY-006",
@@ -187,15 +187,15 @@
       "title": "SPIKE — Observabilidade + captura de eventos de produto",
       "type": "spike",
       "target_role": "arquiteto",
-      "status": "ready",
-      "owner_agent": null,
+      "status": "done",
+      "owner_agent": "arquiteto (claude-opus-4-7)",
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-006-spike-observabilidade.md",
       "blocked_by": [],
       "blocks": ["STORY-007"],
       "estimated_session_size": "M",
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-20"
+      "updated_at": "2026-05-21"
     },
     {
       "id": "STORY-007",
@@ -203,16 +203,16 @@
       "title": "Hello world deployado em homologação via pipeline",
       "type": "implementation",
       "target_role": "programador",
-      "status": "draft",
+      "status": "ready",
       "owner_agent": null,
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-007-hello-world-deployado.md",
-      "blocked_by": ["STORY-001", "STORY-002", "STORY-003", "STORY-004", "STORY-005", "STORY-006"],
+      "blocked_by": [],
       "blocks": ["STORY-008"],
       "estimated_session_size": "L",
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-20",
-      "note": "Promover para 'ready' quando todas as 6 ADRs do EPIC-000 estiverem 'accepted'."
+      "updated_at": "2026-05-21",
+      "note": "Promovida para 'ready' em 2026-05-21: ADR-001..ADR-006 todas 'accepted'."
     },
     {
       "id": "STORY-008",
@@ -296,6 +296,57 @@
         "related_pdrs": ["PDR-001"],
         "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
         "related_stories": ["STORY-003"],
+        "created_at": "2026-05-21",
+        "updated_at": "2026-05-21"
+      },
+      {
+        "id": "ADR-004",
+        "slug": "observabilidade",
+        "title": "Observabilidade do DEFOnline — logs JSON via Laravel + métricas e eventos no Postgres + alertas via Telegram",
+        "type": "observabilidade",
+        "status": "accepted",
+        "path": "decisions/adr/ADR-004-observabilidade.md",
+        "decided_at": "2026-05-21",
+        "decided_by": "arquiteto",
+        "approved_by": "Alexandro",
+        "related_adrs": ["ADR-001", "ADR-002", "ADR-003"],
+        "related_pdrs": ["PDR-001"],
+        "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
+        "related_stories": ["STORY-006"],
+        "created_at": "2026-05-21",
+        "updated_at": "2026-05-21"
+      },
+      {
+        "id": "ADR-005",
+        "slug": "infra",
+        "title": "Infra do DEFOnline — VPS BR genérica + Ansible + Caddy + Docker Compose, homologação real e produção como código",
+        "type": "infra",
+        "status": "accepted",
+        "path": "decisions/adr/ADR-005-infra.md",
+        "decided_at": "2026-05-21",
+        "decided_by": "arquiteto",
+        "approved_by": "Alexandro",
+        "related_adrs": ["ADR-001", "ADR-002", "ADR-003", "ADR-004"],
+        "related_pdrs": ["PDR-001"],
+        "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
+        "related_stories": ["STORY-004"],
+        "created_at": "2026-05-21",
+        "updated_at": "2026-05-21"
+      },
+      {
+        "id": "ADR-006",
+        "slug": "cicd",
+        "title": "CI/CD do DEFOnline — GitHub Actions enxuto (lint + segurança + build + deploy) + pre-push hook local cobrando Pest/Dusk/cobertura + trunk-based + tag-based dual (rc.N → homol, semver → prod) + Ansible deploy + Pennant",
+        "type": "politica-evolucao",
+        "status": "accepted",
+        "path": "decisions/adr/ADR-006-cicd.md",
+        "decided_at": "2026-05-21",
+        "decided_by": "arquiteto",
+        "approved_by": "Alexandro",
+        "related_adrs": ["ADR-001", "ADR-002", "ADR-003", "ADR-004", "ADR-005"],
+        "related_pdrs": ["PDR-001"],
+        "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
+        "related_stories": ["STORY-005"],
         "created_at": "2026-05-21",
         "updated_at": "2026-05-21"
       }

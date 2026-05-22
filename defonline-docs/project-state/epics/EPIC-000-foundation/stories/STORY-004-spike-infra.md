@@ -6,10 +6,10 @@ epic_id: EPIC-000
 sprint_id: null
 type: spike
 target_role: arquiteto
-status: ready
-owner_agent: null
+status: done
+owner_agent: arquiteto (claude-opus-4-7)
 created_at: 2026-05-20
-updated_at: 2026-05-20
+updated_at: 2026-05-21
 estimated_session_size: M
 ---
 
@@ -85,4 +85,45 @@ Você decide cloud, IaC, ambientes, rede. Você **não decide** stack, topologia
 Siga `agent-task-format.md`. Igual à STORY-001.
 
 ## Notas do agente
-(preenchido durante/após execução)
+
+### Decisões tomadas
+
+- **2026-05-21** — Provedor cloud: **VPS BR genérica (provider-agnóstico)**. A ADR fixa o **perfil técnico** (Ubuntu 24.04 LTS, 4 GB RAM, 2 vCPU, 80 GB SSD, IPv4 público, snapshot, residência BR), **não amarra provedor**. Provedores pré-validados: Magalu Cloud, Locaweb, Hostinger BR, HostBrasil, UOL Host. Trocar provedor = editar inventário Ansible. Princípio #7 (reversibilidade) preservado ao extremo. Confirmado pelo PO via `AskUserQuestion` (PO substituiu Magalu específico por "VPS genérica, via SSH/Shell/Ansible").
+- **2026-05-21** — IaC: **Ansible 2.16+** com playbooks YAML + Jinja2, inventários por ambiente, Ansible Vault para secrets. Sem Terraform/OpenTofu (1 ferramenta a menos para time pequeno; ganho de drift-detection não justifica). Confirmado pelo PO via `AskUserQuestion`.
+- **2026-05-21** — Ambientes: **homologação real agora**, **produção como código Ansible pronto sem `playbook run`**. Gatilho de promoção explícito: EPIC-001 done OU PO decide abrir beta fechado. Confirmado pelo PO via `AskUserQuestion`.
+- **2026-05-21** — Reverse proxy: **Caddy 2** em container, TLS automático Let's Encrypt, HSTS, rate limit em `/login`/`/forgot-password`/`/cadastro` (RNF §2.1 e §4.4). Caddyfile via **directory mount** (lição aprendida: bind-mount inode quebra com reload).
+- **2026-05-21** — Backup off-site: **`pg_dump --format=custom` diário 03:00 BRT + GPG --symmetric AES256 + upload Backblaze B2** (S3-compat, provedor distinto da VPS — RNF §2.2). Retenção 30d rolantes + 12 cópias mensais (prod); 7d em homol. Restore testado trimestralmente via `playbooks/restore.yml`. PITR fora do MVP (RNF §5.1 declara desejável).
+- **2026-05-21** — Storage de PDFs: **volume Docker persistente no MVP**. RNF §2.3 declara PDFs regeneráveis. Migrar para S3-compat quando volume justificar (driver `s3` do Laravel filesystems — IDR do Programador, sem ADR de supersede).
+- **2026-05-21** — Cold storage de log 12 meses (input herdado de ADR-004): **cron mensal `playbooks/archive-logs.yml`** compacta `storage/logs/laravel-YYYY-MM-*.log` em tar.zst, GPG, upload B2.
+- **2026-05-21** — DNS: **Cloudflare DNS plano free**, proxy off no MVP. Registros: `homolog.defonline.com.br` e `app.defonline.com.br` (CA-6). Atualização manual no painel no MVP; automação via Ansible `cloudflare_dns` é IDR futuro.
+- **2026-05-21** — Monitor de uptime: **UptimeRobot plano free** (50 monitores, 5min) pingando `/health` em cada ambiente → webhook para Telegram bot (ADR-004).
+- **2026-05-21** — **Decisão 7 adicionada à ADR-005** após pergunta do PO sobre cobertura de Postgres. **Configuração do container Postgres** fixada normativamente: imagem `postgres:18-alpine` + volume `pgdata`; `postgresql.conf` customizado via directory mount com tuning por perfil (4 GB / 8 GB); **3 roles separados** (`postgres` superuser só para migrations, `defonline_app` sem SUPERUSER para runtime, `defonline_backup` read-only via `pg_read_all_data` para `pg_dump`); extensões `pgcrypto`/`pg_trgm`/`citext`/`pg_stat_statements` habilitadas via migration Laravel; locale `C.UTF-8` + timezone `America/Sao_Paulo`; senhas geradas pelo **Ansible Vault no first boot** (64 chars random) e idempotentes nos boots seguintes; **GRANTs restritos em `audit_logs` e `evento_produto`** (REVOKE UPDATE/DELETE) como defesa em profundidade contra o override de model Eloquent de ADR-003/004; 3 testes Pest arquiteturais bloqueiam merge (`PostgresRoleSeparationTest`, `PostgresExtensionsEnabledTest`, `PostgresTuningTest`).
+
+### Descobertas
+
+- **2026-05-21** — A combinação "VPS genérica + Ansible" libera o **princípio #7 (reversibilidade) ao extremo**: trocar de provedor BR é editar 1 linha em `inventories/<env>/hosts.yml` + rodar playbook. Compare com Opção B (Magalu+Terraform): trocar de Magalu para Locaweb exigia reescrever `.tf` (provider Locaweb não existe). Trade-off claro a favor de Ansible no MVP.
+- **2026-05-21** — Backup off-site no **Backblaze B2 (datacenter US/EU)** poderia parecer violar RNF §1.1 (residência BR), mas o **dado lógico** segue sob controle BR — B2 recebe apenas bytes opacos encriptados com chave GPG só em poder do administrador. Equiparável a guardar HD encriptado em cofre fora do país. Política de Privacidade vai documentar como **legítimo interesse** (Art. 7º IX) na ADR jurídica futura.
+- **2026-05-21** — Caddy vence Nginx em ergonomia (TLS automático sem cron, sintaxe legível) e cabe melhor no princípio #4 (opinativo). Memória do projeto pré-reset usou Nginx (com lição inode do bind-mount). Caddy também usa **directory mount** para Caddyfile — lição aplicada.
+- **2026-05-21** — `ansible-playbook --check --diff` substitui razoavelmente o `terraform plan` para drift detection, ao custo de ser manual (ou rodado em CI). Time pequeno topa o trade-off pela ausência de `.tfstate` em S3 com lock.
+- **2026-05-21** — Custo recorrente confortável: **~R$ 95–135/mês na WAVE-2026-01** (só homologação ativa); **~R$ 220–320/mês quando produção for promovida**. Dentro do orçamento mental da ADR-001 (~R$ 200/mês para 2 ambientes — produção passa um pouco por causa do plano 8 GB, mas é o preço justo).
+
+### Bloqueios encontrados
+
+- Nenhum bloqueio que exigisse escalonamento. Três escolhas estruturais (provedor agnóstico via VPS genérica, IaC com Ansible, só homologação real agora) foram confirmadas pelo PO via `AskUserQuestion` antes da redação da ADR.
+
+### ADR produzida
+
+- **ADR-005 — Infra do DEFOnline — VPS BR genérica + Ansible + Caddy + Docker Compose, homologação real e produção como código** — `decisions/adr/ADR-005-infra.md` (status: `proposed`).
+
+### Links de evidência
+
+- ADR cobre integralmente o mini-checklist Tipo 5 de `adr-types.md` (CA-2): provedor (perfil técnico §1.1) + região (BR) + serviços principais (VPS Linux, Caddy, Docker, B2, Cloudflare, UptimeRobot); IaC (Ansible 2.16+ com estrutura de playbooks §2.2); 3 ambientes desde dia 1 (§6); diferenças entre ambientes (tabela §6); estimativa de custo recorrente por ambiente (tabela "Estimativa de custo recorrente"); como recriar do zero (`ansible-playbook site.yml`); backup + restore com runbook automatizado (§4.2 + `playbooks/backup.yml` e `playbooks/restore.yml`).
+- ADR inclui diagrama Mermaid de infra macro (CA-3) cobrindo: usuário, Caddy, docker compose, Postgres, Cloudflare DNS, Let's Encrypt, UptimeRobot, Telegram, Backblaze B2, RFB. Ambiente de produção desenhado em tracejado (não ativo).
+- ADR considera 5 alternativas reais (CA-4): A (escolhida — VPS genérica + Ansible), B (Magalu + Tofu + Ansible), C (AWS São Paulo + Tofu), D (PaaS Render/Railway/Fly), E (status quo). Todos com prós/contras objetivos baseados em custo, lock-in, ergonomia de IaC, presença regional BR.
+- ADR explicita custo orientativo dos 3 ambientes (CA-5): tabela com VPS + snapshot + B2 + DNS + domínio + monitor; total MVP ~R$ 95–135/mês, total pós-promoção de produção ~R$ 220–320/mês.
+- ADR explicita domínios públicos (CA-6): `homolog.defonline.com.br` (homologação) e `app.defonline.com.br` (produção). DNS authoritative Cloudflare.
+- `index.json` atualizado com entrada `ADR-005` em `decisions.adr[]` (CA-7).
+
+### Aprovação humana
+
+- **2026-05-21** — ADR-005 **aceita pelo PO Alexandro em chat**, após adição da Decisão 7 (configuração do container Postgres) pedida pelo PO. Status `proposed` → `accepted`. Estória fechada como `done`. Sem condicionantes.
