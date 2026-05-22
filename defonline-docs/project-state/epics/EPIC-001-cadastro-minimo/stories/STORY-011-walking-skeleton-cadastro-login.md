@@ -181,7 +181,10 @@ Cada passo: red → green → refactor + commit `feat(STORY-011): …`. Suíte c
 - Pint, Larastan nível 6 e gate de cobertura 80% + 98% domínio: todos verdes via `pre-push.sh`.
 
 ### Links de evidência
-- PR: (a abrir após confirmação do PO)
-- Pipeline: (na abertura do PR)
-- Tag de homologação: (próxima `v0.2.0-rc.1`, após PR mergeado)
-- Smoke pós-deploy: (após tag)
+- PR: **pendente** — PO optou em 2026-05-22 por manter commits apenas localmente (6 commits em `main` ainda não pushados).
+- Pipeline: pendente (depende do push/PR).
+- Tag de homologação: pendente — próxima na sequência seria `v0.2.0-rc.1` (primeira rc do EPIC-001 após `v0.1.0-rc.5` da STORY-007).
+- Smoke pós-deploy: pendente.
+
+### Aprovação local
+- 2026-05-22 — **PO aprovou a estória após teste manual local** em http://localhost:8090 (caminho feliz + ajustes: mensagens pt-BR, máscaras de CPF e telefone). Estória permanece em `in_review` porque a DoD exige deploy em homologação + smoke pós-deploy; promoção a `done` fica para o turno em que houver push + tag.
