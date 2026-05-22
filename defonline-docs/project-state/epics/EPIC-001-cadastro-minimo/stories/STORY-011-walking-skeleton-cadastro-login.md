@@ -3,11 +3,11 @@ story_id: STORY-011
 slug: walking-skeleton-cadastro-login
 title: Walking skeleton — cadastro de Usuário + login + home autenticada
 epic_id: EPIC-001
-sprint_id: null
+sprint_id: SPRINT-2026-W22
 type: implementation
 target_role: programador
-status: ready
-owner_agent: null
+status: in_progress
+owner_agent: programador (claude-opus-4-7)
 created_at: 2026-05-22
 updated_at: 2026-05-22
 estimated_session_size: M
@@ -118,24 +118,57 @@ Siga `agent-task-format.md`:
 
 ## Notas do agente (preenchido durante/após execução)
 
+### Documentos lidos (2026-05-22)
+- Estória inteira (CA-1..CA-7, fora de escopo, decisões já tomadas, DoD, protocolo).
+- ADR-001 (auth padrão Laravel + bcrypt 12 + throttle `login` 5/min) — não montar auth próprio.
+- ADR-003 §Decisão 1 (multi-tenancy via FK `usuario_id` + Global Scope — entra a partir da STORY-014, não aqui), §Decisão 3 (UUID v7 em PK via `Str::uuid7()`), §Decisão 4 (audit_logs append-only via `AuditLogger::log()`), §Decisão 6 (CPF em claro, mascarado em log via `LogSanitizer`), agregado `Usuario`.
+- ADR-004 §1.1 (log JSON + `Log::withContext(request_id, user_id, …)` via `EnrichLogContext`), §2 (eventos de produto — `usuario_cadastrado` emitido **só após confirmação de email**, ou seja, STORY-013; nesta estória emitimos apenas em audit).
+- Espec V2 §1.5.2 (Usuário = pessoa física CPF + nome + email + senha + telefone), §3.3 Passo 1 (Cadastro do Usuário — ≤5 min, mobile-first).
+- `references/reading-discipline.md`, `coding-principles.md`, `testing-discipline.md`, `library-discipline.md`, `security-discipline.md`.
+- Código existente: tabela `usuarios` (migration `2026_05_22_000020`), `User` esqueleto Laravel apontando ao não-existente `users`, `LogSanitizer`/`AuditLogger`/`EventLogger`/`RequestId`, middlewares `AssignRequestId`+`EnrichLogContext`+`MeasureRequest`, pre-push hook (Pint + Larastan + Pest --min=80 + Dusk).
+
+### Entendimento consolidado
+Entrega a primeira camada vertical do EPIC-001: rota `/cadastro` (Livewire) cria Usuário em `usuarios` (CPF + nome + email + senha + telefone) usando hash bcrypt 12 da ADR-001; `/login` autentica com Auth padrão; `/home` autenticada renderiza "Olá, {primeiro_nome}" + logout. **Sem** termo, **sem** confirmação de email, **sem** evento de produto `usuario_cadastrado` (esse depende de confirmação — STORY-013); aqui só audit log (`usuario.cadastrado`, `usuario.login_sucesso`). Multi-tenancy via Global Scope ainda não aplica (entra com `EmpresaAnalisada` na STORY-014).
+
+### Decisões locais tomadas
+- **Helper puro de CPF** em `app/Domain/Cpf` (não package). Justificativa: princípio #1 + library-discipline; cálculo de DV cabe em ~30 LoC; cobre CA-7 (UnitPure). Dispara branch de gate ≥98% sobre `app/Domain` no pre-push (estrutura já existe — STORY-010).
+- **Model `Usuario`** em `app/Models/Usuario.php` mapeando `usuarios`. Sobrescreve `getAuthPasswordName()` para `senha_hash` (coluna já existente — migration ADR-003 §ER). `auth.php` aponta para `Usuario`. `User` esqueleto Laravel é removido (não usado em lugar nenhum).
+- **Login** com `Auth::attempt(['email' => …, 'password' => …])` — Laravel mapeia `password` para `getAuthPasswordName()`.
+- **CPF é armazenado só com dígitos** (`preg_replace('/\D+/', '', $cpf)`). Máscara é UI; banco normaliza.
+- **Mensagem genérica em duplicação**: "este dado já está em uso" no campo (CPF ou email).
+- **Throttle de login**: middleware `throttle:login` (5/min IP+email, ADR-001) na rota `/login`.
+- **Sem `users` table renomeada** — a migration original já criou `usuarios`. A `UserFactory` vira `UsuarioFactory`.
+- **Senha em mensagens de erro** nunca exposta — `Password::min(8)->letters()->numbers()` do Laravel; mensagens traduzidas pelo `lang/pt_BR`.
+
+### Plano (5 passos)
+1. Helper `App\Domain\Cpf` + UnitPure tests.
+2. Model `Usuario` + factory + ajuste `auth.php` + remoção do `User`.
+3. Rota `/cadastro` + Livewire `Cadastro` + Blade + Feature tests (CA-1, CA-2, CA-5, CA-6).
+4. Rota `/login` + Livewire `Login` + Blade + Feature tests (CA-3, CA-6) + middleware `throttle:login`.
+5. Rota `/home` (middleware `auth`) + logout + Feature tests (CA-4) + Dusk E2E (CA-7).
+
+Cada passo: red → green → refactor + commit `feat(STORY-011): …`. Suíte completa entre passos.
+
 ### Decisões tomadas
-- <data> — <decisão local>
+- 2026-05-22 — Sem lib externa de CPF (helper puro em `app/Domain/Cpf`).
+- 2026-05-22 — Renomear model `User`→`Usuario` (consistência com domínio + tabela).
+- 2026-05-22 — Manter coluna `senha_hash` (já existe); override em `getAuthPasswordName()`.
 
 ### Descobertas
-- <data> — <gotcha, surpresa>
+- 2026-05-22 — `app/Models/User.php` está excluído da cobertura no `phpunit.xml`. Após a renomeação, remover essa exclusão (o novo `Usuario` tem código nosso e deve contar).
 
 ### Bloqueios encontrados
-- <data> — <bloqueio> — <resolução ou aberto>
+- (nenhum)
 
 ### IDRs criados
-- IDR-XXX — <título> — `decisions/idr/IDR-XXX-<slug>.md`
+- (a preencher)
 
 ### Cobertura final
-- Geral: <%>
-- Domínio (`app/Domain/**`): n/a ou <%>
+- Geral: (a preencher)
+- Domínio (`app/Domain/**`): (a preencher)
 
 ### Links de evidência
-- PR: <url>
-- Pipeline: <url>
-- Tag de homologação: <vX.Y.Z-rc.N>
-- Smoke pós-deploy: <link do run>
+- PR: (a preencher)
+- Pipeline: (a preencher)
+- Tag de homologação: (a preencher)
+- Smoke pós-deploy: (a preencher)

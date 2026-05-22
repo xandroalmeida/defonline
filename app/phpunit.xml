@@ -31,9 +31,8 @@
         <exclude>
             <!-- Scaffold do Laravel sem lógica nossa — excluído da cobertura
                  (STORY-010): o gate mede só o código que ESCREVEMOS. Quando essas
-                 classes ganharem código próprio (User real no EPIC-001, BaseController
-                 no EPIC-002), tirar daqui. -->
-            <file>app/Models/User.php</file>
+                 classes ganharem código próprio (BaseController no EPIC-002),
+                 tirar daqui. -->
             <file>app/Http/Controllers/Controller.php</file>
         </exclude>
     </source>
