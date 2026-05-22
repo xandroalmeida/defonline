@@ -11,6 +11,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Layout;
@@ -47,13 +48,19 @@ final class Cadastro extends Component
 
     public function submit(): mixed
     {
-        $cpfDigitos = Cpf::normalizar($this->cpf);
-        $telefoneDigitos = preg_replace('/\D+/', '', $this->telefone) ?? '';
+        // Estado do componente guarda o valor mascarado (UI). Normalização para
+        // dígitos vive APENAS aqui dentro — assim, se a validação falhar, o
+        // re-render do Livewire mantém o que o usuário vê com a máscara intacta.
+        $dados = [
+            'cpf' => Cpf::normalizar($this->cpf),
+            'nome' => trim($this->nome),
+            'email' => trim($this->email),
+            'senha' => $this->senha,
+            'senha_confirmation' => $this->senha_confirmation,
+            'telefone' => preg_replace('/\D+/', '', $this->telefone) ?? '',
+        ];
 
-        $this->cpf = $cpfDigitos;
-        $this->telefone = $telefoneDigitos;
-
-        $validados = $this->validate([
+        $validados = Validator::make($dados, [
             'cpf' => [
                 'required',
                 'string',
@@ -98,7 +105,7 @@ final class Cadastro extends Component
             'senha.confirmed' => 'A confirmação de senha não confere.',
             'telefone.required' => 'Informe o telefone WhatsApp.',
             'telefone.regex' => 'Informe um telefone válido (DDD + número).',
-        ]);
+        ])->validate();
 
         $usuario = DB::transaction(function () use ($validados): Usuario {
             $u = Usuario::create([

@@ -161,6 +161,22 @@ it('rejeita telefone fora do formato BR', function () {
         ->assertHasErrors(['telefone']);
 });
 
+it('preserva o valor mascarado do usuário no estado após erro (para manter a máscara no DOM)', function () {
+    $component = Livewire::test(Cadastro::class)
+        ->set('cpf', '111.111.111-11')                // CPF inválido (sequência)
+        ->set('nome', 'Roberto')
+        ->set('email', 'roberto@exemplo.com.br')
+        ->set('senha', 'Senha1234')
+        ->set('senha_confirmation', 'Senha1234')
+        ->set('telefone', '(11) 98888-7777')
+        ->call('submit')
+        ->assertHasErrors(['cpf']);
+
+    // Estado NÃO foi normalizado — o re-render preserva a máscara visível.
+    expect($component->get('cpf'))->toBe('111.111.111-11');
+    expect($component->get('telefone'))->toBe('(11) 98888-7777');
+});
+
 it('emite mensagens de validação em pt-BR (não em inglês)', function () {
     $component = Livewire::test(Cadastro::class)
         ->set('cpf', '')
