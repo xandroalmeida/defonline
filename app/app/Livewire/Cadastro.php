@@ -84,10 +84,20 @@ final class Cadastro extends Component
                 'regex:/^[1-9]{2}9?\d{8}$/',                  // DDD + 8 ou 9 dígitos
             ],
         ], [
+            'cpf.required' => 'Informe o CPF.',
+            'cpf.size' => 'O CPF deve ter 11 dígitos.',
             'cpf.unique' => 'Este dado já está em uso.',
+            'nome.required' => 'Informe o nome completo.',
+            'nome.min' => 'O nome deve ter pelo menos 2 caracteres.',
+            'nome.max' => 'O nome não pode passar de 120 caracteres.',
+            'email.required' => 'Informe o email.',
+            'email.email' => 'Informe um email válido.',
+            'email.max' => 'O email não pode passar de 255 caracteres.',
             'email.unique' => 'Este dado já está em uso.',
-            'telefone.regex' => 'Informe um telefone válido (DDD + número).',
+            'senha.required' => 'Informe a senha.',
             'senha.confirmed' => 'A confirmação de senha não confere.',
+            'telefone.required' => 'Informe o telefone WhatsApp.',
+            'telefone.regex' => 'Informe um telefone válido (DDD + número).',
         ]);
 
         $usuario = DB::transaction(function () use ($validados): Usuario {

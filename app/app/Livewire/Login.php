@@ -32,6 +32,10 @@ final class Login extends Component
         $this->validate([
             'email' => ['required', 'string', 'email:rfc'],
             'senha' => ['required', 'string'],
+        ], [
+            'email.required' => 'Informe o email.',
+            'email.email' => 'Informe um email válido.',
+            'senha.required' => 'Informe a senha.',
         ]);
 
         if (! Auth::attempt(['email' => $this->email, 'password' => $this->senha])) {

@@ -3,7 +3,20 @@
 
     <form wire:submit="submit" novalidate>
         <label for="cpf">CPF</label>
-        <input type="text" id="cpf" wire:model.defer="cpf" inputmode="numeric" autocomplete="off" dusk="cadastro-cpf">
+        <input type="text" id="cpf" wire:model.defer="cpf"
+               inputmode="numeric" autocomplete="off"
+               maxlength="14" placeholder="000.000.000-00"
+               x-data
+               x-on:input="
+                   const d = $el.value.replace(/\D/g, '').slice(0, 11);
+                   let m = d;
+                   if (d.length > 9) m = d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6,9)+'-'+d.slice(9);
+                   else if (d.length > 6) m = d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6);
+                   else if (d.length > 3) m = d.slice(0,3)+'.'+d.slice(3);
+                   $el.value = m;
+                   $wire.set('cpf', d, false);
+               "
+               dusk="cadastro-cpf">
         @error('cpf') <p class="erro" dusk="erro-cpf">{{ $message }}</p> @enderror
 
         <label for="nome">Nome completo</label>
@@ -22,7 +35,21 @@
         <input type="password" id="senha_confirmation" wire:model.defer="senha_confirmation" autocomplete="new-password" dusk="cadastro-senha-confirmation">
 
         <label for="telefone">Telefone WhatsApp (DDD + número)</label>
-        <input type="text" id="telefone" wire:model.defer="telefone" inputmode="tel" autocomplete="tel" dusk="cadastro-telefone">
+        <input type="text" id="telefone" wire:model.defer="telefone"
+               inputmode="tel" autocomplete="tel"
+               maxlength="16" placeholder="(11) 98888-7777"
+               x-data
+               x-on:input="
+                   const d = $el.value.replace(/\D/g, '').slice(0, 11);
+                   let m = d;
+                   if (d.length > 10)      m = '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7);
+                   else if (d.length > 6)  m = '('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6);
+                   else if (d.length > 2)  m = '('+d.slice(0,2)+') '+d.slice(2);
+                   else if (d.length > 0)  m = '('+d;
+                   $el.value = m;
+                   $wire.set('telefone', d, false);
+               "
+               dusk="cadastro-telefone">
         @error('telefone') <p class="erro">{{ $message }}</p> @enderror
 
         <button type="submit" class="primary" dusk="cadastro-submit">Criar conta</button>

@@ -161,6 +161,23 @@ it('rejeita telefone fora do formato BR', function () {
         ->assertHasErrors(['telefone']);
 });
 
+it('emite mensagens de validação em pt-BR (não em inglês)', function () {
+    $component = Livewire::test(Cadastro::class)
+        ->set('cpf', '')
+        ->set('nome', '')
+        ->set('email', '')
+        ->set('senha', '')
+        ->set('senha_confirmation', '')
+        ->set('telefone', '')
+        ->call('submit');
+
+    expect($component->errors()->get('cpf')[0])->toBe('Informe o CPF.');
+    expect($component->errors()->get('nome')[0])->toBe('Informe o nome completo.');
+    expect($component->errors()->get('email')[0])->toBe('Informe o email.');
+    expect($component->errors()->get('senha')[0])->toBe('Informe a senha.');
+    expect($component->errors()->get('telefone')[0])->toBe('Informe o telefone WhatsApp.');
+});
+
 it('emite log info "usuario.cadastrado" com PII mascarada (CA-6)', function () {
     Log::spy();
 
