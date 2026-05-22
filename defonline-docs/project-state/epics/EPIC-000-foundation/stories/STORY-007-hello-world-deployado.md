@@ -6,7 +6,7 @@ epic_id: EPIC-000
 sprint_id: null
 type: implementation
 target_role: programador
-status: in_progress
+status: in_review
 owner_agent: programador (claude-opus-4-7)
 created_at: 2026-05-20
 updated_at: 2026-05-22
@@ -192,8 +192,24 @@ A execução está **em curso** e foi quebrada em três fases por alinhamento co
 
 ### IDRs criados
 - **IDR-001** — Extensões Postgres habilitadas via init script do container, não via migration Laravel.
+- **IDR-002** — Subdomínio `defonline.xandrix.com.br` no DNS DigitalOcean (em vez de `defonline.com.br` + Cloudflare previsto na ADR-005 §5).
 
-### Cobertura final (acumulada até Phase 2)
+### Débitos técnicos (anotados para próximas histórias)
+
+- **Rate limit no Caddy** removido por exigir plugin custom-build (`caddy-rate-limit`). ADR-005 §3 fica parcialmente divergente. Mitigação imediata: usar middleware Laravel `throttle:5,1` quando rotas sensíveis existirem (EPIC-001 Cadastro/Login).
+- **Smoke test usa `ansible.builtin.uri` contra URL pública** em vez de `docker compose exec` (que tinha race em recreate). Funciona mas exige Caddy + Let's Encrypt já configurados.
+
+### Cobertura final (acumulada até Phase 3 — homologação viva)
+
+- **CI** verde end-to-end com tag `v0.1.0-rc.5`: validate (8 checks) + build-and-push + deploy + smoke + notify = **12/12 jobs**.
+- **`release-homolog.yml`** dispara automaticamente em `vX.Y.Z-rc.N`, build na main builda + publica em GHCR, deploy via Ansible em SSH dedicado.
+- **URL pública vivendo:** https://defonline.xandrix.com.br/health → 200 + `{"status":"ok","service":"DEFOnline","version":"v0.1.0-rc.5","env":"staging"}`.
+- **TLS válido:** Let's Encrypt (E7 issuer), HSTS preload, HTTP→HTTPS 308, TLSv1.3.
+- **Topologia (ADR-002):** 5 containers Up — `caddy` + `web` (artisan serve) + `worker` (queue:work) + `scheduler` (schedule:work) + `db` (Postgres 18 healthy).
+- **Backups (ADR-005 §4.2):** cron `/opt/defonline/scripts/pg-backup.sh` diário 03:00 BRT, pg_dump → gzip → GPG AES256 → Backblaze B2 (`defonline-backups-homolog`).
+- **Telegram notification:** grupo "DefOnline Alertas" recebe `✅` ou `❌` em cada deploy (`chat_id=-5047063915`).
+
+### Cobertura final (Phase 2 acumulada)
 
 - **Pint:** 60 arquivos, 0 issues — verde.
 - **Larastan nível 6:** 0 erros — verde.
@@ -213,10 +229,19 @@ A execução está **em curso** e foi quebrada em três fases por alinhamento co
   - Visitor can dispatch the demo email (web → fila → worker → Mailpit).
 - **Validação ao vivo:** `docker compose ps` mostra 5 containers up; `/health` e `/ready` 200; e-mail real chega ao Mailpit com `request_id` no subject; tabelas `evento_produto`, `request_metrics`, `job_metrics`, `business_metrics` populadas.
 
-### Links de evidência (Phase 1)
+### Links de evidência
 
-- PR: pendente (entra após Phase 3 — estória só fecha quando deploy em homologação estiver vivo).
-- Pipeline: pendente (Phase 2).
-- Deploy de homologação: pendente (Phase 3).
-- Página viva local: http://localhost:8090 (após `./up.sh`).
-- Mailpit UI: http://localhost:8025.
+- **Repo:** https://github.com/xandroalmeida/defonline
+- **PR mergeado:** [#1 — feat: EPIC-000 foundation](https://github.com/xandroalmeida/defonline/pull/1)
+- **Pipeline release-homolog verde:** run #26303355880 (tag `v0.1.0-rc.5`, 12/12 jobs success)
+- **Deploy em homologação ao vivo:** https://defonline.xandrix.com.br
+  - `/health` → 200 + JSON
+  - `/ready` → 200 + checks db/cache/queue todos `ok`
+  - Página HelloWorld renderizando + Livewire button → e-mail no worker
+- **Imagens publicadas em GHCR:** `ghcr.io/xandroalmeida/defonline/app:{latest, v0.1.0-rc.*}`
+- **Página viva local:** http://localhost:8090 (após `./up.sh`)
+- **Mailpit UI local:** http://localhost:8025
+- **Documentação:**
+  - RUNBOOK provisionamento: `defonline-docs/project-state/epics/EPIC-000-foundation/RUNBOOK-homolog-phase3.md`
+  - ADR-001 a ADR-006: `defonline-docs/project-state/decisions/adr/`
+  - IDR-001 (Postgres extensions), IDR-002 (subdomínio DO): `defonline-docs/project-state/decisions/idr/`

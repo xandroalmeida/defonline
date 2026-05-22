@@ -126,16 +126,28 @@ ssh-keyscan -p 22 -H $VPS_IP > secrets/deploy-homolog.known_hosts
         -d "chat_id=<CHAT_ID>" -d "text=hello DEFOnline"
    ```
 
+> **⚠ Lição aprendida (1ª execução):** Por padrão o BotFather habilita
+> "Privacy mode" no bot — bot só recebe mensagens em grupo se for **mencionado**
+> (`@nomebot ...`) ou se a mensagem for um comando (`/...`). Se o `getUpdates`
+> mostrar só o chat privado, peça uma das duas opções:
+> - mande `@<seubot> ping` no grupo (com `@` real, selecionado no autocomplete);
+> - **OU** em `@BotFather` → `/setprivacy` → `Disable` para o bot ver tudo.
+
 ---
 
 ## 8. Preencher o Ansible Vault (~5 min)
 
 ```bash
 cd ~/Projetos/DEFOnline/infra/ansible
-cp inventories/homolog/group_vars/vault.yml.example inventories/homolog/group_vars/vault.yml
+cp inventories/homolog/group_vars/all/vault.yml.example inventories/homolog/group_vars/all/vault.yml
 ```
 
-Edite `inventories/homolog/group_vars/vault.yml` substituindo todos os `REPLACE_ME`:
+> **⚠ Convenção:** vault fica em `group_vars/all/vault.yml` (não em
+> `group_vars/vault.yml`). Ansible só carrega arquivos cujo path corresponde
+> a um nome de grupo; "vault" não é grupo, "all" é. Estrutura em pasta
+> permite separar `vars.yml` (público) de `vault.yml` (cifrado).
+
+Edite `inventories/homolog/group_vars/all/vault.yml` substituindo todos os `REPLACE_ME`:
 
 - `vault_db_app_password` / `vault_db_backup_password` / `vault_db_superuser_password`: gere com `openssl rand -base64 32` para cada.
 - `vault_b2_app_key_id` / `vault_b2_app_key`: passos 6.3.
@@ -150,11 +162,15 @@ Cifre o vault:
 openssl rand -base64 32 > ~/.ansible-vault-pass-homolog
 chmod 600 ~/.ansible-vault-pass-homolog
 
-ansible-vault encrypt inventories/homolog/group_vars/vault.yml \
+ansible-vault encrypt inventories/homolog/group_vars/all/vault.yml \
     --vault-password-file ~/.ansible-vault-pass-homolog
 ```
 
 A partir daqui o `vault.yml` está cifrado — pode comitar. **NUNCA comite a senha do vault.**
+
+> **⚠ Lição aprendida (1ª execução):** o `.gitignore` ignora `vault.yml` (em
+> qualquer pasta) por segurança. Quando estiver cifrado, force o add com
+> `git add -f infra/ansible/inventories/homolog/group_vars/all/vault.yml`.
 
 ---
 
@@ -172,21 +188,40 @@ rm infra/ansible/inventories/homolog/hosts.yml.bak
 ```bash
 cd ~/Projetos/DEFOnline/infra/ansible
 
+# Antes: instalar coleções no path declarado em ansible.cfg (collections_path = collections).
+ansible-galaxy collection install -r requirements.yml -p collections
+
 # Primeira execução: conecta como root para criar usuário deploy.
+# `-e ansible_user=root` força root (sobrescreve `ansible_user: deploy` do inventário).
+# `-e initial_remote_user=root` é redundante mas explícito.
+# Paths devem ser ABSOLUTOS — `lookup('file', ...)` é relativo ao playbook, não ao CWD.
 ansible-playbook -i inventories/homolog/hosts.yml playbooks/site.yml \
     --vault-password-file ~/.ansible-vault-pass-homolog \
+    -e ansible_user=root \
     -e initial_remote_user=root \
-    -e deploy_authorized_key_path=../../secrets/deploy-homolog.key.pub \
-    -e ansible_ssh_private_key_file=../../secrets/deploy-homolog.key
+    -e ansible_ssh_private_key_file="$(realpath ../../secrets/deploy-homolog.key)" \
+    -e deploy_authorized_key_path="$(realpath ../../secrets/deploy-homolog.key.pub)"
 ```
 
 O playbook orquestra (em ordem):
 1. `bootstrap.yml` — APT update, cria deploy, desliga root SSH, UFW (22+80+443), fail2ban, unattended-upgrades.
 2. `docker.yml` — Docker Engine + Compose plugin via repo oficial.
-3. `app.yml` — `.env` + `docker-compose.yml` + `Caddyfile` gerados de templates Jinja, GHCR login, `docker compose pull`, `up -d`, `php artisan migrate`, smoke interno em `wget /health`.
+3. `app.yml` — `.env` + `docker-compose.yml` + `Caddyfile` gerados de templates Jinja, GHCR login, `docker compose pull`, `up -d`, `php artisan migrate`, smoke via URL pública.
 4. `backup.yml` — rclone + GPG passphrase + cron diário 03:00 BRT.
 
 Se algo falhar, o output do Ansible aponta o passo. Resolva e re-execute (idempotente).
+
+> **⚠ Lições aprendidas (1ª execução):**
+> - **Depois do bootstrap, root SSH fica desligado.** Execuções seguintes
+>   conectam como `deploy` (chave). Não precisa mais de `-e ansible_user=root`.
+> - **Sudo do `deploy` é restritivo** (NOPASSWD apenas para docker/systemctl/ufw).
+>   Playbooks `app.yml` e `deploy.yml` NÃO usam `become: true` no play — todas as
+>   tasks operam em `/opt/defonline` (de propriedade do deploy) ou via docker.
+> - **Smoke usa URL pública** (`uri` module), não `docker compose exec`.
+>   Durante recreate, o exec pega container antigo em transição.
+> - **VPS BR pode demorar segundos** após UFW + restart sshd para portas
+>   voltarem a aceitar TCP. Se SSH falhar com "Connection refused" logo após
+>   o primeiro `site.yml`, aguarde ~60s e retente.
 
 ---
 
