@@ -118,7 +118,7 @@
         cmd: docker compose exec -T web wget -qO- http://localhost:8000/health
         chdir: "{{ deploy_dir }}"
       register: smoke
-      retries: 10
-      delay: 3
+      retries: 30
+      delay: 4
       until: smoke.rc == 0 and ('"status":"ok"' in smoke.stdout)
       changed_when: false

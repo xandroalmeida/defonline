@@ -72,12 +72,15 @@
         cmd: docker image prune -f
       changed_when: false
 
+    # Espera até 2 minutos para `php artisan serve` subir após restart.
+    # `php artisan serve` típico boot ~10s, mas com classmap dump na primeira
+    # request pode chegar a 30-60s.
     - name: Smoke pós-deploy (curl /health no container)
       ansible.builtin.command:
         cmd: docker compose exec -T web wget -qO- http://localhost:8000/health
         chdir: "{{ deploy_dir }}"
       register: smoke
-      retries: 10
-      delay: 3
+      retries: 30
+      delay: 4
       until: smoke.rc == 0 and ('"status":"ok"' in smoke.stdout)
       changed_when: false
