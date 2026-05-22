@@ -113,12 +113,14 @@
       register: migrate_result
       changed_when: "'Nothing to migrate' not in migrate_result.stdout"
 
-    - name: Smoke interno (curl /health no container web)
-      ansible.builtin.command:
-        cmd: docker compose exec -T web wget -qO- http://localhost:8000/health
-        chdir: "{{ deploy_dir }}"
+    # Smoke via URL pública (Caddy → web). Mais robusto que docker exec em web
+    # (que sofre race durante recreate).
+    - name: Smoke pós-provisionamento (curl /health via URL pública)
+      ansible.builtin.uri:
+        url: "{{ app_url }}/health"
+        return_content: true
+        status_code: [200]
       register: smoke
       retries: 30
       delay: 4
-      until: smoke.rc == 0 and ('"status":"ok"' in smoke.stdout)
-      changed_when: false
+      until: smoke.status == 200 and '"status":"ok"' in (smoke.content | default(''))

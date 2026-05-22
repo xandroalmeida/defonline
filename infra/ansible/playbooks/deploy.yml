@@ -72,15 +72,16 @@
         cmd: docker image prune -f
       changed_when: false
 
-    # Espera até 2 minutos para `php artisan serve` subir após restart.
-    # `php artisan serve` típico boot ~10s, mas com classmap dump na primeira
-    # request pode chegar a 30-60s.
-    - name: Smoke pós-deploy (curl /health no container)
-      ansible.builtin.command:
-        cmd: docker compose exec -T web wget -qO- http://localhost:8000/health
-        chdir: "{{ deploy_dir }}"
+    # Smoke via URL pública (Caddy → web). `docker compose exec -T web wget`
+    # tinha race condition: quando o web é recriado pelo `compose up`, o exec
+    # pegava o container antigo em transição. Usar curl externo é mais robusto:
+    # Caddy é estável (não recriado), e só responde 200 quando o backend está vivo.
+    - name: Smoke pós-deploy (curl /health via URL pública)
+      ansible.builtin.uri:
+        url: "{{ app_url }}/health"
+        return_content: true
+        status_code: [200]
       register: smoke
       retries: 30
       delay: 4
-      until: smoke.rc == 0 and ('"status":"ok"' in smoke.stdout)
-      changed_when: false
+      until: smoke.status == 200 and '"status":"ok"' in (smoke.content | default(''))
