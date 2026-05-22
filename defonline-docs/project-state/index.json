@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "generated_at": "2026-05-22T20:00:00Z",
+  "generated_at": "2026-05-22T22:00:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
-    "current_sprint": null
+    "current_sprint": "SPRINT-2026-W22"
   },
   "product": {
     "vision": {
@@ -76,13 +76,13 @@
       "slug": "cadastro-minimo",
       "title": "Cadastro mínimo de Usuário e Empresa Analisada",
       "wave": "WAVE-2026-01",
-      "status": "draft",
+      "status": "ready",
       "path": "epics/EPIC-001-cadastro-minimo/epic.md",
-      "story_ids": [],
+      "story_ids": ["STORY-011", "STORY-012", "STORY-013", "STORY-014", "STORY-015", "STORY-016", "STORY-017"],
       "validation_report": null,
-      "blocked_by_epics": ["EPIC-000"],
+      "blocked_by_epics": [],
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-20"
+      "updated_at": "2026-05-22"
     },
     {
       "id": "EPIC-002",
@@ -281,9 +281,139 @@
       "coverage_geral": "92.4%",
       "related_idrs": ["IDR-003"],
       "note": "Corretiva derivada do F-NB-1 do report.md de validação do EPIC-000 (STORY-008). Habilita PCOV no container web + --coverage --min=80 no pre-push + job test-coverage no pr.yml com artefato + estrutura pronta para --min=98 em app/Domain (phpunit-domain.xml + branch condicional) quando essa pasta nascer no EPIC-001. Cobertura subiu de 57.7% → 92.4% (escritos testes para PennantListOverdue, HelloWorldEmail Job, BaseJob, HelloWorldMessage, Features/HelloWorldEmailHabilitado, CollectJobMetrics, helper). IDR-003 justifica PCOV vs Xdebug. Quando done, re-validar Bloco 2.1 do checklist."
+    },
+    {
+      "id": "STORY-011",
+      "epic_id": "EPIC-001",
+      "title": "Walking skeleton — cadastro de Usuário + login + home autenticada",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": "SPRINT-2026-W22",
+      "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-011-walking-skeleton-cadastro-login.md",
+      "blocked_by": [],
+      "blocks": ["STORY-012", "STORY-013", "STORY-014"],
+      "estimated_session_size": "M",
+      "created_at": "2026-05-22",
+      "updated_at": "2026-05-22"
+    },
+    {
+      "id": "STORY-012",
+      "epic_id": "EPIC-001",
+      "title": "Termo de Adesão + consentimento LGPD (texto placeholder)",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": "SPRINT-2026-W22",
+      "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-012-termo-adesao-lgpd-aceites.md",
+      "blocked_by": ["STORY-011"],
+      "blocks": ["STORY-016"],
+      "estimated_session_size": "S",
+      "created_at": "2026-05-22",
+      "updated_at": "2026-05-22",
+      "note": "Texto entra como placeholder PT-BR genérico — revisão jurídica postergada pelo PO em 2026-05-22. Substituição do conteúdo definitivo vira bugfix curto quando jurídico voltar."
+    },
+    {
+      "id": "STORY-013",
+      "epic_id": "EPIC-001",
+      "title": "Confirmação de email por link assinado (conta inativa até confirmar)",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": "SPRINT-2026-W22",
+      "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-013-confirmacao-email-link-assinado.md",
+      "blocked_by": ["STORY-011"],
+      "blocks": ["STORY-016"],
+      "estimated_session_size": "M",
+      "created_at": "2026-05-22",
+      "updated_at": "2026-05-22"
+    },
+    {
+      "id": "STORY-014",
+      "epic_id": "EPIC-001",
+      "title": "Cadastro de Empresa Analisada por preenchimento manual",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": "SPRINT-2026-W22",
+      "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-014-cadastro-empresa-analisada-manual.md",
+      "blocked_by": ["STORY-011"],
+      "blocks": ["STORY-015", "STORY-016"],
+      "estimated_session_size": "M",
+      "created_at": "2026-05-22",
+      "updated_at": "2026-05-22"
+    },
+    {
+      "id": "STORY-015",
+      "epic_id": "EPIC-001",
+      "title": "Enriquecimento via API RFB (mock + fallback transparente)",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": "SPRINT-2026-W22",
+      "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-015-enriquecimento-rfb-mock-fallback.md",
+      "blocked_by": ["STORY-014"],
+      "blocks": ["STORY-016"],
+      "estimated_session_size": "M",
+      "created_at": "2026-05-22",
+      "updated_at": "2026-05-22",
+      "note": "Provedor real `[A DEFINIR]` na NRF §3.1 — começa com mock; quando provedor real for escolhido, registrar IDR (ou PDR se houver impacto de custo significativo)."
+    },
+    {
+      "id": "STORY-016",
+      "epic_id": "EPIC-001",
+      "title": "Tela \"Minhas Empresas\" + emissão de eventos usuario_cadastrado e empresa_cadastrada",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": "SPRINT-2026-W22",
+      "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-016-minhas-empresas-eventos.md",
+      "blocked_by": ["STORY-012", "STORY-013", "STORY-014"],
+      "blocks": ["STORY-017"],
+      "estimated_session_size": "S",
+      "created_at": "2026-05-22",
+      "updated_at": "2026-05-22",
+      "note": "Ponto de junção do EPIC-001. Primeira consumidora dos eventos de produto fixados pela ADR-004 — sem ela, north star não tem base."
+    },
+    {
+      "id": "STORY-017",
+      "epic_id": "EPIC-001",
+      "title": "Validação final do EPIC-001 Cadastro mínimo",
+      "type": "validation",
+      "target_role": "validador",
+      "status": "draft",
+      "owner_agent": null,
+      "sprint_id": "SPRINT-2026-W22",
+      "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-017-validacao-epic-001.md",
+      "blocked_by": ["STORY-011", "STORY-012", "STORY-013", "STORY-014", "STORY-015", "STORY-016"],
+      "blocks": [],
+      "estimated_session_size": "M",
+      "created_at": "2026-05-22",
+      "updated_at": "2026-05-22",
+      "note": "Promover para `ready` quando STORY-016 estiver `in_review`. Checklist em validation/checklist.md (a criar pelo PO antes da promoção)."
     }
   ],
-  "sprints": [],
+  "sprints": [
+    {
+      "id": "SPRINT-2026-W22",
+      "wave": "WAVE-2026-01",
+      "status": "active",
+      "start_date": "2026-05-25",
+      "end_date": "2026-06-12",
+      "goal": "Entregar o EPIC-001 inteiro: ciclo cadastro Usuário → Termo+LGPD → confirmação de email → cadastro Empresa Analisada (manual + RFB via mock com fallback) → Minhas Empresas → eventos de produto, com validação independente aprovada.",
+      "path": "sprints/SPRINT-2026-W22.md",
+      "story_ids": ["STORY-011", "STORY-012", "STORY-013", "STORY-014", "STORY-015", "STORY-016", "STORY-017"],
+      "epic_ids": ["EPIC-001"],
+      "opened_at": "2026-05-22",
+      "opened_by": "PO (Alexandro / Claude)"
+    }
+  ],
   "decisions": {
     "pdr": [
       {

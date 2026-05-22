@@ -3,10 +3,10 @@ epic_id: EPIC-001
 slug: cadastro-minimo
 title: Cadastro mínimo de Usuário e Empresa Analisada
 wave: WAVE-2026-01
-status: draft
+status: ready
 owner_role: po
 created_at: 2026-05-20
-updated_at: 2026-05-20
+updated_at: 2026-05-22
 target_completion: 2026-07-15
 ---
 
@@ -59,7 +59,22 @@ Ao fim do EPIC-001, Roberto cria a conta dele (CPF + email + senha + telefone Wh
 
 ## Estórias
 
-(A ser detalhado quando o EPIC-000 estiver `in_progress` avançado. Princípios: vertical slicing — cada estória atravessa o stack inteiro; primeira estória entrega "Usuário criado + Empresa cadastrada com dados mínimos digitados manualmente"; estória seguinte adiciona enriquecimento via RFB; estória de Termo de Adesão e LGPD em separado; última estória é validação assumida pela skill `validador`.)
+Decompostas em 7 estórias verticais (Fluxo B do PO, 2026-05-22). Princípio: **walking skeleton primeiro**; em seguida, camadas independentes paralelizáveis (Termo, email, empresa-manual); RFB layered em cima de empresa-manual; tela "Minhas Empresas" + eventos como ponto de junção; validação ao final.
+
+- [ ] **STORY-011** (implementation, programador, `ready`, M) — Walking skeleton: cadastro de Usuário (CPF + email + senha + telefone) + login + home autenticada. Vertical slice mínimo end-to-end. **Sem** Termo, **sem** confirmação de email — entram nas próximas. Destrava todas as outras.
+- [ ] **STORY-012** (implementation, programador, `ready`, S) — Termo de Adesão + consentimento LGPD (aceites obrigatórios) + opt-in de marketing (opcional). **Texto entra como placeholder PT-BR genérico** porque a revisão jurídica foi postergada (decisão PO 2026-05-22); substituição do texto definitivo quando jurídico voltar vira bugfix curto (STORY futura, fora do escopo deste épico). Tabela `TermAcceptance` persistida. Bloqueada por STORY-011.
+- [ ] **STORY-013** (implementation, programador, `ready`, M) — Confirmação de email por link assinado. Notification Laravel + signed URL. **Conta inativa até confirmar** (login bloqueado com mensagem clara). Reenvio com throttling. Bloqueada por STORY-011.
+- [ ] **STORY-014** (implementation, programador, `ready`, M) — Cadastro de Empresa Analisada por preenchimento **manual**. Documento (CNPJ ou CPF da empresa autônoma), razão social, nome fantasia, CNAE, município, UF, situação cadastral. Vincula à conta do Usuário logado. Validações de formato. Sem RFB ainda. Bloqueada por STORY-011.
+- [ ] **STORY-015** (implementation, programador, `ready`, M) — Enriquecimento via API RFB. **Inicia com mock/sandbox** (NRF §3.1: provedor real `[A DEFINIR]`, não bloqueia kickoff). Cliente HTTP isolado em Repository + fallback transparente para o formulário manual da STORY-014 quando a API falha (timeout, indisponibilidade, CNPJ inexistente). Aviso explícito ao usuário no fallback. Monitoramento (alarme >5% erro em janela 10 min). Bloqueada por STORY-014. Quando provedor real for escolhido, registrar IDR.
+- [ ] **STORY-016** (implementation, programador, `ready`, S) — Tela "Minhas Empresas": lista a empresa cadastrada para o Usuário logado, com placeholder "Iniciar diagnóstico" desabilitado (EPIC-002 ativa). Emite eventos `usuario_cadastrado` e `empresa_cadastrada` via `EventLogger` (já existe do EPIC-000), com schema fixado em ADR-004. Bloqueada por STORY-012, STORY-013, STORY-014.
+- [ ] **STORY-017** (validation, validador, `draft`, M) — Validação final do EPIC-001. Promovida para `ready` quando STORY-016 estiver `in_review`. Inclui criação de `validation/checklist.md` (a primeira est-ria desta validação cria; subsequente apenas executa). Mesmo padrão da STORY-008 do EPIC-000.
+
+**Paralelismo:** após STORY-011, podem rodar em paralelo: STORY-012, STORY-013, STORY-014. STORY-015 entra depois da 014. STORY-016 é o ponto de junção.
+
+**Decisões abertas que NÃO bloqueiam abertura do épico:**
+- Texto definitivo do Termo de Adesão e LGPD — depende do jurídico (postergado pelo PO em 2026-05-22). Entra como bugfix futuro.
+- Provedor real da API RFB — `[A DEFINIR]` na NRF §3.1; STORY-015 entra com mock e o provedor real pode entrar via IDR ou PDR posterior.
+- DPO formal — `[DECIDIR]` na NRF §7.4 (indicar pessoa EBP ou contratar DPO-as-a-service). Não bloqueia desenvolvimento; precisa estar definido **antes** do go-live em produção (onda 2).
 
 ## Validação final
 
@@ -70,3 +85,4 @@ Critérios em `validation/checklist.md` (a criar). Relatório do validador em `v
 ## Histórico
 
 - 2026-05-20 — Criado como draft junto com a abertura da WAVE-2026-01.
+- 2026-05-22 — EPIC-000 fechou aprovado (relatório `epics/EPIC-000-foundation/validation/report.md`, segundo passe). PO decidiu **postergar a revisão jurídica do Termo / LGPD** (ação fora do time de dev) e **promover EPIC-001 para `ready`** com Fluxo B de decomposição em 7 estórias (STORY-011 a STORY-017). STORY-011 entra como walking skeleton vertical (cadastro Usuário + login + home autenticada); STORY-012 a 014 paralelizáveis após 011; STORY-015 (RFB) inicia com mock conforme NRF §3.1; STORY-016 emite eventos `usuario_cadastrado` e `empresa_cadastrada`; STORY-017 valida.
