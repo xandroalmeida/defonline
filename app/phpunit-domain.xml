@@ -2,16 +2,18 @@
 <!--
     Configuração de cobertura DEDICADA ao núcleo de domínio (STORY-010 CA-5).
 
-    Quando app/Domain/** existir (nasce no EPIC-001), o pre-push hook e o job
+    Quando app/Domain existir (nasce no EPIC-001), o pre-push hook e o job
     test-coverage do CI invocam:
 
-        ./vendor/bin/pest --configuration=phpunit-domain.xml --coverage --min=98
+        ./vendor/bin/pest configuration=phpunit-domain.xml coverage min=98
 
-    O <source> aqui restringe a medição a app/Domain — assim o gate de 98% só
-    olha o núcleo, e o gate de 80% (phpunit.xml padrão) continua olhando todo
-    o resto. ADR-006 §3.1 + quality-standards §1.1.
+    O elemento source aqui restringe a medição a app/Domain. Assim o gate de
+    98 por cento só olha o núcleo, e o gate de 80 por cento (phpunit.xml
+    padrão) continua olhando todo o resto. ADR-006 secao 3.1 + quality
+    standards secao 1.1.
 
-    Não é exigido rodar enquanto a pasta não existe — o script detecta com `test -d`.
+    Não é exigido rodar enquanto a pasta não existe. O script detecta com
+    o teste de diretório.
 -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"

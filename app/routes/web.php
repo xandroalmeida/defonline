@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\HomeController;
 use App\Livewire\Cadastro;
+use App\Livewire\Login;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -14,3 +16,9 @@ Route::get('/health', [HealthController::class, 'health'])->name('health');
 Route::get('/ready', [HealthController::class, 'ready'])->name('ready');
 
 Route::get('/cadastro', Cadastro::class)->name('cadastro');
+Route::get('/login', Login::class)->middleware('throttle:login')->name('login');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/home', [HomeController::class, 'show'])->name('home');
+    Route::post('/logout', [HomeController::class, 'logout'])->name('logout');
+});

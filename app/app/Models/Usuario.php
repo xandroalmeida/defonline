@@ -22,6 +22,13 @@ use Illuminate\Notifications\Notifiable;
  *
  * Soft delete + anonimização diferida (ADR-003 §Decisão 5) já têm colunas, mas a cascata
  * e o job entram em estória futura — aqui apenas declaramos o trait.
+ *
+ * @property string $id
+ * @property string $cpf
+ * @property string $nome
+ * @property string $email
+ * @property string $senha_hash
+ * @property string $telefone
  */
 #[Fillable(['cpf', 'nome', 'email', 'senha_hash', 'telefone'])]
 #[Hidden(['senha_hash', 'remember_token'])]
@@ -45,7 +52,7 @@ final class Usuario extends Authenticatable
 
     public function primeiroNome(): string
     {
-        return explode(' ', trim($this->nome))[0] ?? $this->nome;
+        return explode(' ', trim($this->nome))[0];
     }
 
     protected static function newFactory(): UsuarioFactory

@@ -175,5 +175,5 @@ it('emite log info "usuario.cadastrado" com PII mascarada (CA-6)', function () {
 
     // O contexto chega ao Monolog e o LogSanitizer mascara em runtime (testado
     // em LogSanitizerTest). Aqui só verificamos que o evento foi emitido.
-    Log::shouldHaveReceived('info')->with('usuario.cadastrado', \Mockery::any())->once();
+    Log::shouldHaveReceived('info')->with('usuario.cadastrado', Mockery::any())->once();
 });
