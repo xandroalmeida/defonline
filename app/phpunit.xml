@@ -28,10 +28,19 @@
         <include>
             <directory>app</directory>
         </include>
+        <exclude>
+            <!-- Scaffold do Laravel sem lógica nossa — excluído da cobertura
+                 (STORY-010): o gate mede só o código que ESCREVEMOS. Quando essas
+                 classes ganharem código próprio (User real no EPIC-001, BaseController
+                 no EPIC-002), tirar daqui. -->
+            <file>app/Models/User.php</file>
+            <file>app/Http/Controllers/Controller.php</file>
+        </exclude>
     </source>
 
     <!-- Cobertura: medir via flag explícita no CLI com PCOV ou Xdebug instalado.
-         Não habilitamos automático para evitar overhead em cada `php artisan test`. -->
+         Gate (mínimo 80% geral, 98% em app/Domain quando nascer) vive no pre-push
+         hook e no job test-coverage do pr.yml (ADR-006 §3.1 + quality-standards). -->
 
     <php>
         <!-- Testing usa MESMO Postgres da app (ADR-001 + quality-standards):

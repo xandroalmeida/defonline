@@ -108,6 +108,124 @@ jobs:
       - run: composer install --prefer-dist --no-progress --no-interaction
       - run: php artisan test --testsuite=UnitPure
 
+  test-coverage:
+    # STORY-010 CA-3/4 — gate de cobertura no PR.
+    #
+    # Roda Pest All (UnitPure + Feature) com PCOV contra Postgres real (mesmo padrão
+    # que release-homolog.yml usa). Falha o PR se a cobertura geral cair abaixo de 80%,
+    # ou se app/Domain (quando existir) cair abaixo de 98% — gates prescritos em
+    # ADR-006 §3.1 + quality-standards §1.1+§2.2.
+    #
+    # Artefato coverage-summary.txt é publicado em qualquer resultado (success/failure)
+    # para auditoria e debugging.
+    name: Pest All (coverage ≥80%)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: app
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: defonline
+          POSTGRES_PASSWORD: defonline
+          POSTGRES_DB: defonline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U defonline -d defonline"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: defonline
+      DB_USERNAME: defonline
+      DB_PASSWORD: defonline
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, zip, bcmath, intl, mbstring
+          coverage: pcov
+      - uses: actions/cache@v4
+        with:
+          path: app/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
+      - run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Gera .env apontando para o Postgres do service
+        run: |
+          cat > .env <<EOF
+          APP_NAME=DEFOnline
+          APP_ENV=testing
+          APP_KEY=
+          APP_DEBUG=true
+          APP_URL=http://localhost
+          APP_VERSION=ci
+          LOG_CHANNEL=stack
+          LOG_STACK=daily
+          LOG_LEVEL=debug
+          LOG_DAILY_DAYS=1
+          DB_CONNECTION=pgsql
+          DB_HOST=127.0.0.1
+          DB_PORT=5432
+          DB_DATABASE=defonline
+          DB_USERNAME=defonline
+          DB_PASSWORD=defonline
+          SESSION_DRIVER=array
+          CACHE_STORE=array
+          QUEUE_CONNECTION=sync
+          MAIL_MAILER=array
+          BROADCAST_CONNECTION=null
+          TELEGRAM_BOT_TOKEN=
+          PULSE_ENABLED=false
+          TELESCOPE_ENABLED=false
+          NIGHTWATCH_ENABLED=false
+          EOF
+
+      - name: Habilita extensões Postgres (IDR-001 — normalmente initdb script)
+        env:
+          PGPASSWORD: defonline
+        run: |
+          psql -h 127.0.0.1 -U defonline -d defonline -v ON_ERROR_STOP=1 -c "
+            CREATE EXTENSION IF NOT EXISTS pgcrypto;
+            CREATE EXTENSION IF NOT EXISTS pg_trgm;
+            CREATE EXTENSION IF NOT EXISTS citext;
+            CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+          "
+
+      - name: app:key + migrate
+        run: |
+          php artisan key:generate --force
+          php artisan migrate --force
+
+      - name: Pest All com --coverage --min=80
+        # `./vendor/bin/pest` direto (não `php artisan test`) porque o wrapper do
+        # artisan engole o exit code do gate de cobertura do Pest 4.7. tee preserva o
+        # exit code do pest via PIPESTATUS.
+        run: |
+          set -o pipefail
+          ./vendor/bin/pest --testsuite=All --coverage --min=80 | tee coverage-summary.txt
+
+      - name: Gate adicional ≥98% em app/Domain (quando a pasta existir)
+        if: hashFiles('app/Domain/**/*.php') != ''
+        run: |
+          set -o pipefail
+          ./vendor/bin/pest --configuration=phpunit-domain.xml --coverage --min=98 | tee -a coverage-summary.txt
+
+      - name: Upload coverage-summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary
+          path: app/coverage-summary.txt
+          if-no-files-found: warn
+          retention-days: 30
+
   security-deps:
     name: composer audit
     runs-on: ubuntu-24.04

@@ -43,7 +43,21 @@ step() {
 
 step "Pint (lint)"     docker compose exec -T web ./vendor/bin/pint --test
 step "Larastan"        docker compose exec -T web ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M
-step "Pest (All)"      docker compose exec -T web php artisan test --testsuite=All
+# Pest + cobertura geral (STORY-010 CA-2; ADR-006 §Decisão 4; quality-standards §2.2).
+# Usa `./vendor/bin/pest` direto em vez de `php artisan test` porque artisan engole
+# o exit code do plugin de cobertura do Pest 4.7 — o gate `--min=80` reporta FAIL
+# mas o wrapper retorna 0, e o hook passaria silenciosamente.
+step "Pest (All, coverage ≥80%)" \
+    docker compose exec -T web ./vendor/bin/pest --testsuite=All --coverage --min=80
+
+# Gate adicional 98% sobre app/Domain quando essa pasta existir (nasce no EPIC-001).
+# CA-5: estrutura pronta — usa phpunit-domain.xml com source restrito a app/Domain.
+# Sem custo enquanto a pasta não existe (o `test -d` é o único trabalho extra).
+if docker compose exec -T web test -d app/Domain; then
+    step "Pest Domain coverage ≥98%" \
+        docker compose exec -T web ./vendor/bin/pest --configuration=phpunit-domain.xml --coverage --min=98
+fi
+
 step "Pennant overdue" docker compose exec -T web php artisan pennant:list-overdue --fail-on-overdue
 
 # Dusk: chromedriver precisa estar de pé dentro do container web. Inicia se necessário.

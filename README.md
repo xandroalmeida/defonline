@@ -104,6 +104,25 @@ docker compose exec web php artisan dusk
 O hook **roda automaticamente** antes de cada `git push` (instalado por `./up.sh`).
 Bypass com `--no-verify` é **proibido por política** (ADR-006).
 
+### Cobertura de testes
+
+A imagem `web` traz **PCOV** habilitado (driver leve de cobertura — ~10-20% de overhead). O gate prescrito em `quality-standards.md` §1.1+§2.2 e em ADR-006 §Decisão 4 é aplicado em DOIS pontos (STORY-010):
+
+- **No pre-push hook local** — falha o `git push` se a cobertura geral cair abaixo de 80%, ou se `app/Domain/**` (a nascer no EPIC-001) ficar abaixo de 98%.
+- **No PR (job `test-coverage` do `pr.yml`)** — falha o check do PR pelas mesmas regras + publica `coverage-summary.txt` como artefato baixável.
+
+Para medir cobertura local sob demanda:
+
+```bash
+# Geral (testsuite All contra Postgres real):
+docker compose exec web ./vendor/bin/pest --testsuite=All --coverage --min=80
+
+# Núcleo de domínio (≥98%, quando app/Domain existir):
+docker compose exec web ./vendor/bin/pest --configuration=phpunit-domain.xml --coverage --min=98
+```
+
+`./vendor/bin/pest` é preferido a `php artisan test` aqui porque o wrapper artisan engole o exit code do gate (Pest 4.7 reporta FAIL mas retorna 0 via artisan).
+
 ## Feature flags (Laravel Pennant)
 
 ```bash

@@ -71,7 +71,8 @@ Decompostas no Fluxo B em 6 spikes paralelizáveis (todas `ready`) + 1 implement
 - [ ] **STORY-006** (spike, arquiteto, `ready`) — Observabilidade + captura de eventos de produto.
 - [x] **STORY-007** (implementation, programador, `ready`) — Hello world deployado em homologação via pipeline (tag rc.N). Destravada em 2026-05-21: todas as 6 ADRs prerrequisitas (ADR-001 a ADR-006) estão `accepted`.
 - [ ] **STORY-009** (implementation, programador, `ready`) — PhpPgAdmin exclusivo do ambiente local de desenvolvimento. Ferramenta de conveniência para o dev local; **nunca** em homologação ou produção (ADR-005 §1.1, §6, §7.5). Paralelizável com Phases 2/3 da STORY-007.
-- [ ] **STORY-008** (validation, validador, `draft`) — Validação final do EPIC-000. Promove para `ready` quando STORY-007 e STORY-009 estiverem `in_review`. Ganha item de checklist verificando que PhpPgAdmin não aparece em playbooks Ansible de homol/prod.
+- [x] **STORY-008** (validation, validador, `done`) — Validação final do EPIC-000. Executada em 2026-05-22; veredito **REJECTED não-bloqueante** (1 fail em Bloco 2.1: gate de cobertura prescrito pela ADR-006 + `quality-standards.md` §1.1/§2.2 não implementado). Relatório em `validation/report.md`. EPIC-000 permanece `in_review` até STORY-010 entrar e re-validação curta confirmar 2.1.
+- [ ] **STORY-010** (bugfix, programador, `ready`) — Corretiva derivada do F-NB-1 do relatório de validação: habilita PCOV no container `web`, `--coverage --min=80` no pre-push, job `test-coverage` no `pr.yml` com artefato, e estrutura pronta para `--min=98` em `app/Domain/**` quando essa pasta nascer no EPIC-001.
 
 ## Validação final
 
@@ -84,3 +85,4 @@ Critérios em `validation/checklist.md` (criado no Fluxo B). Relatório do valid
 - 2026-05-20 — Criado como draft junto com a abertura da WAVE-2026-01.
 - 2026-05-21 — Métrica primária e critérios ajustados pela ADR-006 (`accepted`): tag rc.N substitui merge em main como gatilho de deploy em homologação; pre-push hook local entra no fluxo. STORY-001..006 todas `done`; STORY-007 promovida para `ready`.
 - 2026-05-22 — STORY-009 adicionada pelo PO: PhpPgAdmin exclusivo do dev local (ergonomia do desenvolvedor), proibido em homologação e produção. STORY-008 (validação) ganhará um item de checklist verificando a ausência da ferramenta em playbooks Ansible de homol/prod.
+- 2026-05-22 — STORY-008 executada pelo Validador. Veredito: REJECTED não-bloqueante (relatório em `validation/report.md`). PO optou por manter EPIC-000 em `in_review` e abrir **STORY-010** (corretiva, S) para implementar o gate de cobertura prescrito pela ADR-006. Re-validação do Bloco 2.1 fica pendente até STORY-010 entrar.

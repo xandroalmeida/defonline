@@ -26,7 +26,15 @@ RUN apk add --no-cache \
         chromium chromium-chromedriver \
         nodejs npm \
         && docker-php-ext-install pdo_pgsql zip bcmath \
-        && rm -rf /var/cache/apk/*
+        # PCOV — driver de cobertura leve (ADR-006 §3.1 + quality-standards §1.1/§2.2 +
+        # STORY-010 CA-1 / IDR-003). Preferido a Xdebug por overhead (~10-20% vs 4-5×).
+        # Habilitado por padrão na imagem, mas só ATIVA quando Pest é chamado com
+        # `--coverage` — sem custo em `php artisan test` normal (pcov.enabled=0 OFF).
+        && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+        && pecl install pcov \
+        && docker-php-ext-enable pcov \
+        && apk del .build-deps \
+        && rm -rf /var/cache/apk/* /tmp/pear
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
