@@ -25,6 +25,10 @@ jobs:
   validate:
     name: Re-roda PR jobs contra o SHA mergeado
     uses: ./.github/workflows/pr.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      pull-requests: read
 
   build-and-push:
     name: Build + push GHCR
