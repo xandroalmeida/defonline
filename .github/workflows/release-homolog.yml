@@ -67,7 +67,11 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install "ansible-core>=2.16"
-          ansible-galaxy collection install -r infra/ansible/requirements.yml
+          # Instala coleções no path declarado em ansible.cfg (collections_path = collections),
+          # não no path default `~/.ansible/collections/` — Ansible não acharia.
+          ansible-galaxy collection install \
+              -r infra/ansible/requirements.yml \
+              -p infra/ansible/collections
 
       - name: Configurar chave SSH e known_hosts
         run: |
