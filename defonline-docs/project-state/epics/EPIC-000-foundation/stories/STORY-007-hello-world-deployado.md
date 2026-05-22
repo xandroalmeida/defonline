@@ -6,10 +6,10 @@ epic_id: EPIC-000
 sprint_id: null
 type: implementation
 target_role: programador
-status: draft
-owner_agent: null
+status: in_progress
+owner_agent: programador (claude-opus-4-7)
 created_at: 2026-05-20
-updated_at: 2026-05-20
+updated_at: 2026-05-22
 estimated_session_size: L
 ---
 
@@ -126,25 +126,56 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Em resumo:
 5. **Ao terminar:** preencha "Notas do agente", `status: in_review`, atualize `index.json`, abra PR. Validador (STORY-008) confirma.
 
 ## Notas do agente
-(preenchido durante/após execução)
+
+### Estado da execução (2026-05-22)
+
+A execução está **em curso** e foi quebrada em três fases por alinhamento com o PO no início da sessão (estória `L`, escopo absorvendo 6 ADRs simultâneas).
+
+- **Phase 1 — skeleton local rodando (concluída em 2026-05-22):** app Laravel + Livewire + Docker Compose com 5 containers (web/worker/scheduler/db/mailpit), migrations base, observability cross-process, página viva, /health, /ready, suíte Pest + Dusk verde, README + `up.sh`. **Status atual da estória após Phase 1: `in_progress` ainda** — a estória só vai para `in_review` após Phase 3.
+- **Phase 2 — CI/CD (pendente):** GitHub Actions workflows (pr.yml + main.yml + release-homolog.yml + release-production.yml) + pre-push hook + Laravel Pennant + lints (Pint, Larastan, ansible-lint, commitlint, trivy, gitleaks, composer audit).
+- **Phase 3 — Ansible + deploy real (pendente):** playbooks Ansible (bootstrap, docker, app, deploy, backup, restore), contratar VPS BR, configurar DNS Cloudflare, criar bot Telegram, gerar GPG key, criar bucket Backblaze B2, deploy automatizado em `homolog.defonline.com.br` com TLS via Caddy.
 
 ### Decisões tomadas
-- <data> — <decisão local>
+
+- **2026-05-22 — Reaproveitar `spike-stack/app/` como base.** Movido para `app/` na raiz; mantém versões já validadas no spike (Laravel 13.11 + Livewire 4.3 + PG 18 + Pest 4.7 + Dusk 8.6 + PHP 8.5.6). Stub do `Counter` removido.
+- **2026-05-22 — Imagem Docker única para web/worker/scheduler** (ADR-002). PHP 8.5-cli-alpine + extensões `pdo_pgsql`, `zip`, `bcmath` + Composer + Chromium/ChromeDriver para Dusk. Em local, `php artisan serve` para `web`; em produção (Phase 3) evolui para `nginx + php-fpm`.
+- **2026-05-22 — `request_id` UUID v7 (ADR-002) implementado** via `App\Support\RequestId` (singleton de processo) + helper global `request_id()` (autoload `composer.json:autoload.files`) + middleware `AssignRequestId` + middleware `EnrichLogContext` (injeta `Log::withContext`).
+- **2026-05-22 — `BaseJob` propaga `meta.request_id`** no construtor e re-injeta `RequestId::set()` + `Log::withContext()` no `handle()` — preserva trace cross-process worker → web (ADR-002).
+- **2026-05-22 — Métricas via middleware/listener nativos** (não SaaS): `MeasureRequest` middleware insere em `request_metrics` no `terminate()` (usa `$request->attributes` para sobreviver entre instâncias do middleware); `CollectJobMetrics` listener escuta `JobProcessing/JobProcessed/JobFailed` e insere em `job_metrics`. `business_metrics` é gravada pelos próprios jobs (`HelloWorldEmail` exemplifica).
+- **2026-05-22 — `LogSanitizer` único** aplicado via `Log::tap` nos canais `stdout` (JSON) e `daily` (90d) — ADR-003 §LogSanitizer + ADR-004 §1.1. Lista de chaves: credencial → REDACTED total; CPF/CNPJ/email/telefone → máscara parcial; PII derivada/financeiro → REDACTED total.
+- **2026-05-22 — `EventLogger::emit()` valida PII na origem** lançando `PiiEmEventoException` quando recebe chave proibida (ADR-004 §2.4). Validação recursiva em arrays aninhados. Defesa em camadas: model `EventoProduto` também rejeita update/delete + GRANT `INSERT, SELECT only` no Postgres.
+- **2026-05-22 — `AuditLog` model rejeita update/delete** + GRANT restritivo Postgres (ADR-003 §Decisão 4 + ADR-005 §7.5).
+- **2026-05-22 — Migration `usuarios` usa `DB::statement` para coluna CITEXT** porque Laravel Schema Grammar não conhece o tipo. Coluna criada como `ALTER TABLE ADD` após o `Schema::create` Eloquent.
+- **2026-05-22 — Extensões Postgres habilitadas no init script** (não em migration). Diverge de ADR-005 §7.3 — ver **IDR-001** (motivo: `pg_stat_statements` exige superuser; conceder `CREATE ON DATABASE` ao `defonline_app` quebra princípio do menor privilégio).
 
 ### Descobertas
-- <data> — <descoberta>
+
+- **2026-05-22 — Docblock com `*/` literal quebra parse.** Comentário "faturamento_*/balanco_*" fechou o docblock prematuramente, causando ParseError em `LogSanitizer`. Reescrito sem `*/` no texto.
+- **2026-05-22 — `composer install` no Dockerfile não é o suficiente** quando se adiciona `autoload.files` (helpers) depois do install. Precisa `composer dump-autoload` após mudança.
+- **2026-05-22 — `MeasureRequest` middleware: instâncias separadas entre `handle()` e `terminate()`.** Propriedade tipada `private float $startedAt` falhava com "must not be accessed before initialization". Resolvido armazenando o timestamp em `$request->attributes`.
+- **2026-05-22 — `$event->job->getJobId()` retorna `int` em Laravel queue driver `database`.** O type-hint do listener (`string`) explodia. Resolvido com cast `(string)`.
+- **2026-05-22 — `.env.dusk.local` precisa de `APP_NAME=DEFOnline`** explícito; sem isso, Dusk pega default `'Laravel'` do `config/app.php` e quebra `assertSee('hello DEFOnline')`. Descoberto via screenshot de Dusk.
 
 ### Bloqueios encontrados
-- <data> — <bloqueio>
+- Nenhum bloqueio escalonado. Todos resolvidos no fluxo.
 
 ### IDRs criados
-- <id> — <título>
+- **IDR-001** — Extensões Postgres habilitadas via init script do container, não via migration Laravel.
 
-### Cobertura final
-- Unitários: <%>
-- E2E: <cenários>
+### Cobertura final (Phase 1)
 
-### Links de evidência
-- PR: <url>
-- Pipeline: <url>
-- Deploy de homologação: <url>
+- **Pest:** 40 testes, 82 asserções, 0,77s — todos verdes.
+  - Unit: `LogSanitizer` (8 testes), `RequestId` (5 testes).
+  - Feature: `/health` + `/ready` + propagação `X-Request-Id` (4); HelloWorld Livewire (3); `AuditLogger` (3); `EventLogger` + validação PII (16); `RequestIdPropagation` cross-process (2).
+- **Dusk E2E:** 2 testes, 6 asserções, 1,02s — browser real Chromium 148 contra `localhost:8000`.
+  - Visitor sees hello page with version and OK status.
+  - Visitor can dispatch the demo email (web → fila → worker → Mailpit).
+- **Validação ao vivo:** `docker compose ps` mostra 5 containers up; `/health` e `/ready` 200; e-mail real chega ao Mailpit com `request_id` no subject; tabelas `evento_produto`, `request_metrics`, `job_metrics`, `business_metrics` populadas.
+
+### Links de evidência (Phase 1)
+
+- PR: pendente (entra após Phase 3 — estória só fecha quando deploy em homologação estiver vivo).
+- Pipeline: pendente (Phase 2).
+- Deploy de homologação: pendente (Phase 3).
+- Página viva local: http://localhost:8090 (após `./up.sh`).
+- Mailpit UI: http://localhost:8025.
