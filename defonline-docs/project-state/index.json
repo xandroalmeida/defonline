@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-22T22:00:00Z",
+  "generated_at": "2026-05-22T20:35:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -288,7 +288,7 @@
       "title": "Walking skeleton — cadastro de Usuário + login + home autenticada",
       "type": "implementation",
       "target_role": "programador",
-      "status": "in_review",
+      "status": "done",
       "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-011-walking-skeleton-cadastro-login.md",
@@ -299,9 +299,11 @@
       "updated_at": "2026-05-22",
       "coverage_geral": "95.5%",
       "coverage_dominio": "100%",
-      "tests_pest": "91 (238 asserções)",
-      "tests_dusk": "3 (11 asserções)",
-      "note": "Pre-push hook verde end-to-end (Pint + Larastan + Pest --min=80 + Domain --min=98 + Pennant + Dusk). Aguarda revisão do PO + smoke em homologação após próxima tag rc."
+      "tests_pest": "93 (245 asserções)",
+      "tests_dusk": "5 (21 asserções)",
+      "last_released_tag": "v0.2.0-rc.2",
+      "live_url": "https://defonline.xandrix.com.br/cadastro",
+      "note": "PO aprovou após teste manual local e probe em homologação. rc.1 falhou no smoke pós-deploy (smoke E2E destrutivo) — corrigido na rc.2 com smoke read-only. Princípio a propagar: novos endpoints autenticados precisam de smoke read-only correspondente."
     },
     {
       "id": "STORY-012",

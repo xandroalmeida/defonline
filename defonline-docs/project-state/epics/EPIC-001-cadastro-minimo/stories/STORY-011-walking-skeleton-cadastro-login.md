@@ -6,7 +6,7 @@ epic_id: EPIC-001
 sprint_id: SPRINT-2026-W22
 type: implementation
 target_role: programador
-status: in_review
+status: done
 owner_agent: programador (claude-opus-4-7)
 created_at: 2026-05-22
 updated_at: 2026-05-22
@@ -181,10 +181,16 @@ Cada passo: red → green → refactor + commit `feat(STORY-011): …`. Suíte c
 - Pint, Larastan nível 6 e gate de cobertura 80% + 98% domínio: todos verdes via `pre-push.sh`.
 
 ### Links de evidência
-- PR: **pendente** — PO optou em 2026-05-22 por manter commits apenas localmente (6 commits em `main` ainda não pushados).
-- Pipeline: pendente (depende do push/PR).
-- Tag de homologação: pendente — próxima na sequência seria `v0.2.0-rc.1` (primeira rc do EPIC-001 após `v0.1.0-rc.5` da STORY-007).
-- Smoke pós-deploy: pendente.
+- PR: n/a — trunk-based, commits direto em `main` (preferência do PO registrada em memória).
+- Pipeline rc.1: https://github.com/xandroalmeida/defonline/actions/runs/26310189543 — **falhou no smoke** (lição abaixo).
+- Pipeline rc.2: https://github.com/xandroalmeida/defonline/actions/runs/26310602091 — **verde end-to-end** (validate + build-and-push + deploy + smoke + notify).
+- Tag de homologação: `v0.2.0-rc.2` (rc.1 deployou a feature mas falhou no smoke; rc.2 corrigiu o smoke sem mudança funcional).
+- Smoke pós-deploy: `CadastroLoginSmokeBrowserTest` (read-only, /cadastro + /login) verde em homol.
+- Probe manual pós-deploy: `/cadastro` 200, `/login` 200, `/home` 302, `/health` 200 em https://defonline.xandrix.com.br (2026-05-22).
 
-### Aprovação local
-- 2026-05-22 — **PO aprovou a estória após teste manual local** em http://localhost:8090 (caminho feliz + ajustes: mensagens pt-BR, máscaras de CPF e telefone). Estória permanece em `in_review` porque a DoD exige deploy em homologação + smoke pós-deploy; promoção a `done` fica para o turno em que houver push + tag.
+### Aprovação
+- 2026-05-22 — **PO aprovou após teste manual local** em http://localhost:8090 (caminho feliz + ajustes: mensagens pt-BR, máscaras de CPF e telefone).
+- 2026-05-22 — **Deploy em homologação concluído** via tag `v0.2.0-rc.2`; smoke pós-deploy verde; probe manual dos endpoints `/cadastro`, `/login`, `/home`, `/health` confirmam disponibilidade.
+
+### Lição registrada (rc.1 falha)
+A rc.1 falhou no smoke pós-deploy porque o teste E2E completo (`CadastroLoginHomeBrowserTest`) estava marcado `#[Group('smoke')]` e roda contra a URL pública real — tentou submeter o form de cadastro em produção. Smoke pós-deploy precisa ser **read-only por design** para não contaminar dados de homologação. Corrigido na rc.2 com `CadastroLoginSmokeBrowserTest` (apenas visita + assertPresent). Princípio a propagar para estórias futuras: novos endpoints autenticados ganham um smoke read-only correspondente; E2E destrutivo fica restrito ao pre-push local.
