@@ -31,6 +31,8 @@ it('persiste usuário em "usuarios" com senha hash e redireciona para login (CA-
         ->set('senha', 'Senha1234')
         ->set('senha_confirmation', 'Senha1234')
         ->set('telefone', '(11) 98888-7777')
+        ->set('aceite_termo_adesao', true)
+        ->set('aceite_lgpd', true)
         ->call('submit')
         ->assertRedirect('/login');
 
@@ -51,6 +53,8 @@ it('grava audit_log "usuario.cadastrado" após criar conta (CA-6)', function () 
         ->set('senha', 'Senha1234')
         ->set('senha_confirmation', 'Senha1234')
         ->set('telefone', '11988887777')
+        ->set('aceite_termo_adesao', true)
+        ->set('aceite_lgpd', true)
         ->call('submit');
 
     $usuario = Usuario::firstWhere('email', 'roberto@exemplo.com.br');
@@ -204,6 +208,8 @@ it('emite log info "usuario.cadastrado" com PII mascarada (CA-6)', function () {
         ->set('senha', 'Senha1234')
         ->set('senha_confirmation', 'Senha1234')
         ->set('telefone', '11988887777')
+        ->set('aceite_termo_adesao', true)
+        ->set('aceite_lgpd', true)
         ->call('submit');
 
     // O contexto chega ao Monolog e o LogSanitizer mascara em runtime (testado

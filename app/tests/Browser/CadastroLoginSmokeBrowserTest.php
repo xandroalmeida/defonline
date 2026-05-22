@@ -27,7 +27,28 @@ final class CadastroLoginSmokeBrowserTest extends DuskTestCase
                 ->assertPresent('@cadastro-email')
                 ->assertPresent('@cadastro-senha')
                 ->assertPresent('@cadastro-telefone')
+                ->assertPresent('@cadastro-aceite-termo-adesao')
+                ->assertPresent('@cadastro-aceite-lgpd')
+                ->assertPresent('@cadastro-aceite-marketing')
+                ->assertPresent('@cadastro-link-termo-adesao')
+                ->assertPresent('@cadastro-link-lgpd')
                 ->assertPresent('@cadastro-submit');
+        });
+    }
+
+    #[Group('smoke')]
+    public function test_termos_renderizam_com_banner_placeholder(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/termos/termo-adesao')
+                ->assertSee('Termo de Adesão')
+                ->assertSee('TEXTO PLACEHOLDER')
+                ->assertSeeIn('@legal-versao', 'v1-placeholder');
+
+            $browser->visit('/termos/politica-privacidade')
+                ->assertSee('Política de Privacidade')
+                ->assertSee('TEXTO PLACEHOLDER')
+                ->assertSeeIn('@legal-versao', 'v1-placeholder');
         });
     }
 

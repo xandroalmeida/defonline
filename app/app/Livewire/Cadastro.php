@@ -5,29 +5,39 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Domain\Cpf;
+use App\Domain\TermoTipo;
+use App\Models\TermAcceptance;
 use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
+use App\Support\TermosVigentes;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 /**
- * Cadastro de Usuário (STORY-011 CA-1..CA-6).
+ * Cadastro de Usuário (STORY-011 CA-1..CA-6 + STORY-012 CA-1..CA-6).
  *
  * Campos: CPF (normalizado a dígitos), nome, email (CITEXT unique), senha (bcrypt
  * 12, regra Laravel `Password::min(8)->letters()->numbers()`), confirmação de senha,
- * telefone BR (10-11 dígitos).
+ * telefone BR (10-11 dígitos), 3 aceites de termos (2 obrigatórios + 1 opt-in).
  *
  * Em duplicação de CPF/email, a mensagem é genérica ("este dado já está em uso") —
  * conformidade com security-discipline.md (sem vazar existência de cadastro).
  *
- * Audit log (`usuario.cadastrado`) + log estruturado emitidos na mesma transação.
+ * Persistência transacional cria Usuário + 3 linhas em `term_acceptances` (mesmo
+ * para marketing recusado — registra `aceito: false` para evidenciar a oferta).
+ *
+ * Audit log (`usuario.cadastrado` + 1 `termo.aceito` ou `termo.recusado` por aceite)
+ * emitidos na mesma transação, **sem ip/user-agent em log** (PII fica só em
+ * `term_acceptances`).
+ *
  * Evento de produto `usuario_cadastrado` **não** é emitido aqui — depende da
  * confirmação de email da STORY-013 (ADR-004 §2.2).
  */
@@ -46,6 +56,12 @@ final class Cadastro extends Component
 
     public string $telefone = '';
 
+    public bool $aceite_termo_adesao = false;
+
+    public bool $aceite_lgpd = false;
+
+    public bool $aceite_marketing = false;
+
     public function submit(): mixed
     {
         // Estado do componente guarda o valor mascarado (UI). Normalização para
@@ -58,6 +74,9 @@ final class Cadastro extends Component
             'senha' => $this->senha,
             'senha_confirmation' => $this->senha_confirmation,
             'telefone' => preg_replace('/\D+/', '', $this->telefone) ?? '',
+            'aceite_termo_adesao' => $this->aceite_termo_adesao,
+            'aceite_lgpd' => $this->aceite_lgpd,
+            'aceite_marketing' => $this->aceite_marketing,
         ];
 
         $validados = Validator::make($dados, [
@@ -90,6 +109,9 @@ final class Cadastro extends Component
                 'string',
                 'regex:/^[1-9]{2}9?\d{8}$/',                  // DDD + 8 ou 9 dígitos
             ],
+            'aceite_termo_adesao' => ['accepted'],
+            'aceite_lgpd' => ['accepted'],
+            'aceite_marketing' => ['boolean'],
         ], [
             'cpf.required' => 'Informe o CPF.',
             'cpf.size' => 'O CPF deve ter 11 dígitos.',
@@ -105,9 +127,14 @@ final class Cadastro extends Component
             'senha.confirmed' => 'A confirmação de senha não confere.',
             'telefone.required' => 'Informe o telefone WhatsApp.',
             'telefone.regex' => 'Informe um telefone válido (DDD + número).',
+            'aceite_termo_adesao.accepted' => 'Você precisa aceitar o Termo de Adesão para continuar.',
+            'aceite_lgpd.accepted' => 'Você precisa aceitar a Política de Privacidade e LGPD para continuar.',
         ])->validate();
 
-        $usuario = DB::transaction(function () use ($validados): Usuario {
+        $ip = request()->ip();
+        $userAgent = substr((string) request()->userAgent(), 0, 1024);
+
+        $usuario = DB::transaction(function () use ($validados, $ip, $userAgent): Usuario {
             $u = Usuario::create([
                 'cpf' => $validados['cpf'],
                 'nome' => $validados['nome'],
@@ -115,6 +142,10 @@ final class Cadastro extends Component
                 'senha_hash' => Hash::make($validados['senha']),
                 'telefone' => $validados['telefone'],
             ]);
+
+            $this->registrarAceite($u, TermoTipo::TermoAdesao, true, $ip, $userAgent);
+            $this->registrarAceite($u, TermoTipo::Lgpd, true, $ip, $userAgent);
+            $this->registrarAceite($u, TermoTipo::Marketing, (bool) $validados['aceite_marketing'], $ip, $userAgent);
 
             AuditLogger::log(
                 action: 'usuario.cadastrado',
@@ -130,8 +161,8 @@ final class Cadastro extends Component
                     'telefone' => $u->telefone,
                 ],
                 context: [
-                    'ip' => request()->ip(),
-                    'user_agent' => substr((string) request()->userAgent(), 0, 255),
+                    'ip' => $ip,
+                    'user_agent' => substr($userAgent, 0, 255),
                 ],
             );
 
@@ -151,6 +182,36 @@ final class Cadastro extends Component
         session()->flash('cadastro_sucesso', 'Conta criada com sucesso. Faça login para continuar.');
 
         return $this->redirect('/login', navigate: false);
+    }
+
+    private function registrarAceite(Usuario $usuario, TermoTipo $tipo, bool $aceito, ?string $ip, ?string $userAgent): void
+    {
+        $vigente = TermosVigentes::para($tipo);
+
+        TermAcceptance::create([
+            'id' => (string) Str::uuid7(),
+            'usuario_id' => $usuario->id,
+            'termo_tipo' => $tipo->value,
+            'aceito' => $aceito,
+            'versao' => $vigente->versao,
+            'conteudo_hash' => $vigente->conteudoHash,
+            'ip' => $ip,
+            'user_agent' => $userAgent,
+        ]);
+
+        AuditLogger::log(
+            action: $aceito ? 'termo.aceito' : 'termo.recusado',
+            subjectType: 'TermAcceptance',
+            subjectId: null,
+            actorType: 'user',
+            actorId: $usuario->id,
+            usuarioId: $usuario->id,
+            after: [
+                'termo_tipo' => $tipo->value,
+                'versao' => $vigente->versao,
+            ],
+            // CA-6: ip/user-agent NÃO entram em audit_logs — ficam só em term_acceptances.
+        );
     }
 
     public function render(): View

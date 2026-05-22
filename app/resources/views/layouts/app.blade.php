@@ -20,6 +20,11 @@
         a { color: #2563eb; }
         .sucesso { background: #d1fae5; color: #065f46; padding: .75rem; border-radius: 6px; margin-bottom: 1rem; }
         nav.topo { display: flex; align-items: center; justify-content: space-between; max-width: 720px; margin: 1rem auto; padding: 0 1rem; }
+        fieldset.aceites { border: 1px solid #e5e7eb; border-radius: 8px; padding: .75rem 1rem 1rem; margin-top: 1.25rem; }
+        fieldset.aceites .aceites__legenda { padding: 0 .35rem; font-size: .85rem; color: #6b7280; }
+        label.aceite { display: flex; gap: .55rem; align-items: flex-start; font-weight: 400; margin-top: .65rem; line-height: 1.35; }
+        label.aceite input[type=checkbox] { width: auto; margin-top: .2rem; flex-shrink: 0; }
+        label.aceite small { color: #6b7280; }
     </style>
 </head>
 <body>

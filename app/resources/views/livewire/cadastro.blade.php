@@ -50,6 +50,35 @@
                dusk="cadastro-telefone">
         @error('telefone') <p class="erro">{{ $message }}</p> @enderror
 
+        <fieldset class="aceites">
+            <legend class="aceites__legenda">Termos e consentimentos</legend>
+
+            <label class="aceite">
+                <input type="checkbox" wire:model="aceite_termo_adesao" dusk="cadastro-aceite-termo-adesao">
+                <span>
+                    Li e aceito o
+                    <a href="{{ route('termos.termo-adesao') }}" target="_blank" rel="noopener" dusk="cadastro-link-termo-adesao">Termo de Adesão</a>
+                    <small>(abre em nova aba)</small>
+                </span>
+            </label>
+            @error('aceite_termo_adesao') <p class="erro" dusk="erro-aceite-termo-adesao">{{ $message }}</p> @enderror
+
+            <label class="aceite">
+                <input type="checkbox" wire:model="aceite_lgpd" dusk="cadastro-aceite-lgpd">
+                <span>
+                    Li e aceito a
+                    <a href="{{ route('termos.politica-privacidade') }}" target="_blank" rel="noopener" dusk="cadastro-link-lgpd">Política de Privacidade e LGPD</a>
+                    <small>(abre em nova aba)</small>
+                </span>
+            </label>
+            @error('aceite_lgpd') <p class="erro" dusk="erro-aceite-lgpd">{{ $message }}</p> @enderror
+
+            <label class="aceite">
+                <input type="checkbox" wire:model="aceite_marketing" dusk="cadastro-aceite-marketing">
+                <span>Quero receber comunicações de marketing por email/WhatsApp <small>(opcional)</small></span>
+            </label>
+        </fieldset>
+
         <button type="submit" class="primary" dusk="cadastro-submit">Criar conta</button>
     </form>
 

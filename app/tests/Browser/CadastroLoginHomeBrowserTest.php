@@ -22,7 +22,7 @@ final class CadastroLoginHomeBrowserTest extends DuskTestCase
     use DatabaseTruncation;
 
     /** @var list<string> tabelas truncadas entre testes para evitar UNIQUE colisão entre PHP-FPM e Pest */
-    protected array $tablesToTruncate = ['usuarios', 'audit_logs', 'sessions'];
+    protected array $tablesToTruncate = ['usuarios', 'audit_logs', 'term_acceptances', 'sessions'];
 
     public function test_visitante_cria_conta_faz_login_acessa_home_e_sai(): void
     {
@@ -35,6 +35,8 @@ final class CadastroLoginHomeBrowserTest extends DuskTestCase
                 ->type('@cadastro-senha', 'Senha1234')
                 ->type('@cadastro-senha-confirmation', 'Senha1234')
                 ->type('@cadastro-telefone', '11988887777')
+                ->check('@cadastro-aceite-termo-adesao')
+                ->check('@cadastro-aceite-lgpd')
                 ->press('@cadastro-submit')
                 ->waitForLocation('/login')
                 ->assertSee('Conta criada com sucesso');

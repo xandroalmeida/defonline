@@ -18,6 +18,9 @@ Route::get('/ready', [HealthController::class, 'ready'])->name('ready');
 Route::get('/cadastro', Cadastro::class)->name('cadastro');
 Route::get('/login', Login::class)->middleware('throttle:login')->name('login');
 
+Route::view('/termos/termo-adesao', 'legal.termo-adesao-v1-placeholder')->name('termos.termo-adesao');
+Route::view('/termos/politica-privacidade', 'legal.politica-privacidade-v1-placeholder')->name('termos.politica-privacidade');
+
 Route::middleware('auth')->group(function () {
     Route::get('/home', [HomeController::class, 'show'])->name('home');
     Route::post('/logout', [HomeController::class, 'logout'])->name('logout');
