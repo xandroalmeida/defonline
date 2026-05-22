@@ -3,11 +3,11 @@ story_id: STORY-012
 slug: termo-adesao-lgpd-aceites
 title: Termo de Adesão + consentimento LGPD (com texto placeholder até jurídico retornar)
 epic_id: EPIC-001
-sprint_id: null
+sprint_id: SPRINT-2026-W22
 type: implementation
 target_role: programador
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador (claude-opus-4-7)
 created_at: 2026-05-22
 updated_at: 2026-05-22
 estimated_session_size: S
@@ -46,16 +46,16 @@ Para Roberto, é a sensação concreta de estar entrando num produto com regras 
 
 ## Critérios de aceite
 
-- [ ] **CA-1:** O componente Livewire de cadastro (STORY-011) ganha **três checkboxes**, nesta ordem, abaixo dos campos pessoais:
+- [x] **CA-1:** O componente Livewire de cadastro (STORY-011) ganha **três checkboxes**, nesta ordem, abaixo dos campos pessoais:
   1. "Li e aceito o **Termo de Adesão**" (obrigatório; link `[abrir em nova aba]` para `/termos/termo-adesao` que renderiza o texto placeholder).
   2. "Li e aceito a **Política de Privacidade e LGPD**" (obrigatório; link para `/termos/politica-privacidade`).
   3. "Quero receber comunicações de marketing por email/WhatsApp" (**opcional**, default desmarcado).
-- [ ] **CA-2:** Submit com **algum dos dois obrigatórios desmarcado** falha com mensagem específica por campo ("Você precisa aceitar o Termo de Adesão para continuar."). Submit válido cria o Usuário (STORY-011) **e** três registros em `term_acceptances` (mesmo para marketing — registra `aceito: false`, para evidenciar a oferta explícita).
-- [ ] **CA-3:** Migration cria tabela `term_acceptances` com colunas mínimas: `id`, `usuario_id` (FK), `termo_tipo` (enum: `'termo_adesao' | 'lgpd' | 'marketing'`), `aceito` (boolean), `versao` (string — ex: `'v1-placeholder'`), `conteudo_hash` (SHA-256 do texto exato exibido), `ip` (inet), `user_agent` (text), `aceito_at` (timestamp). Índice em `(usuario_id, termo_tipo, aceito_at)`. **Append-only** (sem update/delete na app — Policy nega; teste arquitetural Pest cobre, mesmo padrão do `AuditLog` e `EventoProduto`).
-- [ ] **CA-4:** Existe arquivo `app/resources/views/legal/termo-adesao-v1-placeholder.blade.php` com texto PT-BR genérico — não é cláusula jurídica formal, é placeholder explicitando: nome do produto, finalidade do tratamento de dados, direitos do titular (LGPD Art. 18 resumido), canal de contato (`dpo@ebparcerias.com`, mesmo que o DPO formal ainda esteja `[DECIDIR]`), retenção de 30 dias para anonimização pós-exclusão, e **um banner visível "TEXTO PLACEHOLDER — substituído após revisão jurídica."** Idem para `politica-privacidade-v1-placeholder.blade.php`. Versão `v1-placeholder` registrada no aceite.
-- [ ] **CA-5:** Rotas públicas `/termos/termo-adesao` e `/termos/politica-privacidade` renderizam o conteúdo atual com header de versão e data — não exigem login. Layout simples (sem chrome do app).
-- [ ] **CA-6:** Cada aceite gera entrada em `audit_logs` (`action: 'termo.aceito'` ou `'termo.recusado'`, contendo `termo_tipo` e `versao`, **sem ip/user-agent em log** — esses ficam só na tabela `term_acceptances`). Reuso de `AuditLogger` do EPIC-000.
-- [ ] **CA-7:** Testes: 1+ UnitPure (validação de aceites obrigatórios em FormRequest/Livewire rules), Feature cobrindo CA-1 a CA-6 (submit sem aceites bloqueia; submit com aceites cria 3 rows; teste arquitetural impede update/delete), 1 Dusk percorrendo `cadastro → marcar obrigatórios → submit OK`. Cobertura ≥ 80%.
+- [x] **CA-2:** Submit com **algum dos dois obrigatórios desmarcado** falha com mensagem específica por campo ("Você precisa aceitar o Termo de Adesão para continuar."). Submit válido cria o Usuário (STORY-011) **e** três registros em `term_acceptances` (mesmo para marketing — registra `aceito: false`, para evidenciar a oferta explícita).
+- [x] **CA-3:** Migration cria tabela `term_acceptances` com colunas mínimas: `id`, `usuario_id` (FK), `termo_tipo` (enum: `'termo_adesao' | 'lgpd' | 'marketing'`), `aceito` (boolean), `versao` (string — ex: `'v1-placeholder'`), `conteudo_hash` (SHA-256 do texto exato exibido), `ip` (inet), `user_agent` (text), `aceito_at` (timestamp). Índice em `(usuario_id, termo_tipo, aceito_at)`. **Append-only** (sem update/delete na app — Policy nega; teste arquitetural Pest cobre, mesmo padrão do `AuditLog` e `EventoProduto`).
+- [x] **CA-4:** Existe arquivo `app/resources/views/legal/termo-adesao-v1-placeholder.blade.php` com texto PT-BR genérico — não é cláusula jurídica formal, é placeholder explicitando: nome do produto, finalidade do tratamento de dados, direitos do titular (LGPD Art. 18 resumido), canal de contato (`dpo@ebparcerias.com`, mesmo que o DPO formal ainda esteja `[DECIDIR]`), retenção de 30 dias para anonimização pós-exclusão, e **um banner visível "TEXTO PLACEHOLDER — substituído após revisão jurídica."** Idem para `politica-privacidade-v1-placeholder.blade.php`. Versão `v1-placeholder` registrada no aceite.
+- [x] **CA-5:** Rotas públicas `/termos/termo-adesao` e `/termos/politica-privacidade` renderizam o conteúdo atual com header de versão e data — não exigem login. Layout simples (sem chrome do app).
+- [x] **CA-6:** Cada aceite gera entrada em `audit_logs` (`action: 'termo.aceito'` ou `'termo.recusado'`, contendo `termo_tipo` e `versao`, **sem ip/user-agent em log** — esses ficam só na tabela `term_acceptances`). Reuso de `AuditLogger` do EPIC-000.
+- [x] **CA-7:** Testes: 1+ UnitPure (validação de aceites obrigatórios em FormRequest/Livewire rules), Feature cobrindo CA-1 a CA-6 (submit sem aceites bloqueia; submit com aceites cria 3 rows; teste arquitetural impede update/delete), 1 Dusk percorrendo `cadastro → marcar obrigatórios → submit OK`. Cobertura ≥ 80%.
 
 ## Fora de escopo
 
@@ -97,12 +97,12 @@ Você **não** decide:
 
 ## Definição de Pronto (DoD)
 
-- [ ] Todos os CAs passam.
-- [ ] Pre-push verde.
-- [ ] Pipeline CI verde.
-- [ ] Deploy em homologação validado por smoke (formulário com checkboxes acessível).
-- [ ] `index.json` atualizado: `done`.
-- [ ] "Notas do agente" preenchidas.
+- [x] Todos os CAs passam (CA-1..CA-7 marcados).
+- [x] Pre-push verde local (Pint, PHPStan 0 erros, Pest 108 testes / cobertura 96.1% e 100% no Domain, Dusk 6 testes).
+- [ ] Pipeline CI verde — pendente: depende de push, e [feedback-workflow-direto-em-main](file:../../../../../../../.claude/projects/-Users-alexandro-Projetos-DEFOnline/memory/feedback-workflow-direto-em-main.md) manda esperar o PO autorizar antes de push/PR/tag.
+- [ ] Deploy em homologação validado por smoke — idem (pós-aprovação do PO).
+- [x] `index.json` atualizado: `in_progress` (transição para `done` após smoke aprovado).
+- [x] "Notas do agente" preenchidas.
 
 ## Protocolo do agente (obrigatório)
 
@@ -111,21 +111,30 @@ Padrão `agent-task-format.md`. Status: `ready → in_progress → in_review →
 ## Notas do agente
 
 ### Decisões tomadas
-- <data> — <decisão>
+- 2026-05-22 — Mecânica de versionamento: registrar `versao` ('v1-placeholder') + `conteudo_hash` SHA-256 do HTML renderizado da view. Quando o jurídico voltar com a redação final, basta trocar a view + bumpar a versão; os hashes antigos ficam preservados em `term_acceptances` e identificam quem precisa re-aceitar (essa UX entra em estória futura).
+- 2026-05-22 — Enum PHP `App\Domain\TermoTipo` + check constraint no Postgres (`termo_tipo IN ('termo_adesao','lgpd','marketing')`). Combina defesa de aplicação com defesa no banco; evita instalar enum nativo Postgres só para 3 valores que mudam pouco.
+- 2026-05-22 — `term_acceptances` append-only via mesmo padrão de `audit_logs`/`evento_produto`: bloqueio em model (RuntimeException em `update`/`delete`) + `REVOKE UPDATE, DELETE` no role `defonline_app` (ADR-005 §7.5).
+- 2026-05-22 — IP + user_agent ficam SÓ em `term_acceptances`; NÃO entram no `context` do `AuditLogger` para os aceites (CA-6 — minimização de PII em log). Teste explícito confirma a ausência.
+- 2026-05-22 — Marketing recusado também gera linha (`aceito=false`) + `audit_log` (`termo.recusado`) — espec CA-2 manda evidenciar a oferta.
+- 2026-05-22 — Rotas dos termos via `Route::view(...)` direto (sem controller dedicado) — não há lógica condicional, só servir Blade público.
 
 ### Descobertas
-- <data> — <gotcha>
+- 2026-05-22 — `phpstan` reclama de `?? throw` quando o array é typed (`const REGISTRO = [...]` cobre todos os enum cases); resolvi removendo o fallback (o array é exaustivo por construção).
+- 2026-05-22 — Os testes do happy path em `CadastroTest` (STORY-011) precisaram receber `aceite_termo_adesao=true` + `aceite_lgpd=true` para continuar passando — agora os aceites são parte do contrato de submit.
 
 ### Bloqueios encontrados
-- <data> — <bloqueio>
+- Nenhum.
 
 ### IDRs criados
-- IDR-XXX — <título>
+- (nenhum — decisões couberam no escopo dado pela espec).
 
 ### Cobertura final
-- Geral: <%>
+- Geral: 96.1% (gate ≥80%)
+- Domain: 100% (gate ≥98%)
+- Tests Pest: 108 (330 asserções)
+- Tests Dusk: 6 (32 asserções)
 
 ### Links de evidência
-- PR: <url>
-- Pipeline: <url>
-- Tag rc.N: <vX.Y.Z-rc.N>
+- PR: — (entrega local; tag/PR só após aprovação do PO, ver [feedback-workflow-direto-em-main](file:../../../../../../../.claude/projects/-Users-alexandro-Projetos-DEFOnline/memory/feedback-workflow-direto-em-main.md))
+- Pipeline: — (idem)
+- Tag rc.N: — (idem)
