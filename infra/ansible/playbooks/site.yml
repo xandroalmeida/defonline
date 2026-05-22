@@ -1,0 +1,14 @@
+---
+# Orquestração completa: provisionar do zero uma VPS recém-contratada.
+# Roda em ordem: bootstrap → docker → app → backup.
+- name: Bootstrap VPS (usuário, SSH, UFW, fail2ban, unattended-upgrades)
+  import_playbook: bootstrap.yml
+
+- name: Docker Engine + Compose plugin
+  import_playbook: docker.yml
+
+- name: App (compose up + migrate)
+  import_playbook: app.yml
+
+- name: Backup off-site (cron pg_dump → GPG → Backblaze B2)
+  import_playbook: backup.yml

@@ -1,0 +1,63 @@
+---
+# Backup off-site Postgres → GPG → Backblaze B2 (ADR-005 §4.2).
+# Provisiona o cron + scripts. Roda 03:00 BRT (definido em group_vars).
+
+- name: Provisionar backup diário Postgres → GPG → Backblaze B2
+  hosts: homolog
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Pacotes para backup
+      ansible.builtin.apt:
+        name:
+          - gnupg
+          - rclone
+          - cron
+        state: present
+
+    - name: Diretórios para backup local + chave GPG
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0700"
+      loop:
+        - "{{ deploy_dir }}/backups"
+        - "/home/{{ deploy_user }}/.config/rclone"
+        - "/home/{{ deploy_user }}/.gnupg"
+
+    - name: Rclone.conf (Backblaze B2)
+      ansible.builtin.template:
+        src: templates/rclone.conf.j2
+        dest: "/home/{{ deploy_user }}/.config/rclone/rclone.conf"
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0600"
+      no_log: true
+
+    - name: Script de backup
+      ansible.builtin.template:
+        src: templates/pg-backup.sh.j2
+        dest: "{{ deploy_dir }}/scripts/pg-backup.sh"
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0750"
+
+    - name: GPG passphrase em arquivo local (chmod 600)
+      ansible.builtin.copy:
+        dest: "/home/{{ deploy_user }}/.backup-gpg-pass"
+        content: "{{ backup_gpg_passphrase }}"
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0600"
+      no_log: true
+
+    - name: Cron diário (horário em group_vars/all.yml)
+      ansible.builtin.cron:
+        name: defonline-pg-backup
+        user: "{{ deploy_user }}"
+        minute: "{{ backup_cron_minute }}"
+        hour: "{{ backup_cron_hour }}"
+        job: "{{ deploy_dir }}/scripts/pg-backup.sh >> {{ deploy_dir }}/backups/backup.log 2>&1"

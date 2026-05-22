@@ -1,0 +1,145 @@
+name: release-homolog — deploy automático em homologação
+
+# ADR-006 §3.3 — Tag `vX.Y.Z-rc.N` dispara este workflow:
+#  1. Re-roda jobs leves do PR contra o SHA da tag.
+#  2. Build + push da imagem com tag git como tag Docker.
+#  3. Ansible deploy contra a VPS de homologação.
+#  4. Smoke test pós-deploy (curl /health + /ready + 1 Dusk leve).
+#  5. Notifica Telegram.
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+'
+
+concurrency:
+  group: deploy-homolog
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/app
+  ENVIRONMENT: homolog
+
+jobs:
+  validate:
+    uses: ./.github/workflows/pr.yml
+
+  build-and-push:
+    needs: validate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/docker/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: APP_VERSION=${{ github.ref_name }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-24.04
+    environment:
+      name: homolog
+      url: https://defonline.xandrix.com.br
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Ansible + community.docker
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install "ansible-core>=2.16"
+          ansible-galaxy collection install -r infra/ansible/requirements.yml
+
+      - name: Configurar chave SSH e known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Ansible Vault password file
+        run: |
+          printf '%s' "${{ secrets.ANSIBLE_VAULT_PASS }}" > ~/.vault-pass
+          chmod 600 ~/.vault-pass
+
+      - name: ansible-playbook deploy.yml (homolog)
+        working-directory: infra/ansible
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "True"
+        run: |
+          ansible-playbook \
+            -i inventories/homolog/hosts.yml \
+            playbooks/deploy.yml \
+            --vault-password-file ~/.vault-pass \
+            -e image_tag=${{ github.ref_name }}
+
+  smoke:
+    needs: deploy
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, zip, bcmath, intl, mbstring
+          coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: app/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
+      - uses: browser-actions/setup-chrome@v1
+
+      - name: HTTP smoke (curl /health + /ready)
+        run: |
+          set -e
+          for endpoint in health ready; do
+              echo "→ GET https://defonline.xandrix.com.br/${endpoint}"
+              curl -fsSL "https://defonline.xandrix.com.br/${endpoint}" | grep -E '"status":"ok"'
+          done
+
+      - name: Composer install (para Dusk smoke)
+        working-directory: app
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Dusk smoke (1 cenário crítico contra URL real)
+        working-directory: app
+        env:
+          APP_URL: https://defonline.xandrix.com.br
+          DUSK_DRIVER_URL: http://localhost:9515
+        run: |
+          # Inicia chromedriver standalone do setup-chrome
+          chromedriver --port=9515 --whitelisted-ips='' >/tmp/chromedriver.log 2>&1 &
+          sleep 3
+          php artisan dusk --group=smoke || (cat /tmp/chromedriver.log && exit 1)
+
+  notify:
+    needs: [deploy, smoke]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Status do deploy
+        run: |
+          STATUS="${{ (needs.deploy.result == 'success' && needs.smoke.result == 'success') && '✅' || '❌' }}"
+          MSG="${STATUS} DEFOnline homol: ${{ github.ref_name }} — deploy=${{ needs.deploy.result }} smoke=${{ needs.smoke.result }}"
+          echo "$MSG"
+          if [ -n "${{ secrets.TELEGRAM_BOT_TOKEN }}" ] && [ -n "${{ secrets.TELEGRAM_CHAT_ID_HOMOLOG }}" ]; then
+            curl -fsS -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+              -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID_HOMOLOG }}" -d "text=${MSG}" || true
+          fi

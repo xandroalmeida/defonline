@@ -42,9 +42,12 @@ O princípio: **se um humano precisa lembrar de fazer algo manualmente, o proces
 
 ### 2.2 CI/CD
 
-- Todo push para branch de feature dispara: lint, testes unitários, testes E2E (em paralelo quando possível), análise de cobertura, análise de segurança básica.
-- Merge em main dispara deploy automático para homologação.
-- Deploy para produção é automatizado — pode ser gated por aprovação humana, mas a *execução* nunca é manual.
+> Política detalhada em [ADR-006](../../../project-state/decisions/adr/ADR-006-cicd.md) (`accepted` 2026-05-21).
+
+- **Antes do push (laptop do dev/agente):** git pre-push hook versionado (instalado por `composer install`) roda testes unitários + testes Feature com Postgres real + testes E2E em browser real (Dusk) + análise de cobertura (gate 80% geral / 98% núcleo `app/Domain/**`). Hook falha = `git push` abortado.
+- **Todo push para branch de feature dispara (CI no GitHub Actions, leve):** lint (pint, larastan, ansible-lint, commitlint), análise de dependências (`composer audit`), análise de imagem (`trivy fs`), detecção de segredos (`gitleaks`), build da imagem Docker. **Não** sobe Postgres nem Chromium no runner — testes pesados já foram cobrados localmente pelo hook.
+- **Promoção é tag-based explícita**: criação da tag `vX.Y.Z-rc.N` dispara deploy automático em homologação (sem gate); criação da tag `vX.Y.Z` (sem `-rc`) dispara deploy em produção com gate humano de 1 clique via GitHub Environment.
+- Deploy é sempre automatizado — execução nunca é manual. Gate humano em produção é o único ato humano no fluxo; tudo o que ele aciona é Ansible playbook versionado.
 
 ### 2.3 Infraestrutura
 

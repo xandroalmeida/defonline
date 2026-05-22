@@ -1,6 +1,13 @@
 .DS_Store
 Thumbs.db
 
+# Phase 3 — secrets locais (chaves SSH/GPG, vault decifrado)
+/secrets/
+infra/ansible/inventories/*/group_vars/vault.yml
+!infra/ansible/inventories/*/group_vars/vault.yml.example
+infra/ansible/.vault-pass
+infra/ansible/collections/
+
 # Editor and local environment files
 .idea/
 .vscode/

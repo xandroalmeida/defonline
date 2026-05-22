@@ -1,0 +1,23 @@
+# Larastan / PHPStan — análise estática (ADR-006 §3.1).
+# Nível 6 como baseline pragmático; ratchet incremental para 8 em IDR futuro.
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 6
+    paths:
+        - app/
+        - database/migrations/
+        - routes/
+
+    excludePaths:
+        - vendor/*
+        - bootstrap/cache/*
+        - storage/*
+        # tests/* fica fora — Pest 4 traz API DSL que Larastan não conhece sem
+        # plugin específico; rely on Pest runtime + cobertura como gate funcional.
+        - tests/*
+
+    # Tipos PHPStan-friendly em propriedades JSONB (cast AsArrayObject).
+    universalObjectCratesClasses:
+        - Illuminate\Database\Eloquent\Casts\ArrayObject

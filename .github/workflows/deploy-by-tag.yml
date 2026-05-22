@@ -1,0 +1,38 @@
+name: deploy-by-tag — rollback / re-deploy explícito de qualquer tag
+
+# ADR-006 §3.3 — Reusa imagem imutável já publicada no GHCR para reverter.
+# Útil quando: tag `-rc.N` quebrou em homologação → recriar com `-rc.(N-1)`,
+# ou produção precisa voltar para semver anterior por incidente.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag a deployar (ex.: v0.3.0-rc.1, v0.2.0)'
+        required: true
+        type: string
+      environment:
+        description: 'Ambiente alvo'
+        required: true
+        type: choice
+        options:
+          - homolog
+          - production
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    environment:
+      name: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      - name: Phase 2 placeholder
+        run: |
+          echo "::warning::Re-deploy real fica para Phase 3 (Ansible)."
+          echo "Tag alvo: ${{ inputs.tag }}"
+          echo "Ambiente: ${{ inputs.environment }}"

@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Backup diário Postgres → GPG → Backblaze B2 (ADR-005 §4.2).
+# Renderizado pelo Ansible em {{ ansible_date_time.iso8601 | default('?') }}.
+
+set -euo pipefail
+
+DEPLOY_DIR="{{ deploy_dir }}"
+DB_NAME="{{ postgres_db }}"
+BUCKET="{{ b2_bucket }}"
+ENV_NAME="{{ env_name }}"
+RETENTION_DAILY="{{ backup_retention_daily }}"
+GPG_PASS_FILE="$HOME/.backup-gpg-pass"
+
+cd "$DEPLOY_DIR"
+
+DATE=$(date +%Y%m%d-%H%M)
+YEAR=$(date +%Y)
+MONTH=$(date +%m)
+LOCAL_FILE="backups/dump-${DATE}.sql.gz.gpg"
+REMOTE_PATH="b2:${BUCKET}/postgres/${ENV_NAME}/${YEAR}/${MONTH}/dump-${DATE}.sql.gz.gpg"
+
+echo "==> $(date -Iseconds) pg_dump → gzip → GPG → ${LOCAL_FILE}"
+
+# pg_dump custom format (mais flexível para restore parcial), comprimido com gzip, cifrado com GPG AES256.
+# Roda pelo role defonline_backup (read-only, sem privilégio de DROP) — ADR-005 §7.4.
+docker compose exec -T db \
+    pg_dump \
+        --username=defonline_backup \
+        --format=custom \
+        --no-owner \
+        --no-acl \
+        "$DB_NAME" \
+    | gzip \
+    | gpg --batch --yes --symmetric \
+          --cipher-algo AES256 \
+          --passphrase-file "$GPG_PASS_FILE" \
+          --output "$LOCAL_FILE"
+
+SIZE=$(stat -c%s "$LOCAL_FILE" 2>/dev/null || stat -f%z "$LOCAL_FILE")
+echo "==> Tamanho do dump: ${SIZE} bytes"
+
+if [ "$SIZE" -lt 1000 ]; then
+    echo "✖ Dump muito pequeno (< 1KB). Abortando upload."
+    exit 1
+fi
+
+echo "==> Upload para ${REMOTE_PATH}"
+rclone copyto "$LOCAL_FILE" "$REMOTE_PATH"
+
+# Limpa locais com mais de 7 dias (B2 mantém retention completa).
+find "${DEPLOY_DIR}/backups" -name 'dump-*.sql.gz.gpg' -mtime +7 -delete
+
+# Limpa B2 daily com mais de N dias (mantém 12 mensais separadamente via lifecycle do bucket).
+rclone delete "b2:${BUCKET}/postgres/${ENV_NAME}/" --min-age "${RETENTION_DAILY}d" --include 'dump-*.sql.gz.gpg' || true
+
+echo "==> $(date -Iseconds) Backup ok."
