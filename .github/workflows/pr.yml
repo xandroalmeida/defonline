@@ -147,6 +147,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  arch-no-pgadmin-in-ansible:
+    # STORY-009 CA-10 — bloqueia merge se algum playbook/role Ansible referenciar
+    # pgadmin / phppgadmin / adminer / dbgate. Ferramentas administrativas são
+    # DEV LOCAL APENAS (ADR-005 §1.1, §6, §7.5).
+    name: Arch — sem pgAdmin/Adminer em Ansible
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./scripts/check-no-pgadmin-in-ansible.sh
+
   flags-check:
     name: Feature flags (overdue)
     runs-on: ubuntu-24.04

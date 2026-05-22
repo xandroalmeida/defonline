@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "defonline (dev local)",
+      "Group": "DEFOnline",
+      "Host": "db",
+      "Port": 5432,
+      "MaintenanceDB": "defonline",
+      "Username": "postgres",
+      "SSLMode": "prefer"
+    }
+  }
+}

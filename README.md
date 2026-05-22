@@ -71,6 +71,18 @@ O script é idempotente (primeira execução: ~3-6 min; depois: ~10s). Sobe:
 - **Readiness:** `curl http://localhost:8090/ready` → 200 + checks de DB/cache/queue.
 - **Mailpit:** após clicar "Disparar e-mail de teste" no hello world, ver em http://localhost:8025.
 
+### Acessando o banco em dev
+
+PhpPgAdmin (na verdade `dpage/pgadmin4`, image oficial e ativa) sobe junto com o `./up.sh`:
+
+- **URL:** http://localhost:8091 (escuta apenas em `127.0.0.1` — não acessível de fora da máquina).
+- **Login da UI:** `admin@defonline.local` / `dev` — credenciais fixas de desenvolvimento, sem segredo.
+- **Servidor `db` pré-registrado** em `infra/pgadmin/servers.json` (grupo "DEFOnline" → "defonline (dev local)"). Ao abrir pela primeira vez ele pede a senha do Postgres:
+  - `postgres` / `postgres_secret_local` — superuser, ignora os GRANTs (use para inspeção ampla em dev).
+  - ou `defonline_app` / `defonline_app_secret_local` — role runtime com os GRANTs restritivos da ADR-003/ADR-004 (use para conferir o que o app realmente enxerga).
+
+> **PhpPgAdmin é exclusivo do ambiente de desenvolvimento local. Não existe em homologação nem em produção.** (STORY-009, ADR-005 §1.1, §6, §7.5.) Em homol/prod, inspeção de banco é via `ssh + psql` autenticado pelo Ansible Vault — não há UI web administrativa.
+
 ## Rodando testes e lints
 
 ```bash

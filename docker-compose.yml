@@ -87,6 +87,32 @@ services:
       - "1025:1025"
       - "8025:8025"
 
+  # PhpPgAdmin — DEV LOCAL APENAS. Nunca portar para playbooks de homol/prod
+  # (STORY-009, ADR-005 §1.1, §6, §7.5). Em homol/prod o canal é ssh + psql.
+  # Porta publicada apenas em 127.0.0.1 (loopback). Credenciais são fixas de dev.
+  pgadmin:
+    image: dpage/pgadmin4:9
+    container_name: defonline-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@defonline.local
+      PGADMIN_DEFAULT_PASSWORD: dev
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      # .local é TLD especial: pgAdmin recusa por padrão. Habilitamos só p/ dev.
+      PGADMIN_CONFIG_ALLOW_SPECIAL_EMAIL_DOMAINS: "['local','localhost']"
+      PGADMIN_CONFIG_CHECK_EMAIL_DELIVERABILITY: "False"
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "127.0.0.1:8091:80"
+    volumes:
+      - ./infra/pgadmin/servers.json:/pgadmin4/servers.json:ro
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   pgdata:
     name: defonline_pgdata
+  pgadmin_data:
+    name: defonline_pgadmin_data

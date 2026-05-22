@@ -24,8 +24,8 @@ fi
 echo "==> [4/5] Aplicando migrations..."
 docker compose run --rm --no-deps web php artisan migrate --force
 
-echo "==> [5/5] Subindo web, worker e scheduler..."
-docker compose up -d web worker scheduler
+echo "==> [5/5] Subindo web, worker, scheduler e pgadmin..."
+docker compose up -d web worker scheduler pgadmin
 
 echo ""
 echo "✅ Ambiente DEFOnline local pronto."
@@ -34,6 +34,7 @@ echo "   - Healthcheck:    http://localhost:8090/health"
 echo "   - Readiness:      http://localhost:8090/ready"
 echo "   - Mailpit UI:     http://localhost:8025"
 echo "   - Postgres:       localhost:5436 (db=defonline, user=defonline_app)"
+echo "   - PhpPgAdmin:     http://localhost:8091 (admin@defonline.local / dev) — DEV LOCAL APENAS"
 echo ""
 echo "Para derrubar tudo:               docker compose down"
 echo "Para rodar testes Pest:           docker compose exec web php artisan test"
