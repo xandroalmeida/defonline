@@ -7,12 +7,15 @@ namespace Tests\Browser;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
-use PHPUnit\Framework\Attributes\Group;
 use Tests\DuskTestCase;
 
 /**
  * E2E browser real cobrindo o walking skeleton da STORY-011 (CA-7):
  * cadastro → login → home → logout, em Chromium real via chromedriver no container.
+ *
+ * NÃO está no grupo `smoke` por design — ele faz writes (cria usuário no banco
+ * sob teste). Smoke pós-deploy precisa ser read-only para não contaminar dados
+ * em homologação. Veja `CadastroLoginSmokeBrowserTest` para o smoke leve.
  */
 final class CadastroLoginHomeBrowserTest extends DuskTestCase
 {
@@ -21,7 +24,6 @@ final class CadastroLoginHomeBrowserTest extends DuskTestCase
     /** @var list<string> tabelas truncadas entre testes para evitar UNIQUE colisão entre PHP-FPM e Pest */
     protected array $tablesToTruncate = ['usuarios', 'audit_logs', 'sessions'];
 
-    #[Group('smoke')]
     public function test_visitante_cria_conta_faz_login_acessa_home_e_sai(): void
     {
         $this->browse(function (Browser $browser) {
