@@ -57,14 +57,34 @@ jobs:
       - run: composer install --prefer-dist --no-progress --no-interaction
       - run: ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M
 
-  lint-commits:
-    name: Conventional Commits
+  lint-pr-title:
+    # ADR-006 §1.3: Conventional Commits aplica-se ao squash final (título do PR vira
+    # commit). NÃO validamos cada commit do histórico — só o título do PR.
+    name: Conventional Commits (PR title)
     runs-on: ubuntu-24.04
     if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: read
     steps:
-      - uses: wagoid/commitlint-github-action@v6
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          configFile: .commitlintrc.json
+          types: |
+            feat
+            fix
+            chore
+            docs
+            refactor
+            test
+            perf
+            ci
+            build
+            revert
+          requireScope: false
+          subjectPatternError: |
+            O título do PR deve ser Conventional Commits.
+            Ex.: "feat: adicionar pre-push hook" — sem letra maiúscula no início do subject.
 
   test-unit-pure:
     name: Pest UnitPure (sem DB)
@@ -105,7 +125,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: aquasecurity/trivy-action@0.28.0
+      - uses: aquasecurity/trivy-action@0.36.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
