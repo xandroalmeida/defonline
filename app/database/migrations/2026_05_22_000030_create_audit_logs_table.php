@@ -33,7 +33,7 @@ return new class extends Migration
         });
 
         // Defesa em profundidade: app só insere/lê (ADR-005 §7.5).
-        $appUser = (string) env('DB_USERNAME', 'defonline_app');
+        $appUser = (string) config('database.connections.pgsql.username', 'defonline_app');
         DB::statement("REVOKE UPDATE, DELETE ON audit_logs FROM {$appUser}");
         DB::statement("GRANT INSERT, SELECT ON audit_logs TO {$appUser}");
     }

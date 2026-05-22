@@ -19,7 +19,7 @@ final class PiiEmEventoException extends RuntimeException
     {
         return new self(
             "Propriedade '{$chave}' não pode aparecer em evento de produto. ".
-            'evento_produto é append-only e proíbe PII na origem (ADR-004 §2.4).'
+            'evento_produto é append-only e proíbe PII na origem (ADR-004 §2.4).',
         );
     }
 }

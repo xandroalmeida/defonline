@@ -1,0 +1,123 @@
+name: release-homolog — deploy automático em homologação
+
+# ADR-006 §3.3 — Tag `vX.Y.Z-rc.N` dispara este workflow:
+#  1. Re-roda jobs leves do PR contra o SHA da tag.
+#  2. Build + push da imagem com tag git como tag Docker.
+#  3. Ansible deploy contra `homolog.defonline.com.br`.  ← PLACEHOLDER PHASE 3
+#  4. Smoke test pós-deploy (curl /health + /ready + 1 Dusk leve).
+#  5. Notifica Telegram.
+#
+# Phase 2: step de deploy está stubbed (echo de TODO). Phase 3 conecta Ansible.
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+'
+
+concurrency:
+  group: deploy-homolog
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/app
+  ENVIRONMENT: homolog
+
+jobs:
+  validate:
+    uses: ./.github/workflows/pr.yml
+
+  build-and-push:
+    needs: validate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/docker/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: APP_VERSION=${{ github.ref_name }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-24.04
+    environment:
+      name: homolog
+      url: https://homolog.defonline.com.br
+    steps:
+      - uses: actions/checkout@v4
+
+      # ─── PHASE 3 (TODO): Ansible deploy ─────────────────────────────────────
+      # - name: Setup Ansible + SSH key
+      #   run: |
+      #     pipx install ansible
+      #     mkdir -p ~/.ssh
+      #     echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+      #     chmod 600 ~/.ssh/id_ed25519
+      #     echo "${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+      # - name: ansible-playbook deploy.yml
+      #   working-directory: infra/ansible
+      #   env:
+      #     ANSIBLE_VAULT_PASS: ${{ secrets.ANSIBLE_VAULT_PASS }}
+      #   run: |
+      #     ansible-playbook -i inventories/homolog playbooks/deploy.yml \
+      #       --vault-password-file <(echo "$ANSIBLE_VAULT_PASS") \
+      #       -e image_tag=${{ github.ref_name }}
+      # ────────────────────────────────────────────────────────────────────────
+
+      - name: Phase 2 placeholder
+        run: |
+          echo "::warning::Deploy real em homol fica para Phase 3 (Ansible)."
+          echo "Imagem publicada: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}"
+
+  smoke:
+    needs: deploy
+    runs-on: ubuntu-24.04
+    if: false # PHASE 3: remover esta linha quando deploy real estiver wired.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, zip, bcmath, intl, mbstring
+          coverage: none
+      - uses: browser-actions/setup-chrome@v1
+      - name: HTTP smoke
+        run: |
+          curl -fsSL https://homolog.defonline.com.br/health
+          curl -fsSL https://homolog.defonline.com.br/ready
+      - name: Dusk smoke (1 cenário crítico contra URL real)
+        working-directory: app
+        env:
+          APP_URL: https://homolog.defonline.com.br
+        run: |
+          composer install --no-progress --no-interaction
+          php artisan dusk --group=smoke
+
+  notify:
+    needs: [deploy, smoke]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - run: |
+          STATUS="${{ needs.deploy.result == 'success' && '✅' || '❌' }}"
+          MSG="${STATUS} DEFOnline homol: ${{ github.ref_name }} — deploy=${{ needs.deploy.result }} smoke=${{ needs.smoke.result }}"
+          echo "$MSG"
+          if [ -n "${{ secrets.TELEGRAM_BOT_TOKEN }}" ] && [ -n "${{ secrets.TELEGRAM_CHAT_ID_HOMOLOG }}" ]; then
+            curl -fsS -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+              -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID_HOMOLOG }}" -d "text=${MSG}" || true
+          fi

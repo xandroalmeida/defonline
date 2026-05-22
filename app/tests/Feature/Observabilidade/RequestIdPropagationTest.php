@@ -16,7 +16,7 @@ it('propagates request_id from dispatcher into job meta', function () {
 
     Bus::assertDispatched(
         HelloWorldEmail::class,
-        fn (HelloWorldEmail $job) => ($job->meta['request_id'] ?? null) === $requestId
+        fn (HelloWorldEmail $job) => ($job->meta['request_id'] ?? null) === $requestId,
     );
 });
 

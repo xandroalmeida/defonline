@@ -43,7 +43,7 @@ abstract class BaseJob implements ShouldQueue
         Log::withContext([
             'request_id' => $requestId,
             'job_class' => static::class,
-            'process' => env('PROCESS_TYPE', 'worker'),
+            'process' => config('app.process', 'worker'),
         ]);
 
         $this->handleJob();

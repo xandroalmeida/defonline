@@ -1,0 +1,147 @@
+name: PR — lint + segurança + Unit puros
+
+# ADR-006 §3.1 — Pipeline de PR (leve, ~2-3 min).
+# CI remoto NÃO sobe Postgres nem Chromium. Testes pesados (Pest Feature + Dusk) e
+# cobertura ficam no pre-push hook local (scripts/git-hooks/pre-push.sh).
+#
+# Jobs em paralelo. Falha em qualquer um = bloqueio de merge.
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-php:
+    name: Pint (lint)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, zip, bcmath, intl, mbstring
+          coverage: none
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: app/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - run: ./vendor/bin/pint --test
+
+  lint-static:
+    name: Larastan (PHPStan nível 6)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, zip, bcmath, intl, mbstring
+          coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: app/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - run: ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M
+
+  lint-commits:
+    name: Conventional Commits
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: wagoid/commitlint-github-action@v6
+        with:
+          configFile: .commitlintrc.json
+
+  test-unit-pure:
+    name: Pest UnitPure (sem DB)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, zip, bcmath, intl, mbstring
+          coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: app/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - run: php artisan test --testsuite=UnitPure
+
+  security-deps:
+    name: composer audit
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+      - run: composer audit --locked
+
+  security-image:
+    name: Trivy filesystem scan
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'HIGH,CRITICAL'
+          exit-code: '1'
+          ignore-unfixed: true
+          skip-dirs: 'app/vendor,app/node_modules,app/storage'
+
+  security-secrets:
+    name: Gitleaks
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  flags-check:
+    name: Feature flags (overdue)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: app
+    continue-on-error: true # warning, não bloqueia merge (ADR-006 §3.1)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, zip, bcmath, intl, mbstring
+          coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: app/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - run: php artisan pennant:list-overdue

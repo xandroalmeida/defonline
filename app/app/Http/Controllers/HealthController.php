@@ -59,7 +59,7 @@ final class HealthController
                 'env' => Config::get('app.env'),
                 'checks' => $checks,
             ],
-            $allOk ? 200 : 503
+            $allOk ? 200 : 503,
         );
     }
 

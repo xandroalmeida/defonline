@@ -30,6 +30,27 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Process Type
+    |--------------------------------------------------------------------------
+    | Identifica o processo Laravel ativo (web | worker | scheduler) — ADR-002.
+    | Lido pelo middleware EnrichLogContext e por BaseJob para discriminar
+    | logs cross-process. Injetado no `docker-compose.yml` via env PROCESS_TYPE.
+    */
+
+    'process' => env('PROCESS_TYPE', 'web'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application Version
+    |--------------------------------------------------------------------------
+    | Versão semver ou commit SHA injetada no build (ADR-006 §Tag-based dual).
+    | Em local: 'dev'. Em deploy: vX.Y.Z[-rc.N] ou git short SHA.
+    */
+
+    'version' => env('APP_VERSION', 'dev'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |
@@ -101,7 +122,7 @@ return [
 
     'previous_keys' => [
         ...array_filter(
-            explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
+            explode(',', (string) env('APP_PREVIOUS_KEYS', '')),
         ),
     ],
 

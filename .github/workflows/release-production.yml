@@ -1,0 +1,87 @@
+name: release-production — deploy em produção (gate humano)
+
+# ADR-006 §3.4 — Tag `vX.Y.Z` (sem -rc) dispara este workflow.
+#  - GitHub Environment "production" exige 1 reviewer (PO) clicando "Approve and deploy".
+#  - Após aprovação, mesma sequência da homol: build + push + ansible + smoke.
+#
+# Phase 2: deploy stubbed (não há VPS de produção ainda). Phase 3 wire-a quando
+# o gatilho de promoção da ADR-005 §Decisão 6 disparar.
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+' # SEMVER puro, sem sufixo -rc
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/app
+  ENVIRONMENT: production
+
+jobs:
+  validate:
+    uses: ./.github/workflows/pr.yml
+
+  build-and-push:
+    needs: validate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/docker/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: APP_VERSION=${{ github.ref_name }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-24.04
+    environment:
+      name: production # exige aprovação manual no GitHub UI (gate humano)
+      url: https://app.defonline.com.br
+    steps:
+      - uses: actions/checkout@v4
+      - name: Phase 2 placeholder
+        run: |
+          echo "::warning::Deploy real em produção fica para Phase 3 (Ansible)."
+          echo "Imagem publicada: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}"
+
+  smoke:
+    needs: deploy
+    runs-on: ubuntu-24.04
+    if: false # PHASE 3
+    steps:
+      - run: |
+          curl -fsSL https://app.defonline.com.br/health
+          curl -fsSL https://app.defonline.com.br/ready
+
+  notify:
+    needs: [deploy, smoke]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - run: |
+          STATUS="${{ needs.deploy.result == 'success' && '✅' || '❌' }}"
+          MSG="${STATUS} DEFOnline produção: ${{ github.ref_name }} — deploy=${{ needs.deploy.result }} smoke=${{ needs.smoke.result }}"
+          echo "$MSG"
+          if [ -n "${{ secrets.TELEGRAM_BOT_TOKEN }}" ] && [ -n "${{ secrets.TELEGRAM_CHAT_ID_PRODUCTION }}" ]; then
+            curl -fsS -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+              -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID_PRODUCTION }}" -d "text=${MSG}" || true
+          fi

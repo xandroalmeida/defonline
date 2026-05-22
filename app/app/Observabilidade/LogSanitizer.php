@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Observabilidade;
 
 use Illuminate\Log\Logger;
+use Monolog\Handler\ProcessableHandlerInterface;
 use Monolog\LogRecord;
 use Monolog\Processor\ProcessorInterface;
 
@@ -62,18 +63,24 @@ final class LogSanitizer
 
     public function __invoke(Logger $logger): void
     {
-        foreach ($logger->getHandlers() as $handler) {
-            $handler->pushProcessor(new class implements ProcessorInterface {
-                public function __invoke(LogRecord $record): LogRecord
-                {
-                    $record = $record->with(
-                        context: LogSanitizer::sanitize($record->context),
-                        extra: LogSanitizer::sanitize($record->extra)
-                    );
+        $processor = new class implements ProcessorInterface
+        {
+            public function __invoke(LogRecord $record): LogRecord
+            {
+                return $record->with(
+                    context: LogSanitizer::sanitize($record->context),
+                    extra: LogSanitizer::sanitize($record->extra),
+                );
+            }
+        };
 
-                    return $record;
-                }
-            });
+        foreach ($logger->getHandlers() as $handler) {
+            // Monolog 3: handlers que extendem AbstractProcessingHandler implementam
+            // ProcessableHandlerInterface (pushProcessor). Larastan não infere isso
+            // automaticamente; o instanceof torna o type guard explícito.
+            if ($handler instanceof ProcessableHandlerInterface) {
+                $handler->pushProcessor($processor);
+            }
         }
     }
 

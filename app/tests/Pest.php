@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,4 +14,4 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 | Unit tests rodam só com PHPUnit base — rápidos, sem DB.
 */
 
-pest()->extend(Tests\TestCase::class)->use(RefreshDatabase::class)->in('Feature');
+pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Feature');

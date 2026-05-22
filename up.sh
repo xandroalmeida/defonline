@@ -6,6 +6,9 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+echo "==> [0/5] Instalando git hooks (idempotente)..."
+./scripts/install-hooks.sh || true
+
 echo "==> [1/5] Subindo db, mailpit e construindo a imagem do app..."
 docker compose up -d --build db mailpit
 

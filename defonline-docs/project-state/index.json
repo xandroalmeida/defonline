@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-21T20:00:00Z",
+  "generated_at": "2026-05-22T12:00:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -55,10 +55,10 @@
       "wave": "WAVE-2026-01",
       "status": "ready",
       "path": "epics/EPIC-000-foundation/epic.md",
-      "story_ids": ["STORY-001", "STORY-002", "STORY-003", "STORY-004", "STORY-005", "STORY-006", "STORY-007", "STORY-008"],
+      "story_ids": ["STORY-001", "STORY-002", "STORY-003", "STORY-004", "STORY-005", "STORY-006", "STORY-007", "STORY-009", "STORY-008"],
       "validation_report": null,
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-20"
+      "updated_at": "2026-05-22"
     },
     {
       "id": "EPIC-001",
@@ -224,12 +224,29 @@
       "owner_agent": null,
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-008-validacao-epic-000.md",
-      "blocked_by": ["STORY-007"],
+      "blocked_by": ["STORY-007", "STORY-009"],
       "blocks": [],
       "estimated_session_size": "M",
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-20",
-      "note": "Promover para 'ready' quando STORY-007 estiver 'in_review'."
+      "updated_at": "2026-05-22",
+      "note": "Promover para 'ready' quando STORY-007 e STORY-009 estiverem 'in_review'. Checklist ganhará item de verificação para garantir que PhpPgAdmin não está em playbooks Ansible de homol/prod."
+    },
+    {
+      "id": "STORY-009",
+      "epic_id": "EPIC-000",
+      "title": "PhpPgAdmin exclusivo do ambiente local de desenvolvimento",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": null,
+      "path": "epics/EPIC-000-foundation/stories/STORY-009-phppgadmin-dev-only.md",
+      "blocked_by": [],
+      "blocks": ["STORY-008"],
+      "estimated_session_size": "S",
+      "created_at": "2026-05-22",
+      "updated_at": "2026-05-22",
+      "note": "Ergonomia de dev: PhpPgAdmin no docker-compose.yml com porta em 127.0.0.1 + regra arquitetural de exclusão em homol/prod (ADR-005 §1.1, §6, §7.5) + teste de regressão no CI."
     }
   ],
   "sprints": [],

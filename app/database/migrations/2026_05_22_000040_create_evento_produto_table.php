@@ -37,7 +37,7 @@ return new class extends Migration
 
         DB::statement('CREATE INDEX gin_evento_produto_propriedades ON evento_produto USING gin (propriedades jsonb_path_ops)');
 
-        $appUser = (string) env('DB_USERNAME', 'defonline_app');
+        $appUser = (string) config('database.connections.pgsql.username', 'defonline_app');
         DB::statement("REVOKE UPDATE, DELETE ON evento_produto FROM {$appUser}");
         DB::statement("GRANT INSERT, SELECT ON evento_produto TO {$appUser}");
     }

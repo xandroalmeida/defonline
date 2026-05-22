@@ -6,7 +6,7 @@ wave: WAVE-2026-01
 status: ready
 owner_role: po
 created_at: 2026-05-20
-updated_at: 2026-05-21
+updated_at: 2026-05-22
 target_completion: 2026-06-24
 ---
 
@@ -61,7 +61,7 @@ Ao fim deste épico, a criação de uma tag git `vX.Y.Z-rc.N` (release candidate
 
 ## Estórias
 
-Decompostas no Fluxo B em 6 spikes paralelizáveis (todas `ready`) + 1 implementação (STORY-007, `draft` até as 6 spikes terem ADRs `accepted`) + 1 validação (STORY-008, `draft` até STORY-007 ir para `in_review`).
+Decompostas no Fluxo B em 6 spikes paralelizáveis (todas `ready`) + 1 implementação (STORY-007, `draft` até as 6 spikes terem ADRs `accepted`) + 1 estória de ergonomia de dev (STORY-009, `ready` após Phase 1 de STORY-007) + 1 validação (STORY-008, `draft` até STORY-007 e STORY-009 irem para `in_review`).
 
 - [ ] **STORY-001** (spike, arquiteto, `ready`) — Stack (linguagem + framework + runtime + ORM + testes + auth padrão; ratifica PostgreSQL e TDD+E2E).
 - [ ] **STORY-002** (spike, arquiteto, `ready`) — Topologia macro do sistema.
@@ -70,7 +70,8 @@ Decompostas no Fluxo B em 6 spikes paralelizáveis (todas `ready`) + 1 implement
 - [ ] **STORY-005** (spike, arquiteto, `ready`) — CI/CD (pipeline, branching, rollback, gates).
 - [ ] **STORY-006** (spike, arquiteto, `ready`) — Observabilidade + captura de eventos de produto.
 - [x] **STORY-007** (implementation, programador, `ready`) — Hello world deployado em homologação via pipeline (tag rc.N). Destravada em 2026-05-21: todas as 6 ADRs prerrequisitas (ADR-001 a ADR-006) estão `accepted`.
-- [ ] **STORY-008** (validation, validador, `draft`) — Validação final do EPIC-000. Promove para `ready` quando STORY-007 estiver `in_review`.
+- [ ] **STORY-009** (implementation, programador, `ready`) — PhpPgAdmin exclusivo do ambiente local de desenvolvimento. Ferramenta de conveniência para o dev local; **nunca** em homologação ou produção (ADR-005 §1.1, §6, §7.5). Paralelizável com Phases 2/3 da STORY-007.
+- [ ] **STORY-008** (validation, validador, `draft`) — Validação final do EPIC-000. Promove para `ready` quando STORY-007 e STORY-009 estiverem `in_review`. Ganha item de checklist verificando que PhpPgAdmin não aparece em playbooks Ansible de homol/prod.
 
 ## Validação final
 
@@ -82,3 +83,4 @@ Critérios em `validation/checklist.md` (criado no Fluxo B). Relatório do valid
 
 - 2026-05-20 — Criado como draft junto com a abertura da WAVE-2026-01.
 - 2026-05-21 — Métrica primária e critérios ajustados pela ADR-006 (`accepted`): tag rc.N substitui merge em main como gatilho de deploy em homologação; pre-push hook local entra no fluxo. STORY-001..006 todas `done`; STORY-007 promovida para `ready`.
+- 2026-05-22 — STORY-009 adicionada pelo PO: PhpPgAdmin exclusivo do dev local (ergonomia do desenvolvedor), proibido em homologação e produção. STORY-008 (validação) ganhará um item de checklist verificando a ausência da ferramenta em playbooks Ansible de homol/prod.

@@ -6,6 +6,7 @@ namespace App\Livewire;
 
 use App\Jobs\HelloWorldEmail;
 use App\Observabilidade\EventLogger;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -45,7 +46,7 @@ final class HelloWorld extends Component
         $this->mensagemEnvio = 'Job enfileirado — veja Mailpit em http://localhost:8025.';
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.hello-world', [
             'appName' => Config::get('app.name', 'DEFOnline'),

@@ -15,9 +15,7 @@ final class HelloWorldMessage extends Mailable
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public readonly string $requestId)
-    {
-    }
+    public function __construct(public readonly string $requestId) {}
 
     public function envelope(): Envelope
     {

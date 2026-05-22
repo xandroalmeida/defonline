@@ -7,7 +7,6 @@ use App\Observabilidade\LogSanitizer;
 /**
  * Teste unitário trivial (STORY-007 CA-7) — também exercita o framework de testes.
  */
-
 it('redacts credentials completely', function () {
     $sanitized = LogSanitizer::sanitize([
         'password' => 'super-secret',

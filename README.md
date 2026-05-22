@@ -2,7 +2,7 @@
 
 Plataforma SaaS de Diagnóstico Econômico-Financeiro para Micro e Pequenas Empresas.
 
-> **STORY-007 Phase 1 (2026-05-22):** este repositório agora contém o app Laravel funcional rodando localmente. As próximas fases adicionarão CI/CD, Ansible e deploy em homologação real (conforme ADRs do EPIC-000).
+> **STORY-007 Phase 2 (2026-05-22):** Phase 1 entregou o app local; Phase 2 entregou CI/CD em GitHub Actions + pre-push hook + Larastan + Pint + Pennant. Phase 3 (Ansible + VPS) fecha o EPIC-000.
 
 ## Estrutura
 
@@ -11,16 +11,31 @@ Plataforma SaaS de Diagnóstico Econômico-Financeiro para Micro e Pequenas Empr
 ├── README.md                       este arquivo
 ├── docker-compose.yml              topologia local (ADR-002): web + worker + scheduler + db + mailpit
 ├── up.sh                           bootstrap "1 comando" (CA-4)
+├── .commitlintrc.json              Conventional Commits (ADR-006 §1.3)
 │
 ├── app/                            ★ código Laravel 13 + Livewire 4
-│   ├── app/                            código-fonte PHP
+│   ├── app/                            código-fonte PHP (Features/, Jobs/, Livewire/, Observabilidade/, ...)
 │   ├── database/migrations/            migrations Laravel (ADR-003 + ADR-004)
 │   ├── routes/                         rotas web e console
-│   └── tests/                          Pest Unit/Feature + Dusk E2E
+│   ├── tests/                          Pest UnitPure/Feature + Dusk E2E
+│   ├── pint.json                       lint Pint (ADR-006 §3.1)
+│   └── phpstan.neon                    Larastan nível 6 (ADR-006 §3.1)
 │
 ├── infra/
 │   ├── docker/Dockerfile               imagem única para web/worker/scheduler (ADR-002)
 │   └── postgres/initdb/                roles e GRANTs (ADR-005 §7.4)
+│
+├── scripts/
+│   ├── git-hooks/pre-push.sh           gates locais (Pint + Larastan + Pest + Dusk) — ADR-006 §4
+│   └── install-hooks.sh                instala pre-push (rodado por up.sh)
+│
+├── .github/workflows/              CI/CD GitHub Actions (ADR-006)
+│   ├── pr.yml                          lint + segurança + Unit puros (~2-3 min)
+│   ├── main.yml                        build + push GHCR
+│   ├── bump-rc.yml                     incrementa próxima tag -rc.N
+│   ├── release-homolog.yml             deploy homol (Phase 3: Ansible)
+│   ├── release-production.yml          deploy prod com gate humano (Phase 3)
+│   └── deploy-by-tag.yml               rollback / re-deploy explícito
 │
 └── defonline-docs/                 documentação do projeto
     ├── project-state/                  estado vivo (épicos, estórias, ADRs, PDRs)
@@ -49,14 +64,34 @@ O script é idempotente (primeira execução: ~3-6 min; depois: ~10s). Sobe:
 - **Readiness:** `curl http://localhost:8090/ready` → 200 + checks de DB/cache/queue.
 - **Mailpit:** após clicar "Disparar e-mail de teste" no hello world, ver em http://localhost:8025.
 
-## Rodando testes
+## Rodando testes e lints
 
 ```bash
-# Suíte unitária + feature (Pest 4)
-docker compose exec web php artisan test
+# Lints
+docker compose exec web ./vendor/bin/pint --test         # estilo (Pint)
+docker compose exec web ./vendor/bin/phpstan analyse     # análise estática (Larastan nível 6)
 
-# E2E em browser real (Laravel Dusk 8) — exige container web rodando
+# Pest 4
+docker compose exec web php artisan test --testsuite=UnitPure   # sem DB, rápido
+docker compose exec web php artisan test --testsuite=All        # com Postgres (RefreshDatabase)
+
+# E2E browser real (Laravel Dusk 8) — exige container web rodando
 docker compose exec web php artisan dusk
+
+# Pre-push hook completo (Pint + Larastan + Pest + Pennant + Dusk)
+./scripts/git-hooks/pre-push.sh
+```
+
+O hook **roda automaticamente** antes de cada `git push` (instalado por `./up.sh`).
+Bypass com `--no-verify` é **proibido por política** (ADR-006).
+
+## Feature flags (Laravel Pennant)
+
+```bash
+# Declarar uma flag em app/Features/<NomeFlag>.php com @owner + @cleanup_due
+# Resolver/ativar/desativar:
+docker compose exec web php artisan pennant:feature:check App\\Features\\HelloWorldEmailHabilitado
+docker compose exec web php artisan pennant:list-overdue --fail-on-overdue
 ```
 
 ## 3 ambientes (estado atual da STORY-007)

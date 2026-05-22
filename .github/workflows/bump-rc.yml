@@ -1,0 +1,64 @@
+name: bump-rc — incrementa próxima tag de release-candidate
+
+# ADR-006 §1.4 — workflow_dispatch para criar tag vX.Y.Z-rc.N automaticamente.
+# Lê a última tag, decide bump (patch por default; minor com input) e abre tag nova.
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Tipo de incremento'
+        required: true
+        type: choice
+        default: 'patch'
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Calcular próxima tag
+        id: next
+        run: |
+          last_release=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-version:refname | head -n1 || true)
+          if [ -z "$last_release" ]; then
+              MAJ=0; MIN=1; PAT=0
+          else
+              CLEAN="${last_release#v}"
+              CLEAN="${CLEAN%%-*}"
+              IFS='.' read -r MAJ MIN PAT <<< "$CLEAN"
+          fi
+
+          case "${{ inputs.bump }}" in
+              major) MAJ=$((MAJ + 1)); MIN=0; PAT=0;;
+              minor) MIN=$((MIN + 1)); PAT=0;;
+              patch) PAT=$((PAT + 1));;
+          esac
+
+          BASE="v${MAJ}.${MIN}.${PAT}"
+          # Acha o próximo -rc.N para essa BASE.
+          RC=1
+          while git tag --list "${BASE}-rc.${RC}" | grep -q "${BASE}-rc.${RC}"; do
+              RC=$((RC + 1))
+          done
+          NEW_TAG="${BASE}-rc.${RC}"
+          echo "Próxima tag: ${NEW_TAG}"
+          echo "tag=${NEW_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Criar e enviar tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "${{ steps.next.outputs.tag }}" -m "release-candidate ${{ steps.next.outputs.tag }}"
+          git push origin "${{ steps.next.outputs.tag }}"

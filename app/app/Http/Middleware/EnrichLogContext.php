@@ -24,7 +24,7 @@ final class EnrichLogContext
         Log::withContext([
             'request_id' => request_id(),
             'user_id' => Auth::id(),
-            'process' => env('PROCESS_TYPE', 'web'),
+            'process' => config('app.process', 'web'),
         ]);
 
         return $next($request);
