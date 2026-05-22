@@ -6,7 +6,7 @@ epic_id: EPIC-001
 sprint_id: SPRINT-2026-W22
 type: implementation
 target_role: programador
-status: in_progress
+status: in_review
 owner_agent: programador (claude-opus-4-7)
 created_at: 2026-05-22
 updated_at: 2026-05-22
@@ -155,20 +155,33 @@ Cada passo: red → green → refactor + commit `feat(STORY-011): …`. Suíte c
 - 2026-05-22 — Manter coluna `senha_hash` (já existe); override em `getAuthPasswordName()`.
 
 ### Descobertas
-- 2026-05-22 — `app/Models/User.php` está excluído da cobertura no `phpunit.xml`. Após a renomeação, remover essa exclusão (o novo `Usuario` tem código nosso e deve contar).
+- 2026-05-22 — `app/Models/User.php` estava excluído da cobertura no `phpunit.xml`. Após a renomeação para `Usuario`, removi essa exclusão (código nosso, deve contar — agora 100%).
+- 2026-05-22 — `phpunit-domain.xml` (STORY-010) tinha `--` (double-hyphen) em comentários XML, o que faz `libxml` falhar com "Comment must not contain '--'". Nunca foi acionado porque `app/Domain/` não existia. Ao criar `app/Domain/Cpf`, o gate ≥98% disparou e o arquivo precisou ser higienizado (substituí os `--` por palavras). Sem isso, o pre-push falhava silenciosamente.
+- 2026-05-22 — `assertSeeLivewire()` não existe nativamente no TestResponse do Laravel 13 + Livewire 4 — substituí por `assertSee('CPF')`. Anotação para futuras estórias.
+- 2026-05-22 — Logout via POST exige CSRF. Em Feature tests, `withSession(['_token' => …])->post('/logout', ['_token' => …])` é o caminho idiomático (sem desligar middleware).
+- 2026-05-22 — `throttle:login` exige um `RateLimiter::for('login', …)` definido em `AppServiceProvider::boot()`. Sem ele a rota retorna 500. Implementado com `Limit::perMinute(5)->by(email|ip)` conforme ADR-001 §Auth.
 
 ### Bloqueios encontrados
 - (nenhum)
 
 ### IDRs criados
-- (a preencher)
+- (nenhum — decisões locais; sem impacto transversal que exija registro)
 
 ### Cobertura final
-- Geral: (a preencher)
-- Domínio (`app/Domain/**`): (a preencher)
+- Geral: **95.5%** (gate ≥80% verde) — código novo desta estória (`Cadastro` 100%, `Login` 94.4%, `HomeController` 100%, `Usuario` 100%).
+- Domínio (`app/Domain/**`): **100%** (gate ≥98% verde) — `App\Domain\Cpf`.
+
+### Resumo de testes
+- Pest UnitPure + Feature: **91 testes / 238 asserções** verdes (era 69 antes).
+  - `Tests\Unit\Domain\CpfTest` — 13 testes (válido/inválido/sequência trivial/tamanho/normalização/formatação).
+  - `Tests\Feature\Livewire\CadastroTest` — 11 testes (CA-1, CA-2, CA-5, CA-6).
+  - `Tests\Feature\Livewire\LoginTest` — 7 testes (CA-3, CA-6).
+  - `Tests\Feature\Http\HomeTest` — 4 testes (CA-4).
+- Dusk E2E: **3 testes / 11 asserções** verdes incluindo o novo `CadastroLoginHomeBrowserTest` que percorre o ciclo cadastro → login → home → logout em Chromium real (CA-7).
+- Pint, Larastan nível 6 e gate de cobertura 80% + 98% domínio: todos verdes via `pre-push.sh`.
 
 ### Links de evidência
-- PR: (a preencher)
-- Pipeline: (a preencher)
-- Tag de homologação: (a preencher)
-- Smoke pós-deploy: (a preencher)
+- PR: (a abrir após confirmação do PO)
+- Pipeline: (na abertura do PR)
+- Tag de homologação: (próxima `v0.2.0-rc.1`, após PR mergeado)
+- Smoke pós-deploy: (após tag)

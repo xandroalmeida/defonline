@@ -288,7 +288,7 @@
       "title": "Walking skeleton — cadastro de Usuário + login + home autenticada",
       "type": "implementation",
       "target_role": "programador",
-      "status": "in_progress",
+      "status": "in_review",
       "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-011-walking-skeleton-cadastro-login.md",
@@ -296,7 +296,12 @@
       "blocks": ["STORY-012", "STORY-013", "STORY-014"],
       "estimated_session_size": "M",
       "created_at": "2026-05-22",
-      "updated_at": "2026-05-22"
+      "updated_at": "2026-05-22",
+      "coverage_geral": "95.5%",
+      "coverage_dominio": "100%",
+      "tests_pest": "91 (238 asserções)",
+      "tests_dusk": "3 (11 asserções)",
+      "note": "Pre-push hook verde end-to-end (Pint + Larastan + Pest --min=80 + Domain --min=98 + Pennant + Dusk). Aguarda revisão do PO + smoke em homologação após próxima tag rc."
     },
     {
       "id": "STORY-012",
