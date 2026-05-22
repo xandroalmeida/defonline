@@ -6,7 +6,7 @@ epic_id: EPIC-001
 sprint_id: SPRINT-2026-W22
 type: implementation
 target_role: programador
-status: in_review
+status: done
 owner_agent: programador (claude-opus-4-7)
 created_at: 2026-05-22
 updated_at: 2026-05-22
@@ -99,9 +99,9 @@ Você **não** decide:
 
 - [x] Todos os CAs passam (CA-1..CA-7 marcados).
 - [x] Pre-push verde local (Pint, PHPStan 0 erros, Pest 108 testes / cobertura 96.1% e 100% no Domain, Dusk 6 testes).
-- [ ] Pipeline CI verde — pendente: depende de push, e [feedback-workflow-direto-em-main](file:../../../../../../../.claude/projects/-Users-alexandro-Projetos-DEFOnline/memory/feedback-workflow-direto-em-main.md) manda esperar o PO autorizar antes de push/PR/tag.
-- [ ] Deploy em homologação validado por smoke — idem (pós-aprovação do PO).
-- [x] `index.json` atualizado: `in_progress` (transição para `done` após smoke aprovado).
+- [x] Pipeline CI verde — `release-homolog` run 26313230355 (validate + build + deploy + smoke + notify, todos ✓).
+- [x] Deploy em homologação validado por smoke — `/cadastro`, `/termos/termo-adesao` e `/termos/politica-privacidade` retornam 200; banner "TEXTO PLACEHOLDER", versão v1-placeholder e canal dpo@ebparcerias.com visíveis em produção homol; Dusk smoke contra URL real verde.
+- [x] `index.json` atualizado: `done`.
 - [x] "Notas do agente" preenchidas.
 
 ## Protocolo do agente (obrigatório)
@@ -135,6 +135,7 @@ Padrão `agent-task-format.md`. Status: `ready → in_progress → in_review →
 - Tests Dusk: 6 (32 asserções)
 
 ### Links de evidência
-- PR: — (entrega local; tag/PR só após aprovação do PO, ver [feedback-workflow-direto-em-main](file:../../../../../../../.claude/projects/-Users-alexandro-Projetos-DEFOnline/memory/feedback-workflow-direto-em-main.md))
-- Pipeline: — (idem)
-- Tag rc.N: — (idem)
+- Commits: `eacc16d` (feat) + `dd6565b` (docs in_review) + commit de fechamento.
+- Pipeline: https://github.com/xandroalmeida/defonline/actions/runs/26313230355
+- Tag rc.N: v0.3.0-rc.1
+- URL pública: https://defonline.xandrix.com.br/cadastro · https://defonline.xandrix.com.br/termos/termo-adesao · https://defonline.xandrix.com.br/termos/politica-privacidade
