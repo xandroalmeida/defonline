@@ -1,0 +1,27 @@
+# DEFOnline — config do Gitleaks (security-discipline §segredos; ADR-006 pr.yml).
+#
+# Mantém as regras default da gitleaks-action@v2 e adiciona allowlist apenas para
+# caminhos onde, por design, nunca há segredos reais:
+#
+# - `defonline-docs/**/*.md` — decision records (ADR/IDR/STORY/sprint) costumam
+#   incluir blocos `.env` de EXEMPLO com chaves vazias. O parser genérico do
+#   gitleaks já confundiu uma linha vazia `RFB_CNPJA_API_KEY=` em IDR-004 (commit
+#   1a958820, line 89) com a linha seguinte (`RFB_CNPJA_RPM=3`), reportando um
+#   falso positivo de entropia 3.5.
+# - `app/tests/**` — fixtures controladas (tokens de fake do `Http::fake()` etc).
+#
+# Código de produção (`app/app/**`, `app/config/**`, `infra/**`, `secrets/**`)
+# segue varrido pelas regras default — qualquer segredo real lá ainda quebra o
+# pipeline.
+
+title = "DEFOnline gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Decision docs e fixtures de teste — sem segredos reais."
+paths = [
+    '''defonline-docs/.*\.md''',
+    '''app/tests/.*''',
+]
