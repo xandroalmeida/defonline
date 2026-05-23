@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\EmailConfirmacaoController;
+use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Livewire\Cadastro;
+use App\Livewire\Empresa\Cadastrar as CadastrarEmpresa;
 use App\Livewire\Login;
 use Illuminate\Support\Facades\Route;
 
@@ -34,4 +36,10 @@ Route::post('/email/reenviar-confirmacao', [EmailConfirmacaoController::class, '
 Route::middleware('auth')->group(function () {
     Route::get('/home', [HomeController::class, 'show'])->name('home');
     Route::post('/logout', [HomeController::class, 'logout'])->name('logout');
+
+    // STORY-014 — cadastro manual da primeira Empresa Analisada + visualização.
+    Route::get('/empresas/nova', CadastrarEmpresa::class)->name('empresas.nova');
+    Route::get('/empresas/{empresa}', [EmpresaController::class, 'show'])
+        ->whereUuid('empresa')
+        ->name('empresas.show');
 });
