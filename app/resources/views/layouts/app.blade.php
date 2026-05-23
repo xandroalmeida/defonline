@@ -37,6 +37,13 @@
         dl.empresa-show dt { font-weight: 600; color: #6b7280; font-size: .9rem; }
         dl.empresa-show dd { margin: 0; }
         a.botao { display: inline-block; padding: .5rem 1rem; border: 1px solid #d1d5db; border-radius: 6px; text-decoration: none; color: #6b7280; pointer-events: none; opacity: .6; }
+        button.secondary { padding: .5rem 1rem; background: white; color: #2563eb; border: 1px solid #2563eb; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        button.secondary:hover:not(:disabled) { background: #eff6ff; }
+        button.secondary:disabled { opacity: .55; cursor: not-allowed; }
+        .rfb-consultar { margin-top: .5rem; display: flex; flex-direction: column; gap: .5rem; }
+        .aviso { margin: .25rem 0 0; padding: .65rem .85rem; border-radius: 6px; font-size: .9rem; line-height: 1.35; }
+        .aviso--alerta { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+        .aviso--sucesso { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
     </style>
 </head>
 <body>

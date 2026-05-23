@@ -3,11 +3,11 @@ story_id: STORY-015
 slug: enriquecimento-rfb-mock-fallback
 title: Enriquecimento de Empresa via API RFB (mock inicial + fallback transparente)
 epic_id: EPIC-001
-sprint_id: null
+sprint_id: SPRINT-2026-W22
 type: implementation
 target_role: programador
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador (claude-opus-4-7)
 created_at: 2026-05-22
 updated_at: 2026-05-23
 estimated_session_size: M
@@ -41,13 +41,13 @@ Para Roberto: ele digita 14 dígitos do CNPJ e o resto aparece preenchido. **5 m
 
 ## Critérios de aceite
 
-- [ ] **CA-1:** Existe interface `App\Services\Rfb\RfbCnpjClient` (PHP interface) com método `consultarCnpj(string $cnpj): RfbCnpjResult` (DTO com `razao_social`, `nome_fantasia`, `cnae`, `municipio`, `uf`, `situacao_cadastral`, `data_fundacao`, `fonte_provedor`, `consultado_at`). Implementação default `App\Services\Rfb\MockRfbCnpjClient` que devolve dados sintéticos a partir do CNPJ (regras simples — você decide, sugestão: hash do CNPJ vira seed determinístico; pelo menos um CNPJ retorna "erro" e outro retorna "timeout" para teste). Implementação real fica para futura troca via `config/services.php` + `AppServiceProvider`.
-- [ ] **CA-2:** Form Livewire de `/empresas/nova` ganha botão "Consultar Receita" ao lado do campo CNPJ. Habilitado apenas quando `tipo_documento = 'cnpj'` e DV do CNPJ está válido. Click dispara método Livewire que: (i) valida DV; (ii) chama `RfbCnpjClient::consultarCnpj()` com timeout de **5 segundos** (Laravel HTTP `timeout(5)` ou equivalente); (iii) em sucesso, preenche campos do form e marca flag `enriquecido = true`; (iv) em qualquer falha, mantém campos como estão, mostra alerta amarelo "Não conseguimos consultar a Receita agora — preencha os campos manualmente."
-- [ ] **CA-3:** Submit do form com flag `enriquecido = true` salva `fonte_enriquecimento = 'rfb'` e `enriquecido_at = $resultado->consultado_at`. Submit sem a flag (ou após fallback) salva `'manual'`/`null`. Tela read-only `/empresas/{id}` exibe badge **"Fonte: Receita Federal"** ou **"Fonte: preenchimento manual"** conforme o caso.
-- [ ] **CA-4:** Cada consulta emite **métrica em `business_metrics`** (tabela existente do EPIC-000) com `kind: 'rfb_consulta'` e `status: 'sucesso' | 'cnpj_inexistente' | 'timeout' | 'erro_5xx' | 'erro_rede'`. Latência (ms) registrada. **Sem CNPJ em log** (PII conforme `security-discipline.md`); apenas o hash SHA-256 do CNPJ no `audit_logs` se necessário para correlação.
-- [ ] **CA-5:** **Alerta de monitoramento** (Telegram via ADR-004) dispara quando taxa de erro > 5% em janela de 10 min com no mínimo 5 consultas. Job/comando agendado (sugestão: `MonitorarRfbErrorRate` como artisan command rodado pelo scheduler a cada 5 min) faz a checagem. Implementação simples: query agregada em `business_metrics` + chamada ao canal Telegram já configurado pelo EPIC-000.
-- [ ] **CA-6:** Configuração: `config/services.php` ganha bloco `rfb` com `provider` (default `'mock'`; valores aceitos `mock | cnpja | receitaws` — conforme IDR-004), `timeout` (default `5`), `cache_ttl` (default `300` — 5 minutos; mesmo CNPJ consultado 2× em 5 min usa cache para evitar custo no provedor real). Cache key `rfb:cnpj:{sha256(cnpj)}`. `MockRfbCnpjClient` ignora cache (sempre retorna fresh) para facilitar testes; clientes reais (entregues pela STORY-018) consultam o cache. O bloco já deve **prever o sub-bloco `providers.<provider>` com `base_url`, `api_key` e `rate_limit_per_minute`** mesmo que vazio nesta estória — schema completo está descrito na IDR-004; isso evita rework na STORY-018.
-- [ ] **CA-7:** Testes: UnitPure do contrato do DTO e do mock (cenários sucesso/timeout/inexistente); Feature cobrindo CA-2 (botão dispara consulta, sucesso pré-preenche, falha mostra alerta), CA-3 (`fonte_enriquecimento` correto após submit), CA-4 (métrica registrada), CA-5 (comando de monitoramento detecta taxa >5%); 1 Dusk percorrendo `cadastrar empresa com CNPJ → clicar Consultar Receita → ver pré-preenchimento → submit → ver badge "Receita Federal"`. Cobertura ≥ 80% geral; ≥ 98% se isolar lógica em `app/Domain/Documentos` ou `app/Domain/Rfb`.
+- [x] **CA-1:** Existe interface `App\Services\Rfb\RfbCnpjClient` (PHP interface) com método `consultarCnpj(string $cnpj): RfbCnpjResult` (DTO com `razao_social`, `nome_fantasia`, `cnae`, `municipio`, `uf`, `situacao_cadastral`, `data_fundacao`, `fonte_provedor`, `consultado_at`). Implementação default `App\Services\Rfb\MockRfbCnpjClient` que devolve dados sintéticos a partir do CNPJ (regras simples — você decide, sugestão: hash do CNPJ vira seed determinístico; pelo menos um CNPJ retorna "erro" e outro retorna "timeout" para teste). Implementação real fica para futura troca via `config/services.php` + `AppServiceProvider`.
+- [x] **CA-2:** Form Livewire de `/empresas/nova` ganha botão "Consultar Receita" ao lado do campo CNPJ. Habilitado apenas quando `tipo_documento = 'cnpj'` e DV do CNPJ está válido. Click dispara método Livewire que: (i) valida DV; (ii) chama `RfbCnpjClient::consultarCnpj()` com timeout de **5 segundos** (Laravel HTTP `timeout(5)` ou equivalente); (iii) em sucesso, preenche campos do form e marca flag `enriquecido = true`; (iv) em qualquer falha, mantém campos como estão, mostra alerta amarelo "Não conseguimos consultar a Receita agora — preencha os campos manualmente."
+- [x] **CA-3:** Submit do form com flag `enriquecido = true` salva `fonte_enriquecimento = 'rfb'` e `enriquecido_at = $resultado->consultado_at`. Submit sem a flag (ou após fallback) salva `'manual'`/`null`. Tela read-only `/empresas/{id}` exibe badge **"Fonte: Receita Federal"** ou **"Fonte: preenchimento manual"** conforme o caso.
+- [x] **CA-4:** Cada consulta emite **métrica em `business_metrics`** (tabela existente do EPIC-000) com `kind: 'rfb_consulta'` e `status: 'sucesso' | 'cnpj_inexistente' | 'timeout' | 'erro_5xx' | 'erro_rede'`. Latência (ms) registrada. **Sem CNPJ em log** (PII conforme `security-discipline.md`); apenas o hash SHA-256 do CNPJ no `audit_logs` se necessário para correlação.
+- [x] **CA-5:** **Alerta de monitoramento** (Telegram via ADR-004) dispara quando taxa de erro > 5% em janela de 10 min com no mínimo 5 consultas. Job/comando agendado (sugestão: `MonitorarRfbErrorRate` como artisan command rodado pelo scheduler a cada 5 min) faz a checagem. Implementação simples: query agregada em `business_metrics` + chamada ao canal Telegram já configurado pelo EPIC-000.
+- [x] **CA-6:** Configuração: `config/services.php` ganha bloco `rfb` com `provider` (default `'mock'`; valores aceitos `mock | cnpja | receitaws` — conforme IDR-004), `timeout` (default `5`), `cache_ttl` (default `300` — 5 minutos; mesmo CNPJ consultado 2× em 5 min usa cache para evitar custo no provedor real). Cache key `rfb:cnpj:{sha256(cnpj)}`. `MockRfbCnpjClient` ignora cache (sempre retorna fresh) para facilitar testes; clientes reais (entregues pela STORY-018) consultam o cache. O bloco já deve **prever o sub-bloco `providers.<provider>` com `base_url`, `api_key` e `rate_limit_per_minute`** mesmo que vazio nesta estória — schema completo está descrito na IDR-004; isso evita rework na STORY-018.
+- [x] **CA-7:** Testes: UnitPure do contrato do DTO e do mock (cenários sucesso/timeout/inexistente); Feature cobrindo CA-2 (botão dispara consulta, sucesso pré-preenche, falha mostra alerta), CA-3 (`fonte_enriquecimento` correto após submit), CA-4 (métrica registrada), CA-5 (comando de monitoramento detecta taxa >5%); 1 Dusk percorrendo `cadastrar empresa com CNPJ → clicar Consultar Receita → ver pré-preenchimento → submit → ver badge "Receita Federal"`. Cobertura ≥ 80% geral; ≥ 98% se isolar lógica em `app/Domain/Documentos` ou `app/Domain/Rfb`.
 
 ## Fora de escopo
 
@@ -98,12 +98,12 @@ Você **não** decide:
 
 ## Definição de Pronto (DoD)
 
-- [ ] CAs passam.
-- [ ] Pre-push verde.
+- [x] CAs passam.
+- [x] Pre-push verde.
 - [ ] Pipeline CI verde.
 - [ ] Deploy em homologação validado: clicar "Consultar Receita" com CNPJ que o mock conhece (pré-preenche), com CNPJ que dispara timeout no mock (alerta amarelo, form em branco), submeter ambos os casos, ver badges corretos.
 - [ ] `index.json` `done`.
-- [ ] "Notas do agente" preenchidas + nota explícita sobre como trocar de mock para provedor real (uma frase).
+- [x] "Notas do agente" preenchidas + nota explícita sobre como trocar de mock para provedor real (uma frase).
 
 ## Protocolo do agente (obrigatório)
 
@@ -112,27 +112,42 @@ Padrão `agent-task-format.md`.
 ## Notas do agente
 
 ### Decisões tomadas
-- <data> — <decisão>
+- 2026-05-23 — Mock dispara cenários de falha por **prefixo dos 2 primeiros dígitos** do CNPJ normalizado (`00` → cnpj_inexistente, `99` → timeout, `88` → erro_5xx, `77` → erro_rede). Determinístico, sem random no teste, e os testes geram CNPJs com DV válido via `EmpresaAnalisadaFactory::cnpjComRaiz()`.
+- 2026-05-23 — Caminho feliz do mock deriva dados sintéticos de `crc32($cnpj)` (mesmo CNPJ ⇒ mesmos dados). Cobre cidade/UF coerentes, CNAE de 7 dígitos, situação cadastral viesando 80% para "ativa" para o mock parecer realista no clique do PO.
+- 2026-05-23 — `RfbConsultarCnpj` é uma classe **separada** do `RfbCnpjClient`. O client só faz a chamada (mock ou provedor real na STORY-018); o orquestrador concentra cache+métrica+audit em uma única boundary. Mantém o contrato do CA-1 enxuto.
+- 2026-05-23 — `cnpj_inexistente` **não** entra no numerador da taxa de erro do monitor (CA-5). É erro do usuário, não problema operacional do provedor. Só `timeout|erro_5xx|erro_rede` somam.
+- 2026-05-23 — `RfbAlerter` é honesto sobre o estado do canal Telegram: tenta HTTP `api.telegram.org` se `services.telegram.bot_token` + `chat_id` estão configurados; senão (caso atual do EPIC-000) degrada para `Log::warning('rfb.alert', …)`. Telegram já é exercitado por teste com `Http::fake`, então o dia que o token vier não precisa mexer em código.
 
 ### Descobertas
-- <data> — <gotcha>
+- 2026-05-23 — Bug latente de TZ na inserção em `business_metrics`: `now()` (Carbon UTC) passado direto pra `DB::table()->insert()` perde offset, e Postgres com `TimeZone=America/Sao_Paulo` interpreta como local — joga o instante 3h pro futuro. Fix: deixar a coluna cair no `useCurrent` da migration (Postgres carimba). Testes que precisam de timestamp arbitrário usam `->toIso8601String()`.
+- 2026-05-23 — `wire:model.live.debounce.200ms` no campo de documento é necessário para o servidor re-renderizar e habilitar o botão "Consultar Receita". Sem isso, o botão fica eternamente disabled até o usuário tirar o foco.
+- 2026-05-23 — `RfbAlerter` não pode ser `final` para permitir `Mockery::mock` nos testes da CA-5; troca por classe simples sem `final` (já é injetada via container).
 
 ### Bloqueios encontrados
-- <data> — <bloqueio>
+- nenhum.
 
 ### IDRs criados
-- IDR-XXX — <título>
+- nenhum nesta estória (IDR-004/005/006 já existiam).
 
 ### Como trocar de mock para provedor real (CA-6 nota)
 - Os provedores reais (`cnpja`, `receitaws`) e o schema de configuração já estão decididos no **IDR-004** e serão **implementados na STORY-018** — não nesta estória.
 - Esta estória precisa apenas deixar o bloco `config/services.php → rfb` no formato canônico da IDR-004 (incluindo o sub-bloco `providers.<provider>` mesmo que vazio).
 - O bind condicional em `AppServiceProvider` pode ser implementado já apontando para `MockRfbCnpjClient` em todas as opções (`mock | cnpja | receitaws`) — a STORY-018 substitui os dois últimos.
+- **Troca prática:** STORY-018 implementa `CnpjaRfbCnpjClient` e `ReceitawsRfbCnpjClient` (ambos implementam `RfbCnpjClient`), edita o `match` no `AppServiceProvider::register()` e o `provider` passa a vir de `RFB_PROVIDER=cnpja` no env do ambiente. Nenhuma mudança aqui no Livewire, no `RfbConsultarCnpj`, no `MonitorarRfbErrorRate` nem nos testes.
 
 ### Cobertura final
-- Geral: <%>
-- `app/Domain/**`: <%>
+- Geral: 95.4% (gate ≥80%)
+- `app/Domain/**`: 100% (gate ≥98%)
+- `app/Domain/Rfb/**`: 100%
+- `app/Services/Rfb/**`: 84.7% (Alerter exercitado via Http::fake; QueryException no service não é testado por design)
+
+### Testes adicionados
+- UnitPure (sem DB): `tests/Unit/Domain/Rfb/RfbCnpjStatusTest.php`, `tests/Unit/Domain/Rfb/RfbCnpjResultTest.php`, `tests/Unit/Services/Rfb/MockRfbCnpjClientTest.php`, `tests/Unit/Services/Rfb/RfbCnpjResultSerializerTest.php`.
+- Feature (Postgres): `tests/Feature/Services/Rfb/RfbConsultarCnpjTest.php`, `tests/Feature/Livewire/Empresa/ConsultarReceitaTest.php`, `tests/Feature/Livewire/Empresa/CadastrarComEnriquecimentoTest.php`, `tests/Feature/Console/MonitorarRfbErrorRateTest.php`.
+- Browser (Dusk): `tests/Browser/EnriquecimentoRfbBrowserTest.php` — fluxo completo + caminho de fallback amarelo.
+- Total: **236 testes (~740 asserções)**, **11 Dusk**.
 
 ### Links de evidência
-- PR: <url>
-- Pipeline: <url>
-- Tag rc.N: <vX.Y.Z-rc.N>
+- PR: a abrir após aprovação local do PO.
+- Pipeline: a anexar após push.
+- Tag rc.N: a definir.

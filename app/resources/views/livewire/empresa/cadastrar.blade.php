@@ -21,7 +21,7 @@
         <label for="documento">
             {{ $tipo_documento === 'cnpj' ? 'CNPJ' : 'CPF' }}
         </label>
-        <input type="text" id="documento" wire:model="documento"
+        <input type="text" id="documento" wire:model.live.debounce.200ms="documento"
                inputmode="numeric" autocomplete="off"
                maxlength="{{ $tipo_documento === 'cnpj' ? 18 : 14 }}"
                placeholder="{{ $tipo_documento === 'cnpj' ? '00.000.000/0000-00' : '000.000.000-00' }}"
@@ -45,6 +45,33 @@
                "
                dusk="empresa-documento">
         @error('documento') <p class="erro" dusk="erro-documento">{{ $message }}</p> @enderror
+
+        @if ($tipo_documento === 'cnpj')
+            @php
+                $digitosCnpj = preg_replace('/\D+/', '', $documento) ?? '';
+                $podeConsultar = strlen($digitosCnpj) === 14;
+            @endphp
+            <div class="rfb-consultar">
+                <button type="button"
+                        wire:click="consultarReceita"
+                        wire:loading.attr="disabled" wire:target="consultarReceita"
+                        @disabled(! $podeConsultar)
+                        class="secondary" dusk="empresa-consultar-receita">
+                    <span wire:loading.remove wire:target="consultarReceita">Consultar Receita</span>
+                    <span wire:loading wire:target="consultarReceita">Consultando…</span>
+                </button>
+                @if ($enriquecido)
+                    <p class="aviso aviso--sucesso" dusk="empresa-enriquecido-ok">
+                        Dados pré-preenchidos pela Receita Federal — confira e ajuste se precisar.
+                    </p>
+                @endif
+                @if ($mensagemFallback)
+                    <p class="aviso aviso--alerta" role="alert" dusk="empresa-fallback">
+                        {{ $mensagemFallback }}
+                    </p>
+                @endif
+            </div>
+        @endif
 
         <label for="razao_social">Razão social</label>
         <input type="text" id="razao_social" wire:model="razao_social"

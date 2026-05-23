@@ -10,6 +10,7 @@ use App\Domain\TipoDocumento;
 use App\Domain\Uf;
 use App\Models\EmpresaAnalisada;
 use App\Models\Usuario;
+use App\Services\Rfb\MockRfbCnpjClient;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -66,6 +67,24 @@ final class EmpresaAnalisadaFactory extends Factory
             $cnpj = $base.self::calcularDvCnpj($base, [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
             $cnpj .= self::calcularDvCnpj($cnpj, [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
         } while (preg_match('/^(\d)\1{13}$/', $cnpj) === 1);
+
+        return $cnpj;
+    }
+
+    /**
+     * Compõe um CNPJ válido cuja matriz começa por uma raiz arbitrária de 8 dígitos
+     * (vira `<raiz><filial=0001><dv1><dv2>`). Usado nos testes da STORY-015 para
+     * forçar gatilhos determinísticos do {@see MockRfbCnpjClient}
+     * por prefixo `00`/`99`/`88`/`77`.
+     */
+    public static function cnpjComRaiz(string $raiz8Digitos): string
+    {
+        if (preg_match('/^\d{8}$/', $raiz8Digitos) !== 1) {
+            throw new \InvalidArgumentException('Raiz precisa ter exatamente 8 dígitos numéricos.');
+        }
+        $base = $raiz8Digitos.'0001';
+        $cnpj = $base.self::calcularDvCnpj($base, [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+        $cnpj .= self::calcularDvCnpj($cnpj, [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
 
         return $cnpj;
     }

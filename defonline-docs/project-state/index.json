@@ -378,8 +378,8 @@
       "title": "Enriquecimento via API RFB (mock + fallback transparente)",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
-      "owner_agent": null,
+      "status": "in_review",
+      "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-015-enriquecimento-rfb-mock-fallback.md",
       "blocked_by": ["STORY-014"],
@@ -388,7 +388,11 @@
       "estimated_session_size": "M",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-23",
-      "note": "Provedores reais decididos pela IDR-004 (cnpja + receitaws via abstração, rate-limit por provedor). Esta estória continua entregando só a abstração + mock + caminho técnico; ativação dos clientes reais ficou na STORY-018. Schema do config/services.php → rfb deve seguir IDR-004 (CA-6)."
+      "coverage_geral": "95.4%",
+      "coverage_dominio": "100%",
+      "tests_pest": "236 (~740 asserções)",
+      "tests_dusk": "11 (61 asserções)",
+      "note": "Implementada a abstração RfbCnpjClient + RfbCnpjResult/RfbCnpjStatus em app/Domain/Rfb, MockRfbCnpjClient com gatilhos por prefixo (00/99/88/77), RfbConsultarCnpj orquestrando cache+métrica+audit, botão Consultar Receita no Livewire Cadastrar com fallback amarelo, comando artisan rfb:monitorar-error-rate agendado a cada 5 min, e RfbAlerter que degrada para Log::warning quando Telegram não está wired. Pre-push verde local. PO valida smoke local: consultar com CNPJ de mock real → ver pré-preenchimento; consultar com cnpjComRaiz('99887766') → ver alerta amarelo; submit ambos os casos e ver badges. STORY-018 (clientes reais) substitui o match em AppServiceProvider sem mexer em mais nada."
     },
     {
       "id": "STORY-016",
