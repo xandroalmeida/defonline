@@ -392,7 +392,9 @@
       "coverage_dominio": "100%",
       "tests_pest": "236 (~740 asserções)",
       "tests_dusk": "11 (61 asserções)",
-      "note": "Implementada a abstração RfbCnpjClient + RfbCnpjResult/RfbCnpjStatus em app/Domain/Rfb, MockRfbCnpjClient com gatilhos por prefixo (00/99/88/77), RfbConsultarCnpj orquestrando cache+métrica+audit, botão Consultar Receita no Livewire Cadastrar com fallback amarelo, comando artisan rfb:monitorar-error-rate agendado a cada 5 min, e RfbAlerter que degrada para Log::warning quando Telegram não está wired. Pre-push verde local. PO valida smoke local: consultar com CNPJ de mock real → ver pré-preenchimento; consultar com cnpjComRaiz('99887766') → ver alerta amarelo; submit ambos os casos e ver badges. STORY-018 (clientes reais) substitui o match em AppServiceProvider sem mexer em mais nada."
+      "last_released_tag": "v0.5.0-rc.1",
+      "live_url": "https://defonline.xandrix.com.br/empresas/nova",
+      "note": "v0.5.0-rc.1 deployada em homologação (pipeline 26336348806 verde end-to-end — validate + build-and-push + deploy + smoke + notify). PO valida em homol: cadastrar com CNPJ qualquer (mock real → ver pré-preenchimento + badge Receita Federal); cadastrar com CNPJ de raiz 99887766 (timeout → ver alerta amarelo + form em branco + badge Manual no submit). STORY-018 (clientes reais) só substituirá o match em AppServiceProvider."
     },
     {
       "id": "STORY-016",

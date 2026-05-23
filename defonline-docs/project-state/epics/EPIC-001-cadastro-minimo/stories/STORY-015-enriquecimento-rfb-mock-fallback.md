@@ -100,7 +100,7 @@ Você **não** decide:
 
 - [x] CAs passam.
 - [x] Pre-push verde.
-- [ ] Pipeline CI verde.
+- [x] Pipeline CI verde (run 26336348806 — release-homolog).
 - [ ] Deploy em homologação validado: clicar "Consultar Receita" com CNPJ que o mock conhece (pré-preenche), com CNPJ que dispara timeout no mock (alerta amarelo, form em branco), submeter ambos os casos, ver badges corretos.
 - [ ] `index.json` `done`.
 - [x] "Notas do agente" preenchidas + nota explícita sobre como trocar de mock para provedor real (uma frase).
@@ -148,6 +148,7 @@ Padrão `agent-task-format.md`.
 - Total: **236 testes (~740 asserções)**, **11 Dusk**.
 
 ### Links de evidência
-- PR: a abrir após aprovação local do PO.
-- Pipeline: a anexar após push.
-- Tag rc.N: a definir.
+- Commit: a623922
+- Pipeline release-homolog: https://github.com/xandroalmeida/defonline/actions/runs/26336348806 (verde end-to-end: validate + build-and-push + deploy + smoke + notify).
+- Tag rc.N: v0.5.0-rc.1
+- URL live: https://defonline.xandrix.com.br/empresas/nova (autenticado) — `/health` reportando `v0.5.0-rc.1` em staging.
