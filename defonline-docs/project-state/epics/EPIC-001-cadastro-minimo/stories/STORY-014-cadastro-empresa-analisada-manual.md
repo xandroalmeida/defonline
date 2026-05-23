@@ -96,8 +96,8 @@ Você **não** decide:
 
 - [x] CAs passam (CA-1..CA-7 cobertos por Pest + Dusk, suíte verde local).
 - [x] Pre-push verde (Pint + Larastan 0 erros + Pest 185 testes / 574 asserções + Pest Domain 100% / gate 98% + Pennant + Dusk 9 testes / 51 asserções).
-- [ ] Pipeline CI verde — aguarda push (PO comanda).
-- [ ] Deploy em homologação validado: cadastrar uma empresa manualmente (CNPJ + CPF dois casos), ver tela read-only, tentar acessar empresa de outro Usuário (cross-tenant) e ver 403 — aguarda tag rc.N do PO.
+- [x] Pipeline CI verde (run 26332847355, v0.4.0-rc.2 — validate 10 jobs + build + deploy + smoke + notify).
+- [ ] Deploy em homologação validado: cadastrar uma empresa manualmente (CNPJ + CPF dois casos), ver tela read-only, tentar acessar empresa de outro Usuário (cross-tenant) e ver 403 — aguarda smoke manual do PO.
 - [ ] `index.json` `done` — após validação em homologação.
 - [x] "Notas do agente" preenchidas.
 
@@ -155,6 +155,7 @@ Padrão `agent-task-format.md`.
 - Dusk E2E: 9 testes (51 asserções) — `CadastroEmpresaBrowserTest` + 8 pré-existentes verdes
 
 ### Links de evidência
-- PR: a abrir após pedido do PO
-- Pipeline: a rodar após push
-- Tag rc.N: a tagear após CI verde
+- PR: trunk-based (commits direto em main)
+- Pipeline: https://github.com/xandroalmeida/defonline/actions/runs/26332847355 (verde)
+- Tag rc.N: v0.4.0-rc.2 (rc.1 já existia no remote apontando para a STORY-013; pulamos para rc.2 para evitar force-push)
+- Homologação: https://defonline.xandrix.com.br/empresas/nova (302 para /login — esperado)

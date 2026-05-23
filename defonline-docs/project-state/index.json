@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-22T20:35:00Z",
+  "generated_at": "2026-05-23T12:30:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -78,11 +78,11 @@
       "wave": "WAVE-2026-01",
       "status": "ready",
       "path": "epics/EPIC-001-cadastro-minimo/epic.md",
-      "story_ids": ["STORY-011", "STORY-012", "STORY-013", "STORY-014", "STORY-015", "STORY-016", "STORY-017"],
+      "story_ids": ["STORY-011", "STORY-012", "STORY-013", "STORY-014", "STORY-015", "STORY-016", "STORY-017", "STORY-018"],
       "validation_report": null,
       "blocked_by_epics": [],
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-22"
+      "updated_at": "2026-05-23"
     },
     {
       "id": "EPIC-002",
@@ -368,7 +368,9 @@
       "coverage_dominio": "100%",
       "tests_pest": "185 (574 asserções)",
       "tests_dusk": "9 (51 asserções)",
-      "note": "Local verde (Pint + Larastan + Pest + Dusk + cobertura). Push, CI, tag rc.N e validação em homologação aguardam comando explícito do PO. Decisão local registrada: 403 + audit log `empresa.acesso_negado` no cross-tenant (estória prescreve 403; ADR-003 §Decisão 1 / NRF §4.3 prescrevem 404 — PO alinhar)."
+      "last_released_tag": "v0.4.0-rc.2",
+      "live_url": "https://defonline.xandrix.com.br/empresas/nova",
+      "note": "v0.4.0-rc.2 deployada em homologação (pipeline 26332847355 verde end-to-end). rc.1 já existia no remote apontando para STORY-013 — pulamos rc para evitar force-push. PO valida smoke manual: cadastrar CNPJ + CPF, ver tela read-only, cross-tenant 403. Decisão pendente para PO alinhar: 403 + audit log `empresa.acesso_negado` no cross-tenant (estória prescreve 403; ADR-003 §Decisão 1 / NRF §4.3 prescrevem 404)."
     },
     {
       "id": "STORY-015",
@@ -381,11 +383,12 @@
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-015-enriquecimento-rfb-mock-fallback.md",
       "blocked_by": ["STORY-014"],
-      "blocks": ["STORY-016"],
+      "blocks": ["STORY-016", "STORY-018"],
+      "related_idrs": ["IDR-004"],
       "estimated_session_size": "M",
       "created_at": "2026-05-22",
-      "updated_at": "2026-05-22",
-      "note": "Provedor real `[A DEFINIR]` na NRF §3.1 — começa com mock; quando provedor real for escolhido, registrar IDR (ou PDR se houver impacto de custo significativo)."
+      "updated_at": "2026-05-23",
+      "note": "Provedores reais decididos pela IDR-004 (cnpja + receitaws via abstração, rate-limit por provedor). Esta estória continua entregando só a abstração + mock + caminho técnico; ativação dos clientes reais ficou na STORY-018. Schema do config/services.php → rfb deve seguir IDR-004 (CA-6)."
     },
     {
       "id": "STORY-016",
@@ -419,7 +422,25 @@
       "estimated_session_size": "M",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-22",
-      "note": "Promover para `ready` quando STORY-016 estiver `in_review`. Checklist em validation/checklist.md (a criar pelo PO antes da promoção)."
+      "note": "Promover para `ready` quando STORY-016 estiver `in_review`. Checklist em validation/checklist.md (a criar pelo PO antes da promoção). STORY-018 (provedores reais da RFB) NÃO bloqueia esta validação — IDR-004 mantém `mock` como default em homologação até decisão operacional explícita."
+    },
+    {
+      "id": "STORY-018",
+      "epic_id": "EPIC-001",
+      "title": "Provedores reais da RFB (cnpja, receitaws) com rate-limit por provedor",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": null,
+      "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-018-rfb-providers-reais-cnpja-receitaws.md",
+      "blocked_by": ["STORY-015"],
+      "blocks": [],
+      "related_idrs": ["IDR-004"],
+      "estimated_session_size": "M",
+      "created_at": "2026-05-23",
+      "updated_at": "2026-05-23",
+      "note": "Implementa o que a IDR-004 decidiu: clientes reais cnpja e receitaws cumprindo o contrato RfbCnpjClient da STORY-015, bind condicional em AppServiceProvider e rate-limit por provedor via RateLimiter. Não introduz mudança de UX. PO confirmou em 2026-05-23 que produção usará os dois mesmos provedores; qual dos dois será o primário (RFB_PROVIDER default em production) é decisão do Arquiteto a registrar em IDR separado quando esta estória entregar. Atribuir a um sprint futuro — não bloqueia o fechamento do EPIC-001."
     }
   ],
   "sprints": [
@@ -594,6 +615,20 @@
         "related_adrs": ["ADR-006"],
         "created_at": "2026-05-22",
         "updated_at": "2026-05-22"
+      },
+      {
+        "id": "IDR-004",
+        "slug": "rfb-provider-abstraction-cnpja-receitaws",
+        "title": "Abstração de provedor RFB com suporte a cnpja.com e receitaws.com.br, parametrizada em config e com rate-limit por provedor",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-004-rfb-provider-abstraction-cnpja-receitaws.md",
+        "decided_at": "2026-05-23",
+        "decided_by": "PO (Alexandro)",
+        "related_story": "STORY-015",
+        "related_stories": ["STORY-015", "STORY-018"],
+        "related_adrs": ["ADR-001", "ADR-004"],
+        "created_at": "2026-05-23",
+        "updated_at": "2026-05-23"
       }
     ]
   },
