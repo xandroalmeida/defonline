@@ -13,7 +13,7 @@ related_pdrs: ["PDR-001"]
 related_epics: ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"]
 related_stories: ["STORY-006"]
 created_at: 2026-05-21
-updated_at: 2026-05-21
+updated_at: 2026-05-23
 type: observabilidade
 ---
 
@@ -63,7 +63,7 @@ A decisão precisa ser tomada agora porque **destrava STORY-007** (hello world d
   - **Métricas:** três tabelas dedicadas no Postgres, populadas por middleware/listener.
     - **`request_metrics`** (uma linha por request HTTP) — `path`, `method`, `status`, `duration_ms`, `request_id`, `usuario_id`, `empresa_id NULL`, `inserido_em`. Particionada por mês (`pg_partman` em IDR do Programador quando volume justificar; no início, tabela única + índice `BRIN` em `inserido_em`).
     - **`job_metrics`** (uma linha por job concluído ou falho) — `job_class`, `queue`, `status` (`ok`/`failed`/`retried`), `duration_ms`, `request_id`, `inserido_em`.
-    - **`business_metrics`** (uma linha por evento técnico de negócio) — `tipo` (`pdf_gerado`, `motor_calculado`, `email_enviado`, `gateway_chamado`), `duracao_ms`, `sucesso bool`, `meta jsonb`, `inserido_em`. Cobre RNF §6.2 (motor, PDF, gateway, e-mail).
+    - **`business_metrics`** (uma linha por evento técnico de negócio) — `tipo` (`pdf_gerado`, `motor_calculado`, `email_enviado`, `gateway_chamado`, `rfb_consulta`, ...), `duracao_ms`, `sucesso bool`, `meta jsonb`, `inserido_em`. Cobre RNF §6.2 (motor, PDF, gateway, e-mail) e RNF §3.1 (RFB com dimensão `provider` no `meta`, conforme IDR-004).
     - **Fila/backlog e conexões DB** não precisam de tabela própria — consultados ao vivo em `jobs` e `pg_stat_activity` pelo dashboard e pelo alertador.
   - **Eventos de produto:** **tabela `evento_produto`** dedicada, append-only, schema separado das métricas técnicas. Helper `EventLogger::emit($nome, array $propriedades = [], ?Usuario $usuario = null, ?EmpresaAnalisada $empresa = null)` chamado nos services/Livewire components. **Síncrono dentro da mesma transação do agregado** quando aplicável (princípio #1 e atomicidade); job assíncrono **só** se o volume justificar (sinal de revisão registrado). Schema dedicado (`nome_evento`, `ocorrido_em`, `usuario_id`, `empresa_id`, `propriedades jsonb`, `request_id`) com índices para query do PO e para análise de funil.
   - **Tracing:** **sem ferramenta de tracing distribuído no MVP**. `request_id` UUID v7 (ADR-002) já correlaciona web → fila → worker → audit log → request_metrics → evento_produto. Cross-process tracing é `grep request_id=0190b1xx` em logs + `WHERE request_id = '0190b1xx'` no Postgres. OpenTelemetry/Tempo/Jaeger ficam **fora** do MVP (sinal de revisão: 3+ módulos com chamadas async cruzadas dentro do monolito, ou EPIC pós-MVP que adicione um serviço externo).
@@ -316,6 +316,8 @@ CREATE TABLE business_metrics (
 CREATE INDEX idx_business_metrics_tipo_inserido_em ON business_metrics (tipo, inserido_em DESC);
 CREATE INDEX brin_business_metrics_inserido_em ON business_metrics USING BRIN (inserido_em);
 ```
+
+**Dimensões adicionais via `meta` (JSONB)** — eventos que precisam de subcategorização gravam no `meta`. Exemplo canônico: `tipo='rfb_consulta'` carrega `meta->>'provider'` (`'mock' | 'cnpja' | 'receitaws'` — IDR-004 + IDR-005) e `meta->>'status'` (`'sucesso' | 'cnpj_inexistente' | 'timeout' | 'erro_5xx' | 'erro_rede'`). Agregações por provedor: `SELECT meta->>'provider' AS provider, count(*) FILTER (WHERE NOT sucesso) * 1.0 / count(*) AS taxa_erro FROM business_metrics WHERE tipo = 'rfb_consulta' AND inserido_em > now() - interval '10 minutes' GROUP BY 1;`. **Alerta de >5% erro/10min para `rfb_consulta` é por provedor** (NRF §3.1) — o `MonitorarRfbErrorRate` (artisan command da STORY-015 CA-5) agrupa por `provider` antes de aplicar a regra. Sem CNPJ em `meta` (PII — apenas hash SHA-256 se necessário para correlação).
 
 **Fila/backlog** (RNF §6.2): consulta direta em `SELECT count(*) FROM jobs WHERE queue = 'pdf'` — tabela do queue driver default do Laravel. Sem tabela extra.
 
@@ -701,3 +703,4 @@ Decisões deliberadamente **não** tomadas nesta ADR:
 
 - 2026-05-21 — criada como `proposed` pelo Arquiteto (STORY-006 SPIKE de observabilidade + eventos de produto). Três escolhas estruturais (trilho técnico, destino dos eventos, canal de alerta) confirmadas pelo PO via `AskUserQuestion` antes da redação.
 - 2026-05-21 — aceita pelo PO Alexandro em chat; status `proposed` → `accepted`.
+- 2026-05-23 — **acréscimo retrospectivo (informação derivada, não mudança de decisão)** no §"1.2 Métricas → `business_metrics`": (a) inclusão de `rfb_consulta` na enumeração de tipos (já admitido pelo schema chave-valor — `tipo TEXT NOT NULL` aceita qualquer string); (b) explicitação do uso de `meta` JSONB para carregar dimensão `provider` (`'mock' | 'cnpja' | 'receitaws'`) e `status`, com query canônica de agregação por provider; (c) regra do alerta A2 (taxa de erro) passa a ser por-provider quando `tipo='rfb_consulta'` (sem alteração do threshold de 5%/10min; só agrupamento extra). **Nenhuma migration necessária** — o schema atual da tabela `business_metrics` (`meta JSONB NOT NULL DEFAULT '{}'::jsonb`) já comporta a dimensão. Edição inicial feita in-place pelo PO em 2026-05-23; entrada de histórico adicionada e ratificada pelo Arquiteto na mesma data.

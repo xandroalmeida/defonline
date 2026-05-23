@@ -134,10 +134,11 @@ Banco relacional **PostgreSQL** é o modelo natural para o domínio (usuários, 
 **Propósito:** enriquecer o cadastro de usuários PJ com Razão Social, Nome Fantasia, Data de Fundação, CNAE Principal, Município, UF e Situação Cadastral.
 
 **Características:**
-- Chamada síncrona no momento do cadastro; timeout curto (ex.: 5s) para não travar a experiência.
-- Cache local por até 24h para CNPJ consultado recentemente (reduz custo e respeita rate limit).
+- Chamada síncrona no momento do cadastro; timeout curto (5s) para não travar a experiência.
+- Cache local de respostas bem-sucedidas com TTL parametrizável (default 5min na implementação inicial; aceita-se valor maior até no máximo 1h por causa de mudanças de Situação Cadastral). Erros NÃO são cacheados.
 - Fallback: se a API estiver indisponível ou retornar erro, o sistema permite preenchimento manual com aviso ao usuário.
-- Provedor específico fica como decisão da spec de construção `[A DEFINIR]`. Há trade-off entre custo, confiabilidade e limites de chamadas.
+- **Provedor: abstração `RfbCnpjClient` com dois provedores reais suportados** — `cnpja` (https://cnpja.com/) e `receitaws` (https://receitaws.com.br/) — selecionáveis via `config/services.php → rfb.provider` (decisão **IDR-004**). PO confirmou que produção usará os dois mesmos provedores; o primário em `production` será definido pelo Arquiteto em IDR separado quando a STORY-018 entregar.
+- **Rate-limit por provedor** configurável independentemente (`rfb.providers.<provider>.rate_limit_per_minute`), implementado via `Illuminate\Support\Facades\RateLimiter` com chave `rfb:provider:{provider}`. Defaults baseados no plano gratuito público de cada um (3 RPM).
 
 ### 3.2 Gateway de Pagamento
 
@@ -500,7 +501,8 @@ A execução completa da suíte E2E é critério de aceite para promoção de qu
 
 - Fallback: permitir preenchimento manual dos campos com aviso ao usuário.
 - Retry automático em segundo plano (background) para atualizar os dados assim que a API voltar.
-- Alerta operacional se a taxa de falha exceder 5% em janela de 15min.
+- Alerta operacional **por provedor** (dimensão `provider` em `business_metrics`) se a taxa de falha exceder 5% em janela de 10min (NRF §3.1 — janela ajustada de 15min para 10min na NRF v2.0).
+- **Failover entre provedores** (`cnpja` ↔ `receitaws`) é manual no MVP — troca via `RFB_PROVIDER` no `.env` + restart do `web`/`worker`. Failover automático exige PDR (impacto de custo e UX) — fora do escopo MVP.
 
 ### 8.2 Falha no gateway de pagamento
 
@@ -571,7 +573,7 @@ A execução completa da suíte E2E é critério de aceite para promoção de qu
 - Storage de PDFs (provedor).
 - Storage de backup off-site (provedor).
 - Provedor de e-mail transacional.
-- API CNPJ (provedor).
+- ~~API CNPJ (provedor)~~ — decidido via **IDR-004**: abstração com `cnpja` + `receitaws` selecionáveis via config + rate-limit por provedor. Definição do primário em `production` fica com o Arquiteto (IDR separado, pós-STORY-018).
 - Gateway de pagamento (provedor).
 
 ### 9.4 Estratégia de armazenamento da matriz de recomendações

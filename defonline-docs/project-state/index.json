@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-23T12:30:00Z",
+  "generated_at": "2026-05-23T17:00:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -432,11 +432,11 @@
       "target_role": "programador",
       "status": "ready",
       "owner_agent": null,
-      "sprint_id": null,
+      "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-018-rfb-providers-reais-cnpja-receitaws.md",
       "blocked_by": ["STORY-015"],
       "blocks": [],
-      "related_idrs": ["IDR-004"],
+      "related_idrs": ["IDR-004", "IDR-005", "IDR-006"],
       "estimated_session_size": "M",
       "created_at": "2026-05-23",
       "updated_at": "2026-05-23",
@@ -450,9 +450,9 @@
       "status": "active",
       "start_date": "2026-05-25",
       "end_date": "2026-06-12",
-      "goal": "Entregar o EPIC-001 inteiro: ciclo cadastro Usuário → Termo+LGPD → confirmação de email → cadastro Empresa Analisada (manual + RFB via mock com fallback) → Minhas Empresas → eventos de produto, com validação independente aprovada.",
+      "goal": "Entregar o EPIC-001 inteiro: ciclo cadastro Usuário → Termo+LGPD → confirmação de email → cadastro Empresa Analisada (manual + RFB com provedor real cnpja + fallback) → Minhas Empresas → eventos de produto, com validação independente aprovada.",
       "path": "sprints/SPRINT-2026-W22.md",
-      "story_ids": ["STORY-011", "STORY-012", "STORY-013", "STORY-014", "STORY-015", "STORY-016", "STORY-017"],
+      "story_ids": ["STORY-011", "STORY-012", "STORY-013", "STORY-014", "STORY-015", "STORY-016", "STORY-017", "STORY-018"],
       "epic_ids": ["EPIC-001"],
       "opened_at": "2026-05-22",
       "opened_by": "PO (Alexandro / Claude)"
@@ -505,7 +505,8 @@
         "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
         "related_stories": ["STORY-002"],
         "created_at": "2026-05-21",
-        "updated_at": "2026-05-21"
+        "updated_at": "2026-05-23",
+        "last_amendment_note": "2026-05-23 — acréscimo retrospectivo de IDRs RFB (IDR-004/005/006) nos blocos §App→RFB e tabela de comunicação. Sem mudança de decisão."
       },
       {
         "id": "ADR-003",
@@ -539,7 +540,8 @@
         "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
         "related_stories": ["STORY-006"],
         "created_at": "2026-05-21",
-        "updated_at": "2026-05-21"
+        "updated_at": "2026-05-23",
+        "last_amendment_note": "2026-05-23 — acréscimo retrospectivo: dimensão provider em meta JSONB de business_metrics; alerta A2 por provider para tipo=rfb_consulta. Sem migration, sem mudança de decisão."
       },
       {
         "id": "ADR-005",
@@ -629,6 +631,40 @@
         "related_adrs": ["ADR-001", "ADR-004"],
         "created_at": "2026-05-23",
         "updated_at": "2026-05-23"
+      },
+      {
+        "id": "IDR-005",
+        "slug": "rfb-provider-default-producao-cnpja",
+        "title": "Provedor primário da RFB em produção será cnpja (com receitaws configurado e pronto para troca manual)",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-005-rfb-provider-default-producao-cnpja.md",
+        "decided_at": "2026-05-23",
+        "decided_by": "Arquiteto",
+        "approved_by": "Alexandro",
+        "related_story": "STORY-018",
+        "related_stories": ["STORY-018"],
+        "related_idrs": ["IDR-004"],
+        "related_adrs": ["ADR-001", "ADR-002", "ADR-004"],
+        "created_at": "2026-05-23",
+        "updated_at": "2026-05-23",
+        "note": "Reaberto pelo Arquiteto pelo método (decision-method.md), aceito por Alexandro em 2026-05-23 no chat (\"pode aprovar tudo\")."
+      },
+      {
+        "id": "IDR-006",
+        "slug": "rfb-wiring-infra-postgres-secrets",
+        "title": "Wiring de infra da abstração RFB — cache e RateLimiter no driver database (Postgres), secrets via Ansible Vault (ADR-005 §7.7)",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-006-rfb-wiring-infra-postgres-secrets.md",
+        "decided_at": "2026-05-23",
+        "decided_by": "Arquiteto",
+        "approved_by": "Alexandro",
+        "related_story": "STORY-018",
+        "related_stories": ["STORY-015", "STORY-018"],
+        "related_idrs": ["IDR-004", "IDR-005"],
+        "related_adrs": ["ADR-002", "ADR-003", "ADR-005"],
+        "created_at": "2026-05-23",
+        "updated_at": "2026-05-23",
+        "note": "Reaberto pelo Arquiteto pelo método, concretizou secrets via Ansible Vault (era vago: 'mesmo mecanismo'); aceito por Alexandro em 2026-05-23 no chat (\"pode aprovar tudo\")."
       }
     ]
   },

@@ -12,7 +12,7 @@ related_adrs: ["ADR-001"]
 related_pdrs: ["PDR-001"]
 related_epics: ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"]
 created_at: 2026-05-21
-updated_at: 2026-05-21
+updated_at: 2026-05-23
 type: topologico
 ---
 
@@ -64,7 +64,7 @@ A decisão precisa ser tomada agora porque destrava STORY-007 (hello world deplo
   - **Web → Worker (assíncrono):** `dispatch(new ProcessPdf(...))` insere linha na tabela `jobs`. Worker consome com `SKIP LOCKED`. Idempotência: cada job carrega um `idempotency_key`; tabela `job_results` (decisão de modelagem fica para ADR de Persistência, mas convenção topológica é estabelecida aqui).
   - **Scheduler → Worker:** scheduler enfileira jobs idênticos aos disparados pela web; worker é agnóstico à origem.
   - **App → Postgres:** SQL via Eloquent. Cada processo (web/worker/scheduler) abre seu próprio pool de conexões.
-  - **App → RFB (externo):** chamada HTTPS síncrona dentro do request com timeout de 5 s + fallback manual (`Spec §3.2`). Não é assíncrona — não usa worker.
+  - **App → RFB (externo):** chamada HTTPS síncrona dentro do request com timeout de 5 s + fallback manual (`Spec §3.2`). Não é assíncrona — não usa worker. **Provedor concreto** é selecionável via configuração entre `cnpja` (primário em produção — IDR-005) e `receitaws` (secundário pronto para troca manual), ambos por trás da abstração `RfbCnpjClient` (IDR-004). **Rate-limit por provedor** via `Illuminate\Support\Facades\RateLimiter` com chave `rfb:provider:{provider}` sobre o cache `database` em Postgres (IDR-006) — contagem global entre `web` e `worker`. Cache de respostas bem-sucedidas (`rfb:cnpj:{sha256(cnpj)}`, TTL parametrizado) usa o mesmo driver `database` (IDR-006), respeitando o princípio Postgres-first.
   - **App → Mailpit (dev) / Provedor SMTP (prod):** worker abre conexão SMTP por job de e-mail. Provedor real é decisão da ADR de Infra/Observabilidade futura.
 - **Local (Docker Compose conceitual):**
   - `web` (porta 8090 → 80), `worker`, `scheduler`, `db` (Postgres 18), `mailpit` (SMTP fake em :1025, UI em :8025).
@@ -218,7 +218,7 @@ flowchart LR
 |---|---|---|---|
 | `user` → `web` | Sync | HTTPS (Livewire roundtrip e HTTP padrão) | Borda do sistema. TLS termina no reverse proxy de infra (STORY-004). |
 | `web` ↔ `db` | Sync | TCP / SQL (Eloquent + `pdo_pgsql`) | Pool por processo PHP-FPM. |
-| `web` → `rfb` | Sync | HTTPS, timeout 5 s | Fallback manual (`Spec §3.2`). Fora da nossa borda. |
+| `web` → `rfb` | Sync | HTTPS, timeout 5 s | Provedor selecionável (`cnpja` primário, `receitaws` secundário) — IDR-004/IDR-005. Rate-limit por provedor via `RateLimiter` no driver `database` (IDR-006). Cache `database`, TTL parametrizado (IDR-006). Fallback manual (`Spec §3.2`). Fora da nossa borda. |
 | `web` → `worker` | Async | Postgres `jobs` (driver `database`) | `dispatch(new ProcessPdf(...))` insere linha; worker consome. Sem broker externo. |
 | `worker` ↔ `db` | Sync | TCP / SQL | `SELECT ... FOR UPDATE SKIP LOCKED`. Próprio pool. |
 | `worker` → `smtp` | Sync (dentro do job) | SMTP | Retry com backoff exponencial (Laravel default: tries=3, backoff=[60,180,600]). |
@@ -423,3 +423,4 @@ Decisões deliberadamente **não** tomadas nesta ADR:
 
 - 2026-05-21 — criada como `proposed` pelo Arquiteto (STORY-002 SPIKE de topologia). Opção A confirmada pelo PO em chat antes da redação (Mailpit no compose desde a STORY-007 também confirmado).
 - 2026-05-21 — aceita pelo PO Alexandro em chat; status `proposed` → `accepted`.
+- 2026-05-23 — **acréscimo retrospectivo (informação derivada, não mudança de decisão)** no §"Comunicação interna" (bloco "App → RFB (externo)") e na tabela "Comunicação entre componentes" (linha `web → rfb`): explicitada a abstração `RfbCnpjClient` com `cnpja` primário e `receitaws` secundário (IDR-004/IDR-005), rate-limit por provedor via `RateLimiter` no driver `database` (IDR-006), cache `database` no Postgres. Nenhuma decisão arquitetural reaberta — só consolidação textual de IDRs aceitos que aterrissam neste ADR. Edição inicial feita in-place pelo PO em 2026-05-23; entrada de histórico adicionada e ratificada pelo Arquiteto na mesma data.

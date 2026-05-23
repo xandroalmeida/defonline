@@ -105,8 +105,9 @@
 
 - **Objetivo:** enriquecer cadastro com Razão Social, Nome Fantasia, CNAE, Município, UF, Data de Fundação, Situação Cadastral.
 - **Fallback robusto** (conforme mitigação R5 do parecer CLAUDE): em caso de indisponibilidade da API, permitir preenchimento manual com aviso explícito.
-- **Provedor da API:** `[A DEFINIR]`. Critérios: custo, confiabilidade, limites de chamadas. Não bloqueia o kickoff — desenvolvimento pode iniciar com mock/sandbox.
-- **Monitoramento:** alarme se taxa de erro > 5% em janela de 10 min.
+- **Provedor da API:** **abstração** `RfbCnpjClient` (PHP interface) com **dois provedores reais suportados**: `cnpja` (`https://cnpja.com/`) e `receitaws` (`https://receitaws.com.br/`). Seleção via configuração (`config/services.php` → bloco `rfb`, chave `provider` — valores aceitos: `mock | cnpja | receitaws`). Mock determinístico permanece como default em `local`/`testing`. Decisão registrada na **IDR-004**; ativação dos provedores reais entregue pela **STORY-018**. Critérios mantidos: custo, confiabilidade, limites de chamadas — agora avaliáveis empiricamente via métricas com dimensão `provider`.
+- **Rate-limit por provedor:** cada provedor tem RPM (requests por minuto) **configurável independentemente** (`config/services.php` → `rfb.providers.<provider>.rate_limit_per_minute`). Defaults conservadores baseados no plano gratuito público de cada um (3 RPM); valores reais são sobrescritos via `.env` conforme plano contratado. Implementação via `Illuminate\Support\Facades\RateLimiter` com chave `rfb:provider:{provider}`.
+- **Monitoramento:** alarme se taxa de erro > 5% em janela de 10 min, **por provedor** (dimensão `provider` em `business_metrics`).
 
 ### 3.2 Gateway de Pagamento
 
@@ -380,7 +381,7 @@ A spec técnica de construção precisa fechar, **antes do início de implementa
 - [ ] Storage de PDFs (provedor).
 - [ ] Storage de backup off-site (provedor).
 - [ ] Provedor de e-mail transacional.
-- [ ] Provedor da API CNPJ.
+- [x] ~~Provedor da API CNPJ~~ — decidido via **IDR-004**: abstração `RfbCnpjClient` com dois provedores reais (`cnpja`, `receitaws`) selecionáveis via config + rate-limit por provedor. Ativação real entregue pela STORY-018.
 - [ ] Gateway de pagamento.
 - [ ] Ferramentas de teste E2E e de teste unitário/integração compatíveis com a stack escolhida.
 
