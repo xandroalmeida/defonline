@@ -42,20 +42,15 @@
          hook e no job test-coverage do pr.yml (ADR-006 §3.1 + quality-standards). -->
 
     <php>
-        <!-- Testing usa MESMO Postgres da app (ADR-001 + quality-standards):
-             RefreshDatabase nivela cada teste. SQLite seria inconsistente com
-             CITEXT, JSONB, BRIN, pg_stat_statements. -->
+        <!-- APP_ENV=testing dispara LoadEnvironmentVariables a carregar
+             `.env.testing` em vez de `.env`. Toda a configuração de testes
+             (DB_DATABASE=defonline_test, CACHE_STORE=array, BCRYPT_ROUNDS=4,
+             MAIL_MAILER=array, etc.) vive lá — não aqui. Tentei force="true"
+             para essas chaves antes e descobri que phpunit só seta $_ENV e
+             getenv(), não $_SERVER; Laravel resolve env() via $_SERVER, então
+             o .env (com APP_ENV=local) sempre vencia. Bug rastreado em
+             2026-05-23 (STORY-015): RefreshDatabase rodava contra o banco
+             `defonline` do smoke manual, apagando dados do PO em cada pre-push. -->
         <env name="APP_ENV" value="testing" force="true"/>
-        <env name="APP_MAINTENANCE_DRIVER" value="file" force="true"/>
-        <env name="BCRYPT_ROUNDS" value="4" force="true"/>
-        <env name="BROADCAST_CONNECTION" value="null" force="true"/>
-        <env name="CACHE_STORE" value="array" force="true"/>
-        <env name="MAIL_MAILER" value="array" force="true"/>
-        <env name="QUEUE_CONNECTION" value="sync" force="true"/>
-        <env name="SESSION_DRIVER" value="array" force="true"/>
-        <env name="TELEGRAM_BOT_TOKEN" value="" force="true"/>
-        <env name="PULSE_ENABLED" value="false" force="true"/>
-        <env name="TELESCOPE_ENABLED" value="false" force="true"/>
-        <env name="NIGHTWATCH_ENABLED" value="false" force="true"/>
     </php>
 </phpunit>

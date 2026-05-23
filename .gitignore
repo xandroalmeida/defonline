@@ -31,3 +31,9 @@ coverage/
 .env
 .env.*
 !.env.example
+# .env.testing — config de testes versionada (DB_DATABASE=defonline_test, etc).
+# Sem segredo: APP_KEY é literal compartilhado, sem credencial de produção.
+!.env.testing
+# .env.dusk.local — config do Laravel Dusk (DUSK_DRIVER_URL, APP_URL). Mesma
+# justificativa: APP_KEY local + sem segredo.
+!.env.dusk.local

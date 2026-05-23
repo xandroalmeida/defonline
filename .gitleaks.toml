@@ -24,4 +24,9 @@ description = "Decision docs e fixtures de teste — sem segredos reais."
 paths = [
     '''defonline-docs/.*\.md''',
     '''app/tests/.*''',
+    # Envs versionados de testing/Dusk — APP_KEY literal local + zero credenciais
+    # de produção (DB_PASSWORD=defonline_app_secret_local, etc.). Segredos reais
+    # de homol/prod vivem em Ansible Vault (ADR-005 §7.7), nunca em repositório.
+    '''app/\.env\.testing''',
+    '''app/\.env\.dusk\.local''',
 ]

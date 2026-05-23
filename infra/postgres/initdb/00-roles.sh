@@ -39,4 +39,23 @@ psql --variable=ON_ERROR_STOP=1 \
     CREATE ROLE ${BACKUP_DB_USER} WITH LOGIN PASSWORD '${BACKUP_DB_PASSWORD}';
     GRANT CONNECT ON DATABASE ${POSTGRES_DB} TO ${BACKUP_DB_USER};
     GRANT pg_read_all_data TO ${BACKUP_DB_USER};
+
+    -- Banco dedicado para a suíte de testes (Pest + RefreshDatabase). Isolado
+    -- do banco \`${POSTGRES_DB}\` que serve a UI em smoke manual local — antes
+    -- (até 2026-05-23) os dois compartilhavam o mesmo banco e qualquer pre-push
+    -- apagava o que o PO tinha cadastrado pela UI. Override correspondente em
+    -- app/phpunit.xml (\`DB_DATABASE=defonline_test\` force=true).
+    CREATE DATABASE defonline_test OWNER ${APP_DB_USER};
+    GRANT CONNECT ON DATABASE defonline_test TO ${BACKUP_DB_USER};
+SQL
+
+# Extensões precisam ser instaladas no banco de teste também — `CREATE EXTENSION`
+# é per-database, e as migrations Laravel não cobrem extensões (IDR-001).
+psql --variable=ON_ERROR_STOP=1 \
+     --username "$POSTGRES_USER" \
+     --dbname defonline_test <<-SQL
+    CREATE EXTENSION IF NOT EXISTS pgcrypto;
+    CREATE EXTENSION IF NOT EXISTS pg_trgm;
+    CREATE EXTENSION IF NOT EXISTS citext;
+    CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 SQL

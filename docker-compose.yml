@@ -8,8 +8,14 @@ x-app: &app-base
     dockerfile: infra/docker/Dockerfile
   image: defonline/app:dev
   working_dir: /var/www/html
-  env_file:
-    - ./app/.env
+  # NÃO injetar `.env` como env_file do container: Laravel já lê `.env` (e
+  # `.env.testing` quando APP_ENV=testing) do filesystem via Dotenv. Quando o
+  # compose injeta `.env` como variáveis de ambiente do OS, elas viram
+  # `$_SERVER[...]` no PHP — e Laravel resolve `env()` via `$_SERVER` antes do
+  # `$_ENV`/`putenv()` que o phpunit.xml força. Resultado: `APP_ENV=testing` do
+  # phpunit nunca prevalecia e o RefreshDatabase rodava no banco `defonline` do
+  # smoke manual, derrubando os dados do PO em cada pre-push. Bug rastreado em
+  # 2026-05-23 (STORY-015). Detalhes técnicos em app/phpunit.xml.
   environment:
     PROCESS_TYPE: web
   volumes:

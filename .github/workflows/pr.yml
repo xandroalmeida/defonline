@@ -129,11 +129,15 @@ jobs:
         env:
           POSTGRES_USER: defonline
           POSTGRES_PASSWORD: defonline
-          POSTGRES_DB: defonline
+          # `defonline_test` (não `defonline`) para casar com o override
+          # `DB_DATABASE` forçado em app/phpunit.xml. Em local existem dois
+          # bancos (defonline para smoke manual + defonline_test para testes);
+          # CI só roda testes, então só precisa do banco de teste.
+          POSTGRES_DB: defonline_test
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U defonline -d defonline"
+          --health-cmd "pg_isready -U defonline -d defonline_test"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
@@ -141,7 +145,7 @@ jobs:
       DB_CONNECTION: pgsql
       DB_HOST: 127.0.0.1
       DB_PORT: 5432
-      DB_DATABASE: defonline
+      DB_DATABASE: defonline_test
       DB_USERNAME: defonline
       DB_PASSWORD: defonline
     steps:
@@ -173,7 +177,7 @@ jobs:
           DB_CONNECTION=pgsql
           DB_HOST=127.0.0.1
           DB_PORT=5432
-          DB_DATABASE=defonline
+          DB_DATABASE=defonline_test
           DB_USERNAME=defonline
           DB_PASSWORD=defonline
           SESSION_DRIVER=array
@@ -191,7 +195,7 @@ jobs:
         env:
           PGPASSWORD: defonline
         run: |
-          psql -h 127.0.0.1 -U defonline -d defonline -v ON_ERROR_STOP=1 -c "
+          psql -h 127.0.0.1 -U defonline -d defonline_test -v ON_ERROR_STOP=1 -c "
             CREATE EXTENSION IF NOT EXISTS pgcrypto;
             CREATE EXTENSION IF NOT EXISTS pg_trgm;
             CREATE EXTENSION IF NOT EXISTS citext;
