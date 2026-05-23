@@ -168,9 +168,12 @@ jobs:
         # mailpit/redis). O `.env` é gerado também porque artisan key:generate
         # e similares leem dele.
         run: |
+          # APP_KEY fixo do CI — runner ephemeral, sem dado real. Evita a
+          # dança `key:generate --env=testing` (que precisaria de --env em
+          # cada artisan posterior). Mesmo valor do .env.dusk.local/.env local.
           ENV_BODY='APP_NAME=DEFOnline
           APP_ENV=testing
-          APP_KEY=
+          APP_KEY=base64:7gf3GPBbCPBAFBDe0OJnHWkXyTkT5LnIXYA+7QIwqHg=
           APP_DEBUG=true
           APP_URL=http://localhost
           APP_VERSION=ci
@@ -207,9 +210,8 @@ jobs:
             CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
           "
 
-      - name: app:key + migrate
+      - name: Migrate (APP_KEY já fixo no .env.testing)
         run: |
-          php artisan key:generate --force
           php artisan migrate --force
 
       - name: Pest All com --coverage --min=80
