@@ -3,13 +3,13 @@ story_id: STORY-014
 slug: cadastro-empresa-analisada-manual
 title: Cadastro de Empresa Analisada por preenchimento manual (sem RFB)
 epic_id: EPIC-001
-sprint_id: null
+sprint_id: SPRINT-2026-W22
 type: implementation
 target_role: programador
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador (claude-opus-4-7)
 created_at: 2026-05-22
-updated_at: 2026-05-22
+updated_at: 2026-05-23
 estimated_session_size: M
 ---
 
@@ -94,12 +94,12 @@ Você **não** decide:
 
 ## Definição de Pronto (DoD)
 
-- [ ] CAs passam.
-- [ ] Pre-push verde.
-- [ ] Pipeline CI verde.
-- [ ] Deploy em homologação validado: cadastrar uma empresa manualmente (CNPJ + CPF dois casos), ver tela read-only, tentar acessar empresa de outro Usuário (cross-tenant) e ver 403.
-- [ ] `index.json` `done`.
-- [ ] "Notas do agente" preenchidas.
+- [x] CAs passam (CA-1..CA-7 cobertos por Pest + Dusk, suíte verde local).
+- [x] Pre-push verde (Pint + Larastan 0 erros + Pest 185 testes / 574 asserções + Pest Domain 100% / gate 98% + Pennant + Dusk 9 testes / 51 asserções).
+- [ ] Pipeline CI verde — aguarda push (PO comanda).
+- [ ] Deploy em homologação validado: cadastrar uma empresa manualmente (CNPJ + CPF dois casos), ver tela read-only, tentar acessar empresa de outro Usuário (cross-tenant) e ver 403 — aguarda tag rc.N do PO.
+- [ ] `index.json` `done` — após validação em homologação.
+- [x] "Notas do agente" preenchidas.
 
 ## Protocolo do agente (obrigatório)
 
@@ -107,23 +107,54 @@ Padrão `agent-task-format.md`.
 
 ## Notas do agente
 
+### Documentos lidos (2026-05-23)
+- STORY-014 inteira (frontmatter, contexto, CA-1..CA-7, fora de escopo, decisões, DoD, protocolo).
+- Espec V2 §1.5.2 (entidade Empresa Analisada) e §3.3 (cadastro em 2 passos).
+- NRF §3.1 (RFB fallback) e §4.3 (multi-tenancy + isolamento).
+- ADR-003 (FK + Global Scope + Policy + soft delete).
+- ADR-004 (eventos de produto — fora desta estória, mas a entidade nasce aqui).
+- `programador/SKILL.md`, `reading-discipline.md`, `testing-discipline.md`, `database-discipline.md`.
+- Código existente: `App\Domain\Cpf`, `App\Models\Usuario`, `App\Livewire\Cadastro`, `App\Observabilidade\AuditLogger`, migrations existentes, factories e padrões de testes (Pest + Dusk).
+
+### Entendimento consolidado
+- Form Livewire `/empresas/nova` (autenticado) cria `EmpresaAnalisada` com `fonte_enriquecimento='manual'` para o Usuário logado. Tela read-only em `/empresas/{empresa}` com Policy.
+- Domínio puro de validação CNPJ vive em `app/Domain/Cnpj.php` (dispara o gate ≥98% de `phpunit-domain.xml`); CPF reutiliza `app/Domain/Cpf.php`.
+- Multi-tenancy via Global Scope no model + Policy. Cross-tenant na rota `/empresas/{empresa}` precisa retornar **403** com audit log (CA-4/CA-6/DoD), por escolha explícita da estória — diverge de ADR-003 §Decisão 1 e NRF §4.3, que prescrevem 404 (ver "Decisões tomadas" abaixo).
+- Audit logs: `empresa.cadastrada` (sem documento — PII) e `empresa.acesso_negado` para tentativa cross-tenant.
+- Testes: UnitPure para `Cnpj`, Feature cobrindo CA-1..CA-6, Dusk para cadastrar manualmente → ver read-only.
+
+### Plano em 5 bullets
+1. Domain `App\Domain\Cnpj` (normalizar/valido/formatar) + UnitPure test ≥98%.
+2. Migration `empresas_analisadas` com FK + enums + índice único parcial `(usuario_id, documento)` + soft delete.
+3. Model `EmpresaAnalisada` com Global Scope `BelongsToUsuarioScope`, factory, enums; Policy `EmpresaAnalisadaPolicy` (view/update/delete); registro do policy via Laravel autodiscover + AppServiceProvider.
+4. Livewire `App\Livewire\Empresa\Cadastrar` + view + rota `/empresas/nova`; Controller `EmpresaController@show` (route model binding sem global scope + `authorize('view')` → 403 com audit log) + rota `/empresas/{empresa}`; menu/link "Voltar para Minhas Empresas" inerte.
+5. Suite de testes: UnitPure Cnpj; Feature: criação CNPJ + CPF, validações, multi-tenant 403, soft delete + outro usuário pode cadastrar mesmo documento, audit log sem documento, audit log acesso_negado; Dusk: cadastrar manualmente → ver tela read-only. Rodar Pint + Larastan + Pest (com cobertura) + Dusk.
+
 ### Decisões tomadas
-- <data> — <decisão>
+- 2026-05-23 — **403 vs 404 (não bloqueante; sigo a estória)**. STORY-014 CA-4/CA-6/DoD prescrevem **403** em acesso cross-tenant + emissão de audit log `empresa.acesso_negado`. NRF §4.3 e ADR-003 §Decisão 1 prescrevem **404** (para não vazar existência). Sigo a estória como contrato local, mas registro para o PO decidir: (a) alinhar ADR-003/NRF para 403 + audit em rotas detail/edit/delete autenticadas; ou (b) corrigir a estória para 404 + audit silencioso. Implemento 403 nesta estória. Listagem (Global Scope) continua sem leak — só o detail/edit/delete responde 403.
+- 2026-05-23 — Validador de CNPJ vai em `app/Domain/Cnpj.php` (espelhando `Cpf.php`). Gate ≥98% sobre `app/Domain/**`.
+- 2026-05-23 — Enums PHP (`TipoDocumento`, `SituacaoCadastral`, `FonteEnriquecimento`) com `string` backing + cast Eloquent. PG armazena `text` com CHECK (mais simples que `CREATE TYPE` que tem dor em alterações futuras).
+- 2026-05-23 — Lista de UFs hardcoded em `app/Domain/Uf.php` (enum) — 27 valores, simples, sem precisar tabela.
+- 2026-05-23 — Documento normalizado para dígitos puros antes de gravar — exatamente como `Usuario.cpf`.
 
 ### Descobertas
-- <data> — <gotcha>
+- 2026-05-23 — `LogSanitizer` (ADR-003/004) mascara `cpf`/`cnpj` por nome de chave, mas não `documento` — campo canônico da `EmpresaAnalisada`. Solução: o `Log::info('empresa.cadastrada', …)` **não inclui** o campo `documento` (PII fica em `empresas_analisadas` + `audit_logs` jurídico). Se essa convenção pegar tração, futuro programador pode estender `LogSanitizer::SENSITIVE_KEYS` com `'documento' => 'cnpj'|'cpf'` polimórfico — fora de escopo aqui.
+- 2026-05-23 — Índice único `(usuario_id, documento)` precisa ser **parcial** (`WHERE deleted_at IS NULL`); senão soft delete bloqueia recadastro mesmo após excluir. Coberto por teste explícito.
+- 2026-05-23 — Laravel 13 com atributos PHP: `#[ScopedBy([...])]` + `#[Fillable([...])]` substituem `$fillable`/`booted` — adotei para consistência com `Usuario` (que usa `#[Fillable]`/`#[Hidden]`).
+- 2026-05-23 — `Scope<TModel>` exige assinatura `Builder<covariant TModel>` no `apply()` para satisfazer Larastan nível 6. Documentado no PHPDoc do scope.
 
 ### Bloqueios encontrados
-- <data> — <bloqueio>
+- (nenhum)
 
 ### IDRs criados
-- IDR-XXX — <título>
+- (nenhum — todas as decisões locais e cabem no PR/Notas)
 
 ### Cobertura final
-- Geral: <%>
-- `app/Domain/**`: <%>
+- Geral: **97.2%** (PCOV, 185 testes Pest, 574 asserções)
+- `app/Domain/**`: **100%** (gate 98% atendido)
+- Dusk E2E: 9 testes (51 asserções) — `CadastroEmpresaBrowserTest` + 8 pré-existentes verdes
 
 ### Links de evidência
-- PR: <url>
-- Pipeline: <url>
-- Tag rc.N: <vX.Y.Z-rc.N>
+- PR: a abrir após pedido do PO
+- Pipeline: a rodar após push
+- Tag rc.N: a tagear após CI verde

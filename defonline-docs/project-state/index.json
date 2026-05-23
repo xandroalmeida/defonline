@@ -355,15 +355,20 @@
       "title": "Cadastro de Empresa Analisada por preenchimento manual",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
-      "owner_agent": null,
+      "status": "in_review",
+      "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-014-cadastro-empresa-analisada-manual.md",
       "blocked_by": ["STORY-011"],
       "blocks": ["STORY-015", "STORY-016"],
       "estimated_session_size": "M",
       "created_at": "2026-05-22",
-      "updated_at": "2026-05-22"
+      "updated_at": "2026-05-23",
+      "coverage_geral": "97.2%",
+      "coverage_dominio": "100%",
+      "tests_pest": "185 (574 asserções)",
+      "tests_dusk": "9 (51 asserções)",
+      "note": "Local verde (Pint + Larastan + Pest + Dusk + cobertura). Push, CI, tag rc.N e validação em homologação aguardam comando explícito do PO. Decisão local registrada: 403 + audit log `empresa.acesso_negado` no cross-tenant (estória prescreve 403; ADR-003 §Decisão 1 / NRF §4.3 prescrevem 404 — PO alinhar)."
     },
     {
       "id": "STORY-015",
