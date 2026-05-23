@@ -13,8 +13,9 @@ related_pdrs: ["PDR-001"]
 related_epics: ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"]
 related_stories: ["STORY-005"]
 created_at: 2026-05-21
-updated_at: 2026-05-21
+updated_at: 2026-05-23
 type: politica-evolucao
+last_amendment_note: "2026-05-23 — §3.2 revisada: main.yml deixa de buildar imagem (`main-<sha>`/`latest`) em todo push porque a imagem nunca era consumida (release-homolog.yml builda do zero a partir do SHA da tag rc). Job `build-and-push` + `notify` removidos; main.yml fica só com `validate`. Sem mudança de decisão estrutural, só remoção de custo morto."
 ---
 
 # ADR-006 — CI/CD do DEFOnline
@@ -80,7 +81,7 @@ A decisão precisa ser tomada agora porque destrava STORY-007 (hello world deplo
   1. **Máquina local do dev/agente** — git pre-push hook versionado (instalado por `scripts/install-hooks.sh`, idempotente) roda: Pest **Unit + Feature** com Postgres real do `docker compose`, Dusk E2E com Chromium em container, cobertura `--min=80` geral e `--min=98` no núcleo. Hook **falha = push abortado**. Mesma stack que o dev usa para desenvolver.
   2. **GitHub Actions (SaaS) — runner hosted `ubuntu-24.04`** — roda apenas o subconjunto **leve** que não precisa de infra: lint (pint, larastan, ansible-lint, commitlint), `composer audit`, `trivy fs`, `gitleaks`, Pest **Unit puros** (testes que não tocam DB nem rede, opcionais), build da imagem Docker multistage, push GHCR, deploy via Ansible, smoke HTTP/Dusk-leve contra a URL real já no ar.
 
-  Branching: **trunk-based** com `main` como única branch protegida; features em branches curtas (`feat/*`, `fix/*`) com PR obrigatório. Merge em `main` publica imagem Docker no GHCR como `main-<sha>` + `latest`. Promoção: tag git `vX.Y.Z-rc.N` → workflow `release-homolog.yml` aciona `ansible-playbook deploy.yml -i inventories/homolog -e image_tag=vX.Y.Z-rc.N`; tag `vX.Y.Z` (sem `-rc`) → workflow `release-production.yml` aciona o mesmo playbook contra inventário de produção, com gate humano via GitHub Environment. Imagem é **imutável** — tag git aponta para SHA + imagem GHCR com a mesma tag. Rollback = recriar tag anterior **ou** acionar workflow manual `deploy-by-tag.yml`. Feature flags via **Laravel Pennant** com driver `database` (princípio #3).
+  Branching: **trunk-based** com `main` como única branch protegida; features em branches curtas (`feat/*`, `fix/*`) com PR obrigatório. Merge em `main` **apenas re-valida** o SHA (sem build de imagem — revisão de 2026-05-23 da §3.2). Promoção: tag git `vX.Y.Z-rc.N` → workflow `release-homolog.yml` aciona `ansible-playbook deploy.yml -i inventories/homolog -e image_tag=vX.Y.Z-rc.N`; tag `vX.Y.Z` (sem `-rc`) → workflow `release-production.yml` aciona o mesmo playbook contra inventário de produção, com gate humano via GitHub Environment. Imagem é **imutável** — tag git aponta para SHA + imagem GHCR com a mesma tag. Rollback = recriar tag anterior **ou** acionar workflow manual `deploy-by-tag.yml`. Feature flags via **Laravel Pennant** com driver `database` (princípio #3).
 
 - **Componentes concretos:**
 
@@ -259,7 +260,7 @@ Notas: ✅ atende plenamente; ⚠️ atende com ressalva; ❌ não atende.
 > - **Pre-push hook local** (`scripts/git-hooks/pre-push.sh`, instalado via `composer install` por `post-install-cmd`): roda Pest **Unit + Feature** com Postgres real via `docker compose`, Dusk E2E com Chromium em container, gate de cobertura **80% geral** e **98% em `app/Domain/**`**. Falha = `git push` abortado. Cache do Docker Compose já levantado pelo dev mantém o hook em ~1 min.
 > - **CI no GitHub Actions** (runner hosted `ubuntu-24.04`): roda apenas o subconjunto leve — lint (pint, larastan, ansible-lint, commitlint), `composer audit`, `trivy fs`, `gitleaks`, Pest **Unit puros** (sem DB) opcionais, build da imagem Docker multistage, push GHCR, `ansible-playbook deploy.yml` via SSH, smoke pós-deploy (HTTP `/health` + `/ready` + 1 Dusk leve **contra URL real já no ar**). **CI não sobe Postgres**, **não sobe app container**, **não roda suíte Pest/Dusk completa** — esse trabalho fica no laptop.
 >
-> Branching: `main` única branch protegida; features em `feat/*`, `fix/*`, `chore/*` com PR obrigatório. Merge em `main` publica imagem GHCR `main-<sha>`. **Promoção é explícita via tag git**: `vX.Y.Z-rc.N` aciona deploy em homologação; `vX.Y.Z` (sem `-rc`) aciona deploy em produção com **gate humano** no GitHub Environment `production` (1 clique do PO). Deploy = `ansible-playbook deploy.yml -i inventories/<env> -e image_tag=<tag>` via SSH com chave em GitHub Secret. **Rollback** = recriar tag anterior **ou** acionar workflow `deploy-by-tag.yml` com a tag anterior — mesma imagem imutável já no GHCR, downtime estimado < 2 min. **Feature flags** via Laravel Pennant (driver `database`), com convenção `@owner` + `@cleanup_due` em PHPDoc e alerta de pipeline para flags vencidas.
+> Branching: `main` única branch protegida; features em `feat/*`, `fix/*`, `chore/*` com PR obrigatório. Merge em `main` apenas re-valida o SHA (build de imagem `main-<sha>` foi removido em 2026-05-23 — vide §3.2). **Promoção é explícita via tag git**: `vX.Y.Z-rc.N` aciona deploy em homologação; `vX.Y.Z` (sem `-rc`) aciona deploy em produção com **gate humano** no GitHub Environment `production` (1 clique do PO). Deploy = `ansible-playbook deploy.yml -i inventories/<env> -e image_tag=<tag>` via SSH com chave em GitHub Secret. **Rollback** = recriar tag anterior **ou** acionar workflow `deploy-by-tag.yml` com a tag anterior — mesma imagem imutável já no GHCR, downtime estimado < 2 min. **Feature flags** via Laravel Pennant (driver `database`), com convenção `@owner` + `@cleanup_due` em PHPDoc e alerta de pipeline para flags vencidas.
 >
 > Custo: R$ 0/mês em CI no MVP (pipeline ~2–3 min por PR; estimado ~200–400 min/mês contra free tier de 2.000). Acréscimo zero ao orçamento da ADR-005.
 
@@ -310,7 +311,7 @@ Hotfix urgente (RTO < 1h): PR direto para `main` com label `hotfix` → após me
 ```
 .github/workflows/
 ├── pr.yml                    # roda em pull_request — gate de merge
-├── main.yml                  # roda em push em main — build + publish ghcr.io
+├── main.yml                  # roda em push em main — só re-valida o SHA (sem build; vide §3.2 — revisão 2026-05-23)
 ├── bump-rc.yml               # workflow_dispatch — incrementa -rc.N e cria tag
 ├── release-homolog.yml       # roda em push de tag v*.*.*-rc.* — deploy homol
 ├── release-production.yml    # roda em push de tag v*.*.*  — gate humano + deploy prod
@@ -366,16 +367,15 @@ Jobs paralelos. Falha em qualquer job = pipeline vermelho = bloqueio de merge.
 
 **O que NÃO roda aqui (intencional):** Pest Feature (toca DB), Dusk E2E completo, medição de cobertura. **Garantia desses gates: pre-push hook local** (Decisão 4).
 
-### 3.2 Pipeline de `main` (`main.yml`) — build + publish
+### 3.2 Pipeline de `main` (`main.yml`) — re-validação
 
-Após merge em `main`:
+Após push em `main`:
 
-1. Re-roda jobs do `pr.yml` contra o SHA mergeado (defesa contra interferência de merge).
-2. `docker build` da imagem multistage (cache GHA).
-3. `docker push ghcr.io/<org>/defonline-app:main-<sha>` e `:latest`.
-4. Notifica Telegram canal `defonline-ci` com sucesso/falha.
+1. Re-roda jobs do `pr.yml` contra o SHA real (defesa contra interferência de merge / regressão silenciosa).
 
-**Tempo total estimado: ~4 min.** **Não há deploy aqui.** Imagem fica disponível para promoção via tag.
+**Tempo total estimado: ~2–3 min.** **Não há deploy nem build aqui.**
+
+> **Revisão 2026-05-23 (STORY-015):** este pipeline antes empurrava `ghcr.io/.../app:main-<sha>` + `:latest` em todo push, mas a imagem nunca era consumida — o `release-homolog.yml` builda do zero a partir do SHA da tag rc, e não usava `main-<sha>` nem como base. Custava ~3 min + camadas no GHCR por commit de pura conveniência (incluindo commits puramente documentais). O job `build-and-push` e o `notify` Telegram foram removidos; a imagem nasce só quando há consumidor (tag rc/release). Quem precisar de imagem fora do ciclo de tag pode disparar `workflow_dispatch` em `release-homolog.yml` ou cortar uma rc manualmente.
 
 ### 3.3 Pipeline `release-homolog.yml` (tag `vX.Y.Z-rc.N`)
 

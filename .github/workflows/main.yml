@@ -1,8 +1,11 @@
-name: main — build + publish GHCR
+name: main — re-valida SHA mergeado
 
-# ADR-006 §3.2 — Após merge em main, re-roda PR pipeline (defesa contra interferência
-# de merge), constrói a imagem Docker multistage e publica em GHCR como
-# `main-<sha>` + `latest`. Não faz deploy — promoção fica para tags.
+# ADR-006 §3.2 (revisado 2026-05-23) — Após push em main, re-roda o pipeline do PR
+# contra o SHA real (defesa contra interferência de merge / regressão silenciosa).
+# NÃO builda imagem aqui: a imagem nasce no `release-homolog.yml` quando uma tag
+# `vX.Y.Z-rc.N` é empurrada — só então existe consumidor (deploy). Builds em main
+# eram puro custo (~3 min + camadas no GHCR) sem nenhum job que consumisse o
+# resultado.
 
 on:
   push:
@@ -15,11 +18,7 @@ concurrency:
 
 permissions:
   contents: read
-  packages: write
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/app
+  pull-requests: read
 
 jobs:
   validate:
@@ -29,52 +28,3 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-
-  build-and-push:
-    name: Build + push GHCR
-    needs: validate
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Login no GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build + push imagem
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: infra/docker/Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main-${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            APP_VERSION=${{ github.sha }}
-
-  notify:
-    name: Notifica Telegram
-    needs: build-and-push
-    if: always()
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Status
-        run: |
-          STATUS="${{ needs.build-and-push.result == 'success' && '✅' || '❌' }}"
-          MSG="${STATUS} DEFOnline main: ${{ github.sha }} — ${{ needs.build-and-push.result }}"
-          echo "$MSG"
-          # Telegram opcional (somente quando secrets existirem).
-          if [ -n "${{ secrets.TELEGRAM_BOT_TOKEN }}" ] && [ -n "${{ secrets.TELEGRAM_CHAT_ID_HOMOLOG }}" ]; then
-            curl -fsS -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-              -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID_HOMOLOG }}" \
-              -d "text=${MSG}" || true
-          fi

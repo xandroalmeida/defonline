@@ -581,7 +581,8 @@
         "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
         "related_stories": ["STORY-005"],
         "created_at": "2026-05-21",
-        "updated_at": "2026-05-21"
+        "updated_at": "2026-05-23",
+        "last_amendment_note": "2026-05-23 — §3.2 revisada: main.yml deixa de buildar imagem `main-<sha>`/`latest` em todo push (imagem nunca era consumida; release-homolog.yml builda do zero a partir do SHA da tag rc). Workflow fica só com job `validate`. Sem mudança de decisão estrutural."
       }
     ],
     "idr": [
