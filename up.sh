@@ -21,11 +21,31 @@ if [ ! -d app/vendor ]; then
         composer install --no-interaction --prefer-dist --no-ansi
 fi
 
-echo "==> [4/5] Aplicando migrations..."
+echo "==> [4/5] Aplicando migrations no banco principal (defonline)..."
 docker compose run --rm --no-deps web php artisan migrate --force
 
-echo "==> [5/5] Subindo web, worker, scheduler e pgadmin..."
-docker compose up -d web worker scheduler pgadmin
+# Banco de testes — usado por Pest+Dusk, isolado do `defonline` da UI manual.
+# `CREATE DATABASE` é idempotente via DO/EXCEPTION; extensões idempotentes.
+# Migration roda contra ele com APP_ENV=testing (carrega .env.testing).
+echo "==> [4b/5] Garantindo banco defonline_test + migrations..."
+docker compose exec -T db psql -U postgres -v ON_ERROR_STOP=1 <<'SQL' >/dev/null
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'defonline_test') THEN
+        CREATE DATABASE defonline_test OWNER defonline_app;
+        GRANT CONNECT ON DATABASE defonline_test TO defonline_backup;
+    END IF;
+END $$;
+SQL
+docker compose exec -T db psql -U postgres -d defonline_test -v ON_ERROR_STOP=1 -c "
+    CREATE EXTENSION IF NOT EXISTS pgcrypto;
+    CREATE EXTENSION IF NOT EXISTS pg_trgm;
+    CREATE EXTENSION IF NOT EXISTS citext;
+    CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+" >/dev/null
+docker compose run --rm --no-deps -e APP_ENV=testing web php artisan migrate --force >/dev/null
+
+echo "==> [5/5] Subindo web, web-test, worker, scheduler e pgadmin..."
+docker compose up -d web web-test worker scheduler pgadmin
 
 echo ""
 echo "✅ Ambiente DEFOnline local pronto."

@@ -30,6 +30,18 @@ if ! docker compose ps --status running --services 2>/dev/null | grep -q '^web$'
     exit 1
 fi
 
+# web-test é o espelho APP_ENV=testing que Dusk usa para NÃO derrubar tabelas
+# do banco `defonline` (smoke manual). Sobe sob demanda se não estiver vivo
+# (acontece em volumes que vieram de antes do commit 9859416/STORY-015).
+if ! docker compose ps --status running --services 2>/dev/null | grep -q '^web-test$'; then
+    ylw "  subindo container web-test (APP_ENV=testing)…"
+    docker compose up -d web-test >/dev/null
+    # Pequena janela pro `artisan serve` aceitar conexões antes do Dusk.
+    until docker compose exec -T web sh -c "curl -fsS http://web-test:8000/health >/dev/null 2>&1"; do
+        sleep 1
+    done
+fi
+
 step() {
     local name="$1"; shift
     bold "→ $name"

@@ -54,6 +54,25 @@ services:
     command: >
       sh -c "php artisan schedule:work"
 
+  # web-test — espelho do `web` rodando em APP_ENV=testing.
+  # Existe para o Dusk (que precisa um Laravel servindo a UI) bater contra o
+  # banco `defonline_test` em vez do `defonline` da UI manual. Sem isso, cada
+  # pre-push truncava tabelas em `defonline` via DatabaseTruncation. Bug
+  # rastreado em 2026-05-23 (STORY-015). `APP_ENV=testing` faz Laravel carregar
+  # `.env.testing` (DB_DATABASE=defonline_test, QUEUE_CONNECTION=sync — sem
+  # worker dedicado, jobs processam inline na mesma request).
+  #
+  # Sem porta publicada externamente: Dusk roda dentro do container `web` e
+  # acessa via DNS interno `http://web-test:8000`.
+  web-test:
+    <<: *app-base
+    container_name: defonline-web-test
+    environment:
+      PROCESS_TYPE: web
+      APP_ENV: testing
+    command: >
+      sh -c "php artisan serve --host=0.0.0.0 --port=8000"
+
   db:
     image: postgres:18-alpine
     container_name: defonline-db
