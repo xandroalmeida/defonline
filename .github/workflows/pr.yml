@@ -161,9 +161,14 @@ jobs:
           key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
       - run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Gera .env apontando para o Postgres do service
+      - name: Sobrescreve .env.testing para o CI (sem Mailpit/Mailpit-driver)
+        # Laravel detecta APP_ENV=testing (do phpunit.xml) e carrega .env.testing.
+        # O arquivo versionado mira o ambiente LOCAL (Dusk contra container
+        # web-test + Mailpit); CI não tem nada disso, então sobrescrevemos in
+        # situ com providers in-memory (array/sync), porém o mesmo Postgres do
+        # service container do job.
         run: |
-          cat > .env <<EOF
+          cat > .env.testing <<EOF
           APP_NAME=DEFOnline
           APP_ENV=testing
           APP_KEY=
