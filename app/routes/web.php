@@ -8,6 +8,7 @@ use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Livewire\Cadastro;
 use App\Livewire\Empresa\Cadastrar as CadastrarEmpresa;
+use App\Livewire\Home\MinhasEmpresas;
 use App\Livewire\Login;
 use Illuminate\Support\Facades\Route;
 
@@ -34,7 +35,8 @@ Route::post('/email/reenviar-confirmacao', [EmailConfirmacaoController::class, '
     ->name('email.reenviar');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/home', [HomeController::class, 'show'])->name('home');
+    // STORY-016 — "Minhas Empresas" substitui a /home mínima da STORY-011.
+    Route::get('/home', MinhasEmpresas::class)->name('home');
     Route::post('/logout', [HomeController::class, 'logout'])->name('logout');
 
     // STORY-014 — cadastro manual da primeira Empresa Analisada + visualização.

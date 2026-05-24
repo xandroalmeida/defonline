@@ -37,6 +37,8 @@
         dl.empresa-show dt { font-weight: 600; color: #6b7280; font-size: .9rem; }
         dl.empresa-show dd { margin: 0; }
         a.botao { display: inline-block; padding: .5rem 1rem; border: 1px solid #d1d5db; border-radius: 6px; text-decoration: none; color: #6b7280; pointer-events: none; opacity: .6; }
+        a.botao--ativo { color: #2563eb; border-color: #2563eb; pointer-events: auto; opacity: 1; }
+        a.botao--ativo:hover { background: #eff6ff; }
         button.secondary { padding: .5rem 1rem; background: white; color: #2563eb; border: 1px solid #2563eb; border-radius: 6px; font-weight: 600; cursor: pointer; }
         button.secondary:hover:not(:disabled) { background: #eff6ff; }
         button.secondary:disabled { opacity: .55; cursor: not-allowed; }

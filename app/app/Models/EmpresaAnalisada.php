@@ -97,6 +97,40 @@ final class EmpresaAnalisada extends Model
         };
     }
 
+    /**
+     * Documento mascarado para exibição em listagem (STORY-016 CA-1).
+     *
+     * CNPJ: `AA dot estrelas barra FFFF dash estrelas` — primeiros 2 dígitos +
+     * filial visíveis, restantes ocultos.
+     * CPF: 3 dígitos centrais visíveis, restantes ocultos.
+     */
+    public function documentoMascarado(): string
+    {
+        $d = $this->documento;
+
+        return match ($this->tipo_documento) {
+            TipoDocumento::Cnpj => strlen($d) === 14
+                ? substr($d, 0, 2).'.***.***/'.substr($d, 8, 4).'-**'
+                : $d,
+            TipoDocumento::Cpf => strlen($d) === 11
+                ? '***.'.substr($d, 3, 3).'.***-**'
+                : $d,
+        };
+    }
+
+    /**
+     * Rótulo curto da fonte para badge — "Receita Federal" ou "Manual"
+     * (STORY-016 CA-1; o rótulo longo de `FonteEnriquecimento::rotulo()`
+     * permanece para o detalhe da empresa).
+     */
+    public function fonteBadge(): string
+    {
+        return match ($this->fonte_enriquecimento) {
+            FonteEnriquecimento::Rfb => 'Receita Federal',
+            FonteEnriquecimento::Manual => 'Manual',
+        };
+    }
+
     protected static function newFactory(): EmpresaAnalisadaFactory
     {
         return EmpresaAnalisadaFactory::new();

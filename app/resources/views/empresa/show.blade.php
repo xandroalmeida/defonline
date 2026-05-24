@@ -34,8 +34,8 @@
         <dd dusk="empresa-show-data-fundacao">{{ $empresa->data_fundacao?->format('d/m/Y') ?: '—' }}</dd>
     </dl>
 
-    {{-- "Minhas Empresas" entra na STORY-016 — link inerte enquanto isso. --}}
-    <a href="#" class="botao" dusk="empresa-show-voltar" aria-disabled="true"
-       onclick="event.preventDefault(); return false;">Voltar para Minhas Empresas</a>
+    <a href="{{ route('home') }}" class="botao botao--ativo" dusk="empresa-show-voltar">
+        Voltar para Minhas Empresas
+    </a>
 </div>
 @endsection

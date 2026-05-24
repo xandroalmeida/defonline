@@ -7,8 +7,10 @@ namespace App\Http\Controllers;
 use App\Jobs\EnviarEmailConfirmacao;
 use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
+use App\Observabilidade\EventLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 
@@ -31,24 +33,37 @@ final class EmailConfirmacaoController extends Controller
                 ->with('email_confirmar_erro_motivo', 'ja_confirmado');
         }
 
-        $usuario->forceFill(['email_confirmed_at' => now()])->save();
+        DB::transaction(function () use ($usuario, $request): void {
+            $usuario->forceFill(['email_confirmed_at' => now()])->save();
 
-        AuditLogger::log(
-            action: 'usuario.email_confirmado',
-            subjectType: 'Usuario',
-            subjectId: $usuario->id,
-            actorType: 'user',
-            actorId: $usuario->id,
-            usuarioId: $usuario->id,
-            after: [
-                'email' => $usuario->email,
-                'email_confirmed_at' => $usuario->email_confirmed_at?->toAtomString(),
-            ],
-            context: [
-                'ip' => $request->ip(),
-                'user_agent' => substr((string) $request->userAgent(), 0, 255),
-            ],
-        );
+            AuditLogger::log(
+                action: 'usuario.email_confirmado',
+                subjectType: 'Usuario',
+                subjectId: $usuario->id,
+                actorType: 'user',
+                actorId: $usuario->id,
+                usuarioId: $usuario->id,
+                after: [
+                    'email' => $usuario->email,
+                    'email_confirmed_at' => $usuario->email_confirmed_at?->toAtomString(),
+                ],
+                context: [
+                    'ip' => $request->ip(),
+                    'user_agent' => substr((string) $request->userAgent(), 0, 255),
+                ],
+            );
+
+            // STORY-016 CA-3 — emissão do evento `usuario_cadastrado` após
+            // confirmação de email (ADR-004 §2.2: o "cadastro" só é considerado
+            // realizado quando o Usuário confirma a posse do email; antes, a
+            // conta está inativa e não conta para north star). Propriedades sem
+            // PII — `plano_inicial` documenta o plano default em onda 1.
+            EventLogger::emit(
+                nomeEvento: 'usuario_cadastrado',
+                propriedades: ['plano_inicial' => 'basico_beta'],
+                usuarioId: $usuario->id,
+            );
+        });
 
         Log::info('usuario.email_confirmado', [
             'usuario_id' => $usuario->id,

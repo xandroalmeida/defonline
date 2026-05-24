@@ -11,6 +11,7 @@ use App\Domain\TipoDocumento;
 use App\Domain\Uf;
 use App\Models\EmpresaAnalisada;
 use App\Observabilidade\AuditLogger;
+use App\Observabilidade\EventLogger;
 use App\Services\Rfb\RfbCnpjFalhouException;
 use App\Services\Rfb\RfbConsultarCnpj;
 use Illuminate\Contracts\View\View;
@@ -231,6 +232,25 @@ final class Cadastrar extends Component
                     'fonte_enriquecimento' => $e->fonte_enriquecimento->value,
                     'uf' => $e->uf,
                 ],
+            );
+
+            // STORY-016 CA-4 — evento de produto `empresa_cadastrada`. Emitido
+            // dentro da mesma transação (ADR-004 §Decisão 2 — atomicidade).
+            // Propriedades sem PII: documento NUNCA viaja no payload; CNAE é
+            // truncado para 2 dígitos = setor agregado (decisão PO 2026-05-22).
+            EventLogger::emit(
+                nomeEvento: 'empresa_cadastrada',
+                propriedades: [
+                    'empresa_id' => $e->id,
+                    'tipo_documento' => $e->tipo_documento->value,
+                    'fonte_enriquecimento' => $e->fonte_enriquecimento->value,
+                    'uf' => $e->uf,
+                    'cnae_2digitos' => $e->cnae !== null && strlen($e->cnae) >= 2
+                        ? substr($e->cnae, 0, 2)
+                        : null,
+                ],
+                usuarioId: $usuarioId,
+                empresaId: $e->id,
             );
 
             return $e;
