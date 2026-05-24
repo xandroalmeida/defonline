@@ -37,3 +37,9 @@ vault_ghcr_pull_token: ""
 #   ansible-vault edit inventories/homolog/group_vars/all/vault.yml
 vault_rfb_cnpja_api_key: ""
 vault_rfb_receitaws_api_key: ""
+
+# Resend — API key do provedor de email transacional (IDR-007).
+# Gerar em https://resend.com/api-keys após verificar o domínio defonline.xandrix.com.br
+# (SPF/DKIM/DMARC publicados conforme painel Resend). Formato: `re_<32_chars>`.
+# Sem essa chave + mail_mailer=resend, o Laravel rejeita o envio em runtime.
+vault_resend_api_key: ""

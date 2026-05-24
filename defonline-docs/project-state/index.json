@@ -672,6 +672,23 @@
         "created_at": "2026-05-23",
         "updated_at": "2026-05-23",
         "note": "Reaberto pelo Arquiteto pelo método, concretizou secrets via Ansible Vault (era vago: 'mesmo mecanismo'); aceito por Alexandro em 2026-05-23 no chat (\"pode aprovar tudo\")."
+      },
+      {
+        "id": "IDR-007",
+        "slug": "email-provider-resend",
+        "title": "Provedor de email transacional em homologação e produção — Resend",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-007-email-provider-resend.md",
+        "decided_at": "2026-05-24",
+        "decided_by": "PO (Alexandro)",
+        "approved_by": "Alexandro",
+        "related_story": "STORY-018",
+        "related_stories": ["STORY-013", "STORY-018"],
+        "related_idrs": ["IDR-006"],
+        "related_adrs": ["ADR-002", "ADR-005"],
+        "created_at": "2026-05-24",
+        "updated_at": "2026-05-24",
+        "note": "Fecha o débito \"mail_mailer: log apenas; sem provedor SMTP real ainda\" aberto desde a STORY-013. Lib transversal resend/resend-php adicionada; wiring Ansible no env.j2 + vars.yml + vault.example pronto. Chave ainda não está no vault — PO criando conta + verificando domínio defonline.xandrix.com.br + gerando key."
       }
     ]
   },
