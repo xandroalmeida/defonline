@@ -12,8 +12,6 @@ declare(strict_types=1);
  *
  * Exclusões documentadas:
  *   - `resources/css/tokens.css` é a única fonte autorizada de hex.
- *   - `resources/views/livewire/hello-world.blade.php` e `resources/views/welcome.blade.php`
- *     são debug do EPIC-000 — a STORY-024 remove ambos. Permitido até lá.
  *   - `resources/views/layouts/legal.blade.php` é shell separado (LEGAL) com seu
  *     próprio escopo de design — não é alvo da STORY-019.
  *
@@ -42,8 +40,6 @@ $alvos = array_map(static fn (string $h) => strtolower(ltrim($h, '#')), $tokensP
 
 $exclusoes = [
     'resources/css/tokens.css',
-    'resources/views/livewire/hello-world.blade.php',
-    'resources/views/welcome.blade.php',
     'resources/views/layouts/legal.blade.php',
     // Emails transacionais — inline styles obrigatórios (clientes de email
     // ignoram CSS vars). Os hex viram cópia manual da paleta v1; mudar tokens

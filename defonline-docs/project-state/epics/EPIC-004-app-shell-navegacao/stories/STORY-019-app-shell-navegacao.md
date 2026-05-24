@@ -6,8 +6,8 @@ epic_id: EPIC-004
 sprint_id: SPRINT-2026-W23
 type: implementation
 target_role: programador
-status: ready
-owner_agent: null
+status: done
+owner_agent: claude-programador
 created_at: 2026-05-24
 updated_at: 2026-05-24
 estimated_session_size: M-L

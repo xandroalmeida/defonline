@@ -12,9 +12,8 @@ use App\Livewire\Home\MinhasEmpresas;
 use App\Livewire\Login;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// STORY-024 — landing pública simples (substitui a página de debug welcome + hello-world).
+Route::view('/', 'landing')->name('landing');
 
 Route::get('/health', [HealthController::class, 'health'])->name('health');
 Route::get('/ready', [HealthController::class, 'ready'])->name('ready');

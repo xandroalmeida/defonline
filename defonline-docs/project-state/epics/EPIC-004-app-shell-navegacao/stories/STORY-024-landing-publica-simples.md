@@ -6,8 +6,8 @@ epic_id: EPIC-004
 sprint_id: SPRINT-2026-W23
 type: implementation
 target_role: programador
-status: ready
-owner_agent: null
+status: done
+owner_agent: claude-programador
 created_at: 2026-05-24
 updated_at: 2026-05-24
 estimated_session_size: S
@@ -286,16 +286,21 @@ Padrão `agent-task-format.md`. Story curta (S) — não exige IDR. Avisar PO no
 ## Notas do agente
 
 ### Decisões tomadas
-- <data> — <decisão>
+- 2026-05-24 — **View standalone em vez de consumir `<x-layouts.auth>`.** O header da landing tem dois CTAs (Entrar ghost + Criar conta primary), e o `<x-auth-header>` compartilhado só comporta um CTA por vez (renderizado por `routeIs('cadastro'|'login')`). Estender o componente compartilhado só para esse caso único viola "don't add abstractions beyond what the task requires"; CA-3 já permite "ou equivalente". A view ficou self-contained com `<!DOCTYPE>` + `@vite` + `@livewireStyles`/`@livewireScripts` (livewire vem no boilerplate por simetria com os outros layouts, apesar de a página em si ser Blade puro), reusando `<x-logo>`, `<x-button>` e `<x-footer-version>` da STORY-019. Header e footer ficam inline na view — replicam o markup do `<x-auth-header>` / `<x-app-footer variant="auth">` com a única diferença sendo os dois CTAs no canto direito.
+- 2026-05-24 — **Tipografia do H1: responsiva `--text-h1` → `--text-display`.** `text-[length:var(--text-h1)] sm:text-[length:var(--text-display)]` — 40px no mobile, 80px no desktop (sm = ≥640px). Mantém estética Stripe e respeita o desejo do CA-4/§Conteúdo de "peso 300 com display". Peso fica `font-light` (300).
+- 2026-05-24 — **Mobile-first nos CTAs do corpo: `flex-col-reverse`.** Primary fica visualmente em cima no mobile e à direita no desktop (alinha com a política CA-18 da STORY-019). Secondary aparece após o primary no DOM, mas reversed flex inverte a ordem visual no mobile.
+- 2026-05-24 — **CTA "Entrar" do header oculto em <480px.** Mantido só "Criar conta" no canto direito do header em telas estreitas; o "Já tenho conta" do corpo continua acessível e é redundante. Decisão coberta pela liberdade técnica do agente (CA-5 + §Liberdade técnica).
+- 2026-05-24 — **Dusk attribute `landing-header-logo` reaproveita padrão de `auth-header-logo`** (não é exigido pelo CA-10, mas dá ao smoke uma asserção a mais sem custo).
 
 ### Descobertas
-- <data> — <gotcha>
+- 2026-05-24 — `tests/Unit/Arch/DesignTokensTest.php` lista `welcome.blade.php` e `livewire/hello-world.blade.php` em `$exclusoes`. Atualizei o gate junto com a remoção dos arquivos: o bloco de documentação do cabeçalho citava explicitamente STORY-024 ("permitido até lá"), agora as exclusões saíram e o teste segue verde (a landing nova não usa hex literal — só tokens via CSS vars).
+- 2026-05-24 — `STORY-019` continua com `status: ready` no frontmatter e no `index.json`, mas o trabalho foi mergeado em `main` (commit `4de29e4`) e todos os componentes que a STORY-024 reusa (`<x-logo>`, `<x-button>`, `<x-footer-version>`, `tokens.css`) já existem e funcionam. Tratei a STORY-019 como entregue de fato e segui com a STORY-024 conforme direcionamento do PO. Status formal da STORY-019 fica para o PO acertar.
 
 ### Bloqueios encontrados
-- <data> — <bloqueio>
+- Nenhum.
 
 ### Cobertura final
-- Geral: <%>
+- Geral: **96.1 %** (gate 80 %). 316 testes Pest verdes (979 asserções). 13 testes Dusk verdes (81 asserções).
 
 ### Arquivos removidos
 - `app/resources/views/welcome.blade.php`
@@ -306,8 +311,12 @@ Padrão `agent-task-format.md`. Story curta (S) — não exige IDR. Avisar PO no
 
 ### Arquivos criados
 - `app/resources/views/landing.blade.php`
-- `app/tests/Feature/LandingTest.php` (ou nome equivalente)
+- `app/tests/Feature/LandingTest.php`
 - `app/tests/Browser/LandingBrowserTest.php`
+
+### Arquivos modificados (não-criação)
+- `app/routes/web.php` — rota `/` agora é `Route::view('/', 'landing')->name('landing')` (substitui closure que retornava `view('welcome')`).
+- `app/tests/Unit/Arch/DesignTokensTest.php` — remove `welcome.blade.php` e `livewire/hello-world.blade.php` da lista de `$exclusoes` (e do bloco de documentação do cabeçalho), pois os arquivos deixaram de existir.
 
 ### Links de evidência
 - PR: <url>

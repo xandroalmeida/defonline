@@ -533,8 +533,8 @@
       "title": "App shell + materialização do design system v1 + refactor das telas existentes",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
-      "owner_agent": null,
+      "status": "done",
+      "owner_agent": "claude-programador",
       "sprint_id": null,
       "path": "epics/EPIC-004-app-shell-navegacao/stories/STORY-019-app-shell-navegacao.md",
       "blocked_by": ["STORY-016"],
@@ -560,6 +560,23 @@
       "created_at": "2026-05-24",
       "updated_at": "2026-05-24",
       "note": "Promover para `ready` quando STORY-019 estiver `in_review`. Checklist em validation/checklist.md (a criar pelo PO antes da promoção). Mesmo padrão da STORY-008 e STORY-017. sprint_id: null — entra na mesma sprint da STORY-019."
+    },
+    {
+      "id": "STORY-024",
+      "epic_id": "EPIC-004",
+      "title": "Landing pública simples + remoção da página de debug `/`",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "done",
+      "owner_agent": "claude-programador",
+      "sprint_id": null,
+      "path": "epics/EPIC-004-app-shell-navegacao/stories/STORY-024-landing-publica-simples.md",
+      "blocked_by": ["STORY-019"],
+      "blocks": ["STORY-020"],
+      "estimated_session_size": "S",
+      "created_at": "2026-05-24",
+      "updated_at": "2026-05-24",
+      "note": "Cleanup + entrega visível: remove a página de debug `/` (welcome + HelloWorld Livewire component + 2 testes) e a substitui por uma landing pública simples (logo, H1 'Diagnóstico estratégico para sua empresa.', subtítulo, 2 CTAs Criar conta grátis / Já tenho conta, footer com versão). Reusa componentes da STORY-019 (<x-logo>, <x-button>, <x-footer-version>, layout auth). Mantém HelloWorldEmail job + mail + flag (vetores do RequestIdPropagationTest). Smoke Dusk de `/` é trocado por novo cenário (landing). sprint_id: null — mesma sprint da STORY-019/020."
     }
   ],
   "sprints": [
