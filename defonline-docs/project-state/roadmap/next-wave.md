@@ -19,15 +19,17 @@ Se a hipótese **não** se confirmar, esta onda muda inteiramente. Cenários pos
 
 ## Épicos esboçados (a confirmar)
 
-- **EPIC-004 — Cobrança e Plano Básico.** Roberto consegue assinar o Plano Básico (R$ 49,90/mês) e comprar créditos avulsos. Pix e cartão recorrente. Trial gratuito (`[DECIDIR]` 2.3 da spec) ainda pendente — decisão até abertura efetiva desta onda. Outcome: produto comercializável para o setor Indústria.
+> Nota: a numeração foi deslocada em 2026-05-24 — o `EPIC-004` deixou de ser placeholder de "Cobrança e Plano Básico" e foi atribuído ao **App shell + materialização do design system v1** dentro da WAVE-2026-01 (ver `roadmap/current-wave.md`). Todos os placeholders abaixo subiram um número.
 
-- **EPIC-005 — Cobertura de Comércio e Serviços.** Quiz, motor de cálculo e matriz de recomendações estendidos para os setores Comércio e Serviços. Joana e autônomos passam a ter relatório com semáforo e recomendações específicas. Outcome: produto serve a maioria das MPEs brasileiras, não só Indústria.
+- **EPIC-005 — Cobrança e Plano Básico.** Roberto consegue assinar o Plano Básico (R$ 49,90/mês) e comprar créditos avulsos. Pix e cartão recorrente. Trial gratuito (`[DECIDIR]` 2.3 da spec) ainda pendente — decisão até abertura efetiva desta onda. Outcome: produto comercializável para o setor Indústria.
 
-- **EPIC-006 — Exportação do relatório em PDF.** Gera versão A4 com semáforo colorido, glossário, recomendações por indicador. Outcome: Roberto leva o relatório para a reunião com o banco/sócio.
+- **EPIC-006 — Cobertura de Comércio e Serviços.** Quiz, motor de cálculo e matriz de recomendações estendidos para os setores Comércio e Serviços. Joana e autônomos passam a ter relatório com semáforo e recomendações específicas. Outcome: produto serve a maioria das MPEs brasileiras, não só Indústria.
 
-- **EPIC-007 — Solicitação de análise primária de captação.** Formulário interno conectado ao relatório do diagnóstico; equipe EBP responde em até 5 dias úteis. Sem cálculo automático no MVP (espec §1.4.1 + roadmap §2.2). Outcome: Roberto pede ajuda para dimensionar captação concreta.
+- **EPIC-007 — Exportação do relatório em PDF.** Gera versão A4 com semáforo colorido, glossário, recomendações por indicador. Outcome: Roberto leva o relatório para a reunião com o banco/sócio.
 
-- **EPIC-008 — Hotsite público + Central de Ajuda + suporte por e-mail.** Substitui o acesso por convite por aquisição orgânica. Landing page, FAQ, primeiros artigos de SEO (parecer CLAUDE §2.2 — meta de 15–20 artigos pré-go-live). Outcome: Roberto descobre o produto sem convite.
+- **EPIC-008 — Solicitação de análise primária de captação.** Formulário interno conectado ao relatório do diagnóstico; equipe EBP responde em até 5 dias úteis. Sem cálculo automático no MVP (espec §1.4.1 + roadmap §2.2). Outcome: Roberto pede ajuda para dimensionar captação concreta.
+
+- **EPIC-009 — Hotsite público + Central de Ajuda + suporte por e-mail.** Substitui o acesso por convite por aquisição orgânica. Landing page, FAQ, primeiros artigos de SEO (parecer CLAUDE §2.2 — meta de 15–20 artigos pré-go-live). Outcome: Roberto descobre o produto sem convite.
 
 ## Outcomes esperados ao fim desta onda
 
@@ -35,9 +37,9 @@ Se esta onda fechar com sucesso, o DEFOnline alcança "MVP comercializável" —
 
 ## Riscos antecipados
 
-- **LGPD e jurídico:** Termo de Adesão revisado por advogado (NRF §8) é gatilho que destrava EPIC-004; sem ele, não se pode cobrar.
+- **LGPD e jurídico:** Termo de Adesão revisado por advogado (NRF §8) é gatilho que destrava EPIC-005; sem ele, não se pode cobrar.
 - **Gateway de pagamento:** ADR específica de gateway sai como spike antecipado, talvez no fim da WAVE-2026-01.
-- **Matriz multi-setor:** validação externa das faixas para Comércio e Serviços (NRF §9.3) precisa estar pronta antes do EPIC-005.
+- **Matriz multi-setor:** validação externa das faixas para Comércio e Serviços (NRF §9.3) precisa estar pronta antes do EPIC-006.
 
 ## O que NÃO entra nesta onda
 
@@ -49,3 +51,4 @@ Se esta onda fechar com sucesso, o DEFOnline alcança "MVP comercializável" —
 ## Histórico
 
 - 2026-05-20 — Rascunho inicial criado junto com a abertura da WAVE-2026-01.
+- 2026-05-24 — Numeração dos placeholders deslocada (+1) porque o `EPIC-004` foi reatribuído ao "App shell + materialização do design system v1" dentro da WAVE-2026-01 (ver `roadmap/current-wave.md`). Cobrança virou EPIC-005, Cobertura virou EPIC-006, PDF virou EPIC-007, Captação virou EPIC-008, Hotsite virou EPIC-009. Riscos atualizados para refletir nova numeração.

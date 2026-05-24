@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-23T17:00:00Z",
+  "generated_at": "2026-05-24T18:00:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -35,7 +35,7 @@
       "goal": "Validar que o DEFOnline entrega valor real ao dono de pequena indústria, entregando em homologação o ciclo cadastro → diagnóstico → histórico no setor Indústria, sem cobrança.",
       "start_date": "2026-05-20",
       "target_end_date": "2026-08-26",
-      "epic_ids": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
+      "epic_ids": ["EPIC-000", "EPIC-001", "EPIC-004", "EPIC-002", "EPIC-003"],
       "path": "roadmap/current-wave.md",
       "related_pdr": "PDR-001"
     },
@@ -109,6 +109,21 @@
       "blocked_by_epics": ["EPIC-002"],
       "created_at": "2026-05-20",
       "updated_at": "2026-05-20"
+    },
+    {
+      "id": "EPIC-004",
+      "slug": "app-shell-navegacao",
+      "title": "App shell + materialização do design system v1 (chassi visual e navegação)",
+      "wave": "WAVE-2026-01",
+      "status": "ready",
+      "path": "epics/EPIC-004-app-shell-navegacao/epic.md",
+      "story_ids": ["STORY-019", "STORY-020"],
+      "validation_report": null,
+      "blocked_by_epics": ["EPIC-001"],
+      "blocks_epics": ["EPIC-002", "EPIC-003"],
+      "created_at": "2026-05-24",
+      "updated_at": "2026-05-24",
+      "note": "Criado pelo PO em 2026-05-24 após análise de gap: nenhum item priorizado previa app shell, menu de navegação, breadcrumb ou materialização do design system em código. Drift de paleta confirmado entre design-system.md (oficial: #0A2540/#635BFF/#F6F9FC) e STORY-011/STORY-016 (#1f2937/#2563eb/#f9fafb). Inserido na WAVE-2026-01 antes do início efetivo do EPIC-002 para evitar retrabalho de UI. STORY-019 entra na próxima sprint (após SPRINT-2026-W22 fechar) — não entra na sprint ativa do EPIC-001. Epic placeholder homônimo da WAVE-2026-02 ('Cobrança e Plano Básico') renumerado para EPIC-005, com cascata."
     }
   ],
   "stories": [
@@ -402,16 +417,16 @@
       "title": "Tela \"Minhas Empresas\" + emissão de eventos usuario_cadastrado e empresa_cadastrada",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
-      "owner_agent": null,
+      "status": "in_review",
+      "owner_agent": "claude-opus-4-7",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-016-minhas-empresas-eventos.md",
       "blocked_by": ["STORY-012", "STORY-013", "STORY-014"],
       "blocks": ["STORY-017"],
       "estimated_session_size": "S",
       "created_at": "2026-05-22",
-      "updated_at": "2026-05-22",
-      "note": "Ponto de junção do EPIC-001. Primeira consumidora dos eventos de produto fixados pela ADR-004 — sem ela, north star não tem base."
+      "updated_at": "2026-05-24",
+      "note": "Implementação local pronta (pre-push verde: Pint + Larastan + Pest 96.0% + Domain 100% + Dusk 12/12). Aguarda PR/CI verde + validação em homologação. Destrava promoção da STORY-017 (draft → ready) pelo PO."
     },
     {
       "id": "STORY-017",
@@ -447,6 +462,40 @@
       "created_at": "2026-05-23",
       "updated_at": "2026-05-24",
       "note": "Implementa o que a IDR-004 decidiu: clientes reais cnpja e receitaws cumprindo o contrato RfbCnpjClient da STORY-015, bind condicional em AppServiceProvider e rate-limit por provedor via RateLimiter. Não introduz mudança de UX. Smoke contratual em 2026-05-23 corrigiu drift do cnpja (endpoint público mudou para open.cnpja.com; address.city em vez de address.municipality). Wiring de infra Ansible (env.j2, vars.yml, vault.yml) entregue. Chave do cnpja gravada em vault homolog e .env local sob responsabilidade explícita do PO (rotação em débito — ver Notas do agente)."
+    },
+    {
+      "id": "STORY-019",
+      "epic_id": "EPIC-004",
+      "title": "App shell + materialização do design system v1 + refactor das telas existentes",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": null,
+      "path": "epics/EPIC-004-app-shell-navegacao/stories/STORY-019-app-shell-navegacao.md",
+      "blocked_by": ["STORY-016"],
+      "blocks": ["STORY-020"],
+      "estimated_session_size": "M-L",
+      "created_at": "2026-05-24",
+      "updated_at": "2026-05-24",
+      "note": "Abertura do EPIC-004. Entrega: layout Blade base (header + sidebar/drawer + breadcrumb + footer), tokens do design-system.md materializados em CSS vars centralizadas, Blade Components para button/card/input/label/link, refactor das 4 telas do EPIC-001 (/cadastro, /login, /home, /empresas/nova) sem regressão, IDR de framework CSS (Tailwind v4 vs CSS vanilla — agente decide), promoção do design-system.md de alpha para v1. sprint_id: null — entra na próxima sprint após SPRINT-2026-W22 fechar (decisão PO: não infla sprint ativa do EPIC-001). Bloqueada por STORY-016 (precisa de /home redefinida)."
+    },
+    {
+      "id": "STORY-020",
+      "epic_id": "EPIC-004",
+      "title": "Validação final do EPIC-004 App shell + design system v1",
+      "type": "validation",
+      "target_role": "validador",
+      "status": "draft",
+      "owner_agent": null,
+      "sprint_id": null,
+      "path": "epics/EPIC-004-app-shell-navegacao/stories/STORY-020-validacao-epic-004.md",
+      "blocked_by": ["STORY-019"],
+      "blocks": [],
+      "estimated_session_size": "M",
+      "created_at": "2026-05-24",
+      "updated_at": "2026-05-24",
+      "note": "Promover para `ready` quando STORY-019 estiver `in_review`. Checklist em validation/checklist.md (a criar pelo PO antes da promoção). Mesmo padrão da STORY-008 e STORY-017. sprint_id: null — entra na mesma sprint da STORY-019."
     }
   ],
   "sprints": [

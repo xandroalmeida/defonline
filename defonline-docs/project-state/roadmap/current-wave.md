@@ -31,7 +31,7 @@ Estas três restrições orientam decisões internas a cada épico:
 
 ## Épicos da onda
 
-Quatro épicos sequenciais, cada um terminando com uma estória de validação assumida pela skill `validador`. EPIC-000 é pré-requisito de todos os outros; EPIC-001 → EPIC-002 → EPIC-003 fluem em ordem natural de dependência.
+Cinco épicos, cada um terminando com uma estória de validação assumida pela skill `validador`. EPIC-000 é pré-requisito de todos os outros; EPIC-001 → EPIC-004 → EPIC-002 → EPIC-003 fluem em ordem natural de dependência. EPIC-004 (App shell + design system v1) foi acrescentado em 2026-05-24 entre o EPIC-001 e o EPIC-002 para entregar o chassi visual da aplicação antes que as telas densas do diagnóstico (quiz, relatório com 14 indicadores, semáforo) e do histórico nasçam com drift de paleta.
 
 ### EPIC-000 — Foundation
 
@@ -60,6 +60,24 @@ Quatro épicos sequenciais, cada um terminando com uma estória de validação a
 **Referências da especificação.** `defonline-docs/especificacao/V2/especificacao-funcional.md` §1.5.2, §3.2, §3.3; `defonline-docs/especificacao/V2/requisitos-nao-funcionais-e-juridicos.md` §3.1, §7.
 
 **Estimativa orientativa.** 3 semanas.
+
+### EPIC-004 — App shell + materialização do design system v1
+
+**Propósito.** Entregar o chassi visual da aplicação: layout Blade base, header global, navegação principal responsiva (sidebar no desktop / drawer no mobile), breadcrumb, footer, e materialização em código (CSS vars centralizadas) dos tokens já especificados em `especificacao/V2/design-system.md`. Refatorar as quatro telas existentes do EPIC-001 (`/cadastro`, `/login`, `/home`, `/empresas/nova`) para consumirem o novo layout, corrigindo o drift de paleta confirmado entre o design system oficial (`#0A2540/#635BFF/#F6F9FC`) e as STORY-011/STORY-016 (`#1f2937/#2563eb/#f9fafb`).
+
+**Outcome.** Ao fim do EPIC-004, toda rota autenticada do DEFOnline renderiza dentro de um shell único com header (logo + nome do usuário + dropdown "Conta" com Sair), navegação principal com itens **Minhas Empresas / Adicionar Empresa** (ativos) e **Diagnósticos / Histórico / Conta** (desabilitados com tooltip "Em breve"), breadcrumb em telas internas e footer com versão deployada + links institucionais. Tokens do design system materializados em arquivo único — alteração de cor primária se propaga em uma só edição.
+
+**Critério de pronto observável.** Roberto, em homologação, loga e navega entre `/home` (Minhas Empresas) e `/empresas/nova` pelo menu (não por URL direta), tanto em mobile (drawer + hamburger) quanto em desktop (sidebar fixa). Paleta Stripe-like aplicada em todas as telas. `design-system.md` promovido de `alpha` para `v1`. IDR de framework CSS aceita.
+
+**Métrica primária do épico.** Qualidade percebida em entrevista qualitativa do beta: 4 de 5 Robertos descrevem o produto como "parece profissional" / "parece um sistema sério" sem provocação. Janela: D+14 após deploy em homologação. Métrica de cobertura visual: 100% das rotas autenticadas existentes consumindo o novo layout; zero telas com paleta divergente do design system oficial.
+
+**Fora de escopo do épico.** Página `/conta` com edição de Usuário (onda 2); rotas reais para Termo / Política de Privacidade (placeholders nesta onda; conteúdo definitivo pendente do jurídico); dark mode; auditoria WCAG AAA (alvo é AA básico); tutorial onboarding de 3 slides; hotsite público (entra em EPIC-009 da onda 2 — renumerado em 2026-05-24); telas do EPIC-002.
+
+**Referências da especificação.** `defonline-docs/especificacao/V2/design-system.md` (fonte da verdade — tokens, componentes-base, do's and don'ts); `defonline-docs/especificacao/V2/especificacao-funcional.md` §3.3 (painel principal — base mental do shell); ADR-001 (stack Laravel 13 + Livewire 4) — restringe escolha de framework CSS a alternativas compatíveis; ADR-002 (monolito modular).
+
+**Dependências.** Bloqueado por EPIC-001 (precisa das telas existentes para refatorar; começa quando STORY-016 fechar `done`). Bloqueia EPIC-002 e EPIC-003 (chassi precisa estar pronto antes das telas densas do diagnóstico e do histórico).
+
+**Estimativa orientativa.** 1–2 semanas (1 estória implementation `M-L` + 1 validação `M`). Entra na próxima sprint após SPRINT-2026-W22 fechar — não infla a sprint ativa do EPIC-001.
 
 ### EPIC-002 — Diagnóstico para Indústria
 
@@ -99,7 +117,7 @@ Quatro épicos sequenciais, cada um terminando com uma estória de validação a
 
 ## Sequência e justificativa
 
-A ordem segue dependência natural: sem Foundation, nada deploya; sem Cadastro, não há Empresa Analisada para vincular diagnóstico; sem Diagnóstico, não há nada para a Recorrência reapresentar. EPIC-002 é o coração do valor e merece a fatia maior do tempo da onda. EPIC-003 é menor mas indispensável — sem ele, a métrica de recorrência (D3) nunca pode ser observada.
+A ordem segue dependência natural: sem Foundation, nada deploya; sem Cadastro, não há Empresa Analisada para vincular diagnóstico; sem chassi visual (EPIC-004), as telas densas do EPIC-002 (quiz + relatório com 14 indicadores + semáforo) e do EPIC-003 (lista + comparativo) nasceriam com drift de paleta e gerariam retrabalho; sem Diagnóstico, não há nada para a Recorrência reapresentar. EPIC-002 é o coração do valor e merece a fatia maior do tempo da onda. EPIC-003 é menor mas indispensável — sem ele, a métrica de recorrência (D3) nunca pode ser observada. EPIC-004 é fundação de UX (1–2 semanas) e roda entre EPIC-001 e EPIC-002, sem competir pelo orçamento de tempo do EPIC-002.
 
 ## Janela orientativa
 
@@ -127,3 +145,4 @@ A instrumentação é parte do escopo das estórias relevantes — não fica par
 ## Histórico
 
 - 2026-05-20 — Criada com PDR-001 aceito.
+- 2026-05-24 — **EPIC-004 (App shell + materialização do design system v1)** acrescentado entre EPIC-001 e EPIC-002 pelo PO após análise de gap no backlog: nenhum item priorizado previa app shell, menu de navegação, breadcrumb ou materialização do design system em código. Drift de paleta já confirmado entre `especificacao/V2/design-system.md` (oficial: `#0A2540/#635BFF/#F6F9FC`) e STORY-011/STORY-016 (`#1f2937/#2563eb/#f9fafb`). Inserir o chassi **antes** do início efetivo do EPIC-002 evita retrabalho de UI nas telas densas do diagnóstico (14 indicadores + semáforo + Resumo Executivo) e do histórico (lista cronológica + comparativo). STORY-019 (implementação) e STORY-020 (validação) entram na **próxima sprint** após SPRINT-2026-W22 fechar — não inflam a sprint ativa do EPIC-001. Numeração da WAVE-2026-02 deslocada (EPIC-004 placeholder de "Cobrança" virou EPIC-005, com cascata).
