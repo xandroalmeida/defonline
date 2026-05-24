@@ -1,10 +1,13 @@
 ---
 sprint_id: SPRINT-2026-W22
 wave: WAVE-2026-01
-status: active
+status: closed
 start_date: 2026-05-25
 end_date: 2026-06-12
+closed_at: 2026-05-24
+closed_early: true
 goal: "Entregar o EPIC-001 inteiro: ciclo cadastro Usuário → Termo+LGPD → confirmação de email → cadastro Empresa Analisada (manual + RFB com provedor real cnpja + fallback) → Minhas Empresas → eventos de produto, com validação independente aprovada."
+goal_achieved: true
 ---
 
 # SPRINT-2026-W22
@@ -101,16 +104,94 @@ Em homologação, ao fim de 2026-06-12:
 |---|---|---|---|
 | 2026-05-23 | **+ STORY-018** (Provedores reais cnpja + receitaws com rate-limit por provedor) | Decisões IDR-004/005/006 aceitas em 2026-05-23 fecharam a frente RFB. Sem STORY-018 nesta sprint, homologação rodaria com mock — perda do sinal de produção real ao fechar o EPIC-001. STORY-018 paraleliza com STORY-016 (depende só da STORY-015), sem alterar caminho crítico para STORY-017. | +1M (~2h efetivas). Buffer de Semana 3 absorve sem realocar. |
 
-## Fechamento do sprint (preencher no encerramento)
+## Fechamento do sprint
+
+**Fechado em 2026-05-24**, 19 dias antes da `end_date` planejada (12/06/2026). Goal totalmente atingido.
 
 ### O que foi entregue
-- (a preencher em 12/06/2026)
+
+Todas as 8 estórias planejadas em `done`:
+
+| ID | Título | Tag rc | Notas |
+|---|---|---|---|
+| STORY-011 | Walking skeleton — cadastro Usuário + login + home | `v0.2.0-rc.2` | Lição da rc.1 (E2E destrutivo no smoke) absorvida em todas as subsequentes |
+| STORY-012 | Termo de Adesão + LGPD (placeholder) | `v0.3.0-rc.1` | Mecanismo entregue; texto definitivo entra como bugfix quando jurídico voltar |
+| STORY-013 | Confirmação de email por link assinado | (`v0.4+`) | Resend wiring veio depois (IDR-007) |
+| STORY-014 | Cadastro de Empresa Analisada manual | `v0.4.0-rc.2` | Multi-tenant 403 — divergência com ADR-003 (404) registrada e endereçada por STORY-021 |
+| STORY-015 | Enriquecimento RFB (mock + fallback) | `v0.5.0-rc.1` | Abstração `RfbCnpjClient` permitiu STORY-018 não tocar UX |
+| STORY-016 | Tela "Minhas Empresas" + eventos `usuario_cadastrado`/`empresa_cadastrada` | `v0.6.0-rc.1` (incorporado em rc seguinte) | Primeiros consumidores reais do EventLogger do EPIC-000 |
+| STORY-018 | Provedores reais RFB (cnpja + receitaws) | `v0.6.0-rc.1` | Smoke contratual corrigiu drift do endpoint público cnpja; chave queimada em débito |
+| STORY-017 | Validação final do EPIC-001 | (sem tag — só docs) | Validador → `approved_with_pending` → PO sobrescreveu para `approved` após análise |
+
+**Mudanças de escopo registradas durante o sprint:**
+
+| Data | Mudança | Custo |
+|---|---|---|
+| 2026-05-23 | +STORY-018 (provedores reais RFB) — após IDR-004/005/006 aceitas | +1M absorvido pelo buffer |
+| 2026-05-24 | +IDR-007 (Resend) — débito histórico de SMTP fechado durante smoke da STORY-018 | Zero (cabeu na janela) |
+| 2026-05-24 | +EPIC-004 (App shell + design system) inserido na WAVE-2026-01 — após drift de paleta identificado em análise de gap do roadmap | Não impacta esta sprint (STORY-019/020 entram na próxima) |
+| 2026-05-24 | +STORY-021/022/023 (débitos do EPIC-001) — geradas no fechamento da validação | Não consomem capacidade desta sprint (`sprint_id: null`) |
+
+**Versão em homologação ao fim da sprint:** `v0.8.0-rc.1` (cobrindo todos os commits do EPIC-001 + STORY-018 + Resend + placeholder docs do EPIC-004).
 
 ### O que ficou para trás (e por quê)
-- (a preencher em 12/06/2026)
 
-### Aprendizados
-- (a preencher em 12/06/2026)
+**Nada do planejado.** Os 8 itens originais entregaram.
+
+**Débitos identificados durante a execução** (não competem com goal — viraram estórias separadas):
+
+- **STORY-021** (spike Arquiteto — 403 vs 404 cross-tenant) — `ready`, próxima sprint.
+- **STORY-022** (renomear `kind` ↔ `tipo` em `business_metrics`) — `ready`, backlog.
+- **STORY-023** (fix `bump-rc.yml` não dispara `release-homolog.yml`) — `ready`, backlog.
+- **Ação operacional não-virada-estória:** rotacionar chave cnpja queimada (STORY-018 notas) — PO executa fora do fluxo de sprint.
+
+### Aprendizados (retro por escrito — time pequeno)
+
+**1. O que funcionou e queremos continuar:**
+
+- **Abstração antes do provedor real** (STORY-015 entregando `RfbCnpjClient` + DTO + cache + métricas/alerta antes da STORY-018 trazer os clientes concretos) — STORY-018 só precisou cumprir o contrato; zero retrabalho. Padrão a propagar para EPIC-002 (motor de cálculo + indicadores).
+- **Lição absorvida coletivamente da rc.1 da STORY-011** (smoke E2E destrutivo em homol) — todas as 7 estórias seguintes mantiveram smoke read-only. Disciplina espontânea sem precisar de checklist de processo.
+- **Notas do agente substanciais em todas as estórias** (decisões, descobertas, gotchas, lições) — gerou documentação real e rastreável; permitiu o Validador trabalhar com evidência forte mesmo sem acesso direto a homol.
+- **Validador sendo conservador no veredito** (`approved_with_pending` em vez de `approved` puro) + **PO assumindo a sobrescrita com transparência** (mantendo o `verdict_history` na fonte) — separa rigor de validação do trade-off de decisão de produto sem misturar.
+- **Pipelines verdes consistentemente** (14 jobs no `release-homolog` da v0.8.0-rc.1) — gates de cobertura + lint + types + security scan trabalhando como esperado.
+
+**2. O que custou caro e queremos mudar:**
+
+- **Sprint fechou 19 dias antes da `end_date`.** Goal atingido, mas isso evidencia que a estimativa original (3 semanas para 8 estórias com agente Claude em modo focado) foi **muito conservadora**. Recalibrar para SPRINT-2026-W23: usar histórico real desta sprint como base (8 estórias entregues em ~5 dias úteis efetivos, ainda que sob compressão).
+- **Chave de API do cnpja queimada no chat** (STORY-018 Decisões) — falha de processo de PO ao colar credencial em texto plano. Mitigação registrada (rotação pendente). Mudança para o próximo sprint: PO nunca cola credencial no chat; usa `gh secret set` ou `ansible-vault encrypt_string` direto no terminal.
+- **Divergência arquitetural conhecida (403 vs 404 cross-tenant)** ficou aberta por 1 sprint inteira sem IDR formal — programador absorveu como decisão local na STORY-014; só virou estória explícita (STORY-021) no fechamento da validação. Para próximas waves: divergência detectada → IDR aberta no mesmo dia, não no fim.
+- **Checklist do PO usou `kind`, schema usou `tipo`** (item 4.8 do `validation/checklist.md`) — falha de redação do PO. Mudança: PO grep cruzado (`grep -rn 'kind|tipo' app/ defonline-docs/`) antes de redigir item de checklist que cita schema.
+- **Smoke manual do PO declinado no fechamento** — trade-off assumido explicitamente (registro em `validation/report.md` seção "Decisão do PO"). Não é mudança de processo, é risco a monitorar.
+
+**3. Um experimento concreto para o próximo sprint:**
+
+> **STORY-021 (spike Arquiteto cross-tenant) entra na primeira janela disponível**, **em paralelo** com STORY-019 (App shell EPIC-004). Justificativa: spike de Arquiteto é independente de implementação do EPIC-004; rodando os dois em paralelo testa se o time pequeno consegue de fato paralelizar trabalho de papéis distintos (PO+Arquiteto numa frente, Programador noutra). Se funcionar, vira padrão.
 
 ### Ajustes para o próximo sprint
-- (a preencher em 12/06/2026)
+
+- **Recalibrar capacidade**: usar dado real desta sprint (8 estórias S+M em ~5 dias úteis) em vez de estimativa conservadora. Próxima sprint pode comportar **EPIC-004 inteiro (STORY-019+020) + STORY-021 + 1-2 débitos** sem stress.
+- **Tamanho de sprint**: considerar **1 semana** em vez de 2-3 (`sprint-mechanics.md` sugere 1 semana para time muito pequeno + MVP cedo). Validar na próxima abertura.
+- **Status report mais leve durante execução** (não no fechamento): "olhada no índice + chat" diária quase desnecessária no modo agente focado — quase tudo aparece em uma sessão. Manter ritual mínimo apenas para acompanhamento de débitos abertos / decisões aguardando humano.
+
+### Métricas finais da sprint
+
+| Métrica | Valor | Meta |
+|---|---|---|
+| Estórias `done` | **8** | 8 |
+| Estórias entregues / planejadas | **100%** | — |
+| Cobertura geral média (estórias EPIC-001) | **~96%** | ≥ 80% |
+| Cobertura `app/Domain` | **100%** | ≥ 98% |
+| Suíte Pest (fim da sprint) | **265 testes / ~830 asserções** | — |
+| Suíte Dusk (fim da sprint) | **12 testes** | — |
+| Pipelines `release-homolog` verdes | **5/5** (v0.5 → v0.8) | 100% |
+| Bloqueios reportados | **0** | — |
+| Mudanças de escopo no meio | **3** (STORY-018, IDR-007, EPIC-004) | — |
+| Veredito da validação do épico | **APPROVED** (após análise PO) | approved |
+| Velocidade real (estórias/dia útil) | **~1.6** | — |
+| Sprint encerrado | **19 dias antes** da end_date | — |
+
+### Comemoração explícita (cultura)
+
+EPIC-001 fechado em ~5 dias úteis efetivos com 8 estórias entregues, dois novos provedores externos integrados (Resend + cnpja), primeira instância de eventos de produto reais consumindo o EventLogger do EPIC-000, multi-tenancy via Global Scope funcionando em produção homol, e qualidade técnica acima de todas as metas. 🚀 A WAVE-2026-01 está adiantada em relação à `target_end_date` (26/08/2026): 2 de 5 épicos `done` em ~5 dias úteis de execução real.
+
+> "Sprint bem conduzido entrega mais que estórias — entrega ritmo, previsibilidade e aprendizado contínuo." (`sprint-mechanics.md`)

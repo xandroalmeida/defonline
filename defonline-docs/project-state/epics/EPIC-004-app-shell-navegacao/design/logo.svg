@@ -1,0 +1,27 @@
+<!--
+  DEFOnline — Logomarca principal (ícone "D")
+  Monocromática em primary (#0A2540), com um ponto de acento em tertiary (#635BFF)
+  como assinatura visual discreta. Sem gradientes, sem efeitos. Escala bem de 16 a 128px.
+
+  Uso:
+    <svg ...>  ->  variação default (sobre fundos claros).
+    Para fundos escuros, sobrescreva o atributo `fill` do path principal para #FFFFFF
+    e o do ponto para #FFFFFF também (ou mantenha o tertiary se houver contraste).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32"
+     role="img" aria-label="DEFOnline">
+  <title>DEFOnline</title>
+
+  <!-- "D" geométrico: retângulo vertical à esquerda + semicírculo à direita,
+       construído como um único path para que o "miolo" fique vazado limpo. -->
+  <path
+    fill="#0A2540"
+    fill-rule="evenodd"
+    d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z
+       M9 9 V23 H15 A9 9 0 0 0 15 9 Z"
+  />
+
+  <!-- Acento tertiary: ponto discreto no canto inferior direito, como marca de "presença/conexão".
+       Single-accent: aparece apenas aqui na logomarca, nunca em decoração extra. -->
+  <circle cx="26" cy="25" r="2" fill="#635BFF"/>
+</svg>

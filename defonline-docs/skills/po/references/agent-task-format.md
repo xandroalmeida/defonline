@@ -33,7 +33,7 @@ Uma estória deve ser executável em **uma sessão**. Toda a informação necess
 
 ## Ao começar (passos 1–4)
 
-1. **Carregue a skill apropriada.** Se a estória tem `target_role: programador`, carregue a skill `programador`. Se `arquiteto`, carregue `arquiteto`. Se `validador`, carregue `validador`.
+1. **Carregue a skill apropriada.** Se a estória tem `target_role: programador`, carregue a skill `programador`. Se `arquiteto`, carregue `arquiteto`. Se `validador`, carregue `validador`. Se `designer`, carregue `designer`. Se a estória tem `requires_design: true` mas `target_role: programador`, o **Programador é dono** da estória — mas o **Designer entra em paralelo** desde o início (ver `designer/references/collaboration-with-developer.md`); o Programador não toca a UI até o sync inicial com o Designer (rabisco + ≤15 min de alinhamento).
 2. **Leia a estória inteira** antes de qualquer outra coisa. Identifique referências, dependências, decisões já tomadas (PDRs/ADRs).
 3. **Leia os documentos referenciados** — não confie só no que está na estória. A spec é mais fundo.
 4. **Edite o frontmatter da estória:**

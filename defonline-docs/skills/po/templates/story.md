@@ -5,7 +5,8 @@ title: Título humano da estória
 epic_id: EPIC-XXX
 sprint_id: SPRINT-YYYY-WNN  # opcional até a estória entrar em sprint
 type: implementation  # implementation | spike | validation | enablement | bugfix
-target_role: programador  # programador | arquiteto | validador
+target_role: programador  # programador | arquiteto | validador | designer
+requires_design: false   # true quando a estória envolve UI nova/alterada — Designer entra em paralelo (ver PDR-002)
 status: ready  # ready | in_progress | blocked | in_review | done | abandoned
 owner_agent: null  # preenchido quando um agente assume
 created_at: YYYY-MM-DD

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DEFOnline — Logo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* Tokens do design system — fonte: especificacao/V2/design-system.md */
+      --color-primary:   #0A2540;
+      --color-secondary: #425466;
+      --color-tertiary:  #635BFF;
+      --color-neutral:   #F6F9FC;
+      --color-surface:   #FFFFFF;
+      --color-border:    #E3E8EE;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+
+      --shadow-sm: 0 1px 2px rgba(10, 37, 64, 0.04);
+      --shadow-md: 0 4px 12px rgba(10, 37, 64, 0.06);
+
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 32px;
+      --space-xl: 64px;
+
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-sans);
+      font-weight: 400;
+      color: var(--color-primary);
+      background: var(--color-neutral);
+      margin: 0;
+      padding: var(--space-lg) var(--space-md);
+      line-height: 1.55;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .page h1 {
+      font-size: 1.75rem;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      margin: 0 0 var(--space-xs);
+    }
+
+    .page > p.caption {
+      color: var(--color-secondary);
+      font-size: 0.875rem;
+      margin: 0 0 var(--space-lg);
+    }
+
+    section.demo {
+      margin-bottom: var(--space-lg);
+    }
+
+    section.demo h2 {
+      font-size: 1.25rem;
+      font-weight: 500;
+      margin: 0 0 var(--space-sm);
+    }
+
+    section.demo p.caption {
+      color: var(--color-secondary);
+      font-size: 0.875rem;
+      margin: 0 0 var(--space-md);
+    }
+
+    /* Contextos de apresentação --------------------------------------------- */
+    .ctx {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+      padding: var(--space-lg);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+    }
+
+    .ctx--light   { background: var(--color-surface); }
+    .ctx--neutral { background: var(--color-neutral); }
+    .ctx--dark    { background: var(--color-primary); border-color: var(--color-primary); }
+
+    .ctx-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--color-secondary);
+      width: 96px;
+      flex-shrink: 0;
+    }
+
+    .ctx--dark .ctx-label { color: rgba(255, 255, 255, 0.7); }
+
+    .sizes {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+      flex-wrap: wrap;
+    }
+
+    .size-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    .size-item small {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--color-secondary);
+    }
+
+    .ctx--dark .size-item small { color: rgba(255, 255, 255, 0.55); }
+
+    .wordmark {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-family: var(--font-sans);
+      font-weight: 500;
+      color: var(--color-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .ctx--dark .wordmark { color: var(--color-surface); }
+
+    .wordmark--24 { font-size: 0.95rem; }
+    .wordmark--32 { font-size: 1.15rem; }
+    .wordmark--48 { font-size: 1.6rem; }
+
+    /* SVG inline ------------------------------------------------------------ */
+    .logo-svg { display: block; }
+
+    /* Variação dark: substitui o fill via classe (sem precisar de outro SVG) */
+    .ctx--dark .logo-svg path { fill: var(--color-surface); }
+    .ctx--dark .logo-svg circle { fill: var(--color-tertiary); } /* mantém acento */
+  </style>
+</head>
+<body>
+  <main class="page">
+    <h1>DEFOnline — Logomarca</h1>
+    <p class="caption">Ícone "D" geométrico, monocromático em primary, com ponto de acento tertiary discreto. Tamanhos 24 / 32 / 48 px em três contextos.</p>
+
+    <!-- Contexto 1: Header light (sobre #FFFFFF) -->
+    <section class="demo">
+      <h2>Header light</h2>
+      <p class="caption">Uso típico: header da aplicação sobre fundo branco.</p>
+      <div class="ctx ctx--light">
+        <span class="ctx-label">surface<br>#FFFFFF</span>
+        <div class="sizes">
+          <div class="size-item">
+            <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="24" height="24" role="img" aria-label="DEFOnline">
+              <path fill="#0A2540" fill-rule="evenodd" d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z M9 9 V23 H15 A9 9 0 0 0 15 9 Z"/>
+              <circle cx="26" cy="25" r="2" fill="#635BFF"/>
+            </svg>
+            <small>24px</small>
+          </div>
+          <div class="size-item">
+            <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="DEFOnline">
+              <path fill="#0A2540" fill-rule="evenodd" d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z M9 9 V23 H15 A9 9 0 0 0 15 9 Z"/>
+              <circle cx="26" cy="25" r="2" fill="#635BFF"/>
+            </svg>
+            <small>32px</small>
+          </div>
+          <div class="size-item">
+            <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48" role="img" aria-label="DEFOnline">
+              <path fill="#0A2540" fill-rule="evenodd" d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z M9 9 V23 H15 A9 9 0 0 0 15 9 Z"/>
+              <circle cx="26" cy="25" r="2" fill="#635BFF"/>
+            </svg>
+            <small>48px</small>
+          </div>
+          <div class="size-item">
+            <span class="wordmark wordmark--32">
+              <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28" role="img" aria-label="DEFOnline">
+                <path fill="#0A2540" fill-rule="evenodd" d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z M9 9 V23 H15 A9 9 0 0 0 15 9 Z"/>
+                <circle cx="26" cy="25" r="2" fill="#635BFF"/>
+              </svg>
+              DEFOnline
+            </span>
+            <small>com wordmark</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contexto 2: Card (sobre #F6F9FC) -->
+    <section class="demo">
+      <h2>Card / superfície neutra</h2>
+      <p class="caption">Uso típico: dentro de cards, dialogs, ilustrações de estado vazio.</p>
+      <div class="ctx ctx--neutral">
+        <span class="ctx-label">neutral<br>#F6F9FC</span>
+        <div class="sizes">
+          <div class="size-item">
+            <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="24" height="24" role="img" aria-label="DEFOnline">
+              <path fill="#0A2540" fill-rule="evenodd" d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z M9 9 V23 H15 A9 9 0 0 0 15 9 Z"/>
+              <circle cx="26" cy="25" r="2" fill="#635BFF"/>
+            </svg>
+            <small>24px</small>
+          </div>
+          <div class="size-item">
+            <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="DEFOnline">
+              <path fill="#0A2540" fill-rule="evenodd" d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z M9 9 V23 H15 A9 9 0 0 0 15 9 Z"/>
+              <circle cx="26" cy="25" r="2" fill="#635BFF"/>
+            </svg>
+            <small>32px</small>
+          </div>
+          <div class="size-item">
+            <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48" role="img" aria-label="DEFOnline">
+              <path fill="#0A2540" fill-rule="evenodd" d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z M9 9 V23 H15 A9 9 0 0 0 15 9 Z"/>
+              <circle cx="26" cy="25" r="2" fill="#635BFF"/>
+            </svg>
+            <small>48px</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contexto 3: Header dark (sobre #0A2540) -->
+    <section class="demo">
+      <h2>Header dark / fundo escuro</h2>
+      <p class="caption">Uso típico: hotsite hero, footer institucional, materiais impressos sobre fundo escuro.</p>
+      <div class="ctx ctx--dark">
+        <span class="ctx-label">primary<br>#0A2540</span>
+        <div class="sizes">
+          <div class="size-item">
+            <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="24" height="24" role="img" aria-label="DEFOnline">
+              <path fill="#0A2540" fill-rule="evenodd" d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z M9 9 V23 H15 A9 9 0 0 0 15 9 Z"/>
+              <circle cx="26" cy="25" r="2" fill="#635BFF"/>
+            </svg>
+            <small>24px</small>
+          </div>
+          <div class="size-item">
+            <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="DEFOnline">
+              <path fill="#0A2540" fill-rule="evenodd" d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z M9 9 V23 H15 A9 9 0 0 0 15 9 Z"/>
+              <circle cx="26" cy="25" r="2" fill="#635BFF"/>
+            </svg>
+            <small>32px</small>
+          </div>
+          <div class="size-item">
+            <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48" role="img" aria-label="DEFOnline">
+              <path fill="#0A2540" fill-rule="evenodd" d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z M9 9 V23 H15 A9 9 0 0 0 15 9 Z"/>
+              <circle cx="26" cy="25" r="2" fill="#635BFF"/>
+            </svg>
+            <small>48px</small>
+          </div>
+          <div class="size-item">
+            <span class="wordmark wordmark--32">
+              <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28" role="img" aria-label="DEFOnline">
+                <path fill="#0A2540" fill-rule="evenodd" d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z M9 9 V23 H15 A9 9 0 0 0 15 9 Z"/>
+                <circle cx="26" cy="25" r="2" fill="#635BFF"/>
+              </svg>
+              DEFOnline
+            </span>
+            <small>com wordmark</small>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

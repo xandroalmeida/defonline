@@ -3,7 +3,7 @@ story_id: STORY-019
 slug: app-shell-navegacao
 title: App shell + materialização do design system v1 + refactor das telas existentes
 epic_id: EPIC-004
-sprint_id: null
+sprint_id: SPRINT-2026-W23
 type: implementation
 target_role: programador
 status: ready
@@ -15,7 +15,13 @@ estimated_session_size: M-L
 
 # STORY-019 — App shell + materialização do design system v1 + refactor das telas existentes
 
-> **Para o agente programador:** esta é a estória de abertura do EPIC-004 — chassi visual da aplicação. Não entrega funcionalidade nova ao Roberto; entrega o palco onde o EPIC-002 (quiz + relatório) e o EPIC-003 (histórico) vão atuar. Você materializa em código o `especificacao/V2/design-system.md` (hoje só em markdown) e refatora as telas do EPIC-001 para consumirem o novo layout, **corrigindo o drift de paleta** que apareceu nas STORY-011 e STORY-016.
+> **Para o agente programador:** esta é a estória de abertura do EPIC-004 — chassi visual da aplicação. Não entrega funcionalidade nova ao Roberto; entrega o palco onde o EPIC-002 (quiz + relatório) e o EPIC-003 (histórico) vão atuar. Você materializa em código o `especificacao/V2/design-system.md` (hoje só em markdown) e refatora as telas do EPIC-001 para consumirem o novo layout, **corrigindo o drift de paleta** que apareceu nas STORY-011 e STORY-016 + **6 problemas adicionais** (CA-14 a CA-19) identificados em auditoria UX (2026-05-24).
+>
+> **Antes de codar, leia obrigatoriamente:**
+> - `defonline-docs/project-state/epics/EPIC-004-app-shell-navegacao/design/ux-specs.md` — spec UX consolidada (inventário de telas, política Cancelar/Voltar, política de versão, política de identificação de tela ativa).
+> - `defonline-docs/project-state/epics/EPIC-004-app-shell-navegacao/design/fluxo-navegacao.md` — fluxo de navegação ponta-a-ponta (mapa de rotas, fluxos detalhados por tela, mobile).
+> - `defonline-docs/project-state/epics/EPIC-004-app-shell-navegacao/design/mock-shell.html` — protótipo navegável com as 6 telas. Abra no navegador e percorra. É o "design assinado" pelo PO.
+> - `defonline-docs/project-state/epics/EPIC-004-app-shell-navegacao/design/logo.svg` — logomarca "D" oficial (use inline; não baixe).
 
 ## Contexto (por que esta estória existe)
 
@@ -87,6 +93,39 @@ Para o time de implementação: alteração de uma cor primária no design syste
   - Dusk: drawer mobile abre/fecha com hamburger e com Escape.
   - Smoke pós-deploy: probe read-only em `/home` em homologação, verificando presença do shell.
 
+- [ ] **CA-14 (Bug fix — Adicionar empresa sempre disponível):** Em `/home` (componente `MinhasEmpresas`), o botão `Adicionar empresa` (primary, com ícone "+") aparece no header da seção em **todos** os estados (vazio, 1 empresa, 2+). No estado vazio, o CTA inline `Cadastrar primeira empresa` dentro do empty state permanece como hoje — mas o do header da seção é o oficial. Teste Dusk: criar usuário com 1 empresa via factory → acessar `/home` → asserir presença do botão `[dusk="minhas-empresas-cta-adicionar"]` → clicar → asserir navegação para `/empresas/nova`. Atualmente este caminho não existe e o teste falha — a story corrige.
+
+- [ ] **CA-15 (Logomarca "D"):** Criar `resources/views/components/logo.blade.php` consumindo o SVG de `defonline-docs/project-state/epics/EPIC-004-app-shell-navegacao/design/logo.svg`. Componente aceita props `size` (default 32) e `variant` (`default` | `dark`, com `dark` invertendo `fill` do path principal para `#FFFFFF`). Inline no header (não via `<img>` ou tag externa). Wordmark "DEFOnline" em texto Inter weight 500 fica ao lado do ícone no desktop e no mobile ≥ 480px; oculto em viewport < 480px (`@media (max-width: 479px)`). Inclui `aria-label="DEFOnline"` no `<svg>`.
+
+- [ ] **CA-16 (Número da versão no footer):** Footer da rota autenticada (e versão simplificada da rota auth) mostra o número da versão no **canto direito**, separado dos links institucionais. Formato:
+  - Produção (`config('app.env') === 'production'`): `v0.4.2` (lê de `config('app.version')`).
+  - Não-produção: `v0.4.2 · homol` (middle-dot U+00B7 separando ambiente). Em `local` a string é `v0.4.2 · local`; em `testing` é omitida.
+  - Tipografia: peso 400, cor `var(--color-secondary)` (`#425466`), tamanho `var(--fs-body-sm)` (14px). Sem link.
+  - Implementado em `<x-footer-version>` parcial reutilizável (já previsto na STORY-019, agora com formato definido). Teste feature: GET `/home` no env `testing` com `APP_VERSION=v0.4.2-test` → asserir `v0.4.2-test` presente no HTML. Dusk: visualmente em homologação confirmar `· homol` aparece.
+
+- [ ] **CA-17 (Identificação da tela ativa — 4 sinais):** Em cada rota autenticada, todos os quatro sinais abaixo estão presentes (exceto breadcrumb em raiz). Inspecionar via feature test em cada rota e Dusk em pelo menos `/home` e `/empresas/nova`:
+  1. Item correspondente na sidebar com classe `is-active` + atributo `aria-current="page"` + barra vertical 3px tertiary à esquerda + texto/ícone tertiary + fundo neutral.
+  2. Breadcrumb com último item sem link e com `aria-current="page"`. Não renderiza em `/home`.
+  3. `<h1>` única na página com texto correspondente (ex.: "Minhas Empresas", "Cadastrar empresa", "{razão social}").
+  4. `<title>` no formato `"{H1} · DEFOnline"`.
+
+  Mapeamento canônico (de `design/ux-specs.md §1` e `design/fluxo-navegacao.md §7`):
+
+  | Rota | Sidebar ativa | Breadcrumb | H1 | `<title>` |
+  |---|---|---|---|---|
+  | `/home` | Minhas Empresas | — | Minhas Empresas | "Minhas Empresas · DEFOnline" |
+  | `/empresas/nova` | + Adicionar Empresa | Minhas Empresas › Nova empresa | Cadastrar empresa | "Cadastrar empresa · DEFOnline" |
+  | `/empresas/{id}/show` | Minhas Empresas | Minhas Empresas › {nome} | {nome fantasia ou razão social} | "{razão social} · DEFOnline" |
+
+- [ ] **CA-18 (Política de Cancelar / Voltar):** Botões secundários de navegação seguem a política consolidada em `design/ux-specs.md §2` e `design/fluxo-navegacao.md §6`. Concretamente nesta story:
+  - `/empresas/nova` tem botão `Cancelar` (variant `secondary`) **ao lado** de `Cadastrar empresa` no desktop (mesma linha, primary à direita); **abaixo** dele no mobile (`flex-direction: column-reverse` com primary no topo). Click em Cancelar navega via GET para `/home` (sem confirmação modal — fora de escopo). `dusk="empresa-cancelar"`.
+  - `/empresas/{id}/show` tem botão `Voltar para Minhas Empresas` (variant `secondary` com ícone seta-esquerda) no final do conteúdo. Substitui o `<a class="botao botao--ativo">` cru atual. `dusk="empresa-show-voltar"` (preserva o `dusk` existente).
+  - **Cancelar e Voltar nunca coexistem na mesma tela.**
+  - `/cadastro` e `/login` **não** ganham Cancelar nem Voltar (são raízes de fluxo público).
+  - Test feature: presença do botão Cancelar em GET `/empresas/nova`. Test feature: clicar Cancelar (POST ou GET) volta para `/home`. Test Dusk mobile: ordem visual (primary primeiro, Cancelar embaixo).
+
+- [ ] **CA-19 (Logout com redirect e flash):** O dropdown "Conta" no header tem item `Sair` que dispara POST `/logout` (route nomeada `logout`). Backend já existe (STORY-011) — não alterar. Após logout, redirect para `/login` com flash `cadastro_sucesso` ou flash novo `logout_sucesso` (mensagem: "Você saiu da conta com sucesso.") — Programador decide a chave; valida com PO se quiser reusar a existente. Test Dusk: navegar para `/home` → abrir dropdown Conta → click "Sair" → asserir URL `/login` + flash visível.
+
 ## Fora de escopo
 
 - **Página `/conta`** com edição de dados do Usuário — onda 2.
@@ -96,6 +135,10 @@ Para o time de implementação: alteração de uma cor primária no design syste
 - **Reposicionar `/home` para `/dashboard`** ou renomear rotas existentes — a STORY-016 fixou `/home` como Minhas Empresas; não mexer agora.
 - **Animações elaboradas** (slide-in, parallax, etc.) — apenas transições simples (drawer 200ms, dropdown 150ms). Design é flat por princípio (`design-system.md` §Filosofia).
 - **Telas do EPIC-002** (quiz, relatório, semáforo) — só preparamos o palco.
+- **Modal de confirmação "Descartar alterações?"** ao clicar `Cancelar` num form com dirty state — fica para depois. Por enquanto Cancelar simplesmente navega para o pai.
+- **Persistência de rascunho** do form `/empresas/nova` (Roberto fecha aba e volta com dados) — não.
+- **Páginas de erro customizadas 404/403/500** dentro do shell — desejável incluir, mas o PO autoriza o agente a deixar para story dedicada se a complexidade superar o orçamento da M-L. Decisão explícita no IDR ou em nota do agente.
+- **Logo dark / hotsite** — só a variante light (sobre `#FFFFFF`) e a variante dark (sobre `#0A2540` — usada em `homol` pill background ou similar) entram. Aplicação no hotsite é EPIC-008.
 
 ## Padrões de qualidade exigidos
 
@@ -115,10 +158,19 @@ Para o time de implementação: alteração de uma cor primária no design syste
 
 - **`design-system.md` é fonte da verdade** — paleta Stripe-like (`#0A2540 / #425466 / #635BFF / #F6F9FC / #FFFFFF`), Inter 300/400/500/600, tokens listados em §Tokens.
 - **Single-accent** — Tertiary (`#635BFF`) usado em **uma** ação por tela; itens ativos do menu também consomem Tertiary (decisão UX coerente com §"Do's").
-- **Itens "Diagnósticos" e "Histórico" no menu já aparecem desabilitados** — preparam o usuário para a chegada do EPIC-002/003 sem prometer demais (tooltip "Em breve" explicita).
+- **Itens "Diagnósticos", "Histórico" e "Conta" no menu já aparecem desabilitados** — preparam o usuário para a chegada do EPIC-002/003 e Onda 2 sem prometer demais (tooltip "Em breve — Onda 2").
 - **Mobile-first** — Roberto digita no celular (persona EPIC-001).
-- **Footer com versão deployada continua existindo** — já é entregue desde STORY-007; apenas extraímos para parcial reutilizável.
+- **Footer com versão deployada continua existindo** — já é entregue desde STORY-007; apenas extraímos para parcial reutilizável `<x-footer-version>` e formalizamos o formato (`v0.4.2` / `v0.4.2 · homol`).
 - **Não criar rotas para Termo / Política de Privacidade** — placeholders apenas; conteúdo definitivo está pendente do jurídico (decisão PO 2026-05-22 mantida).
+- **Logomarca "D"** — SVG inline em `design/logo.svg`. Inicial geométrica monocromática em `primary` + ponto de acento em `tertiary`. Wordmark "DEFOnline" ao lado no desktop e mobile ≥ 480px; só ícone em < 480px.
+- **Botão "Adicionar empresa" sempre visível em `/home`** — header da seção, em todos os estados (vazio, 1, 2+). É correção de bug funcional identificada na auditoria.
+- **`Cancelar` em forms de criação, `Voltar` em telas de detalhe; nunca os dois juntos** — política consolidada em `design/ux-specs.md §2` e `design/fluxo-navegacao.md §6`.
+- **4 sinais de identificação de tela ativa** — sidebar destacada + breadcrumb + H1 + title. Todos sempre presentes na rota autenticada (exceto breadcrumb na raiz).
+- **Posição da pill `homol`** — colada ao logo no header (decisão do PO sobre `ux-specs.md §13.5`).
+- **Texto exato dos tooltips disabled** — `"Em breve — Onda 2"` (decisão do PO sobre `ux-specs.md §13.2`).
+- **Botão `Iniciar diagnóstico` em `/empresas/{id}/show`** — fica visível como disabled, ocupando o slot do CTA primário para preparar Roberto para EPIC-002 (decisão do PO sobre `ux-specs.md §13.3`).
+- **Texto "Voltar para Minhas Empresas"** preferido sobre só "Voltar" — mais informativo (decisão do PO sobre `ux-specs.md §13.4`).
+- **Avatar com inicial no header** mantido (decisão do PO sobre `ux-specs.md §13.6`) — barato, dá identidade. Inicial do `primeiroNome()` do User em círculo `surface` com borda `border`.
 
 ## Liberdade técnica do agente
 
@@ -140,7 +192,7 @@ Você **não** decide:
 
 ## Definição de Pronto (DoD)
 
-- [ ] CA-1 a CA-13 passam.
+- [ ] CA-1 a CA-19 passam.
 - [ ] Pre-push verde (Pint + Larastan + Pest + Dusk + cobertura ≥ 80%).
 - [ ] Pipeline CI verde (validate + build-and-push + deploy + smoke + notify).
 - [ ] Deploy em homologação validado: percorrer fluxo `cadastrar → confirmar email → cadastrar empresa → /home → menu para /empresas/nova → breadcrumb de volta → logout` em mobile real (≤ 5 min) e em desktop. Screenshot anexado.

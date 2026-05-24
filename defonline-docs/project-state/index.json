@@ -1,10 +1,11 @@
 {
-  "version": 1,
-  "generated_at": "2026-05-24T18:00:00Z",
+  "version": 2,
+  "generated_at": "2026-05-24T20:30:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
-    "current_sprint": "SPRINT-2026-W22"
+    "current_sprint": null,
+    "last_closed_sprint": "SPRINT-2026-W22"
   },
   "product": {
     "vision": {
@@ -76,13 +77,25 @@
       "slug": "cadastro-minimo",
       "title": "Cadastro mínimo de Usuário e Empresa Analisada",
       "wave": "WAVE-2026-01",
-      "status": "ready",
+      "status": "done",
       "path": "epics/EPIC-001-cadastro-minimo/epic.md",
-      "story_ids": ["STORY-011", "STORY-012", "STORY-013", "STORY-014", "STORY-015", "STORY-016", "STORY-017", "STORY-018"],
-      "validation_report": null,
+      "story_ids": ["STORY-011", "STORY-012", "STORY-013", "STORY-014", "STORY-015", "STORY-016", "STORY-017", "STORY-018", "STORY-021", "STORY-022", "STORY-023"],
+      "validation_report": {
+        "path": "epics/EPIC-001-cadastro-minimo/validation/report.md",
+        "verdict": "approved",
+        "validated_at": "2026-05-24",
+        "validated_by": "validador (claude-opus-4-7)",
+        "verdict_history": [
+          { "at": "2026-05-24T18:00:00-03:00", "verdict": "approved_with_pending", "by": "validador (claude-opus-4-7)", "reason": "6 PASS com ressalva por limitação de acesso do validador (Postgres homol, dashboard Resend, inbox real) — zero fail técnico." },
+          { "at": "2026-05-24T20:30:00-03:00", "verdict": "approved", "by": "po (Alexandro)", "reason": "PO sobrescreveu após análise honesta das 6 ressalvas (3 por falta de evidência primária, 1 erro do próprio checklist, 1 divergência arquitetural aceita, 1 mecânica do índice). 3 débitos com mérito viraram STORY-021/022/023." }
+        ],
+        "po_decision_at": "2026-05-24",
+        "debts_spawned_as_stories": ["STORY-021", "STORY-022", "STORY-023"]
+      },
       "blocked_by_epics": [],
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-23"
+      "updated_at": "2026-05-24",
+      "note": "Fechado em 2026-05-24 após validação `approved` (PO sobrescreveu o `approved_with_pending` inicial do Validador — detalhes na seção 'Decisão do PO' do `validation/report.md`). 3 estórias de débito criadas no momento do fechamento: STORY-021 (spike Arquiteto: IDR 403 vs 404), STORY-022 (renomear kind↔tipo em business_metrics), STORY-023 (fix bump-rc.yml). Débito não-virado-estória: rotacionar chave cnpja queimada (STORY-018 notas — ação operacional do PO fora do fluxo de sprint)."
     },
     {
       "id": "EPIC-002",
@@ -349,7 +362,7 @@
       "title": "Confirmação de email por link assinado (conta inativa até confirmar)",
       "type": "implementation",
       "target_role": "programador",
-      "status": "in_review",
+      "status": "done",
       "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-013-confirmacao-email-link-assinado.md",
@@ -357,7 +370,7 @@
       "blocks": ["STORY-016"],
       "estimated_session_size": "M",
       "created_at": "2026-05-22",
-      "updated_at": "2026-05-22",
+      "updated_at": "2026-05-24",
       "coverage_geral": "96.7%",
       "coverage_dominio": "100%",
       "tests_pest": "134 (419 asserções)",
@@ -370,7 +383,7 @@
       "title": "Cadastro de Empresa Analisada por preenchimento manual",
       "type": "implementation",
       "target_role": "programador",
-      "status": "in_review",
+      "status": "done",
       "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-014-cadastro-empresa-analisada-manual.md",
@@ -378,7 +391,7 @@
       "blocks": ["STORY-015", "STORY-016"],
       "estimated_session_size": "M",
       "created_at": "2026-05-22",
-      "updated_at": "2026-05-23",
+      "updated_at": "2026-05-24",
       "coverage_geral": "97.2%",
       "coverage_dominio": "100%",
       "tests_pest": "185 (574 asserções)",
@@ -393,7 +406,7 @@
       "title": "Enriquecimento via API RFB (mock + fallback transparente)",
       "type": "implementation",
       "target_role": "programador",
-      "status": "in_review",
+      "status": "done",
       "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-015-enriquecimento-rfb-mock-fallback.md",
@@ -402,7 +415,7 @@
       "related_idrs": ["IDR-004"],
       "estimated_session_size": "M",
       "created_at": "2026-05-22",
-      "updated_at": "2026-05-23",
+      "updated_at": "2026-05-24",
       "coverage_geral": "95.4%",
       "coverage_dominio": "100%",
       "tests_pest": "236 (~740 asserções)",
@@ -417,8 +430,8 @@
       "title": "Tela \"Minhas Empresas\" + emissão de eventos usuario_cadastrado e empresa_cadastrada",
       "type": "implementation",
       "target_role": "programador",
-      "status": "in_review",
-      "owner_agent": "claude-opus-4-7",
+      "status": "done",
+      "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-016-minhas-empresas-eventos.md",
       "blocked_by": ["STORY-012", "STORY-013", "STORY-014"],
@@ -434,16 +447,16 @@
       "title": "Validação final do EPIC-001 Cadastro mínimo",
       "type": "validation",
       "target_role": "validador",
-      "status": "draft",
-      "owner_agent": null,
+      "status": "done",
+      "owner_agent": "validador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-017-validacao-epic-001.md",
       "blocked_by": ["STORY-011", "STORY-012", "STORY-013", "STORY-014", "STORY-015", "STORY-016"],
       "blocks": [],
       "estimated_session_size": "M",
       "created_at": "2026-05-22",
-      "updated_at": "2026-05-22",
-      "note": "Promover para `ready` quando STORY-016 estiver `in_review`. Checklist em validation/checklist.md (a criar pelo PO antes da promoção). STORY-018 (provedores reais da RFB) NÃO bloqueia esta validação — IDR-004 mantém `mock` como default em homologação até decisão operacional explícita."
+      "updated_at": "2026-05-24",
+      "note": "Promovida para `ready` em 2026-05-24 pelo PO após criação do `validation/checklist.md` (8 blocos, 47 itens). STORY-018 (provedores reais da RFB) NÃO bloqueia esta validação — IDR-004 mantém `mock` como default em homologação até decisão operacional explícita."
     },
     {
       "id": "STORY-018",
@@ -451,17 +464,68 @@
       "title": "Provedores reais da RFB (cnpja, receitaws) com rate-limit por provedor",
       "type": "implementation",
       "target_role": "programador",
-      "status": "in_review",
+      "status": "done",
       "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-018-rfb-providers-reais-cnpja-receitaws.md",
       "blocked_by": ["STORY-015"],
       "blocks": [],
-      "related_idrs": ["IDR-004", "IDR-005", "IDR-006"],
+      "related_idrs": ["IDR-004", "IDR-005", "IDR-006", "IDR-007"],
       "estimated_session_size": "M",
       "created_at": "2026-05-23",
       "updated_at": "2026-05-24",
       "note": "Implementa o que a IDR-004 decidiu: clientes reais cnpja e receitaws cumprindo o contrato RfbCnpjClient da STORY-015, bind condicional em AppServiceProvider e rate-limit por provedor via RateLimiter. Não introduz mudança de UX. Smoke contratual em 2026-05-23 corrigiu drift do cnpja (endpoint público mudou para open.cnpja.com; address.city em vez de address.municipality). Wiring de infra Ansible (env.j2, vars.yml, vault.yml) entregue. Chave do cnpja gravada em vault homolog e .env local sob responsabilidade explícita do PO (rotação em débito — ver Notas do agente)."
+    },
+    {
+      "id": "STORY-021",
+      "epic_id": "EPIC-001",
+      "title": "SPIKE — Decidir 403 vs 404 cross-tenant (alinhar STORY-014 com ADR-003/NRF)",
+      "type": "spike",
+      "target_role": "arquiteto",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": null,
+      "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-021-spike-403-vs-404-cross-tenant.md",
+      "blocked_by": [],
+      "blocks": [],
+      "estimated_session_size": "S",
+      "created_at": "2026-05-24",
+      "updated_at": "2026-05-24",
+      "note": "Débito derivado da validação do EPIC-001 (item 4.6 do `validation/report.md`). Decide entre Opção A (404 silencioso — alinha com ADR-003/NRF), Opção B (mantém 403 + audit — status quo, exige aditivo formal nos docs), Opção C (híbrido GET/POST). Registra IDR-008 ou número próximo. Recomendado fechar antes do EPIC-002 (6+ novas rotas autenticadas vão herdar a decisão)."
+    },
+    {
+      "id": "STORY-022",
+      "epic_id": "EPIC-001",
+      "title": "Alinhar nomenclatura `kind` ↔ `tipo` em `business_metrics` (checklist vs schema)",
+      "type": "bugfix",
+      "target_role": "programador",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": null,
+      "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-022-alinhar-nomenclatura-business-metrics.md",
+      "blocked_by": [],
+      "blocks": [],
+      "estimated_session_size": "S",
+      "created_at": "2026-05-24",
+      "updated_at": "2026-05-24",
+      "note": "Débito cosmético derivado da validação do EPIC-001 (item 4.8 do `validation/report.md`). PO recomenda Direção A (corrigir docs — schema atual `tipo` está bom). Direção B (renomear coluna) só se Arquiteto justificar mudança. Sem urgência; janela ociosa."
+    },
+    {
+      "id": "STORY-023",
+      "epic_id": "EPIC-001",
+      "title": "Fix — `bump-rc.yml` precisa disparar `release-homolog.yml` automaticamente",
+      "type": "bugfix",
+      "target_role": "programador",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": null,
+      "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-023-fix-bump-rc-dispara-release-homolog.md",
+      "blocked_by": [],
+      "blocks": [],
+      "estimated_session_size": "S",
+      "created_at": "2026-05-24",
+      "updated_at": "2026-05-24",
+      "note": "Débito de tooling CI derivado das Notas da STORY-018 (gotcha do `GITHUB_TOKEN` não dispara workflows downstream). 3 opções: PAT (mais simples), `gh release create` (sem secret novo), GitHub App (mais robusto). Recomendado fechar antes do EPIC-002 começar a usar `bump-rc` ativamente."
     },
     {
       "id": "STORY-019",
@@ -502,15 +566,28 @@
     {
       "id": "SPRINT-2026-W22",
       "wave": "WAVE-2026-01",
-      "status": "active",
+      "status": "closed",
       "start_date": "2026-05-25",
       "end_date": "2026-06-12",
+      "closed_at": "2026-05-24",
+      "closed_early": true,
       "goal": "Entregar o EPIC-001 inteiro: ciclo cadastro Usuário → Termo+LGPD → confirmação de email → cadastro Empresa Analisada (manual + RFB com provedor real cnpja + fallback) → Minhas Empresas → eventos de produto, com validação independente aprovada.",
+      "goal_achieved": true,
       "path": "sprints/SPRINT-2026-W22.md",
       "story_ids": ["STORY-011", "STORY-012", "STORY-013", "STORY-014", "STORY-015", "STORY-016", "STORY-017", "STORY-018"],
       "epic_ids": ["EPIC-001"],
       "opened_at": "2026-05-22",
-      "opened_by": "PO (Alexandro / Claude)"
+      "opened_by": "PO (Alexandro / Claude)",
+      "closed_by": "PO (Alexandro / Claude)",
+      "outcome": {
+        "stories_planned": 8,
+        "stories_delivered": 8,
+        "stories_dropped": 0,
+        "mid_sprint_changes": 3,
+        "epic_closed": "EPIC-001",
+        "spawned_debt_stories": ["STORY-021", "STORY-022", "STORY-023"]
+      },
+      "note": "Fechado 19 dias antes da end_date (12/06). Todas as 8 estórias planejadas entregues; goal totalmente atingido. 3 mudanças de escopo registradas durante a execução (STORY-018, IDR-007 Resend, EPIC-004 inserido na onda). 3 estórias de débito derivadas da validação criadas no fechamento (não competem com a sprint — sprint_id null). Próxima sprint NÃO foi aberta por decisão explícita do PO em 2026-05-24."
     }
   ],
   "decisions": {
@@ -524,6 +601,22 @@
         "decided_at": "2026-05-20",
         "decided_by": "PO (Alexandro / Claude)",
         "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"]
+      },
+      {
+        "id": "PDR-002",
+        "slug": "habilitacao-papel-designer",
+        "title": "Habilitação do papel Designer no método DEFOnline (5º papel) e evolução do schema do índice (v1 → v2)",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-002-habilitacao-papel-designer.md",
+        "decided_at": "2026-05-24",
+        "decided_by": "PO (Alexandro / Claude)",
+        "approved_by": "Alexandro",
+        "approved_at": "2026-05-24",
+        "related_epics": ["EPIC-001", "EPIC-002", "EPIC-003"],
+        "related_adrs": ["ADR-001"],
+        "schema_migration": "v1 -> v2",
+        "created_at": "2026-05-24",
+        "updated_at": "2026-05-24"
       }
     ],
     "adr": [
@@ -739,7 +832,21 @@
         "updated_at": "2026-05-24",
         "note": "Fecha o débito \"mail_mailer: log apenas; sem provedor SMTP real ainda\" aberto desde a STORY-013. Lib transversal resend/resend-php adicionada; wiring Ansible no env.j2 + vars.yml + vault.example pronto. Chave ainda não está no vault — PO criando conta + verificando domínio defonline.xandrix.com.br + gerando key."
       }
-    ]
+    ],
+    "ddr": []
+  },
+  "design": {
+    "screens": [],
+    "system": {
+      "root_path": "design/system/",
+      "tokens": "design/system/tokens.md",
+      "components": "design/system/components.md",
+      "patterns": "design/system/patterns.md",
+      "voice_and_tone": "design/system/voice-and-tone.md",
+      "canonical_reference": "../especificacao/V2/design-system.md",
+      "status": "canonical_only",
+      "note": "Design System vivo em project-state/design/system/ ainda não criado. Por enquanto, o DS canônico em especificacao/V2/design-system.md é a única fonte de verdade. Será inicializado pelo Designer no primeiro spec de tela (ver designer/templates/design-system.md)."
+    }
   },
   "reports": [
     {

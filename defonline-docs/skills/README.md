@@ -8,6 +8,7 @@ Este diretório contém as skills que definem como agentes de IA atuam neste pro
 |---|---|---|
 | [`po/`](po/SKILL.md) | **Product Owner** — decide o quê, por que, para quem, em que ordem; mantém o estado do projeto | **completa** |
 | [`arquiteto/`](arquiteto/SKILL.md) | **Arquiteto** — decisões técnicas de alto nível, ADRs | **completa** |
+| [`designer/`](designer/SKILL.md) | **Designer** — UX/UI das telas; mantém Design System; registra DDRs; spec de tela mobile-first | **completa** |
 | [`programador/`](programador/SKILL.md) | **Programador** — executa estórias, implementa código com qualidade exigida | **completa** |
 | [`validador/`](validador/SKILL.md) | **Validador** — valida fim de épico, produz relatório `approved`/`rejected` | **completa** |
 
@@ -16,17 +17,26 @@ Este diretório contém as skills que definem como agentes de IA atuam neste pro
 ```
 PO ──────── O QUÊ + POR QUÊ + QUANDO + QUALIDADE EXIGIDA
             │
-            ▼  (escreve estórias)
-Arquiteto ─ COMO em alto nível (stack, padrões, contratos)
+            │  (escreve estória)
             │
-            ▼  (decide via ADR)
-Programador ─ COMO em baixo nível (implementação concreta)
-            │
-            ▼  (entrega código + testes)
-Validador ── VERIFICA tudo no fim do épico
+   ┌────────┴────────┐
+   ▼                 ▼
+Designer       Programador ──── COMO em baixo nível (implementação)
+(UX/UI, DS,    (em paralelo                │
+DDR, spec      com o Designer              │  (consulta ADRs vigentes
+de tela)       na mesma estória)           │   do Arquiteto)
+   │                 │                     ▼
+   └────────┬────────┘              Arquiteto ──── COMO em alto nível
+            │                                      (stack, padrões, ADRs)
+            ▼  (entrega código + testes + spec coerente)
+       Validador ───── VERIFICA tudo no fim do épico
 ```
 
-Um papel **nunca** cruza para a área do outro. O PO não programa, o Programador não decide produto, o Arquiteto não escreve testes E2E.
+Um papel **nunca** cruza para a área do outro. O PO não programa, o Programador não decide produto, o Arquiteto não escreve testes E2E, o Designer não escolhe stack nem altera CA da estória, o Validador não conserta nada.
+
+**Designer e Programador trabalham em paralelo** na mesma estória de UI — rabisco inicial do Designer + sync curto antes do código começar (ver `designer/references/collaboration-with-developer.md`). O Designer **revisa** o PR contra o spec, mas **não** emite veredito independente — isso é do Validador.
+
+**O Arquiteto entra antes** quando o PO abre estória de spike arquitetural, e suas ADRs vigentes restringem o que Designer e Programador podem decidir.
 
 ## Como o agente carrega uma skill
 

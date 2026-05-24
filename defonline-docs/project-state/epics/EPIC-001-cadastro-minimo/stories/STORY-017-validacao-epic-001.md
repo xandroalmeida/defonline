@@ -6,10 +6,10 @@ epic_id: EPIC-001
 sprint_id: null
 type: validation
 target_role: validador
-status: draft
-owner_agent: null
+status: done
+owner_agent: validador (claude-opus-4-7)
 created_at: 2026-05-22
-updated_at: 2026-05-22
+updated_at: 2026-05-24
 estimated_session_size: M
 ---
 
@@ -103,13 +103,19 @@ Siga `agent-task-format.md`:
 ## Notas do agente
 
 ### Tempo investido
-- <horas>
+- ~1,5 hora de sessão única (leitura do checklist + epic + 7 estórias + 4 references + template; execução dos 47 itens; redação do `report.md`; atualização do índice).
 
 ### Dificuldades encontradas
-- <data> — <dificuldade>
+- 2026-05-24 — **Acesso restrito ao Postgres de homologação** — itens de evidência direta no banco (queries em `term_acceptances`, `audit_logs`, `evento_produto`, `business_metrics`, `usuarios.senha_hash`) precisaram cair em evidência indireta (código + migrations + REVOKE/GRANT + relato das notas + CI verde). Marcado como ressalva explícita nos itens 1.6, 3.2, 4.8, 7.4 e seção "Limitações da validação" do relatório.
+- 2026-05-24 — **Sem inbox real nem dashboard Resend** — itens 3.2 e 7.4 ficaram com evidência indireta forte (IDR-007 accepted + `mail_mailer: resend` no vars.yml + URL signed 60 min no código). Recomendação: PO complementa com print do dashboard Resend antes de fechar o épico.
+- 2026-05-24 — **Divergência STORY-014 (403) vs ADR-003/NRF (404)** — registrada como observação não-bloqueante (item 4.6), conforme acordado no próprio checklist do PO.
+- 2026-05-24 — **Divergência nominal `kind` (checklist) vs `tipo` (schema do banco) em `business_metrics`** — registrada como ressalva nominal (item 4.8). Conteúdo está correto; só o nome do campo difere.
+- 2026-05-24 — **Pré-condição "todas em `done`" divergente entre validation-workflow.md (skill) e STORY-017** — STORY-017 autoriza `in_review`, workflow padrão exige `done`. Conflito absorvido na classificação do item 8.1 (PASS com ressalva, pendência operacional do PO).
 
 ### Observações úteis ao PO
-- <data> — <observação>
+- 2026-05-24 — **Veredito APPROVED com pendências.** Zero fails técnicos. Recomendo fechar o EPIC-001 após as transições operacionais listadas na seção "Recomendação ao PO" do relatório (transicionar STORY-013, STORY-014, STORY-015, STORY-016 e STORY-018 para `done`; mudar EPIC-001 para `done`; opcionalmente fazer smoke manual de 15 min cobrindo as 3 zonas de evidência indireta — Resend dashboard, inbox real, rate-limit no submit Livewire real).
+- 2026-05-24 — Disciplina do time foi alta: smoke read-only após lição da rc.1 STORY-011, segregação `app/Domain` com gate ≥98%, abstração `RfbCnpjClient` antes do provedor real, validador de PII em `EventLogger` com lista de chaves proibidas + regex. Padrões a propagar para EPIC-002.
+- 2026-05-24 — Débitos operacionais visíveis nas notas das estórias mas fora do escopo desta validação: rotacionar chave cnpja (queimada no chat — STORY-018), corrigir `bump-rc.yml` para disparar `release-homolog.yml` via PAT (STORY-018), verificar domínio `defonline.xandrix.com.br` específico no Resend para remover override `MAIL_FROM_ADDRESS`.
 
 ### Veredito emitido
-- <approved | rejected> em <data>. Relatório em `validation/report.md`.
+- **approved_with_pending** em 2026-05-24. Relatório em `validation/report.md`. Pendências documentadas como ressalvas (não fails). Decisão final de fechamento do EPIC-001 é do PO após aceitar este relatório.
