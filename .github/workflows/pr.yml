@@ -161,6 +161,17 @@ jobs:
           key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
       - run: composer install --prefer-dist --no-progress --no-interaction
 
+      # STORY-019/024 — views autenticadas e a landing pública consomem `@vite(['resources/css/app.css', 'resources/js/app.js'])`.
+      # Sem manifest no `public/build/`, qualquer feature test que renderize view explode com ViteManifestNotFoundException → 500.
+      # `public/build/` é gitignored; CI precisa buildar antes do Pest.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+
       - name: Gera .env e .env.testing apontando para o Postgres do service
         # Laravel detecta APP_ENV=testing (do phpunit.xml) e carrega .env.testing
         # — então o `.env.testing` versionado (mira Dusk local contra web-test +

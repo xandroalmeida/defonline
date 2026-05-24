@@ -13,7 +13,20 @@ RUN composer install \
         --no-autoloader \
         --prefer-dist
 
-# ─── Stage 2: runtime ───────────────────────────────────────────────────────
+# ─── Stage 2: Vite assets (STORY-019/024) ───────────────────────────────────
+# Tailwind v4 + Inter (Bunny) compilam para public/build/{manifest.json,assets/*}.
+# Views autenticadas e a landing usam @vite(['resources/css/app.css','resources/js/app.js']);
+# sem manifest, qualquer rota explode com ViteManifestNotFoundException.
+# public/build é gitignored → tem que ser regerado no build da imagem.
+FROM node:20-alpine AS vite-build
+WORKDIR /build
+COPY app/package.json app/package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY app/resources ./resources
+COPY app/vite.config.js ./vite.config.js
+RUN npm run build
+
+# ─── Stage 3: runtime ───────────────────────────────────────────────────────
 FROM php:8.5-cli-alpine
 
 ARG APP_VERSION=dev
@@ -46,6 +59,9 @@ COPY --from=composer-deps /build/vendor /var/www/html/vendor
 
 # Copia código da app
 COPY app/ /var/www/html/
+
+# Sobrescreve public/build com o output do stage vite-build (compila assets do design system).
+COPY --from=vite-build /build/public/build /var/www/html/public/build
 
 # bootstrap/cache e storage subdirs estão no .dockerignore — recria do zero
 RUN mkdir -p bootstrap/cache \
