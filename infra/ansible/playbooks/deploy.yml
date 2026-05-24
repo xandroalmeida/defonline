@@ -38,6 +38,15 @@
         password: "{{ ghcr_pull_token }}"
       when: ghcr_pull_token | length > 0
 
+    # Libera espaço ANTES do pull. A imagem runtime carrega chromium (~500MB
+    # extraído) para Dusk smoke do CI; layers acumulam rápido. Sem prune o pull
+    # quebra com "no space left on device" depois de algumas tags rc. Tira só
+    # imagens/build cache não-referenciados (containers rodando preservados).
+    - name: Limpar imagens e cache de build não-utilizados (pré-pull)
+      ansible.builtin.command:
+        cmd: docker system prune -af
+      changed_when: false
+
     - name: Docker compose pull (nova tag)
       ansible.builtin.command:
         cmd: docker compose pull
