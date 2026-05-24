@@ -188,6 +188,29 @@ Padrão `agent-task-format.md`.
 - `RFB_RECEITAWS_RATE_LIMIT_PER_MINUTE=1` + 2 chamadas → 2ª falha idem.
 
 ### Links de evidência
-- PR: (a abrir quando o PO autorizar push — workflow `direto em main local`, sem push automático).
-- Pipeline: (mesmo)
-- Tag rc.N: (mesmo)
+- Commit: `6b662fc` em `main` (2026-05-24, 26 files, +1339/-106).
+- PR: n/a (workflow do projeto é commit direto em `main` local, autorizado pelo PO).
+- Pipeline pre-push (local): Pint ✓ / Larastan ✓ / Pest All 265 ✓ / Domain 100% ✓ / Pennant ✓ / Dusk 11 ✓.
+- Pipeline release-homolog: https://github.com/xandroalmeida/defonline/actions/runs/26350358335 — **success em 5m25s** (14 jobs todos verdes: validate ×10, build-and-push, deploy, smoke, notify).
+- Tag rc: `v0.6.0-rc.1` (minor bump a partir de v0.5.0-rc.1 que entregou STORY-015).
+- Imagem Docker: `ghcr.io/xandroalmeida/defonline/app:v0.6.0-rc.1` (publicada em 03:08 UTC).
+- Smoke público pós-deploy: `https://defonline.xandrix.com.br/health` retorna `{"status":"ok","version":"v0.6.0-rc.1","env":"staging"}`; `/ready` reporta `db/cache/queue` OK.
+
+### Bugs históricos descobertos durante o smoke manual (corrigidos em commits separados)
+- 2026-05-24 — **Mixed Content em homologação** ao abrir `/cadastro` no browser real (descoberto pelo PO). `bootstrap/app.php` não chamava `$middleware->trustProxies(...)` — Laravel ignorava `X-Forwarded-Proto: https` enviado pelo Caddy e gerava URLs `http://...` em `asset()`/`url()`. Livewire injetava `<script src="http://...">` em página HTTPS → bloqueado. Bug HISTÓRICO desde STORY-011 (Dusk roda contra HTTP e smoke automatizado só bate `/health`, então nunca tinha aparecido). Corrigido em commit `78bb84a` (`fix(infra): TrustProxies em bootstrap/app.php`) com 3 testes de regressão em `tests/Feature/Http/TrustedProxiesTest.php`. Re-deploy em `v0.6.0-rc.2`.
+
+### Gotchas encontradas no pipeline (não-bloqueantes, vale registrar)
+- 2026-05-24 — **`bump-rc.yml` não dispara `release-homolog.yml`.** A tag criada pelo workflow `bump-rc` com `GITHUB_TOKEN` implícito **não acionou** o trigger `on: push: tags`. É a proteção do GitHub contra loops de workflow (`GITHUB_TOKEN` não dispara workflows downstream). Workaround imediato: deletar a tag remota e re-empurrar do host local com credenciais pessoais. Correção definitiva (proposta para IDR ou aditivo ADR-006): trocar `secrets.GITHUB_TOKEN` por PAT dedicado no `actions/checkout` do `bump-rc.yml`, ou usar `gh release create` (que dispara workflow corretamente). Como é fix pequeno em workflow CI e não no produto, não bloqueia esta estória — fica como débito técnico flagged.
+
+### Validação DoD em homologação — status
+
+| Item DoD | Status | Como validar |
+|---|---|---|
+| `/health` + `/ready` verde | ✅ feito (smoke do pipeline + curl manual) | curl manual feito acima |
+| `RFB_PROVIDER=cnpja` + CNPJ real → pré-preenche com dados reais | ⏳ **pendente — smoke manual do PO** | PO loga em homol, cadastra Empresa Analisada via `/empresas/nova`, digita 00.000.000/0001-91, clica "Consultar Receita" → deve preencher "BANCO DO BRASIL SA / Brasília / DF / Ativa / 1966-08-01" |
+| Métrica `business_metrics` com `provider: cnpja, status: sucesso` | ⏳ pendente — observável após o smoke manual acima | `SELECT meta, sucesso, duracao_ms FROM business_metrics WHERE tipo='rfb_consulta' ORDER BY id DESC LIMIT 3;` no Postgres de homol |
+| `RFB_PROVIDER=receitaws` + CNPJ real → idem | ⏭ fora desta janela (receitaws ficou desligado em homol — só cnpja primário) | quando ativar receitaws para A/B, smoke equivalente |
+| `RFB_CNPJA_RPM=1` + duas chamadas em <60s → segunda falha com fallback amarelo | ⏳ pendente — smoke manual do PO | operacionalmente: ajustar via `ansible-vault edit` ou `-e rfb_cnpja_rate_limit_per_minute=1`, re-deploy, repetir 2× consulta no mesmo CNPJ |
+| `RFB_PROVIDER=mock` → fluxo da STORY-015 inalterado | ✅ feito (Dusk no pre-push cobre isso — `EnriquecimentoRfbBrowserTest` roda com mock e passou) | — |
+
+**Bloqueio operacional para fechar DoD:** smoke manual do PO no UI de homol (10 min, basicamente "cadastrar empresa com CNPJ do Banco do Brasil e ver os campos preencherem").
