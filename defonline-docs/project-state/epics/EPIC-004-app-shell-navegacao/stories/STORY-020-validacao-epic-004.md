@@ -6,8 +6,9 @@ epic_id: EPIC-004
 sprint_id: SPRINT-2026-W23
 type: validation
 target_role: validador
-status: draft
-owner_agent: null
+status: done
+owner_agent: claude-validador
+sprint_id: SPRINT-2026-W23
 created_at: 2026-05-24
 updated_at: 2026-05-24
 estimated_session_size: M
@@ -111,17 +112,32 @@ Estória de validação — exceção declarada em `quality-standards.md`: Valid
 ## Notas do agente
 
 ### Tempo investido
-- <total em horas>
+- ~2h (leitura inicial: 25min · suite de testes + cobertura + grep: 20min · inspeção visual + screenshots + DOM facts: 35min · escrita do report.md + evidence/: 40min)
 
 ### Dificuldades encontradas
-- <descrição>
+- **Janela do Chrome MCP não pôde ser reduzida abaixo de ~1500x800 efetivos** — frame do navegador é fixo. Capturas de páginas autenticadas em 360x800 caíram para evidência via Dusk (`ShellMobileBrowserTest` em viewport explícito) + headless chromium dentro do container para a landing mobile (PNG anexado). Sem grande prejuízo de evidência, mas anotado para sessões futuras.
+- **Build de assets Vite estava desatualizado no primeiro screenshot da landing**, fazendo o link `Entrar` parecer bug (CSS sem a regra `min-[480px]:inline-flex`). `npm run build` regenerou e o problema desapareceu. Diagnóstico: tooling, não fonte. Inclui sugestão de processo no relatório.
+- **Tinker não aceita `use Foo;` duas vezes seguidas** — workaround com FQNs num arquivo .php temporário copiado para o container. Útil para próximas sessões.
 
 ### Observações úteis ao PO
-- <gaps no checklist, ambiguidades, sugestões de processo>
+- **F-NB-1 (deploy pendente)** ilustra a tensão entre "workflow direto em main local" e itens de checklist que apontam para homol. Talvez valha um IDR formalizando "validação aceita evidência local como autoritativa para itens de código; gera 2º passe pós-deploy para itens de URL pública". Já é o que esta validação fez; formalizar ajuda futuras.
+- **CA-1 da STORY-024** ("`grep -r "hello-world" app/resources/` → zero") é ambíguo entre "literal no fonte" e "literal no HTML renderizado". F-NB-2 ilustra. Sugestão: ajustar redação para "zero ocorrências em caminhos vivos (rotas, includes, namespaces) — comentários não contam".
+- **`<x-footer-version>` em ambiente local** mostra "dev · local" porque APP_VERSION está fixado em "dev". Funciona corretamente; em homol/prod o pipeline injeta a tag rc esperada. Padronizar APP_VERSION local para algo como "v0.0.0-local" elimina o ruído visual durante validações locais.
+- **Headless chromium dentro do container** funciona para capturas — sugestão de incluir uma routine `scripts/capture-screenshots.sh` que loga via cookie de sessão programática e salva PNGs na evidence/. Seria útil para validações de UX-pesadas que virão (EPIC-002 relatório com 14 indicadores, EPIC-003 histórico).
 
 ### Screenshots anexados
-- <lista de paths/links>
+- `validation/evidence/01-landing-desktop-1280x800.png`
+- `validation/evidence/02-landing-mobile-360x800.png`
+- `validation/evidence/03-home-desktop-dom-facts.txt`
+- `validation/evidence/04-empresas-nova-desktop-dom-facts.txt`
+- `validation/evidence/05-empresas-show-desktop-dom-facts.txt`
+- `validation/evidence/06-dropdown-conta-aberto-dom-facts.txt`
+- `validation/evidence/07-drawer-mobile-via-dusk-evidence.txt`
+- `validation/evidence/08-suite-de-testes-saida.txt`
+- `validation/evidence/09-grep-hex-design-system.txt`
+- `validation/evidence/10-cleanup-arquivos-removidos.txt`
 
 ### Links de evidência
-- Report: `epics/EPIC-004-app-shell-navegacao/validation/report.md`
-- Index.json commit: <sha>
+- Report: [`epics/EPIC-004-app-shell-navegacao/validation/report.md`](../validation/report.md)
+- Veredito: **approved_with_pending** (0 F-B, 2 F-NB, 3 ressalvas, 57 pass, 4 n/a)
+- index.json: EPIC-004 → `done`, STORY-020 → `done`, validation_report apontado.

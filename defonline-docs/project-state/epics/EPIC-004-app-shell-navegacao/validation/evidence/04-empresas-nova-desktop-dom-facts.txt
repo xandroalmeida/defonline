@@ -1,0 +1,17 @@
+Capture: GET http://localhost:8090/empresas/nova @ viewport 1280x800 (autenticado, 1 empresa)
+
+URL: http://localhost:8090/empresas/nova
+<title>: "Cadastrar empresa · DEFOnline"  (CA-17 ✓)
+<h1>: "Cadastrar empresa"  (CA-17 ✓)
+Breadcrumb: "Minhas Empresas › Nova empresa"  (CA-4 ✓)
+Último item do breadcrumb com aria-current="page"  ✓ (CA-17 sinal 2 + A11y)
+Active nav: "Adicionar Empresa"  (CA-3 ✓ — item ativo destacado)
+Cancelar:
+  <a href="/home" class="btn btn--secondary sm:w-auto" dusk="empresa-cancelar" wire:navigate>Cancelar</a>
+  → CA-18 ✓ (botão Cancelar presente, leva a /home)
+Voltar para Minhas Empresas: NÃO presente  ✓ (CA-18 — Cancelar e Voltar nunca juntos)
+
+Observações visuais:
+- Form de cadastro completo: tipo doc (CNPJ/CPF), input CNPJ com placeholder mascarado, botão "Consultar Receita" (secondary), Razão social, Nome Fantasia, CNAE, Município, UF.
+- Sidebar mantém shell consistente; item "+ Adicionar Empresa" destacado em tertiary.
+- Header e footer iguais a /home.

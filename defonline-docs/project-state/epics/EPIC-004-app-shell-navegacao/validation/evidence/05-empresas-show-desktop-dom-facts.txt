@@ -1,0 +1,17 @@
+Capture: GET http://localhost:8090/empresas/019e5c26-ae92-70ae-b89d-cf45f48dc049 @ viewport 1280x800 (autenticado)
+
+URL: http://localhost:8090/empresas/{id}
+<title>: "Acme Industria Ltda · DEFOnline"  (CA-17 ✓ — usa razão social)
+<h1>: "Acme"  (CA-17 — usa nome fantasia quando disponível, conforme decisão registrada em STORY-019 notas)
+Breadcrumb: "Minhas Empresas › Acme"  (CA-4 ✓)
+Active nav: "Minhas Empresas"  ✓ (CA-3 — mantém ativo no ramo /empresas/{id})
+Voltar para Minhas Empresas:
+  <a href="/home" class="btn btn--secondary" dusk="empresa-show-voltar"><svg.../> Voltar para Minhas Empresas</a>
+  → CA-18 ✓
+Cancelar: NÃO presente  ✓ (CA-18 — nunca juntos)
+Iniciar diagnóstico: presente como disabled (decisão PO §13.3)  ✓
+
+Observações visuais:
+- Card surface com pill "Fonte: Preenchimento manual", grade de campos: tipo doc, CNPJ formatado (11.222.333/0001-81), razão, nome fantasia, CNAE, município/UF (São Paulo / SP), situação cadastral (Ativa), data de fundação.
+- Botão "Iniciar diagnóstico" disabled posicionado no header da seção como ação primária da tela (slot reservado para EPIC-002).
+- Shell consistente com /home e /empresas/nova.

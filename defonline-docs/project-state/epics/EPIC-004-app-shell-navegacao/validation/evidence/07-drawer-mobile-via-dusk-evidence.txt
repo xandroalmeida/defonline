@@ -1,0 +1,25 @@
+Evidência do drawer mobile (viewport 360x800)
+
+Limitação metodológica: a janela do Chrome MCP usada para inspeção visual interativa não pôde ser reduzida abaixo de ~1500x800 efetivos (frame do navegador é fixo). Portanto, o drawer mobile foi validado por:
+
+1. **Programaticamente (autoritativo)** — `tests/Browser/ShellMobileBrowserTest.php` roda Dusk com viewport explícito 360x800 e PASSA.
+
+   Cenários cobertos:
+   - `drawer_mobile_abre_pelo_hamburger_e_fecha_pelo_escape` — abre via clique no `[dusk="app-header-hamburger"]`, fecha via Escape. Asserções: sidebar entra/sai do viewport, overlay aparece, drawer fechado fica fora da tela.
+   - `adicionar_empresa_cta_visivel_no_mobile_com_empresa_cadastrada` — em 360x800 com 1 empresa cadastrada, o botão `[dusk="minhas-empresas-cta-adicionar"]` está visível (CA-14 + CA-9).
+
+   Output da última execução: `Tests: 13 passed (81 assertions). Duration: 10.68s`.
+
+2. **CSS/HTML inspecionado** — o componente `app-nav.blade.php` usa:
+   - `lg:translate-x-0` (sidebar fixa em ≥1024px)
+   - `:class="navOpen ? 'translate-x-0' : '-translate-x-full'"` (drawer off-canvas em <1024px)
+   - `@keydown.escape.window="navOpen = false"` no shell root (`app.blade.php`)
+   - Overlay `<div x-show="navOpen" ... lg:hidden @click="navOpen = false">`
+   - Hamburger `<button class="lg:hidden" dusk="app-header-hamburger">`
+
+3. **Touch targets** — botões 44x44 (header hamburger, dropdown trigger, nav fechar) verificados no markup com `w-11 h-11`.
+
+Conexão com CAs:
+- CA-3 (drawer mobile + hamburger) ✓
+- CA-9 (responsividade 360x800 sem scroll horizontal, touch ≥44x44) ✓
+- CA-10 (Escape fecha drawer) ✓

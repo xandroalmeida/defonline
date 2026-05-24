@@ -1,0 +1,19 @@
+Capture: dropdown "Conta" aberto em /home @ viewport 1280x800
+
+Trigger: button[aria-haspopup="menu"][dusk="app-header-conta-toggle"]
+Após abrir (via Alpine $data.open = true; também ativável via clique do usuário):
+  - aria-expanded: "true" ✓
+  - <div role="menu" dusk="app-header-conta-menu"> visível
+  - Item 1: <button role="menuitem" disabled aria-disabled="true" title="Em breve — Onda 2" dusk="app-header-conta-editar">Editar perfil</button>
+  - Item 2: <form action="/logout" method="POST"> <button role="menuitem" dusk="app-header-conta-sair">Sair</button> </form>
+
+Atributos A11y:
+- aria-haspopup="menu" presente no trigger
+- aria-expanded sincronizado com estado (false fechado, true aberto)
+- Escape global fecha (visto em código: @keydown.escape.window="open = false" + @click.outside="open = false")
+- "Sair" envia POST /logout com @csrf
+
+Conexão com CAs:
+- CA-2: dropdown "Conta" ✓
+- CA-10: A11y (aria-haspopup, aria-expanded, Escape) ✓
+- CA-19: logout via POST /logout ✓ (LogoutFlashTest confirma redirect + flash logout_sucesso)

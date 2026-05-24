@@ -1,0 +1,39 @@
+Saídas das suítes de teste executadas em 2026-05-24 contra commit ae131ab (STORY-024 done, local main).
+
+## Pest (Feature + Unit + Arch + Integration)
+Comando: `docker compose exec -T web-test php artisan test`
+Resultado: **316 passed (979 assertions). Duration: 8.20s**
+
+Pacote relevante para EPIC-004:
+- Tests\Feature\Shell\AppShellRenderTest — 20 testes (CA-1, CA-2, CA-3, CA-4, CA-5, CA-16, CA-17): PASS
+- Tests\Feature\Shell\CancelarEmpresaNovaTest — 3 testes (CA-18): PASS
+- Tests\Feature\Shell\LogoutFlashTest — 2 testes (CA-19): PASS
+- Tests\Feature\LandingTest — 11 testes (CA-2, CA-4, CA-5, CA-7, CA-8, CA-9, CA-10 da STORY-024): PASS
+- Tests\Unit\Arch\DesignTokensTest — 3 testes (CA-6 STORY-019 — gate "nenhum hex fora de tokens.css"): PASS
+
+Pacote do EPIC-001 (verificação de zero regressão):
+- Tests\Feature\Observabilidade\RequestIdPropagationTest — PASS (HelloWorldEmail job preservado)
+- Tests\Feature\Jobs\HelloWorldEmailTest — PASS (job preservado)
+- Tests\Unit\Mail\HelloWorldMessageTest — PASS (mail preservado)
+- Tests\Browser\* — 13 cenários (cadastro, login, home, empresa show, enriquecimento RFB): PASS
+
+## Dusk (Browser)
+Comando: `docker compose exec -T web php artisan dusk`
+Resultado: **13 passed (81 assertions). Duration: 10.68s**
+
+Testes executados:
+- CadastroLoginHomeBrowserTest: cadastro → login → home → logout (full flow)
+- CadastroLoginSmokeBrowserTest: 3 smokes (cadastro/termos/login renderizam)
+- EmailConfirmacaoBrowserTest: 2 cenários (link email + login bloqueado sem confirmação)
+- EnriquecimentoRfbBrowserTest: 2 cenários (sucesso RFB + fallback)
+- LandingBrowserTest [#[Group('smoke')]]: visitante vê landing com logo + CTAs + footer-version
+- MinhasEmpresasBrowserTest: fluxo completo cadastra empresa via RFB
+- ShellMobileBrowserTest (CA-3 + CA-9 + CA-14): 2 cenários (drawer mobile via hamburger+Escape, CTA Adicionar visível em mobile com empresa cadastrada)
+
+## Cobertura
+Comando: `php -d pcov.enabled=1 vendor/bin/pest --coverage-clover=/tmp/coverage.xml`
+Resultado: **96.19% (1289/1340 linhas executáveis cobertas)**. Gate STORY-010: 80%. **Folga: +16.19pp.**
+
+## Pipeline CI
+Último run release-homolog na branch main: `26363845068` (commit 7b5cc57 — abertura do EPIC-004 docs), **success**, tag `v0.8.0-rc.1`.
+ATENÇÃO: commits da STORY-019 (`4de29e4`) e STORY-024 (`ae131ab`) **ainda não foram pushados** ao remoto (workflow direto em main local — política do PO). Pipeline para esses commits ainda não rodou; deploy em homologação ainda mostra a versão anterior (v0.8.0-rc.1 com "hello DEFOnline"). Ver F-NB-1 no relatório.

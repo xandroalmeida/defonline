@@ -1,0 +1,18 @@
+Capture: GET http://localhost:8090/home @ viewport 1280x800 (autenticado como validador@defonline.test, 1 empresa)
+Data: 2026-05-24
+
+URL: http://localhost:8090/home
+<title>: "Minhas Empresas · DEFOnline"  (CA-17 ✓)
+<h1>: "Minhas Empresas"  (CA-17 ✓)
+aria-current="page" no item ativo da sidebar: "Minhas Empresas"  (CA-17 sinal 1 + CA-3 ✓)
+Breadcrumb: ausente (correto para raiz — CA-4 ✓)
+CTA Adicionar empresa (header da seção, primary):
+  <a href="/empresas/nova" class="btn btn--primary" dusk="minhas-empresas-cta-adicionar">+ Adicionar empresa</a>
+  → CA-14 ✓ Bug fix funcional: botão visível mesmo com 1 empresa.
+Footer (canto direito): "dev · local"
+  → Formato `{version} · {env}` correto (CA-16). Literal `dev` em vez de semver porque APP_VERSION local não está fixado em vX.Y.Z (config de ambiente, não regressão de código).
+
+Observações visuais (inspeção):
+- Header: logo "D" + wordmark "DEFOnline" + pill "local" colada ao logo. Dropdown "Conta" com avatar "R" + "Olá, Roberto" + chevron.
+- Sidebar fixa (240px): Minhas Empresas (ATIVO, fundo neutral + texto tertiary + barra 3px tertiary à esquerda), + Adicionar Empresa, Diagnósticos (cinza disabled), Histórico (cinza disabled), Conta (cinza disabled). Itens disabled têm tooltip "Em breve — Onda 2" (CA-3, A.disabled).
+- Conteúdo: título "Minhas Empresas", contagem "Você tem 1 empresa cadastrada.", card "Acme" com Manual pill, CNPJ mascarado "11.******/0001-**", localização "São Paulo / SP", botão "Ver detalhes" (secondary) + "Iniciar diagnóstico" (disabled).

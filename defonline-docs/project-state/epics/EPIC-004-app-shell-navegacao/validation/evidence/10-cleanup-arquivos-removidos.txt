@@ -1,0 +1,27 @@
+Verificação CA-1 da STORY-024 (bloco H1) — remoção e preservação de arquivos.
+
+## Arquivos removidos (esperado)
+- resources/views/welcome.blade.php           → REMOVED ✓
+- resources/views/livewire/hello-world.blade.php → REMOVED ✓
+- app/Livewire/HelloWorld.php                  → REMOVED ✓
+- tests/Feature/Livewire/HelloWorldTest.php    → REMOVED ✓
+- tests/Browser/HelloWorldBrowserTest.php      → REMOVED ✓
+
+## Arquivos preservados (esperado)
+- app/Jobs/HelloWorldEmail.php                              → KEPT ✓
+- app/Mail/HelloWorldMessage.php                            → KEPT ✓
+- app/Features/HelloWorldEmailHabilitado.php                → KEPT ✓
+- tests/Feature/Observabilidade/RequestIdPropagationTest.php → KEPT ✓
+- tests/Feature/Jobs/HelloWorldEmailTest.php                → KEPT ✓
+- tests/Unit/Mail/HelloWorldMessageTest.php                 → KEPT ✓
+
+## Greps confirmatórios
+`grep -rn "Livewire\\\\HelloWorld" app/ resources/ tests/` → zero ocorrências em código de produção ✓
+
+`grep -rn "hello-world\|livewire.hello-world" resources/` → única ocorrência:
+  resources/views/landing.blade.php:5: * Substitui a página de debug `/` da STORY-007 (welcome + livewire/hello-world).
+  → Comentário Blade documentando origem do arquivo. **Não é caminho de código vivo** (não inclui view, não dispara render, não importa classe). Pass com ressalva: a leitura estrita do CA-1 ("`grep -r "hello-world" app/resources/` → zero resultados") é violada por este comentário documental. Recomendação: o PO pode optar por (a) remover a linha do comentário, ou (b) ajustar a redação do CA-1 para "zero ocorrências em caminhos de código vivo (rotas, includes, namespaces)". Não compromete o entregável visível.
+
+## Smoke Dusk substituído
+
+`tests/Browser/LandingBrowserTest.php` com `#[Group('smoke')]` substitui o `HelloWorldBrowserTest`. Passou na suíte local. O pipeline `release-homolog.yml` linha 138 roda `php artisan dusk --group=smoke` — a substituição é transparente.

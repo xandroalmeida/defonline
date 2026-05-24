@@ -1,0 +1,50 @@
+Verificação CA-6 (STORY-019) + bloco F do checklist — "nenhum hex literal de design system fora de tokens.css".
+
+## Comando: paleta v1 + drift conhecido em resources/views/ e resources/css/
+
+```sh
+grep -rEn "#[0-9a-fA-F]{6}" resources/views/ resources/css/ | grep -v "tokens.css"
+```
+
+Saída (todas em exclusões documentadas):
+```
+resources/views/mail/email-confirmacao.blade.php:14: #0A2540 #F6F9FC
+resources/views/mail/email-confirmacao.blade.php:15: #FFFFFF #E3E8EE
+resources/views/mail/email-confirmacao.blade.php:21: #635BFF #FFFFFF
+resources/views/mail/email-confirmacao.blade.php:26: #425466
+resources/views/mail/email-confirmacao.blade.php:28: #635BFF
+resources/views/mail/email-confirmacao.blade.php:31: #425466
+resources/views/mail/email-confirmacao.blade.php:32: #0A2540
+resources/views/mail/email-confirmacao.blade.php:35: #425466
+resources/views/mail/email-confirmacao.blade.php:37: #425466
+resources/views/layouts/legal.blade.php:9: #f3f4f6 #111827
+resources/views/layouts/legal.blade.php:13: #6b7280
+resources/views/layouts/legal.blade.php:14: #fef3c7 #f59e0b #92400e
+resources/views/layouts/legal.blade.php:16: #2563eb
+```
+
+## Análise
+
+Todas as ocorrências são em arquivos **explicitamente documentados como exceções** no teste arquitetural `tests/Unit/Arch/DesignTokensTest.php` (linhas 41-48), com justificativa:
+
+1. `resources/views/mail/email-confirmacao.blade.php` — emails transacionais exigem inline styles (clientes de email ignoram CSS vars). Cópia manual da paleta v1; mudar tokens implica atualizar à mão. **Decisão aceita por isolamento + baixa rotatividade.** Cores observadas: todas da paleta v1 oficial (#0A2540, #425466, #635BFF, #F6F9FC, #FFFFFF, #E3E8EE).
+
+2. `resources/views/layouts/legal.blade.php` — shell LEGAL separado (Termo de Adesão / Política de Privacidade), fora do escopo da STORY-019. **Confirmado em STORY-019 notas do agente.** Cores observadas pertencem ao drift (não à paleta v1) — não é regressão porque está fora do shell APP/AUTH refatorado.
+
+## Drift de paleta da STORY-016 (CA-8 / bloco F)
+
+Comando explícito do checklist:
+```sh
+grep -rEn "#1f2937|#2563eb|#f9fafb|#1d4ed8|#3730a3|#dbeafe" resources/views/ resources/css/
+```
+
+Saída:
+```
+resources/views/layouts/legal.blade.php:16: a { color: #2563eb; }
+```
+
+Única ocorrência: `legal.blade.php` (exclusão documentada). **Drift eliminado das views refatoradas (CA-8 STORY-019 ✓).**
+
+## Teste arquitetural
+
+`tests/Unit/Arch/DesignTokensTest.php` cobre 23 hex da paleta v1 + 23 hex do drift conhecido. PASSA.
