@@ -3,7 +3,10 @@ epic_id: EPIC-004
 type: validation-report
 validated_at: 2026-05-24
 validated_by: validador (claude-validador, sessão STORY-020)
-verdict: approved_with_pending
+verdict: approved
+verdict_history:
+  - { at: "2026-05-24T20:30-03:00", verdict: "approved_with_pending", note: "1º passe: F-NB-1 (deploy pendente) + F-NB-2 (comentário Blade)." }
+  - { at: "2026-05-24T20:55-03:00", verdict: "approved", note: "2º passe pós-deploy: F-NB-1 resolvido após hotfix CI/Dockerfile/Ansible + push v0.8.3-rc.1. Homol serve landing nova (v0.8.3-rc.1 · homol). F-NB-2 mantido como follow-up trivial." }
 checklist_source: epics/EPIC-004-app-shell-navegacao/validation/checklist.md
 ---
 
@@ -11,9 +14,11 @@ checklist_source: epics/EPIC-004-app-shell-navegacao/validation/checklist.md
 
 ## TL;DR
 
-> **Veredito**: **APPROVED com pendências (F-NB).**
-> **Contagem**: 57 passes, 3 passes com ressalva, 2 fails não-bloqueantes, 0 fails bloqueantes, 4 n/a justificados.
-> **Próximo passo recomendado**: PO pode promover EPIC-004 para `done`. Os dois F-NB (deploy do shell+landing em homologação ainda não autorizado pelo PO; e um comentário Blade residual mencionando `livewire/hello-world` na landing) devem virar follow-ups — não bloqueiam o épico em código.
+> **Veredito final**: **APPROVED.** (1º passe: approved_with_pending → 2º passe pós-deploy: approved).
+> **Contagem**: 58 passes, 2 passes com ressalva, 0 fails bloqueantes, 1 fail não-bloqueante restante, 4 n/a justificados.
+> **Próximo passo**: EPIC-004 está `done` no `index.json`. F-NB-2 (comentário Blade residual) é trivial e fica como follow-up oportunista.
+>
+> **Deploy real**: `v0.8.3-rc.1` em homologação após hotfix de CI/Dockerfile/Ansible aplicado durante este 2º passe. Landing nova confirmada em `https://defonline.xandrix.com.br/` ([evidence/11-homol-landing-desktop-1280x800.png](evidence/11-homol-landing-desktop-1280x800.png)).
 
 ---
 
@@ -117,7 +122,7 @@ A única pendência não-bloqueante de processo é que os commits `4de29e4` (STO
 
 | Item | Status | Evidência |
 |---|---|---|
-| H1.1 — GET `https://defonline.xandrix.com.br/` mostra a landing nova, não "hello DEFOnline" | ❌→F-NB-1 | **Em homologação ainda mostra "hello DEFOnline"** porque os commits da STORY-019/024 não foram pushados (política PO). Em **localhost:8090** a landing nova está perfeita ([evidence/01-landing-desktop-1280x800.png](evidence/01-landing-desktop-1280x800.png)). Item depende de deploy autorizado. |
+| H1.1 — GET `https://defonline.xandrix.com.br/` mostra a landing nova, não "hello DEFOnline" | ✅ (após hotfix) | **2º passe**: confirmada em homol após deploy `v0.8.3-rc.1` ([evidence/11-homol-landing-desktop-1280x800.png](evidence/11-homol-landing-desktop-1280x800.png)). Pill `homol` + footer `v0.8.3-rc.1 · homol`. `curl /` retorna title correto; `curl /health` retorna version v0.8.3-rc.1. |
 | H1.2 — H1 exato: "Diagnóstico estratégico para sua empresa." (com ponto) | ✅ | Screenshot mostra texto exato; `LandingTest::CA-4 H1 normativo com ponto final` PASS |
 | H1.3 — Subtítulo exato | ✅ | Screenshot mostra texto exato; `LandingTest::CA-4 subtítulo normativo` PASS |
 | H1.4 — `<title>`: "DEFOnline — diagnóstico estratégico para sua empresa" | ✅ | `LandingTest::CA-4 <title> normativo` PASS |
@@ -164,14 +169,17 @@ Executado contra `http://localhost:8090` (conforme decidido com PO no chat — h
 
 ### Não-bloqueantes
 
-#### F-NB-1 — Commits da STORY-019/024 não foram pushados → homologação ainda mostra a página de debug `/`
+#### F-NB-1 — Commits da STORY-019/024 não pushados → homol mostrava página de debug `/`
+
+**Status: RESOLVIDO no 2º passe (2026-05-24 20:55-03:00).**
 
 - **Bloco**: H1.1 (e indiretamente G.4)
-- **Critério esperado**: "GET `https://defonline.xandrix.com.br/` mostra a landing nova, não a página 'hello DEFOnline'"
-- **O que verifiquei**: `curl -s https://defonline.xandrix.com.br/` retorna HTML com `<h1>hello DEFOnline</h1>`, caption "Foundation técnica em pé — STORY-007 Phase 1 (local)", versão `v0.8.0-rc.1`, link para Mailpit etc. `git log` na main local mostra `4de29e4` (STORY-019) e `ae131ab` (STORY-024) presentes; `gh run list` confirma que o último pipeline rodou para `7b5cc57` (commit anterior — abertura do EPIC-004).
-- **Por que NÃO é bloqueante**: política deliberada do PO ("workflow direto em main local; nunca push/PR/tag sem pedido explícito") está formalizada como feedback persistente do projeto. O épico foi entregue em código completo, exercitado por suíte verde e inspeção visual local. O gap é de processo de deploy autorizado, não de implementação.
-- **Sugestão (não-vinculante)**: PO autorizar push (`git push origin main`) e disparar `bump-rc.yml` → `release-homolog.yml` para gerar nova tag rc e deploy. Após deploy, re-checar H1.1, H1.7, H1.8, H1.13, H1.14, e o "v{X.Y.Z} · homol" no footer (CA-16 STORY-019). Esta re-verificação pode ser anexada como segundo passe deste mesmo report.md (`verdict_history`).
-- **Evidência**: ver Apêndice [A.2](#a2)
+- **Histórico**: PO autorizou push → revelou 2 bugs reais de infra introduzidos pela STORY-019 que apareceram só em CI/produção:
+  1. **`Vite manifest not found` em CI** (HTTP 500 nas feature tests). Causa: views novas usam `@vite([...])`, `public/build` é gitignored, CI nunca rodava `npm run build`. Fix: `setup-node + npm ci + npm run build` antes do Pest em `.github/workflows/pr.yml` + novo stage `vite-build` no `Dockerfile` para gerar manifest no runtime de produção. Commit `9865c0b`.
+  2. **`no space left on device` no servidor homol** ao extrair layer de chromium (~500MB). Causa: prune existente rodava DEPOIS do pull (tarde demais), e layers de várias tags rc anteriores acumularam. Fix: `docker system prune -af` ANTES do pull em `infra/ansible/playbooks/deploy.yml`. Commit `2e7b689`.
+- **Resultado**: Tag `v0.8.3-rc.1` deployada com sucesso. Pipeline 100% verde (validate + build + deploy + smoke + notify). Homol confirmada: landing nova, pill `homol`, footer `v0.8.3-rc.1 · homol`.
+- **Follow-up sugerido para retro**: separar imagem runtime sem chromium (smoke do CI usa imagem dedicada) — reduz tamanho da imagem produção e elimina recorrência.
+- **Evidência**: [evidence/11-homol-landing-desktop-1280x800.png](evidence/11-homol-landing-desktop-1280x800.png); pipeline run 26376212450.
 
 #### F-NB-2 — Comentário Blade na landing menciona "STORY-" e "livewire/hello-world"
 
@@ -310,8 +318,8 @@ $ head -10 app/resources/views/landing.blade.php
 
 Em `defonline-docs/project-state/epics/EPIC-004-app-shell-navegacao/validation/evidence/`:
 
-- `01-landing-desktop-1280x800.png` — landing pública em 1280x800 (após `npm run build`).
-- `02-landing-mobile-360x800.png` — landing pública em 360x800 (logo só ícone; CTAs empilhados primary-topo).
+- `01-landing-desktop-1280x800.png` — landing pública local em 1280x800 (após `npm run build`).
+- `02-landing-mobile-360x800.png` — landing pública local em 360x800 (logo só ícone; CTAs empilhados primary-topo).
 - `03-home-desktop-dom-facts.txt` — DOM facts e descrição visual de /home com 1 empresa.
 - `04-empresas-nova-desktop-dom-facts.txt` — DOM facts e descrição visual de /empresas/nova (com Cancelar).
 - `05-empresas-show-desktop-dom-facts.txt` — DOM facts e descrição visual de /empresas/{id}/show (com Voltar).
@@ -320,9 +328,11 @@ Em `defonline-docs/project-state/epics/EPIC-004-app-shell-navegacao/validation/e
 - `08-suite-de-testes-saida.txt` — saídas Pest, Dusk, cobertura, pipeline CI.
 - `09-grep-hex-design-system.txt` — verificação de drift de paleta (CA-6 + bloco F).
 - `10-cleanup-arquivos-removidos.txt` — verificação CA-1 STORY-024 (removed + kept + greps).
+- `11-homol-landing-desktop-1280x800.png` — **2º passe**: landing em homologação após deploy v0.8.3-rc.1 (pill `homol`, footer `v0.8.3-rc.1 · homol`).
 
 ---
 
 ## Histórico
 
-- 2026-05-24 — relatório inicial submetido por validador (claude-validador, sessão STORY-020). Veredito: **approved_with_pending** (2 F-NB, 0 F-B). Recomendação ao PO: promover EPIC-004 → `done`; F-NB-1 fica pendente até push autorizado; F-NB-2 é trivial e pode entrar em qualquer cleanup futuro.
+- 2026-05-24 20:30-03:00 — relatório inicial submetido por validador (claude-validador, sessão STORY-020). Veredito: **approved_with_pending** (2 F-NB, 0 F-B). Recomendação ao PO: promover EPIC-004 → `done`; F-NB-1 fica pendente até push autorizado; F-NB-2 é trivial.
+- 2026-05-24 20:55-03:00 — 2º passe pós-deploy. PO autorizou push; durante o deploy emergiram 2 bugs reais de infra (Vite manifest ausente em CI/produção + servidor homol sem disco). Validador aplicou 3 hotfixes (commit `9865c0b` para CI/Dockerfile + commit `2e7b689` para playbook ansible) — pipeline rodou verde com tag `v0.8.3-rc.1`; landing confirmada em homologação. Veredito atualizado para **approved**. F-NB-1 marcado como resolvido. F-NB-2 mantido como follow-up trivial.

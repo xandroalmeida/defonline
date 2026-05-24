@@ -133,13 +133,17 @@
       "story_ids": ["STORY-019", "STORY-024", "STORY-020"],
       "validation_report": {
         "path": "epics/EPIC-004-app-shell-navegacao/validation/report.md",
-        "verdict": "approved_with_pending",
+        "verdict": "approved",
         "validated_at": "2026-05-24",
         "validated_by": "validador (claude-validador, sessão STORY-020)",
+        "verdict_history": [
+          { "at": "2026-05-24T20:30-03:00", "verdict": "approved_with_pending", "note": "1º passe: F-NB-1 (deploy pendente) + F-NB-2 (comentário Blade)." },
+          { "at": "2026-05-24T20:55-03:00", "verdict": "approved", "note": "2º passe pós-deploy v0.8.3-rc.1: F-NB-1 resolvido (3 hotfixes: CI npm build, Dockerfile stage vite-build, ansible prune pré-pull). Homol confirmada." }
+        ],
         "pendencies": [
-          "F-NB-1: deploy do shell+landing em homologação aguarda push autorizado pelo PO (workflow direto em main local).",
           "F-NB-2: comentário Blade em landing.blade.php:5 menciona 'STORY-007' e 'livewire/hello-world' — invisível ao usuário; trivial de remover ou ajustar CA literal."
-        ]
+        ],
+        "deployed_tag": "v0.8.3-rc.1"
       },
       "blocked_by_epics": ["EPIC-001"],
       "blocks_epics": ["EPIC-002", "EPIC-003"],
