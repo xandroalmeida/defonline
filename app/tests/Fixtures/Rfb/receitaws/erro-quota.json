@@ -1,0 +1,4 @@
+{
+  "status": "ERROR",
+  "message": "Você excedeu o número máximo de requisições por minuto permitidas para o seu plano."
+}

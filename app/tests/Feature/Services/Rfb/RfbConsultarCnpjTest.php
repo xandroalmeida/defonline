@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Rfb\RfbCnpjResult;
 use App\Domain\Rfb\RfbCnpjStatus;
+use App\Services\Rfb\MockRfbCnpjClient;
 use App\Services\Rfb\RfbCnpjClient;
 use App\Services\Rfb\RfbCnpjFalhouException;
 use App\Services\Rfb\RfbConsultarCnpj;
@@ -93,7 +94,10 @@ it('ignora cache quando provider=mock (sempre retorna fresh) — CA-6', function
 
 it('usa cache na 2ª chamada quando provider≠mock (CA-6)', function () {
     config(['services.rfb.provider' => 'cnpja', 'services.rfb.cache_ttl' => 300]);
-    // Bind continua resolvendo Mock — STORY-018 troca por cliente real.
+    // Após a STORY-018 o bind passa a resolver CnpjaRfbCnpjClient — que faria HTTP
+    // real. Aqui o foco é o cache do orquestrador, não o cliente: troca o bind por
+    // Mock e desliga o flag mock-no-cache via config explícita.
+    app()->bind(RfbCnpjClient::class, fn () => new MockRfbCnpjClient);
     $cnpj = EmpresaAnalisadaFactory::cnpjComRaiz('12345678');
 
     chamarRfb($cnpj);

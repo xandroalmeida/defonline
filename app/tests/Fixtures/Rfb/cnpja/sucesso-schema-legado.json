@@ -1,0 +1,19 @@
+{
+  "taxId": "12345678000195",
+  "company": {
+    "name": "EMPRESA INDIVIDUAL MEI 123 LTDA"
+  },
+  "founded": "2020-03-15",
+  "status": {
+    "id": 3,
+    "text": "Suspensa"
+  },
+  "address": {
+    "municipality": "Sao Paulo",
+    "state": "sp"
+  },
+  "mainActivity": {
+    "id": 4721102,
+    "text": "Padaria e confeitaria com predominancia de revenda"
+  }
+}

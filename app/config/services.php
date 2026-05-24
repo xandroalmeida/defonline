@@ -71,12 +71,19 @@ return [
                 'rate_limit_per_minute' => null,
             ],
             'cnpja' => [
-                'base_url' => env('RFB_CNPJA_BASE_URL', 'https://api.cnpja.com'),
+                // STORY-018 — smoke contratual em 2026-05-23 confirmou que `api.cnpja.com`
+                // exige autenticação (HTTP 401 sem token). O endpoint público gratuito
+                // (Open API, 3 RPM) vive em `open.cnpja.com`. O `api.cnpja.com` continua
+                // sendo o endpoint do plano pago — para ativá-lo, sobrescreva via env
+                // junto com `RFB_CNPJA_API_KEY`.
+                'base_url' => env('RFB_CNPJA_BASE_URL', 'https://open.cnpja.com'),
                 'api_key' => env('RFB_CNPJA_API_KEY'),
                 'rate_limit_per_minute' => (int) env('RFB_CNPJA_RATE_LIMIT_PER_MINUTE', 3),
             ],
             'receitaws' => [
-                'base_url' => env('RFB_RECEITAWS_BASE_URL', 'https://receitaws.com.br/v1/cnpj'),
+                // IDR-004: base_url = https://receitaws.com.br/v1 (sem o sub-recurso /cnpj,
+                // que é montado pelo ReceitawsRfbCnpjClient antes do CNPJ).
+                'base_url' => env('RFB_RECEITAWS_BASE_URL', 'https://receitaws.com.br/v1'),
                 'api_key' => env('RFB_RECEITAWS_API_KEY'),
                 'rate_limit_per_minute' => (int) env('RFB_RECEITAWS_RATE_LIMIT_PER_MINUTE', 3),
             ],

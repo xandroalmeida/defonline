@@ -436,8 +436,8 @@
       "title": "Provedores reais da RFB (cnpja, receitaws) com rate-limit por provedor",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
-      "owner_agent": null,
+      "status": "in_review",
+      "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-018-rfb-providers-reais-cnpja-receitaws.md",
       "blocked_by": ["STORY-015"],
@@ -445,8 +445,8 @@
       "related_idrs": ["IDR-004", "IDR-005", "IDR-006"],
       "estimated_session_size": "M",
       "created_at": "2026-05-23",
-      "updated_at": "2026-05-23",
-      "note": "Implementa o que a IDR-004 decidiu: clientes reais cnpja e receitaws cumprindo o contrato RfbCnpjClient da STORY-015, bind condicional em AppServiceProvider e rate-limit por provedor via RateLimiter. Não introduz mudança de UX. PO confirmou em 2026-05-23 que produção usará os dois mesmos provedores; qual dos dois será o primário (RFB_PROVIDER default em production) é decisão do Arquiteto a registrar em IDR separado quando esta estória entregar. Atribuir a um sprint futuro — não bloqueia o fechamento do EPIC-001."
+      "updated_at": "2026-05-24",
+      "note": "Implementa o que a IDR-004 decidiu: clientes reais cnpja e receitaws cumprindo o contrato RfbCnpjClient da STORY-015, bind condicional em AppServiceProvider e rate-limit por provedor via RateLimiter. Não introduz mudança de UX. Smoke contratual em 2026-05-23 corrigiu drift do cnpja (endpoint público mudou para open.cnpja.com; address.city em vez de address.municipality). Wiring de infra Ansible (env.j2, vars.yml, vault.yml) entregue. Chave do cnpja gravada em vault homolog e .env local sob responsabilidade explícita do PO (rotação em débito — ver Notas do agente)."
     }
   ],
   "sprints": [

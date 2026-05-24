@@ -1,0 +1,25 @@
+{
+  "taxId": "00000000000191",
+  "updated": "2026-05-23T05:25:31.000Z",
+  "company": {
+    "name": "BANCO DO BRASIL SA"
+  },
+  "alias": "Direcao Geral",
+  "founded": "1966-08-01",
+  "head": true,
+  "statusDate": "2005-11-03",
+  "status": {
+    "id": 2,
+    "text": "Ativa"
+  },
+  "address": {
+    "municipality": 5300108,
+    "city": "Brasília",
+    "state": "DF",
+    "zip": "70040912"
+  },
+  "mainActivity": {
+    "id": 6422100,
+    "text": "Bancos múltiplos, com carteira comercial"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "status": "OK",
+  "ultima_atualizacao": "2024-05-23T10:00:00.000-03:00",
+  "cnpj": "00.000.000/0001-91",
+  "tipo": "MATRIZ",
+  "porte": "DEMAIS",
+  "nome": "BANCO DO BRASIL SA",
+  "fantasia": "BB",
+  "abertura": "01/08/1966",
+  "atividade_principal": [
+    {
+      "code": "64.22-1-00",
+      "text": "Bancos multiplos, com carteira comercial"
+    }
+  ],
+  "natureza_juridica": "2038 - Sociedade de Economia Mista",
+  "logradouro": "Q SAUN QUADRA 5 LOTE B TORRES I, II E III",
+  "municipio": "Brasilia",
+  "uf": "DF",
+  "situacao": "ATIVA"
+}

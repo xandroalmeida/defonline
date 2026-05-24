@@ -44,6 +44,21 @@ backup_cron_hour: "3"                  # 03:00 BRT
 telegram_chat_id: "{{ vault_telegram_chat_id_homolog }}"
 telegram_bot_token: "{{ vault_telegram_bot_token }}"
 
+# RFB (STORY-018 / IDR-004 / IDR-005 / IDR-006).
+# Em homol: `cnpja` no plano pago (api.cnpja.com) — IDR-005 escolheu cnpja como
+# primário; a chave vem do vault. RPM default 30 (placeholder de plano pago;
+# ajustar quando contratar definitivo). Receitaws fica desligado nesta janela —
+# entra se decidirmos rodar A/B observacional (IDR-004 §"permitir A/B").
+rfb_provider: "cnpja"
+rfb_timeout: 5
+rfb_cache_ttl: 300
+rfb_cnpja_base_url: "https://api.cnpja.com"
+rfb_cnpja_api_key: "{{ vault_rfb_cnpja_api_key }}"
+rfb_cnpja_rate_limit_per_minute: 30
+rfb_receitaws_base_url: "https://receitaws.com.br/v1"
+rfb_receitaws_api_key: "{{ vault_rfb_receitaws_api_key }}"
+rfb_receitaws_rate_limit_per_minute: 3
+
 # Segredos referenciados aqui — definidos em `group_vars/vault.yml` (cifrado).
 db_app_password: "{{ vault_db_app_password }}"
 db_backup_password: "{{ vault_db_backup_password }}"

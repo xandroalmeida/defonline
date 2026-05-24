@@ -29,3 +29,11 @@ vault_telegram_chat_id_homolog: "-1000000000000"
 # GHCR pull token — Personal Access Token com escopo read:packages.
 # Se o repo for público, pode ser vazio.
 vault_ghcr_pull_token: ""
+
+# RFB — API keys dos provedores reais (STORY-018 / IDR-004 / IDR-006).
+# Plano gratuito de cada provedor dispensa token; preencher só se contratar plano pago.
+# Em homologação, o default operacional é `cnpja` no plano pago (api.cnpja.com).
+# Após contratar: gerar a chave no painel do provedor, gravar aqui via
+#   ansible-vault edit inventories/homolog/group_vars/all/vault.yml
+vault_rfb_cnpja_api_key: ""
+vault_rfb_receitaws_api_key: ""

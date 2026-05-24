@@ -1,0 +1,17 @@
+{
+  "status": "OK",
+  "cnpj": "12.345.678/0001-95",
+  "tipo": "MATRIZ",
+  "nome": "PADARIA BOA VISTA ME",
+  "fantasia": "",
+  "abertura": "15/03/2020",
+  "atividade_principal": [
+    {
+      "code": "47.21-1-02",
+      "text": "Padaria e confeitaria"
+    }
+  ],
+  "municipio": "Sao Paulo",
+  "uf": "sp",
+  "situacao": "INAPTA"
+}
