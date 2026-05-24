@@ -24,7 +24,7 @@ use Livewire\Component;
  * Acesso à `/home` é leitura — não gera entrada em `audit_logs` (STORY-016 CA-5;
  * espec exige audit para escrita).
  */
-#[Layout('layouts.app')]
+#[Layout('components.layouts.app')]
 final class MinhasEmpresas extends Component
 {
     public function render(): View
@@ -39,6 +39,6 @@ final class MinhasEmpresas extends Component
         return view('livewire.home.minhas-empresas', [
             'usuario' => $usuario,
             'empresas' => $empresas,
-        ]);
+        ])->layoutData(['title' => 'Minhas Empresas']);
     }
 }

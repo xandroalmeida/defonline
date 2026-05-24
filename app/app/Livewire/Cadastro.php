@@ -42,7 +42,7 @@ use Livewire\Component;
  * Evento de produto `usuario_cadastrado` **não** é emitido aqui — depende da
  * confirmação de email da STORY-013 (ADR-004 §2.2).
  */
-#[Layout('layouts.app')]
+#[Layout('components.layouts.auth')]
 final class Cadastro extends Component
 {
     public string $cpf = '';
@@ -224,6 +224,7 @@ final class Cadastro extends Component
 
     public function render(): View
     {
-        return view('livewire.cadastro');
+        return view('livewire.cadastro')
+            ->layoutData(['title' => 'Criar conta']);
     }
 }

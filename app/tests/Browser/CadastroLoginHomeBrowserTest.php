@@ -58,8 +58,13 @@ final class CadastroLoginHomeBrowserTest extends DuskTestCase
                 ->waitForLocation('/home')
                 ->assertSeeIn('@saudacao', 'Olá, Roberto');
 
-            $browser->press('@logout')
-                ->waitForLocation('/login');
+            // STORY-019 — logout agora vive dentro do dropdown "Conta" do header.
+            // Abre o dropdown, clica "Sair", confirma redirect + flash.
+            $browser->click('@app-header-conta-toggle')
+                ->waitFor('@app-header-conta-sair')
+                ->click('@app-header-conta-sair')
+                ->waitForLocation('/login')
+                ->assertSeeIn('@logout-sucesso', 'Você saiu da conta com sucesso.');
         });
 
         // Confirma persistência real no Postgres.

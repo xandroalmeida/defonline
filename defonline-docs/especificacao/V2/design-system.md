@@ -1,6 +1,6 @@
 # DEFOnline — Design System
 
-**Versão:** alpha
+**Versão:** v1
 **Inspiração:** Stripe (payment-infrastructure aesthetic)
 **Status:** especificação ativa
 
@@ -205,7 +205,13 @@ A área logada (app pós-login) e o hotsite público compartilham os mesmos toke
 
 ## Evolução
 
-Esta é uma especificação **alpha**. Após a primeira aplicação real em telas, o PO faz uma revisão para promover para **v1** ou ajustar tokens com base no aprendizado. Mudanças no design system depois de v1 exigem bump de versão neste arquivo e avaliação de impacto em telas já implementadas.
+Promovida de **alpha** para **v1** em 2026-05-25 após primeira aplicação real em código pela STORY-019 (EPIC-004 — app shell + materialização dos tokens). Mudanças no design system depois de v1 exigem bump de versão neste arquivo e avaliação de impacto em telas já implementadas.
+
+---
+
+## Histórico
+
+- **2026-05-25 — promoção para v1.** Primeira aplicação real do design-system em código pela STORY-019. Tokens materializados em `app/resources/css/tokens.css` via Tailwind v4 `@theme` (IDR-008). Componentes-base Blade implementados (`<x-button>` 3 variants, `<x-card>`, `<x-input>`, `<x-label>`, `<x-link>`, `<x-logo>`, `<x-breadcrumb>`, `<x-page-header>`, `<x-footer-version>`) consumindo só CSS vars. Telas existentes do EPIC-001 (`/cadastro`, `/login`, `/home`, `/empresas/nova`, `/empresas/{id}/show`) refatoradas para usar o novo layout — drift de paleta da STORY-016 (`#1f2937`, `#2563eb`, `#f9fafb`) eliminado. Nenhuma mudança de token foi necessária: paleta, tipografia, espaçamento, raios e sombras passaram intactos no teste real. Único ajuste implícito foi a definição de variantes hover/active derivadas do Tertiary (`--color-tertiary-hover: #4F46E5`, `--color-tertiary-active: #4338CA`) — antes ficavam descritas como "8% darker" sem hex concreto. Próxima revisão de tokens só com sinal concreto de outra aplicação (EPIC-002 / EPIC-008).
 
 ---
 

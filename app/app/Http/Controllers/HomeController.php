@@ -20,6 +20,9 @@ final class HomeController
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        // STORY-019 CA-19 — flash de confirmação após logout para o usuário ver
+        // que a ação aconteceu (sem o flash, o redirect para /login parece "perdi a sessão").
+        return redirect('/login')
+            ->with('logout_sucesso', 'Você saiu da conta com sucesso.');
     }
 }

@@ -47,7 +47,7 @@ final class MinhasEmpresasBrowserTest extends DuskTestCase
                 ->visit('/home')
                 ->waitFor('@minhas-empresas-vazio')
                 ->assertSee('Olá, Roberto')
-                ->assertSee('Cadastre sua primeira Empresa')
+                ->assertSee('Nenhuma empresa cadastrada ainda')
                 ->click('@minhas-empresas-cta-cadastrar')
                 ->waitForLocation('/empresas/nova')
                 ->radio('@empresa-tipo-cnpj', 'cnpj')

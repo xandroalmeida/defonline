@@ -1,0 +1,124 @@
+/*
+ * tokens.css — única fonte autorizada de hex literais de design system.
+ *
+ * Materializa em código o design-system v1 (defonline-docs/especificacao/V2/design-system.md).
+ * Mudou aqui, propaga em todo o app. Qualquer hex de design system fora deste arquivo
+ * é regressão — o teste arquitetural tests/Arch/DesignTokensTest.php reprova.
+ *
+ * Tailwind v4 lê o bloco @theme abaixo e gera tanto CSS custom properties (var(--*))
+ * quanto classes utilitárias (bg-tertiary, text-primary, p-md, rounded-lg, etc.).
+ *
+ * IDR-008 — Framework CSS: Tailwind v4 com @theme.
+ */
+
+@theme {
+    /* Tipografia — Inter (design-system §Tipografia). Peso 700+ é proibido. */
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+
+    --text-display: 5rem;
+    --text-display--line-height: 1.05;
+    --text-display--letter-spacing: -0.04em;
+    --text-display--font-weight: 300;
+
+    --text-h1: 2.5rem;
+    --text-h1--line-height: 1.15;
+    --text-h1--letter-spacing: -0.02em;
+    --text-h1--font-weight: 500;
+
+    --text-h2: 1.75rem;
+    --text-h2--line-height: 1.2;
+    --text-h2--letter-spacing: -0.01em;
+    --text-h2--font-weight: 500;
+
+    --text-h3: 1.25rem;
+    --text-h3--line-height: 1.3;
+    --text-h3--font-weight: 500;
+
+    --text-body: 0.98rem;
+    --text-body--line-height: 1.6;
+    --text-body--font-weight: 400;
+
+    --text-body-sm: 0.875rem;
+    --text-body-sm--line-height: 1.55;
+    --text-body-sm--font-weight: 400;
+
+    --text-label: 0.72rem;
+    --text-label--line-height: 1.4;
+    --text-label--letter-spacing: 0.02em;
+    --text-label--font-weight: 600;
+
+    --text-code: 0.875rem;
+    --text-code--line-height: 1.55;
+    --text-code--font-weight: 400;
+
+    /* Cores — paleta Stripe-like (design-system §Tokens > Cores). */
+    --color-primary: #0A2540;
+    --color-secondary: #425466;
+    --color-tertiary: #635BFF;
+    --color-neutral: #F6F9FC;
+    --color-surface: #FFFFFF;
+    --color-on-primary: #FFFFFF;
+
+    /* Semânticas. */
+    --color-destructive: #E11D48;
+    --color-border: #E3E8EE;
+    --color-input: #E3E8EE;
+    --color-ring: hsla(243, 100%, 67%, 0.4);
+
+    /* Variantes de hover/active derivadas do design-system (tertiary 8% darker etc.). */
+    --color-tertiary-hover: #4F46E5;
+    --color-tertiary-active: #4338CA;
+
+    /* Faróis semáforos — usados pelo relatório do EPIC-002. Aqui só registrados como tokens. */
+    --color-farol-verde: #0E9F6E;
+    --color-farol-amarelo: #D97706;
+    --color-farol-vermelho: #DC2626;
+    --color-farol-cinza: #94A3B8;
+
+    /* Espaçamento — escala compacta do design-system. */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 32px;
+    --spacing-xl: 64px;
+    --spacing-2xl: 96px;
+
+    /* Border radius. */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-full: 9999px;
+
+    /* Sombras sutis (design-system §Sombras). Nunca pretas saturadas. */
+    --shadow-sm: 0 1px 2px rgba(10, 37, 64, 0.04);
+    --shadow-md: 0 4px 12px rgba(10, 37, 64, 0.06);
+    --shadow-lg: 0 12px 32px rgba(10, 37, 64, 0.08);
+
+    /* Breakpoint único declarado em ux-specs.md §7 — drawer em < 1024px, sidebar fixa em ≥ 1024px.
+       Tailwind v4 inclui breakpoints padrão (sm/md/lg/xl); aqui só renomeamos lg para o nosso 1024. */
+    --breakpoint-shell: 1024px;
+}
+
+/*
+ * Tokens não-Tailwind: usados em CSS custom para casos específicos
+ * (animações do drawer, estados que utilities não cobrem bem).
+ */
+:root {
+    --transition-drawer: 200ms;
+    --transition-dropdown: 150ms;
+
+    /* Containers (ux-specs §7) */
+    --container-narrow: 480px;
+    --container-mid: 640px;
+    --container-default: 960px;
+
+    /* Touch target mínimo (mobile-first) */
+    --touch-target-min: 44px;
+}

@@ -21,7 +21,7 @@ use Livewire\Component;
  * email-inexistente vs. senha-errada (security-discipline.md). Em sucesso, gera
  * sessão (Auth::login), regenera o session id e grava audit_log + log estruturado.
  */
-#[Layout('layouts.app')]
+#[Layout('components.layouts.auth')]
 final class Login extends Component
 {
     public string $email = '';
@@ -101,6 +101,7 @@ final class Login extends Component
 
     public function render(): View
     {
-        return view('livewire.login');
+        return view('livewire.login')
+            ->layoutData(['title' => 'Entrar']);
     }
 }

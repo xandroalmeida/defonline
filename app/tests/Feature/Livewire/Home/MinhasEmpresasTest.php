@@ -11,6 +11,7 @@ use Database\Factories\EmpresaAnalisadaFactory;
 
 /**
  * STORY-016 CA-1, CA-2, CA-5 — tela "Minhas Empresas" e respeito ao multi-tenant.
+ * STORY-019 CA-14 — botão "Adicionar empresa" sempre visível.
  */
 beforeEach(function () {
     $this->usuario = Usuario::factory()->create(['nome' => 'Roberto Souza']);
@@ -25,8 +26,8 @@ it('renderiza estado vazio com CTA para /empresas/nova quando não há empresas 
         ->get('/home')
         ->assertOk()
         ->assertSee('Olá, Roberto')
-        ->assertSee('Cadastre sua primeira Empresa para começar')
-        ->assertSee('Cadastrar primeira Empresa')
+        ->assertSee('Nenhuma empresa cadastrada ainda')
+        ->assertSee('Cadastrar primeira empresa')
         ->assertSee('/empresas/nova', escape: false);
 });
 
@@ -87,7 +88,7 @@ it('botão "Iniciar diagnóstico" aparece desabilitado (CA-1)', function () {
         ->assertSee('Iniciar diagnóstico');
 
     expect($response->getContent())
-        ->toMatch('/<button[^>]*\bdisabled\b[^>]*>\s*Iniciar diagnóstico/');
+        ->toMatch('/<button[^>]*\bdisabled\b[^>]*>[\s\S]*?Iniciar diagnóstico/');
 });
 
 it('não vaza empresas de outros usuários — multi-tenancy via Global Scope (CA-5)', function () {
@@ -115,11 +116,30 @@ it('não grava entrada em audit_logs ao acessar /home (CA-5)', function () {
     expect(AuditLog::count())->toBe($auditAntes);
 });
 
-it('botão "Adicionar empresa" não aparece nesta onda (epic — fora do escopo)', function () {
-    EmpresaAnalisada::factory()->create(['usuario_id' => $this->usuario->id]);
+/*
+ * STORY-019 CA-14 — bug fix: botão "Adicionar empresa" sempre visível no header
+ * da seção (todos os estados: vazio, 1 empresa, 2+). A versão anterior do teste
+ * cobrava o oposto (que o botão NÃO aparecia) por causa de uma decisão antiga
+ * do EPIC-001 que se mostrou ser bug funcional na auditoria UX da STORY-019.
+ */
+it('CA-14 — botão "Adicionar empresa" aparece no header em todos os estados', function () {
+    // Estado vazio.
+    $response = $this->actingAs($this->usuario)->get('/home');
+    $response->assertOk()
+        ->assertSee('Adicionar empresa')
+        ->assertSee('dusk="minhas-empresas-cta-adicionar"', escape: false);
 
-    $this->actingAs($this->usuario)
-        ->get('/home')
-        ->assertOk()
-        ->assertDontSee('Adicionar empresa');
+    // Estado com 1 empresa.
+    EmpresaAnalisada::factory()->create(['usuario_id' => $this->usuario->id]);
+    $response = $this->actingAs($this->usuario)->get('/home');
+    $response->assertOk()
+        ->assertSee('Adicionar empresa')
+        ->assertSee('dusk="minhas-empresas-cta-adicionar"', escape: false);
+
+    // Estado com 2+ empresas.
+    EmpresaAnalisada::factory()->create(['usuario_id' => $this->usuario->id]);
+    $response = $this->actingAs($this->usuario)->get('/home');
+    $response->assertOk()
+        ->assertSee('Adicionar empresa')
+        ->assertSee('dusk="minhas-empresas-cta-adicionar"', escape: false);
 });

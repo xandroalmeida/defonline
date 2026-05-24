@@ -41,7 +41,7 @@ use Livewire\Component;
  * STORY-014 CA-6); `documento` vive apenas em `empresas_analisadas` + log
  * estruturado mascarado pelo LogSanitizer.
  */
-#[Layout('layouts.app')]
+#[Layout('components.layouts.app')]
 final class Cadastrar extends Component
 {
     public string $tipo_documento = TipoDocumento::Cnpj->value;
@@ -294,6 +294,12 @@ final class Cadastrar extends Component
             'ufs' => Uf::cases(),
             'situacoes' => SituacaoCadastral::cases(),
             'tipos' => TipoDocumento::cases(),
+        ])->layoutData([
+            'title' => 'Cadastrar empresa',
+            'breadcrumb' => [
+                ['label' => 'Minhas Empresas', 'url' => route('home')],
+                ['label' => 'Nova empresa', 'url' => route('empresas.nova')],
+            ],
         ]);
     }
 }

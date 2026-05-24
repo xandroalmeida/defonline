@@ -1,11 +1,220 @@
 @import 'tailwindcss';
+@import './tokens.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+/*
+ * Base — aplica fonte Inter e composição neutral conforme design-system §Filosofia.
+ * Negative space carrega a composição: o body é neutral, surfaces brancos flutuam sobre ele.
+ */
+@layer base {
+    html {
+        color-scheme: light;
+    }
+
+    body {
+        font-family: var(--font-sans);
+        font-weight: var(--font-weight-normal);
+        font-size: var(--text-body);
+        line-height: var(--text-body--line-height);
+        color: var(--color-primary);
+        background: var(--color-neutral);
+        margin: 0;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        margin: 0;
+    }
+
+    *:focus-visible {
+        outline: 2px solid var(--color-ring);
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+}
+
+/*
+ * Componentes — atalhos para combinações que aparecem em ≥3 lugares e prejudicariam
+ * legibilidade se ficassem inline (IDR-008 — gatilho para usar @layer components).
+ */
+@layer components {
+    /*
+     * Botão base — único lugar com paddings/raios que se repetem nas 3 variants.
+     * Variants (primary/secondary/ghost) e tamanhos (md/sm) ficam nas classes
+     * combinadas pelo componente <x-button>.
+     */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-sm);
+        padding: 12px 20px;
+        min-height: var(--touch-target-min);
+        border-radius: var(--radius-md);
+        font-family: var(--font-sans);
+        font-size: var(--text-body);
+        font-weight: var(--font-weight-medium);
+        line-height: 1;
+        text-decoration: none;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+    }
+
+    .btn--primary {
+        background: var(--color-tertiary);
+        color: var(--color-on-primary);
+    }
+    .btn--primary:hover:not(:disabled) {
+        background: var(--color-tertiary-hover);
+    }
+
+    .btn--secondary {
+        background: var(--color-surface);
+        color: var(--color-primary);
+        border-color: var(--color-border);
+    }
+    .btn--secondary:hover:not(:disabled) {
+        background: var(--color-neutral);
+    }
+
+    .btn--ghost {
+        background: transparent;
+        color: var(--color-primary);
+    }
+    .btn--ghost:hover:not(:disabled) {
+        background: var(--color-neutral);
+    }
+
+    .btn--sm {
+        padding: 8px 14px;
+        min-height: 36px;
+        font-size: var(--text-body-sm);
+    }
+
+    .btn:disabled,
+    .btn[aria-disabled='true'] {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /*
+     * Input base — usa border-radius sm (6px) conforme design-system §input.
+     */
+    .input {
+        display: block;
+        width: 100%;
+        padding: 10px 12px;
+        min-height: var(--touch-target-min);
+        background: var(--color-surface);
+        color: var(--color-primary);
+        border: 1px solid var(--color-input);
+        border-radius: var(--radius-sm);
+        font-family: var(--font-sans);
+        font-size: var(--text-body);
+        line-height: var(--text-body--line-height);
+        box-sizing: border-box;
+        transition: border-color 120ms ease, box-shadow 120ms ease;
+    }
+    .input::placeholder {
+        color: var(--color-secondary);
+    }
+    .input:focus {
+        outline: none;
+        border-color: var(--color-tertiary);
+        box-shadow: 0 0 0 2px var(--color-ring);
+    }
+    .input:disabled {
+        background: var(--color-neutral);
+        color: var(--color-secondary);
+        cursor: not-allowed;
+    }
+
+    /* Label — uppercase pequena, peso 600, cor secundária (design-system §label). */
+    .label {
+        display: block;
+        font-size: var(--text-label);
+        font-weight: var(--font-weight-semibold);
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--color-secondary);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    /* Card — surface branco com borda neutra, sombra mínima. */
+    .card {
+        background: var(--color-surface);
+        color: var(--color-primary);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Link — tertiary, sem underline default; underline aparece no hover. */
+    .link {
+        color: var(--color-tertiary);
+        text-decoration: none;
+    }
+    .link:hover {
+        text-decoration: underline;
+    }
+
+    /* Item de navegação da sidebar/drawer. */
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        padding: 10px var(--spacing-md);
+        min-height: 40px;
+        border-radius: var(--radius-sm);
+        color: var(--color-primary);
+        font-weight: var(--font-weight-medium);
+        text-decoration: none;
+        position: relative;
+        transition: background-color 120ms ease, color 120ms ease;
+    }
+    .nav-item:hover:not(.is-disabled) {
+        background: var(--color-neutral);
+    }
+    .nav-item.is-active {
+        background: var(--color-neutral);
+        color: var(--color-tertiary);
+    }
+    .nav-item.is-active::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 8px;
+        bottom: 8px;
+        width: 3px;
+        background: var(--color-tertiary);
+        border-radius: var(--radius-full);
+    }
+    .nav-item.is-disabled {
+        color: var(--color-secondary);
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Pill discreta — usada para ambiente (homol), fonte de empresa (RFB), etc.
+       Sem text-transform por padrão — preserva o conteúdo do consumidor.
+       Para pill com texto uppercase, combinar com utility `uppercase` no consumidor. */
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 10px;
+        background: var(--color-neutral);
+        color: var(--color-secondary);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-full);
+        font-size: var(--text-body-sm);
+        font-weight: var(--font-weight-medium);
+        line-height: 1.4;
+    }
 }

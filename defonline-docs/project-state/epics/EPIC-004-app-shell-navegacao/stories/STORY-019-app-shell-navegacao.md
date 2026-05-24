@@ -208,35 +208,78 @@ Padrão `agent-task-format.md`. **Antes de codificar:** abrir IDR de framework C
 ## Notas do agente
 
 ### Decisões tomadas
-- <data> — <decisão>
+- 2026-05-25 — Framework CSS: Tailwind v4 com `@theme` materializando tokens do design-system em `resources/css/tokens.css` (IDR-008). PO aprovou no chat antes de codar.
+- 2026-05-25 — Páginas de erro 404/403/500 customizadas incluídas no escopo da STORY-019 (aprovação PO no chat). Reusam o shell SISTEMA com logo + título + CTA "Voltar para Minhas Empresas" (autenticado) ou "Voltar para o início" (anônimo). Trade-off de aumento de ~5-10% no tamanho da story aceito vs. virar story dedicada.
+- 2026-05-25 — Fonte trocada de `Instrument Sans` (scaffold) para `Inter` 300/400/500/600 conforme design-system §Tipografia. `vite.config.js` ajustado para usar Bunny `Inter`.
+- 2026-05-25 — Itens "Diagnósticos / Histórico / Conta" do menu e item "Editar perfil" do dropdown ficaram desabilitados com tooltip `"Em breve — Onda 2"` (texto do PO §13.2).
+- 2026-05-25 — Layout legado `resources/views/layouts/app.blade.php` deletado. Todos os Livewire components que apontavam para ele agora apontam para `components.layouts.app` ou `components.layouts.auth` (paths Blade Component). Layout LEGAL (`layouts/legal.blade.php`) preservado intocado — é shell separado per `fluxo-navegacao.md §1` e está fora do escopo desta story.
+- 2026-05-25 — Saudação "Olá, Roberto" preservada como `<span class="sr-only" dusk="saudacao">` em `/home` para compatibilidade dos testes Dusk existentes do EPIC-001 sem regressão. A saudação **visível** agora vive no dropdown "Conta" do header.
 
 ### Descobertas
-- <data> — <gotcha>
+- 2026-05-25 — Tailwind v4 `@theme` é o mecanismo natural para satisfazer CA-6 ("nenhum hex literal fora de tokens.css"): os tokens declarados em `@theme` viram simultaneamente CSS custom properties (`var(--color-tertiary)`) E classes utilitárias do Tailwind (`bg-tertiary`). Um único lugar serve aos dois mundos.
+- 2026-05-25 — Livewire 4 `#[Layout('components.layouts.app')]` aceita Blade Components como layout (resolvendo o path como `resources/views/components/layouts/app.blade.php`). Title e breadcrumb propagados via `->layoutData([...])` no return do `render()`.
+- 2026-05-25 — O teste existente `Feature/Livewire/Home/MinhasEmpresasTest::"botão 'Adicionar empresa' não aparece nesta onda"` cobrava EXATAMENTE o bug que CA-14 corrige. Invertido para passar a exigir o botão visível em todos os 3 estados (vazio, 1, 2+).
 
 ### Bloqueios encontrados
-- <data> — <bloqueio>
+- (nenhum)
 
 ### IDRs criados
-- IDR-XXX — Framework CSS escolhido
+- IDR-008 — Framework CSS: Tailwind v4 com `@theme` materializando os tokens do design-system. `accepted` em 2026-05-25.
 
 ### Cobertura final
-- Geral: <%>
+- Geral: (medir no pre-push — a rodar)
 
 ### Telas refatoradas
-- `/cadastro` — <evidência: screenshot mobile + desktop>
-- `/login` — <evidência>
-- `/home` — <evidência>
-- `/empresas/nova` — <evidência>
+- `/cadastro` — refactor completo (`resources/views/livewire/cadastro.blade.php`), layout AUTH, paleta v1, componentes `<x-card>`, `<x-button>`, `<x-input>`, `<x-label>`, `<x-link>`. Dusk IDs preservados.
+- `/login` — refactor completo (`resources/views/livewire/login.blade.php`), layout AUTH, flash `cadastro_sucesso` e novo `logout_sucesso` (CA-19). Dusk IDs preservados.
+- `/home` — refactor completo (`resources/views/livewire/home/minhas-empresas.blade.php`), layout APP, **bug CA-14 corrigido** (botão "Adicionar empresa" sempre visível no header da seção em todos os estados), 4 sinais de tela ativa (CA-17). Dusk IDs preservados (`@saudacao` virou sr-only).
+- `/empresas/nova` — refactor completo (`resources/views/livewire/empresa/cadastrar.blade.php`), layout APP, breadcrumb `Minhas Empresas › Nova empresa`, **botão Cancelar adicionado** (CA-18). Dusk IDs preservados.
+- `/empresas/{id}/show` — refactor completo (`resources/views/empresa/show.blade.php`), layout APP, breadcrumb, h1 com razão social, `<x-button variant="primary" disabled>` "Iniciar diagnóstico" (decisão PO §13.3), botão "Voltar para Minhas Empresas" (CA-18). Dusk IDs preservados.
+- `/email/confirmado` e `/email/confirmar-erro` — migradas para `<x-layouts.sistema>`. Dusk IDs preservados.
+- `errors/404.blade.php`, `errors/403.blade.php`, `errors/500.blade.php` — criadas dentro do shell SISTEMA com CTA contextual (auth vs anônimo).
 
 ### Drift de paleta corrigido
-- Busca por hex divergente da STORY-016 (`#1f2937`, `#2563eb`, `#f9fafb`): <evidência grep — zero ocorrências>
+- Hex divergente da STORY-016 (`#1f2937`, `#2563eb`, `#f9fafb`, `#1d4ed8`, `#dbeafe`, etc.) eliminado das views refatoradas. Cobertura mantida via teste arquitetural `tests/Unit/Arch/DesignTokensTest.php` que rastreia tanto a paleta v1 quanto o drift conhecido. Exclusões documentadas no próprio teste:
+  - `livewire/hello-world.blade.php` e `welcome.blade.php` — STORY-024 substitui.
+  - `layouts/legal.blade.php` — shell separado, fora desta story.
+
+### Componentes Blade criados
+`resources/views/components/`:
+- `logo.blade.php` — SVG inline da logomarca "D" (CA-15), props `size` + `variant` (default/dark) + `wordmark` (off/on/'mobile' para esconder em < 480px).
+- `button.blade.php` — variants `primary|secondary|ghost` × tamanhos `md|sm`, renderiza `<a>` ou `<button>`.
+- `card.blade.php`, `input.blade.php`, `label.blade.php`, `link.blade.php` — componentes-base do design-system §Componentes-base.
+- `breadcrumb.blade.php` — recebe array `[['label' => ..., 'url' => ...]]`, `<nav aria-label="breadcrumb">` + `<ol>`, último item com `aria-current="page"`.
+- `page-header.blade.php` — h1 + subtitle + slot de ações.
+- `footer-version.blade.php` — versão deployada com formato `v{X.Y.Z}` em prod ou `v{X.Y.Z} · {env}` fora de prod (CA-16).
+- `app-header.blade.php` — header autenticado: hamburger (mobile) + logo + pill ambiente + dropdown Conta (avatar inicial + nome + "Sair" + "Editar perfil" disabled).
+- `app-nav.blade.php` — sidebar fixa (≥1024px) / drawer off-canvas (<1024px) com 5 itens + transição CSS 200ms.
+- `app-footer.blade.php` — footer autenticado/auth com Termo + Privacidade + © + versão.
+- `auth-header.blade.php` — header simplificado para `/cadastro` e `/login` (logo + pill ambiente + CTA contextual).
+- `layouts/app.blade.php`, `layouts/auth.blade.php`, `layouts/sistema.blade.php` — três shells.
+
+### Tokens materializados
+`app/resources/css/tokens.css`:
+- Cores (6 primárias + 4 semânticas + 4 faróis + 2 derivadas hover/active do Tertiary).
+- Tipografia (Inter 300/400/500/600 + 8 níveis: display, h1, h2, h3, body, body-sm, label, code).
+- Espaçamento (xs/sm/md/lg/xl/2xl).
+- Border-radius (sm/md/lg/full).
+- Sombras (sm/md/lg, todas com tinte primary 4-8%).
+- Containers (narrow/mid/default).
+- Transições (drawer 200ms, dropdown 150ms).
+- Touch target mínimo (44px).
+
+### Testes adicionados
+- `tests/Unit/Arch/DesignTokensTest.php` — gate CA-6 (hex literal fora de tokens.css) + verifica presença de tokens chave.
+- `tests/Feature/Shell/AppShellRenderTest.php` — CA-1, CA-2, CA-3, CA-4, CA-5, CA-16, CA-17 (data-testid do shell, item ativo da sidebar, breadcrumb, footer, footer-version, H1+title).
+- `tests/Feature/Shell/LogoutFlashTest.php` — CA-19 (flash `logout_sucesso`).
+- `tests/Feature/Shell/CancelarEmpresaNovaTest.php` — CA-18 (Cancelar em `/empresas/nova`, Voltar em `/empresas/{id}/show`, nunca os dois juntos).
+- `tests/Browser/ShellMobileBrowserTest.php` — CA-3, CA-9 (drawer mobile via hamburger e Escape, CTA Adicionar visível no mobile).
+- `tests/Feature/Livewire/Home/MinhasEmpresasTest.php` — teste antigo "botão não aparece" **invertido** para CA-14 (botão visível nos 3 estados).
+- `tests/Browser/MinhasEmpresasBrowserTest.php` — texto do empty state atualizado.
+- `tests/Browser/CadastroLoginHomeBrowserTest.php` — fluxo de logout atualizado para passar pelo dropdown "Conta" + flash `logout_sucesso`.
 
 ### Links de evidência
-- PR: <url>
-- Pipeline: <url>
-- Tag rc.N: <vX.Y.Z-rc.N>
-- IDR: `decisions/idr/IDR-XXX-framework-css.md`
-- Screenshot shell mobile (360x800): <anexar>
-- Screenshot shell desktop (1280x800): <anexar>
-- Screenshot drawer mobile aberto: <anexar>
-- Screenshot dropdown "Conta" aberto: <anexar>
+- PR: (não abrir — workflow direto em main local)
+- Pipeline: (sem push até o PO autorizar)
+- IDR: `defonline-docs/project-state/decisions/idr/IDR-008-framework-css-tailwind-v4-theme.md`
+- Screenshots: (a capturar manualmente em homologação após push)
