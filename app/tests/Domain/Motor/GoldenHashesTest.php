@@ -26,28 +26,29 @@ use App\Domain\Motor\Motor;
 */
 
 dataset('golden_fixtures', [
-    // Hashes re-emitidos na STORY-031 (motor 1.1.0 → 1.2.0):
-    // resumo_executivo deixa de ser placeholder e passa a carregar veredito +
-    // destaques produzidos pelo algoritmo §4.7.1.
+    // Hashes re-emitidos na STORY-032 (motor 1.2.0 → 1.3.0):
+    // mensagem placeholder "Faixa verde/amarela/vermelha." substituída pelo
+    // texto literal da matriz dez-2025 (Anexo F, coluna Indústria).
+    // Destaques do resumo_executivo herdam os textos novos automaticamente.
     'saudavel' => [
         'quiz_industria_saudavel.json',
-        '3301503e9ce0d9bc1efe8c8b122d6d5bba1465592649259d100a2135e56ecebf',
+        '96cdd0e777eeea8aef00a614946c356014e60091cb7137f3353c263fb2fff018',
     ],
     'atencao' => [
         'quiz_industria_atencao.json',
-        '67ff7c1f0f9f31daffe8f8291689efaa34dd9723d0c88df992046c35274762ff',
+        '33f6baf8aa3d02bbd7b373b3452e1774b565d05156deb3c46f1192456ba118cc',
     ],
     'alerta' => [
         'quiz_industria_alerta.json',
-        '1d4ccb1c0b8c12a671db7190c934bb49c1a424c03cb47e8c197a3f109ff4526d',
+        'b77ec453af3ce4fa54a7e88da6dbe60f831e0eb29ee7523d58cfcc5321525038',
     ],
     'ncg_negativo' => [
         'quiz_industria_ncg_negativo.json',
-        'bb03b7c6df395aa27dbf2246ed5b21f9dceacf15680550d7ebf07284f8bad15e',
+        '25e11b1279b3599865642716c6ee03850594e57d07ed59e87930f35ac1ea0848',
     ],
     '70pct_indisponivel' => [
         'quiz_industria_70pct_indisponivel.json',
-        '315466d44f78b7042967bbc33bed74c307306a472bfb4f7d4c12d9b98567c321',
+        '0011bb5d1d2d82bae24e210ba69ce515b45690a93ca6f1fc9ee08c570ae9e318',
     ],
 ]);
 

@@ -25,6 +25,14 @@ use App\Domain\Motor\MotivosIndisponibilidade;
  * a referência "10% das Vendas" não existe — usamos a Faixa 2 como fallback
  * conservador (mensagem moderada, não alarmista).
  *
+ * **Não consome a matriz `dez-2025`.** A STORY-032 (motor 1.3.0) migrou os 13
+ * indicadores com farol para `MatrizRecomendacoes::texto()`. Este indicador
+ * **não** entrou na migração: o Anexo F só tem 2 cenários (positiva/negativa)
+ * e a granularidade FOLGA/MODERADO/ALTO entregue pela STORY-028 é mais útil
+ * ao usuário. Decisão registrada no briefing da STORY-032. A entrada do Anexo F
+ * para NCG abs fica disponível em `config/motor/matriz-dez-2025-industria.php`
+ * (chaves `positiva`/`negativa`) para auditoria editorial.
+ *
  * Casos extremos (catálogo §9):
  *   - Q03 ∨ Q04 ∨ Q07 ausente → `indisponivel:ncg_componente_faltante`.
  *   - Vendas faltante NÃO bloqueia — NCG é calculado de qualquer forma.

@@ -91,7 +91,7 @@ it('indisponível — Q09 não-numérico (defensa)', function () {
         ->and($r['farol'])->toBe('nenhum');
 });
 
-it('mensagem placeholder PT-BR para faixa verde', function () {
+it('mensagem da matriz dez-2025 para faixa verde', function () {
     $r = calcMargemBruta(pBaseMb());
-    expect($r['mensagem'])->toBe('Faixa verde.');
+    expect($r['mensagem'])->toBe('Buscar manter a margem atual.');
 });

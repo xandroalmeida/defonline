@@ -7,7 +7,7 @@ namespace App\Domain\Motor\Indicadores;
 use App\Domain\Motor\Calculos\DreAdaptada;
 use App\Domain\Motor\Farois\FarolIndustria;
 use App\Domain\Motor\IndicadorResultado;
-use App\Domain\Motor\MensagensFarol;
+use App\Domain\Motor\MatrizRecomendacoes;
 use App\Domain\Motor\MotivosIndisponibilidade;
 
 /**
@@ -86,7 +86,7 @@ final class MargemLiquida implements Indicador
             valor: $valor,
             farol: $farol,
             motivo: null,
-            mensagem: MensagensFarol::paraFarol($farol),
+            mensagem: (new MatrizRecomendacoes)->texto($this->chave(), $farol),
         );
     }
 }

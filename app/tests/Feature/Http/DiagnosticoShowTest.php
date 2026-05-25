@@ -98,6 +98,20 @@ it('devolve 404 quando o diagnóstico não existe', function () {
         ->assertNotFound();
 });
 
+it('exibe texto da matriz dez-2025 (Anexo F Indústria) no lugar do placeholder (STORY-032)', function () {
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnostico($dono);
+
+    $response = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}");
+
+    // payloadSaudavel → Margem Bruta 50% → verde → texto F.1 verde da matriz dez-2025.
+    $response->assertOk()
+        ->assertSee('Buscar manter a margem atual.')
+        ->assertDontSee('Faixa verde.')
+        ->assertDontSee('Faixa amarela.')
+        ->assertDontSee('Faixa vermelha.');
+});
+
 it('exibe NCG absoluto em card separado, sem farol verde/amarelo/vermelho (CA-4)', function () {
     $dono = Usuario::factory()->create();
     $diag = gerarDiagnostico($dono);
