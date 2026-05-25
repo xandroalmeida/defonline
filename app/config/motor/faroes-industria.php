@@ -86,4 +86,61 @@ return [
         'amarelo' => ['min' => 30.0, 'max' => 60.0],
         'vermelho' => ['op' => '>', 'valor' => 60.0],
     ],
+
+    // ============================================================
+    // Indicadores adicionados em STORY-030 (motor V2 = 1.1.0)
+    // ============================================================
+
+    // 2) Margem EBITDA — Indústria: > 20% verde · 15.01–20% amarelo · ≤ 15% vermelho.
+    'margem_ebitda' => [
+        'tipo' => 'maior_melhor',
+        'verde' => ['op' => '>', 'valor' => 20.0],
+        'amarelo' => ['min' => 15.0, 'max' => 20.0],   // (15, 20]
+        'vermelho' => ['op' => '<=', 'valor' => 15.0],
+    ],
+
+    // 5) Despesas Financeiras / EBITDA — Indústria: ≤ 35% verde · 35.01–50% amarelo · > 50% vermelho.
+    'despesas_fin_ebitda' => [
+        'tipo' => 'menor_melhor',
+        'verde' => ['op' => '<=', 'valor' => 35.0],
+        'amarelo' => ['min' => 35.0, 'max' => 50.0],   // (35, 50]
+        'vermelho' => ['op' => '>', 'valor' => 50.0],
+    ],
+
+    // 6) Fontes de Recursos (PC / PL) — Indústria: ≤ 0.5 verde · 0.501–1 amarelo · > 1 vermelho.
+    //    Faixa expressa em múltiplo (0.5 = PC representa 50% do PL).
+    'fontes_recursos' => [
+        'tipo' => 'menor_melhor',
+        'verde' => ['op' => '<=', 'valor' => 0.5],
+        'amarelo' => ['min' => 0.5, 'max' => 1.0],   // (0.5, 1]
+        'vermelho' => ['op' => '>', 'valor' => 1.0],
+    ],
+
+    // 7) Giro do Ativo (Vendas / Ativo Total) — Indústria: > 2 verde · 1.01–2 amarelo · ≤ 1 vermelho.
+    'giro_ativo' => [
+        'tipo' => 'maior_melhor',
+        'verde' => ['op' => '>', 'valor' => 2.0],
+        'amarelo' => ['min' => 1.0, 'max' => 2.0],   // (1, 2]
+        'vermelho' => ['op' => '<=', 'valor' => 1.0],
+    ],
+
+    // 12) PME (prazo médio de estoque) — Indústria: ≤ 30 dias verde · 30.01–60 amarelo · > 60 vermelho.
+    'pme' => [
+        'tipo' => 'menor_melhor',
+        'verde' => ['op' => '<=', 'valor' => 30.0],
+        'amarelo' => ['min' => 30.0, 'max' => 60.0],
+        'vermelho' => ['op' => '>', 'valor' => 60.0],
+    ],
+
+    // 14) Inadimplência (% sobre clientes) — Indústria: ≤ 3% verde · 3.01–5% amarelo · > 5% vermelho.
+    'inadimplencia' => [
+        'tipo' => 'menor_melhor',
+        'verde' => ['op' => '<=', 'valor' => 3.0],
+        'amarelo' => ['min' => 3.0, 'max' => 5.0],
+        'vermelho' => ['op' => '>', 'valor' => 5.0],
+    ],
+
+    // (+) Ciclo Operacional (PME + PMR) — INFORMATIVO, sem farol direto.
+    //     Não aparece nesta config; classe Indicador devolve farol='nenhum' por design
+    //     (decisão registrada na STORY-030; Anexo D não lista, Anexo E não traz faixas).
 ];

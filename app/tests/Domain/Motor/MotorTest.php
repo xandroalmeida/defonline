@@ -33,22 +33,30 @@ function payloadIndustriaSaudavel(): array
 it('retorna estrutura canônica com motor_version, matrix_version, setor, indicadores e resumo', function () {
     $r = (new Motor)->calcular(payloadIndustriaSaudavel(), 'industria');
     expect($r)->toHaveKeys(['motor_version', 'matrix_version', 'setor', 'indicadores_calculados', 'resumo_executivo']);
-    expect($r['motor_version'])->toBe('1.0.0');
-    expect($r['matrix_version'])->toBe('dez-2025');
+    expect($r['motor_version'])->toBe(config('motor.version'));
+    expect($r['matrix_version'])->toBe(config('motor.matrix_version'));
     expect($r['setor'])->toBe('industria');
 });
 
-it('produz exatamente 8 indicadores na V1 (7 com farol + NCG abs)', function () {
+it('produz exatamente 15 indicadores na V2 (14 do Anexo D + Ciclo Operacional informativo)', function () {
     $r = (new Motor)->calcular(payloadIndustriaSaudavel(), 'industria');
     expect(array_keys($r['indicadores_calculados']))->toBe([
-        'margem_bruta',
-        'margem_liquida',
-        'divida_liquida_ebitda',
-        'ncg_vendas',
-        'pmr',
-        'pmc',
-        'ciclo_financeiro',
-        'ncg_absoluto',
+        // ordem do Anexo D §4.5
+        'margem_bruta',           // #1
+        'margem_ebitda',          // #2
+        'margem_liquida',         // #3
+        'divida_liquida_ebitda',  // #4
+        'despesas_fin_ebitda',    // #5
+        'fontes_recursos',        // #6
+        'giro_ativo',             // #7
+        'ciclo_financeiro',       // #8
+        'ncg_absoluto',           // #9  (informativo)
+        'ncg_vendas',             // #10
+        'pmc',                    // #11
+        'pme',                    // #12
+        'pmr',                    // #13
+        'inadimplencia',          // #14
+        'ciclo_operacional',      // (+) informativo
     ]);
 });
 

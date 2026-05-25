@@ -11,6 +11,7 @@
     $snapshot = (array) $diagnostico->indicadores_calculados;
 
     $ncgAbsoluto = $snapshot['ncg_absoluto'] ?? null;
+    $cicloOperacional = $snapshot['ciclo_operacional'] ?? null;
 
     /*
      * Glossário inline — textos editoriais derivados do Anexo I (espec V2).
@@ -62,7 +63,7 @@
         </x-slot:actions>
     </x-page-header>
 
-    {{-- 7 indicadores essenciais. ----------------------------------------------
+    {{-- 13 indicadores essenciais com farol (motor V2 = 1.1.0, Anexo D §4.5).
          Renderiza dois layouts: tabela densa em ≥ md, stack de cards em < md.
          IDR-008 (tokens) + briefing §6 mobile-first.
     --}}
@@ -72,7 +73,7 @@
         {{-- Desktop: tabela densa. --}}
         <div class="hidden md:block rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] overflow-hidden shadow-[var(--shadow-sm)]">
             <table class="w-full text-sm" data-testid="indicadores-tabela">
-                <caption class="sr-only">7 indicadores essenciais com farol e mensagem.</caption>
+                <caption class="sr-only">Indicadores essenciais com farol e mensagem.</caption>
                 <thead class="bg-[color:var(--color-neutral)]">
                     <tr class="text-left">
                         <th scope="col" class="px-4 py-3 text-[color:var(--color-secondary)] text-xs uppercase tracking-wider font-semibold">Indicador</th>
@@ -101,10 +102,15 @@
         </div>
     </section>
 
-    {{-- NCG absoluto — informativo, sem farol. ------------------------------- --}}
-    @if ($ncgAbsoluto !== null)
-        <div class="mb-8">
-            <x-relatorio.card-ncg :indicador="$ncgAbsoluto"/>
+    {{-- Indicadores informativos (sem farol) — NCG absoluto + Ciclo Operacional. --}}
+    @if ($ncgAbsoluto !== null || $cicloOperacional !== null)
+        <div class="mb-8 grid gap-4 md:grid-cols-2">
+            @if ($ncgAbsoluto !== null)
+                <x-relatorio.card-informativo codigo="ncg_absoluto" :indicador="$ncgAbsoluto"/>
+            @endif
+            @if ($cicloOperacional !== null)
+                <x-relatorio.card-informativo codigo="ciclo_operacional" :indicador="$cicloOperacional"/>
+            @endif
         </div>
     @endif
 

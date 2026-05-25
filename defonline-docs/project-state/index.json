@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-05-25T19:00:00Z",
+  "generated_at": "2026-05-25T19:45:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -892,20 +892,23 @@
       "title": "Motor — completar 7 indicadores restantes (14 total) + ajuste fino do farol Indústria",
       "type": "implementation",
       "target_role": "programador",
-      "status": "draft",
+      "status": "in_review",
       "estimated_session_size": "L",
       "blocked_by": [
         "STORY-028"
       ],
       "blocks": [
-        "STORY-031",
         "STORY-032",
         "STORY-036"
       ],
-      "note": "V2 do motor: Margem EBITDA, Despesas Fin/EBITDA, Fontes PC/PL, Giro do Ativo, PME, Inadimplência, Ciclo Operacional. motor_version bumpa para 1.1.0. Snapshot preserva diagnósticos antigos.",
+      "parallel_with": "STORY-031",
+      "coverage_dominio": "100%",
+      "tests_pest": "674 (1815 asserções) — 97 novos no pacote Motor",
+      "note": "V2 entregue 2026-05-25 (programador claude-programador). 7 indicadores adicionados (Margem EBITDA, Desp.Fin/EBITDA, Fontes PC/PL, Giro do Ativo, PME, Inadimplência, Ciclo Operacional informativo); ordem de Motor::indicadores() alinhada ao Anexo D §4.5 com NCG abs no slot #9 e Ciclo Operacional ao final. config/motor.php 1.0.0→1.1.0. Golden hashes re-emitidos (saída cresceu 8→15 entradas). IndicadorFormatter expandido (ORDEM_ESSENCIAIS com 13 com farol; cards informativos separados para NCG abs + Ciclo Op via novo componente <x-relatorio.card-informativo>). Diagnósticos antigos em 1.0.0 preservados (snapshot). Aguarda aval visual do PO antes de done. Briefing operacional do PO em briefings/STORY-030-abertura.md.",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W25",
-      "owner_agent": null,
+      "owner_agent": "claude-programador",
+      "briefing_path": "epics/EPIC-002-diagnostico-industria/briefings/STORY-030-abertura.md",
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-030-motor-completar-14-indicadores.md",
       "created_at": "2026-05-25",
       "updated_at": "2026-05-25"
@@ -916,18 +919,20 @@
       "title": "Resumo Executivo — algoritmo determinístico §4.7.1",
       "type": "implementation",
       "target_role": "programador",
-      "status": "draft",
+      "status": "ready",
       "estimated_session_size": "M",
       "blocked_by": [
-        "STORY-030"
+        "STORY-028"
       ],
       "blocks": [
         "STORY-032"
       ],
-      "note": "Algoritmo determinístico (sem IA): veredito saudável/atenção/alerta + até 2 destaques negativos + 1 positivo, truncamento ~80 chars, fallback fixo quando ≥70% indicadores indisponíveis. NCG abs excluído da contagem.",
+      "parallel_with": "STORY-030",
+      "note": "Algoritmo determinístico (sem IA): veredito saudável/atenção/alerta + até 2 destaques negativos + 1 positivo, truncamento ~80 chars, fallback fixo quando ≥70% indicadores indisponíveis. NCG abs excluído da contagem. Substitui o placeholder atual `{pendente_story: STORY-031}` no slot resumo_executivo. motor_version bumpa para 1.1.0 (ou 1.2.0 se STORY-030 mergear primeiro — regra do bump em paralelo no briefing). Atualizado 2026-05-25: dependência rígida de STORY-030 removida — opera sobre o motor disponível no momento (7 indicadores V1 hoje; 13 quando 030 fechar; veredito pode mudar para o mesmo input no merge da 030 — esperado, é o motivo do bump). Promovida para `ready` em paralelo com STORY-030 — Checkpoint 2 / kill-switch. Briefing operacional do PO em briefings/STORY-031-abertura.md.",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W25",
       "owner_agent": null,
+      "briefing_path": "epics/EPIC-002-diagnostico-industria/briefings/STORY-031-abertura.md",
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-031-resumo-executivo-deterministico.md",
       "created_at": "2026-05-25",
       "updated_at": "2026-05-25"

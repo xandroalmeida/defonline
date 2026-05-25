@@ -15,6 +15,8 @@ declare(strict_types=1);
  * recalculados quando estas versões mudam.
  */
 return [
-    'version' => '1.0.0',
+    // 1.0.0 — STORY-028 (V1: 7 indicadores essenciais + NCG abs).
+    // 1.1.0 — STORY-030 (V2: completa 14 do Anexo D + Ciclo Operacional informativo).
+    'version' => '1.1.0',
     'matrix_version' => 'dez-2025',
 ];

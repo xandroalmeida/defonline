@@ -1,4 +1,5 @@
 @props([
+    'codigo',
     'indicador', // array{valor: ?float|int, farol: 'nenhum', motivo: ?string, mensagem: string}
 ])
 
@@ -8,16 +9,17 @@
     $valor = $indicador['valor'] ?? null;
     $mensagem = $indicador['mensagem'] ?? '';
     $indisponivel = $valor === null;
+    $tituloId = $codigo.'-titulo';
 @endphp
 
-<section aria-labelledby="ncg-abs-titulo"
+<section aria-labelledby="{{ $tituloId }}"
          class="rounded-[length:var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-neutral)] p-5 sm:p-6 shadow-[var(--shadow-sm)]"
-         data-codigo="ncg_absoluto">
+         data-codigo="{{ $codigo }}">
     <div class="flex items-start justify-between gap-3 mb-3">
         <div>
             <p class="text-[color:var(--color-secondary)] uppercase tracking-wider text-xs font-semibold m-0">Indicador informativo</p>
-            <h2 id="ncg-abs-titulo" class="text-[color:var(--color-primary)] text-xl font-medium m-0 mt-1">
-                {{ IndicadorFormatter::nome('ncg_absoluto') }}
+            <h2 id="{{ $tituloId }}" class="text-[color:var(--color-primary)] text-xl font-medium m-0 mt-1">
+                {{ IndicadorFormatter::nome($codigo) }}
             </h2>
         </div>
         <x-relatorio.farol cor="nenhum"/>
@@ -27,7 +29,7 @@
         @if ($indisponivel)
             <span class="text-[color:var(--color-secondary)] italic text-lg">Indisponível</span>
         @else
-            {{ IndicadorFormatter::valor('ncg_absoluto', $valor) }}
+            {{ IndicadorFormatter::valor($codigo, $valor) }}
         @endif
     </p>
 

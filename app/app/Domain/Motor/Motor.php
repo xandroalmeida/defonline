@@ -6,17 +6,24 @@ namespace App\Domain\Motor;
 
 use App\Domain\Motor\Calculos\DreAdaptada;
 use App\Domain\Motor\Indicadores\CicloFinanceiro;
+use App\Domain\Motor\Indicadores\CicloOperacional;
+use App\Domain\Motor\Indicadores\DespesasFinEbitda;
 use App\Domain\Motor\Indicadores\DividaLiquidaEbitda;
+use App\Domain\Motor\Indicadores\FontesRecursos;
+use App\Domain\Motor\Indicadores\GiroAtivo;
+use App\Domain\Motor\Indicadores\Inadimplencia;
 use App\Domain\Motor\Indicadores\Indicador;
 use App\Domain\Motor\Indicadores\MargemBruta;
+use App\Domain\Motor\Indicadores\MargemEbitda;
 use App\Domain\Motor\Indicadores\MargemLiquida;
 use App\Domain\Motor\Indicadores\NcgAbsoluto;
 use App\Domain\Motor\Indicadores\NcgVendas;
 use App\Domain\Motor\Indicadores\Pmc;
+use App\Domain\Motor\Indicadores\Pme;
 use App\Domain\Motor\Indicadores\Pmr;
 
 /**
- * Orquestrador do motor de cálculo V1 (STORY-028 — `motor_version = 1.0.0`).
+ * Orquestrador do motor de cálculo V2 (STORY-030 — `motor_version = 1.1.0`).
  *
  * Responsabilidades:
  *   1. Canonicaliza o `quiz_payload` (IDR-010 §sub-decisão 3).
@@ -30,10 +37,10 @@ use App\Domain\Motor\Indicadores\Pmr;
  * — fontes de não-determinismo proibidas). O `gerado_em` é definido pelo Action
  * `CalcularDiagnostico`, não aqui.
  *
- * **Ordem dos indicadores** = ordem de definição dos essenciais na STORY-028 +
- * NCG absoluto por último (informativo). Esta ordem entra no hash de saída.
+ * **Ordem dos indicadores** = ordem do Anexo D §4.5 (#1..#14) + Ciclo Operacional
+ * informativo no final. Esta ordem entra no hash de saída — mudança requer bump.
  *
- * **Resumo Executivo** é placeholder nesta V1 — STORY-031 substitui pelo
+ * **Resumo Executivo** é placeholder nesta V1/V2 — STORY-031 substitui pelo
  * algoritmo determinístico §4.7.1. O placeholder mantém o snapshot
  * sintaticamente válido (campo NOT NULL no banco).
  */
@@ -41,7 +48,7 @@ final class Motor
 {
     /**
      * @param  array<string, mixed>  $payload  quiz_payload bruto (será canonicalizado aqui).
-     * @param  string  $setor  V1 aceita SOMENTE 'industria'. Outros setores entram em estória futura
+     * @param  string  $setor  V1/V2 aceita SOMENTE 'industria'. Outros setores entram em estória futura
      *                         do EPIC-002+ (cada um traz seu classificador de farol próprio).
      * @return array{
      *     motor_version: string,
@@ -57,7 +64,7 @@ final class Motor
     {
         if ($setor !== 'industria') {
             throw new \InvalidArgumentException(
-                "Setor '{$setor}' não suportado pelo motor V1 (1.0.0). Esta versão atende apenas Indústria; ".
+                "Setor '{$setor}' não suportado pelo motor (1.1.0). Esta versão atende apenas Indústria; ".
                 'Comércio/Serviços entram em estória posterior do EPIC-002.',
             );
         }
@@ -83,21 +90,29 @@ final class Motor
     }
 
     /**
-     * Lista canônica dos indicadores V1, na ordem que entra no snapshot.
+     * Lista canônica dos indicadores, na ordem do Anexo D §4.5 (#1..#14)
+     * com Ciclo Operacional informativo ao final.
      *
      * @return list<Indicador>
      */
     private static function indicadores(): array
     {
         return [
-            new MargemBruta,
-            new MargemLiquida,
-            new DividaLiquidaEbitda,
-            new NcgVendas,
-            new Pmr,
-            new Pmc,
-            new CicloFinanceiro,
-            new NcgAbsoluto,
+            new MargemBruta,           // #1
+            new MargemEbitda,          // #2  (STORY-030)
+            new MargemLiquida,         // #3
+            new DividaLiquidaEbitda,   // #4
+            new DespesasFinEbitda,     // #5  (STORY-030)
+            new FontesRecursos,        // #6  (STORY-030)
+            new GiroAtivo,             // #7  (STORY-030)
+            new CicloFinanceiro,       // #8
+            new NcgAbsoluto,           // #9  (informativo, sem farol)
+            new NcgVendas,             // #10
+            new Pmc,                   // #11
+            new Pme,                   // #12 (STORY-030)
+            new Pmr,                   // #13
+            new Inadimplencia,         // #14 (STORY-030)
+            new CicloOperacional,      // (+) informativo, sem farol (STORY-030)
         ];
     }
 }

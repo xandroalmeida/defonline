@@ -47,13 +47,13 @@ it('persiste um Diagnostico com snapshot completo', function () {
     $diag = $action->execute($empresa, payloadIndustriaCanonico());
 
     expect($diag)->toBeInstanceOf(Diagnostico::class);
-    expect($diag->motor_version)->toBe('1.0.0');
-    expect($diag->matrix_version)->toBe('dez-2025');
+    expect($diag->motor_version)->toBe(config('motor.version'));
+    expect($diag->matrix_version)->toBe(config('motor.matrix_version'));
     expect($diag->setor)->toBe('industria');
     expect($diag->usuario_id)->toBe($u->id);
     expect($diag->empresa_analisada_id)->toBe($empresa->id);
     expect($diag->payload_hash)->toMatch('/^[0-9a-f]{64}$/');
-    expect(count($diag->indicadores_calculados))->toBe(8);
+    expect(count($diag->indicadores_calculados))->toBe(15);
 });
 
 it('calcula payload_hash como SHA-256 do canonical JSON', function () {
