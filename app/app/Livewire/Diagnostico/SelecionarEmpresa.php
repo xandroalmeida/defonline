@@ -22,6 +22,7 @@ final class SelecionarEmpresa extends Component
     public function render(): View
     {
         $empresas = EmpresaAnalisada::query()
+            ->withUltimoDiagnosticoId()
             ->orderBy('created_at')
             ->get();
 

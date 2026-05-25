@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\FonteEnriquecimento;
 use App\Domain\TipoDocumento;
 use App\Models\AuditLog;
+use App\Models\Diagnostico;
 use App\Models\EmpresaAnalisada;
 use App\Models\Usuario;
 use Database\Factories\EmpresaAnalisadaFactory;
@@ -77,18 +78,42 @@ it('exibe badge "Manual" para empresa de fonte manual (CA-1)', function () {
         ->assertSee('Manual');
 });
 
-it('botão "Iniciar diagnóstico" aparece desabilitado (CA-1)', function () {
-    EmpresaAnalisada::factory()->create([
+it('botão "Iniciar diagnóstico" leva ao quiz quando empresa não tem diagnóstico ainda', function () {
+    $empresa = EmpresaAnalisada::factory()->create([
         'usuario_id' => $this->usuario->id,
     ]);
 
     $response = $this->actingAs($this->usuario)
         ->get('/home')
         ->assertOk()
-        ->assertSee('Iniciar diagnóstico');
+        ->assertSee('Iniciar diagnóstico')
+        ->assertDontSee('Ver último diagnóstico')
+        ->assertDontSee('Refazer diagnóstico');
 
     expect($response->getContent())
-        ->toMatch('/<button[^>]*\bdisabled\b[^>]*>[\s\S]*?Iniciar diagnóstico/');
+        ->toContain(route('diagnosticos.novo', $empresa, absolute: false));
+});
+
+it('mostra "Ver último diagnóstico" + "Refazer diagnóstico" quando empresa já tem diagnóstico (STORY-029 entry point)', function () {
+    $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $this->usuario->id]);
+
+    Diagnostico::factory()->paraEmpresa($empresa)->create([
+        'gerado_em' => now()->subDays(2),
+    ]);
+    $maisRecente = Diagnostico::factory()->paraEmpresa($empresa)->create([
+        'gerado_em' => now()->subMinutes(5),
+    ]);
+
+    $response = $this->actingAs($this->usuario)
+        ->get('/home')
+        ->assertOk()
+        ->assertSee('Ver último diagnóstico')
+        ->assertSee('Refazer diagnóstico')
+        ->assertDontSee('>Iniciar diagnóstico<', escape: false);
+
+    // O link aponta para o diagnóstico MAIS RECENTE por gerado_em (não o primeiro).
+    expect($response->getContent())
+        ->toContain(route('diagnosticos.show', $maisRecente, absolute: false));
 });
 
 it('não vaza empresas de outros usuários — multi-tenancy via Global Scope (CA-5)', function () {

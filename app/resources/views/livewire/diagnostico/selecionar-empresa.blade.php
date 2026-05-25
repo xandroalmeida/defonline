@@ -29,9 +29,16 @@
                             <span>{{ $empresa->municipio }} / {{ $empresa->uf }}</span>
                         </div>
                         <div class="flex flex-wrap gap-2 mt-auto pt-2">
+                            @if ($empresa->ultimo_diagnostico_id)
+                                <x-button :href="route('diagnosticos.show', $empresa->ultimo_diagnostico_id)"
+                                          variant="secondary" size="sm"
+                                          dusk="selecionar-empresa-ver-diagnostico-{{ $empresa->id }}">
+                                    Ver último diagnóstico
+                                </x-button>
+                            @endif
                             <x-button :href="route('diagnosticos.novo', $empresa)" variant="primary" size="sm"
                                       dusk="selecionar-empresa-cta-{{ $empresa->id }}">
-                                Fazer diagnóstico
+                                {{ $empresa->ultimo_diagnostico_id ? 'Refazer diagnóstico' : 'Fazer diagnóstico' }}
                             </x-button>
                         </div>
                     </x-card>

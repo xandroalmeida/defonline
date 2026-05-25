@@ -33,6 +33,7 @@ final class MinhasEmpresas extends Component
         $usuario = Auth::user();
 
         $empresas = EmpresaAnalisada::query()
+            ->withUltimoDiagnosticoId()
             ->orderBy('created_at')
             ->get();
 

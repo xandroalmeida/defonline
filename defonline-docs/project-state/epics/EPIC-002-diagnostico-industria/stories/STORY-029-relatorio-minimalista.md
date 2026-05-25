@@ -114,3 +114,16 @@ Padrão. Avisar PO em `in_review`.
 - F-NB-1: CA-7 (p95 ≤ 3s em homol) — medição depende de deploy. Pendente.
 - F-NB-2: Dusk smoke do caminho quiz→relatório fica naturalmente coberto pela cadeia já existente — opcional adicionar Browser test específico no fechamento do EPIC-002.
 - F-NB-3 (info): seeder demo não vai para homol/prod automaticamente (guard de ambiente). Quando o PO quiser dados de demo em homol, abrir story curta para `--force-prod`.
+
+**Aditivo pós-aprovação do PO (2026-05-25, mesma sessão):**
+
+PO levantou em revisão visual que o relatório recém-criado ficou *invisível* pela navegação — só era alcançável via redirect do submit do quiz ou URL direta (UUID). Decisão acordada: adicionar ponto de entrada nos cards das duas listagens (Minhas Empresas + Selecionar Empresa) sem expandir o escopo para uma estória nova.
+
+- **Relação adicionada:** `EmpresaAnalisada::scopeWithUltimoDiagnosticoId(Builder)` — anexa `ultimo_diagnostico_id` (UUID|null) à query via `addSelect` subquery. **Não usa** `hasOne()->latestOfMany('gerado_em')` porque Postgres não tem `MAX(uuid)` (Eloquent injeta `MAX(id)` como tiebreaker automaticamente — explodiu com `SQLSTATE[42883] function max(uuid) does not exist`). A subquery via `Diagnostico::query()` herda o Global Scope `BelongsToUsuarioScope`, mantendo defesa em profundidade.
+- **Helper de relação extra:** `EmpresaAnalisada::diagnosticos()` (HasMany) — útil para EPIC-003 (histórico). Não usado nas views agora, mas serve de fundação.
+- **Eager-load** nos dois componentes Livewire (`MinhasEmpresas` + `SelecionarEmpresa`) via `EmpresaAnalisada::query()->withUltimoDiagnosticoId()->...` — uma única query, sem N+1.
+- **Botões nos cards:**
+  - Sem diagnóstico ainda: só "Iniciar diagnóstico" (=> quiz) ou "Fazer diagnóstico" (na tela selecionar).
+  - Com pelo menos 1 diagnóstico: "Ver último diagnóstico" (=> `/diagnosticos/{id}`) + "Refazer diagnóstico" (=> quiz). O label do botão primário muda de "Iniciar" para "Refazer".
+- **Teste obsoleto da STORY-016 corrigido:** o teste `botão "Iniciar diagnóstico" aparece desabilitado` ainda assertava `<button disabled>` mas o botão é `<a href>` desde a STORY-027. Substituído por dois testes: (a) sem diagnóstico, label "Iniciar diagnóstico" + href para o quiz; (b) com diagnósticos, label "Refazer", botão extra "Ver último diagnóstico" e href para o **mais recente** por `gerado_em` (regressão garantida).
+- **Cobertura:** `MinhasEmpresas` 100%, `SelecionarEmpresa` 100%, `EmpresaAnalisada` 96.4% (linha não-coberta é o método `usuario()` BelongsTo, herdado da 014). Total geral: 96.7%.

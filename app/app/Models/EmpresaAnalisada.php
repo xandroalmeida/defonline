@@ -14,10 +14,12 @@ use App\Models\Scopes\BelongsToUsuarioScope;
 use Database\Factories\EmpresaAnalisadaFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -82,6 +84,38 @@ final class EmpresaAnalisada extends Model
     public function usuario(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'usuario_id');
+    }
+
+    /**
+     * @return HasMany<Diagnostico, $this>
+     */
+    public function diagnosticos(): HasMany
+    {
+        return $this->hasMany(Diagnostico::class, 'empresa_analisada_id');
+    }
+
+    /**
+     * Anexa `ultimo_diagnostico_id` (UUID|null) à query — usado pela tela
+     * "Minhas Empresas" e pelo seletor de empresa do menu Diagnósticos para
+     * oferecer um atalho de leitura ao Roberto sem refazer o quiz.
+     *
+     * Implementado como **subquery select** em vez de `hasOne()->latestOfMany()`
+     * porque Postgres não suporta `MAX(uuid)` como tiebreaker — e o Eloquent
+     * `latestOfMany` injeta esse aggregate na PK automaticamente. A subquery
+     * é mais simples e a `Diagnostico::select()` herda o Global Scope
+     * `BelongsToUsuarioScope`, mantendo defesa em profundidade no multi-tenant.
+     *
+     * @param  Builder<EmpresaAnalisada>  $query
+     */
+    public function scopeWithUltimoDiagnosticoId(Builder $query): void
+    {
+        $query->addSelect([
+            'ultimo_diagnostico_id' => Diagnostico::query()
+                ->select('id')
+                ->whereColumn('empresa_analisada_id', 'empresas_analisadas.id')
+                ->latest('gerado_em')
+                ->limit(1),
+        ]);
     }
 
     public function ufEnum(): Uf

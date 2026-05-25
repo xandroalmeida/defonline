@@ -64,9 +64,16 @@
                                       dusk="minhas-empresas-ver-{{ $empresa->id }}">
                                 Ver detalhes
                             </x-button>
+                            @if ($empresa->ultimo_diagnostico_id)
+                                <x-button :href="route('diagnosticos.show', $empresa->ultimo_diagnostico_id)"
+                                          variant="secondary" size="sm"
+                                          dusk="minhas-empresas-ver-diagnostico-{{ $empresa->id }}">
+                                    Ver último diagnóstico
+                                </x-button>
+                            @endif
                             <x-button :href="route('diagnosticos.novo', $empresa)" variant="primary" size="sm"
                                       dusk="minhas-empresas-diagnostico-{{ $empresa->id }}">
-                                Iniciar diagnóstico
+                                {{ $empresa->ultimo_diagnostico_id ? 'Refazer diagnóstico' : 'Iniciar diagnóstico' }}
                             </x-button>
                         </div>
                     </x-card>
