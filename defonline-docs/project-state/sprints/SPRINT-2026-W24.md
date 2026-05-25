@@ -1,11 +1,13 @@
 ---
 sprint_id: SPRINT-2026-W24
 wave: WAVE-2026-01
-status: open
+status: closed
 start_date: 2026-05-25
 end_date: 2026-05-29
+closed_at: 2026-05-24
+closed_early: true
 goal: "Sweep de débito técnico do backlog — fechar STORY-021 (spike 403 vs 404 cross-tenant), STORY-022 (kind↔tipo docs), STORY-023 (fix bump-rc.yml dispara release-homolog) e STORY-025 (split runtime/dev no Dockerfile sem chromium em runtime), zerando o débito acumulado dos EPICs 000/001 antes de abrir o EPIC-002."
-goal_achieved: null
+goal_achieved: false
 ---
 
 # SPRINT-2026-W24
@@ -130,12 +132,71 @@ Ao fim de 2026-05-29:
 
 ## Fechamento do sprint
 
-> A ser preenchido ao fim da sprint pelo PO. Padrão herdado de W22 e W23:
-> - O que foi entregue (tabela ID × título × tag rc × notas).
-> - Mudanças de escopo registradas durante o sprint.
-> - Versão em homologação ao fim da sprint.
-> - O que ficou para trás (e por quê).
-> - Aprendizados (retro: o que funcionou / o que custou caro / um experimento para a próxima).
-> - Ajustes para o próximo sprint (que entra no EPIC-002).
-> - Métricas finais (estórias done, cobertura, pipelines verdes, velocidade real).
-> - Comemoração explícita (cultura).
+**Fechado em 2026-05-24**, 5 dias antes da `end_date` planejada (29/05/2026). **Goal não atingido na íntegra:** 3 de 4 estórias entregues; STORY-023 deferida conscientemente pelo PO.
+
+### O que foi entregue
+
+| ID | Título | Owner agent | Status |
+|---|---|---|---|
+| STORY-021 | SPIKE — Decidir 403 vs 404 cross-tenant | arquiteto | ✅ done |
+| STORY-022 | Alinhar nomenclatura `kind` ↔ `tipo` em `business_metrics` | programador | ✅ done |
+| STORY-025 | Imagem runtime sem chromium — separar dev/runtime no Dockerfile | programador-claude | ✅ done |
+| STORY-023 | Fix — `bump-rc.yml` dispara `release-homolog.yml` | — | ⏸ deferida (volta ao backlog) |
+
+### O que ficou para trás (e por quê)
+
+**STORY-023 — Fix `bump-rc.yml` dispara `release-homolog.yml` automaticamente.**
+
+> "Sprint implementada, menos a história do PAT que complicou e tomei a decisão de deixar para depois." — PO, 2026-05-24
+
+A Opção A (PAT) da estória esbarrou em complicações práticas de provisionamento/escopo de token que tornaram o trabalho maior que o "S" planejado. Em vez de estourar o tamanho dentro do sprint ou pular para Opção B/C sem análise suficiente, o **PO decidiu deferir** a estória inteira para o backlog. Workaround atual ("deletar tag remota + re-empurrar do host local") continua sendo a operação manual em uso até a estória ser reaberta.
+
+**Estado pós-fechamento:**
+
+- STORY-023 volta ao backlog com `sprint_id: null` e `status: ready` (mantém o trabalho de redação — não é regressão).
+- Recomendação a registrar quando reabrir: revisitar **Opção B (`gh release create`)** primeiro, que não exige secret novo e provavelmente evita a complicação que travou a Opção A.
+- Não é bloqueante para EPIC-002 — o workaround manual ainda funciona; só carrega atrito.
+
+### Mudanças no escopo durante o sprint
+
+| Data | Mudança | Custo |
+|---|---|---|
+| 2026-05-24 | **−STORY-023** (deferida para backlog) — Opção A (PAT) complicou; PO decidiu não forçar dentro do tamanho S | Goal de "zerar débito" não atingido — 1 débito remanescente |
+
+### O que funcionou
+
+- **STORY-021 (spike Arquiteto) entregue em paralelo com STORY-022/025** — confirma o experimento da retro da W22: time pequeno **consegue** paralelizar trabalho de papéis distintos (Arquiteto + Programador) em débitos independentes. Vira padrão.
+- **STORY-025 escopo bem dimensionado** apesar da observação do Programador estar parcialmente errada (chromium não era "só para CI") — a estória capturou a complicação real (split dev/runtime) antes do agente começar, e o Programador entregou no tamanho previsto.
+- **PO tomou decisão clara de deferir STORY-023** em vez de empurrar o tamanho — sinal saudável de governança de escopo. Padrão da W22 (Validador conservador + PO sobrescreve com transparência) aplicado de forma simétrica aqui (Programador sinaliza complicação + PO escolhe deferir com transparência, em vez de inflar).
+
+### O que custou caro
+
+- **Estória de CI/CD subestimada como "S"** — STORY-023 foi sized S porque "é só trocar trigger", mas Opção A esconde provisionamento de PAT + escopo + rotação + secret no repo. Para a próxima encarnação da estória, **partir da Opção B como default** e só escalar para A/C se B for inviável.
+- **Sem agregação de RC final** — diferente de W22/W23, não tem registro de tag rc nesta sprint (estórias eram débitos pequenos sem ciclo de release definido). Próxima sprint volta a ter ciclo rc explícito quando entrar em código de produção (EPIC-002).
+
+### Um experimento para a próxima
+
+> **Estórias de CI/CD entram com a opção mais simples como default**, não como "decida entre 3". Para o caso da STORY-023 reaberta: assumir Opção B (`gh release create`) na abertura; PR escalando para A ou C precisa justificativa explícita. Reduz superfície de decisão dentro de estórias S.
+
+### Ajustes para o próximo sprint
+
+- **SPRINT-2026-W25** abre no EPIC-002 (Diagnóstico Econômico-Financeiro para Indústria), conforme planejado.
+- **STORY-023 fica no backlog**, recomendada para inclusão na primeira sprint do EPIC-002 como "frestas" (ainda é S, e o workaround manual atrasa cada release rc do EPIC-002).
+- **Backlog `ready` sem sprint pós-W24:** 1 estória (STORY-023).
+
+### Métricas finais da sprint
+
+| Métrica | Valor | Meta |
+|---|---|---|
+| Estórias `done` | **3** | 4 |
+| Estórias entregues / planejadas | **75%** | 100% |
+| Estórias deferidas conscientemente | **1** | — |
+| Mudanças de escopo no meio | **1** (STORY-023 deferida) | — |
+| Sprint encerrado | **5 dias antes** da `end_date` | — |
+| Velocidade real (estórias/dia útil) | **~3 estórias em 1 dia útil efetivo** | — |
+| Cobertura geral (mantida) | **~96%** | ≥ 80% |
+| Pipeline `release-homolog` verde | **sim** (estado pós-W23 + chore de Dockerfile) | 100% |
+
+### Comemoração explícita (cultura)
+
+3 débitos limpos em 1 dia útil efetivo — incluindo um spike de Arquiteto que fecha uma divergência arquitetural aberta há 1 sprint inteira (cross-tenant 403 vs 404) e um chore de infra (~500MB economizados em runtime) que melhora higiene de produção. Backlog quase zerado antes do EPIC-002 abrir. **Deferir conscientemente** STORY-023 também é vitória: time aprendeu a separar "scope S" de "scope que parecia S mas era M", em vez de empurrar. WAVE-2026-01 continua adiantada em relação ao `target_end_date` (26/08/2026). 🚀

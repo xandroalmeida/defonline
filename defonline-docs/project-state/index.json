@@ -670,14 +670,14 @@
       "target_role": "programador",
       "status": "ready",
       "owner_agent": null,
-      "sprint_id": "SPRINT-2026-W24",
+      "sprint_id": null,
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-023-fix-bump-rc-dispara-release-homolog.md",
       "blocked_by": [],
       "blocks": [],
       "estimated_session_size": "S",
       "created_at": "2026-05-24",
-      "updated_at": "2026-05-25",
-      "note": "Débito de tooling CI derivado das Notas da STORY-018 (gotcha do `GITHUB_TOKEN` não dispara workflows downstream). 3 opções: PAT (mais simples), `gh release create` (sem secret novo), GitHub App (mais robusto). Recomendado fechar antes do EPIC-002 começar a usar `bump-rc` ativamente."
+      "updated_at": "2026-05-24",
+      "note": "Débito de tooling CI derivado das Notas da STORY-018 (gotcha do `GITHUB_TOKEN` não dispara workflows downstream). Entrou na SPRINT-2026-W24 e foi DEFERIDA pelo PO em 2026-05-24 — Opção A (PAT) complicou além do tamanho S. Volta ao backlog. Recomendação ao reabrir: partir da Opção B (`gh release create`) como default, que não exige secret novo."
     },
     {
       "id": "STORY-019",
@@ -842,11 +842,11 @@
     {
       "id": "SPRINT-2026-W24",
       "wave": "WAVE-2026-01",
-      "status": "open",
+      "status": "closed",
       "start_date": "2026-05-25",
       "end_date": "2026-05-29",
       "goal": "Sweep de débito técnico do backlog — fechar STORY-021 (spike 403 vs 404 cross-tenant), STORY-022 (kind↔tipo docs), STORY-023 (fix bump-rc.yml dispara release-homolog) e STORY-025 (split runtime/dev no Dockerfile sem chromium em runtime), zerando o débito acumulado dos EPICs 000/001 antes de abrir o EPIC-002.",
-      "goal_achieved": null,
+      "goal_achieved": false,
       "path": "sprints/SPRINT-2026-W24.md",
       "story_ids": [
         "STORY-021",
@@ -860,7 +860,21 @@
       ],
       "opened_at": "2026-05-25",
       "opened_by": "PO (Alexandro / Claude)",
-      "note": "Sprint de sweep de débito. 4 estórias S sem caminho crítico em série — ~4-6h efetivas, cabem folgadamente em 5 dias úteis. Buffer assumido como espaço para PO + Arquiteto rascunharem o escopo do EPIC-002 (fora do goal). Fim da sprint = backlog de estórias `ready` sem sprint = vazio; próxima sprint entra no EPIC-002."
+      "note": "Fechado 5 dias antes da end_date planejada (29/05). 3 de 4 estórias entregues; STORY-023 (fix bump-rc → release-homolog) deferida pelo PO porque Opção A (PAT) complicou além do tamanho S. Goal literal de 'zerar 4 débitos' não atingido — 1 remanescente. Recomendação registrada na retro: reabertura partir da Opção B (`gh release create`) como default em vez de A. Backlog `ready` sem sprint = 1 estória (STORY-023).",
+      "closed_at": "2026-05-24",
+      "closed_early": true,
+      "closed_by": "PO (Alexandro / Claude)",
+      "outcome": {
+        "stories_planned": 4,
+        "stories_delivered": 3,
+        "stories_deferred": 1,
+        "stories_dropped": 0,
+        "mid_sprint_changes": 1,
+        "deferred_story_ids": [
+          "STORY-023"
+        ],
+        "spawned_debt_stories": []
+      }
     }
   ],
   "decisions": {
