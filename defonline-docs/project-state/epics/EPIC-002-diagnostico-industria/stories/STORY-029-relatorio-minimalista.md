@@ -6,8 +6,11 @@ epic_id: EPIC-002
 sprint_id: SPRINT-2026-W25
 type: implementation
 target_role: programador
-status: in_review
+status: done
 owner_agent: claude-programador
+approved_by: Alexandro
+approved_at: 2026-05-25
+closed_at: 2026-05-25
 created_at: 2026-05-25
 updated_at: 2026-05-25
 estimated_session_size: M

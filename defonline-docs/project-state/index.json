@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-05-25T17:15:00Z",
+  "generated_at": "2026-05-25T19:00:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -861,7 +861,7 @@
       "title": "Relatório web minimalista — 7 indicadores + semáforo + glossário inline",
       "type": "implementation",
       "target_role": "programador",
-      "status": "in_review",
+      "status": "done",
       "estimated_session_size": "M",
       "blocked_by": [
         "STORY-026",
@@ -872,7 +872,12 @@
         "STORY-031",
         "STORY-032"
       ],
-      "note": "Primeiro relatório vivo em homol. Caminho feliz ponta-a-ponta. Render Blade server-side do snapshot `indicadores_calculados`, p95 baseline, glossário inline, mobile-first card-per-indicador. Atualizado 2026-05-25: dependência de STORY-027 removida — pode rodar em paralelo usando fixtures+seeder da STORY-028 já entregue. Integração final do redirect quiz→relatório fica naturalmente coordenada via merge. Briefing operacional do PO em briefings/STORY-029-abertura.md.",
+      "approved_by": "Alexandro",
+      "approved_at": "2026-05-25",
+      "closed_at": "2026-05-25",
+      "coverage_total": "96.8%",
+      "coverage_dominio": "100%",
+      "note": "Primeiro relatório vivo em homol entregue + aprovado pelo PO em 2026-05-25. Render Blade server-side do snapshot `indicadores_calculados`, tabela densa (md+) / cards (mobile), 4 componentes <x-relatorio.*>, helper IndicadorFormatter (100% cobertura), seeder demo (5 fixtures × diagnósticos), glossário inline <details> sem JS. Cross-tenant 404 silente IDR-009 com 4 testes feature. Aditivo pós-aprovação: pontos de entrada nos cards de Minhas Empresas + Selecionar Empresa via EmpresaAnalisada::scopeWithUltimoDiagnosticoId() — eager-load sem N+1; HasMany diagnosticos() como fundação para EPIC-003. Cobertura total 96.8%; Domain 100%; Pint+Larastan+Dusk verdes (Dusk obsoleto da STORY-027 corrigido na mesma sessão). F-NB-1: CA-7 (p95 ≤ 3s em homol) pendente de deploy; F-NB-2: Dusk smoke quiz→relatório opcional para validador final do EPIC.",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W25",
       "owner_agent": "claude-programador",
