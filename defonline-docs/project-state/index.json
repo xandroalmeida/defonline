@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-05-25T01:00:00Z",
+  "generated_at": "2026-05-25T02:00:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -634,16 +634,16 @@
       "title": "SPIKE — Decidir 403 vs 404 cross-tenant (alinhar STORY-014 com ADR-003/NRF)",
       "type": "spike",
       "target_role": "arquiteto",
-      "status": "ready",
-      "owner_agent": null,
+      "status": "done",
+      "owner_agent": "arquiteto (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W24",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-021-spike-403-vs-404-cross-tenant.md",
       "blocked_by": [],
       "blocks": [],
       "estimated_session_size": "S",
       "created_at": "2026-05-24",
-      "updated_at": "2026-05-25",
-      "note": "Débito derivado da validação do EPIC-001 (item 4.6 do `validation/report.md`). Decide entre Opção A (404 silencioso — alinha com ADR-003/NRF), Opção B (mantém 403 + audit — status quo, exige aditivo formal nos docs), Opção C (híbrido GET/POST). Registra IDR-008 ou número próximo. Recomendado fechar antes do EPIC-002 (6+ novas rotas autenticadas vão herdar a decisão)."
+      "updated_at": "2026-05-24",
+      "note": "Fechada em 2026-05-24 com IDR-009 (`decisions/idr/IDR-009-cross-tenant-403-vs-404.md`) — veredito **Opção A: 404 silente via Global Scope, sem audit log dedicado**. Recomendação de estória de refactor de `EmpresaController::show` + revisão de `audit_logs.action='empresa.acesso_negado'` registrada na IDR (não implementada nesta sessão; cabe ao PO criar a estória de correção)."
     },
     {
       "id": "STORY-022",
@@ -651,16 +651,16 @@
       "title": "Alinhar nomenclatura `kind` ↔ `tipo` em `business_metrics` (checklist vs schema)",
       "type": "bugfix",
       "target_role": "programador",
-      "status": "ready",
-      "owner_agent": null,
+      "status": "done",
+      "owner_agent": "programador",
       "sprint_id": "SPRINT-2026-W24",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-022-alinhar-nomenclatura-business-metrics.md",
       "blocked_by": [],
       "blocks": [],
       "estimated_session_size": "S",
       "created_at": "2026-05-24",
-      "updated_at": "2026-05-25",
-      "note": "Débito cosmético derivado da validação do EPIC-001 (item 4.8 do `validation/report.md`). PO recomenda Direção A (corrigir docs — schema atual `tipo` está bom). Direção B (renomear coluna) só se Arquiteto justificar mudança. Sem urgência; janela ociosa."
+      "updated_at": "2026-05-24",
+      "note": "Fechada em 2026-05-24 via Direção A (corrigir docs; schema `tipo` mantido). Arquivos tocados: validation/checklist.md item 4.8 (kind→tipo + ajuste de query para meta->>'status'), IDR-004 §Consequências linha 102 (kind→tipo), STORY-015 CA-4 (kind→tipo). ADR-004 §1.2 e templates do PO auditados sem divergências. Notas históricas em report.md/STORY-017 preservadas como registro de auditoria. Zero mudança em código de produção."
     },
     {
       "id": "STORY-023",
@@ -1225,6 +1225,27 @@
         "created_at": "2026-05-24",
         "updated_at": "2026-05-24",
         "note": "Fecha o débito \"mail_mailer: log apenas; sem provedor SMTP real ainda\" aberto desde a STORY-013. Lib transversal resend/resend-php adicionada; wiring Ansible no env.j2 + vars.yml + vault.example pronto. Chave ainda não está no vault — PO criando conta + verificando domínio defonline.xandrix.com.br + gerando key."
+      },
+      {
+        "id": "IDR-009",
+        "slug": "cross-tenant-403-vs-404",
+        "title": "Acesso cross-tenant em rotas autenticadas — 404 silente via Global Scope (sem audit log dedicado)",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-009-cross-tenant-403-vs-404.md",
+        "decided_at": "2026-05-24",
+        "decided_by": "arquiteto (claude-opus-4-7)",
+        "related_story": "STORY-021",
+        "related_stories": [
+          "STORY-014",
+          "STORY-021"
+        ],
+        "related_idrs": [],
+        "related_adrs": [
+          "ADR-003"
+        ],
+        "created_at": "2026-05-24",
+        "updated_at": "2026-05-24",
+        "note": "Spike STORY-021. Veredito Opção A: 404 silente via Global Scope, sem audit log dedicado. Alinha com ADR-003 §Decisão 1 + NRF §4.3 sem precisar aditivar nenhum dos dois. Recomendação de estória de refactor de `EmpresaController::show` (remover `withoutGlobalScope` + emissão de `empresa.acesso_negado`) registrada na própria IDR como follow-up — não implementada nesta sessão (cabe ao PO criar a estória de correção)."
       }
     ],
     "ddr": []

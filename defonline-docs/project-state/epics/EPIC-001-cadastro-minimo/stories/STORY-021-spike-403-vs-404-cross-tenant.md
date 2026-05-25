@@ -3,12 +3,12 @@ story_id: STORY-021
 slug: spike-403-vs-404-cross-tenant
 title: SPIKE — Decidir 403 vs 404 cross-tenant (alinhar STORY-014 com ADR-003/NRF)
 epic_id: EPIC-001
-sprint_id: null
+sprint_id: SPRINT-2026-W24
 type: spike
 target_role: arquiteto
 requires_design: false
-status: ready
-owner_agent: null
+status: done
+owner_agent: arquiteto (claude-opus-4-7)
 created_at: 2026-05-24
 updated_at: 2026-05-24
 estimated_session_size: S
@@ -57,11 +57,11 @@ Para o produto: consistência. Roberto não percebe diretamente, mas se duas rot
 
 ## Critérios de aceite
 
-- [ ] **CA-1:** IDR criada em `defonline-docs/project-state/decisions/idr/IDR-XXX-cross-tenant-403-vs-404.md` (número conforme `references/indexing.md`) com a estrutura padrão (contexto, decisão, alternativas consideradas, consequências, como verificar). Vinculada a `related_adrs: ["ADR-003"]` e `related_story: "STORY-014"`.
-- [ ] **CA-2:** Decisão entre as 3 opções (A | B | C) **com justificativa em prosa** considerando: (a) princípio anti-enumeração da security-discipline, (b) custo de mudança no código atual, (c) precedente para EPIC-002, (d) auditoria jurídica do acesso negado vs. minimização de ruído.
-- [ ] **CA-3:** Caso a decisão **não seja** "manter 403" (opção B), a IDR lista as estórias de correção sugeridas: pelo menos uma estória de refactor em `EmpresaController::show` + revisão da action `empresa.acesso_negado` em `audit_logs`. **Não implementa**; só propõe ao PO.
-- [ ] **CA-4:** Caso a decisão **seja** "manter 403" (opção B), a IDR ratifica formalmente e **registra um aditivo** explícito em ADR-003 §Decisão 1 e/ou NRF §4.3 explicando por que a defesa em profundidade (audit + anti-enumeração) vence o argumento puro de anti-enumeração — caso contrário a próxima leitura cruzada do ADR vai gerar ruído de novo.
-- [ ] **CA-5:** `index.json` atualizado: `decisions.idr` ganha a nova entrada com `status: accepted`; STORY-021 vai para `done`.
+- [x] **CA-1:** IDR criada em `defonline-docs/project-state/decisions/idr/IDR-009-cross-tenant-403-vs-404.md` (IDR-008 já ocupada por Tailwind v4) com a estrutura padrão (contexto, decisão, alternativas consideradas, consequências, como verificar). Vinculada a `related_adrs: ["ADR-003"]`, `related_story: "STORY-021"`, `related_stories: ["STORY-014", "STORY-021"]`.
+- [x] **CA-2:** Decisão entre as 3 opções (A | B | C) + 1 opção autoral (D), **com justificativa em prosa** considerando: (a) princípio anti-enumeração + atenuação por UUID v7, (b) custo de mudança no código atual + economia de boilerplate, (c) precedente para EPIC-002, (d) auditoria jurídica vs. minimização de ruído + papel do request log estruturado.
+- [x] **CA-3:** Decisão NÃO foi "manter 403" (foi Opção A — 404 silente). A IDR §"Consequências/Para o projeto" lista a estória de correção sugerida (refactor de `EmpresaController::show` + atualização dos testes + revisão da action `empresa.acesso_negado` em `audit_logs`) com tamanho sugerido S. **Não implementada** nesta sessão; proposta ao PO criar a estória.
+- [ ] **CA-4:** N/A — decisão NÃO foi "manter 403" (Opção B). Não há aditivo a ADR-003/NRF a registrar (ambos canônicos prevalecem como estão).
+- [x] **CA-5:** `index.json` atualizado: `decisions.idr` ganhou a entrada IDR-009 com `status: accepted`; STORY-021 movida para `status: done`.
 
 ## Fora de escopo
 
@@ -101,11 +101,11 @@ Você NÃO decide:
 
 ## Definição de Pronto
 
-- [ ] IDR criada e referenciada em `index.json`.
-- [ ] Decisão em prosa com justificativa.
-- [ ] Frontmatter da IDR completo (`status: accepted`, `decided_at`, `decided_by`, `related_adrs`, `related_story`).
-- [ ] STORY-021 `status: done` no frontmatter + `index.json`.
-- [ ] Notas do agente preenchidas.
+- [x] IDR criada e referenciada em `index.json`.
+- [x] Decisão em prosa com justificativa.
+- [x] Frontmatter da IDR completo (`status: accepted`, `decided_at`, `decided_by`, `related_adrs`, `related_story`).
+- [x] STORY-021 `status: done` no frontmatter + `index.json`.
+- [x] Notas do agente preenchidas.
 
 ## Protocolo do agente (obrigatório)
 
@@ -114,13 +114,17 @@ Padrão `agent-task-format.md`. Como é spike de decisão, não há commits de c
 ## Notas do agente
 
 ### Tempo investido
-- <horas>
+- ~45 min (leitura dos canônicos ADR-003 §Decisão 1, NRF §4.3, security-discipline.md, STORY-014 + controller atual; redação da IDR; atualização de `index.json` e frontmatter).
 
 ### Decisões tomadas
-- <data> — <decisão>
+- 2026-05-24 — **Opção A (404 silente via Global Scope, sem audit log dedicado)**. Justificativa completa em IDR-009 §"Por quê". Resumo: alinha com ADR-003 + NRF sem precisar aditivar nenhum dos dois; custo de refactor é menor que custo de manter divergência multiplicada por 6+ rotas no EPIC-002; UUID v7 mitiga o argumento "anti-enumeração não tem efeito", mas defesa em profundidade ainda é grátis; tentativa frustrada cross-tenant **não** é "operação de tratamento" LGPD — audit jurídico se reserva a CRUD do próprio dado, sinal forense vai para log estruturado.
+- 2026-05-24 — **Opção D autoral registrada e rejeitada** (404 + audit log preservado). Anularia o ganho de simplicidade da Opção A (exigiria continuar bypassando o Global Scope). Capacidade forense já existe no request log estruturado.
+- 2026-05-24 — Não emitir aditivo em ADR-003/NRF. A divergência ficou registrada como **erro local da STORY-014**, não como erro de arquitetura — IDR-009 é a fonte canônica do raciocínio.
 
 ### IDR criada
-- IDR-XXX em `decisions/idr/IDR-XXX-cross-tenant-403-vs-404.md` — veredito: <Opção A | B | C | outra>.
+- IDR-009 em `decisions/idr/IDR-009-cross-tenant-403-vs-404.md` — veredito: **Opção A** (404 silente via Global Scope, sem audit log dedicado). Note: IDR-008 já estava ocupado por `framework-css-tailwind-v4-theme` (arquivo presente no disco, embora não esteja catalogada no `decisions.idr` do `index.json` — drift identificado, ver "Observações úteis ao PO").
 
 ### Observações úteis ao PO
-- <data> — <observação>
+- 2026-05-24 — **Estória de refactor recomendada** (não criada nesta sessão, por escopo): refatorar [EmpresaController::show](app/app/Http/Controllers/EmpresaController.php) para remover `withoutGlobalScope(BelongsToUsuarioScope::class)`, eliminar bloco de emissão de `AuditLogger::log(action: 'empresa.acesso_negado', ...)` e simplificar para route binding padrão; atualizar testes de feature de STORY-014 que assertam `assertStatus(403)` em cross-tenant para `assertStatus(404)`; decidir destino do conjunto histórico de entradas `audit_logs.action='empresa.acesso_negado'` em homologação (mantidas como legado append-only, sem nova emissão dessa action). Tamanho sugerido: S (~30 min).
+- 2026-05-24 — **Drift do índice identificado**: `IDR-008-framework-css-tailwind-v4-theme.md` existe no disco (`decisions/idr/`) mas não está catalogada em `decisions.idr[]` do `index.json` (só aparece em nota da sprint W24). Fora do escopo desta SPIKE; vale uma estória S de housekeeping pelo PO para adicionar a entrada e auditar se há mais drift similar.
+- 2026-05-24 — **Sinais de revisão** desta IDR estão registrados na própria IDR §"Como verificar"; principal: incidente em produção onde 404 silente atrase investigação porque não há audit_logs correlacionável. Se acontecer, reabrir.
