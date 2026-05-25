@@ -1,5 +1,14 @@
 # DEFOnline — imagem única para web/worker/scheduler (ADR-002).
-# Multistage: composer separa cache de deps; runtime final tem PHP + código + vendor.
+# Multistage:
+#   - composer-deps: gera vendor sem dev deps (cacheável).
+#   - vite-build:    compila public/build com Tailwind v4 + Inter.
+#   - runtime:       imagem final deployada em homol/prod (SEM chromium).
+#   - dev:           FROM runtime + chromium + chromedriver — usada pelo
+#                    docker-compose.yml local (Dusk via pre-push). NÃO é a
+#                    imagem deployada — ADR-002 §"imagem única" continua
+#                    valendo para o runtime.
+#
+# Targets explícitos: CI builda `--target runtime`; compose constrói `target: dev`.
 
 # ─── Stage 1: composer + vendor ─────────────────────────────────────────────
 FROM composer:2 AS composer-deps
@@ -26,8 +35,8 @@ COPY app/resources ./resources
 COPY app/vite.config.js ./vite.config.js
 RUN npm run build
 
-# ─── Stage 3: runtime ───────────────────────────────────────────────────────
-FROM php:8.5-cli-alpine
+# ─── Stage 3: runtime (SEM chromium — usado em homol/prod) ──────────────────
+FROM php:8.5-cli-alpine AS runtime
 
 ARG APP_VERSION=dev
 ENV APP_VERSION=${APP_VERSION}
@@ -36,7 +45,6 @@ RUN apk add --no-cache \
         bash git curl unzip \
         libzip-dev oniguruma-dev libpng-dev libxml2-dev icu-dev \
         postgresql-dev postgresql-client \
-        chromium chromium-chromedriver \
         nodejs npm \
         && docker-php-ext-install pdo_pgsql zip bcmath \
         # PCOV — driver de cobertura leve (ADR-006 §3.1 + quality-standards §1.1/§2.2 +
@@ -79,3 +87,16 @@ RUN composer dump-autoload --no-dev --optimize --classmap-authoritative --no-scr
 RUN php artisan package:discover --ansi
 
 EXPOSE 8000
+
+# ─── Stage 4: dev (= runtime + chromium para Dusk local) ────────────────────
+# Usado APENAS pelo docker-compose.yml local (pre-push roda
+# `docker compose exec -T web php artisan dusk` dentro deste container).
+# CI smoke (release-homolog.yml) usa chromium do runner do GitHub Actions
+# — não desta imagem. Homol/prod nunca constroem este target.
+#
+# Chromium fica na ÚLTIMA layer significativa: mudanças de código (stage
+# runtime) não invalidam o `apk add chromium` (~500MB).
+FROM runtime AS dev
+
+RUN apk add --no-cache chromium chromium-chromedriver \
+    && rm -rf /var/cache/apk/*

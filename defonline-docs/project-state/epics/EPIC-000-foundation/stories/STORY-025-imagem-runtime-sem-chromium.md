@@ -3,14 +3,14 @@ story_id: STORY-025
 slug: imagem-runtime-sem-chromium
 title: Imagem runtime sem chromium — separar dev/runtime no Dockerfile (~500MB)
 epic_id: EPIC-000
-sprint_id: null
+sprint_id: SPRINT-2026-W24
 type: chore
 target_role: programador
 requires_design: false
-status: ready
-owner_agent: null
+status: in_progress
+owner_agent: programador-claude
 created_at: 2026-05-25
-updated_at: 2026-05-25
+updated_at: 2026-05-24
 estimated_session_size: S
 ---
 
@@ -143,20 +143,83 @@ Padrão `agent-task-format.md`. **Importante:** rebuild local com `docker compos
 ## Notas do agente
 
 ### Tempo investido
-- <horas>
+- ~1h (leitura + refactor + build dos dois targets + ADR-002 + Notas)
 
 ### Tamanhos das imagens
-- `defonline-app:runtime` — <MB>
-- `defonline-app:dev` — <MB>
-- Economia em homol/prod: <MB>
+
+Medidas em 2026-05-24 com `docker images` (buildx, default platform local
+darwin/arm64, build sem cache GHA — apenas cache local):
+
+| Imagem | `docker images` (SIZE) | Layer apk delta (do `docker history`) |
+|---|---|---|
+| `defonline-app:runtime` | **1.19 GB** | `apk add ...` (sem chromium): **691 MB** |
+| `defonline-app:dev` | **2.25 GB** | layer adicional `apk add chromium ...`: **750 MB** |
+| **Economia em homol/prod (layer chromium ausente)** | — | **~750 MB por imagem** |
+
+Observação: a estimativa original da estória (~500MB) era conservadora. O
+`apk add chromium chromium-chromedriver` em Alpine puxa não só os dois
+pacotes nominais como toda a árvore de libs X11/fonts/gtk+ etc., totalizando
+~750 MB descompactados (a diferença entre `1.19 GB` e `2.25 GB` no `docker
+images`, que reflete o tamanho visível para `docker pull` em homol/prod
+após o split, é ~1.06 GB — atribuível a diferenças de contagem multi-arch
+do buildx; o número canônico aqui é o do `docker history` da layer, **750 MB**).
+
+Verificações de CA-2/CA-3 executadas:
+
+```
+$ docker run --rm defonline-app:runtime sh -c "command -v chromium || echo NAO_INSTALADO"
+NAO_INSTALADO
+
+$ docker run --rm defonline-app:dev chromium --version
+Chromium 148.0.7778.167 Alpine Linux
+
+$ docker run --rm defonline-app:dev chromedriver --version
+ChromeDriver 148.0.7778.167 (...)
+
+$ docker run --rm defonline-app:runtime php artisan --version
+Laravel Framework 13.11.2
+
+$ docker run --rm defonline-app:runtime php -m | grep -E "pdo_pgsql|pcov|bcmath|zip"
+bcmath
+pcov
+pdo_pgsql
+zip
+```
+
+`docker history defonline-app:dev` confirma que o `apk add chromium ...` é
+**a última layer** do stage `dev` (CA: layer pesada friendly ao cache —
+mudança de código no `runtime` não invalida a layer de 750 MB).
 
 ### Decisões locais
-- Target default: <runtime | dev>
-- `nodejs npm` ficou em: <runtime | dev>
-- Outras ferramentas movidas para `dev`: <lista ou "nenhuma">
+
+- **Target default:** não há default — workflows do CI (`release-homolog.yml`,
+  `release-production.yml`) declaram `target: runtime` explicitamente;
+  `docker-compose.yml` declara `target: dev` no `x-app.build`. Decisão para
+  evitar acoplamento a "qual é o último stage do Dockerfile" (que muda se um
+  futuro stage for adicionado depois de `dev`). Explícito > implícito.
+- **`nodejs npm` ficou em:** `runtime`. Não foi movido para `dev`. Vite roda
+  no stage `vite-build` separado (já não polui runtime com Node), mas
+  `nodejs npm` continua instalado no runtime base por compatibilidade
+  reversa — se algum script artisan/composer ou pacote downstream invocar
+  `npm` em runtime, não quero descobrir agora. Avaliação custou < 5 min;
+  conclusão é que **vale uma estória subsequente** medir empiricamente e
+  separar, em vez de arriscar aqui (escopo fora desta estória conforme §"Fora
+  de escopo"). Anotação para retro.
+- **Outras ferramentas movidas para `dev`:** nenhuma. Só chromium +
+  chromium-chromedriver. Mesma justificativa de escopo.
+- **Ordem dos stages no Dockerfile:** `runtime` antes de `dev` para que `dev`
+  faça `FROM runtime AS dev` — superset literal, garantindo "tudo o que
+  funciona em runtime também funciona em dev".
 
 ### Aditivo ADR-002 / IDR
-- Link / trecho:
+
+- Aditivo retrospectivo registrado em [`ADR-002-topologia.md`](defonline-docs/project-state/decisions/adr/ADR-002-topologia.md) §Histórico (entrada 2026-05-24). Não muda a decisão; só explicita que "imagem única" do ADR é o `target runtime` e que `dev` é convenção de build local. Nenhum IDR novo.
 
 ### Observações úteis ao PO
-- <opcional>
+
+- **CA-7 e CA-8 não foram exercitados nesta sessão** (pipeline `release-homolog` end-to-end e pre-push Dusk). Motivo: a sessão é local-only por padrão de workflow (commits direto em `main` local; push/PR/tag são prerrogativa do PO). Os dois CAs só fecham quando o PO:
+  1. der push da `main` e disparar uma tag rc (validação E2E do `release-homolog`); ou
+  2. rodar `make pre-push` localmente após `docker compose build --no-cache web` (validação local do Dusk com a imagem `target: dev`).
+  Recomendo o passo 2 antes do push, conforme `padrões de qualidade exigidos` da estória.
+- Imagens locais buildadas como `defonline-app:runtime` e `defonline-app:dev` para diagnóstico — não conflitam com a tag `defonline/app:dev` do compose (namespace diferente). Podem ser removidas com `docker rmi defonline-app:runtime defonline-app:dev` sem efeito colateral.
+- `docker system prune -af` segue válido no `deploy.yml` por força do acúmulo de tags rc, mesmo agora sem chromium; comentário atualizado (~300MB por tag em vez de ~500MB).

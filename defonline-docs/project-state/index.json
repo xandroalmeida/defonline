@@ -747,15 +747,15 @@
       "title": "Imagem runtime sem chromium — separar dev/runtime no Dockerfile (~500MB)",
       "type": "chore",
       "target_role": "programador",
-      "status": "ready",
-      "owner_agent": null,
+      "status": "in_progress",
+      "owner_agent": "programador-claude",
       "sprint_id": "SPRINT-2026-W24",
       "path": "epics/EPIC-000-foundation/stories/STORY-025-imagem-runtime-sem-chromium.md",
       "blocked_by": [],
       "blocks": [],
       "estimated_session_size": "S",
       "created_at": "2026-05-25",
-      "updated_at": "2026-05-25",
+      "updated_at": "2026-05-24",
       "note": "Débito de infra levantado pelo Programador no fechamento da SPRINT-2026-W22. Chromium está no stage runtime do Dockerfile (~500MB) mas só é usado em dev local (pre-push Dusk via docker compose exec) — CI smoke usa chromium do runner, homol/prod nunca usa. Solução: split de targets multistage runtime (sem chromium) vs dev (com chromium) — sem ferir ADR-002 (imagem única para web/worker/scheduler em runtime continua)."
     }
   ],

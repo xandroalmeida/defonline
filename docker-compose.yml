@@ -6,6 +6,12 @@ x-app: &app-base
   build:
     context: .
     dockerfile: infra/docker/Dockerfile
+    # `dev` = `runtime` + chromium + chromedriver (Dockerfile stage 4).
+    # Necessário porque o pre-push (scripts/git-hooks/pre-push.sh) roda
+    # `docker compose exec -T web php artisan dusk` dentro deste container.
+    # CI homol/prod buildam `--target runtime` (sem chromium, ~500MB menor).
+    # STORY-025 / ADR-002.
+    target: dev
   image: defonline/app:dev
   working_dir: /var/www/html
   # NÃO injetar `.env` como env_file do container: Laravel já lê `.env` (e
