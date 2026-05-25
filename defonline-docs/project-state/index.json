@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-05-24T20:30:00Z",
+  "generated_at": "2026-05-25T01:00:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -36,7 +36,13 @@
       "goal": "Validar que o DEFOnline entrega valor real ao dono de pequena indústria, entregando em homologação o ciclo cadastro → diagnóstico → histórico no setor Indústria, sem cobrança.",
       "start_date": "2026-05-20",
       "target_end_date": "2026-08-26",
-      "epic_ids": ["EPIC-000", "EPIC-001", "EPIC-004", "EPIC-002", "EPIC-003"],
+      "epic_ids": [
+        "EPIC-000",
+        "EPIC-001",
+        "EPIC-004",
+        "EPIC-002",
+        "EPIC-003"
+      ],
       "path": "roadmap/current-wave.md",
       "related_pdr": "PDR-001"
     },
@@ -56,15 +62,35 @@
       "wave": "WAVE-2026-01",
       "status": "done",
       "path": "epics/EPIC-000-foundation/epic.md",
-      "story_ids": ["STORY-001", "STORY-002", "STORY-003", "STORY-004", "STORY-005", "STORY-006", "STORY-007", "STORY-009", "STORY-008", "STORY-010"],
+      "story_ids": [
+        "STORY-001",
+        "STORY-002",
+        "STORY-003",
+        "STORY-004",
+        "STORY-005",
+        "STORY-006",
+        "STORY-007",
+        "STORY-009",
+        "STORY-008",
+        "STORY-010"
+      ],
       "validation_report": {
         "path": "epics/EPIC-000-foundation/validation/report.md",
         "verdict": "approved",
         "validated_at": "2026-05-22",
         "validated_by": "validador (claude-opus-4-7)",
         "verdict_history": [
-          { "at": "2026-05-22", "verdict": "rejected", "blocking": false, "reason": "F-NB-1 — gate de cobertura prescrito não implementado" },
-          { "at": "2026-05-22", "verdict": "approved", "reason": "STORY-010 entregou PCOV + gate --min=80 no pre-push e no PR; cobertura medida ao vivo 92.4% ≥ 80%" }
+          {
+            "at": "2026-05-22",
+            "verdict": "rejected",
+            "blocking": false,
+            "reason": "F-NB-1 — gate de cobertura prescrito não implementado"
+          },
+          {
+            "at": "2026-05-22",
+            "verdict": "approved",
+            "reason": "STORY-010 entregou PCOV + gate --min=80 no pre-push e no PR; cobertura medida ao vivo 92.4% ≥ 80%"
+          }
         ],
         "remediation_story": "STORY-010",
         "revalidation_pending": false
@@ -79,18 +105,44 @@
       "wave": "WAVE-2026-01",
       "status": "done",
       "path": "epics/EPIC-001-cadastro-minimo/epic.md",
-      "story_ids": ["STORY-011", "STORY-012", "STORY-013", "STORY-014", "STORY-015", "STORY-016", "STORY-017", "STORY-018", "STORY-021", "STORY-022", "STORY-023"],
+      "story_ids": [
+        "STORY-011",
+        "STORY-012",
+        "STORY-013",
+        "STORY-014",
+        "STORY-015",
+        "STORY-016",
+        "STORY-017",
+        "STORY-018",
+        "STORY-021",
+        "STORY-022",
+        "STORY-023"
+      ],
       "validation_report": {
         "path": "epics/EPIC-001-cadastro-minimo/validation/report.md",
         "verdict": "approved",
         "validated_at": "2026-05-24",
         "validated_by": "validador (claude-opus-4-7)",
         "verdict_history": [
-          { "at": "2026-05-24T18:00:00-03:00", "verdict": "approved_with_pending", "by": "validador (claude-opus-4-7)", "reason": "6 PASS com ressalva por limitação de acesso do validador (Postgres homol, dashboard Resend, inbox real) — zero fail técnico." },
-          { "at": "2026-05-24T20:30:00-03:00", "verdict": "approved", "by": "po (Alexandro)", "reason": "PO sobrescreveu após análise honesta das 6 ressalvas (3 por falta de evidência primária, 1 erro do próprio checklist, 1 divergência arquitetural aceita, 1 mecânica do índice). 3 débitos com mérito viraram STORY-021/022/023." }
+          {
+            "at": "2026-05-24T18:00:00-03:00",
+            "verdict": "approved_with_pending",
+            "by": "validador (claude-opus-4-7)",
+            "reason": "6 PASS com ressalva por limitação de acesso do validador (Postgres homol, dashboard Resend, inbox real) — zero fail técnico."
+          },
+          {
+            "at": "2026-05-24T20:30:00-03:00",
+            "verdict": "approved",
+            "by": "po (Alexandro)",
+            "reason": "PO sobrescreveu após análise honesta das 6 ressalvas (3 por falta de evidência primária, 1 erro do próprio checklist, 1 divergência arquitetural aceita, 1 mecânica do índice). 3 débitos com mérito viraram STORY-021/022/023."
+          }
         ],
         "po_decision_at": "2026-05-24",
-        "debts_spawned_as_stories": ["STORY-021", "STORY-022", "STORY-023"]
+        "debts_spawned_as_stories": [
+          "STORY-021",
+          "STORY-022",
+          "STORY-023"
+        ]
       },
       "blocked_by_epics": [],
       "created_at": "2026-05-20",
@@ -106,7 +158,10 @@
       "path": "epics/EPIC-002-diagnostico-industria/epic.md",
       "story_ids": [],
       "validation_report": null,
-      "blocked_by_epics": ["EPIC-000", "EPIC-001"],
+      "blocked_by_epics": [
+        "EPIC-000",
+        "EPIC-001"
+      ],
       "created_at": "2026-05-20",
       "updated_at": "2026-05-20"
     },
@@ -119,7 +174,9 @@
       "path": "epics/EPIC-003-historico-basico/epic.md",
       "story_ids": [],
       "validation_report": null,
-      "blocked_by_epics": ["EPIC-002"],
+      "blocked_by_epics": [
+        "EPIC-002"
+      ],
       "created_at": "2026-05-20",
       "updated_at": "2026-05-20"
     },
@@ -130,23 +187,40 @@
       "wave": "WAVE-2026-01",
       "status": "done",
       "path": "epics/EPIC-004-app-shell-navegacao/epic.md",
-      "story_ids": ["STORY-019", "STORY-024", "STORY-020"],
+      "story_ids": [
+        "STORY-019",
+        "STORY-024",
+        "STORY-020"
+      ],
       "validation_report": {
         "path": "epics/EPIC-004-app-shell-navegacao/validation/report.md",
         "verdict": "approved",
         "validated_at": "2026-05-24",
         "validated_by": "validador (claude-validador, sessão STORY-020)",
         "verdict_history": [
-          { "at": "2026-05-24T20:30-03:00", "verdict": "approved_with_pending", "note": "1º passe: F-NB-1 (deploy pendente) + F-NB-2 (comentário Blade)." },
-          { "at": "2026-05-24T20:55-03:00", "verdict": "approved", "note": "2º passe pós-deploy v0.8.3-rc.1: F-NB-1 resolvido (3 hotfixes: CI npm build, Dockerfile stage vite-build, ansible prune pré-pull). Homol confirmada." }
+          {
+            "at": "2026-05-24T20:30-03:00",
+            "verdict": "approved_with_pending",
+            "note": "1º passe: F-NB-1 (deploy pendente) + F-NB-2 (comentário Blade)."
+          },
+          {
+            "at": "2026-05-24T20:55-03:00",
+            "verdict": "approved",
+            "note": "2º passe pós-deploy v0.8.3-rc.1: F-NB-1 resolvido (3 hotfixes: CI npm build, Dockerfile stage vite-build, ansible prune pré-pull). Homol confirmada."
+          }
         ],
         "pendencies": [
           "F-NB-2: comentário Blade em landing.blade.php:5 menciona 'STORY-007' e 'livewire/hello-world' — invisível ao usuário; trivial de remover ou ajustar CA literal."
         ],
         "deployed_tag": "v0.8.3-rc.1"
       },
-      "blocked_by_epics": ["EPIC-001"],
-      "blocks_epics": ["EPIC-002", "EPIC-003"],
+      "blocked_by_epics": [
+        "EPIC-001"
+      ],
+      "blocks_epics": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
       "created_at": "2026-05-24",
       "updated_at": "2026-05-24",
       "note": "Criado pelo PO em 2026-05-24 após análise de gap: nenhum item priorizado previa app shell, menu de navegação, breadcrumb ou materialização do design system em código. Drift de paleta confirmado entre design-system.md (oficial: #0A2540/#635BFF/#F6F9FC) e STORY-011/STORY-016 (#1f2937/#2563eb/#f9fafb). Inserido na WAVE-2026-01 antes do início efetivo do EPIC-002 para evitar retrabalho de UI. STORY-019 entra na próxima sprint (após SPRINT-2026-W22 fechar) — não entra na sprint ativa do EPIC-001. Epic placeholder homônimo da WAVE-2026-02 ('Cobrança e Plano Básico') renumerado para EPIC-005, com cascata."
@@ -164,7 +238,9 @@
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-001-spike-stack.md",
       "blocked_by": [],
-      "blocks": ["STORY-007"],
+      "blocks": [
+        "STORY-007"
+      ],
       "estimated_session_size": "L",
       "created_at": "2026-05-20",
       "updated_at": "2026-05-20"
@@ -180,7 +256,9 @@
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-002-spike-topologia.md",
       "blocked_by": [],
-      "blocks": ["STORY-007"],
+      "blocks": [
+        "STORY-007"
+      ],
       "estimated_session_size": "M",
       "created_at": "2026-05-20",
       "updated_at": "2026-05-21"
@@ -196,7 +274,9 @@
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-003-spike-persistencia.md",
       "blocked_by": [],
-      "blocks": ["STORY-007"],
+      "blocks": [
+        "STORY-007"
+      ],
       "estimated_session_size": "M",
       "created_at": "2026-05-20",
       "updated_at": "2026-05-21"
@@ -212,7 +292,9 @@
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-004-spike-infra.md",
       "blocked_by": [],
-      "blocks": ["STORY-007"],
+      "blocks": [
+        "STORY-007"
+      ],
       "estimated_session_size": "M",
       "created_at": "2026-05-20",
       "updated_at": "2026-05-21"
@@ -228,7 +310,9 @@
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-005-spike-cicd.md",
       "blocked_by": [],
-      "blocks": ["STORY-007"],
+      "blocks": [
+        "STORY-007"
+      ],
       "estimated_session_size": "M",
       "created_at": "2026-05-20",
       "updated_at": "2026-05-21"
@@ -244,7 +328,9 @@
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-006-spike-observabilidade.md",
       "blocked_by": [],
-      "blocks": ["STORY-007"],
+      "blocks": [
+        "STORY-007"
+      ],
       "estimated_session_size": "M",
       "created_at": "2026-05-20",
       "updated_at": "2026-05-21"
@@ -260,7 +346,9 @@
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-007-hello-world-deployado.md",
       "blocked_by": [],
-      "blocks": ["STORY-008"],
+      "blocks": [
+        "STORY-008"
+      ],
       "estimated_session_size": "L",
       "created_at": "2026-05-20",
       "updated_at": "2026-05-22",
@@ -279,7 +367,10 @@
       "owner_agent": "validador (claude-opus-4-7)",
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-008-validacao-epic-000.md",
-      "blocked_by": ["STORY-007", "STORY-009"],
+      "blocked_by": [
+        "STORY-007",
+        "STORY-009"
+      ],
       "blocks": [],
       "estimated_session_size": "M",
       "created_at": "2026-05-20",
@@ -298,7 +389,9 @@
       "sprint_id": null,
       "path": "epics/EPIC-000-foundation/stories/STORY-009-phppgadmin-dev-only.md",
       "blocked_by": [],
-      "blocks": ["STORY-008"],
+      "blocks": [
+        "STORY-008"
+      ],
       "estimated_session_size": "S",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-22",
@@ -320,7 +413,9 @@
       "created_at": "2026-05-22",
       "updated_at": "2026-05-22",
       "coverage_geral": "92.4%",
-      "related_idrs": ["IDR-003"],
+      "related_idrs": [
+        "IDR-003"
+      ],
       "note": "Corretiva derivada do F-NB-1 do report.md de validação do EPIC-000 (STORY-008). Habilita PCOV no container web + --coverage --min=80 no pre-push + job test-coverage no pr.yml com artefato + estrutura pronta para --min=98 em app/Domain (phpunit-domain.xml + branch condicional) quando essa pasta nascer no EPIC-001. Cobertura subiu de 57.7% → 92.4% (escritos testes para PennantListOverdue, HelloWorldEmail Job, BaseJob, HelloWorldMessage, Features/HelloWorldEmailHabilitado, CollectJobMetrics, helper). IDR-003 justifica PCOV vs Xdebug. Quando done, re-validar Bloco 2.1 do checklist."
     },
     {
@@ -334,7 +429,11 @@
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-011-walking-skeleton-cadastro-login.md",
       "blocked_by": [],
-      "blocks": ["STORY-012", "STORY-013", "STORY-014"],
+      "blocks": [
+        "STORY-012",
+        "STORY-013",
+        "STORY-014"
+      ],
       "estimated_session_size": "M",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-22",
@@ -356,8 +455,12 @@
       "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-012-termo-adesao-lgpd-aceites.md",
-      "blocked_by": ["STORY-011"],
-      "blocks": ["STORY-016"],
+      "blocked_by": [
+        "STORY-011"
+      ],
+      "blocks": [
+        "STORY-016"
+      ],
       "estimated_session_size": "S",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-22",
@@ -379,8 +482,12 @@
       "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-013-confirmacao-email-link-assinado.md",
-      "blocked_by": ["STORY-011"],
-      "blocks": ["STORY-016"],
+      "blocked_by": [
+        "STORY-011"
+      ],
+      "blocks": [
+        "STORY-016"
+      ],
       "estimated_session_size": "M",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-24",
@@ -400,8 +507,13 @@
       "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-014-cadastro-empresa-analisada-manual.md",
-      "blocked_by": ["STORY-011"],
-      "blocks": ["STORY-015", "STORY-016"],
+      "blocked_by": [
+        "STORY-011"
+      ],
+      "blocks": [
+        "STORY-015",
+        "STORY-016"
+      ],
       "estimated_session_size": "M",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-24",
@@ -423,9 +535,16 @@
       "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-015-enriquecimento-rfb-mock-fallback.md",
-      "blocked_by": ["STORY-014"],
-      "blocks": ["STORY-016", "STORY-018"],
-      "related_idrs": ["IDR-004"],
+      "blocked_by": [
+        "STORY-014"
+      ],
+      "blocks": [
+        "STORY-016",
+        "STORY-018"
+      ],
+      "related_idrs": [
+        "IDR-004"
+      ],
       "estimated_session_size": "M",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-24",
@@ -447,8 +566,14 @@
       "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-016-minhas-empresas-eventos.md",
-      "blocked_by": ["STORY-012", "STORY-013", "STORY-014"],
-      "blocks": ["STORY-017"],
+      "blocked_by": [
+        "STORY-012",
+        "STORY-013",
+        "STORY-014"
+      ],
+      "blocks": [
+        "STORY-017"
+      ],
       "estimated_session_size": "S",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-24",
@@ -464,7 +589,14 @@
       "owner_agent": "validador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-017-validacao-epic-001.md",
-      "blocked_by": ["STORY-011", "STORY-012", "STORY-013", "STORY-014", "STORY-015", "STORY-016"],
+      "blocked_by": [
+        "STORY-011",
+        "STORY-012",
+        "STORY-013",
+        "STORY-014",
+        "STORY-015",
+        "STORY-016"
+      ],
       "blocks": [],
       "estimated_session_size": "M",
       "created_at": "2026-05-22",
@@ -481,9 +613,16 @@
       "owner_agent": "programador (claude-opus-4-7)",
       "sprint_id": "SPRINT-2026-W22",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-018-rfb-providers-reais-cnpja-receitaws.md",
-      "blocked_by": ["STORY-015"],
+      "blocked_by": [
+        "STORY-015"
+      ],
       "blocks": [],
-      "related_idrs": ["IDR-004", "IDR-005", "IDR-006", "IDR-007"],
+      "related_idrs": [
+        "IDR-004",
+        "IDR-005",
+        "IDR-006",
+        "IDR-007"
+      ],
       "estimated_session_size": "M",
       "created_at": "2026-05-23",
       "updated_at": "2026-05-24",
@@ -497,13 +636,13 @@
       "target_role": "arquiteto",
       "status": "ready",
       "owner_agent": null,
-      "sprint_id": null,
+      "sprint_id": "SPRINT-2026-W24",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-021-spike-403-vs-404-cross-tenant.md",
       "blocked_by": [],
       "blocks": [],
       "estimated_session_size": "S",
       "created_at": "2026-05-24",
-      "updated_at": "2026-05-24",
+      "updated_at": "2026-05-25",
       "note": "Débito derivado da validação do EPIC-001 (item 4.6 do `validation/report.md`). Decide entre Opção A (404 silencioso — alinha com ADR-003/NRF), Opção B (mantém 403 + audit — status quo, exige aditivo formal nos docs), Opção C (híbrido GET/POST). Registra IDR-008 ou número próximo. Recomendado fechar antes do EPIC-002 (6+ novas rotas autenticadas vão herdar a decisão)."
     },
     {
@@ -514,13 +653,13 @@
       "target_role": "programador",
       "status": "ready",
       "owner_agent": null,
-      "sprint_id": null,
+      "sprint_id": "SPRINT-2026-W24",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-022-alinhar-nomenclatura-business-metrics.md",
       "blocked_by": [],
       "blocks": [],
       "estimated_session_size": "S",
       "created_at": "2026-05-24",
-      "updated_at": "2026-05-24",
+      "updated_at": "2026-05-25",
       "note": "Débito cosmético derivado da validação do EPIC-001 (item 4.8 do `validation/report.md`). PO recomenda Direção A (corrigir docs — schema atual `tipo` está bom). Direção B (renomear coluna) só se Arquiteto justificar mudança. Sem urgência; janela ociosa."
     },
     {
@@ -531,13 +670,13 @@
       "target_role": "programador",
       "status": "ready",
       "owner_agent": null,
-      "sprint_id": null,
+      "sprint_id": "SPRINT-2026-W24",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-023-fix-bump-rc-dispara-release-homolog.md",
       "blocked_by": [],
       "blocks": [],
       "estimated_session_size": "S",
       "created_at": "2026-05-24",
-      "updated_at": "2026-05-24",
+      "updated_at": "2026-05-25",
       "note": "Débito de tooling CI derivado das Notas da STORY-018 (gotcha do `GITHUB_TOKEN` não dispara workflows downstream). 3 opções: PAT (mais simples), `gh release create` (sem secret novo), GitHub App (mais robusto). Recomendado fechar antes do EPIC-002 começar a usar `bump-rc` ativamente."
     },
     {
@@ -548,10 +687,14 @@
       "target_role": "programador",
       "status": "done",
       "owner_agent": "claude-programador",
-      "sprint_id": null,
+      "sprint_id": "SPRINT-2026-W23",
       "path": "epics/EPIC-004-app-shell-navegacao/stories/STORY-019-app-shell-navegacao.md",
-      "blocked_by": ["STORY-016"],
-      "blocks": ["STORY-020"],
+      "blocked_by": [
+        "STORY-016"
+      ],
+      "blocks": [
+        "STORY-020"
+      ],
       "estimated_session_size": "M-L",
       "created_at": "2026-05-24",
       "updated_at": "2026-05-24",
@@ -567,7 +710,10 @@
       "owner_agent": "claude-validador",
       "sprint_id": "SPRINT-2026-W23",
       "path": "epics/EPIC-004-app-shell-navegacao/stories/STORY-020-validacao-epic-004.md",
-      "blocked_by": ["STORY-019", "STORY-024"],
+      "blocked_by": [
+        "STORY-019",
+        "STORY-024"
+      ],
       "blocks": [],
       "estimated_session_size": "M",
       "created_at": "2026-05-24",
@@ -582,14 +728,35 @@
       "target_role": "programador",
       "status": "done",
       "owner_agent": "claude-programador",
-      "sprint_id": null,
+      "sprint_id": "SPRINT-2026-W23",
       "path": "epics/EPIC-004-app-shell-navegacao/stories/STORY-024-landing-publica-simples.md",
-      "blocked_by": ["STORY-019"],
-      "blocks": ["STORY-020"],
+      "blocked_by": [
+        "STORY-019"
+      ],
+      "blocks": [
+        "STORY-020"
+      ],
       "estimated_session_size": "S",
       "created_at": "2026-05-24",
       "updated_at": "2026-05-24",
       "note": "Cleanup + entrega visível: remove a página de debug `/` (welcome + HelloWorld Livewire component + 2 testes) e a substitui por uma landing pública simples (logo, H1 'Diagnóstico estratégico para sua empresa.', subtítulo, 2 CTAs Criar conta grátis / Já tenho conta, footer com versão). Reusa componentes da STORY-019 (<x-logo>, <x-button>, <x-footer-version>, layout auth). Mantém HelloWorldEmail job + mail + flag (vetores do RequestIdPropagationTest). Smoke Dusk de `/` é trocado por novo cenário (landing). sprint_id: null — mesma sprint da STORY-019/020."
+    },
+    {
+      "id": "STORY-025",
+      "epic_id": "EPIC-000",
+      "title": "Imagem runtime sem chromium — separar dev/runtime no Dockerfile (~500MB)",
+      "type": "chore",
+      "target_role": "programador",
+      "status": "ready",
+      "owner_agent": null,
+      "sprint_id": "SPRINT-2026-W24",
+      "path": "epics/EPIC-000-foundation/stories/STORY-025-imagem-runtime-sem-chromium.md",
+      "blocked_by": [],
+      "blocks": [],
+      "estimated_session_size": "S",
+      "created_at": "2026-05-25",
+      "updated_at": "2026-05-25",
+      "note": "Débito de infra levantado pelo Programador no fechamento da SPRINT-2026-W22. Chromium está no stage runtime do Dockerfile (~500MB) mas só é usado em dev local (pre-push Dusk via docker compose exec) — CI smoke usa chromium do runner, homol/prod nunca usa. Solução: split de targets multistage runtime (sem chromium) vs dev (com chromium) — sem ferir ADR-002 (imagem única para web/worker/scheduler em runtime continua)."
     }
   ],
   "sprints": [
@@ -604,8 +771,19 @@
       "goal": "Entregar o EPIC-001 inteiro: ciclo cadastro Usuário → Termo+LGPD → confirmação de email → cadastro Empresa Analisada (manual + RFB com provedor real cnpja + fallback) → Minhas Empresas → eventos de produto, com validação independente aprovada.",
       "goal_achieved": true,
       "path": "sprints/SPRINT-2026-W22.md",
-      "story_ids": ["STORY-011", "STORY-012", "STORY-013", "STORY-014", "STORY-015", "STORY-016", "STORY-017", "STORY-018"],
-      "epic_ids": ["EPIC-001"],
+      "story_ids": [
+        "STORY-011",
+        "STORY-012",
+        "STORY-013",
+        "STORY-014",
+        "STORY-015",
+        "STORY-016",
+        "STORY-017",
+        "STORY-018"
+      ],
+      "epic_ids": [
+        "EPIC-001"
+      ],
       "opened_at": "2026-05-22",
       "opened_by": "PO (Alexandro / Claude)",
       "closed_by": "PO (Alexandro / Claude)",
@@ -615,9 +793,74 @@
         "stories_dropped": 0,
         "mid_sprint_changes": 3,
         "epic_closed": "EPIC-001",
-        "spawned_debt_stories": ["STORY-021", "STORY-022", "STORY-023"]
+        "spawned_debt_stories": [
+          "STORY-021",
+          "STORY-022",
+          "STORY-023"
+        ]
       },
       "note": "Fechado 19 dias antes da end_date (12/06). Todas as 8 estórias planejadas entregues; goal totalmente atingido. 3 mudanças de escopo registradas durante a execução (STORY-018, IDR-007 Resend, EPIC-004 inserido na onda). 3 estórias de débito derivadas da validação criadas no fechamento (não competem com a sprint — sprint_id null). Próxima sprint NÃO foi aberta por decisão explícita do PO em 2026-05-24."
+    },
+    {
+      "id": "SPRINT-2026-W23",
+      "wave": "WAVE-2026-01",
+      "status": "closed",
+      "start_date": "2026-05-25",
+      "end_date": "2026-05-29",
+      "closed_at": "2026-05-24",
+      "closed_early": true,
+      "goal": "Entregar o EPIC-004 inteiro (App shell + materialização do design system v1 + landing pública placeholder), corrigindo os 11 problemas de UX/UI auditados no EPIC-001 — com o bug funcional do 'Adicionar empresa quando já tem empresa' eliminado e o domínio público mostrando uma landing digna no lugar da página de debug da STORY-007. Validação independente aprovada.",
+      "goal_achieved": true,
+      "path": "sprints/SPRINT-2026-W23.md",
+      "story_ids": [
+        "STORY-019",
+        "STORY-024",
+        "STORY-020"
+      ],
+      "epic_ids": [
+        "EPIC-004"
+      ],
+      "opened_at": "2026-05-24",
+      "opened_by": "PO (Alexandro / Claude)",
+      "closed_by": "PO (Alexandro / Claude)",
+      "outcome": {
+        "stories_planned": 3,
+        "stories_delivered": 3,
+        "stories_dropped": 0,
+        "mid_sprint_changes": 3,
+        "epic_closed": "EPIC-004",
+        "spawned_debt_stories": [],
+        "optional_debts_pulled": [],
+        "optional_debts_skipped": [
+          "STORY-021",
+          "STORY-022",
+          "STORY-023"
+        ]
+      },
+      "note": "Fechado 5 dias antes da end_date (29/05) e antes da start_date (25/05) — executou em janela comprimida puxada do buffer da W22. Todas as 3 estórias núcleo (STORY-019, STORY-024, STORY-020) entregues; goal totalmente atingido com veredito APPROVED do EPIC-004 (após 2º passe pós-deploy v0.8.3-rc.1). 3 mudanças de escopo registradas (IDR-008 Tailwind v4 + @theme, template DDR, 3 hotfixes de infra). Débitos opcionais STORY-021/022/023 não puxados — continuam ready para W24, com STORY-023 promovida a núcleo pela retro. Pendência não-bloqueante restante: F-NB-2 (comentário Blade trivial). Segundo experimento consecutivo de sprint de 1 semana confirmou-se."
+    },
+    {
+      "id": "SPRINT-2026-W24",
+      "wave": "WAVE-2026-01",
+      "status": "open",
+      "start_date": "2026-05-25",
+      "end_date": "2026-05-29",
+      "goal": "Sweep de débito técnico do backlog — fechar STORY-021 (spike 403 vs 404 cross-tenant), STORY-022 (kind↔tipo docs), STORY-023 (fix bump-rc.yml dispara release-homolog) e STORY-025 (split runtime/dev no Dockerfile sem chromium em runtime), zerando o débito acumulado dos EPICs 000/001 antes de abrir o EPIC-002.",
+      "goal_achieved": null,
+      "path": "sprints/SPRINT-2026-W24.md",
+      "story_ids": [
+        "STORY-021",
+        "STORY-022",
+        "STORY-023",
+        "STORY-025"
+      ],
+      "epic_ids": [
+        "EPIC-000",
+        "EPIC-001"
+      ],
+      "opened_at": "2026-05-25",
+      "opened_by": "PO (Alexandro / Claude)",
+      "note": "Sprint de sweep de débito. 4 estórias S sem caminho crítico em série — ~4-6h efetivas, cabem folgadamente em 5 dias úteis. Buffer assumido como espaço para PO + Arquiteto rascunharem o escopo do EPIC-002 (fora do goal). Fim da sprint = backlog de estórias `ready` sem sprint = vazio; próxima sprint entra no EPIC-002."
     }
   ],
   "decisions": {
@@ -630,7 +873,12 @@
         "path": "decisions/pdr/PDR-001-escopo-wave-2026-01.md",
         "decided_at": "2026-05-20",
         "decided_by": "PO (Alexandro / Claude)",
-        "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"]
+        "related_epics": [
+          "EPIC-000",
+          "EPIC-001",
+          "EPIC-002",
+          "EPIC-003"
+        ]
       },
       {
         "id": "PDR-002",
@@ -642,8 +890,14 @@
         "decided_by": "PO (Alexandro / Claude)",
         "approved_by": "Alexandro",
         "approved_at": "2026-05-24",
-        "related_epics": ["EPIC-001", "EPIC-002", "EPIC-003"],
-        "related_adrs": ["ADR-001"],
+        "related_epics": [
+          "EPIC-001",
+          "EPIC-002",
+          "EPIC-003"
+        ],
+        "related_adrs": [
+          "ADR-001"
+        ],
         "schema_migration": "v1 -> v2",
         "created_at": "2026-05-24",
         "updated_at": "2026-05-24"
@@ -660,9 +914,15 @@
         "decided_at": "2026-05-20",
         "decided_by": "arquiteto",
         "approved_by": "Alexandro",
-        "related_pdrs": ["PDR-001"],
-        "related_epics": ["EPIC-000"],
-        "related_stories": ["STORY-001"],
+        "related_pdrs": [
+          "PDR-001"
+        ],
+        "related_epics": [
+          "EPIC-000"
+        ],
+        "related_stories": [
+          "STORY-001"
+        ],
         "spike_branch": "spike/STORY-001-stack",
         "spike_commit": "3fc1bb4",
         "created_at": "2026-05-20",
@@ -678,10 +938,21 @@
         "decided_at": "2026-05-21",
         "decided_by": "arquiteto",
         "approved_by": "Alexandro",
-        "related_adrs": ["ADR-001"],
-        "related_pdrs": ["PDR-001"],
-        "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
-        "related_stories": ["STORY-002"],
+        "related_adrs": [
+          "ADR-001"
+        ],
+        "related_pdrs": [
+          "PDR-001"
+        ],
+        "related_epics": [
+          "EPIC-000",
+          "EPIC-001",
+          "EPIC-002",
+          "EPIC-003"
+        ],
+        "related_stories": [
+          "STORY-002"
+        ],
         "created_at": "2026-05-21",
         "updated_at": "2026-05-23",
         "last_amendment_note": "2026-05-23 — acréscimo retrospectivo de IDRs RFB (IDR-004/005/006) nos blocos §App→RFB e tabela de comunicação. Sem mudança de decisão."
@@ -696,10 +967,22 @@
         "decided_at": "2026-05-21",
         "decided_by": "arquiteto",
         "approved_by": "Alexandro",
-        "related_adrs": ["ADR-001", "ADR-002"],
-        "related_pdrs": ["PDR-001"],
-        "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
-        "related_stories": ["STORY-003"],
+        "related_adrs": [
+          "ADR-001",
+          "ADR-002"
+        ],
+        "related_pdrs": [
+          "PDR-001"
+        ],
+        "related_epics": [
+          "EPIC-000",
+          "EPIC-001",
+          "EPIC-002",
+          "EPIC-003"
+        ],
+        "related_stories": [
+          "STORY-003"
+        ],
         "created_at": "2026-05-21",
         "updated_at": "2026-05-21"
       },
@@ -713,10 +996,23 @@
         "decided_at": "2026-05-21",
         "decided_by": "arquiteto",
         "approved_by": "Alexandro",
-        "related_adrs": ["ADR-001", "ADR-002", "ADR-003"],
-        "related_pdrs": ["PDR-001"],
-        "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
-        "related_stories": ["STORY-006"],
+        "related_adrs": [
+          "ADR-001",
+          "ADR-002",
+          "ADR-003"
+        ],
+        "related_pdrs": [
+          "PDR-001"
+        ],
+        "related_epics": [
+          "EPIC-000",
+          "EPIC-001",
+          "EPIC-002",
+          "EPIC-003"
+        ],
+        "related_stories": [
+          "STORY-006"
+        ],
         "created_at": "2026-05-21",
         "updated_at": "2026-05-23",
         "last_amendment_note": "2026-05-23 — acréscimo retrospectivo: dimensão provider em meta JSONB de business_metrics; alerta A2 por provider para tipo=rfb_consulta. Sem migration, sem mudança de decisão."
@@ -731,10 +1027,24 @@
         "decided_at": "2026-05-21",
         "decided_by": "arquiteto",
         "approved_by": "Alexandro",
-        "related_adrs": ["ADR-001", "ADR-002", "ADR-003", "ADR-004"],
-        "related_pdrs": ["PDR-001"],
-        "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
-        "related_stories": ["STORY-004"],
+        "related_adrs": [
+          "ADR-001",
+          "ADR-002",
+          "ADR-003",
+          "ADR-004"
+        ],
+        "related_pdrs": [
+          "PDR-001"
+        ],
+        "related_epics": [
+          "EPIC-000",
+          "EPIC-001",
+          "EPIC-002",
+          "EPIC-003"
+        ],
+        "related_stories": [
+          "STORY-004"
+        ],
         "created_at": "2026-05-21",
         "updated_at": "2026-05-21"
       },
@@ -748,10 +1058,25 @@
         "decided_at": "2026-05-21",
         "decided_by": "arquiteto",
         "approved_by": "Alexandro",
-        "related_adrs": ["ADR-001", "ADR-002", "ADR-003", "ADR-004", "ADR-005"],
-        "related_pdrs": ["PDR-001"],
-        "related_epics": ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"],
-        "related_stories": ["STORY-005"],
+        "related_adrs": [
+          "ADR-001",
+          "ADR-002",
+          "ADR-003",
+          "ADR-004",
+          "ADR-005"
+        ],
+        "related_pdrs": [
+          "PDR-001"
+        ],
+        "related_epics": [
+          "EPIC-000",
+          "EPIC-001",
+          "EPIC-002",
+          "EPIC-003"
+        ],
+        "related_stories": [
+          "STORY-005"
+        ],
         "created_at": "2026-05-21",
         "updated_at": "2026-05-23",
         "last_amendment_note": "2026-05-23 — §3.2 revisada: main.yml deixa de buildar imagem `main-<sha>`/`latest` em todo push (imagem nunca era consumida; release-homolog.yml builda do zero a partir do SHA da tag rc). Workflow fica só com job `validate`. Sem mudança de decisão estrutural."
@@ -767,7 +1092,10 @@
         "decided_at": "2026-05-22",
         "decided_by": "programador",
         "related_story": "STORY-007",
-        "related_adrs": ["ADR-003", "ADR-005"],
+        "related_adrs": [
+          "ADR-003",
+          "ADR-005"
+        ],
         "created_at": "2026-05-22",
         "updated_at": "2026-05-22"
       },
@@ -780,7 +1108,9 @@
         "decided_at": "2026-05-22",
         "decided_by": "programador",
         "related_story": "STORY-007",
-        "related_adrs": ["ADR-005"],
+        "related_adrs": [
+          "ADR-005"
+        ],
         "created_at": "2026-05-22",
         "updated_at": "2026-05-22"
       },
@@ -793,7 +1123,9 @@
         "decided_at": "2026-05-22",
         "decided_by": "programador",
         "related_story": "STORY-010",
-        "related_adrs": ["ADR-006"],
+        "related_adrs": [
+          "ADR-006"
+        ],
         "created_at": "2026-05-22",
         "updated_at": "2026-05-22"
       },
@@ -806,8 +1138,14 @@
         "decided_at": "2026-05-23",
         "decided_by": "PO (Alexandro)",
         "related_story": "STORY-015",
-        "related_stories": ["STORY-015", "STORY-018"],
-        "related_adrs": ["ADR-001", "ADR-004"],
+        "related_stories": [
+          "STORY-015",
+          "STORY-018"
+        ],
+        "related_adrs": [
+          "ADR-001",
+          "ADR-004"
+        ],
         "created_at": "2026-05-23",
         "updated_at": "2026-05-23"
       },
@@ -821,9 +1159,17 @@
         "decided_by": "Arquiteto",
         "approved_by": "Alexandro",
         "related_story": "STORY-018",
-        "related_stories": ["STORY-018"],
-        "related_idrs": ["IDR-004"],
-        "related_adrs": ["ADR-001", "ADR-002", "ADR-004"],
+        "related_stories": [
+          "STORY-018"
+        ],
+        "related_idrs": [
+          "IDR-004"
+        ],
+        "related_adrs": [
+          "ADR-001",
+          "ADR-002",
+          "ADR-004"
+        ],
         "created_at": "2026-05-23",
         "updated_at": "2026-05-23",
         "note": "Reaberto pelo Arquiteto pelo método (decision-method.md), aceito por Alexandro em 2026-05-23 no chat (\"pode aprovar tudo\")."
@@ -838,9 +1184,19 @@
         "decided_by": "Arquiteto",
         "approved_by": "Alexandro",
         "related_story": "STORY-018",
-        "related_stories": ["STORY-015", "STORY-018"],
-        "related_idrs": ["IDR-004", "IDR-005"],
-        "related_adrs": ["ADR-002", "ADR-003", "ADR-005"],
+        "related_stories": [
+          "STORY-015",
+          "STORY-018"
+        ],
+        "related_idrs": [
+          "IDR-004",
+          "IDR-005"
+        ],
+        "related_adrs": [
+          "ADR-002",
+          "ADR-003",
+          "ADR-005"
+        ],
         "created_at": "2026-05-23",
         "updated_at": "2026-05-23",
         "note": "Reaberto pelo Arquiteto pelo método, concretizou secrets via Ansible Vault (era vago: 'mesmo mecanismo'); aceito por Alexandro em 2026-05-23 no chat (\"pode aprovar tudo\")."
@@ -855,9 +1211,17 @@
         "decided_by": "PO (Alexandro)",
         "approved_by": "Alexandro",
         "related_story": "STORY-018",
-        "related_stories": ["STORY-013", "STORY-018"],
-        "related_idrs": ["IDR-006"],
-        "related_adrs": ["ADR-002", "ADR-005"],
+        "related_stories": [
+          "STORY-013",
+          "STORY-018"
+        ],
+        "related_idrs": [
+          "IDR-006"
+        ],
+        "related_adrs": [
+          "ADR-002",
+          "ADR-005"
+        ],
         "created_at": "2026-05-24",
         "updated_at": "2026-05-24",
         "note": "Fecha o débito \"mail_mailer: log apenas; sem provedor SMTP real ainda\" aberto desde a STORY-013. Lib transversal resend/resend-php adicionada; wiring Ansible no env.j2 + vars.yml + vault.example pronto. Chave ainda não está no vault — PO criando conta + verificando domínio defonline.xandrix.com.br + gerando key."

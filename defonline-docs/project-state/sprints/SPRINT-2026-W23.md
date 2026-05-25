@@ -1,11 +1,13 @@
 ---
 sprint_id: SPRINT-2026-W23
 wave: WAVE-2026-01
-status: open
+status: closed
 start_date: 2026-05-25
 end_date: 2026-05-29
+closed_at: 2026-05-24
+closed_early: true
 goal: "Entregar o EPIC-004 inteiro (App shell + materialização do design system v1 + landing pública placeholder), corrigindo os 11 problemas de UX/UI auditados no EPIC-001 — com o bug funcional do 'Adicionar empresa quando já tem empresa' eliminado e o domínio público mostrando uma landing digna no lugar da página de debug da STORY-007. Validação independente aprovada."
-goal_achieved: null
+goal_achieved: true
 ---
 
 # SPRINT-2026-W23
@@ -155,12 +157,92 @@ Em homologação, ao fim de 2026-05-29:
 
 ## Fechamento do sprint
 
-> A ser preenchido ao fim da sprint pelo PO. Padrão da W22:
-> - O que foi entregue (tabela ID × título × tag rc × notas)
-> - Mudanças de escopo registradas durante o sprint
-> - Versão em homologação ao fim da sprint
-> - O que ficou para trás (e por quê)
-> - Aprendizados (retro por escrito: o que funcionou / o que custou caro / um experimento para a próxima)
-> - Ajustes para o próximo sprint
-> - Métricas finais (estórias done, cobertura, pipelines verdes, velocidade real, etc.)
-> - Comemoração explícita (cultura)
+**Fechado em 2026-05-24**, 5 dias antes da `end_date` planejada (2026-05-29) e antes mesmo da `start_date` calendarizada (2026-05-25) — a sprint executou em janela comprimida puxada do buffer da W22, que fechara em 2026-05-24. Goal totalmente atingido.
+
+### O que foi entregue
+
+Todas as 3 estórias do núcleo em `done`:
+
+| ID | Título | Tag rc | Notas |
+|---|---|---|---|
+| STORY-019 | App shell + materialização do design system v1 + refactor das telas existentes | `v0.8.1-rc.1` (+ hotfix `v0.8.2-rc.1` CI Vite build) | IDR-008 aceita (Tailwind v4 + `@theme`). Tokens centralizados em `resources/css/tokens.css`; 10+ Blade components; refactor das 4 telas do EPIC-001 sem regressão funcional; bug `Adicionar empresa` eliminado; políticas Cancelar/Voltar consolidadas; 4 sinais de tela ativa; drawer mobile + dropdown Conta acessíveis. |
+| STORY-024 | Landing pública simples + remoção da página de debug `/` | `v0.8.1-rc.1` | Landing `D + DEFOnline + tagline + 2 CTAs + footer com versão`; remoção dos 5 arquivos de debug da STORY-007 (preservando `HelloWorldEmail` job/mail/flag/tests); smoke Dusk `LandingBrowserTest` no group `smoke` substituindo `HelloWorldBrowserTest`. |
+| STORY-020 | Validação final do EPIC-004 | (sem nova tag — só docs; deploy efetivo em `v0.8.3-rc.1`) | 1º passe: `approved_with_pending` (F-NB-1 deploy pendente + F-NB-2 comentário Blade residual). 3 hotfixes durante o passe (CI Vite build, Dockerfile stage `vite-build`, Ansible prune pré-pull) liberaram o deploy `v0.8.3-rc.1`. 2º passe: **APPROVED**. F-NB-2 mantido como follow-up trivial. |
+
+**Mudanças de escopo registradas durante o sprint:**
+
+| Data | Mudança | Custo |
+|---|---|---|
+| 2026-05-24 | +IDR-008 (Framework CSS — Tailwind v4 com `@theme`) — formalizada após PO aprovar opção A no chat dentro da STORY-019 | Zero (decisão coube no Dia 1 conforme risco previsto) |
+| 2026-05-24 | +Template DDR (Design Decision Record) commitado junto da STORY-019 (`37a34eb`) | Zero (docs trivial, viu uso natural ao formalizar IDR-008) |
+| 2026-05-24 | +3 hotfixes no fechamento (CI Vite build, Dockerfile stage `vite-build`, Ansible prune) — surfaced no 1º passe da validação | Absorvidos sem atraso; geraram os tags `v0.8.2-rc.1` e `v0.8.3-rc.1` |
+
+**Versão em homologação ao fim da sprint:** `v0.8.3-rc.1` (cobre STORY-019 + STORY-024 + STORY-020 + 3 hotfixes; confirmada por screenshot em [evidence/11-homol-landing-desktop-1280x800.png](../epics/EPIC-004-app-shell-navegacao/validation/evidence/11-homol-landing-desktop-1280x800.png)).
+
+### O que ficou para trás (e por quê)
+
+**Nada do núcleo planejado.** As 3 estórias núcleo entregaram.
+
+**Débitos do EPIC-001 listados como opcionais — não puxados:**
+
+- **STORY-021** (SPIKE 403 vs 404 cross-tenant) — recomendada explicitamente pela retro da W22, mas não puxada nesta janela comprimida; permanece `ready` para SPRINT-2026-W24.
+- **STORY-022** (renomear `kind` ↔ `tipo` em `business_metrics`) — `ready`, backlog.
+- **STORY-023** (fix `bump-rc.yml` não dispara `release-homolog.yml`) — `ready`, backlog. (Nota: deploy do EPIC-004 confirmou empiricamente que o problema persiste — os 3 hotfixes precisaram de `gh workflow run` manual.)
+
+**Pendência não-bloqueante restante:**
+
+- **F-NB-2** (comentário Blade em `landing.blade.php:5` mencionando "STORY-007"/"livewire/hello-world") — invisível ao usuário; trivial de remover. Fica como follow-up oportunista.
+
+### Aprendizados (retro por escrito — time pequeno)
+
+**1. O que funcionou e queremos continuar:**
+
+- **Sprint de 1 semana provou o conceito** — o experimento recomendado na retro da W22 confirmou-se: 3 estórias do núcleo entregues + validação independente aprovada em janela comprimida de ~1 dia útil efetivo de execução (puxando do buffer da W22). A velocidade real continua excedendo a estimativa.
+- **IDR aberta e fechada no mesmo dia** — a IDR-008 (Tailwind v4 + `@theme`) executou exatamente o ciclo desenhado no risco: Programador propôs as alternativas, PO respondeu em horas, decisão registrada antes do código depender dela. Padrão a manter.
+- **Mock navegável (`mock-shell.html`) + ux-specs.md como contrato visual** — permitiu Programador implementar 6 telas sem ping-pong de design durante a execução; única ambiguidade tratada por decisão local respeitando os tokens.
+- **Teste arquitetural "nenhum hex fora de `tokens.css`"** (CA-6 da STORY-019) — gate técnico que blindou o objetivo principal do EPIC-004 (acabar com o drift de paleta). Padrão a propagar para outras categorias de drift futuras.
+- **Validador conservador + 2 passes** — `approved_with_pending` no 1º passe forçou os hotfixes de CI/Dockerfile/Ansible serem aplicados antes do épico ser declarado `done`. Sem essa disciplina, o deploy real teria ficado por conta do EPIC-002 absorver — risco real evitado.
+
+**2. O que custou caro e queremos mudar:**
+
+- **3 hotfixes de infra surfacearam no fechamento, não na execução** — CI sem build Vite, Dockerfile sem stage de assets, Ansible sem prune. Os três são sintomas do mesmo gap: o pipeline `release-homolog` não exercita o build completo de assets desde o EPIC-000 (último a tocar `vite.config.js`). Mudança proposta: incluir smoke de "ativos estáticos servem com CSS aplicado" no pipeline (não apenas "/" responde 200).
+- **Bug do `bump-rc.yml` continuou nos mordendo** (STORY-023, ainda `ready`) — cada um dos 3 hotfixes precisou de `gh workflow run` manual. Mudança proposta: STORY-023 promovida para topo do backlog da próxima sprint, não fica mais opcional.
+- **Numeração `W23` ambígua** (a SPRINT calendarizada para a semana ISO 22 fechou em 2026-05-24; esta sprint foi nominalmente W23 mas executou antes da `start_date`). Convenção a formalizar no `sprint-mechanics.md` antes da próxima abertura: ou se adota número sequencial puro (W23 = 23ª sprint, independente do calendário) ou se adota semana ISO real (e a sprint pode começar imediatamente sem esperar segunda-feira).
+
+**3. Um experimento concreto para o próximo sprint:**
+
+> **SPRINT-2026-W24 abre como sprint de 1 semana padrão** (já o segundo ciclo curto consecutivo, validando o experimento da W22 como a nova norma de capacidade) e **inclui STORY-021 + STORY-023 como núcleo** (não opcionais) + arrancada do EPIC-002 (Diagnóstico Indústria). Justificativa: dois sprints curtos seguidos comprovam que o time pequeno + agentes Claude opera melhor em janelas curtas; e os débitos críticos de CI/CD não devem mais ficar como opcionais.
+
+### Ajustes para o próximo sprint
+
+- **Promover STORY-023 do backlog opcional para núcleo** — o bug do `bump-rc.yml` virou fricção recorrente comprovada (3 ocorrências consecutivas durante o EPIC-004).
+- **Smoke de assets estáticos no pipeline** — registrar como item de runbook (`pipeline-asset-smoke.md`) ou virar estória técnica curta na próxima sprint.
+- **Formalizar convenção de numeração de sprint** no `defonline-docs/skills/po/sprint-mechanics.md` antes da abertura da W24.
+- **Manter validação independente em 2 passes como padrão** quando houver pendências de deploy/infra — provou valor evitando contaminação do épico seguinte.
+
+### Métricas finais da sprint
+
+| Métrica | Valor | Meta |
+|---|---|---|
+| Estórias núcleo `done` | **3/3** | 3 |
+| Débitos opcionais puxados | **0/3** | — (opcionais) |
+| Estórias entregues / planejadas (núcleo) | **100%** | — |
+| Cobertura geral (após STORY-019) | **96.19%** | ≥ 80% |
+| Suíte Pest (fim da sprint) | **316 testes / 979 asserções** (+51 testes vs W22) | — |
+| Suíte Dusk (fim da sprint) | **13 testes / 81 asserções** (+1 vs W22) | — |
+| Teste arquitetural "hex fora de tokens.css" | **verde** (0 violações) | 0 |
+| Pipelines `release-homolog` verdes | **3/3** (`v0.8.1` → `v0.8.3`) | 100% |
+| Hotfixes durante o fechamento | **3** (CI Vite, Dockerfile, Ansible) | — |
+| Bloqueios reportados | **0** | — |
+| Mudanças de escopo no meio | **3** (IDR-008, DDR template, 3 hotfixes infra) | — |
+| Veredito da validação do épico | **APPROVED** (após 2º passe pós-deploy) | approved |
+| Vereditos da validação (1º → 2º passe) | `approved_with_pending` → `approved` | — |
+| Pendências não-bloqueantes restantes | **1** (F-NB-2 comentário Blade) | — |
+| Velocidade real (estórias/dia útil) | **~3** (3 estórias num único dia útil efetivo) | — |
+| Sprint encerrado | **5 dias antes** da end_date, **antes da start_date** | — |
+
+### Comemoração explícita (cultura)
+
+EPIC-004 fechado em ~1 dia útil efetivo de execução, 11 problemas de UX/UI auditados eliminados, drift de paleta erradicado com gate arquitetural, app shell único reutilizado por todas as rotas, landing pública digna substituindo o `hello DEFOnline` de debug, design-system promovido de `alpha` para `v1` com aprendizado real da primeira aplicação, IDR-008 formalizando Tailwind v4 + `@theme` como padrão transversal, e 3 hotfixes de infra surfaceados e resolvidos antes do próximo épico herdar o problema. 🚀 A WAVE-2026-01 está agora com **3 de 5 épicos `done` em ~6 dias úteis de execução real** (EPIC-000 + EPIC-001 + EPIC-004), restando EPIC-002 (Diagnóstico Indústria) e EPIC-003 (Histórico) — agora desbloqueados pelo shell e podendo arrancar com fundação técnica + funcional + visual completas.
+
+> "Sprint bem conduzido entrega mais que estórias — entrega ritmo, previsibilidade e aprendizado contínuo." (`sprint-mechanics.md`)
