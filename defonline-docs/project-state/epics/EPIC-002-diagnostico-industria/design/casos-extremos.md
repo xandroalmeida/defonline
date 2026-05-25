@@ -4,9 +4,13 @@ title: Casos extremos do motor de cálculo — política de retorno por indicado
 related_idr: IDR-010
 related_story: STORY-026
 related_epic: EPIC-002
-status: draft
+status: revised
 created_at: 2026-05-25
 updated_at: 2026-05-25
+revisions:
+  - at: 2026-05-25
+    by: po (alexandro) via arquiteto
+    note: "Correção de Qs após auditoria do Programador (STORY-028). Trocas: Q02 (caixa) é o disponível para Dívida Líquida/EBITDA (era Q04 erroneamente); Q04 é estoques no NCG e Giro do Ativo (era Q05 erroneamente); AT enumerado corretamente como Q02+Q03+Q04+Q05. Motor seguiu o Anexo A (autoritativo) — sem prejuízo funcional, apenas correção de redação do design-note."
 ---
 
 # Casos extremos por indicador — política de retorno
@@ -56,14 +60,14 @@ Fórmula: `LOL / Vendas × 100`. LOL = EBITDA − Despesas financeiras = EBITDA 
 
 ### Indicador 4 — Dívida Líquida / EBITDA
 
-Fórmula: `(PCF − ACF) / EBITDA`. PCF = Q06 dívida financeira; ACF = Q04 disponibilidades.
+Fórmula: `(PCF − ACF) / EBITDA`. PCF = Q06 dívida financeira; ACF = Q02 recursos disponíveis (caixa + bancos + aplicações).
 
 | # | Caso | Disparador | Saída |
 |---|---|---|---|
 | 4.1 | EBITDA zero (denominador 0) | EBITDA calculado = 0 | `motivo: "indisponivel:ebitda_zero"` — *"Indicador indisponível: EBITDA é zero."* |
 | 4.2 | EBITDA negativo (semântica inválida) | EBITDA < 0 | `motivo: "indisponivel:ebitda_negativo"` — *"Indicador indisponível: EBITDA negativo — empresa em prejuízo operacional. Veja Margem EBITDA."* (a interpretação de "dívida líquida sobre prejuízo" não faz sentido financeiro) |
 | 4.3 | Dívida líquida negativa | `(PCF − ACF) < 0` | **Valor calculado normalmente** (negativo é semanticamente válido = "caixa líquido"); farol verde (≤ 2). Não é caso extremo, apenas registrado aqui para evitar tratá-lo como bug. |
-| 4.4 | Q04 ou Q06 faltante | `Q04 == null` ou `Q06 == null` | `motivo: "indisponivel:divida_componente_faltante"` — *"Indicador indisponível: dívidas ou disponibilidades não informadas."* |
+| 4.4 | Q02 ou Q06 faltante | `Q02 == null` ou `Q06 == null` | `motivo: "indisponivel:divida_componente_faltante"` — *"Indicador indisponível: dívidas ou disponibilidades não informadas."* |
 
 ### Indicador 5 — Desp. Financeiras / EBITDA
 
@@ -77,21 +81,21 @@ Fórmula: `Despesas financeiras / EBITDA × 100`.
 
 ### Indicador 6 — Fontes de Recursos (PC / PL)
 
-Fórmula: `PC / PL`. PL = Ativo Total − Passivo Circulante (espec §4.5 — simplificação validada pela EBC).
+Fórmula: `PC / PL`. PL = Ativo Total − Passivo Circulante (espec §4.5 — simplificação validada pela EBC). Ativo Total = Q02 (recursos disponíveis) + Q03 (clientes) + Q04 (estoques) + Q05 (patrimônio imobilizado).
 
 | # | Caso | Disparador | Saída |
 |---|---|---|---|
 | 6.1 | PL zero ou negativo (denominador inválido) | `PL <= 0` | `motivo: "indisponivel:pl_nao_positivo"` — *"Indicador indisponível: patrimônio líquido apurado é zero ou negativo (passivo ≥ ativo). Reveja contas a pagar e dívidas declaradas."* |
-| 6.2 | Ativo Total faltante | qualquer componente do AT faltante (Q03 + Q04 + Q05 estoques) | `motivo: "indisponivel:ativo_componente_faltante"` — *"Indicador indisponível: componentes do ativo não informados."* |
+| 6.2 | Ativo Total faltante | qualquer componente do AT faltante (Q02 ∨ Q03 ∨ Q04 ∨ Q05) | `motivo: "indisponivel:ativo_componente_faltante"` — *"Indicador indisponível: componentes do ativo não informados."* |
 
 ### Indicador 7 — Giro do Ativo
 
-Fórmula: `Vendas / Ativo Total`.
+Fórmula: `Vendas / Ativo Total`. AT = Q02 + Q03 + Q04 + Q05.
 
 | # | Caso | Disparador | Saída |
 |---|---|---|---|
 | 7.1 | Ativo Total zero | AT = 0 | `motivo: "indisponivel:ativo_zero"` — *"Indicador indisponível: ativo total declarado é zero."* |
-| 7.2 | Componente do AT faltante | qualquer Q03/Q04/Q05 = null | `motivo: "indisponivel:ativo_componente_faltante"` — *"Indicador indisponível: componentes do ativo não informados."* |
+| 7.2 | Componente do AT faltante | qualquer Q02 ∨ Q03 ∨ Q04 ∨ Q05 = null | `motivo: "indisponivel:ativo_componente_faltante"` — *"Indicador indisponível: componentes do ativo não informados."* |
 
 ### Indicador 8 — Ciclo Financeiro
 
@@ -104,22 +108,22 @@ Fórmula: `PME + PMR − PMC`.
 
 ### Indicador 9 — NCG absoluto (informativo, sem farol)
 
-Fórmula: `Estoques + Clientes − Fornecedores`. Indicador sempre **informativo** (espec §4.5, decisão 6.3 fechada 17/05/2026 — `farol = "nenhum"` sempre).
+Fórmula: `Estoques + Clientes − Fornecedores` = `Q04 + Q03 − Q07`. Indicador sempre **informativo** (espec §4.5, decisão 6.3 fechada 17/05/2026 — `farol = "nenhum"` sempre).
 
 | # | Caso | Disparador | Saída |
 |---|---|---|---|
-| 9.1 | Qualquer componente faltante | Q03 ∨ Q05_estoques ∨ Q07_fornecedores = null | `motivo: "indisponivel:ncg_componente_faltante"` — *"NCG indisponível: estoques, clientes a receber ou fornecedores não informados."* |
+| 9.1 | Qualquer componente faltante | Q03 ∨ Q04 ∨ Q07 = null | `motivo: "indisponivel:ncg_componente_faltante"` — *"NCG indisponível: estoques, clientes a receber ou fornecedores não informados."* |
 | 9.2 | NCG negativo (folga operacional) | NCG calculado < 0 | **Valor calculado normalmente**; aplica mensagem semântica "folga operacional / capital de giro positivo" (espec §4.5). Sem farol. |
 | 9.3 | NCG > 10% das Vendas anualizadas | calculado normalmente | **Valor calculado normalmente**; aplica mensagem "positivo alto crescente / pressão sobre o caixa" (espec §4.5). Sem farol. |
 
 ### Indicador 10 — NCG / Vendas
 
-Fórmula: `(ACC − PCC) / Vendas`. ACC = Clientes (Q03) + Estoques (Q05); PCC = Fornecedores (Q07).
+Fórmula: `(ACC − PCC) / Vendas`. ACC = Clientes (Q03) + Estoques (Q04); PCC = Fornecedores (Q07).
 
 | # | Caso | Disparador | Saída |
 |---|---|---|---|
 | 10.1 | Vendas zero | `Vendas anualizadas == 0` | `motivo: "indisponivel:vendas_zero"` — *"Indicador indisponível: vendas anuais são zero."* |
-| 10.2 | Componente do NCG faltante | Q03 ∨ Q05 ∨ Q07 = null | `motivo: "indisponivel:ncg_componente_faltante"` — *"Indicador indisponível: estoques, clientes ou fornecedores não informados."* |
+| 10.2 | Componente do NCG faltante | Q03 ∨ Q04 ∨ Q07 = null | `motivo: "indisponivel:ncg_componente_faltante"` — *"Indicador indisponível: estoques, clientes ou fornecedores não informados."* |
 
 ### Indicador 11 — PMC
 

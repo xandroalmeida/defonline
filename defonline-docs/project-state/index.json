@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-05-25T16:30:00Z",
+  "generated_at": "2026-05-25T17:15:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -809,16 +809,15 @@
         "STORY-026"
       ],
       "blocks": [
-        "STORY-028",
-        "STORY-029",
         "STORY-033",
         "STORY-034",
         "STORY-035"
       ],
-      "note": "Quiz com 4 blocos (Identificação/DRE/Balanço/Contexto), máscaras R$/%/dias/CPF, validação por campo, rascunho persistido (90 dias default §6.4), idempotência no submit.",
+      "note": "Quiz com 4 blocos (Identificação/DRE/Balanço/Contexto), máscaras R$/%/dias/CPF, validação por campo, rascunho persistido em tabela separada `quiz_rascunhos` (90 dias default §6.4 — atualizado 2026-05-25 conforme IDR-010), anti-duplo-submit via UX (não dedup em banco — IDR-010). STORY-028 já entregou Motor V1; integração no submit chama `App\\Actions\\CalcularDiagnostico::execute()`. Atualizado 2026-05-25: relação com STORY-029 deixa de ser bloqueio rígido — 029 usa fixtures+seeder da 028 e pode rodar em paralelo. Briefing operacional do PO em briefings/STORY-027-abertura.md.",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W25",
       "owner_agent": null,
+      "briefing_path": "epics/EPIC-002-diagnostico-industria/briefings/STORY-027-abertura.md",
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-027-quiz-industria-anexo-a.md",
       "created_at": "2026-05-25",
       "updated_at": "2026-05-25"
@@ -844,10 +843,11 @@
       "approved_by": "Alexandro",
       "approved_at": "2026-05-25",
       "closed_at": "2026-05-25",
-      "note": "Motor V1 entregue e aprovado pelo PO em 2026-05-25 (programador claude-opus-4-7). 7 indicadores + NCG abs + persistência idempotente + 5 fixtures golden + baseline latência p95 + cross-tenant 404. CA-1..CA-10 ✓; cobertura 100% em app/Domain; Larastan + Pint verdes. Destrava STORY-029, STORY-030, STORY-031.",
+      "note": "Motor V1 entregue e aprovado pelo PO em 2026-05-25 (programador claude-opus-4-7). 7 indicadores + NCG abs + persistência idempotente + 5 fixtures golden + baseline latência p95 + cross-tenant 404. CA-1..CA-10 ✓; cobertura 100% em app/Domain; Larastan + Pint verdes. Destrava STORY-029, STORY-030, STORY-031. PO fez revisão retroativa da redação da estória em 2026-05-25 (CA-5/CA-6/CA-9/CA-10) para refletir IDR-010 (valor=null + motivo em vez de disponivel=false; sem dedup em banco; fixtures em JSON canonicalizado, não YAML) — nenhuma mudança funcional, apenas alinhamento de documentação retroativo. PO também corrigiu typos no design/casos-extremos.md (Qs do balanço — Q02 disponível, Q04 estoques, Q05 imobilizado). Aditivo na IDR-010 registrando placeholder de resumo_executivo (será preenchido pela STORY-031 com bump de motor_version).",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W25",
       "owner_agent": "programador (claude-opus-4-7)",
+      "briefing_path": "epics/EPIC-002-diagnostico-industria/briefings/STORY-028-abertura.md",
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-028-motor-7-indicadores-essenciais.md",
       "created_at": "2026-05-25",
       "updated_at": "2026-05-25"
@@ -862,7 +862,6 @@
       "estimated_session_size": "M",
       "blocked_by": [
         "STORY-026",
-        "STORY-027",
         "STORY-028"
       ],
       "blocks": [
@@ -870,10 +869,11 @@
         "STORY-031",
         "STORY-032"
       ],
-      "note": "Primeiro relatório vivo em homol. Caminho feliz ponta-a-ponta. Render Blade server-side, p95 baseline, glossário inline, mobile-first card-per-indicador.",
+      "note": "Primeiro relatório vivo em homol. Caminho feliz ponta-a-ponta. Render Blade server-side do snapshot `indicadores_calculados`, p95 baseline, glossário inline, mobile-first card-per-indicador. Atualizado 2026-05-25: dependência de STORY-027 removida — pode rodar em paralelo usando fixtures+seeder da STORY-028 já entregue. Integração final do redirect quiz→relatório fica naturalmente coordenada via merge. Briefing operacional do PO em briefings/STORY-029-abertura.md.",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W25",
       "owner_agent": null,
+      "briefing_path": "epics/EPIC-002-diagnostico-industria/briefings/STORY-029-abertura.md",
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-029-relatorio-minimalista.md",
       "created_at": "2026-05-25",
       "updated_at": "2026-05-25"

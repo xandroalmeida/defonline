@@ -65,12 +65,12 @@ Sem motor, não há relatório. Sem teste de motor, não há validação externa
 - [x] **CA-2 (7 indicadores corretos):** Margem Bruta, Margem Líquida, Dívida Líq./EBITDA, NCG/Vendas, PMR, PMC, Ciclo Financeiro — fórmulas em `app/Domain/Motor/Indicadores/*.php` batem com §4.5 da spec.
 - [x] **CA-3 (NCG absoluto informativo):** classe `NcgAbsoluto.php` calcula o valor e retorna `farol = 'nenhum'` + mensagem em 1 de 3 faixas (negativo / moderado / alto) com texto exato da spec §4.5.
 - [x] **CA-4 (Farol Indústria):** `FarolIndustria.php` aplica as faixas exatas do §4.5 para o setor Indústria. Faixas em arquivo de config separado (`config/motor/faroes-industria.php`) — facilita ajuste pela validação externa sem mexer em código.
-- [x] **CA-5 (Casos extremos):** divisão por zero, vendas=0, EBITDA negativo, valores nulos — todos retornam `disponivel = false` + mensagem semântica, sem exception. Cobertos por testes específicos.
-- [x] **CA-6 (Persistência):** action `CalcularDiagnostico::execute` salva `Diagnostico` com `quiz_payload`, `indicadores_calculados` (JSON com 8 entradas), `motor_version`, `matrix_version`, `status = 'concluido'`. Idempotente (rerun com mesmo input + mesmas versões = mesmo hash de output, devolve o registro existente).
+- [x] **CA-5 (Casos extremos):** divisão por zero, vendas=0, EBITDA negativo, valores nulos — todos retornam `valor = null` + `motivo` (código estável) + `mensagem` semântica, sem exception. Cobertos por testes específicos. **Atualizado 2026-05-25 conforme IDR-010 §5: chave `valor=null` substitui `disponivel=false`; `motivo` é código estável catalogado em `design/casos-extremos.md`.**
+- [x] **CA-6 (Persistência idempotente — atualizada 2026-05-25 conforme IDR-010):** action `CalcularDiagnostico::execute` salva `Diagnostico` com `quiz_payload`, `indicadores_calculados` (JSON com 8 entradas), `motor_version`, `matrix_version`, `payload_hash`, `gerado_em`. **Idempotência é contrato de teste** (golden hashes em `app/tests/Domain/Motor/GoldenHashesTest.php`, **não** dedup em banco): dois reruns com mesmo input + mesmas versões geram dois registros independentes em `diagnosticos` com o mesmo `payload_hash` e o mesmo `indicadores_calculados`. Sem UNIQUE em `payload_hash`. **Não há coluna `status` em `diagnosticos`** — diagnóstico só existe quando concluído; rascunho do quiz fica em `quiz_rascunhos` (responsabilidade da STORY-027).
 - [x] **CA-7 (Latência p95):** medição em ambiente homol. 50 chamadas com fixtures variadas; p95 ≤ 0.5s nesta estória (motor com 7 indicadores; budget total p95 ≤ 3s inclui render do relatório que vem em STORY-029).
 - [x] **CA-8 (Cobertura ≥ 98%):** suite Pest do pacote `app/Domain/Motor/` atinge ≥ 98% (gate de regra de núcleo conforme `quality-standards.md`).
-- [x] **CA-9 (≥ 10 casos por indicador):** fixtures em `tests/fixtures/quiz/industria/` — 10 perfis canônicos por indicador. Documentar em `design/fixtures.md` o critério de seleção (verde típico, amarelo típico, vermelho típico, edge cases…).
-- [x] **CA-10 (Golden hash):** fixture canônica `tests/fixtures/quiz/industria/perfil-padrao-roberto.yaml` produz hash X (registrado em teste); qualquer PR que mude X exige nota de revisão explicando a mudança intencional.
+- [x] **CA-9 (≥ 10 casos por indicador):** fixtures de teste em `app/tests/Domain/Motor/Indicadores/*Test.php` — 13 a 16 casos por indicador (verde típico, amarelo típico nas 3 fronteiras, vermelho típico, ≥ 4 casos extremos). **Atualizado 2026-05-25 conforme IDR-010: fixtures finais em JSON canonicalizado em `app/tests/Domain/Motor/Fixtures/` (não em YAML).**
+- [x] **CA-10 (Golden hash):** 5 fixtures canônicos em `app/tests/Domain/Motor/Fixtures/*.json` produzem hashes hardcoded no `GoldenHashesTest.php`; qualquer PR que mude um hash exige nota de revisão explicando a mudança intencional + bump de `motor_version` quando aplicável.
 
 ## Fora de escopo
 
@@ -90,7 +90,7 @@ Sem motor, não há relatório. Sem teste de motor, não há validação externa
 
 - Motor único atual (`MotorV1`); evolução por versão de motor (não por branch de motor antigo). Snapshot dos resultados em `indicadores_calculados` garante reprodutibilidade.
 - Faixas de farol em arquivo de config (`config/motor/faroes-industria.php`) — facilita ajuste pelo Validador externo (STORY-036).
-- Casos extremos retornam `disponivel = false`, sem exception.
+- Casos extremos retornam `valor = null` + `motivo` (código estável) + `mensagem` semântica, sem exception (atualizado conforme IDR-010 §5).
 - NCG absoluto sem farol — decisão registrada na epic.md.
 
 ## DoD
