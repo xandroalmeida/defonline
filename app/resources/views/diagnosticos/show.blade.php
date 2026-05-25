@@ -16,6 +16,19 @@
      * Glossário inline — textos editoriais derivados do Anexo I (espec V2).
      * Mudanças no Anexo I propagam por edição manual aqui — Anexo I não tem motor_version.
      */
+    /*
+     * Destino do botão "Voltar" — segue o Referer (de onde Roberto veio):
+     * Minhas Empresas, Selecionar Empresa, ou redirect do submit do quiz.
+     * Fallback /home quando não há referer (URL bookmarkada ou refresh) ou
+     * quando o referer é externo ao app (defesa contra open-redirect).
+     */
+    $voltarUrl = url()->previous();
+    $hostApp = request()->getSchemeAndHttpHost();
+    $urlAtual = request()->fullUrl();
+    if (! str_starts_with($voltarUrl, $hostApp) || $voltarUrl === $urlAtual) {
+        $voltarUrl = route('home');
+    }
+
     $glossario = [
         ['Margem Bruta (MB) / Lucro Bruto (LB)', 'Diferença entre o faturamento e o custo (dos produtos/mercadorias/serviços vendidos), antes das despesas.'],
         ['Margem Operacional Líquida (MOL)', 'A parcela operacional de lucro obtida sobre as vendas, considerando despesas financeiras, depreciação e tributos.'],
@@ -133,13 +146,13 @@
     </footer>
 
     <div class="mt-6 flex">
-        <x-button :href="route('empresas.show', $empresa)" variant="secondary" dusk="diagnostico-voltar-empresa">
+        <x-button :href="$voltarUrl" variant="secondary" dusk="diagnostico-voltar">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <line x1="19" y1="12" x2="5" y2="12"/>
                 <polyline points="12 19 5 12 12 5"/>
             </svg>
-            Voltar para a empresa
+            Voltar
         </x-button>
     </div>
 </x-layouts.app>

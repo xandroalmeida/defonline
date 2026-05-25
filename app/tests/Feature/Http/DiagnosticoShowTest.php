@@ -187,6 +187,67 @@ it('contém estrutura semântica básica (<main>, <h1>, breadcrumb com aria) —
     expect($html)->toContain('aria-label="Farol:');
 });
 
+it('botão "Voltar" segue o Referer interno (Selecionar Empresa)', function () {
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnostico($dono);
+    $previousUrl = url('/diagnosticos/novo');
+
+    $response = $this->actingAs($dono)
+        ->withHeader('referer', $previousUrl)
+        ->get("/diagnosticos/{$diag->id}");
+
+    $response->assertOk();
+    expect($response->getContent())
+        ->toContain('dusk="diagnostico-voltar"')
+        ->toContain('href="'.$previousUrl.'"');
+});
+
+it('botão "Voltar" segue o Referer interno (Minhas Empresas)', function () {
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnostico($dono);
+    $previousUrl = url('/home');
+
+    $response = $this->actingAs($dono)
+        ->withHeader('referer', $previousUrl)
+        ->get("/diagnosticos/{$diag->id}");
+
+    expect($response->getContent())->toContain('href="'.$previousUrl.'"');
+});
+
+it('botão "Voltar" cai em /home quando não há Referer (URL direta/bookmark)', function () {
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnostico($dono);
+
+    $response = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}");
+
+    expect($response->getContent())->toContain('href="'.url('/home').'"');
+});
+
+it('botão "Voltar" cai em /home quando Referer aponta para fora do app (anti-open-redirect)', function () {
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnostico($dono);
+
+    $response = $this->actingAs($dono)
+        ->withHeader('referer', 'https://atacante.example/phish')
+        ->get("/diagnosticos/{$diag->id}");
+
+    $html = $response->getContent();
+    expect($html)->toContain('href="'.url('/home').'"');
+    expect($html)->not->toContain('atacante.example');
+});
+
+it('botão "Voltar" cai em /home quando Referer é a própria página (refresh)', function () {
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnostico($dono);
+    $urlAtual = url("/diagnosticos/{$diag->id}");
+
+    $response = $this->actingAs($dono)
+        ->withHeader('referer', $urlAtual)
+        ->get("/diagnosticos/{$diag->id}");
+
+    expect($response->getContent())->toContain('href="'.url('/home').'"');
+});
+
 it('exibe ambos os layouts (tabela em md+ e cards em <md) para mobile-first — CA-6', function () {
     $dono = Usuario::factory()->create();
     $diag = gerarDiagnostico($dono);
