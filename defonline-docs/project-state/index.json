@@ -668,16 +668,16 @@
       "title": "Fix — `bump-rc.yml` precisa disparar `release-homolog.yml` automaticamente",
       "type": "bugfix",
       "target_role": "programador",
-      "status": "in_review",
-      "owner_agent": "programador (claude-opus-4-7)",
+      "status": "ready",
+      "owner_agent": null,
       "sprint_id": "SPRINT-2026-W24",
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-023-fix-bump-rc-dispara-release-homolog.md",
       "blocked_by": [],
       "blocks": [],
       "estimated_session_size": "S",
       "created_at": "2026-05-24",
-      "updated_at": "2026-05-24",
-      "note": "Implementação local em 2026-05-24 — escolhida Opção A (PAT `RELEASE_TAG_PAT`, Fine-grained, scope `Contents: write` em single repo). Arquivos tocados: `.github/workflows/bump-rc.yml` (token no checkout), `defonline-docs/skills/programador/references/cicd-secrets.md` (novo doc com procedimento de geração/rotação/teste), `decisions/adr/ADR-006-cicd.md` §1.4 + §2.3 + `last_amendment_note` (aditivo). Status `in_review` porque CA-3 (teste empírico bump-rc → release-homolog ao vivo) depende do PO (1) provisionar `gh secret set RELEASE_TAG_PAT --repo xandroalmeida/DEFOnline`, (2) push do commit, (3) `gh workflow run bump-rc.yml`. Procedimento + comandos exatos em `cicd-secrets.md`."
+      "updated_at": "2026-05-25",
+      "note": "Débito de tooling CI derivado das Notas da STORY-018 (gotcha do `GITHUB_TOKEN` não dispara workflows downstream). 3 opções: PAT (mais simples), `gh release create` (sem secret novo), GitHub App (mais robusto). Recomendado fechar antes do EPIC-002 começar a usar `bump-rc` ativamente."
     },
     {
       "id": "STORY-019",
