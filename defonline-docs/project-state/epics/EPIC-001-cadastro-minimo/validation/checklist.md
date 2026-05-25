@@ -146,8 +146,8 @@ A STORY-018 entregou os provedores reais da RFB, mas **não bloqueia esta valida
   - **Critério de aprovação:** PII fora do log; documento vive só em `empresas_analisadas` + `audit_logs` jurídico (se aplicável).
 
 - [ ] **4.8** `business_metrics` registra `rfb_consulta` com `status` em `sucesso | cnpj_inexistente | timeout | erro_5xx | erro_rede` + `provider` em `meta` JSONB.
-  - **Como verificar:** disparar 3 consultas em homol (sucesso + timeout + inexistente); `SELECT kind, status, meta, duracao_ms FROM business_metrics WHERE kind = 'rfb_consulta' ORDER BY inserido_em DESC LIMIT 10`.
-  - **Evidência esperada:** linhas com `kind = 'rfb_consulta'`, `meta->>'provider'` populado, latência > 0.
+  - **Como verificar:** disparar 3 consultas em homol (sucesso + timeout + inexistente); `SELECT tipo, sucesso, meta->>'status' AS status, meta, duracao_ms FROM business_metrics WHERE tipo = 'rfb_consulta' ORDER BY inserido_em DESC LIMIT 10`.
+  - **Evidência esperada:** linhas com `tipo = 'rfb_consulta'`, `meta->>'provider'` populado, latência > 0.
   - **Critério de aprovação:** observabilidade ativa.
 
 - [ ] **4.9** Alerta de monitoramento `rfb_error_rate > 5% em janela 10 min` configurado via `MonitorarRfbErrorRate` (CA-5 STORY-015).

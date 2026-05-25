@@ -3,12 +3,12 @@ story_id: STORY-022
 slug: alinhar-nomenclatura-business-metrics
 title: Alinhar nomenclatura `kind` ↔ `tipo` em `business_metrics` (checklist vs schema)
 epic_id: EPIC-001
-sprint_id: null
+sprint_id: SPRINT-2026-W24
 type: bugfix
 target_role: programador
 requires_design: false
-status: ready
-owner_agent: null
+status: done
+owner_agent: programador
 created_at: 2026-05-24
 updated_at: 2026-05-24
 estimated_session_size: S
@@ -119,13 +119,24 @@ Padrão `agent-task-format.md`.
 ## Notas do agente
 
 ### Tempo investido
-- <horas>
+- ~20 minutos (grep cruzado + 3 edits + atualização de status).
 
 ### Direção escolhida
-- <A | B> — <justificativa em 1 linha>
+- **A** — schema atual (`tipo`) está bom, código de produção usa `tipo` consistentemente; correção foi em docs.
 
 ### Arquivos tocados
-- <lista>
+- `defonline-docs/project-state/epics/EPIC-001-cadastro-minimo/validation/checklist.md` (item 4.8): trocado `kind` → `tipo` na query "Como verificar" e na "Evidência esperada". Aproveitei para corrigir referência inexistente a coluna `status` (não existe na tabela; status vive em `meta JSONB`), passando a query a `SELECT tipo, sucesso, meta->>'status' AS status, meta, duracao_ms FROM business_metrics WHERE tipo = 'rfb_consulta' ...` — agora é executável como descrito.
+- `defonline-docs/project-state/decisions/idr/IDR-004-rfb-provider-abstraction-cnpja-receitaws.md` (§Consequências, linha 102): `kind: 'rfb_consulta'` → `tipo: 'rfb_consulta'`.
+- `defonline-docs/project-state/epics/EPIC-001-cadastro-minimo/stories/STORY-015-enriquecimento-rfb-mock-fallback.md` (CA-4): `kind: 'rfb_consulta'` → `tipo: 'rfb_consulta'`; `status: ...` reescrito como `meta->>'status' ∈ {...}` para evitar a mesma ambiguidade do checklist (essa estória já está `done`/aceita — alteração é puramente de wording retrospectivo).
+- `defonline-docs/project-state/index.json` (entrada STORY-022): `status: done`, `owner_agent: programador`, `updated_at: 2026-05-24`.
+
+### Documentos auditados sem mudança
+- `defonline-docs/project-state/decisions/adr/ADR-004-observabilidade.md` §1.2 — já usa `tipo` em todos os trechos relevantes (linhas 66, 316, 320, 706). Nenhuma divergência.
+- `defonline-docs/skills/po/templates/` — grep por `kind` no contexto de métricas: zero matches. Sem template para atualizar (CA-3 vazio por ausência de target).
+- `defonline-docs/project-state/epics/EPIC-001-cadastro-minimo/validation/report.md` (linhas 84, 152, 181) — mantido como **registro histórico** da divergência detectada na validação. Reescrever apagaria o rastro do achado; o report.md é snapshot do momento, não doc vivo.
+- `defonline-docs/project-state/epics/EPIC-001-cadastro-minimo/stories/STORY-017-validacao-epic-001.md` (linha 112) — mesma razão: nota histórica da estória de validação que detectou o débito.
 
 ### Observações úteis ao PO
-- <opcional>
+- O grep `grep -rn "kind" defonline-docs/ | grep -iE "business_metrics|metric|rfb_consulta"` agora retorna apenas: (a) o título desta STORY-022, (b) as duas notas históricas no `report.md`/`STORY-017` listadas acima. Zero divergências vivas remanescentes.
+- Sem mudança em código de produção (`app/`, `database/`, `tests/`) — CA-4 cumprido.
+- Nenhuma alteração de pipeline / CI / testes; nada a empurrar além do commit de docs.

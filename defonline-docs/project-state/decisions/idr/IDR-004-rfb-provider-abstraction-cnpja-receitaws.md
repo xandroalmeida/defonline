@@ -99,7 +99,7 @@ RFB_RECEITAWS_RPM=3
 - A NRF §3.1 deixa de marcar **"Provedor da API"** como `[A DEFINIR]` e passa a registrar que o provedor é **selecionável entre `cnpja` e `receitaws`** via configuração, com rate-limit por provedor. O item desaparece também do checklist §10.2.
 - A STORY-015 segue **inalterada no escopo de implementação** (mock + caminho técnico): ela já estava arquitetada para esta decisão. A nota de rodapé "provedor real `[A DEFINIR]`" é atualizada para apontar este IDR e a STORY-018.
 - **STORY-018 é criada** para entregar `CnpjaRfbCnpjClient` + `ReceitawsRfbCnpjClient` + `bind` condicional + RateLimiter por provedor + testes de integração contratuais (gravados com VCR/`Http::fake()`).
-- Métricas existentes em `business_metrics` (`kind: 'rfb_consulta'`) ganham dimensão `provider` (`'mock' | 'cnpja' | 'receitaws'`) para permitir A/B observacional sem mudar schema (já é tabela chave-valor).
+- Métricas existentes em `business_metrics` (`tipo: 'rfb_consulta'`) ganham dimensão `provider` (`'mock' | 'cnpja' | 'receitaws'`) para permitir A/B observacional sem mudar schema (já é tabela chave-valor).
 - Alerta de >5% de erro em janela de 10 min (NRF §3.1, STORY-015 CA-5) passa a ser por provedor — quando dois forem ativados em paralelo em algum experimento futuro, isso deixa explícito qual provedor falhou.
 
 ## Quando reabrir esta decisão

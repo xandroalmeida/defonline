@@ -25,7 +25,7 @@ Esta sprint é deliberadamente curta — **1 semana (5 dias úteis)** — porque
 | ID | Título | Épico | Tamanho | Status atual | Bloqueada por |
 |---|---|---|---|---|---|
 | STORY-021 | SPIKE — Decidir 403 vs 404 cross-tenant (alinhar STORY-014 com ADR-003/NRF) | EPIC-001 | S | ready | — |
-| STORY-022 | Alinhar nomenclatura `kind` ↔ `tipo` em `business_metrics` | EPIC-001 | S | ready | — |
+| STORY-022 | Alinhar nomenclatura `kind` ↔ `tipo` em `business_metrics` | EPIC-001 | S | done | — |
 | STORY-023 | Fix — `bump-rc.yml` precisa disparar `release-homolog.yml` automaticamente | EPIC-001 | S | ready | — |
 | STORY-025 | Imagem runtime sem chromium — separar dev/runtime no Dockerfile (~500MB) | EPIC-000 | S | ready | — |
 
