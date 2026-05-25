@@ -64,9 +64,7 @@
                                       dusk="minhas-empresas-ver-{{ $empresa->id }}">
                                 Ver detalhes
                             </x-button>
-                            <x-button variant="ghost" size="sm" type="button"
-                                      :disabled="true"
-                                      title="Em breve — Onda 2"
+                            <x-button :href="route('diagnosticos.novo', $empresa)" variant="primary" size="sm"
                                       dusk="minhas-empresas-diagnostico-{{ $empresa->id }}">
                                 Iniciar diagnóstico
                             </x-button>

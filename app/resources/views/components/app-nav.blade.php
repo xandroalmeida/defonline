@@ -25,10 +25,9 @@
         [
             'label' => 'Diagnósticos',
             'icon' => 'chart',
-            'href' => '#',
-            'active' => false,
-            'disabled' => true,
-            'tooltip' => 'Em breve — Onda 2',
+            'href' => route('diagnosticos.selecionar'),
+            'active' => request()->routeIs('diagnosticos.*'),
+            'disabled' => false,
             'dusk' => 'app-nav-diagnosticos',
         ],
         [

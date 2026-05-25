@@ -6,8 +6,11 @@ epic_id: EPIC-002
 sprint_id: SPRINT-2026-W25
 type: implementation
 target_role: programador
-status: ready
+status: done
 owner_agent: claude-programador
+approved_by: Alexandro
+approved_at: 2026-05-25
+closed_at: 2026-05-25
 created_at: 2026-05-25
 updated_at: 2026-05-25
 estimated_session_size: L
@@ -101,4 +104,57 @@ Padrão `agent-task-format.md`. Avisar PO quando entrar em `in_review`.
 
 ## Notas do agente
 
-*(A preencher.)*
+### Entrega (2026-05-25 — claude-programador)
+
+**Arquivos novos**
+
+- `database/migrations/2026_05_25_000020_create_quiz_rascunhos_table.php` — schema do CA-6 (UUID PK, usuario_id/empresa_analisada_id FK, quiz_payload jsonb, ultimo_bloco_preenchido smallint com CHECK 1..4, expires_at, timestamps + deleted_at, índice `(usuario_id, expires_at)`, UNIQUE parcial `(usuario_id, empresa_analisada_id) WHERE deleted_at IS NULL`).
+- `app/Models/QuizRascunho.php` — HasUuids + SoftDeletes + BelongsToUsuarioScope, cast `AsArrayObject` em `quiz_payload`, scope `ativos()`, helper `paraEmpresa()`.
+- `app/Livewire/Diagnostico/Quiz.php` + `resources/views/livewire/diagnostico/quiz.blade.php` + 4 partials (`campo-brl`, `campo-dias`, `campo-pct`, `campo-cpf`) — núcleo do quiz, 4 blocos, máscaras Alpine inline, validação Laravel por bloco, persistência de rascunho a cada `Próximo`.
+- `app/Livewire/Diagnostico/SelecionarEmpresa.php` + view — tela "Selecione uma empresa" quando Roberto entra pelo menu sem ter clicado em card.
+- `app/Events/QuizIniciado.php` — evento placeholder (CA-13). Listener detalhado fica em STORY-035.
+- `resources/views/diagnostico/stub-resultado.blade.php` — destino temporário do redirect; STORY-029 substitui pelo relatório minimalista.
+- `tests/Feature/Livewire/Diagnostico/QuizTest.php` — 24 testes Pest cobrindo CA-1..CA-13.
+
+**Arquivos editados**
+
+- `routes/web.php` — três rotas autenticadas: `/diagnosticos/novo` (seletor), `/empresas/{empresa}/diagnosticos/novo` (quiz), `/diagnosticos/{diagnostico}` (stub que STORY-029 vai substituir).
+- `resources/views/components/app-nav.blade.php` — item "Diagnósticos" deixou de ser disabled e aponta para `diagnosticos.selecionar`.
+- `resources/views/livewire/home/minhas-empresas.blade.php` — botão "Iniciar diagnóstico" do card vira link primário para `diagnosticos.novo`.
+
+**Divergências da STORY-027 vs. estado canônico (já formalizadas no briefing)**
+
+- Rascunho **NÃO** em `diagnosticos` — está em `quiz_rascunhos` (IDR-010 vence).
+- **Sem dedup no banco** — anti-duplo-submit é UX (`wire:loading.attr="disabled"`).
+- `EmpresaAnalisada` ainda não tem coluna `setor` — Q01 é hardcoded `"industria"` (EPIC-002 só Indústria); quando outros setores entrarem, o setor migra para a empresa.
+
+**Decisões do programador (preferências em aberto da estória)**
+
+- 1 componente Livewire com 4 steps (preferido pela estória) — viewmodel único, `bloco_atual: int`.
+- Máscaras com **Alpine.js inline** (mesmo padrão da STORY-014 — CNPJ/CPF) — sem lib externa nova; mantém footprint do bundle igual.
+- Decimais BR → canônico (`number_format($float, 2, '.', '')`) só no momento do submit; properties ficam em formato BR ("1.234,56") até lá — mantém o que Roberto digitou ao retomar rascunho.
+- Botão "Calcular diagnóstico" usa `wire:loading.attr="disabled"` + texto "Calculando…" (UX) — CA-9 cumprido sem hash em banco.
+
+**Cobertura e qualidade**
+
+- Pre-push verde: Pint ✓, Larastan ✓, Pest 533 testes / 1460 asserções / 96.0% cobertura geral (gate ≥80%).
+- Domínio (`app/Domain/`) preservado em 100% (não foi tocado nesta estória — motor já entregue pela STORY-028).
+- Quiz especificamente: 24 testes Pest cobrindo CA-1 (autenticação, rota, nav), CA-2 (navegação entre blocos), CA-5 (validações de tipo/faixa, regra Q20<Q09, CPF inválido), CA-6 (rascunho persistido + retomada + multi-tenant), CA-7 (expiração + banner), CA-8 (submit feliz com Diagnostico criado), CA-9 (caminho de erro do motor não persiste), CA-13 (QuizIniciado disparado 1× só na primeira transição 1→2).
+
+**Débito explícito (CA-7 prevê)**
+
+- **Cron de purge de rascunhos expirados** — não entregue nesta estória (a estória explicita "fica como débito explícito"). Listagem de "rascunhos ativos" já filtra via `QuizRascunho::ativos()` (expires_at > now()), então rascunhos vencidos ficam invisíveis ao Roberto. Recomendação: estória `S` no próximo backlog para criar comando `php artisan rascunhos:purgar` rodando diariamente via scheduler (soft delete dos `expires_at < now()`), com retenção de N dias antes do force-delete para diagnóstico de bugs. Pode entrar no EPIC-003 (histórico) ou virar débito do EPIC-002.
+
+**Pendências em aberto (esperando outras estórias)**
+
+- `Route::get('/diagnosticos/{diagnostico}')` é stub temporário renderizando `resources/views/diagnostico/stub-resultado.blade.php`. **STORY-029** substitui pelo relatório minimalista. Sem ação requerida neste momento.
+- Listener real de `QuizIniciado` (escreve em `eventos_produto`) é responsabilidade da **STORY-035**.
+- Tooltips por campo (§6.8) — fora de escopo nesta estória, virá pela **STORY-033**.
+- Validações cruzadas DRE × Balanço (§6.6) — **STORY-034**.
+- Aviso "valor atípico" para PMC/PME/PMR > 365 dias — não bloqueante, fora desta estória; o motor V1 (STORY-028) já classifica via matriz mesmo com valor > 365.
+
+**Coordenação com STORY-029**
+
+- O redirect final do quiz aponta para `route('diagnosticos.show', $diagnostico)` — STORY-029 reusa esse nome ao implementar o relatório minimalista. O stub atual exibe os metadados (motor_version, matrix_version, setor, gerado_em, count de indicadores) e linka de volta para `/home`.
+
+— Programador (claude-opus-4-7)

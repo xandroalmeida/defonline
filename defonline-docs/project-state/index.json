@@ -803,7 +803,10 @@
       "title": "Quiz de Indústria — formulário com 23 campos do Anexo A (rascunho persistido)",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
+      "approved_by": "Alexandro",
+      "approved_at": "2026-05-25",
+      "closed_at": "2026-05-25",
       "estimated_session_size": "L",
       "blocked_by": [
         "STORY-026"
@@ -816,7 +819,7 @@
       "note": "Quiz com 4 blocos (Identificação/DRE/Balanço/Contexto), máscaras R$/%/dias/CPF, validação por campo, rascunho persistido em tabela separada `quiz_rascunhos` (90 dias default §6.4 — atualizado 2026-05-25 conforme IDR-010), anti-duplo-submit via UX (não dedup em banco — IDR-010). STORY-028 já entregou Motor V1; integração no submit chama `App\\Actions\\CalcularDiagnostico::execute()`. Atualizado 2026-05-25: relação com STORY-029 deixa de ser bloqueio rígido — 029 usa fixtures+seeder da 028 e pode rodar em paralelo. Briefing operacional do PO em briefings/STORY-027-abertura.md.",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W25",
-      "owner_agent": null,
+      "owner_agent": "claude-programador",
       "briefing_path": "epics/EPIC-002-diagnostico-industria/briefings/STORY-027-abertura.md",
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-027-quiz-industria-anexo-a.md",
       "created_at": "2026-05-25",

@@ -7,9 +7,12 @@ use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Livewire\Cadastro;
+use App\Livewire\Diagnostico\Quiz as QuizDiagnostico;
+use App\Livewire\Diagnostico\SelecionarEmpresa as SelecionarEmpresaDiagnostico;
 use App\Livewire\Empresa\Cadastrar as CadastrarEmpresa;
 use App\Livewire\Home\MinhasEmpresas;
 use App\Livewire\Login;
+use App\Models\Diagnostico;
 use Illuminate\Support\Facades\Route;
 
 // STORY-024 — landing pública simples (substitui a página de debug welcome + hello-world).
@@ -43,4 +46,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/empresas/{empresa}', [EmpresaController::class, 'show'])
         ->whereUuid('empresa')
         ->name('empresas.show');
+
+    // STORY-027 — quiz de diagnóstico (Indústria) + seletor de empresa quando
+    // Roberto entra pelo menu sem ter clicado em um card de empresa.
+    Route::get('/diagnosticos/novo', SelecionarEmpresaDiagnostico::class)->name('diagnosticos.selecionar');
+    Route::get('/empresas/{empresa}/diagnosticos/novo', QuizDiagnostico::class)
+        ->whereUuid('empresa')
+        ->name('diagnosticos.novo');
+
+    // STORY-029 substitui este stub com o relatório minimalista. Aqui só basta
+    // ter o destino do redirect do quiz vivo — Global Scope do model garante
+    // 404 cross-tenant (IDR-009).
+    Route::get('/diagnosticos/{diagnostico}', function (Diagnostico $diagnostico) {
+        return view('diagnostico.stub-resultado', ['diagnostico' => $diagnostico]);
+    })->whereUuid('diagnostico')->name('diagnosticos.show');
 });
