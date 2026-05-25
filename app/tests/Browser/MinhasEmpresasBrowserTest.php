@@ -76,9 +76,13 @@ final class MinhasEmpresasBrowserTest extends DuskTestCase
                 'CNPJ cru não pode aparecer na tela Minhas Empresas',
             );
 
-            // Botão "Iniciar diagnóstico" presente e desabilitado.
+            // Botão "Iniciar diagnóstico" presente e habilitado (STORY-027 ativou o quiz).
             $browser->assertVisible('@minhas-empresas-diagnostico-'.$empresa->id)
-                ->assertAttribute('@minhas-empresas-diagnostico-'.$empresa->id, 'disabled', 'true');
+                ->assertAttribute(
+                    '@minhas-empresas-diagnostico-'.$empresa->id,
+                    'href',
+                    url(route('diagnosticos.novo', $empresa, absolute: false)),
+                );
         });
 
         // Evidência da emissão dos dois eventos de produto (CA-3 + CA-4).
