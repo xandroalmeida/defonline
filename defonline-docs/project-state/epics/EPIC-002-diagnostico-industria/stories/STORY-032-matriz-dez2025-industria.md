@@ -11,53 +11,67 @@ owner_agent: claude-programador
 created_at: 2026-05-25
 updated_at: 2026-05-25
 estimated_session_size: M
+related_idrs: ["IDR-010"]
 ---
 
 # STORY-032 — Matriz DEZ/2025 (Indústria)
 
-> Acopla as **recomendações textuais por indicador × farol** ao relatório, alimentadas pelo Anexo F da spec, filtradas para coluna Indústria.
+> Acopla as **recomendações textuais por indicador × farol** ao relatório, alimentadas pelo Anexo F da spec, filtradas para a coluna Indústria. Texto é **gravado no snapshot** do diagnóstico (não lido on-the-fly) conforme IDR-010 §Sub-decisão 2.
 
 ## Contexto
 
-Anexo F da spec V2 (`anexos/anexo-F-matriz-recomendacoes-dez2025.md`) tem texto por **indicador × cor de farol × setor**. Esta estória traz esse texto para dentro do relatório. Versionamento via `matrix_version = "dez-2025"`.
+Anexo F da spec V2 (`defonline-docs/especificacao/V2/anexos/anexo-F-matriz-recomendacoes-dez2025.md`, **autoria EB Parcerias / EBC**) tem texto por **indicador × cor de farol × setor**. Esta estória traz esse texto para dentro do relatório.
+
+A IDR-010 (aprovada 2026-05-25) **já fixou** as decisões arquiteturais relevantes:
+
+- **Versionamento:** `matrix_version = "dez-2025"` (formato datado curto, varchar(16)) — definido em IDR-010 §Sub-decisão 1.
+- **Snapshot dos resultados:** o texto da matriz é gravado em `diagnosticos.indicadores_calculados[*].mensagem_detalhada` (JSONB imutável) **no momento do cálculo**, garantindo reprodutibilidade absoluta — IDR-010 §Sub-decisão 2.
+- **Matriz como dado versionado, não como código:** arquivo PHP versionado em git carregado por `matrix_version` — IDR-010 §Operacional ("Mensagens da matriz são lidas como dado versionado (config PHP carregado por `matrix_version`), não como template Twig/Blade").
+
+> **Correção 2026-05-25:** a redação original (a) listava decisão "snapshot vs lookup" como aberta no CA-7 — decisão já tomada na IDR-010; (b) usava nome de campo `indicadores_calculados.recomendacao` divergente do schema da IDR-010 (`mensagem_detalhada`); (c) delegava ao programador a escolha "config PHP ou banco" — fixada como **config PHP versionado** na IDR-010. Realinhado.
 
 ## O quê
 
-1. **Ingestão da matriz:** seed/loader que lê o Anexo F e popula `config/motor/matriz-dez-2025-industria.php` (ou banco — decisão do programador; preferência PO: arquivo PHP versionado em git, mais auditável).
+1. **Ingestão da matriz:** seed/loader que lê o Anexo F (markdown) e popula **`config/motor/matriz-dez-2025-industria.php`** — arquivo PHP versionado em git, fonte única lida pelo motor. Sem tabela no banco para a matriz no MVP (IDR-010 §Operacional).
 2. **Filtro Indústria:** apenas linhas onde setor = Indústria. Comércio/Serviços ficam fora desta sprint.
-3. **Componente `<x-recomendacao>`** que recebe `indicador` + `farol` e renderiza o texto correspondente.
-4. **Render integrado** no relatório (STORY-029): abaixo de cada indicador, ou expansível por click, mostra a recomendação textual.
-5. **Fallback gracioso:** se faltar texto para um par (indicador × farol), mostra placeholder "Recomendação em revisão" + log de warning (não quebra relatório).
-6. **Versionamento:** `matrix_version` no `diagnosticos` referencia a versão exata. Mudança da matriz no futuro = bump (`matrix_version = "mar-2026"`); diagnósticos antigos seguem com texto de DEZ/2025 (snapshot dos resultados, mas texto da matriz é lookup — decidir se snapshotar ou não na CA-7).
+3. **Carga por `matrix_version`:** o motor recebe `matrix_version` como parâmetro e carrega o arquivo correspondente (`config/motor/matriz-{matrix_version}-industria.php`). Permite evolução futura sem mexer em código.
+4. **Snapshot no momento do cálculo:** o texto recomendado (curto + detalhado) é **interpolado e gravado** em `diagnosticos.indicadores_calculados[*].mensagem_detalhada` no `INSERT` original. Re-renderizar o relatório lê o snapshot — **o motor não é re-invocado** (IDR-010 §Sub-decisão 2).
+5. **Componente Blade `<x-recomendacao>`** que recebe `mensagem_curta` + `mensagem_detalhada` (ambos já no snapshot do diagnóstico) e renderiza. **Não lê config** — só renderiza dados do agregado.
+6. **Render integrado** no relatório (componente já entregue na STORY-029, `done`): abaixo de cada indicador, expansível por click no mobile, inline no desktop ≥ 1024px.
+7. **Fallback gracioso:** se faltar texto para um par (indicador × farol) **no momento do cálculo**, grava placeholder no snapshot (`"Recomendação em revisão"`) + log warning + acresce à lista em `design/matriz-lacunas.md`. **Não quebra cálculo nem relatório.**
+8. **Versionamento documentado:** o rodapé do relatório (já entregue) exibe `matrix_version = "dez-2025"`. Bump futuro = novo arquivo `matriz-mar-2026-industria.php` + bump da constante; diagnósticos antigos continuam exibindo texto DEZ/2025 (porque está no snapshot).
 
 ## Critérios de aceite
 
-- [ ] **CA-1:** Anexo F lido e carregado em config PHP versionado.
-- [ ] **CA-2:** Apenas coluna Indústria carregada (Comércio/Serviços fora).
-- [ ] **CA-3:** Componente `<x-recomendacao>` renderiza texto por par (indicador × farol).
-- [ ] **CA-4:** Relatório (STORY-029) integra as recomendações abaixo de cada indicador.
-- [ ] **CA-5 (fallback):** par sem texto → placeholder + log warning. Não quebra. Lista de pares faltantes documentada em `design/matriz-lacunas.md` para PO consolidar com EB.
-- [ ] **CA-6:** `matrix_version` continua `"dez-2025"` (não muda nesta estória).
-- [ ] **CA-7 (snapshot vs lookup):** decisão tomada e justificada nas Notas do agente. Default PO: snapshot — gravar texto da recomendação dentro de `indicadores_calculados.recomendacao` no momento do cálculo, garantindo reprodutibilidade absoluta mesmo se Anexo F for editado depois.
-- [ ] **CA-8 (testes):** Pest feature confirma render integrado. Casos: 1 par com texto, 1 par sem texto (fallback), 1 par com texto longo (truncamento ou expansão).
-- [ ] **CA-9 (mobile):** recomendações não quebram layout mobile — expansível por default ou ocupa linha completa.
+- [ ] **CA-1:** Anexo F lido e carregado em `config/motor/matriz-dez-2025-industria.php` (PHP versionado, sem tabela de banco).
+- [ ] **CA-2:** Apenas coluna Indústria carregada (Comércio/Serviços fora). Loader tem teste arquitetural Pest que falha se um setor não-Indústria entrar no array.
+- [ ] **CA-3:** Componente `<x-recomendacao>` renderiza texto a partir do snapshot `indicadores_calculados[*].mensagem_curta` + `mensagem_detalhada` — sem consultar config em runtime.
+- [ ] **CA-4:** Motor (STORY-028/030, `done`) é estendido para **gravar `mensagem_detalhada` no snapshot** durante `CalcularDiagnostico::execute`. Diagnósticos calculados antes desta estória continuam funcionais (campo `mensagem_detalhada` ausente → componente renderiza só `mensagem_curta`).
+- [ ] **CA-5 (fallback):** par sem texto na matriz → `mensagem_detalhada = "Recomendação em revisão."` + log warning + linha adicionada a `design/matriz-lacunas.md` (auto-append pelo loader). PO consolida lacunas com a EBC em backlog dedicado **durante** a execução — não bloqueia.
+- [ ] **CA-6:** `matrix_version` continua `"dez-2025"` (carimbado na linha do diagnóstico). Não cria nova versão nesta estória.
+- [ ] **CA-7 (testes):** Pest feature confirma render integrado em homol — casos: par com texto, par sem texto (fallback), par com texto longo (overflow inline). Pest unit valida o loader (filtro Indústria, parse de markdown, fallback).
+- [ ] **CA-8 (mobile):** mensagem detalhada não quebra layout — expansível por click em mobile (< 1024px), inline em desktop. Tokens do design system v1 (STORY-019 `done`).
+- [ ] **CA-9 (snapshot imutável):** teste arquitetural Pest assegura que `indicadores_calculados.mensagem_detalhada` nunca é atualizado após `INSERT` (`update()` em diagnóstico já existente falha).
 
 ## Fora de escopo
 
 - Comércio e Serviços — onda 2.
 - Edição da matriz pelo PO via UI — roadmap §6 (backoffice).
 - Mecanismo de feedback 👍/👎 por recomendação — roadmap §1.4.
+- Migração retroativa de diagnósticos antigos para preencher `mensagem_detalhada` — fora do MVP.
 
 ## Dependências
 
-- **Bloqueada por:** STORY-031 (resumo + 14 indicadores prontos).
+- **Bloqueada por:** STORY-031 (resumo + 14 indicadores prontos — **`done`** ✓), IDR-010 (versionamento + snapshot — **`accepted`** ✓).
 - **Bloqueia:** STORY-036 (Validador externo revisa as recomendações também).
 
 ## Decisões já tomadas
 
-- Anexo F como fonte da verdade.
-- Filtro Indústria-only.
-- Snapshot da recomendação no momento do cálculo (CA-7).
+- **Anexo F como fonte da verdade** (autoria EB Parcerias / EBC).
+- **Filtro Indústria-only** no MVP.
+- **Snapshot da recomendação no momento do cálculo** (IDR-010 §Sub-decisão 2) — não lookup em runtime.
+- **Config PHP versionado em git**, sem tabela de banco para a matriz (IDR-010 §Operacional).
+- **Schema do snapshot:** `indicadores_calculados[*].mensagem_detalhada` (snake_case PHP-friendly, conforme IDR-010 §Sub-decisão 2).
 - Sem UI de edição da matriz nesta sprint.
 
 ## DoD

@@ -30,9 +30,9 @@ A SPRINT-2026-W25 cobre o EPIC-002 em sua totalidade do ponto de vista tech. O r
    - Calcular diagnóstico, ver relatório em ≤ 3s, conferir 14 indicadores + NCG abs + Resumo Executivo + recomendações DEZ/2025.
    - Confirmar eventos `quiz_iniciado` e `diagnostico_concluido` em banco.
    - Confirmar idempotência: re-submeter o mesmo quiz → não duplica diagnóstico.
-   - Logout e login com outra conta → tentar acessar o diagnóstico anterior → 403/404 (conforme IDR-007).
+   - Logout e login com outra conta → tentar acessar o diagnóstico anterior → 404 cross-tenant (conforme **IDR-009**, decisão "404 cross-tenant para evitar leak por enumeração").
 2. **Validação independente formal:**
-   - `validation/checklist.md` (PO escreve durante a sprint) listando todos os critérios de aceite do EPIC-002 + critérios da `epic.md`.
+   - `validation/checklist.md` **(PO escreve até 2026-06-26 — fim da Semana 4)** listando todos os critérios de aceite do EPIC-002 + critérios da `epic.md`. **Pré-requisito explícito**: sem o checklist publicado, o agente Validador Claude não inicia.
    - Validador (agente Claude) roda o checklist, registra evidências em `validation/evidence/` (screenshots, prints de DevTools, SQL outputs).
    - `validation/report.md` com veredito formal: `approved` / `approved_with_pending` / `blocked`.
 3. **Pacote de handoff** em `epics/EPIC-002-diagnostico-industria/handoff/README.md`:
@@ -55,7 +55,7 @@ A SPRINT-2026-W25 cobre o EPIC-002 em sua totalidade do ponto de vista tech. O r
 - [ ] **CA-3 (validação independente):** `validation/report.md` com veredito formal. Se `approved_with_pending`, PO triagem cada item.
 - [ ] **CA-4 (gate validação externa):** STORY-036 está `approved` ou `approved_with_pending` com follow-ups não-críticos documentados.
 - [ ] **CA-5 (p95 ≤ 3s comprovado):** medição final em 50 navegações em homol, p95 ≤ 3s. Gráfico/tabela anexada.
-- [ ] **CA-6 (handoff):** `handoff/README.md` cobre os 9 pontos do item 3 acima. Revisado em dry-run com 1 representante de implantação na Semana 4 (Checkpoint 4) antes do fechamento.
+- [ ] **CA-6 (handoff):** `handoff/README.md` cobre os 9 pontos do item 3 acima. **Dry-run com 1 representante de implantação na Semana 4** (Checkpoint 4) antes do fechamento. **Se até 2026-06-12 (Checkpoint 3) ainda não houver representante de implantação alocado**, PO escala para o stakeholder e abre PDR de mitigação (alternativa: dry-run feito com o próprio PO assumindo a persona de implantação, com auditoria posterior do time real).
 - [ ] **CA-7 (cobertura):** geral ≥ 80%, motor ≥ 98%.
 - [ ] **CA-8 (zero regressão):** todos os testes Pest + Dusk de EPIC-000/001/004 continuam verdes.
 - [ ] **CA-9 (`done` no `index.json`):** EPIC-002 promovido, EPIC-003 destravado.
@@ -77,8 +77,15 @@ A SPRINT-2026-W25 cobre o EPIC-002 em sua totalidade do ponto de vista tech. O r
 
 - Fecha o EPIC-002 sob ótica técnica.
 - Pacote de handoff é deliverable formal — não é "opcional se sobrar tempo".
-- Dry-run com implantação na Semana 4 para não deixar lacunas no handoff.
+- Dry-run com implantação na Semana 4 para não deixar lacunas no handoff (com fallback definido no CA-6).
 - Critério "≥ 10 Robertos + NPS ≥ 30" da `epic.md` permanece como meta da WAVE-2026-01, executado pós-handoff.
+- Comportamento cross-tenant nos testes do smoke E2E segue **IDR-009** (404, não 403).
+
+## Pendências do PO antes do Validador Claude iniciar
+
+1. **`validation/checklist.md` escrito** até 2026-06-26 — sem ele, esta estória não começa.
+2. **Representante de implantação identificado** até 2026-06-12 (Checkpoint 3) — ou fallback do CA-6 ativado.
+3. **Tag final `v1.0.0`** confirmada (coerente com IDR-010 §Sub-decisão 1 — Motor V1 = `1.0.0`, Motor com 14 indicadores = `1.1.0`; "v1.0.0" aqui refere-se ao **produto** como release pública, não ao motor).
 
 ## DoD
 

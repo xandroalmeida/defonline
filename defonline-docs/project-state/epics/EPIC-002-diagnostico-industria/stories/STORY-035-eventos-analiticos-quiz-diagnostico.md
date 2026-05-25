@@ -11,54 +11,79 @@ owner_agent: claude-programador
 created_at: 2026-05-25
 updated_at: 2026-05-25
 estimated_session_size: S
+related_adrs: ["ADR-002", "ADR-004"]
 ---
 
 # STORY-035 — Eventos analíticos do EPIC-002
 
-> Instrumenta o produto para o north star (D2 — Ativação). Emite os 2 eventos exigidos pela epic.md.
+> Instrumenta o produto para o north star (D2 — Ativação). Emite os 2 eventos exigidos pela epic.md **conforme contrato fixado em ADR-004 §Decisão 2**.
 
 ## Contexto
 
-Epic.md: *"Eventos `quiz_iniciado` e `diagnostico_concluido` emitidos com `empresa_id`, `usuario_id` e timestamps."* Onda (current-wave.md): *"alimentam D2 — Ativação e o próprio north star"*.
+Epic.md cita os eventos `quiz_iniciado` e `diagnostico_concluido`; o **contrato técnico** (payload obrigatório, helper, tabela, política PII) está fixado em **ADR-004 §Decisão 2** ("Eventos de produto") e ADR-002 (request_id UUID v7 cross-process). Esta estória só **consome** esse pipeline — não decide nada novo.
 
-O ADR de captura de eventos foi definido no EPIC-000. Esta estória só **consome** esse pipeline.
+> **Importante (correção 2026-05-25):** a redação original desta estória listava payload `{empresa_id, usuario_id, motor_version, matrix_version, timestamp_iso8601, sessao_id}` e tabela `eventos` com sink externo assíncrono. Ambos divergiam do ADR-004 já aprovado em 2026-05-21 (síncrono dentro da transação, tabela `evento_produto`, propriedades canônicas por evento). A estória foi realinhada ao ADR.
 
 ## O quê
 
-1. **`quiz_iniciado`** — disparado no primeiro avanço de bloco (Bloco 1 → 2) na STORY-027.
-2. **`diagnostico_concluido`** — disparado quando `CalcularDiagnostico::execute` retorna sucesso e o registro é persistido.
-3. **Payload mínimo:** `{empresa_id, usuario_id, motor_version, matrix_version, timestamp_iso8601, sessao_id (opcional)}`.
-4. **Emissão idempotente:** se o mesmo diagnóstico for re-submetido (CA-9 da STORY-027), `diagnostico_concluido` **não** é emitido de novo.
-5. **Persistência local + sink externo:** segue o ADR de eventos do EPIC-000 (provavelmente: registro em tabela `eventos` local + dispatch async para sink externo se houver — confirmar no ADR).
-6. **Captura confirmável:** PO consegue rodar `SELECT * FROM eventos WHERE tipo = 'diagnostico_concluido'` em homol e ver o registro logo após o smoke E2E da STORY-037.
+1. **`quiz_iniciado`** — disparado no **primeiro POST de resposta de Q01** que muda o status do rascunho de `null → rascunho` (definição literal do ADR-004 §2.2). Implementado no fluxo do quiz da STORY-027.
+2. **`diagnostico_concluido`** — disparado no service `diagnostico/CalcularDiagnostico` **após** a transição `rascunho → enviado` + motor calculado + `Diagnostico` persistido (definição literal do ADR-004 §2.2).
+3. **Helper canônico:** chamadas exclusivamente via `EventLogger::emit($nome, array $propriedades, ?Usuario $usuario, ?EmpresaAnalisada $empresa)` (ADR-004 §Decisão 2.3). Síncrono dentro da transação do agregado — **sem job assíncrono e sem sink externo** (ADR-004: *"sem fila intermediária; tornar async só se >100 eventos/segundo sustentado"*).
+4. **Tabela `evento_produto`** (ADR-004 §2.1 — schema dedicado, append-only). Colunas: `id`, `nome_evento`, `ocorrido_em`, `usuario_id`, `empresa_id`, `propriedades jsonb`, `request_id`. **Não criar tabela nova** — a migration já é responsabilidade de EPIC-000/STORY do ADR-004; verificar que está rodada em homol antes de começar.
+5. **Payload obrigatório por evento (ADR-004 §2.2 — copiar exatamente):**
+    - **`quiz_iniciado`:** `usuario_id` (obrigatório), `empresa_id` (obrigatório), `propriedades` = `{ quiz_id (uuid interno), quiz_versao (ex.: "2026.1") }`.
+    - **`diagnostico_concluido`:** `usuario_id` (obrigatório), `empresa_id` (obrigatório), `propriedades` = `{ quiz_id, diagnostico_id, duracao_preenchimento_seg (int), setor, porte }`.
+    - **`request_id`** (UUID v7 do middleware HTTP — ADR-002) é gravado pelo próprio `EventLogger::emit` lendo do contexto da request; **não passar manualmente**.
+    - **Sem PII em `propriedades`** (ADR-004 §2.4) — não logar CNPJ, e-mail, telefone, razão social. Apenas IDs internos e enums.
+6. **Idempotência:**
+    - `quiz_iniciado` — só emite na **primeira** transição `null → rascunho` (não em saves subsequentes). Garantia: gatilho no model `Quiz` quando o status muda para `rascunho`, observer não dispara em re-saves.
+    - `diagnostico_concluido` — chave de idempotência = `diagnostico_id`. Re-submissão idempotente do mesmo `payload_hash` (IDR-010 §Sub-decisão 3) retorna o `Diagnostico` existente e **não** re-emite o evento.
+7. **Captura confirmável em homol:**
+    ```sql
+    SELECT nome_evento, ocorrido_em, usuario_id, empresa_id, propriedades, request_id
+    FROM evento_produto
+    WHERE nome_evento IN ('quiz_iniciado','diagnostico_concluido')
+    ORDER BY ocorrido_em DESC LIMIT 10;
+    ```
 
 ## Critérios de aceite
 
-- [ ] **CA-1:** evento `quiz_iniciado` emitido no primeiro `Próximo`. Idempotente por sessão (não duplica se Roberto recuar e avançar).
-- [ ] **CA-2:** evento `diagnostico_concluido` emitido após persistência do `Diagnostico`. Idempotente por `diagnostico_id`.
-- [ ] **CA-3:** payload contém todos os campos obrigatórios.
-- [ ] **CA-4:** sink interno (`eventos` local) recebe o registro.
-- [ ] **CA-5:** sink externo (se aplicável) recebe assíncrono — falha do sink externo **não** quebra o quiz/relatório (registrar como warning).
-- [ ] **CA-6 (testes):** Pest unit ≥ 4 (cada evento × emite + idempotência). Feature: simula fluxo completo e verifica registro no banco.
-- [ ] **CA-7 (cobertura):** ≥ 80%.
-- [ ] **CA-8 (homol):** PO consegue confirmar registros via SQL após smoke E2E.
+- [ ] **CA-1:** `quiz_iniciado` emitido **uma única vez** na transição `null → rascunho` (Bloco 1 → 2). Re-saves do mesmo rascunho não duplicam.
+- [ ] **CA-2:** `diagnostico_concluido` emitido **uma única vez** por `diagnostico_id` após `CalcularDiagnostico::execute` retornar sucesso e o registro ser persistido. Re-submissão do mesmo `payload_hash` (idempotência IDR-010) **não** re-emite.
+- [ ] **CA-3 (payload conforme ADR-004 §2.2):**
+    - `quiz_iniciado.propriedades` contém **exatamente** `quiz_id`, `quiz_versao`.
+    - `diagnostico_concluido.propriedades` contém **exatamente** `quiz_id`, `diagnostico_id`, `duracao_preenchimento_seg`, `setor`, `porte`.
+    - Ambos os eventos gravam `usuario_id`, `empresa_id`, `request_id` (UUID v7) e `ocorrido_em` (timestamptz).
+- [ ] **CA-4 (helper):** todas as emissões passam por `EventLogger::emit(...)` — busca de `evento_produto::create()` direto no código de aplicação retorna **zero ocorrências fora do `EventLogger`** (assert por teste arquitetural Pest).
+- [ ] **CA-5 (síncrono na transação):** evento é gravado **na mesma transação** do agregado que o originou (sem job, sem fila). Falha do `INSERT` em `evento_produto` faz **rollback** do quiz/diagnóstico — não há "tolerância" para evento perdido no MVP.
+- [ ] **CA-6 (sem PII em `propriedades`):** teste arquitetural assegura que `propriedades` JSONB não carrega chaves `cnpj`, `email`, `telefone`, `razao_social`, `nome_completo`, ou qualquer string que case com regex de CNPJ/CPF/e-mail/telefone.
+- [ ] **CA-7 (testes):** Pest unit ≥ 4 (cada evento × emite + idempotência). Pest feature: fluxo completo do quiz simulado, asserta exatamente 1 linha por evento no banco com payload conforme CA-3. Suíte cobre também o evento que **não** dispara (re-save de rascunho, re-submissão idempotente).
+- [ ] **CA-8 (cobertura):** ≥ 80% no pacote, ≥ 95% no `EventLogger` (helper hot path).
+- [ ] **CA-9 (homol):** PO consegue confirmar registros via SQL acima após smoke E2E da STORY-037 — esperado ≥ 1 linha por evento, com `request_id` igual ao da request que originou (rastreável via logs).
 
 ## Fora de escopo
 
 - Dashboards de métricas — roadmap §6.
 - Eventos de Recorrência (D3 — `diagnostico_visualizado`, `comparativo_aberto`) — EPIC-003.
-- Eventos de quiz_abandonado — roadmap (sinal de drop-off).
+- Eventos `quiz_abandonado` — roadmap (sinal de drop-off, pós-V1).
+- Sink externo (PostHog, Mixpanel) — supersede de ADR-004 quando volume passar de 100 eventos/segundo sustentado.
 
 ## Dependências
 
-- **Bloqueada por:** STORY-027 (quiz emite `quiz_iniciado`), STORY-028 (motor persiste e emite `diagnostico_concluido`), ADR de eventos do EPIC-000.
-- **Bloqueia:** nada.
+- **Bloqueada por:**
+    - STORY-027 (quiz existe, transição `null → rascunho` é observável) — **`done`** ✓.
+    - STORY-028 (motor persiste `Diagnostico`) — **`done`** ✓.
+    - **ADR-004 §Decisão 2** (contrato dos eventos) — **`accepted`** em 2026-05-21 ✓.
+    - Migration da tabela `evento_produto` rodada em homol — confirmar no Dia 1.
+- **Bloqueia:** nada na sprint W25.
 
 ## Decisões já tomadas
 
-- Emissão idempotente (não duplica).
-- Falha do sink externo não quebra o fluxo do usuário.
-- Payload mínimo conforme epic.md.
+- **Contrato dos eventos = ADR-004 §2.2** (payload, propriedades, helper, política PII).
+- **Síncrono na transação** (ADR-004 §Decisão 2.3) — sem fila, sem job.
+- **`EventLogger::emit(...)` é a única porta de entrada** — sem chamadas diretas a `evento_produto::create()`.
+- **Idempotência:** `quiz_iniciado` por transição de status, `diagnostico_concluido` por `diagnostico_id`.
+- **`request_id`** gravado automaticamente pelo helper (não passar manualmente).
 
 ## DoD
 

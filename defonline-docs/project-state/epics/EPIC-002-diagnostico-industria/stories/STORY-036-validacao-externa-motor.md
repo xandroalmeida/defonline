@@ -15,13 +15,17 @@ estimated_session_size: M-L
 
 # STORY-036 — Validação externa do motor (NRF §9.3)
 
-> **Estória atípica:** não é código. É gate técnico de qualidade exigido pela spec (NRF §9.3) antes de liberar o produto para uso por usuário real. Executada por **especialista financeiro contratado externamente** (não membro do time tech). PO coordena a contratação.
+> **Estória atípica — NÃO é hand-off para o programador.** Não há código a escrever. É gate técnico de qualidade exigido pela spec (NRF §9.3) antes de liberar o produto para uso por usuário real. Executada por **especialista financeiro contratado externamente** (não membro do time tech). **PO coordena a contratação pessoalmente — agente Claude não pode contratar terceiros.**
 
 ## Contexto
 
 NRF §9.3 (`requisitos-nao-funcionais-e-juridicos.md`) exige validação externa pré-go-live do motor de cálculo. Sem o parecer aprovado, o produto não pode ser oferecido para uso por usuário real — mesmo em beta fechado.
 
 Validador externo é especialista em finanças corporativas (CFA, auditor sênior, professor de finanças com experiência em PME). PO inicia processo de contratação na Semana 1 com 3 candidatos shortlisted; contrato fechado até Checkpoint 2 (2026-06-05).
+
+> **Risco materializado em 2026-05-25 (abertura da sprint):** PO ainda **não** tem os 3 candidatos shortlisted. Janela = 7 dias úteis até Checkpoint 2. Status atualizado nos riscos da sprint W25.
+>
+> **Plano B (se até 2026-06-05 não houver contrato assinado):** PO solicita parecer de **conselheiro informal** (ex.: contador parceiro, professor de finanças conhecido) registrado como `approved_with_pending` + follow-up contratual para sprint pós-EPIC-002. Não substitui o §9.3 formalmente, mas destrava o beta fechado com ressalva documentada no handoff.
 
 ## O quê
 
@@ -41,7 +45,8 @@ Validador externo é especialista em finanças corporativas (CFA, auditor sênio
 
 ## Critérios de aceite
 
-- [ ] **CA-1 (contrato):** Validador externo contratado, contrato assinado até 2026-06-05.
+- [ ] **CA-0 (shortlist — pré-condição):** PO tem **3 candidatos shortlisted** até **2026-05-29 (Checkpoint 1)**. Sem shortlist nesta data, abre PDR de mitigação e ativa Plano B já no Checkpoint 1 (não no Checkpoint 2).
+- [ ] **CA-1 (contrato):** Validador externo contratado, contrato assinado até 2026-06-05. Se falhar → Plano B do Contexto ativado.
 - [ ] **CA-2 (pacote entregue):** Validador recebe acesso + briefing + fixtures + código motor + matriz até 2026-06-19 (Checkpoint 4).
 - [ ] **CA-3 (revisão concluída):** Validador entrega parecer escrito até 2026-07-01.
 - [ ] **CA-4 (veredito registrado):** `validation/external-review.md` existe com veredito e justificativas.
@@ -74,7 +79,7 @@ Validador externo é especialista em finanças corporativas (CFA, auditor sênio
 
 ## Protocolo do agente
 
-Esta estória **não tem agente Claude executando** — é coordenação humana (PO contrata + Validador entrega). O fluxo de status updates no `index.json` é manual.
+Esta estória **não tem agente Claude executando** — é coordenação humana (PO contrata + Validador entrega). O fluxo de status updates no `index.json` é manual. Agente Claude **pode auxiliar** o PO em: (a) redigir briefing técnico para o Validador, (b) consolidar fixtures, (c) revisar o parecer recebido contra os 140 casos canônicos. **Não pode**: contratar, assinar contrato, ou emitir o parecer.
 
 ## Notas do agente
 

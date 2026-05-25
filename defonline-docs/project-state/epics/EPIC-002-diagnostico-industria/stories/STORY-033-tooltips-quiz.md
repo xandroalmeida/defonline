@@ -21,22 +21,30 @@ estimated_session_size: S
 
 A epic.md inclui como entregável: *"Tooltip/box de explicação por indicador no quiz para reduzir erro de entrada (espec §6.8 e Anexo A §A.6)"*. Roberto, sem contador ao lado, pode confundir "PMR" (recebimento) com "PMC" (compras). Tooltip resolve.
 
+> **Status das fontes textuais (2026-05-25):** spec V2 §6.8 ainda marcada `[DECIDIR]` (apenas proposta preliminar: "tooltip acionado por clique em ícone (?) ao lado do label"; conteúdos finais por campo a consolidar). Anexo A §A.6 está reservado mas vazio.
+>
+> **Decisão do PO em 2026-05-25:** formato fixado em **tooltip inline com click no ícone `?` ao lado do label** (proposta preliminar da spec promovida a oficial). **Os 23 textos** ainda precisam ser escritos pelo PO até **2026-06-05 (Checkpoint 2)** — uma semana antes do início da implementação. Não inclui priorização por taxa de abandono no MVP (todos os 23 campos ganham tooltip de uma vez).
+
 ## O quê
 
-1. **Conteúdo:** 23 textos curtos (~50 palavras cada), um por campo do quiz. PO consolida texto na semana 1; programador integra na semana 3.
-2. **Componente `<x-help>`** acoplado ao label do campo, mostra ícone de interrogação. Em desktop: hover ou click abre tooltip flutuante. Em mobile: click abre bottom-sheet ou expande inline.
-3. **Acessibilidade:** `aria-describedby` ligando label ao texto. Tooltip alcançável por teclado (Tab + Enter).
-4. **Textos em config externa** (`config/quiz/help-industria.php`) — facilita ajuste sem refactor.
+1. **Conteúdo:** 23 textos curtos (~50 palavras cada), um por campo do quiz. PO consolida texto até **2026-06-05 (Checkpoint 2)**; programador integra na Semana 3.
+2. **Componente `<x-help>`** acoplado ao label do campo, mostra ícone de interrogação. **Click no ícone** abre tooltip — sem hover (igual em desktop e mobile, padrão simples).
+    - **Desktop (≥ 1024px):** popover flutuante posicionado abaixo/ao lado do ícone.
+    - **Mobile (< 1024px):** bottom-sheet (consistente com app shell v1).
+3. **Tokens do Design System v1** (STORY-019 `done`) — cores, tipografia, raio, sombra do `<x-help>` consumidos da camada de tokens (Tailwind v4 theme — IDR-008). Sem cores hard-coded.
+4. **Acessibilidade:** `aria-describedby` ligando label ao texto. Tooltip alcançável por teclado (Tab para o ícone, Enter ou Space abre, Esc fecha). Contraste AA mínimo (≥ 4.5:1) já garantido pelos tokens v1.
+5. **Textos em config externa** (`config/quiz/help-industria.php`) — facilita ajuste sem refactor.
 
 ## Critérios de aceite
 
 - [ ] **CA-1:** Todos os 23 campos do quiz têm tooltip funcional.
-- [ ] **CA-2:** Texto pode ser editado em config sem mudar código.
-- [ ] **CA-3:** Mobile: bottom-sheet ou expand inline (escolha do programador).
-- [ ] **CA-4:** Desktop: tooltip ou popover flutuante.
-- [ ] **CA-5 (acessibilidade):** `aria-describedby`, Tab/Enter funcionam, contraste AA.
-- [ ] **CA-6 (testes):** Pest feature — view contém os textos esperados. Dusk: hover/click revela tooltip.
-- [ ] **CA-7:** Textos consolidados pelo PO entregues antes do Dia 1 da Semana 3.
+- [ ] **CA-2:** Texto pode ser editado em `config/quiz/help-industria.php` sem mudar código de componente nem teste.
+- [ ] **CA-3:** Mobile (< 1024px): bottom-sheet ao click no ícone.
+- [ ] **CA-4:** Desktop (≥ 1024px): popover flutuante ao click no ícone.
+- [ ] **CA-5 (acessibilidade):** `aria-describedby`, Tab/Enter/Space/Esc funcionam, contraste AA — auditado com Pa11y ou similar.
+- [ ] **CA-6 (design system):** zero cores/tamanhos hard-coded no componente; tudo via tokens v1 (teste arquitetural Pest assegura).
+- [ ] **CA-7 (testes):** Pest feature — view contém os textos esperados (lê de config no setUp). Dusk: click no ícone revela o conteúdo em mobile e desktop.
+- [ ] **CA-8 (gate do PO):** os 23 textos consolidados pelo PO devem estar publicados em `config/quiz/help-industria.php` (ou em PR equivalente) **até 2026-06-05**. Sem isso, a estória não inicia.
 
 ## Fora de escopo
 
@@ -46,18 +54,20 @@ A epic.md inclui como entregável: *"Tooltip/box de explicação por indicador n
 
 ## Dependências
 
-- **Bloqueada por:** STORY-027 (campos existem para receber tooltip), PO entregar textos.
+- **Bloqueada por:** STORY-027 (campos existem — **`done`** ✓), STORY-019 (Design System v1 — **`done`** ✓), **PO entregar 23 textos até 2026-06-05**.
 - **Bloqueia:** nada (parte da V3).
 
 ## Decisões já tomadas
 
-- Conteúdo em config externa, não hardcoded.
+- Conteúdo em config externa, não hard-coded.
 - Indústria-only.
-- Spec V2 §6.8 + Anexo A §A.6 são fontes da verdade.
+- Spec V2 §6.8 + Anexo A §A.6 são fontes da verdade (§6.8 promovida de `[DECIDIR]` a oficial em 2026-05-25 — formato tooltip inline com click no ícone `?`).
+- Click (não hover) em desktop e mobile — uniformidade.
+- Tokens do Design System v1 (IDR-008 Tailwind v4 theme + STORY-019).
 
 ## DoD
 
-CA-1 a CA-7 + tag `rc.W25S3.2`. `index.json` atualizado.
+CA-1 a CA-8 + tag `rc.W25S3.2`. `index.json` atualizado.
 
 ## Protocolo do agente
 
