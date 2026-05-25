@@ -7,8 +7,8 @@ sprint_id: null
 type: bugfix
 target_role: programador
 requires_design: false
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador (claude-opus-4-7)
 created_at: 2026-05-24
 updated_at: 2026-05-24
 estimated_session_size: S
@@ -101,17 +101,24 @@ Padrão `agent-task-format.md`. **Importante**: a mudança envolve secret do rep
 ## Notas do agente
 
 ### Tempo investido
-- <horas>
+- ~0.5h (análise das 3 opções + implementação + documentação + aditivo ADR).
 
 ### Opção escolhida
-- <A | B | C> — <justificativa em 1-2 linhas>
+- **Opção A (PAT)** — substituir `GITHUB_TOKEN` por `secrets.RELEASE_TAG_PAT` em `actions/checkout@v4` do `bump-rc.yml`. Justificativa: opção B (`gh release create`) é arriscada porque a limitação do GitHub é sobre **a origem do evento ser o `GITHUB_TOKEN`**, não sobre o **mecanismo** (push vs API) — relatos online são contraditórios e o risco de virar "às vezes dispara, às vezes não" é incompatível com um workflow que precisa ser determinístico. Opção C (GitHub App) tem overhead alto demais (provisionar App, gerenciar segredo da App, instalação no repo) para um projeto de 1 dev no MVP. Opção A é o caminho clássico documentado pelo próprio GitHub, com escopo mínimo (`Contents: write` em single repo) e rotação anual previsível.
 
 ### Secret(s) provisionado(s)
-- <nome do secret> — escopo: <permissões>; owner: <Alexandro | bot>; rotação: <quando>.
+- **`RELEASE_TAG_PAT`** — Fine-grained PAT; escopo: `Contents: Read and write` no único repo `xandroalmeida/DEFOnline`; owner: Alexandro (conta pessoal); rotação: anual (ou ao expirar — GitHub avisa por email 7 dias antes). **Procedimento de geração + provisionamento + rotação + teste de fumaça documentados em [defonline-docs/skills/programador/references/cicd-secrets.md](../../../skills/programador/references/cicd-secrets.md).**
+- **Pendente do PO** (CA-3 depende disto): provisionar o valor do secret com `gh secret set RELEASE_TAG_PAT --repo xandroalmeida/DEFOnline` antes do teste empírico.
 
 ### Link do teste empírico
-- bump-rc run: <link>
-- release-homolog disparado: <link>
+- bump-rc run: **pendente** — depende do PO (1) provisionar `RELEASE_TAG_PAT` no remote, (2) push do commit desta estória, (3) rodar `gh workflow run bump-rc.yml --repo xandroalmeida/DEFOnline -f bump=patch`.
+- release-homolog disparado: **pendente** — esperar via `gh run list --workflow=release-homolog.yml --repo xandroalmeida/DEFOnline --limit 1` (deve aparecer com `event: push` e `display_title: <tag-criada>` em até 1min).
 
 ### Observações úteis ao PO
-- <opcional>
+
+- **CA-2 (implementação)**: arquivo único alterado — [.github/workflows/bump-rc.yml](../../../../.github/workflows/bump-rc.yml). Diff é mínimo: adiciona `token: ${{ secrets.RELEASE_TAG_PAT }}` no `actions/checkout` + comentário-cabeçalho explicando o porquê.
+- **CA-4 (documentação)**: criado novo arquivo [defonline-docs/skills/programador/references/cicd-secrets.md](../../../skills/programador/references/cicd-secrets.md) consolidando todos os secrets de CI/CD (não só este — aproveitei para mapear `DEPLOY_SSH_KEY`, `ANSIBLE_VAULT_PASS`, etc. com ponteiros para os ADRs onde foram decididos).
+- **CA-5 (aditivo ADR)**: ADR-006 §1.4 + §2.3 (tabela de secrets) + `last_amendment_note` no frontmatter atualizados.
+- **Idempotência (padrão de qualidade)**: rodar `bump-rc.yml` duas vezes seguidas continua gerando `-rc.(N+1)` para a próxima tag (lógica do step "Calcular próxima tag" já garantia isso desde antes — não tocada). Sem efeito colateral do PAT nessa garantia.
+- **Sem commit em main remoto ainda** (por padrão da memória do projeto: nunca push/PR/tag sem ordem explícita do PO). Quando você aprovar, basta `git push origin main` + o procedimento do CA-3.
+- **Rollback do fix**: se algum dia o PAT estiver vazando ou indesejado, basta `git revert` do commit + `gh secret delete RELEASE_TAG_PAT` — voltamos ao estado pré-STORY-023 (com o workaround manual de re-empurrar tag do host).

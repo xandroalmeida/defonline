@@ -2,6 +2,13 @@ name: bump-rc — incrementa próxima tag de release-candidate
 
 # ADR-006 §1.4 — workflow_dispatch para criar tag vX.Y.Z-rc.N automaticamente.
 # Lê a última tag, decide bump (patch por default; minor com input) e abre tag nova.
+#
+# STORY-023 / ADR-006 aditivo 2026-05-24 — o `git push` da tag usa o secret
+# `RELEASE_TAG_PAT` (Fine-grained PAT, scope `contents:write`) no lugar do
+# `GITHUB_TOKEN` implícito. Motivo: tags empurradas com `GITHUB_TOKEN` NÃO
+# disparam workflows downstream (proteção do GitHub contra loops). Sem o PAT,
+# o `release-homolog.yml` (trigger `on: push: tags`) fica parado e o time
+# precisa do workaround manual "deletar a tag e re-empurrar do host local".
 
 on:
   workflow_dispatch:
@@ -27,6 +34,7 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+          token: ${{ secrets.RELEASE_TAG_PAT }}
 
       - name: Calcular próxima tag
         id: next

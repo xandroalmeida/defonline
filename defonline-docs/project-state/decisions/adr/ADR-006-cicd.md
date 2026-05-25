@@ -13,9 +13,9 @@ related_pdrs: ["PDR-001"]
 related_epics: ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"]
 related_stories: ["STORY-005"]
 created_at: 2026-05-21
-updated_at: 2026-05-23
+updated_at: 2026-05-24
 type: politica-evolucao
-last_amendment_note: "2026-05-23 — §3.2 revisada: main.yml deixa de buildar imagem (`main-<sha>`/`latest`) em todo push porque a imagem nunca era consumida (release-homolog.yml builda do zero a partir do SHA da tag rc). Job `build-and-push` + `notify` removidos; main.yml fica só com `validate`. Sem mudança de decisão estrutural, só remoção de custo morto."
+last_amendment_note: "2026-05-24 — §1.4 + §2.3 aditivo (STORY-023): `bump-rc.yml` passa a usar `secrets.RELEASE_TAG_PAT` em `actions/checkout` para que a tag empurrada dispare o `release-homolog.yml`. Workaround documentado para a proteção do GitHub contra loops de workflow (eventos disparados por `GITHUB_TOKEN` implícito não criam novos workflow runs, exceto `workflow_dispatch`/`repository_dispatch`). Sem o fix, todo `bump-rc` exigia deletar a tag remota e re-empurrá-la do host local. Provisionamento + rotação do PAT em `skills/programador/references/cicd-secrets.md`. Sem mudança estrutural — apenas substitui credencial. 2026-05-23 — §3.2 revisada: main.yml deixa de buildar imagem (`main-<sha>`/`latest`) em todo push porque a imagem nunca era consumida (release-homolog.yml builda do zero a partir do SHA da tag rc). Job `build-and-push` + `notify` removidos; main.yml fica só com `validate`. Sem mudança de decisão estrutural, só remoção de custo morto."
 ---
 
 # ADR-006 — CI/CD do DEFOnline
@@ -290,6 +290,8 @@ Toda mudança em `main` passa por PR. Bypass apenas para o workflow automatizado
 
 **Criação de tag de homol:** workflow_dispatch `bump-rc.yml` calcula próxima versão a partir do último tag + incrementa `-rc.N`. Comando local equivalente: `git tag v0.3.0-rc.1 && git push --tags`.
 
+> **Aditivo 2026-05-24 (STORY-023):** o `git push` da tag dentro do `bump-rc.yml` usa `secrets.RELEASE_TAG_PAT` (Fine-grained PAT, scope `Contents: write`) em vez do `GITHUB_TOKEN` implícito. Sem isso, a tag empurrada **não dispara** o `release-homolog.yml` (proteção do GitHub: eventos disparados por `GITHUB_TOKEN` não criam novos workflow runs, exceto `workflow_dispatch`/`repository_dispatch`). Provisionamento + rotação do secret em [`skills/programador/references/cicd-secrets.md`](../../skills/programador/references/cicd-secrets.md). Opção B (`gh release create`) e C (GitHub App) avaliadas e rejeitadas: B tem o mesmo problema de origem do evento (o token é o mesmo `GITHUB_TOKEN`); C tem overhead de provisionar uma App pra um projeto de 1 dev MVP.
+
 **Criação de tag de prod:** **manual pelo PO** (ou agente sob ordem do PO), tipicamente após `-rc.N` validada em homologação. Comando: `git tag v0.3.0 <sha-da-rc-validada> && git push --tags`.
 
 **Imutabilidade:** uma tag, uma vez criada, **nunca é movida** (`git push --force --tags` proibido por branch protection rule). Se a release saiu errada, cria-se `-rc.(N+1)` ou patch (`v0.3.1`), **não** se reescreve `v0.3.0`.
@@ -342,6 +344,7 @@ Composite actions reusáveis em `.github/actions/`:
 | `TELEGRAM_BOT_TOKEN` | GitHub Secret (org-wide) | `notify-telegram` |
 | `TELEGRAM_CHAT_ID_HOMOLOG` / `..._PRODUCTION` | GitHub Secret | idem |
 | `GHCR_PAT` (opcional) | GitHub Secret | push em GHCR — `GITHUB_TOKEN` cobre na maior parte dos casos |
+| `RELEASE_TAG_PAT` | GitHub Secret (Fine-grained PAT, scope `Contents: write` no repo) | `bump-rc.yml` (step `actions/checkout`) — workaround documentado para a limitação do `GITHUB_TOKEN` não disparar workflows downstream (ver §1.4 e aditivo 2026-05-24). Provisionamento + rotação em [skills/programador/references/cicd-secrets.md](../../skills/programador/references/cicd-secrets.md). |
 
 **Sem segredo no repo.** `.env` de cada ambiente é **gerado pelo Ansible** a partir do Vault + templates Jinja (ADR-005).
 
