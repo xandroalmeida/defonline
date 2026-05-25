@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-05-25T02:00:00Z",
+  "generated_at": "2026-05-25T15:55:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -154,16 +154,30 @@
       "slug": "diagnostico-industria",
       "title": "Diagnóstico Econômico-Financeiro para Indústria",
       "wave": "WAVE-2026-01",
-      "status": "draft",
+      "status": "active",
       "path": "epics/EPIC-002-diagnostico-industria/epic.md",
-      "story_ids": [],
+      "story_ids": [
+        "STORY-026",
+        "STORY-027",
+        "STORY-028",
+        "STORY-029",
+        "STORY-030",
+        "STORY-031",
+        "STORY-032",
+        "STORY-033",
+        "STORY-034",
+        "STORY-035",
+        "STORY-036",
+        "STORY-037"
+      ],
       "validation_report": null,
       "blocked_by_epics": [
         "EPIC-000",
         "EPIC-001"
       ],
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-20"
+      "updated_at": "2026-05-25",
+      "activated_at": "2026-05-25"
     },
     {
       "id": "EPIC-003",
@@ -757,6 +771,290 @@
       "created_at": "2026-05-25",
       "updated_at": "2026-05-24",
       "note": "Débito de infra levantado pelo Programador no fechamento da SPRINT-2026-W22. Chromium está no stage runtime do Dockerfile (~500MB) mas só é usado em dev local (pre-push Dusk via docker compose exec) — CI smoke usa chromium do runner, homol/prod nunca usa. Solução: split de targets multistage runtime (sem chromium) vs dev (com chromium) — sem ferir ADR-002 (imagem única para web/worker/scheduler em runtime continua)."
+    },
+    {
+      "id": "STORY-026",
+      "slug": "spike-versionamento-motor-persistencia",
+      "title": "SPIKE — Estratégia de versionamento do motor + persistência idempotente do diagnóstico",
+      "type": "spike",
+      "target_role": "arquiteto",
+      "status": "done",
+      "estimated_session_size": "S-M",
+      "blocked_by": [],
+      "blocks": [
+        "STORY-027",
+        "STORY-028",
+        "STORY-029"
+      ],
+      "related_idr": "IDR-010",
+      "closed_at": "2026-05-25",
+      "approved_by": "Alexandro",
+      "note": "Spike inicial do EPIC-002 fechado em 2026-05-25 com aceite explícito do PO. Arquiteto (claude-opus-4-7) entregou: IDR-010 (accepted) + migration esqueleto `2026_05_25_000010_create_diagnosticos_table.php` (não rodada — STORY-028 roda) + model `App\\Models\\Diagnostico` + `design/casos-extremos.md` (34 entradas) + `design/idempotencia.md`. Veredito: snapshot dos resultados + motor único (sem dispatcher V1/V2) + motor_version semver (1.0.0) + matrix_version datada (dez-2025). CA-1..CA-7 atendidos. PO confirmou adicionalmente que rascunho do quiz (STORY-027) fica em tabela separada `quiz_rascunhos`. Destrava STORY-027/028/029.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W25",
+      "owner_agent": "arquiteto (claude-opus-4-7)",
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-026-spike-versionamento-motor-persistencia.md",
+      "created_at": "2026-05-25",
+      "updated_at": "2026-05-25"
+    },
+    {
+      "id": "STORY-027",
+      "slug": "quiz-industria-anexo-a",
+      "title": "Quiz de Indústria — formulário com 23 campos do Anexo A (rascunho persistido)",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "L",
+      "blocked_by": [
+        "STORY-026"
+      ],
+      "blocks": [
+        "STORY-028",
+        "STORY-029",
+        "STORY-033",
+        "STORY-034",
+        "STORY-035"
+      ],
+      "note": "Quiz com 4 blocos (Identificação/DRE/Balanço/Contexto), máscaras R$/%/dias/CPF, validação por campo, rascunho persistido (90 dias default §6.4), idempotência no submit.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W25",
+      "owner_agent": null,
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-027-quiz-industria-anexo-a.md",
+      "created_at": "2026-05-25",
+      "updated_at": "2026-05-25"
+    },
+    {
+      "id": "STORY-028",
+      "slug": "motor-7-indicadores-essenciais",
+      "title": "Motor de cálculo — 7 indicadores essenciais + NCG absoluto informativo",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "L",
+      "blocked_by": [
+        "STORY-026"
+      ],
+      "blocks": [
+        "STORY-029",
+        "STORY-030",
+        "STORY-031"
+      ],
+      "note": "V1 do motor: Margem Bruta, Margem Líquida, Dívida Líq./EBITDA, NCG/Vendas, PMR, PMC, Ciclo Financeiro + NCG absoluto sem farol. Cobertura ≥98%, ≥10 casos por fórmula. motor_version=1.0.0.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W25",
+      "owner_agent": null,
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-028-motor-7-indicadores-essenciais.md",
+      "created_at": "2026-05-25",
+      "updated_at": "2026-05-25"
+    },
+    {
+      "id": "STORY-029",
+      "slug": "relatorio-minimalista",
+      "title": "Relatório web minimalista — 7 indicadores + semáforo + glossário inline",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-026",
+        "STORY-027",
+        "STORY-028"
+      ],
+      "blocks": [
+        "STORY-030",
+        "STORY-031",
+        "STORY-032"
+      ],
+      "note": "Primeiro relatório vivo em homol. Caminho feliz ponta-a-ponta. Render Blade server-side, p95 baseline, glossário inline, mobile-first card-per-indicador.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W25",
+      "owner_agent": null,
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-029-relatorio-minimalista.md",
+      "created_at": "2026-05-25",
+      "updated_at": "2026-05-25"
+    },
+    {
+      "id": "STORY-030",
+      "slug": "motor-completar-14-indicadores",
+      "title": "Motor — completar 7 indicadores restantes (14 total) + ajuste fino do farol Indústria",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "draft",
+      "estimated_session_size": "L",
+      "blocked_by": [
+        "STORY-028"
+      ],
+      "blocks": [
+        "STORY-031",
+        "STORY-032",
+        "STORY-036"
+      ],
+      "note": "V2 do motor: Margem EBITDA, Despesas Fin/EBITDA, Fontes PC/PL, Giro do Ativo, PME, Inadimplência, Ciclo Operacional. motor_version bumpa para 1.1.0. Snapshot preserva diagnósticos antigos.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W25",
+      "owner_agent": null,
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-030-motor-completar-14-indicadores.md",
+      "created_at": "2026-05-25",
+      "updated_at": "2026-05-25"
+    },
+    {
+      "id": "STORY-031",
+      "slug": "resumo-executivo-deterministico",
+      "title": "Resumo Executivo — algoritmo determinístico §4.7.1",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "draft",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-030"
+      ],
+      "blocks": [
+        "STORY-032"
+      ],
+      "note": "Algoritmo determinístico (sem IA): veredito saudável/atenção/alerta + até 2 destaques negativos + 1 positivo, truncamento ~80 chars, fallback fixo quando ≥70% indicadores indisponíveis. NCG abs excluído da contagem.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W25",
+      "owner_agent": null,
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-031-resumo-executivo-deterministico.md",
+      "created_at": "2026-05-25",
+      "updated_at": "2026-05-25"
+    },
+    {
+      "id": "STORY-032",
+      "slug": "matriz-dez2025-industria",
+      "title": "Matriz DEZ/2025 — recomendações por indicador × farol filtradas para Indústria",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "draft",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-031"
+      ],
+      "blocks": [
+        "STORY-036"
+      ],
+      "note": "Carrega Anexo F filtrado Indústria em config PHP versionado. Snapshot do texto da recomendação no momento do cálculo (reprodutibilidade). Fallback gracioso para pares sem texto. matrix_version=dez-2025.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W25",
+      "owner_agent": null,
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-032-matriz-dez2025-industria.md",
+      "created_at": "2026-05-25",
+      "updated_at": "2026-05-25"
+    },
+    {
+      "id": "STORY-033",
+      "slug": "tooltips-quiz",
+      "title": "Tooltips/box de explicação por indicador no quiz (§6.8)",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "draft",
+      "estimated_session_size": "S",
+      "blocked_by": [
+        "STORY-027"
+      ],
+      "blocks": [],
+      "note": "23 textos curtos (~50 palavras cada) em config externa. PO consolida textos antes do Dia 1 da Semana 3. Mobile: bottom-sheet/expand; Desktop: tooltip/popover. Acessibilidade AA com aria-describedby.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W25",
+      "owner_agent": null,
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-033-tooltips-quiz.md",
+      "created_at": "2026-05-25",
+      "updated_at": "2026-05-25"
+    },
+    {
+      "id": "STORY-034",
+      "slug": "validacoes-cruzadas-dre-balanco",
+      "title": "Validações cruzadas DRE × Balanço + mensagens de erro acionáveis (§6.6)",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "draft",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-027",
+        "STORY-030"
+      ],
+      "blocks": [],
+      "note": "Alertas não-bloqueantes entre blocos do quiz. Default mínimo: 3 regras (Q16x12>Q06x2; custos>vendas; passivo>ativo). PO fecha lista canônica no Dia 1 da Semana 4. Regras em config externa.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W25",
+      "owner_agent": null,
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-034-validacoes-cruzadas-dre-balanco.md",
+      "created_at": "2026-05-25",
+      "updated_at": "2026-05-25"
+    },
+    {
+      "id": "STORY-035",
+      "slug": "eventos-analiticos-quiz-diagnostico",
+      "title": "Eventos analíticos — quiz_iniciado e diagnostico_concluido",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "draft",
+      "estimated_session_size": "S",
+      "blocked_by": [
+        "STORY-027",
+        "STORY-028"
+      ],
+      "blocks": [],
+      "note": "Instrumenta D2 (Ativação) do north star. Payload com empresa_id, usuario_id, motor_version, matrix_version, timestamp. Idempotente. Falha do sink externo não quebra fluxo do usuário.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W25",
+      "owner_agent": null,
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-035-eventos-analiticos-quiz-diagnostico.md",
+      "created_at": "2026-05-25",
+      "updated_at": "2026-05-25"
+    },
+    {
+      "id": "STORY-036",
+      "slug": "validacao-externa-motor",
+      "title": "Validação externa do motor (NRF §9.3) — parecer técnico de especialista financeiro",
+      "type": "validation",
+      "target_role": "validador-externo",
+      "status": "draft",
+      "estimated_session_size": "M-L",
+      "blocked_by": [
+        "STORY-030",
+        "STORY-032"
+      ],
+      "blocks": [
+        "STORY-037"
+      ],
+      "note": "Estória atípica (não-código). Especialista externo contratado pelo PO. Gate técnico de qualidade exigido pela spec antes de liberar uso real. PO inicia contratação na Semana 1, contrato fechado até Checkpoint 2 (2026-06-05).",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W25",
+      "owner_agent": null,
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-036-validacao-externa-motor.md",
+      "created_at": "2026-05-25",
+      "updated_at": "2026-05-25"
+    },
+    {
+      "id": "STORY-037",
+      "slug": "validacao-final-handoff",
+      "title": "Validação final EPIC-002 (interna) + smoke E2E + pacote de handoff para comercial/implantação",
+      "type": "validation",
+      "target_role": "validador",
+      "status": "draft",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-026",
+        "STORY-027",
+        "STORY-028",
+        "STORY-029",
+        "STORY-030",
+        "STORY-031",
+        "STORY-032",
+        "STORY-033",
+        "STORY-034",
+        "STORY-035",
+        "STORY-036"
+      ],
+      "blocks": [],
+      "note": "Fecha EPIC-002 sob ótica técnica. Smoke E2E + validação independente + pacote de handoff em epics/EPIC-002-.../handoff/README.md para comercial/implantação tocar o beta. Recrutamento de Robertos, NPS e operação do beta de 60 dias FORA desta sprint.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W25",
+      "owner_agent": null,
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-037-validacao-final-handoff.md",
+      "created_at": "2026-05-25",
+      "updated_at": "2026-05-25"
     }
   ],
   "sprints": [
@@ -875,6 +1173,70 @@
         ],
         "spawned_debt_stories": []
       }
+    },
+    {
+      "id": "SPRINT-2026-W25",
+      "wave": "WAVE-2026-01",
+      "status": "planned",
+      "start_date": "2026-05-25",
+      "end_date": "2026-07-03",
+      "goal": "Entregar o EPIC-002 pronto-para-beta sob otica tecnica em 5 semanas (12 estorias em 5 fatias verticais V1-V5), com validacao externa do motor (NRF §9.3) aprovada, validacao interna independente aprovada e pacote de handoff para comercial/implantacao. Recrutamento de Robertos, NPS e operacao do beta ficam fora desta sprint.",
+      "goal_achieved": null,
+      "path": "sprints/SPRINT-2026-W25.md",
+      "story_ids": [
+        "STORY-026",
+        "STORY-027",
+        "STORY-028",
+        "STORY-029",
+        "STORY-030",
+        "STORY-031",
+        "STORY-032",
+        "STORY-033",
+        "STORY-034",
+        "STORY-035",
+        "STORY-036",
+        "STORY-037"
+      ],
+      "epic_ids": [
+        "EPIC-002"
+      ],
+      "opened_at": "2026-05-25",
+      "opened_by": "PO (Alexandro / Claude)",
+      "note": "Sprint longa de 5 semanas cobrindo EPIC-002 em sua totalidade sob otica tecnica. Decisao explicita do PO em 2026-05-25 de fugir da cadencia semanal (W22/W23/W24) por uma unica sprint longa com 5 checkpoints internos. Gate kill-switch formal no Checkpoint 2 (2026-06-05) — se motor (V1+V2) nao estiver done, PO abre PDR de replanejamento. Recrutamento de Robertos, NPS e operacao do beta ficam fora — handoff para comercial/implantacao no Checkpoint 5.",
+      "sprint_duration_weeks": 5,
+      "cadence_experiment": "sprint-longa-com-checkpoints-semanais",
+      "checkpoints": [
+        {
+          "id": "W25S1",
+          "date": "2026-05-29",
+          "goal": "V1: caminho feliz vivo (quiz + motor 7 indicadores + relatorio minimalista)",
+          "kill_switch": false
+        },
+        {
+          "id": "W25S2",
+          "date": "2026-06-05",
+          "goal": "V2: 14 indicadores + Resumo Executivo",
+          "kill_switch": true
+        },
+        {
+          "id": "W25S3",
+          "date": "2026-06-12",
+          "goal": "V3: matriz DEZ/2025 + tooltips",
+          "kill_switch": false
+        },
+        {
+          "id": "W25S4",
+          "date": "2026-06-19",
+          "goal": "V4: validacoes cruzadas + eventos analiticos + dry-run handoff",
+          "kill_switch": false
+        },
+        {
+          "id": "W25S5",
+          "date": "2026-07-03",
+          "goal": "V5: validacao externa + validacao interna + handoff tecnico (FECHAMENTO)",
+          "kill_switch": false
+        }
+      ]
     }
   ],
   "decisions": {
@@ -1260,6 +1622,34 @@
         "created_at": "2026-05-24",
         "updated_at": "2026-05-24",
         "note": "Spike STORY-021. Veredito Opção A: 404 silente via Global Scope, sem audit log dedicado. Alinha com ADR-003 §Decisão 1 + NRF §4.3 sem precisar aditivar nenhum dos dois. Recomendação de estória de refactor de `EmpresaController::show` (remover `withoutGlobalScope` + emissão de `empresa.acesso_negado`) registrada na própria IDR como follow-up — não implementada nesta sessão (cabe ao PO criar a estória de correção)."
+      },
+      {
+        "id": "IDR-010",
+        "slug": "versionamento-motor-persistencia-diagnostico",
+        "title": "Versionamento do motor de cálculo + persistência idempotente do diagnóstico (snapshot dos resultados)",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-010-versionamento-motor-persistencia-diagnostico.md",
+        "decided_at": "2026-05-25",
+        "decided_by": "arquiteto (claude-opus-4-7)",
+        "approved_by": "Alexandro",
+        "approved_at": "2026-05-25",
+        "related_story": "STORY-026",
+        "related_stories": [
+          "STORY-027",
+          "STORY-028",
+          "STORY-029",
+          "STORY-030",
+          "STORY-032",
+          "STORY-036"
+        ],
+        "related_idrs": [],
+        "related_adrs": [
+          "ADR-001",
+          "ADR-003"
+        ],
+        "created_at": "2026-05-25",
+        "updated_at": "2026-05-25",
+        "note": "Spike STORY-026 (EPIC-002), accepted pelo PO em 2026-05-25. Veredito: snapshot dos resultados + motor único (sem dispatcher V1/V2) + motor_version semver (1.0.0) + matrix_version datada (dez-2025). Idempotência por SHA-256 do quiz_payload canonicalizado, validada por golden hashes em tests/Domain/Motor. Casos extremos retornam null + motivo semântico (sem exception). Migration + Model esqueletos commitados (não rodados — STORY-028 roda). PO confirmou adicionalmente que rascunho do quiz (STORY-027) fica em tabela separada `quiz_rascunhos`."
       }
     ],
     "ddr": []

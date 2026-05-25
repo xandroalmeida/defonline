@@ -1,0 +1,255 @@
+---
+sprint_id: SPRINT-2026-W25
+wave: WAVE-2026-01
+status: planned
+start_date: 2026-05-25
+end_date: 2026-07-03
+goal: "Entregar o EPIC-002 (Diagnóstico Econômico-Financeiro para Indústria) pronto-para-beta sob ótica técnica — quiz com os 23 campos do Anexo A aplicáveis a Indústria, motor com os 14 indicadores (incluindo NCG absoluto informativo sem farol), Resumo Executivo determinístico §4.7.1, recomendações da matriz DEZ/2025 filtradas por Indústria, tooltips/box de explicação no quiz, validações cruzadas DRE×Balanço, persistência idempotente do diagnóstico, eventos analíticos (quiz_iniciado / diagnostico_concluido), validação externa do motor aprovada (NRF §9.3) e validação interna independente aprovada. p95 do relatório ≤ 3s. Cobertura do motor ≥ 98%. Recrutamento de Robertos do beta, coleta de NPS e onboarding comercial ficam fora desta sprint — planejados com comercial/implantação em conversa separada."
+goal_achieved: null
+---
+
+# SPRINT-2026-W25
+
+## Decisão de formato: sprint longa (5 semanas)
+
+Esta sprint foge da cadência semanal das três anteriores (W22/W23/W24) **por decisão explícita do PO em 2026-05-25**. O EPIC-002 é estimado em 5–6 semanas (current-wave.md) e a própria `epic.md` registra o sinal de quebra "estimativa do épico exceder 6 semanas" — o que coloca o épico **no limite** do que cabe num único ciclo. Em vez de fatiar o épico em 5 sprints semanais (alternativa preferida pelo PO em condições normais), a sessão de planejamento escolheu **uma sprint longa única** cobrindo todas as fatias verticais do épico, com **5 checkpoints semanais internos** que preservam o feedback curto do ciclo anterior.
+
+**Trade-off aceito conscientemente:**
+
+- ❌ Perdemos previsibilidade fina (não há "fechamento de sprint" semanal observável pelos stakeholders).
+- ❌ Risco de inflar escopo é maior — sem deadline curto pressionando, é mais fácil decisão de quebra deslizar.
+- ✅ Ganhamos coesão narrativa do épico — um único relatório de fechamento descreve todo o ciclo cadastro→quiz→relatório.
+- ✅ Reduzimos overhead de abertura/fechamento × 5 (≈ 4 horas de PO economizadas no agregado).
+- ✅ Permitimos planejamento integrado da validação externa (NRF §9.3) sem ter que coordenar entre sprints.
+
+**Mecanismos compensatórios** (formalizados na Ordem de execução abaixo):
+
+1. **5 checkpoints semanais** no fim de cada sexta — PO escreve um mini-status (≤ 300 palavras) atualizando: estórias `done` desde o último checkpoint, riscos materializados, decisão de continuar/replanejar/abortar (gate kill-switch explícito).
+2. **Goal incremental por checkpoint** (não só goal único de 5 semanas) — checkpoint 1 entrega valor mínimo já observável (relatório com 7 indicadores), e cada checkpoint subsequente é "demonstrável" em homologação.
+3. **Gate kill-switch após o Checkpoint 2** (final da 2ª semana) — se motor de 14 indicadores não estiver `done`, PO abre PDR de replanejamento (fatiar em 2 ondas: V1+V2 nesta sprint, V3+V4+V5 em sprint seguinte).
+
+> **Nota sobre o nome da sprint:** SPRINT-2026-W25 mantém a convenção sequencial herdada (não estritamente ISO). Convenção formalizada quando o time consolidar sprints de duração variável como padrão (ver retro da W24 — também levantou tema).
+
+## Objetivo do sprint
+
+Ao fim de 2026-07-03, em homologação (`https://defonline.xandrix.com.br`):
+
+- **Roberto autenticado** (conta de teste do time interno), com uma Empresa Analisada já cadastrada (entregue por EPIC-001), seleciona a empresa, abre o item de menu "Diagnósticos" (que neste sprint deixa de ser disabled), inicia um novo diagnóstico e responde **o quiz com os 23 campos do Anexo A** aplicáveis a Indústria (rascunho persistido entre sessões).
+- Submete o quiz e recebe, em **≤ 3 segundos (p95)**, o **relatório web com os 14 indicadores**, semáforo verde/amarelo/vermelho por indicador, **NCG absoluto exibido como indicador informativo sem farol** (mensagem em 3 faixas semânticas), **Resumo Executivo gerado pelo algoritmo determinístico §4.7.1**, **recomendações textuais por indicador** filtradas da matriz DEZ/2025 (Anexo F) coluna Indústria, e **glossário inline** consumindo Anexo I.
+- **Tooltips/box de explicação** disponíveis por campo no quiz para reduzir erro de entrada (§6.8 e Anexo A §A.6).
+- **Validações cruzadas DRE × Balanço** ativas com mensagens de erro **acionáveis** (não bloqueantes, conforme §6.6) quando dados inconsistentes são digitados.
+- **Eventos `quiz_iniciado` e `diagnostico_concluido`** emitidos com `empresa_id`, `usuario_id`, `motor_version`, `matrix_version`, `timestamp` — feeding the north star (D2 Ativação).
+- **Diagnóstico persistido** com chave de versionamento (`motor_version` + `matrix_version`) garantindo **idempotência** — mesmo input + mesma versão = mesmo output, pré-requisito para o EPIC-003 (histórico).
+- **Validação externa do motor APROVADA** por especialista financeiro (NRF §9.3) com parecer registrado em `epics/EPIC-002-.../validation/external-review.md` — gate técnico de qualidade exigido pela spec **antes** do produto ser liberado para uso por usuário real.
+- **Validação independente interna do EPIC-002** com veredito `approved` em `epics/EPIC-002-.../validation/report.md`.
+- **Pacote de handoff para comercial/implantação** pronto: link de homologação, instruções de criação de contas de teste, smoke E2E documentado, evidências de p95 ≤ 3s, parecer externo do motor, lista de feature flags ativas, contato de suporte técnico para o beta.
+- **EPIC-002 promovido para `done`** no `index.json` sob a ótica técnica (validação interna + externa aprovadas + handoff entregue). O critério **"≥ 10 Robertos do beta com diagnóstico concluído + NPS ≥ 30"** registrado na `epic.md` permanece como meta de validação de hipótese da WAVE-2026-01, executada por comercial/implantação após o handoff — esse status entra nos reports da onda, não no fechamento desta sprint.
+
+## Estórias incluídas
+
+São **12 estórias** organizadas em **5 fatias verticais** (V1→V5), seguindo o princípio explícito da `epic.md`: *"dividir verticalmente — primeira estória entrega quiz + motor com ~7 indicadores essenciais + relatório minimalista; estórias seguintes completam para 14 indicadores, adicionam Resumo Executivo, refinam recomendações da matriz DEZ/2025, adicionam tooltips e validações cruzadas."*
+
+### Fatia V1 — Vertical mínima de valor (Semana 1)
+
+Goal incremental: ao fim do Checkpoint 1, Roberto em homologação responde um quiz reduzido e vê um relatório com 7 indicadores essenciais + semáforo + glossário minimalista. Sem matriz, sem Resumo Executivo, sem tooltips — o caminho feliz ponta-a-ponta funciona.
+
+| ID | Título | Épico | Tamanho | Status | Bloqueada por |
+|---|---|---|---|---|---|
+| STORY-026 | SPIKE/ADR — Estratégia de versionamento do motor + persistência idempotente do diagnóstico | EPIC-002 | S-M | draft | — |
+| STORY-027 | Quiz de Indústria — formulário com 23 campos do Anexo A (validações de tipo, máscaras R$/%/dias, rascunho persistido) | EPIC-002 | L | draft | STORY-026 (decisão de persistência) |
+| STORY-028 | Motor de cálculo — 7 indicadores essenciais (Margem Bruta, Margem Líquida, Dívida Líquida/EBITDA, NCG/Vendas, PMR, PMC, Ciclo Financeiro) + NCG absoluto informativo + semáforo Indústria | EPIC-002 | L | draft | STORY-026 |
+| STORY-029 | Relatório web minimalista — tabela dos 7 indicadores + semáforo + glossário inline + roteamento `/diagnosticos/{id}` dentro do app shell | EPIC-002 | M | draft | STORY-028, EPIC-004 |
+
+**Checkpoint 1 — Sexta 2026-05-29:** caminho feliz vivo em homologação. Demo gravada em vídeo (PO faz screencast). Critério kill-switch: se STORY-027 e STORY-028 não estiverem `done`, PO abre PDR de replanejamento na segunda 2026-06-01.
+
+### Fatia V2 — Completar 14 indicadores e Resumo Executivo (Semana 2)
+
+Goal incremental: ao fim do Checkpoint 2, o relatório está **completo em indicadores** (14) e tem o **Resumo Executivo** no topo — ainda sem matriz de recomendações DEZ/2025, sem tooltips, sem validações cruzadas.
+
+| ID | Título | Épico | Tamanho | Status | Bloqueada por |
+|---|---|---|---|---|---|
+| STORY-030 | Motor — completar 7 indicadores restantes (Margem EBITDA, Despesas Financeiras/EBITDA, Fontes PC/PL, Giro do Ativo, PME, Inadimplência, Ciclo Operacional) + ajuste de farol por indicador para setor Indústria conforme spec §4.5 | EPIC-002 | L | draft | STORY-028 |
+| STORY-031 | Resumo Executivo — implementar algoritmo determinístico §4.7.1 (contagem proporcional + veredito por limiares + até 2 negativos / 1 positivo + truncamento ~80 chars + mensagem fixa quando ≥70% indicadores indisponíveis) | EPIC-002 | M | draft | STORY-030 |
+
+**Checkpoint 2 — Sexta 2026-06-05 (GATE KILL-SWITCH):** 14 indicadores + Resumo Executivo vivos em homologação. Se motor ≠ `done`, PO **abre PDR de replanejamento** — opções: (a) fatiar sprint em duas (V1+V2 aqui, V3+V4+V5 em SPRINT-2026-W30), (b) cortar fatia V3 (matriz DEZ/2025) e aceitar relatório sem recomendações texto-livre para esta sprint, (c) reforçar time (mais Programador) e seguir.
+
+### Fatia V3 — Camada qualitativa: matriz DEZ/2025 + tooltips (Semana 3)
+
+Goal incremental: ao fim do Checkpoint 3, Roberto recebe **mensagens textuais por indicador** vindas da matriz DEZ/2025 (não só semáforo) e tem **box de explicação** por campo no quiz reduzindo erro de entrada.
+
+| ID | Título | Épico | Tamanho | Status | Bloqueada por |
+|---|---|---|---|---|---|
+| STORY-032 | Matriz DEZ/2025 — recomendações por indicador × farol filtradas para Indústria (Anexo F), com versionamento `matrix_version` no payload do diagnóstico + fallback gracioso quando faltar texto | EPIC-002 | M | draft | STORY-031 |
+| STORY-033 | Tooltips/box de explicação por indicador no quiz (§6.8 e Anexo A §A.6) — conteúdo curto por campo (~50 palavras), redução de erro de entrada | EPIC-002 | S | draft | STORY-027 |
+
+**Checkpoint 3 — Sexta 2026-06-12:** relatório qualitativo completo em homologação. Início do trabalho de validação externa em paralelo (Validador externo recebe acesso à homol).
+
+### Fatia V4 — Robustez: validações cruzadas + instrumentação (Semana 4)
+
+Goal incremental: ao fim do Checkpoint 4, o produto está **pronto para validação externa formal e abertura de beta** — dados ruins do Roberto disparam alerta acionável, eventos analíticos rodam, p95 do relatório ≤ 3s confirmado.
+
+| ID | Título | Épico | Tamanho | Status | Bloqueada por |
+|---|---|---|---|---|---|
+| STORY-034 | Validações cruzadas DRE × Balanço + mensagens de erro acionáveis (§6.6 — alerta não-bloqueante: Q16×12 > Q06×2; custos anuais > vendas; passivo > ativo; outras regras a fechar com PO no Dia 1 da semana 4) | EPIC-002 | M | draft | STORY-027 |
+| STORY-035 | Eventos analíticos — emitir `quiz_iniciado` e `diagnostico_concluido` com `empresa_id`, `usuario_id`, `motor_version`, `matrix_version`, `timestamp`; validar captura no pipeline definido por ADR de captura de eventos (EPIC-000) | EPIC-002 | S | draft | STORY-031 |
+
+**Checkpoint 4 — Sexta 2026-06-19:** produto pronto para validação externa formal. PO confirma com Validador externo a janela da Semana 5 e roda o **dry-run do pacote de handoff** com 1 representante de implantação para coletar lacunas antes do fechamento.
+
+### Fatia V5 — Validação externa + handoff técnico (Semana 5)
+
+Goal incremental: ao fim do Checkpoint 5, o EPIC-002 está `done` **sob ótica técnica** — validação externa do motor `approved`, validação independente interna `approved`, e pacote de handoff entregue para comercial/implantação rodar o beta.
+
+| ID | Título | Épico | Tamanho | Status | Bloqueada por |
+|---|---|---|---|---|---|
+| STORY-036 | Validação externa do motor (NRF §9.3) — especialista financeiro contratado revisa ≥ 10 casos canônicos por fórmula, parecer escrito em `validation/external-review.md` com veredito `approved` / `approved_with_pending` / `blocked` | EPIC-002 | M-L (não código) | draft | STORY-030 (motor completo) |
+| STORY-037 | Validação final EPIC-002 (interna) + smoke E2E em homologação + pacote de handoff para comercial/implantação (link homol, instruções de criação de conta de teste, evidências de p95, parecer externo, feature flags ativas, contato de suporte) | EPIC-002 | M | draft | todas anteriores |
+
+**Checkpoint 5 — Sexta 2026-07-03 (FECHAMENTO):** EPIC-002 `done` sob ótica técnica. Pacote de handoff entregue. O time de comercial/implantação assume daqui — recrutamento de Robertos, convites, coleta de NPS e operação do beta de 60 dias rodam fora do escopo desta sprint.
+
+**Total estimado:** 1 spike S-M + 3 L + 4 M + 1 S + 1 M-L (não-código) + 1 M = ~38–46h efetivas de implementação + ~10h de validação externa + ~6h de validação interna ≈ **~55–62h efetivas em 25 dias úteis.** Velocidade implícita: ~2.4h/dia útil, com folga generosa para retrabalho, débitos imprevistos e o overhead inerente a um épico denso.
+
+**Comparação com velocidade histórica:** W22 entregou 8 estórias S/M em ~5 dias úteis (~1.6 estórias/dia). 12 estórias em 25 dias úteis = 0.48 estórias/dia — folga de 3.3× para absorver complexidade técnica do motor e validações externas que não cabem na velocidade naïve.
+
+## Fora de escopo desta sprint (handoff para comercial/implantação)
+
+Esta sprint **não inclui** as atividades abaixo, que são responsabilidade do time de comercial/implantação e serão planejadas em conversa separada após o handoff técnico. O EPIC-002 fecha como `done` pela ótica técnica quando o pacote de handoff (STORY-037) é entregue; a meta de "≥ 10 Robertos + NPS ≥ 30" da `epic.md` permanece viva como objetivo da WAVE-2026-01 e aparece nos status reports da onda.
+
+- **Recrutamento dos Robertos do beta fechado.** Lista de candidatos, qualificação, abordagem, agendamento. Comercial.
+- **Operação do convite e da relação durante o beta.** Envio de convites, acompanhamento de onboarding, suporte humano ao Roberto durante os primeiros usos. Implantação.
+- **Coleta estruturada de NPS** após o 1º diagnóstico (formulário, lembrete, consolidação). Implantação + Produto.
+- **Entrevistas qualitativas** estruturadas com cada Roberto (mitigação do "Risco de hipótese" registrado em `current-wave.md`). PO + Implantação.
+- **Janela de observação de 60 dias** do beta, com leitura semanal das métricas D2 (Ativação) e D3 (Recorrência inicial). PO + Comercial.
+- **Comunicação pública** sobre o lançamento do beta (e-mail interno EBP, redes, newsletter). Comercial + Marketing.
+
+Tech entrega: produto pronto, validado externamente, instrumentado com eventos analíticos, com pacote de handoff. Tech fica disponível para suporte técnico reativo durante o beta (bugs, dúvidas de pipeline, ajustes de feature flag), mas não conduz a operação do beta.
+
+## Compromisso visível ao fim do sprint
+
+Ao fim de 2026-07-03, em homologação:
+
+- ✅ Usuário autenticado (conta de teste interna) loga, navega para `/diagnosticos` (item de menu agora ativo, não mais "Em breve"), seleciona uma Empresa Analisada e clica `Novo diagnóstico`.
+- ✅ Quiz com 23 campos do Anexo A (Indústria) é apresentado em blocos lógicos (Identificação / DRE / Balanço / Contexto-Captação), com máscaras de R$, % e dias funcionando, tooltips em cada campo, rascunho salvo a cada navegação entre blocos.
+- ✅ Validações cruzadas DRE×Balanço disparam mensagens de erro acionáveis (não-bloqueantes) quando há inconsistência conforme §6.6.
+- ✅ Submissão do quiz gera o relatório em **≤ 3 segundos no p95** (medido em 50 submissões em homol).
+- ✅ Relatório exibe Resumo Executivo (§4.7.1) + 14 indicadores com semáforo (NCG absoluto sem farol, mensagem informativa em 3 faixas) + recomendações textuais por indicador (matriz DEZ/2025 filtrada Indústria) + glossário inline (Anexo I) + rodapé com versão do motor, versão da matriz e aviso legal.
+- ✅ Diagnóstico persiste com `motor_version` + `matrix_version` no payload, idempotência verificável (mesmo quiz + mesma versão → mesmo relatório).
+- ✅ Eventos `quiz_iniciado` e `diagnostico_concluido` capturados no pipeline definido pelo ADR de eventos (EPIC-000), confirmáveis em consulta SQL ou dashboard.
+- ✅ Parecer externo do Validador especialista anexado em `validation/external-review.md` com veredito `approved` (ou `approved_with_pending` com follow-ups documentados não-bloqueantes para o beta).
+- ✅ Validação independente interna em `validation/report.md` com veredito `approved`.
+- ✅ **Pacote de handoff para comercial/implantação** publicado em `epics/EPIC-002-.../handoff/README.md` com: link do ambiente de homologação, instruções de criação de conta de teste e Empresa Analisada, smoke E2E descrito passo-a-passo, evidências do p95 ≤ 3s, parecer externo, feature flags ativas, escopo coberto (Indústria) e fora de escopo (Comércio/Serviços/PDF/Captação), contato de suporte técnico durante o beta.
+- ✅ EPIC-002 promovido para `done` no `index.json` (ótica técnica). Critério da `epic.md` de "≥ 10 Robertos + NPS" mantém-se como meta da onda, executada por comercial/implantação, e aparece nos status reports da WAVE-2026-01.
+- ✅ EPIC-003 (Histórico básico) destravado para abertura na SPRINT-2026-W30.
+
+**Métricas de qualidade técnica (gates herdados + novos):**
+
+- Cobertura **≥ 98% no motor de cálculo** (gate da regra de núcleo conforme `quality-standards.md`).
+- Cobertura geral **≥ 80%** (gate herdado).
+- ≥ 10 casos de teste por fórmula (NRF §9.2) — total ≥ 140 casos para os 14 indicadores.
+- Zero regressão nos testes Pest/Dusk dos EPICs 000/001/004.
+- Pipeline `release-homolog.yml` verde end-to-end com cada release-candidate semanal (rc.W25S1 a rc.W25S5).
+
+## Capacidade e premissas
+
+- **Time:** Alexandro (PO + revisão + Validador interno) + agentes Claude (Programador para STORY-027 a STORY-035, Arquiteto para STORY-026, Validador para STORY-037) + **especialista financeiro externo a contratar** para STORY-036 (NRF §9.3).
+- **Cadência esperada:** velocidade histórica W22 = ~1.6 estórias S/M por dia útil. 12 estórias em 25 dias úteis = 0.48 estórias/dia — folga de 3.3× absorve a complexidade extra do motor e da validação externa.
+- **Sem feriado nacional na janela** (2026-05-25 a 2026-07-03). Verificar: Corpus Christi cai em 2026-06-04 (não é feriado nacional, mas é ponto facultativo em alguns estados/órgãos federais — não impacta time interno mas pode atrasar resposta de Validador externo).
+- **Cobertura ≥ 80% obrigatória** + cobertura motor **≥ 98%**.
+- **Ambiente de homologação `https://defonline.xandrix.com.br`** estável (premissa de continuidade pós EPIC-000/001/004).
+- **Validador externo contratado até 2026-06-19** (Checkpoint 4) — PO inicia processo na **semana 1**.
+- **Beta fechado:** convite ao primeiro Roberto na Semana 5; lista completa de 10+ Robertos do beta a fechar pelo PO em paralelo durante semanas 1–4.
+
+## Riscos identificados na abertura
+
+| Risco | Probabilidade | Impacto | Mitigação | Owner |
+|---|---|---|---|---|
+| Motor (STORY-028 + STORY-030) estoura tempo estimado por complexidade das 14 fórmulas + 140+ casos de teste | alta | alto | Fatiamento V1 (7 indicadores essenciais) entrega valor no Checkpoint 1 mesmo se V2 atrasar. Gate kill-switch no Checkpoint 2 dispara PDR de replanejamento se motor incompleto. Validador externo recebe motor parcial na Semana 4 (não Semana 5) para paralelizar revisão. | Programador + Arquiteto + PO |
+| Matriz DEZ/2025 (Anexo F) tem ambiguidades ou inconsistências quando filtrada por Indústria | média | médio | Programador faz leitura inicial do Anexo F na **Semana 1** (não Semana 3) e reporta inconsistências ao PO em backlog específico. PO consolida ambiguidades com EB (autor da matriz) em paralelo. Fallback gracioso (STORY-032 CA) garante que faltas pontuais não quebrem o relatório. | Programador + PO |
+| Validador externo (STORY-036) atrasa parecer porque o contrato/escopo não fecha a tempo | média | alto | PO inicia processo de contratação na **Semana 1** com 3 candidatos shortlisted; meta de assinar contrato até 2026-06-05 (Checkpoint 2). Fallback: PO solicita parecer de um conselheiro informal (não substitui §9.3 mas destrava beta com ressalva documentada). | PO |
+| Validações cruzadas (STORY-034) explodem em complexidade porque regras §6.6 são incompletas na spec | média | médio | PO **fecha lista canônica** de validações cruzadas no Dia 1 da Semana 4 com o Arquiteto — não na Semana 1 (evita over-engineering antecipado). Default: implementar APENAS as 3 regras citadas na epic.md (Q16×12 > Q06×2; custos anuais > vendas; passivo > ativo); outras regras viram backlog. | PO + Arquiteto |
+| Decisões abertas em §6 da spec (6.4 expiração rascunho, 6.6 validações, 6.7 aviso PL, 6.8 tooltips, 6.10 trial) bloqueiam estórias da V3/V4 | média | médio | PO consolida lista das 5 decisões em IDR única ANTES da Semana 3 (target: fim da Semana 2). Defaults explícitos: 6.4 = 90 dias (espec); 6.7 = 30% do Ativo (espec); 6.8 = tooltip inline curto; 6.10 não entra (cobrança é WAVE-2026-02). | PO |
+| Sprint longa relaxa disciplina de fechamento e épico estoura para 6+ semanas | alta | alto | **Gate kill-switch explícito no Checkpoint 2.** Mini-status semanal de PO (≤ 300 palavras) com decisão go/no-go formal. Cada checkpoint tem **release-candidate tag** (rc.W25S1 a rc.W25S5) — não sair de uma fatia sem rc verde. | PO |
+| p95 ≤ 3s não é atingido em homologação (cálculo + render do relatório com 14 indicadores) | baixa | alto | Medição de baseline já na fatia V1 (7 indicadores) — se baseline > 1.5s, alarme. STORY-029 inclui medição p95 como CA. Otimizações típicas (cache de matriz em memória, lazy loading de glossário) viram subtasks se necessário. | Programador |
+| Cobertura ≥ 98% no motor impossível de atingir porque algumas faixas têm divisão por zero / valores extremos | baixa | médio | Spike STORY-026 inclui catálogo dos casos extremos (NCG quando vendas = 0; PMR quando recebimento = 0; etc.) e define política de retorno (`null` + mensagem "indisponível"). Casos extremos cobertos por testes específicos. | Arquiteto + Programador |
+| Acúmulo de débitos paralelos (STORY-023 ainda no backlog, F-NB-2 da W23) não cabe na sprint | baixa | baixo | Débitos **não entram** nesta sprint por decisão explícita — foco total no épico. STORY-023 e F-NB-2 ficam no backlog para SPRINT-2026-W30 (pós EPIC-002). | PO |
+| Pacote de handoff (STORY-037) sai genérico demais e comercial/implantação não consegue operar o beta sozinhos | baixa | médio | Template de `handoff/README.md` revisado em par com pelo menos 1 representante de implantação na Semana 4 (não fim da Semana 5). PO coleta perguntas/dúvidas reais antes do fechamento. | PO |
+| Cobertura ≥ 80% geral cai porque infra de testes do motor não foi pensada para 140+ casos | baixa | médio | Spike STORY-026 dimensiona estratégia de fixtures (CSV ou YAML de casos canônicos, lidos por test provider). Validador interno (STORY-037) confere o número de casos no parecer. | Programador |
+
+## Decisões pendentes que podem afetar o sprint
+
+- **STORY-026 (spike):** estratégia de versionamento do motor (semver inteiro vs hash de fórmulas vs date-version) — Arquiteto propõe em IDR no Dia 2, PO decide em ≤ 4h. Default: semver inteiro (`motor_version = "1.0.0"`, `matrix_version = "dez-2025"`) — pragmático e legível.
+- **Decisões abertas §6 da spec:** PO consolida em IDR única ao fim da Semana 2 (ver risco). Defaults explícitos listados acima.
+- **Contratação do Validador externo (STORY-036):** PO inicia na Semana 1, contrato fechado até Checkpoint 2.
+- **Layout do relatório (densidade da tabela de 14 indicadores em mobile):** Programador propõe em IDR-XXX dentro da STORY-029, PO decide ≤ 4h. Default: card-per-indicator em mobile, tabela densa em desktop (≥ 1024px).
+- **Cap. de rascunho do quiz (expiração — decisão §6.4):** Default 90 dias conforme spec. PO confirma no Dia 1 da Semana 1 (não bloqueia STORY-027, mas precisa fechar antes de `done`).
+
+## Mudanças no escopo do sprint
+
+> Toda alteração no conjunto de estórias após esta abertura registra aqui.
+
+| Data | O que mudou | Motivo | Custo |
+|---|---|---|---|
+| — | — | — | — |
+
+## Mini-status semanal (preenchido pelo PO)
+
+> Cada sexta, ≤ 300 palavras. Formato: (1) estórias `done` desde último checkpoint, (2) riscos materializados, (3) decisão go/no-go.
+
+### Checkpoint 1 — 2026-05-29
+
+*A preencher pelo PO ao fim da Semana 1.*
+
+### Checkpoint 2 — 2026-06-05 (GATE KILL-SWITCH)
+
+*A preencher pelo PO. Se motor (V1+V2) ≠ `done`, PO abre PDR de replanejamento na segunda 2026-06-08.*
+
+### Checkpoint 3 — 2026-06-12
+
+*A preencher pelo PO.*
+
+### Checkpoint 4 — 2026-06-19
+
+*A preencher pelo PO. Confirmar janela do Validador externo para Semana 5.*
+
+### Checkpoint 5 — 2026-07-03 (FECHAMENTO)
+
+*A preencher pelo PO como retro final da sprint.*
+
+## Fechamento do sprint
+
+*A redigir em 2026-07-03 (ou antes, se fechamento adiantado).*
+
+### O que foi entregue
+
+*A preencher.*
+
+### O que ficou para trás (e por quê)
+
+*A preencher.*
+
+### Mudanças no escopo durante o sprint
+
+*A consolidar das entradas da tabela acima.*
+
+### Aprendizados (retro por escrito)
+
+*A preencher — especial atenção para validar/refutar o experimento de "sprint longa com checkpoints semanais" como cadência viável para épicos densos do tamanho do EPIC-002.*
+
+### Métricas finais da sprint
+
+| Métrica | Valor | Meta |
+|---|---|---|
+| Estórias `done` | — | 12 |
+| Estórias entregues / planejadas | — | 100% |
+| Cobertura geral | — | ≥ 80% |
+| Cobertura motor | — | ≥ 98% |
+| Casos de teste por fórmula | — | ≥ 10 |
+| p95 relatório (50 amostras em homol) | — | ≤ 3s |
+| Validação externa | — | `approved` |
+| Validação interna | — | `approved` |
+| Pacote de handoff entregue | — | sim |
+| Eventos `quiz_iniciado` capturados | — | ≥ 1 (conta de teste interna) |
+| Eventos `diagnostico_concluido` capturados | — | ≥ 1 (conta de teste interna) |
+
+### Comemoração (cultura)
+
+*A redigir.*
