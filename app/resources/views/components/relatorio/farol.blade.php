@@ -5,34 +5,40 @@
 @php
     $cor = in_array($cor, ['verde', 'amarelo', 'vermelho', 'nenhum'], true) ? $cor : 'nenhum';
 
-    $config = [
+    /*
+     * Mapeia a cor para um par fixo de classes utility (text + bg). Inline
+     * `style="color: var(--color-farol-*)"` não funciona porque o Tailwind v4
+     * faz tree-shake dos tokens do @theme quando eles não aparecem dentro de
+     * `class=` — a variável fica undefined e a cor herda do <body>. Já o
+     * arbitrary value `text-[color:var(--color-farol-*)]` é reconhecido pelo
+     * scanner do Tailwind e força a emissão da var no bundle.
+     *
+     * As classes precisam estar em string literal completa (sem interpolação)
+     * para o scanner do Tailwind v4 detectá-las.
+     */
+    $estilos = [
         'verde' => [
-            'token' => 'var(--color-farol-verde)',
-            'bg' => 'rgba(14, 159, 110, 0.12)',
+            'cor' => 'text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10',
             'rotulo' => 'Verde',
         ],
         'amarelo' => [
-            'token' => 'var(--color-farol-amarelo)',
-            'bg' => 'rgba(217, 119, 6, 0.14)',
+            'cor' => 'text-[color:var(--color-farol-amarelo)] bg-[color:var(--color-farol-amarelo)]/12',
             'rotulo' => 'Amarelo',
         ],
         'vermelho' => [
-            'token' => 'var(--color-farol-vermelho)',
-            'bg' => 'rgba(220, 38, 38, 0.12)',
+            'cor' => 'text-[color:var(--color-farol-vermelho)] bg-[color:var(--color-farol-vermelho)]/10',
             'rotulo' => 'Vermelho',
         ],
         'nenhum' => [
-            'token' => 'var(--color-farol-cinza)',
-            'bg' => 'rgba(148, 163, 184, 0.14)',
+            'cor' => 'text-[color:var(--color-farol-cinza)] bg-[color:var(--color-farol-cinza)]/15',
             'rotulo' => 'Sem classificação',
         ],
     ][$cor];
 @endphp
 
-<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
-      style="color: {{ $config['token'] }}; background-color: {{ $config['bg'] }};"
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium {{ $estilos['cor'] }}"
       role="img"
-      aria-label="Farol: {{ $config['rotulo'] }}"
+      aria-label="Farol: {{ $estilos['rotulo'] }}"
       data-farol="{{ $cor }}">
     {{-- Ícone (acessibilidade — daltônicos não dependem da cor). --}}
     @switch($cor)
@@ -71,5 +77,5 @@
                 <circle cx="12" cy="8" r="0.6" fill="currentColor"/>
             </svg>
     @endswitch
-    <span>{{ $config['rotulo'] }}</span>
+    <span>{{ $estilos['rotulo'] }}</span>
 </span>
