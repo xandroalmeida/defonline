@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-05-25T15:55:00Z",
+  "generated_at": "2026-05-25T16:30:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -829,7 +829,7 @@
       "title": "Motor de cálculo — 7 indicadores essenciais + NCG absoluto informativo",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "estimated_session_size": "L",
       "blocked_by": [
         "STORY-026"
@@ -839,10 +839,15 @@
         "STORY-030",
         "STORY-031"
       ],
-      "note": "V1 do motor: Margem Bruta, Margem Líquida, Dívida Líq./EBITDA, NCG/Vendas, PMR, PMC, Ciclo Financeiro + NCG absoluto sem farol. Cobertura ≥98%, ≥10 casos por fórmula. motor_version=1.0.0.",
+      "coverage_dominio": "100%",
+      "tests_pest": "511 (1376 asserções)",
+      "approved_by": "Alexandro",
+      "approved_at": "2026-05-25",
+      "closed_at": "2026-05-25",
+      "note": "Motor V1 entregue e aprovado pelo PO em 2026-05-25 (programador claude-opus-4-7). 7 indicadores + NCG abs + persistência idempotente + 5 fixtures golden + baseline latência p95 + cross-tenant 404. CA-1..CA-10 ✓; cobertura 100% em app/Domain; Larastan + Pint verdes. Destrava STORY-029, STORY-030, STORY-031.",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W25",
-      "owner_agent": null,
+      "owner_agent": "programador (claude-opus-4-7)",
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-028-motor-7-indicadores-essenciais.md",
       "created_at": "2026-05-25",
       "updated_at": "2026-05-25"

@@ -11,15 +11,23 @@
             <directory>tests/Unit</directory>
         </testsuite>
 
+        <!-- Domain: testes de núcleo de regra de negócio (app/Domain). Pure unit,
+             sem DB nem rede. Cobertura medida com gate ≥ 98% (phpunit-domain.xml).
+             Introduzido na STORY-028 (motor de cálculo). -->
+        <testsuite name="Domain">
+            <directory>tests/Domain</directory>
+        </testsuite>
+
         <!-- Feature: tocam Postgres real (RefreshDatabase) + Livewire + middlewares.
              Exigem `docker compose up db` ANTES de rodar. Cobrados no pre-push hook. -->
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
 
-        <!-- Atalho equivalente a UnitPure + Feature. -->
+        <!-- Atalho equivalente a UnitPure + Domain + Feature. -->
         <testsuite name="All">
             <directory>tests/Unit</directory>
+            <directory>tests/Domain</directory>
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>

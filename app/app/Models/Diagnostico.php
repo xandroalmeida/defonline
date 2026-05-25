@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Scopes\BelongsToUsuarioScope;
+use Database\Factories\DiagnosticoFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Casts\ArrayObject;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -33,10 +35,10 @@ use Illuminate\Support\Carbon;
  * @property string $motor_version
  * @property string $matrix_version
  * @property string $setor
- * @property \Illuminate\Database\Eloquent\Casts\ArrayObject $quiz_payload
+ * @property ArrayObject<string, mixed> $quiz_payload
  * @property string $payload_hash
- * @property \Illuminate\Database\Eloquent\Casts\ArrayObject $indicadores_calculados
- * @property \Illuminate\Database\Eloquent\Casts\ArrayObject $resumo_executivo
+ * @property ArrayObject<string, array{valor: float|int|null, farol: string, motivo: ?string, mensagem: string}> $indicadores_calculados
+ * @property ArrayObject<string, mixed> $resumo_executivo
  * @property Carbon $gerado_em
  * @property Carbon|null $deleted_at
  *
@@ -57,7 +59,7 @@ use Illuminate\Support\Carbon;
 #[ScopedBy([BelongsToUsuarioScope::class])]
 final class Diagnostico extends Model
 {
-    /** @use HasFactory<\Database\Factories\DiagnosticoFactory> */
+    /** @use HasFactory<DiagnosticoFactory> */
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $table = 'diagnosticos';

@@ -15,3 +15,8 @@ use Tests\TestCase;
 */
 
 pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Feature');
+
+// Domain: testes do núcleo de regras de negócio (app/Domain). Boot do Laravel
+// é necessário para `config(...)` e service container, mas NÃO usa banco.
+// Gate de cobertura ≥ 98% via phpunit-domain.xml (STORY-010 + STORY-028).
+pest()->extend(TestCase::class)->in('Domain');

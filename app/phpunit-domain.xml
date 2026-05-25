@@ -23,6 +23,7 @@
     <testsuites>
         <testsuite name="All">
             <directory>tests/Unit</directory>
+            <directory>tests/Domain</directory>
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
