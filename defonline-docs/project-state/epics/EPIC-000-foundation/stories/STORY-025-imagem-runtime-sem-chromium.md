@@ -7,7 +7,7 @@ sprint_id: SPRINT-2026-W24
 type: chore
 target_role: programador
 requires_design: false
-status: in_progress
+status: in_review
 owner_agent: programador-claude
 created_at: 2026-05-25
 updated_at: 2026-05-24
@@ -217,9 +217,25 @@ mudança de código no `runtime` não invalida a layer de 750 MB).
 
 ### Observações úteis ao PO
 
-- **CA-7 e CA-8 não foram exercitados nesta sessão** (pipeline `release-homolog` end-to-end e pre-push Dusk). Motivo: a sessão é local-only por padrão de workflow (commits direto em `main` local; push/PR/tag são prerrogativa do PO). Os dois CAs só fecham quando o PO:
-  1. der push da `main` e disparar uma tag rc (validação E2E do `release-homolog`); ou
-  2. rodar `make pre-push` localmente após `docker compose build --no-cache web` (validação local do Dusk com a imagem `target: dev`).
-  Recomendo o passo 2 antes do push, conforme `padrões de qualidade exigidos` da estória.
-- Imagens locais buildadas como `defonline-app:runtime` e `defonline-app:dev` para diagnóstico — não conflitam com a tag `defonline/app:dev` do compose (namespace diferente). Podem ser removidas com `docker rmi defonline-app:runtime defonline-app:dev` sem efeito colateral.
-- `docker system prune -af` segue válido no `deploy.yml` por força do acúmulo de tags rc, mesmo agora sem chromium; comentário atualizado (~300MB por tag em vez de ~500MB).
+- **CA-8 fechado nesta sessão.** Após `docker compose build --no-cache web`
+  e `docker compose up -d --force-recreate web web-test worker scheduler`,
+  o `./scripts/git-hooks/pre-push.sh` rodou **verde end-to-end**:
+  - Pint (lint) ✓
+  - Larastan ✓
+  - Pest All — **316 testes / 979 asserções**, cobertura ≥80% ✓
+  - Pest Domain — **100%** em todos os value objects, gate ≥98% ✓
+  - Pennant overdue ✓
+  - **Dusk E2E — 13 testes / 81 asserções** dentro do container `web`
+    (target `dev`), todos verdes. Browser navega chromium 148 local. ✓
+- **CA-7 e smoke manual ainda dependem de push de rc** (prerrogativa do PO).
+  Quando o PO criar a próxima tag rc, o `release-homolog.yml` builda
+  `--target runtime` (sem chromium), faz push GHCR e deploy via Ansible
+  contra `defonline.xandrix.com.br`. Smoke `/health` automatizado já no
+  playbook, e smoke manual de UX visual completa o gate visual.
+- Imagens locais auxiliares `defonline-app:runtime` / `defonline-app:dev`
+  podem ser removidas com `docker rmi defonline-app:runtime
+  defonline-app:dev` sem efeito colateral (namespace separado da tag
+  `defonline/app:dev` que o compose mantém).
+- `docker system prune -af` segue válido no `deploy.yml` por força do
+  acúmulo de tags rc, mesmo agora sem chromium; comentário atualizado
+  (~300MB por tag em vez de ~500MB).

@@ -747,7 +747,7 @@
       "title": "Imagem runtime sem chromium — separar dev/runtime no Dockerfile (~500MB)",
       "type": "chore",
       "target_role": "programador",
-      "status": "in_progress",
+      "status": "in_review",
       "owner_agent": "programador-claude",
       "sprint_id": "SPRINT-2026-W24",
       "path": "epics/EPIC-000-foundation/stories/STORY-025-imagem-runtime-sem-chromium.md",
