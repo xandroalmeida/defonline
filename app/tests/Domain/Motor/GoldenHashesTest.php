@@ -26,28 +26,28 @@ use App\Domain\Motor\Motor;
 */
 
 dataset('golden_fixtures', [
-    // Hashes re-emitidos na STORY-030 (motor 1.0.0 → 1.1.0):
-    // saída agora contém 15 indicadores (14 do Anexo D + Ciclo Operacional informativo)
-    // em vez dos 8 anteriores (7 + NCG abs).
+    // Hashes re-emitidos na STORY-031 (motor 1.1.0 → 1.2.0):
+    // resumo_executivo deixa de ser placeholder e passa a carregar veredito +
+    // destaques produzidos pelo algoritmo §4.7.1.
     'saudavel' => [
         'quiz_industria_saudavel.json',
-        '873225b9c0c62d98d4d8eeec50e628274dba8819145c5ad0fa2e9e868bfa41c4',
+        '3301503e9ce0d9bc1efe8c8b122d6d5bba1465592649259d100a2135e56ecebf',
     ],
     'atencao' => [
         'quiz_industria_atencao.json',
-        'e5b5f0286ea67f77d0c683eaa81f5367ffe6c56de756b0a7eff7f2c6cfc8f3d9',
+        '67ff7c1f0f9f31daffe8f8291689efaa34dd9723d0c88df992046c35274762ff',
     ],
     'alerta' => [
         'quiz_industria_alerta.json',
-        '44925c20108c7d2601e6376b920792983cc3c29677a3402992f66d32103bc372',
+        '1d4ccb1c0b8c12a671db7190c934bb49c1a424c03cb47e8c197a3f109ff4526d',
     ],
     'ncg_negativo' => [
         'quiz_industria_ncg_negativo.json',
-        '78b37bfb723e64400536e17d04b13abfb5ba7ed602afc3e1760c9505ffe1f5bd',
+        'bb03b7c6df395aa27dbf2246ed5b21f9dceacf15680550d7ebf07284f8bad15e',
     ],
     '70pct_indisponivel' => [
         'quiz_industria_70pct_indisponivel.json',
-        'a4cea0d1c228b4e5be5b736ba8cfa4a69367532f3b73d6865e030256880ad245',
+        '315466d44f78b7042967bbc33bed74c307306a472bfb4f7d4c12d9b98567c321',
     ],
 ]);
 

@@ -23,7 +23,7 @@ use App\Domain\Motor\Indicadores\Pme;
 use App\Domain\Motor\Indicadores\Pmr;
 
 /**
- * Orquestrador do motor de cálculo V2 (STORY-030 — `motor_version = 1.1.0`).
+ * Orquestrador do motor de cálculo (STORY-031 — `motor_version = 1.2.0`).
  *
  * Responsabilidades:
  *   1. Canonicaliza o `quiz_payload` (IDR-010 §sub-decisão 3).
@@ -32,6 +32,7 @@ use App\Domain\Motor\Indicadores\Pmr;
  *      monta `indicadores_calculados` preservando ordem (importante para hash).
  *   4. Estampa `motor_version` e `matrix_version` no resultado, a partir do
  *      `config('motor.*')`.
+ *   5. Gera o `resumo_executivo` determinístico via {@see ResumoExecutivo}.
  *
  * **Pureza.** Sem `now()`, sem leitura de banco, sem Auth (IDR-010 §sub-decisão 4
  * — fontes de não-determinismo proibidas). O `gerado_em` é definido pelo Action
@@ -39,10 +40,6 @@ use App\Domain\Motor\Indicadores\Pmr;
  *
  * **Ordem dos indicadores** = ordem do Anexo D §4.5 (#1..#14) + Ciclo Operacional
  * informativo no final. Esta ordem entra no hash de saída — mudança requer bump.
- *
- * **Resumo Executivo** é placeholder nesta V1/V2 — STORY-031 substitui pelo
- * algoritmo determinístico §4.7.1. O placeholder mantém o snapshot
- * sintaticamente válido (campo NOT NULL no banco).
  */
 final class Motor
 {
@@ -55,7 +52,7 @@ final class Motor
      *     matrix_version: string,
      *     setor: string,
      *     indicadores_calculados: array<string, array{valor: float|int|null, farol: string, motivo: ?string, mensagem: string}>,
-     *     resumo_executivo: array{pendente_story: string, fallback_acionado: bool}
+     *     resumo_executivo: array<string, mixed>
      * }
      *
      * @throws \InvalidArgumentException se `$setor` não é suportado nesta versão do motor.
@@ -64,7 +61,7 @@ final class Motor
     {
         if ($setor !== 'industria') {
             throw new \InvalidArgumentException(
-                "Setor '{$setor}' não suportado pelo motor (1.1.0). Esta versão atende apenas Indústria; ".
+                "Setor '{$setor}' não suportado pelo motor (1.2.0). Esta versão atende apenas Indústria; ".
                 'Comércio/Serviços entram em estória posterior do EPIC-002.',
             );
         }
@@ -77,15 +74,15 @@ final class Motor
             $indicadoresCalculados[$indicador->chave()] = $indicador->calcular($canonical, $dre)->toArray();
         }
 
+        $motorVersion = (string) config('motor.version');
+        $resumoExecutivo = (new ResumoExecutivo)->gerar($indicadoresCalculados, $motorVersion);
+
         return [
-            'motor_version' => (string) config('motor.version'),
+            'motor_version' => $motorVersion,
             'matrix_version' => (string) config('motor.matrix_version'),
             'setor' => $setor,
             'indicadores_calculados' => $indicadoresCalculados,
-            'resumo_executivo' => [
-                'pendente_story' => 'STORY-031',
-                'fallback_acionado' => false,
-            ],
+            'resumo_executivo' => $resumoExecutivo,
         ];
     }
 

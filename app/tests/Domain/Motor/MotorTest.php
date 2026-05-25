@@ -108,12 +108,29 @@ it('payload todo null → todos indicadores indisponíveis', function () {
     }
 });
 
-it('resumo executivo é placeholder pendente_story=STORY-031', function () {
+it('resumo executivo é populado pelo algoritmo §4.7.1 (STORY-031)', function () {
     $r = (new Motor)->calcular(payloadIndustriaSaudavel(), 'industria');
-    expect($r['resumo_executivo'])->toBe([
-        'pendente_story' => 'STORY-031',
-        'fallback_acionado' => false,
+
+    expect($r['resumo_executivo'])->toHaveKeys([
+        'motor_version_origem',
+        'veredito',
+        'veredito_texto',
+        'destaques_negativos',
+        'destaque_positivo',
+        'linha_fixa',
+        'fallback_acionado',
+        'mensagem_fallback',
     ]);
+    expect($r['resumo_executivo']['veredito'])->toBeIn(['saudavel', 'precisa_atencao', 'em_alerta', 'fallback']);
+    expect($r['resumo_executivo']['motor_version_origem'])->toBe((string) config('motor.version'));
+});
+
+it('resumo executivo entra em fallback quando todos os indicadores são indisponíveis', function () {
+    $r = (new Motor)->calcular(['Q01' => 1], 'industria');
+
+    expect($r['resumo_executivo']['veredito'])->toBe('fallback');
+    expect($r['resumo_executivo']['fallback_acionado'])->toBeTrue();
+    expect($r['resumo_executivo']['mensagem_fallback'])->toBeString();
 });
 
 it('aceita industria sem exception', function () {

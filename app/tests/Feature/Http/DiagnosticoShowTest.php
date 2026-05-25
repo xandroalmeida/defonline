@@ -248,6 +248,55 @@ it('botão "Voltar" cai em /home quando Referer é a própria página (refresh)'
     expect($response->getContent())->toContain('href="'.url('/home').'"');
 });
 
+it('renderiza o bloco "Resumo executivo" no topo do relatório (STORY-031)', function () {
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnostico($dono);
+
+    $response = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}");
+
+    $html = $response->getContent();
+    $response->assertOk();
+    expect($html)->toContain('data-testid="resumo-executivo"');
+    expect($html)->toContain('aria-label="Resumo executivo"');
+    expect($html)->toContain('data-veredito="');
+    // Linha fixa do passo 4.
+    expect($html)->toContain('Veja a tabela abaixo para análise detalhada');
+    // Bloco aparece ANTES da tabela de indicadores.
+    $posResumo = mb_strpos($html, 'data-testid="resumo-executivo"');
+    $posTabela = mb_strpos($html, 'data-testid="indicadores-tabela"');
+    expect($posResumo)->toBeLessThan($posTabela);
+});
+
+it('resumo executivo entra em modo fallback quando ≥70% indicadores indisponíveis', function () {
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnostico($dono, payloadIndisponivel());
+
+    $response = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}");
+
+    $response->assertOk();
+    $html = $response->getContent();
+    expect($html)->toContain('data-veredito="fallback"');
+    expect($html)->toContain('Não foi possível calcular indicadores suficientes');
+});
+
+it('snapshot legado em motor_version < 1.2.0 (placeholder) não quebra a view', function () {
+    // Diagnóstico antigo persistido com resumo_executivo no formato placeholder
+    // — o componente deve ser silenciado em vez de quebrar.
+    $dono = Usuario::factory()->create();
+    Auth::login($dono);
+    $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $dono->id]);
+    $diag = Diagnostico::factory()->paraEmpresa($empresa)->create([
+        'motor_version' => '1.1.0',
+        'resumo_executivo' => ['pendente_story' => 'STORY-031', 'fallback_acionado' => false],
+    ]);
+    Auth::logout();
+
+    $response = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}");
+
+    $response->assertOk();
+    expect($response->getContent())->not->toContain('data-testid="resumo-executivo"');
+});
+
 it('exibe ambos os layouts (tabela em md+ e cards em <md) para mobile-first — CA-6', function () {
     $dono = Usuario::factory()->create();
     $diag = gerarDiagnostico($dono);

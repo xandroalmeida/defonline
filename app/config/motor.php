@@ -17,6 +17,7 @@ declare(strict_types=1);
 return [
     // 1.0.0 — STORY-028 (V1: 7 indicadores essenciais + NCG abs).
     // 1.1.0 — STORY-030 (V2: completa 14 do Anexo D + Ciclo Operacional informativo).
-    'version' => '1.1.0',
+    // 1.2.0 — STORY-031 (resumo_executivo populado pelo algoritmo §4.7.1 — substitui placeholder).
+    'version' => '1.2.0',
     'matrix_version' => 'dez-2025',
 ];

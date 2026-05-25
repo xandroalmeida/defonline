@@ -13,6 +13,13 @@
     $ncgAbsoluto = $snapshot['ncg_absoluto'] ?? null;
     $cicloOperacional = $snapshot['ciclo_operacional'] ?? null;
 
+    // Resumo Executivo §4.7.1 — coluna NOT NULL desde STORY-028 (placeholder até a 030,
+    // populada de verdade pela 031). Snapshots em motor_version < 1.2.0 (placeholder
+    // `{pendente_story, fallback_acionado}`) NÃO contêm `veredito` — o componente trata
+    // qualquer payload inválido como fallback visual.
+    $resumoExecutivo = (array) ($diagnostico->resumo_executivo ?? []);
+    $resumoEhValido = isset($resumoExecutivo['veredito']);
+
     /*
      * Glossário inline — textos editoriais derivados do Anexo I (espec V2).
      * Mudanças no Anexo I propagam por edição manual aqui — Anexo I não tem motor_version.
@@ -62,6 +69,12 @@
             </span>
         </x-slot:actions>
     </x-page-header>
+
+    {{-- Resumo executivo §4.7.1 (STORY-031). Diagnósticos antigos em motor < 1.2.0
+         carregam placeholder e não renderizam o bloco (mantém compatibilidade). --}}
+    @if ($resumoEhValido)
+        <x-relatorio.resumo-executivo :resumo="$resumoExecutivo"/>
+    @endif
 
     {{-- 13 indicadores essenciais com farol (motor V2 = 1.1.0, Anexo D §4.5).
          Renderiza dois layouts: tabela densa em ≥ md, stack de cards em < md.

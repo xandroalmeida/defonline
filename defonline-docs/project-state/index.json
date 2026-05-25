@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-05-25T19:45:00Z",
+  "generated_at": "2026-05-25T23:00:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -892,7 +892,7 @@
       "title": "Motor — completar 7 indicadores restantes (14 total) + ajuste fino do farol Indústria",
       "type": "implementation",
       "target_role": "programador",
-      "status": "in_review",
+      "status": "done",
       "estimated_session_size": "L",
       "blocked_by": [
         "STORY-028"
@@ -902,9 +902,12 @@
         "STORY-036"
       ],
       "parallel_with": "STORY-031",
+      "approved_by": "Alexandro",
+      "approved_at": "2026-05-25",
+      "closed_at": "2026-05-25",
       "coverage_dominio": "100%",
       "tests_pest": "674 (1815 asserções) — 97 novos no pacote Motor",
-      "note": "V2 entregue 2026-05-25 (programador claude-programador). 7 indicadores adicionados (Margem EBITDA, Desp.Fin/EBITDA, Fontes PC/PL, Giro do Ativo, PME, Inadimplência, Ciclo Operacional informativo); ordem de Motor::indicadores() alinhada ao Anexo D §4.5 com NCG abs no slot #9 e Ciclo Operacional ao final. config/motor.php 1.0.0→1.1.0. Golden hashes re-emitidos (saída cresceu 8→15 entradas). IndicadorFormatter expandido (ORDEM_ESSENCIAIS com 13 com farol; cards informativos separados para NCG abs + Ciclo Op via novo componente <x-relatorio.card-informativo>). Diagnósticos antigos em 1.0.0 preservados (snapshot). Aguarda aval visual do PO antes de done. Briefing operacional do PO em briefings/STORY-030-abertura.md.",
+      "note": "V2 entregue + aprovada pelo PO em 2026-05-25. 7 indicadores adicionados (Margem EBITDA, Desp.Fin/EBITDA, Fontes PC/PL, Giro do Ativo, PME, Inadimplência, Ciclo Operacional informativo); ordem de Motor::indicadores() alinhada ao Anexo D §4.5 com NCG abs no slot #9 e Ciclo Operacional ao final. Faixas do farol conferidas pelo PO contra Anexo E (Indústria) — todas batem. config/motor.php 1.0.0→1.1.0. Golden hashes re-emitidos (saída cresceu 8→15 entradas). IndicadorFormatter expandido (ORDEM_ESSENCIAIS com 13 com farol; cards informativos separados para NCG abs + Ciclo Op via novo componente <x-relatorio.card-informativo>). Diagnósticos antigos em 1.0.0 preservados (snapshot). Decisão do PO: Ciclo Operacional informativo (PME+PMR, sem farol, mensagem fixa) — confirmada em-sessão e registrada nas Notas. F-NB-1: verificação visual em browser real fica como cheque do screencast Checkpoint 2. F-NB-2: latência ≤ 3s em homol pendente do deploy. Briefing operacional do PO em briefings/STORY-030-abertura.md. Impacto na STORY-031 paralela: deverá bumpar para 1.2.0 (cenário documentado no briefing-031 §4).",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W25",
       "owner_agent": "claude-programador",
@@ -919,7 +922,7 @@
       "title": "Resumo Executivo — algoritmo determinístico §4.7.1",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "estimated_session_size": "M",
       "blocked_by": [
         "STORY-028"
@@ -927,11 +930,15 @@
       "blocks": [
         "STORY-032"
       ],
-      "parallel_with": "STORY-030",
-      "note": "Algoritmo determinístico (sem IA): veredito saudável/atenção/alerta + até 2 destaques negativos + 1 positivo, truncamento ~80 chars, fallback fixo quando ≥70% indicadores indisponíveis. NCG abs excluído da contagem. Substitui o placeholder atual `{pendente_story: STORY-031}` no slot resumo_executivo. motor_version bumpa para 1.1.0 (ou 1.2.0 se STORY-030 mergear primeiro — regra do bump em paralelo no briefing). Atualizado 2026-05-25: dependência rígida de STORY-030 removida — opera sobre o motor disponível no momento (7 indicadores V1 hoje; 13 quando 030 fechar; veredito pode mudar para o mesmo input no merge da 030 — esperado, é o motivo do bump). Promovida para `ready` em paralelo com STORY-030 — Checkpoint 2 / kill-switch. Briefing operacional do PO em briefings/STORY-031-abertura.md.",
+      "approved_by": "Alexandro",
+      "approved_at": "2026-05-25",
+      "closed_at": "2026-05-25",
+      "coverage_dominio": "100%",
+      "tests_pest": "695 (∼720 asserções) — 17 cenários canônicos no ResumoExecutivoTest + 3 feature em DiagnosticoShowTest",
+      "note": "Algoritmo §4.7.1 entregue + aprovado pelo PO em 2026-05-25. 14 indicadores do Anexo D na whitelist CODIGOS_ANEXO_D; NCG abs entra na contagem do 14 mas é excluído da seleção de destaques (farol=nenhum); Ciclo Operacional excluído de tudo (fora do Anexo D). Vereditos JSON: saudavel/precisa_atencao/em_alerta/fallback com textos humanos literais da spec. Linha 5 fixa correta. 'Por outro lado, ' no destaque positivo. Severidade pela fórmula literal da spec |valor−fronteira_amarela|/amplitude_faixa_vermelha; generalização para amarelos quando V<2 documentada no docblock como decisão local válida. config/motor.php 1.1.0→1.2.0; 5 golden hashes re-emitidos. Componente <x-relatorio.resumo-executivo> no topo do relatório. Snapshot legado 1.1.0 com placeholder não renderiza (compatibilidade retroativa IDR-010). 1ª iteração teve regra patrimonial inviável invented pelo briefing — Programador identificou, PO cancelou job, briefing revisado retroativamente (registrado no front-matter revisions). Briefing revisado em briefings/STORY-031-abertura.md. F-NB-1: aprovação visual em browser registrada como cheque do screencast Checkpoint 2.",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W25",
-      "owner_agent": null,
+      "owner_agent": "claude-programador",
       "briefing_path": "epics/EPIC-002-diagnostico-industria/briefings/STORY-031-abertura.md",
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-031-resumo-executivo-deterministico.md",
       "created_at": "2026-05-25",
