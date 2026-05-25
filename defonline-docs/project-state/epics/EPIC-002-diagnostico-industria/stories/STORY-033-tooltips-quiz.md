@@ -23,7 +23,9 @@ A epic.md inclui como entregável: *"Tooltip/box de explicação por indicador n
 
 > **Status das fontes textuais (2026-05-25):** spec V2 §6.8 ainda marcada `[DECIDIR]` (apenas proposta preliminar: "tooltip acionado por clique em ícone (?) ao lado do label"; conteúdos finais por campo a consolidar). Anexo A §A.6 está reservado mas vazio.
 >
-> **Decisão do PO em 2026-05-25:** formato fixado em **tooltip inline com click no ícone `?` ao lado do label** (proposta preliminar da spec promovida a oficial). **Os 23 textos** ainda precisam ser escritos pelo PO até **2026-06-05 (Checkpoint 2)** — uma semana antes do início da implementação. Não inclui priorização por taxa de abandono no MVP (todos os 23 campos ganham tooltip de uma vez).
+> **Decisão do PO em 2026-05-25:** formato fixado em **tooltip inline com click no ícone `?` ao lado do label** (proposta preliminar da spec promovida a oficial). Não inclui priorização por taxa de abandono no MVP (todos os 23 campos ganham tooltip de uma vez).
+>
+> **Atualização 2026-05-25 (mesmo dia, mais tarde):** os 23 textos foram **extraídos da planilha-fonte e expandidos no formato §6.8** pela equipe de produto. Os 15 financeiros (Q02–Q16) vêm da `DEFweb.net - QUIZ.xlsx` coluna "DESCRIÇÕES EM ÍCONES (?)" (autoria EB Parcerias / EBC); os 8 restantes (Q01 setor + Q17–Q23 captação) foram redigidos pela equipe e ficam como **rascunho a confirmar com EBC** na próxima revisão (não bloqueiam o dev). Textos finais publicados em `defonline-docs/especificacao/V2/anexos/anexo-A-campos-quiz.md §A.6` (tabela 1.0) e em `app/config/quiz/help-industria.php` (config consumido pelo componente). **CA-8 (gate dos textos até 2026-06-05) já está atendido — antecipação de ~11 dias.**
 
 ## O quê
 
@@ -44,7 +46,7 @@ A epic.md inclui como entregável: *"Tooltip/box de explicação por indicador n
 - [ ] **CA-5 (acessibilidade):** `aria-describedby`, Tab/Enter/Space/Esc funcionam, contraste AA — auditado com Pa11y ou similar.
 - [ ] **CA-6 (design system):** zero cores/tamanhos hard-coded no componente; tudo via tokens v1 (teste arquitetural Pest assegura).
 - [ ] **CA-7 (testes):** Pest feature — view contém os textos esperados (lê de config no setUp). Dusk: click no ícone revela o conteúdo em mobile e desktop.
-- [ ] **CA-8 (gate do PO):** os 23 textos consolidados pelo PO devem estar publicados em `config/quiz/help-industria.php` (ou em PR equivalente) **até 2026-06-05**. Sem isso, a estória não inicia.
+- [x] **CA-8 (gate do PO):** ~~os 23 textos consolidados pelo PO devem estar publicados em `config/quiz/help-industria.php` (ou em PR equivalente) **até 2026-06-05**. Sem isso, a estória não inicia.~~ **Atendido em 2026-05-25** — `app/config/quiz/help-industria.php` v1.0.0 publicado; Anexo A §A.6 tabela 1.0 publicada. Q01 e Q17–Q23 marcados como `rascunho a confirmar EBC` mas **não bloqueiam o dev** (revisão da EBC pode entrar como PR de polimento durante ou após a STORY-033).
 
 ## Fora de escopo
 
@@ -54,8 +56,12 @@ A epic.md inclui como entregável: *"Tooltip/box de explicação por indicador n
 
 ## Dependências
 
-- **Bloqueada por:** STORY-027 (campos existem — **`done`** ✓), STORY-019 (Design System v1 — **`done`** ✓), **PO entregar 23 textos até 2026-06-05**.
+- **Bloqueada por:** STORY-027 (campos existem — **`done`** ✓), STORY-019 (Design System v1 — **`done`** ✓), ~~PO entregar 23 textos até 2026-06-05~~ **atendido 2026-05-25** ✓.
 - **Bloqueia:** nada (parte da V3).
+
+## Pós-condição opcional (não-bloqueante)
+
+- Revisão dos 8 textos marcados `rascunho a confirmar EBC` (Q01, Q17–Q23) na próxima reunião com EB Parcerias. Mudanças entram via PR direto em `app/config/quiz/help-industria.php` + bump da versão no header do arquivo + bump da versão do Anexo A §A.6.
 
 ## Decisões já tomadas
 

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-05-25T22:11:10Z",
+  "generated_at": "2026-05-25T22:23:47Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -984,7 +984,7 @@
       "owner_agent": null,
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-033-tooltips-quiz.md",
       "created_at": "2026-05-25",
-      "updated_at": "2026-05-25T22:11:10Z"
+      "updated_at": "2026-05-25T22:23:47Z"
     },
     {
       "id": "STORY-034",
@@ -1262,7 +1262,7 @@
           "kill_switch": false
         }
       ],
-      "updated_at": "2026-05-25T22:11:10Z"
+      "updated_at": "2026-05-25T22:23:47Z"
     }
   ],
   "decisions": {
