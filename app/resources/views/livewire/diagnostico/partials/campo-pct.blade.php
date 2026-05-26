@@ -3,7 +3,10 @@
     Vars: $id, $label, $help, $mask (JS).
 --}}
 <div>
-    <x-label :for="$id">{{ $label }}</x-label>
+    <div class="flex items-center gap-1.5 mb-1">
+        <x-label :for="$id" class="mb-0">{{ $label }}</x-label>
+        <x-help :id="$id" :text="config('quiz.help-industria.campos.'.$id)" :label="$label"/>
+    </div>
     <label class="input-affix" for="{{ $id }}">
         <input type="text" id="{{ $id }}" name="{{ $id }}"
                class="input-affix__input"

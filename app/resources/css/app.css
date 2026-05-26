@@ -272,4 +272,120 @@
         font-weight: var(--font-weight-medium);
         line-height: 1.4;
     }
+
+    /*
+     * Help / box explicativo por campo (STORY-033 — espec §6.8).
+     * Ícone "?" abre um painel: bottom-sheet em < 1024px, popover ancorado em
+     * ≥ 1024px. Layout vira no @media abaixo (sem JS). Cores/raio/sombra só via
+     * tokens v1 — o gate arquitetural DesignTokensTest reprova qualquer hex aqui.
+     */
+    .help {
+        position: relative;
+        display: inline-flex;
+        vertical-align: middle;
+    }
+    .help__trigger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        padding: 0;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-full);
+        background: var(--color-surface);
+        color: var(--color-secondary);
+        font-family: var(--font-sans);
+        font-size: var(--text-body-sm);
+        font-weight: var(--font-weight-semibold);
+        line-height: 1;
+        cursor: pointer;
+        transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+    }
+    .help__trigger:hover {
+        background: var(--color-neutral);
+        color: var(--color-tertiary);
+        border-color: var(--color-tertiary);
+    }
+
+    /* Backdrop do bottom-sheet (mobile). Escurece o conteúdo atrás. */
+    .help__backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        background: color-mix(in srgb, var(--color-primary) 40%, transparent);
+    }
+
+    /* Painel — mobile-first: bottom-sheet ancorado no rodapé da viewport. */
+    .help__painel {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 50;
+        max-height: 70vh;
+        overflow-y: auto;
+        padding: var(--spacing-lg);
+        background: var(--color-surface);
+        color: var(--color-primary);
+        border-top: 1px solid var(--color-border);
+        border-top-left-radius: var(--radius-lg);
+        border-top-right-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        /* O ícone vive dentro de um <label>/<legend> com uppercase + tracking;
+           o painel reseta para texto corrido legível. */
+        text-transform: none;
+        letter-spacing: normal;
+    }
+    .help__titulo {
+        margin: 0 0 var(--spacing-sm);
+        font-size: var(--text-body-sm);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-primary);
+    }
+    .help__texto {
+        margin: 0;
+        font-size: var(--text-body-sm);
+        line-height: var(--text-body-sm--line-height);
+        font-weight: var(--font-weight-normal);
+        color: var(--color-secondary);
+    }
+    .help__texto strong {
+        color: var(--color-primary);
+        font-weight: var(--font-weight-semibold);
+    }
+    .help__fechar {
+        margin-top: var(--spacing-md);
+        width: 100%;
+        min-height: var(--touch-target-min);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        background: var(--color-surface);
+        color: var(--color-primary);
+        font-family: var(--font-sans);
+        font-size: var(--text-body);
+        font-weight: var(--font-weight-medium);
+        cursor: pointer;
+    }
+    .help__fechar:hover {
+        background: var(--color-neutral);
+    }
+
+    /* ≥ 1024px: popover flutuante ancorado abaixo do ícone (design-system shell). */
+    @media (min-width: 1024px) {
+        .help__painel {
+            position: absolute;
+            left: 0;
+            right: auto;
+            bottom: auto;
+            top: calc(100% + var(--spacing-xs));
+            width: 320px;
+            max-width: 80vw;
+            max-height: none;
+            padding: var(--spacing-md);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+        }
+    }
 }

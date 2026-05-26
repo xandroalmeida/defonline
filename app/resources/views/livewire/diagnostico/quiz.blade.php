@@ -86,7 +86,10 @@
             @if ($bloco_atual === 1)
                 <div class="flex flex-col gap-4" dusk="quiz-bloco-1">
                     <div>
-                        <x-label for="Q01">Setor de atividade</x-label>
+                        <div class="flex items-center gap-1.5 mb-1">
+                            <x-label for="Q01" class="mb-0">Setor de atividade</x-label>
+                            <x-help id="Q01" :text="config('quiz.help-industria.campos.Q01')" label="Setor de atividade"/>
+                        </div>
                         <x-input type="text" id="Q01" name="Q01"
                                  :value="ucfirst($Q01)" readonly disabled
                                  dusk="quiz-Q01"/>
@@ -198,6 +201,7 @@
                     <fieldset class="rounded-md border border-[color:var(--color-border)] p-4 flex flex-col gap-2">
                         <legend class="px-1 text-xs font-semibold uppercase tracking-wider text-[color:var(--color-secondary)]">
                             Q17 — Necessita captar recursos?
+                            <x-help id="Q17" :text="config('quiz.help-industria.campos.Q17')" label="Necessidade de captação"/>
                         </legend>
                         @foreach ([['sim', 'Sim'], ['nao', 'Não']] as [$valor, $rotulo])
                             <label class="flex gap-2.5 items-center cursor-pointer text-[color:var(--color-primary)]">
