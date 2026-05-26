@@ -8,12 +8,12 @@ use App\Actions\CalcularDiagnostico;
 use App\Domain\Cpf;
 use App\Domain\Quiz\Alerta;
 use App\Domain\Quiz\ValidacoesCruzadas;
-use App\Events\QuizIniciado;
 use App\Models\EmpresaAnalisada;
 use App\Models\QuizRascunho;
-use App\Models\Usuario;
+use App\Observabilidade\EventLogger;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -157,19 +157,6 @@ final class Quiz extends Component
     public function proximoBloco(): void
     {
         $this->validate($this->regrasDoBloco($this->bloco_atual));
-
-        // CA-13: quiz_iniciado dispara só na primeira transição (1 → 2).
-        // Rascunhos retomados em bloco 2+ já tiveram o evento disparado na sessão original.
-        if ($this->bloco_atual === 1 && ! $this->retomando_rascunho) {
-            /** @var Usuario $usuario */
-            $usuario = Auth::user();
-            QuizIniciado::dispatch(
-                $this->empresa,
-                $usuario,
-                (string) config('motor.version'),
-                (string) config('motor.matrix_version'),
-            );
-        }
 
         // CA-5: ao sair do Bloco 3 (Balanço), checa inconsistências entre blocos.
         // Se houver alerta ainda não aceito, segura o avanço e mostra o banner inline.
@@ -337,12 +324,23 @@ final class Quiz extends Component
     {
         $this->validate($this->regrasDoBloco(4));
 
+        // Correlação do funil (STORY-035): quiz_id = id do rascunho que originou
+        // o diagnóstico; duração = segundos entre o início (created_at do rascunho)
+        // e agora. Lido antes do soft-delete do rascunho lá embaixo.
+        $rascunho = QuizRascunho::paraEmpresa($this->empresa);
+        $quizId = $rascunho?->id;
+        $duracaoSeg = $rascunho !== null
+            ? (int) $rascunho->created_at->diffInSeconds(now())
+            : null;
+
         try {
             $diagnostico = $calcular->execute(
                 $this->empresa,
                 $this->payloadCanonico(),
                 $this->Q01,
                 $this->alertas_aceitos,
+                $quizId,
+                $duracaoSeg,
             );
         } catch (Throwable $e) {
             // CA-9: exception inesperada não persiste registro parcial (action usa transaction).
@@ -518,18 +516,39 @@ final class Quiz extends Component
     /**
      * Persiste o estado atual do quiz no rascunho. UPSERT por
      * `(usuario_id, empresa_analisada_id)` — UNIQUE parcial cuida do resto.
+     *
+     * STORY-035 (ADR-004 §Decisão 2): emite `quiz_iniciado` na **primeira**
+     * transição `null → rascunho`, síncrono dentro da mesma transação do INSERT
+     * (CA-5 — falha do evento faz rollback do rascunho). `wasRecentlyCreated` é
+     * verdadeiro só no INSERT, então re-saves (update) não reemitem (CA-1).
+     * `quiz_id` é o próprio id do rascunho — chave de correlação reusada por
+     * `diagnostico_concluido`.
      */
     private function persistirRascunho(): void
     {
-        QuizRascunho::query()->updateOrCreate(
-            ['empresa_analisada_id' => $this->empresa->id],
-            [
-                'usuario_id' => Auth::id(),
-                'quiz_payload' => $this->payloadParcial(),
-                'ultimo_bloco_preenchido' => $this->bloco_atual,
-                'expires_at' => now()->addDays(90),
-            ],
-        );
+        DB::transaction(function (): void {
+            $rascunho = QuizRascunho::query()->updateOrCreate(
+                ['empresa_analisada_id' => $this->empresa->id],
+                [
+                    'usuario_id' => Auth::id(),
+                    'quiz_payload' => $this->payloadParcial(),
+                    'ultimo_bloco_preenchido' => $this->bloco_atual,
+                    'expires_at' => now()->addDays(90),
+                ],
+            );
+
+            if ($rascunho->wasRecentlyCreated) {
+                EventLogger::emit(
+                    nomeEvento: 'quiz_iniciado',
+                    propriedades: [
+                        'quiz_id' => $rascunho->id,
+                        'quiz_versao' => (string) config('quiz.versao'),
+                    ],
+                    usuarioId: (string) Auth::id(),
+                    empresaId: $this->empresa->id,
+                );
+            }
+        });
     }
 
     /**

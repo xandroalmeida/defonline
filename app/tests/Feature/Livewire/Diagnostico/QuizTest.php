@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Events\QuizIniciado;
 use App\Livewire\Diagnostico\Quiz;
 use App\Models\Diagnostico;
 use App\Models\EmpresaAnalisada;
+use App\Models\EventoProduto;
 use App\Models\QuizRascunho;
 use App\Models\Scopes\BelongsToUsuarioScope;
 use App\Models\Usuario;
@@ -286,27 +286,35 @@ it('apaga o rascunho ativo após submit bem-sucedido', function () {
 });
 
 // ============================================================================
-// CA-13 — Evento quiz_iniciado
+// CA-13 / STORY-035 — Evento quiz_iniciado em evento_produto
 // ============================================================================
 
-it('dispara QuizIniciado na primeira transição 1 → 2', function () {
-    Event::fake([QuizIniciado::class]);
-
+it('emite quiz_iniciado em evento_produto na primeira transição 1 → 2 (uma vez)', function () {
     Livewire::test(Quiz::class, ['empresa' => $this->empresa])
         ->call('proximoBloco')
-        ->call('proximoBloco');   // segundo Próximo NÃO redispara
+        ->call('proximoBloco');   // segundo Próximo NÃO reemite
 
-    Event::assertDispatchedTimes(QuizIniciado::class, 1);
-    Event::assertDispatched(QuizIniciado::class, function (QuizIniciado $e) {
-        return $e->empresa->id === $this->empresa->id
-            && $e->usuario->id === $this->usuario->id
-            && $e->motorVersion === config('motor.version');
-    });
+    $eventos = EventoProduto::where('nome_evento', 'quiz_iniciado')->get();
+    expect($eventos)->toHaveCount(1);
+
+    $evento = $eventos->first();
+    expect($evento->usuario_id)->toBe($this->usuario->id);
+    expect($evento->empresa_id)->toBe($this->empresa->id);
+    expect($evento->request_id)->not->toBeEmpty();
+
+    // quiz_id = id do rascunho recém-criado; payload conforme ADR-004 §2.2 (CA-3).
+    $rascunho = QuizRascunho::query()
+        ->where('empresa_analisada_id', $this->empresa->id)
+        ->first();
+
+    $props = (array) $evento->propriedades;
+    expect(array_keys($props))->toEqualCanonicalizing(['quiz_id', 'quiz_versao']);
+    expect($props['quiz_id'])->toBe($rascunho->id);
+    expect($props['quiz_versao'])->toBe('2026.1');
 });
 
-it('não redispara QuizIniciado quando retoma rascunho do bloco 2+', function () {
-    Event::fake([QuizIniciado::class]);
-
+it('não reemite quiz_iniciado ao retomar rascunho do bloco 2+', function () {
+    // Rascunho já existente (criado direto, sem passar pelo emissor) → retomada.
     QuizRascunho::create([
         'usuario_id' => $this->usuario->id,
         'empresa_analisada_id' => $this->empresa->id,
@@ -322,7 +330,7 @@ it('não redispara QuizIniciado quando retoma rascunho do bloco 2+', function ()
         ->set('Q13', '5')
         ->call('proximoBloco');
 
-    Event::assertNotDispatched(QuizIniciado::class);
+    expect(EventoProduto::where('nome_evento', 'quiz_iniciado')->count())->toBe(0);
 });
 
 // ============================================================================
