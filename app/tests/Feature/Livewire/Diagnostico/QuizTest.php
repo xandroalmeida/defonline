@@ -362,6 +362,86 @@ it('caminho de erro do submit não cria Diagnóstico e mostra mensagem ao usuár
 });
 
 // ============================================================================
+// STORY-034 — validações cruzadas DRE × Balanço (gate Bloco 3 → 4)
+// ============================================================================
+
+it('segura o avanço do Bloco 3 quando há inconsistência cruzada (R3) — CA-5', function () {
+    $component = quizComBalancoInconsistente($this)
+        ->call('proximoBloco');   // tentativa 3 → 4
+
+    $component->assertSet('bloco_atual', 3);   // não avançou
+
+    $alertas = $component->get('alertas_cruzados');
+    expect($alertas)->toHaveCount(1)
+        ->and($alertas[0]['regra'])->toBe('R3')
+        ->and($alertas[0]['severidade'])->toBe('warning')
+        ->and($alertas[0]['mensagem'])->toContain('passivo total');
+});
+
+it('é não-bloqueante: continuarComAlertas registra o aceito e avança (CA-3)', function () {
+    $component = quizComBalancoInconsistente($this)
+        ->call('proximoBloco')           // gate dispara
+        ->call('continuarComAlertas');
+
+    $component->assertSet('bloco_atual', 4)
+        ->assertSet('alertas_cruzados', []);
+
+    $aceitos = $component->get('alertas_aceitos');
+    expect($aceitos)->toHaveCount(1)
+        ->and($aceitos[0]['regra'])->toBe('R3')
+        ->and($aceitos[0])->toHaveKeys(['regra', 'ocorrido_em', 'valor_envolvido']);
+});
+
+it('irParaCampo leva ao bloco do campo suspeito e fecha o banner (CA-4)', function () {
+    $component = quizComBalancoInconsistente($this)->call('proximoBloco');
+
+    // Q16 (despesas financeiras) vive no Bloco 2.
+    $component->call('irParaCampo', 'Q16')
+        ->assertSet('bloco_atual', 2)
+        ->assertSet('alertas_cruzados', []);
+
+    // Q06 (dívidas) vive no Bloco 3.
+    $component->call('irParaCampo', 'Q06')
+        ->assertSet('bloco_atual', 3);
+});
+
+it('não duplica alertas_aceitos ao reaceitar a mesma regra', function () {
+    $component = quizComBalancoInconsistente($this)
+        ->call('proximoBloco')
+        ->call('continuarComAlertas')   // aceita R3 (→ bloco 4)
+        ->call('blocoAnterior')         // volta ao 3
+        ->call('proximoBloco');         // dados iguais — já aceito, não re-segura
+
+    // Como R3 já foi aceito, o gate não re-segura: avança direto.
+    $component->assertSet('bloco_atual', 4);
+    expect($component->get('alertas_aceitos'))->toHaveCount(1);
+});
+
+it('grava alertas_aceitos no Diagnóstico ao submeter (CA-3 ponta-a-ponta)', function () {
+    Event::fake();
+
+    $component = quizComBalancoInconsistente($this)
+        ->call('proximoBloco')
+        ->call('continuarComAlertas')   // → bloco 4
+        ->set('Q17', 'nao')
+        ->call('submeter')
+        ->assertHasNoErrors()
+        ->assertRedirect();
+
+    $diagnostico = Diagnostico::query()->first();
+    $payload = (array) $diagnostico->quiz_payload;
+
+    expect($payload)->toHaveKey('alertas_aceitos')
+        ->and($payload['alertas_aceitos'][0]['regra'])->toBe('R3');
+});
+
+it('não mostra alertas com dados consistentes — sem falso positivo', function () {
+    quizPreencherAteBloco4($this)   // dados saudáveis: já avança 3 → 4
+        ->assertSet('bloco_atual', 4)
+        ->assertSet('alertas_cruzados', []);
+});
+
+// ============================================================================
 // Helpers
 // ============================================================================
 
@@ -392,4 +472,32 @@ function quizPreencherAteBloco4(TestCase $test): Testable
         ->set('Q06', '40000')
         ->set('Q07', '80000')
         ->call('proximoBloco');  // 3 → 4
+}
+
+/**
+ * Preenche os Blocos 2 e 3 com um balanço inconsistente (passivo ≫ ativo → R3),
+ * deixando o componente parado no Bloco 3, pronto para tentar avançar e disparar
+ * o gate de validações cruzadas (STORY-034). Bloco 2 fica saudável de propósito,
+ * para que só a R3 dispare.
+ */
+function quizComBalancoInconsistente(TestCase $test): Testable
+{
+    return Livewire::test(Quiz::class, ['empresa' => $test->empresa])
+        ->call('proximoBloco')   // 1 → 2
+        ->set('Q08', '50000')
+        ->set('Q09', '100000')
+        ->set('Q14', '20000')
+        ->set('Q15', '8000')
+        ->set('Q16', '2000')
+        ->set('Q10', '90')
+        ->set('Q11', '15')
+        ->set('Q12', '15')
+        ->set('Q13', '2')
+        ->call('proximoBloco')   // 2 → 3
+        ->set('Q02', '1000')
+        ->set('Q03', '1000')
+        ->set('Q04', '1000')
+        ->set('Q05', '1000')
+        ->set('Q06', '100000')
+        ->set('Q07', '100000');
 }

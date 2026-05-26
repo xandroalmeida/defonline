@@ -6,6 +6,8 @@ namespace App\Livewire\Diagnostico;
 
 use App\Actions\CalcularDiagnostico;
 use App\Domain\Cpf;
+use App\Domain\Quiz\Alerta;
+use App\Domain\Quiz\ValidacoesCruzadas;
 use App\Events\QuizIniciado;
 use App\Models\EmpresaAnalisada;
 use App\Models\QuizRascunho;
@@ -55,6 +57,22 @@ final class Quiz extends Component
 
     /** True quando o rascunho anterior expirou (banner "começamos do início"). */
     public bool $rascunho_expirou = false;
+
+    /**
+     * Alertas de validação cruzada pendentes no gate Bloco 3 → 4 (STORY-034).
+     * Cada item é o {@see Alerta::toArray()}; vazio = nenhuma inconsistência aberta.
+     *
+     * @var list<array<string, mixed>>
+     */
+    public array $alertas_cruzados = [];
+
+    /**
+     * Alertas que Roberto optou por ignorar (CA-3). Persistidos em
+     * `quiz_payload.alertas_aceitos` no submit — fora do `payload_hash`.
+     *
+     * @var list<array{regra: string, ocorrido_em: string, valor_envolvido: float|int}>
+     */
+    public array $alertas_aceitos = [];
 
     // -------- Bloco 1: Identificação --------
     public string $Q01 = 'industria';   // EPIC-002 só Indústria.
@@ -153,15 +171,117 @@ final class Quiz extends Component
             );
         }
 
-        $this->bloco_atual = min(4, $this->bloco_atual + 1);
-        $this->persistirRascunho();
-        $this->retomando_rascunho = false;
-        $this->rascunho_expirou = false;
+        // CA-5: ao sair do Bloco 3 (Balanço), checa inconsistências entre blocos.
+        // Se houver alerta ainda não aceito, segura o avanço e mostra o banner inline.
+        if ($this->bloco_atual === 3) {
+            $alertas = $this->detectarAlertasCruzados();
+            if ($alertas !== [] && ! $this->todosAlertasJaAceitos($alertas)) {
+                $this->alertas_cruzados = $alertas;
+
+                return;
+            }
+        }
+
+        $this->avancarBloco();
     }
 
     public function blocoAnterior(): void
     {
         $this->bloco_atual = max(1, $this->bloco_atual - 1);
+        $this->alertas_cruzados = [];
+    }
+
+    /**
+     * CA-5: Roberto vê os alertas e decide seguir mesmo assim. Registra o "aceito"
+     * (CA-3) e avança para o Bloco 4.
+     */
+    public function continuarComAlertas(): void
+    {
+        foreach ($this->alertas_cruzados as $alerta) {
+            // Dedup por regra — reaceitar a mesma regra (ex.: voltou e avançou de novo) não duplica.
+            $this->alertas_aceitos = array_values(array_filter(
+                $this->alertas_aceitos,
+                fn (array $registro): bool => $registro['regra'] !== $alerta['regra'],
+            ));
+            $this->alertas_aceitos[] = [
+                'regra' => $alerta['regra'],
+                'ocorrido_em' => now()->toIso8601String(),
+                'valor_envolvido' => $alerta['valor_envolvido'],
+            ];
+        }
+
+        $this->alertas_cruzados = [];
+        $this->avancarBloco();
+    }
+
+    /**
+     * CA-4/CA-5: leva Roberto direto ao campo suspeito (no bloco correto) e pede
+     * foco via evento de browser. Fecha o banner — ele reavalia ao clicar Próximo.
+     */
+    public function irParaCampo(string $campo): void
+    {
+        $this->alertas_cruzados = [];
+        $this->bloco_atual = $this->blocoDoCampo($campo);
+        $this->dispatch('focar-campo', campo: $campo);
+    }
+
+    /**
+     * Avança um bloco (limitado a 4) e persiste o rascunho. Centraliza o que era
+     * o fim do {@see proximoBloco()} para reuso pelo gate de validações cruzadas.
+     */
+    private function avancarBloco(): void
+    {
+        $this->bloco_atual = min(4, $this->bloco_atual + 1);
+        $this->persistirRascunho();
+        $this->retomando_rascunho = false;
+        $this->rascunho_expirou = false;
+        $this->alertas_cruzados = [];
+    }
+
+    /**
+     * Roda as validações cruzadas (STORY-034 §6.6) sobre os valores atuais,
+     * convertidos para float canônico. Retorna a lista serializável de alertas.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function detectarAlertasCruzados(): array
+    {
+        $campos = ['Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07', 'Q09', 'Q14', 'Q15', 'Q16'];
+
+        $valores = [];
+        foreach ($campos as $campo) {
+            $valores[$campo] = self::parseDecimal($this->{$campo});
+        }
+
+        return array_map(
+            fn (Alerta $alerta): array => $alerta->toArray(),
+            app(ValidacoesCruzadas::class)->validar($valores),
+        );
+    }
+
+    /**
+     * True quando toda regra dos `$alertas` já consta em `alertas_aceitos` — evita
+     * re-segurar o avanço quando Roberto volta e avança de novo sem mudar os dados.
+     *
+     * @param  list<array<string, mixed>>  $alertas
+     */
+    private function todosAlertasJaAceitos(array $alertas): bool
+    {
+        $aceitos = array_column($this->alertas_aceitos, 'regra');
+
+        foreach ($alertas as $alerta) {
+            if (! in_array($alerta['regra'], $aceitos, true)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /** Bloco do quiz (2 = DRE/Operação, 3 = Balanço) que contém o campo dado. */
+    private function blocoDoCampo(string $campo): int
+    {
+        return in_array($campo, ['Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07'], true) ? 3 : 2;
     }
 
     /**
@@ -222,6 +342,7 @@ final class Quiz extends Component
                 $this->empresa,
                 $this->payloadCanonico(),
                 $this->Q01,
+                $this->alertas_aceitos,
             );
         } catch (Throwable $e) {
             // CA-9: exception inesperada não persiste registro parcial (action usa transaction).
@@ -412,9 +533,11 @@ final class Quiz extends Component
     }
 
     /**
-     * Payload "raw" (formato BR preservado) para o rascunho.
+     * Payload "raw" (formato BR preservado) para o rascunho. Inclui
+     * `alertas_aceitos` para que a decisão de Roberto sobreviva à retomada de
+     * rascunho (re-hidratado em {@see mount()} via `property_exists`).
      *
-     * @return array<string, string|null>
+     * @return array<string, mixed>
      */
     private function payloadParcial(): array
     {
@@ -428,6 +551,7 @@ final class Quiz extends Component
             'Q21' => $this->Q21 !== null ? Cpf::normalizar($this->Q21) : null,
             'Q22' => $this->Q22 !== null ? Cpf::normalizar($this->Q22) : null,
             'Q23' => $this->Q23 !== null ? Cpf::normalizar($this->Q23) : null,
+            'alertas_aceitos' => $this->alertas_aceitos,
         ];
     }
 

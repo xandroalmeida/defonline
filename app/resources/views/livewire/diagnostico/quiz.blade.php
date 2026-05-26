@@ -52,7 +52,8 @@
     JS;
 @endphp
 
-<div>
+<div x-data
+     x-on:focar-campo.window="$nextTick(() => document.getElementById($event.detail.campo)?.focus())">
     <x-page-header :title="'Diagnóstico — ' . ($empresa->nome_fantasia ?: $empresa->razao_social)"
                    :subtitle="'Bloco ' . $bloco_atual . ' de 4 — ' . $tituloBloco"/>
 
@@ -192,6 +193,38 @@
                         'help' => 'Obrigações comerciais em aberto.',
                         'mask' => $maskBrl,
                     ])
+
+                    {{-- STORY-034 — validações cruzadas DRE × Balanço (§6.6). Banner inline,
+                         não-bloqueante: aparece ao tentar avançar quando há inconsistência. --}}
+                    @if (count($alertas_cruzados) > 0)
+                        <div class="rounded-md border border-[color:var(--color-farol-amarelo)]/40 bg-[color:var(--color-farol-amarelo)]/10 p-4 flex flex-col gap-3"
+                             role="alert" aria-live="polite" dusk="quiz-alertas-cruzados">
+                            <p class="font-semibold text-[color:var(--color-primary)] m-0">
+                                Detectamos inconsistências. Você quer corrigir agora?
+                            </p>
+                            <ul class="flex flex-col gap-3 list-none m-0 p-0">
+                                @foreach ($alertas_cruzados as $alerta)
+                                    <li class="flex flex-col gap-1.5" dusk="quiz-alerta-{{ $alerta['regra'] }}">
+                                        <p class="text-sm text-[color:var(--color-primary)] m-0">{{ $alerta['mensagem'] }}</p>
+                                        <div>
+                                            <x-button type="button" variant="secondary" size="sm"
+                                                      wire:click="irParaCampo('{{ $alerta['campo_foco'] }}')"
+                                                      dusk="quiz-alerta-corrigir-{{ $alerta['regra'] }}">
+                                                {{ $alerta['botao_label'] }}
+                                            </x-button>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ul>
+                            <div class="pt-1 border-t border-[color:var(--color-border)]">
+                                <x-button type="button" variant="primary" size="sm"
+                                          wire:click="continuarComAlertas"
+                                          dusk="quiz-alertas-continuar">
+                                    Continuar mesmo assim
+                                </x-button>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             @endif
 

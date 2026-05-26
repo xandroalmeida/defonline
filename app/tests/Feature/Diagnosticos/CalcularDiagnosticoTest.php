@@ -147,6 +147,31 @@ it('rollback de transaction se algo falhar — exception inesperada não persist
     expect(Diagnostico::withoutGlobalScopes()->count())->toBe(0);
 });
 
+it('persiste alertas_aceitos no quiz_payload sem alterar o payload_hash (STORY-034 CA-3)', function () {
+    $u = Usuario::factory()->create();
+    Auth::login($u);
+    $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $u->id]);
+
+    $payload = payloadIndustriaCanonico();
+    $alertas = [
+        ['regra' => 'R3', 'ocorrido_em' => now()->toIso8601String(), 'valor_envolvido' => 70000.0],
+    ];
+
+    $action = app(CalcularDiagnostico::class);
+    $semAlertas = $action->execute($empresa, $payload);
+    $comAlertas = $action->execute($empresa, $payload, 'industria', $alertas);
+
+    // Mesmos inputs → mesmo hash, mesmo com a auditoria gravada.
+    expect($comAlertas->payload_hash)->toBe($semAlertas->payload_hash);
+
+    $persistido = (array) $comAlertas->quiz_payload;
+    expect($persistido)->toHaveKey('alertas_aceitos')
+        ->and($persistido['alertas_aceitos'][0]['regra'])->toBe('R3');
+
+    // Sem alertas, a chave não é criada.
+    expect((array) $semAlertas->quiz_payload)->not->toHaveKey('alertas_aceitos');
+});
+
 it('valor de indicador é numérico quando calculável (margem_bruta verde 50%)', function () {
     // **Nota:** Postgres `jsonb` normaliza floats sem fração para int ao armazenar
     // (50.0 → 50). O cast `AsArrayObject` devolve o tipo que veio do banco. O

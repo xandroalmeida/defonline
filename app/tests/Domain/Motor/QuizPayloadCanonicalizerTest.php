@@ -97,3 +97,23 @@ it('serializa false sem trocar por 0', function () {
     $json = QuizPayloadCanonicalizer::toJson(QuizPayloadCanonicalizer::canonicalize(['Q17' => false]));
     expect($json)->toBe('{"Q17":false}');
 });
+
+it('remove alertas_aceitos do canonical — não entra no hash (STORY-034 CA-3)', function () {
+    $base = ['Q01' => 1, 'Q06' => '40000', 'Q16' => '10000'];
+    $comAlertas = $base + [
+        'alertas_aceitos' => [
+            ['regra' => 'R1', 'ocorrido_em' => '2026-05-26T10:00:00+00:00', 'valor_envolvido' => 120000.0],
+        ],
+    ];
+
+    $canonical = QuizPayloadCanonicalizer::canonicalize($comAlertas);
+
+    // A chave some do canonical (logo, do JSON e do hash).
+    expect($canonical)->not->toHaveKey('alertas_aceitos');
+
+    $hashBase = hash('sha256', QuizPayloadCanonicalizer::toJson(QuizPayloadCanonicalizer::canonicalize($base)));
+    $hashComAlertas = hash('sha256', QuizPayloadCanonicalizer::toJson($canonical));
+
+    // Mesmos inputs Q0X ⇒ mesmo payload_hash, independentemente dos alertas aceitos.
+    expect($hashComAlertas)->toBe($hashBase);
+});

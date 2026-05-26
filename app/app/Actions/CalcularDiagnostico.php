@@ -33,15 +33,24 @@ final class CalcularDiagnostico
 
     /**
      * @param  array<string, mixed>  $quizPayload  Respostas brutas do quiz (será canonicalizado).
+     * @param  list<array{regra: string, ocorrido_em: string, valor_envolvido: float|int}>  $alertasAceitos
+     *                                                                                                       Alertas de validação cruzada que Roberto optou por ignorar (STORY-034 CA-3). Gravados
+     *                                                                                                       em `quiz_payload.alertas_aceitos` para auditoria, mas **fora** do `payload_hash`.
      *
      * @throws \InvalidArgumentException se `$empresa->setor` não é suportado nesta versão.
      */
-    public function execute(EmpresaAnalisada $empresa, array $quizPayload, string $setor = 'industria'): Diagnostico
+    public function execute(EmpresaAnalisada $empresa, array $quizPayload, string $setor = 'industria', array $alertasAceitos = []): Diagnostico
     {
         $canonical = QuizPayloadCanonicalizer::canonicalize($quizPayload);
         $payloadHash = hash('sha256', QuizPayloadCanonicalizer::toJson($canonical));
 
         $saida = $this->motor->calcular($canonical, $setor);
+
+        // Auditoria mesclada DEPOIS do hash e do motor: não muda payload_hash nem chega ao motor.
+        $quizPayloadPersistido = $canonical;
+        if ($alertasAceitos !== []) {
+            $quizPayloadPersistido['alertas_aceitos'] = $alertasAceitos;
+        }
 
         return DB::transaction(fn () => Diagnostico::create([
             'usuario_id' => $empresa->usuario_id,
@@ -49,7 +58,7 @@ final class CalcularDiagnostico
             'motor_version' => $saida['motor_version'],
             'matrix_version' => $saida['matrix_version'],
             'setor' => $saida['setor'],
-            'quiz_payload' => $canonical,
+            'quiz_payload' => $quizPayloadPersistido,
             'payload_hash' => $payloadHash,
             'indicadores_calculados' => $saida['indicadores_calculados'],
             'resumo_executivo' => $saida['resumo_executivo'],

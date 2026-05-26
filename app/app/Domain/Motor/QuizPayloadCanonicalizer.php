@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Motor;
 
+use App\Actions\CalcularDiagnostico;
+
 /**
  * Canonicalização do `quiz_payload` para idempotência (IDR-010 §sub-decisão 3;
  * `design/idempotencia.md`).
@@ -16,6 +18,11 @@ namespace App\Domain\Motor;
  *   4. Numéricos passados como string ("123.45") **permanecem string** — o
  *      canonicalizador NÃO força casas decimais (responsabilidade do quiz).
  *      Numéricos PHP `int`/`float` permanecem como tal.
+ *   5. A chave `alertas_aceitos` (auditoria de validações cruzadas, STORY-034) é
+ *      **removida** antes de tudo — não compõe o `payload_hash` (IDR-010
+ *      §sub-decisão 3): dois diagnósticos que só diferem nos alertas aceitos têm
+ *      inputs idênticos. O dado segue gravado em `quiz_payload`, mesclado pela
+ *      {@see CalcularDiagnostico} APÓS o hash.
  *
  * O método {@see toJson()} serializa o canonical com flags determinísticas
  * (`JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION`),
@@ -33,6 +40,9 @@ final class QuizPayloadCanonicalizer
      */
     public static function canonicalize(array $payload): array
     {
+        // STORY-034: auditoria das validações cruzadas vive no payload, mas fora do hash.
+        unset($payload['alertas_aceitos']);
+
         return self::normalize($payload);
     }
 
