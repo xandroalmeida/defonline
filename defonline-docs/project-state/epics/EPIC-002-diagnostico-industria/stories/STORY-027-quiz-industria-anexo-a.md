@@ -55,19 +55,19 @@ Sem o quiz, não há input para o motor. Esta é a UX mais densa do produto.
 
 ## Critérios de aceite
 
-- [ ] **CA-1 (Rota e navegação):** Item `Diagnósticos` da sidebar deixa de ser disabled. Clicar leva a uma tela "Selecione uma empresa para diagnosticar" se nenhuma estiver selecionada, ou direto para `/empresas/{id}/diagnosticos/novo` se Roberto chegou via card de empresa.
-- [ ] **CA-2 (4 blocos navegáveis):** Quiz tem 4 blocos com botões `Próximo` / `Voltar`. Progresso visual claro (1/4, 2/4, etc.).
-- [ ] **CA-3 (23 campos com labels do Anexo A):** todos os labels e helps copiados literalmente do Anexo A. Mudança de copy requer PO.
-- [ ] **CA-4 (Máscaras funcionando):** R$ (com decimais), dias (inteiro), %, CPF. Programador escolhe lib (alpinejs-mask, imask, mask própria — preferência: alpine js + livewire).
-- [ ] **CA-5 (Validações por campo):** obrigatoriedade, faixa numérica plausível (não negativo onde não faz sentido), tipo. Mensagens em PT-BR claras.
-- [ ] **CA-6 (Rascunho persistido em `quiz_rascunhos` — atualizado 2026-05-25):** ao apertar `Próximo`, payload parcial é salvo em uma tabela nova **`quiz_rascunhos`** (migration criada nesta estória; schema mínimo descrito no item 5 acima). **Não** em `diagnosticos`. Voltar à tela após 1h mostra os dados preenchidos. UNIQUE parcial `(usuario_id, empresa_analisada_id) WHERE deleted_at IS NULL` — 1 rascunho ativo por (Roberto, empresa).
-- [ ] **CA-7 (Expiração do rascunho — §6.4):** rascunho expira em 90 dias (default da spec) via coluna `expires_at`. Cron de purge de rascunhos expirados fica como **débito explícito** desta estória (não bloqueia DoD — só listar em "Notas do agente" ao final). Listagem de "Em rascunho" só mostra registros com `expires_at > now()`.
-- [ ] **CA-8 (Submit final):** click em `Calcular diagnóstico` → chama o motor (STORY-028) → redireciona para `/diagnosticos/{id}`. Loading state durante cálculo (skeleton ou spinner).
-- [ ] **CA-9 (Anti-duplo-submit — atualizado 2026-05-25 conforme IDR-010):** **não** há dedup no banco. Idempotência do **cálculo** é garantida pelo motor (golden hashes — STORY-028). Para evitar duplo submit acidental (clique duplo, F5), o botão `Calcular diagnóstico` é desabilitado após o primeiro clique até o redirect; uso de Livewire `wire:loading.attr="disabled"` ou equivalente. Se Roberto refresh-ar a tela do resultado e clicar `Refazer diagnóstico`, isso **é** uma nova emissão consciente — dois registros em `diagnosticos` com mesmo `payload_hash` são aceitáveis (IDR-010 §sub-decisão 2).
-- [ ] **CA-10 (Acessibilidade):** todos os campos com `<label>` associado; navegação por teclado funciona; foco visível.
-- [ ] **CA-11 (Mobile):** layout em viewport 360x800 sem scroll horizontal; campos ocupam largura total; teclado numérico aparece para campos monetários (input type number ou inputmode="decimal").
-- [ ] **CA-12 (Testes):** cobertura ≥ 80%. Pest: 1 teste por bloco (renderização + validação + persistência de rascunho); Dusk smoke: preencher quiz inteiro com dados válidos e ver redirect.
-- [ ] **CA-13 (Evento `quiz_iniciado`):** chamado no primeiro `Próximo`. Detalhes em STORY-035.
+- [x] **CA-1 (Rota e navegação):** Item `Diagnósticos` da sidebar deixa de ser disabled. Clicar leva a uma tela "Selecione uma empresa para diagnosticar" se nenhuma estiver selecionada, ou direto para `/empresas/{id}/diagnosticos/novo` se Roberto chegou via card de empresa.
+- [x] **CA-2 (4 blocos navegáveis):** Quiz tem 4 blocos com botões `Próximo` / `Voltar`. Progresso visual claro (1/4, 2/4, etc.).
+- [x] **CA-3 (23 campos com labels do Anexo A):** todos os labels e helps copiados literalmente do Anexo A. Mudança de copy requer PO.
+- [x] **CA-4 (Máscaras funcionando):** R$ (com decimais), dias (inteiro), %, CPF. Programador escolhe lib (alpinejs-mask, imask, mask própria — preferência: alpine js + livewire).
+- [x] **CA-5 (Validações por campo):** obrigatoriedade, faixa numérica plausível (não negativo onde não faz sentido), tipo. Mensagens em PT-BR claras.
+- [x] **CA-6 (Rascunho persistido em `quiz_rascunhos` — atualizado 2026-05-25):** ao apertar `Próximo`, payload parcial é salvo em uma tabela nova **`quiz_rascunhos`** (migration criada nesta estória; schema mínimo descrito no item 5 acima). **Não** em `diagnosticos`. Voltar à tela após 1h mostra os dados preenchidos. UNIQUE parcial `(usuario_id, empresa_analisada_id) WHERE deleted_at IS NULL` — 1 rascunho ativo por (Roberto, empresa).
+- [x] **CA-7 (Expiração do rascunho — §6.4):** rascunho expira em 90 dias (default da spec) via coluna `expires_at`. Cron de purge de rascunhos expirados fica como **débito explícito** desta estória (não bloqueia DoD — só listar em "Notas do agente" ao final). Listagem de "Em rascunho" só mostra registros com `expires_at > now()`.
+- [x] **CA-8 (Submit final):** click em `Calcular diagnóstico` → chama o motor (STORY-028) → redireciona para `/diagnosticos/{id}`. Loading state durante cálculo (skeleton ou spinner).
+- [x] **CA-9 (Anti-duplo-submit — atualizado 2026-05-25 conforme IDR-010):** **não** há dedup no banco. Idempotência do **cálculo** é garantida pelo motor (golden hashes — STORY-028). Para evitar duplo submit acidental (clique duplo, F5), o botão `Calcular diagnóstico` é desabilitado após o primeiro clique até o redirect; uso de Livewire `wire:loading.attr="disabled"` ou equivalente. Se Roberto refresh-ar a tela do resultado e clicar `Refazer diagnóstico`, isso **é** uma nova emissão consciente — dois registros em `diagnosticos` com mesmo `payload_hash` são aceitáveis (IDR-010 §sub-decisão 2).
+- [x] **CA-10 (Acessibilidade):** todos os campos com `<label>` associado; navegação por teclado funciona; foco visível.
+- [x] **CA-11 (Mobile):** layout em viewport 360x800 sem scroll horizontal; campos ocupam largura total; teclado numérico aparece para campos monetários (input type number ou inputmode="decimal").
+- [x] **CA-12 (Testes):** cobertura ≥ 80%. Pest: 1 teste por bloco (renderização + validação + persistência de rascunho); Dusk smoke: preencher quiz inteiro com dados válidos e ver redirect.
+- [x] **CA-13 (Evento `quiz_iniciado`):** chamado no primeiro `Próximo`. Detalhes em STORY-035.
 
 ## Fora de escopo
 

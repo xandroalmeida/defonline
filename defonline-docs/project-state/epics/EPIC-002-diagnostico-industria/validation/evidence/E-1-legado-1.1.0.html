@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="YwCJsSNESDqLz7Q7988j3BBfbVfe7YgNxPYgEpWS">
+    <title>Diagnóstico de 25/05/2026 · DEFOnline</title>
+
+    <link rel="preload" as="style" href="http://localhost:8090/build/assets/app-CVqeX598.css" /><link rel="modulepreload" as="script" href="http://localhost:8090/build/assets/app-BvRk9kiK.js" /><link rel="stylesheet" href="http://localhost:8090/build/assets/app-CVqeX598.css" data-navigate-track="reload" /><script type="module" src="http://localhost:8090/build/assets/app-BvRk9kiK.js" data-navigate-track="reload"></script>    <!-- Livewire Styles --><style >[wire\:loading][wire\:loading], [wire\:loading\.delay][wire\:loading\.delay], [wire\:loading\.list-item][wire\:loading\.list-item], [wire\:loading\.inline-block][wire\:loading\.inline-block], [wire\:loading\.inline][wire\:loading\.inline], [wire\:loading\.block][wire\:loading\.block], [wire\:loading\.flex][wire\:loading\.flex], [wire\:loading\.table][wire\:loading\.table], [wire\:loading\.grid][wire\:loading\.grid], [wire\:loading\.inline-flex][wire\:loading\.inline-flex] {display: none;}[wire\:loading\.delay\.none][wire\:loading\.delay\.none], [wire\:loading\.delay\.shortest][wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter][wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short][wire\:loading\.delay\.short], [wire\:loading\.delay\.default][wire\:loading\.delay\.default], [wire\:loading\.delay\.long][wire\:loading\.delay\.long], [wire\:loading\.delay\.longer][wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest][wire\:loading\.delay\.longest] {display: none;}[wire\:offline][wire\:offline] {display: none;}[wire\:dirty]:not(textarea):not(input):not(select) {display: none;}:root {--livewire-progress-bar-color: #2299dd;}[x-cloak] {display: none !important;}[wire\:cloak] {display: none !important;}dialog#livewire-error::backdrop {background-color: rgba(0, 0, 0, .6);}</style>
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <div x-data="{ navOpen: false }"
+         @keydown.escape.window="navOpen = false"
+         class="flex-1 flex flex-col">
+
+        
+        <header data-testid="app-header"
+        class="sticky top-0 z-30 flex items-center justify-between gap-3 h-16 px-4 sm:px-6 bg-[color:var(--color-surface)] border-b border-[color:var(--color-border)]">
+
+    <div class="flex items-center gap-3 min-w-0">
+        
+        <button type="button"
+                class="inline-flex items-center justify-center w-11 h-11 lg:hidden rounded-md text-[color:var(--color-primary)] hover:bg-[color:var(--color-neutral)]"
+                aria-controls="app-nav-drawer"
+                :aria-expanded="navOpen ? 'true' : 'false'"
+                @click="navOpen = !navOpen"
+                aria-label="Abrir menu"
+                dusk="app-header-hamburger">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <line x1="4" y1="7" x2="20" y2="7"/>
+                <line x1="4" y1="12" x2="20" y2="12"/>
+                <line x1="4" y1="17" x2="20" y2="17"/>
+            </svg>
+        </button>
+
+        <a href="http://localhost:8090/home" class="flex items-center gap-2 text-[color:var(--color-primary)] no-underline"
+           dusk="app-header-logo">
+            <span class="inline-flex items-center gap-2">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
+         width="32" height="32"
+         role="img" aria-label="DEFOnline">
+        <title>DEFOnline</title>
+        <path fill="var(--color-primary)" fill-rule="evenodd"
+              d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z M9 9 V23 H15 A9 9 0 0 0 15 9 Z"/>
+        <circle cx="26" cy="25" r="2" fill="var(--color-tertiary)"/>
+    </svg>
+            <span class="text-[color:var(--color-primary)] font-medium text-base tracking-tight hidden min-[480px]:inline">
+            DEFOnline
+        </span>
+    </span>
+        </a>
+
+                    <span class="pill" data-testid="env-pill" dusk="env-pill">local</span>
+            </div>
+
+            <div class="relative" x-data="{ open: false }"
+             @keydown.escape.window="open = false"
+             @click.outside="open = false">
+            <button type="button"
+                    class="inline-flex items-center gap-2 h-11 px-3 rounded-md hover:bg-[color:var(--color-neutral)]"
+                    @click="open = !open"
+                    :aria-expanded="open ? 'true' : 'false'"
+                    aria-haspopup="menu"
+                    dusk="app-header-conta-toggle">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[color:var(--color-neutral)] border border-[color:var(--color-border)] text-[color:var(--color-primary)] text-sm font-medium"
+                      aria-hidden="true">
+                    R
+                </span>
+                <span class="hidden min-[640px]:inline text-[color:var(--color-primary)] font-medium text-sm"
+                      dusk="app-header-saudacao">
+                    Olá, Roberto
+                </span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+
+            <div x-show="open"
+                 x-cloak
+                 x-transition.opacity.duration.150ms
+                 role="menu"
+                 class="absolute right-0 mt-2 w-56 bg-[color:var(--color-surface)] border border-[color:var(--color-border)] rounded-lg shadow-md py-1 overflow-hidden"
+                 dusk="app-header-conta-menu">
+                <button type="button"
+                        role="menuitem"
+                        disabled
+                        aria-disabled="true"
+                        title="Em breve — Onda 2"
+                        class="w-full text-left px-4 py-2.5 text-sm text-[color:var(--color-secondary)] cursor-not-allowed opacity-60"
+                        dusk="app-header-conta-editar">
+                    Editar perfil
+                </button>
+                <form method="POST" action="http://localhost:8090/logout" class="m-0" dusk="app-header-conta-sair-form">
+                    <input type="hidden" name="_token" value="YwCJsSNESDqLz7Q7988j3BBfbVfe7YgNxPYgEpWS" autocomplete="off">                    <button type="submit"
+                            role="menuitem"
+                            class="w-full text-left px-4 py-2.5 text-sm text-[color:var(--color-primary)] hover:bg-[color:var(--color-neutral)]"
+                            dusk="app-header-conta-sair">
+                        Sair
+                    </button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+        
+        <div class="flex-1 flex">
+            <div x-show="navOpen"
+     x-cloak
+     x-transition.opacity.duration.200ms
+     class="fixed inset-0 z-40 bg-[color:var(--color-primary)]/40 lg:hidden"
+     @click="navOpen = false"
+     aria-hidden="true">
+</div>
+
+
+<aside id="app-nav-drawer"
+       data-testid="app-nav"
+       class="fixed top-0 left-0 z-50 h-full w-[280px] max-w-[80vw] bg-[color:var(--color-surface)] border-r border-[color:var(--color-border)] transform transition-transform duration-200 ease-out lg:translate-x-0 lg:sticky lg:top-0 lg:z-auto lg:w-60 lg:h-screen lg:max-w-none lg:transform-none"
+       :class="navOpen ? 'translate-x-0' : '-translate-x-full'"
+       :aria-hidden="navOpen ? 'false' : 'true'"
+       aria-label="Navegação principal">
+
+    
+    <div class="flex items-center justify-between h-16 px-4 border-b border-[color:var(--color-border)] lg:hidden">
+        <span class="inline-flex items-center gap-2">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
+         width="28" height="28"
+         role="img" aria-label="DEFOnline">
+        <title>DEFOnline</title>
+        <path fill="var(--color-primary)" fill-rule="evenodd"
+              d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z M9 9 V23 H15 A9 9 0 0 0 15 9 Z"/>
+        <circle cx="26" cy="25" r="2" fill="var(--color-tertiary)"/>
+    </svg>
+            <span class="text-[color:var(--color-primary)] font-medium text-base tracking-tight ">
+            DEFOnline
+        </span>
+    </span>
+        <button type="button"
+                class="inline-flex items-center justify-center w-11 h-11 rounded-md text-[color:var(--color-primary)] hover:bg-[color:var(--color-neutral)]"
+                @click="navOpen = false"
+                aria-label="Fechar menu"
+                dusk="app-nav-fechar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <line x1="6" y1="6" x2="18" y2="18"/>
+                <line x1="18" y1="6" x2="6" y2="18"/>
+            </svg>
+        </button>
+    </div>
+
+    <nav class="flex flex-col gap-1 p-4" aria-label="Navegação principal">
+                                    <a href="http://localhost:8090/home"
+                   class="nav-item "
+                                      dusk="app-nav-minhas-empresas"
+                   @click="navOpen = false">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 22V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v18M4 22h16M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2M9 18h2M13 18h2"/>
+                    </svg>
+                    <span>Minhas Empresas</span>
+                </a>
+                                                <a href="http://localhost:8090/empresas/nova"
+                   class="nav-item "
+                                      dusk="app-nav-adicionar-empresa"
+                   @click="navOpen = false">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    <span>Adicionar Empresa</span>
+                </a>
+                                                <a href="http://localhost:8090/diagnosticos/novo"
+                   class="nav-item  is-active "
+                    aria-current="page"                    dusk="app-nav-diagnosticos"
+                   @click="navOpen = false">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 3v18h18M7 14l4-4 4 4 6-6"/>
+                    </svg>
+                    <span>Diagnósticos</span>
+                </a>
+                                                <span class="nav-item is-disabled"
+                      aria-disabled="true"
+                      tabindex="-1"
+                      title="Em breve — Onda 2"
+                      data-tooltip="Em breve — Onda 2"
+                      dusk="app-nav-historico">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+                    </svg>
+                    <span>Histórico</span>
+                </span>
+                                                <span class="nav-item is-disabled"
+                      aria-disabled="true"
+                      tabindex="-1"
+                      title="Em breve — Onda 2"
+                      data-tooltip="Em breve — Onda 2"
+                      dusk="app-nav-conta">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>
+                    </svg>
+                    <span>Conta</span>
+                </span>
+                        </nav>
+</aside>
+
+            <div class="flex-1 flex flex-col min-w-0">
+                <main class="flex-1 px-4 sm:px-6 py-6 sm:py-8" data-testid="app-main">
+                    <div class="max-w-[960px] mx-auto w-full">
+                                                    <nav aria-label="breadcrumb" class="mb-4 text-sm" >
+        <ol class="flex flex-wrap items-center gap-2 m-0 p-0 list-none">
+                                            <li class="flex items-center gap-2">
+                                            <a href="http://localhost:8090/home"
+                           class="text-[color:var(--color-secondary)] hover:text-[color:var(--color-tertiary)] no-underline hover:underline">
+                            Minhas Empresas
+                        </a>
+                        <span aria-hidden="true" class="text-[color:var(--color-secondary)]">›</span>
+                                    </li>
+                                            <li class="flex items-center gap-2">
+                                            <a href="http://localhost:8090/empresas/019e60af-e5f9-7021-8b32-dd21098fc64c"
+                           class="text-[color:var(--color-secondary)] hover:text-[color:var(--color-tertiary)] no-underline hover:underline">
+                            Demo · saudavel
+                        </a>
+                        <span aria-hidden="true" class="text-[color:var(--color-secondary)]">›</span>
+                                    </li>
+                                            <li class="flex items-center gap-2">
+                                            <span aria-current="page"
+                              class="text-[color:var(--color-primary)] font-medium">
+                            Diagnóstico de 25/05/2026
+                        </span>
+                                    </li>
+                    </ol>
+    </nav>
+                                                <header class="flex flex-col gap-2 mb-6 sm:flex-row sm:items-end sm:justify-between">
+    <div class="flex flex-col gap-1">
+                    <h1 class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)]">
+                Demo · saudavel
+            </h1>
+                            <p class="text-[color:var(--color-secondary)] text-sm m-0">
+                Diagnóstico de 25/05/2026
+            </p>
+            </div>
+            <div class="flex gap-3 flex-shrink-0">
+            <span class="pill" dusk="diagnostico-mvp-badge"
+                  style="background-color: rgba(99, 91, 255, 0.10); color: var(--color-tertiary); border: 1px solid rgba(99, 91, 255, 0.3); padding: 4px 10px; border-radius: 9999px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;">
+                Versão MVP
+            </span>
+        </div>
+    </header>
+
+    
+    
+    
+    <section aria-labelledby="indicadores-titulo" class="mb-8">
+        <h2 id="indicadores-titulo" class="sr-only">Indicadores essenciais</h2>
+
+        
+        <div class="hidden md:block rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] overflow-hidden shadow-[var(--shadow-sm)]">
+            <table class="w-full text-sm" data-testid="indicadores-tabela">
+                <caption class="sr-only">Indicadores essenciais com farol e mensagem.</caption>
+                <thead class="bg-[color:var(--color-neutral)]">
+                    <tr class="text-left">
+                        <th scope="col" class="px-4 py-3 text-[color:var(--color-secondary)] text-xs uppercase tracking-wider font-semibold">Indicador</th>
+                        <th scope="col" class="px-4 py-3 text-[color:var(--color-secondary)] text-xs uppercase tracking-wider font-semibold">Valor</th>
+                        <th scope="col" class="px-4 py-3 text-[color:var(--color-secondary)] text-xs uppercase tracking-wider font-semibold">Farol</th>
+                        <th scope="col" class="px-4 py-3 text-[color:var(--color-secondary)] text-xs uppercase tracking-wider font-semibold">Mensagem</th>
+                    </tr>
+                </thead>
+                <tbody class="[&_th]:px-4 [&_td]:px-4">
+                                                                        <tr class="border-b border-[color:var(--color-border)] last:border-b-0 align-top"
+    data-codigo="margem_bruta"
+    class="">
+    <th scope="row" class="py-3 pr-4 text-left text-[color:var(--color-primary)] font-medium">
+        Margem Bruta
+    </th>
+    <td class="py-3 pr-4 text-[color:var(--color-primary)] tabular-nums whitespace-nowrap">
+                    50,0%
+            </td>
+    <td class="py-3 pr-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </td>
+    <td class="py-3 text-[color:var(--color-secondary)] text-sm">
+        Faixa verde.
+    </td>
+</tr>
+                                                                                                <tr class="border-b border-[color:var(--color-border)] last:border-b-0 align-top"
+    data-codigo="margem_ebitda"
+    class="">
+    <th scope="row" class="py-3 pr-4 text-left text-[color:var(--color-primary)] font-medium">
+        Margem EBITDA
+    </th>
+    <td class="py-3 pr-4 text-[color:var(--color-primary)] tabular-nums whitespace-nowrap">
+                    22,0%
+            </td>
+    <td class="py-3 pr-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </td>
+    <td class="py-3 text-[color:var(--color-secondary)] text-sm">
+        Faixa verde.
+    </td>
+</tr>
+                                                                                                <tr class="border-b border-[color:var(--color-border)] last:border-b-0 align-top"
+    data-codigo="margem_liquida"
+    class="">
+    <th scope="row" class="py-3 pr-4 text-left text-[color:var(--color-primary)] font-medium">
+        Margem Líquida
+    </th>
+    <td class="py-3 pr-4 text-[color:var(--color-primary)] tabular-nums whitespace-nowrap">
+                    20,0%
+            </td>
+    <td class="py-3 pr-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </td>
+    <td class="py-3 text-[color:var(--color-secondary)] text-sm">
+        Faixa verde.
+    </td>
+</tr>
+                                                                                                <tr class="border-b border-[color:var(--color-border)] last:border-b-0 align-top"
+    data-codigo="divida_liquida_ebitda"
+    class="">
+    <th scope="row" class="py-3 pr-4 text-left text-[color:var(--color-primary)] font-medium">
+        Dívida Líquida / EBITDA
+    </th>
+    <td class="py-3 pr-4 text-[color:var(--color-primary)] tabular-nums whitespace-nowrap">
+                    -0,04×
+            </td>
+    <td class="py-3 pr-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </td>
+    <td class="py-3 text-[color:var(--color-secondary)] text-sm">
+        Faixa verde.
+    </td>
+</tr>
+                                                                                                <tr class="border-b border-[color:var(--color-border)] last:border-b-0 align-top"
+    data-codigo="despesas_fin_ebitda"
+    class="">
+    <th scope="row" class="py-3 pr-4 text-left text-[color:var(--color-primary)] font-medium">
+        Despesas Financeiras / EBITDA
+    </th>
+    <td class="py-3 pr-4 text-[color:var(--color-primary)] tabular-nums whitespace-nowrap">
+                    9,1%
+            </td>
+    <td class="py-3 pr-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </td>
+    <td class="py-3 text-[color:var(--color-secondary)] text-sm">
+        Faixa verde.
+    </td>
+</tr>
+                                                                                                <tr class="border-b border-[color:var(--color-border)] last:border-b-0 align-top"
+    data-codigo="fontes_recursos"
+    class="">
+    <th scope="row" class="py-3 pr-4 text-left text-[color:var(--color-primary)] font-medium">
+        Fontes de Recursos (PC / PL)
+    </th>
+    <td class="py-3 pr-4 text-[color:var(--color-primary)] tabular-nums whitespace-nowrap">
+                    0,46×
+            </td>
+    <td class="py-3 pr-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </td>
+    <td class="py-3 text-[color:var(--color-secondary)] text-sm">
+        Faixa verde.
+    </td>
+</tr>
+                                                                                                <tr class="border-b border-[color:var(--color-border)] last:border-b-0 align-top"
+    data-codigo="giro_ativo"
+    class="">
+    <th scope="row" class="py-3 pr-4 text-left text-[color:var(--color-primary)] font-medium">
+        Giro do Ativo
+    </th>
+    <td class="py-3 pr-4 text-[color:var(--color-primary)] tabular-nums whitespace-nowrap">
+                    3,16×
+            </td>
+    <td class="py-3 pr-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </td>
+    <td class="py-3 text-[color:var(--color-secondary)] text-sm">
+        Faixa verde.
+    </td>
+</tr>
+                                                                                                <tr class="border-b border-[color:var(--color-border)] last:border-b-0 align-top"
+    data-codigo="ciclo_financeiro"
+    class="">
+    <th scope="row" class="py-3 pr-4 text-left text-[color:var(--color-primary)] font-medium">
+        Ciclo Financeiro
+    </th>
+    <td class="py-3 pr-4 text-[color:var(--color-primary)] tabular-nums whitespace-nowrap">
+                    -60 dias
+            </td>
+    <td class="py-3 pr-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </td>
+    <td class="py-3 text-[color:var(--color-secondary)] text-sm">
+        Faixa verde.
+    </td>
+</tr>
+                                                                                                <tr class="border-b border-[color:var(--color-border)] last:border-b-0 align-top"
+    data-codigo="ncg_vendas"
+    class="">
+    <th scope="row" class="py-3 pr-4 text-left text-[color:var(--color-primary)] font-medium">
+        NCG / Vendas
+    </th>
+    <td class="py-3 pr-4 text-[color:var(--color-primary)] tabular-nums whitespace-nowrap">
+                    -4,2%
+            </td>
+    <td class="py-3 pr-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </td>
+    <td class="py-3 text-[color:var(--color-secondary)] text-sm">
+        Faixa verde.
+    </td>
+</tr>
+                                                                                                <tr class="border-b border-[color:var(--color-border)] last:border-b-0 align-top"
+    data-codigo="pmc"
+    class="">
+    <th scope="row" class="py-3 pr-4 text-left text-[color:var(--color-primary)] font-medium">
+        PMC — Prazo médio de pagamento
+    </th>
+    <td class="py-3 pr-4 text-[color:var(--color-primary)] tabular-nums whitespace-nowrap">
+                    90 dias
+            </td>
+    <td class="py-3 pr-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </td>
+    <td class="py-3 text-[color:var(--color-secondary)] text-sm">
+        Faixa verde.
+    </td>
+</tr>
+                                                                                                <tr class="border-b border-[color:var(--color-border)] last:border-b-0 align-top"
+    data-codigo="pme"
+    class="">
+    <th scope="row" class="py-3 pr-4 text-left text-[color:var(--color-primary)] font-medium">
+        PME — Prazo médio de estoque
+    </th>
+    <td class="py-3 pr-4 text-[color:var(--color-primary)] tabular-nums whitespace-nowrap">
+                    15 dias
+            </td>
+    <td class="py-3 pr-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </td>
+    <td class="py-3 text-[color:var(--color-secondary)] text-sm">
+        Faixa verde.
+    </td>
+</tr>
+                                                                                                <tr class="border-b border-[color:var(--color-border)] last:border-b-0 align-top"
+    data-codigo="pmr"
+    class="">
+    <th scope="row" class="py-3 pr-4 text-left text-[color:var(--color-primary)] font-medium">
+        PMR — Prazo médio de recebimento
+    </th>
+    <td class="py-3 pr-4 text-[color:var(--color-primary)] tabular-nums whitespace-nowrap">
+                    15 dias
+            </td>
+    <td class="py-3 pr-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </td>
+    <td class="py-3 text-[color:var(--color-secondary)] text-sm">
+        Faixa verde.
+    </td>
+</tr>
+                                                                                                <tr class="border-b border-[color:var(--color-border)] last:border-b-0 align-top"
+    data-codigo="inadimplencia"
+    class="">
+    <th scope="row" class="py-3 pr-4 text-left text-[color:var(--color-primary)] font-medium">
+        Inadimplência
+    </th>
+    <td class="py-3 pr-4 text-[color:var(--color-primary)] tabular-nums whitespace-nowrap">
+                    2,0%
+            </td>
+    <td class="py-3 pr-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </td>
+    <td class="py-3 text-[color:var(--color-secondary)] text-sm">
+        Faixa verde.
+    </td>
+</tr>
+                                                            </tbody>
+            </table>
+        </div>
+
+        
+        <div class="md:hidden flex flex-col gap-3" data-testid="indicadores-cards">
+                                                <article class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-sm)]"
+         data-codigo="margem_bruta"
+         class="">
+    <header class="flex items-start justify-between gap-3 mb-2">
+        <h3 class="text-[color:var(--color-primary)] font-medium text-base m-0">Margem Bruta</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </header>
+
+    <p class="text-[color:var(--color-primary)] text-2xl font-medium tabular-nums m-0 mb-2">
+                    50,0%
+            </p>
+
+    <p class="text-[color:var(--color-secondary)] text-sm m-0">Faixa verde.</p>
+</article>
+                                                                <article class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-sm)]"
+         data-codigo="margem_ebitda"
+         class="">
+    <header class="flex items-start justify-between gap-3 mb-2">
+        <h3 class="text-[color:var(--color-primary)] font-medium text-base m-0">Margem EBITDA</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </header>
+
+    <p class="text-[color:var(--color-primary)] text-2xl font-medium tabular-nums m-0 mb-2">
+                    22,0%
+            </p>
+
+    <p class="text-[color:var(--color-secondary)] text-sm m-0">Faixa verde.</p>
+</article>
+                                                                <article class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-sm)]"
+         data-codigo="margem_liquida"
+         class="">
+    <header class="flex items-start justify-between gap-3 mb-2">
+        <h3 class="text-[color:var(--color-primary)] font-medium text-base m-0">Margem Líquida</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </header>
+
+    <p class="text-[color:var(--color-primary)] text-2xl font-medium tabular-nums m-0 mb-2">
+                    20,0%
+            </p>
+
+    <p class="text-[color:var(--color-secondary)] text-sm m-0">Faixa verde.</p>
+</article>
+                                                                <article class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-sm)]"
+         data-codigo="divida_liquida_ebitda"
+         class="">
+    <header class="flex items-start justify-between gap-3 mb-2">
+        <h3 class="text-[color:var(--color-primary)] font-medium text-base m-0">Dívida Líquida / EBITDA</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </header>
+
+    <p class="text-[color:var(--color-primary)] text-2xl font-medium tabular-nums m-0 mb-2">
+                    -0,04×
+            </p>
+
+    <p class="text-[color:var(--color-secondary)] text-sm m-0">Faixa verde.</p>
+</article>
+                                                                <article class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-sm)]"
+         data-codigo="despesas_fin_ebitda"
+         class="">
+    <header class="flex items-start justify-between gap-3 mb-2">
+        <h3 class="text-[color:var(--color-primary)] font-medium text-base m-0">Despesas Financeiras / EBITDA</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </header>
+
+    <p class="text-[color:var(--color-primary)] text-2xl font-medium tabular-nums m-0 mb-2">
+                    9,1%
+            </p>
+
+    <p class="text-[color:var(--color-secondary)] text-sm m-0">Faixa verde.</p>
+</article>
+                                                                <article class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-sm)]"
+         data-codigo="fontes_recursos"
+         class="">
+    <header class="flex items-start justify-between gap-3 mb-2">
+        <h3 class="text-[color:var(--color-primary)] font-medium text-base m-0">Fontes de Recursos (PC / PL)</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </header>
+
+    <p class="text-[color:var(--color-primary)] text-2xl font-medium tabular-nums m-0 mb-2">
+                    0,46×
+            </p>
+
+    <p class="text-[color:var(--color-secondary)] text-sm m-0">Faixa verde.</p>
+</article>
+                                                                <article class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-sm)]"
+         data-codigo="giro_ativo"
+         class="">
+    <header class="flex items-start justify-between gap-3 mb-2">
+        <h3 class="text-[color:var(--color-primary)] font-medium text-base m-0">Giro do Ativo</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </header>
+
+    <p class="text-[color:var(--color-primary)] text-2xl font-medium tabular-nums m-0 mb-2">
+                    3,16×
+            </p>
+
+    <p class="text-[color:var(--color-secondary)] text-sm m-0">Faixa verde.</p>
+</article>
+                                                                <article class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-sm)]"
+         data-codigo="ciclo_financeiro"
+         class="">
+    <header class="flex items-start justify-between gap-3 mb-2">
+        <h3 class="text-[color:var(--color-primary)] font-medium text-base m-0">Ciclo Financeiro</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </header>
+
+    <p class="text-[color:var(--color-primary)] text-2xl font-medium tabular-nums m-0 mb-2">
+                    -60 dias
+            </p>
+
+    <p class="text-[color:var(--color-secondary)] text-sm m-0">Faixa verde.</p>
+</article>
+                                                                <article class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-sm)]"
+         data-codigo="ncg_vendas"
+         class="">
+    <header class="flex items-start justify-between gap-3 mb-2">
+        <h3 class="text-[color:var(--color-primary)] font-medium text-base m-0">NCG / Vendas</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </header>
+
+    <p class="text-[color:var(--color-primary)] text-2xl font-medium tabular-nums m-0 mb-2">
+                    -4,2%
+            </p>
+
+    <p class="text-[color:var(--color-secondary)] text-sm m-0">Faixa verde.</p>
+</article>
+                                                                <article class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-sm)]"
+         data-codigo="pmc"
+         class="">
+    <header class="flex items-start justify-between gap-3 mb-2">
+        <h3 class="text-[color:var(--color-primary)] font-medium text-base m-0">PMC — Prazo médio de pagamento</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </header>
+
+    <p class="text-[color:var(--color-primary)] text-2xl font-medium tabular-nums m-0 mb-2">
+                    90 dias
+            </p>
+
+    <p class="text-[color:var(--color-secondary)] text-sm m-0">Faixa verde.</p>
+</article>
+                                                                <article class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-sm)]"
+         data-codigo="pme"
+         class="">
+    <header class="flex items-start justify-between gap-3 mb-2">
+        <h3 class="text-[color:var(--color-primary)] font-medium text-base m-0">PME — Prazo médio de estoque</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </header>
+
+    <p class="text-[color:var(--color-primary)] text-2xl font-medium tabular-nums m-0 mb-2">
+                    15 dias
+            </p>
+
+    <p class="text-[color:var(--color-secondary)] text-sm m-0">Faixa verde.</p>
+</article>
+                                                                <article class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-sm)]"
+         data-codigo="pmr"
+         class="">
+    <header class="flex items-start justify-between gap-3 mb-2">
+        <h3 class="text-[color:var(--color-primary)] font-medium text-base m-0">PMR — Prazo médio de recebimento</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </header>
+
+    <p class="text-[color:var(--color-primary)] text-2xl font-medium tabular-nums m-0 mb-2">
+                    15 dias
+            </p>
+
+    <p class="text-[color:var(--color-secondary)] text-sm m-0">Faixa verde.</p>
+</article>
+                                                                <article class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-sm)]"
+         data-codigo="inadimplencia"
+         class="">
+    <header class="flex items-start justify-between gap-3 mb-2">
+        <h3 class="text-[color:var(--color-primary)] font-medium text-base m-0">Inadimplência</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10"
+      role="img"
+      aria-label="Farol: Verde"
+      data-farol="verde">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+                <span>Verde</span>
+</span>
+            </header>
+
+    <p class="text-[color:var(--color-primary)] text-2xl font-medium tabular-nums m-0 mb-2">
+                    2,0%
+            </p>
+
+    <p class="text-[color:var(--color-secondary)] text-sm m-0">Faixa verde.</p>
+</article>
+                                    </div>
+    </section>
+
+    
+            <div class="mb-8 grid gap-4 md:grid-cols-2">
+                            <section aria-labelledby="ncg_absoluto-titulo"
+         class="rounded-[length:var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-neutral)] p-5 sm:p-6 shadow-[var(--shadow-sm)]"
+         data-codigo="ncg_absoluto">
+    <div class="flex items-start justify-between gap-3 mb-3">
+        <div>
+            <p class="text-[color:var(--color-secondary)] uppercase tracking-wider text-xs font-semibold m-0">Indicador informativo</p>
+            <h2 id="ncg_absoluto-titulo" class="text-[color:var(--color-primary)] text-xl font-medium m-0 mt-1">
+                NCG — Necessidade de Capital de Giro
+            </h2>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-cinza)] bg-[color:var(--color-farol-cinza)]/15"
+      role="img"
+      aria-label="Farol: Sem classificação"
+      data-farol="nenhum">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="11" x2="12" y2="16"/>
+                <circle cx="12" cy="8" r="0.6" fill="currentColor"/>
+            </svg>
+        <span>Sem classificação</span>
+</span>
+    </div>
+
+    <p class="text-[color:var(--color-primary)] text-3xl sm:text-4xl font-light tabular-nums m-0 mb-2">
+                    -R$ 50.000,00
+            </p>
+
+    <p class="text-[color:var(--color-secondary)] text-sm m-0">Folga operacional: seu ciclo de pagamento a fornecedores cobre o ciclo de recebimento e estoques. Capital de giro positivo.</p>
+</section>
+                                        <section aria-labelledby="ciclo_operacional-titulo"
+         class="rounded-[length:var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-neutral)] p-5 sm:p-6 shadow-[var(--shadow-sm)]"
+         data-codigo="ciclo_operacional">
+    <div class="flex items-start justify-between gap-3 mb-3">
+        <div>
+            <p class="text-[color:var(--color-secondary)] uppercase tracking-wider text-xs font-semibold m-0">Indicador informativo</p>
+            <h2 id="ciclo_operacional-titulo" class="text-[color:var(--color-primary)] text-xl font-medium m-0 mt-1">
+                Ciclo Operacional
+            </h2>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-[color:var(--color-farol-cinza)] bg-[color:var(--color-farol-cinza)]/15"
+      role="img"
+      aria-label="Farol: Sem classificação"
+      data-farol="nenhum">
+    
+                
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="11" x2="12" y2="16"/>
+                <circle cx="12" cy="8" r="0.6" fill="currentColor"/>
+            </svg>
+        <span>Sem classificação</span>
+</span>
+    </div>
+
+    <p class="text-[color:var(--color-primary)] text-3xl sm:text-4xl font-light tabular-nums m-0 mb-2">
+                    30 dias
+            </p>
+
+    <p class="text-[color:var(--color-secondary)] text-sm m-0">Indicador informativo: ciclo operacional = PME + PMR.</p>
+</section>
+                    </div>
+    
+    
+    <section aria-labelledby="glossario-titulo" class="mb-8" data-testid="glossario">
+        <h2 id="glossario-titulo" class="text-[color:var(--color-primary)] text-lg font-medium mb-3">Glossário</h2>
+        <p class="text-[color:var(--color-secondary)] text-sm mb-4">
+            Definições rápidas dos termos usados neste relatório. Toque para expandir.
+        </p>
+        <div class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] divide-y divide-[color:var(--color-border)]">
+                            <details class="group">
+                    <summary class="cursor-pointer px-4 py-3 text-[color:var(--color-primary)] font-medium text-sm flex items-center justify-between gap-3 hover:bg-[color:var(--color-neutral)] focus:bg-[color:var(--color-neutral)] focus:outline-2 focus:outline-offset-[-2px] focus:outline-[color:var(--color-ring)]">
+                        <span>Margem Bruta (MB) / Lucro Bruto (LB)</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="transition-transform group-open:rotate-180 text-[color:var(--color-secondary)] flex-shrink-0"
+                             aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </summary>
+                    <div class="px-4 pb-3 text-[color:var(--color-secondary)] text-sm">Diferença entre o faturamento e o custo (dos produtos/mercadorias/serviços vendidos), antes das despesas.</div>
+                </details>
+                            <details class="group">
+                    <summary class="cursor-pointer px-4 py-3 text-[color:var(--color-primary)] font-medium text-sm flex items-center justify-between gap-3 hover:bg-[color:var(--color-neutral)] focus:bg-[color:var(--color-neutral)] focus:outline-2 focus:outline-offset-[-2px] focus:outline-[color:var(--color-ring)]">
+                        <span>Margem Operacional Líquida (MOL)</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="transition-transform group-open:rotate-180 text-[color:var(--color-secondary)] flex-shrink-0"
+                             aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </summary>
+                    <div class="px-4 pb-3 text-[color:var(--color-secondary)] text-sm">A parcela operacional de lucro obtida sobre as vendas, considerando despesas financeiras, depreciação e tributos.</div>
+                </details>
+                            <details class="group">
+                    <summary class="cursor-pointer px-4 py-3 text-[color:var(--color-primary)] font-medium text-sm flex items-center justify-between gap-3 hover:bg-[color:var(--color-neutral)] focus:bg-[color:var(--color-neutral)] focus:outline-2 focus:outline-offset-[-2px] focus:outline-[color:var(--color-ring)]">
+                        <span>Relação Dívida Líquida / EBITDA</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="transition-transform group-open:rotate-180 text-[color:var(--color-secondary)] flex-shrink-0"
+                             aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </summary>
+                    <div class="px-4 pb-3 text-[color:var(--color-secondary)] text-sm">Demonstra o número de períodos que uma empresa levaria para pagar sua dívida líquida.</div>
+                </details>
+                            <details class="group">
+                    <summary class="cursor-pointer px-4 py-3 text-[color:var(--color-primary)] font-medium text-sm flex items-center justify-between gap-3 hover:bg-[color:var(--color-neutral)] focus:bg-[color:var(--color-neutral)] focus:outline-2 focus:outline-offset-[-2px] focus:outline-[color:var(--color-ring)]">
+                        <span>NCG / Vendas</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="transition-transform group-open:rotate-180 text-[color:var(--color-secondary)] flex-shrink-0"
+                             aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </summary>
+                    <div class="px-4 pb-3 text-[color:var(--color-secondary)] text-sm">Representa a relação entre a necessidade de capital de giro e as vendas realizadas. Expressa, em proporção, quanto da receita precisa ser financiada para sustentar o ciclo operacional.</div>
+                </details>
+                            <details class="group">
+                    <summary class="cursor-pointer px-4 py-3 text-[color:var(--color-primary)] font-medium text-sm flex items-center justify-between gap-3 hover:bg-[color:var(--color-neutral)] focus:bg-[color:var(--color-neutral)] focus:outline-2 focus:outline-offset-[-2px] focus:outline-[color:var(--color-ring)]">
+                        <span>PMR — Prazo Médio de Recebimento</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="transition-transform group-open:rotate-180 text-[color:var(--color-secondary)] flex-shrink-0"
+                             aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </summary>
+                    <div class="px-4 pb-3 text-[color:var(--color-secondary)] text-sm">Tempo médio, em dias, que a empresa leva para receber dos clientes após a venda.</div>
+                </details>
+                            <details class="group">
+                    <summary class="cursor-pointer px-4 py-3 text-[color:var(--color-primary)] font-medium text-sm flex items-center justify-between gap-3 hover:bg-[color:var(--color-neutral)] focus:bg-[color:var(--color-neutral)] focus:outline-2 focus:outline-offset-[-2px] focus:outline-[color:var(--color-ring)]">
+                        <span>PMC — Prazo Médio de pagamento a fornecedores</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="transition-transform group-open:rotate-180 text-[color:var(--color-secondary)] flex-shrink-0"
+                             aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </summary>
+                    <div class="px-4 pb-3 text-[color:var(--color-secondary)] text-sm">Tempo médio, em dias, que a empresa leva para pagar seus fornecedores após a compra.</div>
+                </details>
+                            <details class="group">
+                    <summary class="cursor-pointer px-4 py-3 text-[color:var(--color-primary)] font-medium text-sm flex items-center justify-between gap-3 hover:bg-[color:var(--color-neutral)] focus:bg-[color:var(--color-neutral)] focus:outline-2 focus:outline-offset-[-2px] focus:outline-[color:var(--color-ring)]">
+                        <span>Ciclo Financeiro (CF)</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="transition-transform group-open:rotate-180 text-[color:var(--color-secondary)] flex-shrink-0"
+                             aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </summary>
+                    <div class="px-4 pb-3 text-[color:var(--color-secondary)] text-sm">Indica a necessidade de financiamento complementar do capital de giro, em número de dias, em média (se positivo). Fórmula: PME + PMR − PMC.</div>
+                </details>
+                            <details class="group">
+                    <summary class="cursor-pointer px-4 py-3 text-[color:var(--color-primary)] font-medium text-sm flex items-center justify-between gap-3 hover:bg-[color:var(--color-neutral)] focus:bg-[color:var(--color-neutral)] focus:outline-2 focus:outline-offset-[-2px] focus:outline-[color:var(--color-ring)]">
+                        <span>Necessidade de Capital de Giro (NCG)</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="transition-transform group-open:rotate-180 text-[color:var(--color-secondary)] flex-shrink-0"
+                             aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </summary>
+                    <div class="px-4 pb-3 text-[color:var(--color-secondary)] text-sm">Instrumento de aferição da saúde financeira da empresa, apurada pela diferença entre Ativo e Passivo circulante cíclico. Se positiva, indica quanto de financiamento complementar a empresa necessita.</div>
+                </details>
+                            <details class="group">
+                    <summary class="cursor-pointer px-4 py-3 text-[color:var(--color-primary)] font-medium text-sm flex items-center justify-between gap-3 hover:bg-[color:var(--color-neutral)] focus:bg-[color:var(--color-neutral)] focus:outline-2 focus:outline-offset-[-2px] focus:outline-[color:var(--color-ring)]">
+                        <span>EBITDA / Margem Operacional</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="transition-transform group-open:rotate-180 text-[color:var(--color-secondary)] flex-shrink-0"
+                             aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </summary>
+                    <div class="px-4 pb-3 text-[color:var(--color-secondary)] text-sm">Resultado do negócio: faturamento menos custos e despesas operacionais, exceto depreciação (e antes das despesas financeiras e tributos). Mede a eficiência em produzir lucros por meio das vendas.</div>
+                </details>
+                            <details class="group">
+                    <summary class="cursor-pointer px-4 py-3 text-[color:var(--color-primary)] font-medium text-sm flex items-center justify-between gap-3 hover:bg-[color:var(--color-neutral)] focus:bg-[color:var(--color-neutral)] focus:outline-2 focus:outline-offset-[-2px] focus:outline-[color:var(--color-ring)]">
+                        <span>Farol / Semáforo</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="transition-transform group-open:rotate-180 text-[color:var(--color-secondary)] flex-shrink-0"
+                             aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </summary>
+                    <div class="px-4 pb-3 text-[color:var(--color-secondary)] text-sm">Classificação visual (verde / amarelo / vermelho) atribuída automaticamente a cada indicador a partir das faixas da matriz de recomendações.</div>
+                </details>
+                            <details class="group">
+                    <summary class="cursor-pointer px-4 py-3 text-[color:var(--color-primary)] font-medium text-sm flex items-center justify-between gap-3 hover:bg-[color:var(--color-neutral)] focus:bg-[color:var(--color-neutral)] focus:outline-2 focus:outline-offset-[-2px] focus:outline-[color:var(--color-ring)]">
+                        <span>Indisponível</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="transition-transform group-open:rotate-180 text-[color:var(--color-secondary)] flex-shrink-0"
+                             aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </summary>
+                    <div class="px-4 pb-3 text-[color:var(--color-secondary)] text-sm">Rótulo exibido quando o indicador não pode ser calculado (ex.: denominador igual a zero ou dado faltante). Não recebe farol nem texto de recomendação.</div>
+                </details>
+                            <details class="group">
+                    <summary class="cursor-pointer px-4 py-3 text-[color:var(--color-primary)] font-medium text-sm flex items-center justify-between gap-3 hover:bg-[color:var(--color-neutral)] focus:bg-[color:var(--color-neutral)] focus:outline-2 focus:outline-offset-[-2px] focus:outline-[color:var(--color-ring)]">
+                        <span>Balanço Adaptado / DRE Adaptada</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="transition-transform group-open:rotate-180 text-[color:var(--color-secondary)] flex-shrink-0"
+                             aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </summary>
+                    <div class="px-4 pb-3 text-[color:var(--color-secondary)] text-sm">Versão simplificada construída a partir dos 23 campos do quiz; suficiente para os indicadores da v1, mas não equivalente a um balanço/DRE contábil formal.</div>
+                </details>
+                    </div>
+    </section>
+
+    
+    <footer class="border-t border-[color:var(--color-border)] pt-4 text-[color:var(--color-secondary)] text-xs"
+            data-testid="relatorio-rodape">
+        <p class="m-0 mb-1">
+            <span dusk="relatorio-versoes">
+                motor v1.1.0 · matriz dez-2025 · gerado em 25/05/2026 19:50
+            </span>
+        </p>
+        <p class="m-0 italic">
+            Este diagnóstico é uma ferramenta de apoio à gestão. Decisões financeiras devem considerar análise integral do negócio.
+        </p>
+    </footer>
+
+    <div class="mt-6 flex">
+        <a href="http://localhost:8090/_dusk/login/019e60af-e553-737b-aa26-4b836b9ca9a9"
+              class="btn btn--secondary" dusk="diagnostico-voltar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Voltar
+    </a>
+    </div>
+                    </div>
+                </main>
+
+                <footer data-testid="app-footer"
+        class="border-t border-[color:var(--color-border)] bg-[color:var(--color-surface)] px-4 sm:px-6 py-5">
+    <div class="max-w-[960px] mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm text-[color:var(--color-secondary)]">
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <a href="http://localhost:8090/termos/termo-adesao" class="link"
+                   dusk="app-footer-termo">Termo de Adesão</a>
+                <a href="http://localhost:8090/termos/politica-privacidade" class="link"
+                   dusk="app-footer-privacidade">Política de Privacidade</a>
+                <span>© DEFOnline 2026</span>
+            </div>
+        
+        <span class="text-[color:var(--color-secondary)] text-sm font-normal"
+      data-testid="footer-version"
+      dusk="footer-version">
+    dev · local</span>
+    </div>
+</footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- Livewire Scripts -->
+<script src="http://localhost:8090/livewire-5ca3fe4c/livewire.js?id=ab6b028c"   data-csrf="YwCJsSNESDqLz7Q7988j3BBfbVfe7YgNxPYgEpWS" data-module-url="http://localhost:8090/livewire-5ca3fe4c" data-update-uri="http://localhost:8090/livewire-5ca3fe4c/update" data-navigate-once="true"></script>
+</body>
+</html>

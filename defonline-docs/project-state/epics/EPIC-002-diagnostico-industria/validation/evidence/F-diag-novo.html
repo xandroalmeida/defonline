@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="Cu8IsLesgjYIFeY0bb7775yERligZ9UgRrgrXkHN">
+    <title>Selecione uma empresa · DEFOnline</title>
+
+    <link rel="preload" as="style" href="http://localhost:8090/build/assets/app-CVqeX598.css" /><link rel="modulepreload" as="script" href="http://localhost:8090/build/assets/app-BvRk9kiK.js" /><link rel="stylesheet" href="http://localhost:8090/build/assets/app-CVqeX598.css" data-navigate-track="reload" /><script type="module" src="http://localhost:8090/build/assets/app-BvRk9kiK.js" data-navigate-track="reload"></script>    <!-- Livewire Styles --><style >[wire\:loading][wire\:loading], [wire\:loading\.delay][wire\:loading\.delay], [wire\:loading\.list-item][wire\:loading\.list-item], [wire\:loading\.inline-block][wire\:loading\.inline-block], [wire\:loading\.inline][wire\:loading\.inline], [wire\:loading\.block][wire\:loading\.block], [wire\:loading\.flex][wire\:loading\.flex], [wire\:loading\.table][wire\:loading\.table], [wire\:loading\.grid][wire\:loading\.grid], [wire\:loading\.inline-flex][wire\:loading\.inline-flex] {display: none;}[wire\:loading\.delay\.none][wire\:loading\.delay\.none], [wire\:loading\.delay\.shortest][wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter][wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short][wire\:loading\.delay\.short], [wire\:loading\.delay\.default][wire\:loading\.delay\.default], [wire\:loading\.delay\.long][wire\:loading\.delay\.long], [wire\:loading\.delay\.longer][wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest][wire\:loading\.delay\.longest] {display: none;}[wire\:offline][wire\:offline] {display: none;}[wire\:dirty]:not(textarea):not(input):not(select) {display: none;}:root {--livewire-progress-bar-color: #2299dd;}[x-cloak] {display: none !important;}[wire\:cloak] {display: none !important;}dialog#livewire-error::backdrop {background-color: rgba(0, 0, 0, .6);}</style>
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <div x-data="{ navOpen: false }"
+         @keydown.escape.window="navOpen = false"
+         class="flex-1 flex flex-col">
+
+        
+        <header data-testid="app-header"
+        class="sticky top-0 z-30 flex items-center justify-between gap-3 h-16 px-4 sm:px-6 bg-[color:var(--color-surface)] border-b border-[color:var(--color-border)]">
+
+    <div class="flex items-center gap-3 min-w-0">
+        
+        <button type="button"
+                class="inline-flex items-center justify-center w-11 h-11 lg:hidden rounded-md text-[color:var(--color-primary)] hover:bg-[color:var(--color-neutral)]"
+                aria-controls="app-nav-drawer"
+                :aria-expanded="navOpen ? 'true' : 'false'"
+                @click="navOpen = !navOpen"
+                aria-label="Abrir menu"
+                dusk="app-header-hamburger">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <line x1="4" y1="7" x2="20" y2="7"/>
+                <line x1="4" y1="12" x2="20" y2="12"/>
+                <line x1="4" y1="17" x2="20" y2="17"/>
+            </svg>
+        </button>
+
+        <a href="http://localhost:8090/home" class="flex items-center gap-2 text-[color:var(--color-primary)] no-underline"
+           dusk="app-header-logo">
+            <span class="inline-flex items-center gap-2">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
+         width="32" height="32"
+         role="img" aria-label="DEFOnline">
+        <title>DEFOnline</title>
+        <path fill="var(--color-primary)" fill-rule="evenodd"
+              d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z M9 9 V23 H15 A9 9 0 0 0 15 9 Z"/>
+        <circle cx="26" cy="25" r="2" fill="var(--color-tertiary)"/>
+    </svg>
+            <span class="text-[color:var(--color-primary)] font-medium text-base tracking-tight hidden min-[480px]:inline">
+            DEFOnline
+        </span>
+    </span>
+        </a>
+
+                    <span class="pill" data-testid="env-pill" dusk="env-pill">local</span>
+            </div>
+
+            <div class="relative" x-data="{ open: false }"
+             @keydown.escape.window="open = false"
+             @click.outside="open = false">
+            <button type="button"
+                    class="inline-flex items-center gap-2 h-11 px-3 rounded-md hover:bg-[color:var(--color-neutral)]"
+                    @click="open = !open"
+                    :aria-expanded="open ? 'true' : 'false'"
+                    aria-haspopup="menu"
+                    dusk="app-header-conta-toggle">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[color:var(--color-neutral)] border border-[color:var(--color-border)] text-[color:var(--color-primary)] text-sm font-medium"
+                      aria-hidden="true">
+                    R
+                </span>
+                <span class="hidden min-[640px]:inline text-[color:var(--color-primary)] font-medium text-sm"
+                      dusk="app-header-saudacao">
+                    Olá, Roberto
+                </span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+
+            <div x-show="open"
+                 x-cloak
+                 x-transition.opacity.duration.150ms
+                 role="menu"
+                 class="absolute right-0 mt-2 w-56 bg-[color:var(--color-surface)] border border-[color:var(--color-border)] rounded-lg shadow-md py-1 overflow-hidden"
+                 dusk="app-header-conta-menu">
+                <button type="button"
+                        role="menuitem"
+                        disabled
+                        aria-disabled="true"
+                        title="Em breve — Onda 2"
+                        class="w-full text-left px-4 py-2.5 text-sm text-[color:var(--color-secondary)] cursor-not-allowed opacity-60"
+                        dusk="app-header-conta-editar">
+                    Editar perfil
+                </button>
+                <form method="POST" action="http://localhost:8090/logout" class="m-0" dusk="app-header-conta-sair-form">
+                    <input type="hidden" name="_token" value="Cu8IsLesgjYIFeY0bb7775yERligZ9UgRrgrXkHN" autocomplete="off">                    <button type="submit"
+                            role="menuitem"
+                            class="w-full text-left px-4 py-2.5 text-sm text-[color:var(--color-primary)] hover:bg-[color:var(--color-neutral)]"
+                            dusk="app-header-conta-sair">
+                        Sair
+                    </button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+        
+        <div class="flex-1 flex">
+            <div x-show="navOpen"
+     x-cloak
+     x-transition.opacity.duration.200ms
+     class="fixed inset-0 z-40 bg-[color:var(--color-primary)]/40 lg:hidden"
+     @click="navOpen = false"
+     aria-hidden="true">
+</div>
+
+
+<aside id="app-nav-drawer"
+       data-testid="app-nav"
+       class="fixed top-0 left-0 z-50 h-full w-[280px] max-w-[80vw] bg-[color:var(--color-surface)] border-r border-[color:var(--color-border)] transform transition-transform duration-200 ease-out lg:translate-x-0 lg:sticky lg:top-0 lg:z-auto lg:w-60 lg:h-screen lg:max-w-none lg:transform-none"
+       :class="navOpen ? 'translate-x-0' : '-translate-x-full'"
+       :aria-hidden="navOpen ? 'false' : 'true'"
+       aria-label="Navegação principal">
+
+    
+    <div class="flex items-center justify-between h-16 px-4 border-b border-[color:var(--color-border)] lg:hidden">
+        <span class="inline-flex items-center gap-2">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
+         width="28" height="28"
+         role="img" aria-label="DEFOnline">
+        <title>DEFOnline</title>
+        <path fill="var(--color-primary)" fill-rule="evenodd"
+              d="M4 4 H15 A13 13 0 0 1 15 28 H4 Z M9 9 V23 H15 A9 9 0 0 0 15 9 Z"/>
+        <circle cx="26" cy="25" r="2" fill="var(--color-tertiary)"/>
+    </svg>
+            <span class="text-[color:var(--color-primary)] font-medium text-base tracking-tight ">
+            DEFOnline
+        </span>
+    </span>
+        <button type="button"
+                class="inline-flex items-center justify-center w-11 h-11 rounded-md text-[color:var(--color-primary)] hover:bg-[color:var(--color-neutral)]"
+                @click="navOpen = false"
+                aria-label="Fechar menu"
+                dusk="app-nav-fechar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <line x1="6" y1="6" x2="18" y2="18"/>
+                <line x1="18" y1="6" x2="6" y2="18"/>
+            </svg>
+        </button>
+    </div>
+
+    <nav class="flex flex-col gap-1 p-4" aria-label="Navegação principal">
+                                    <a href="http://localhost:8090/home"
+                   class="nav-item "
+                                      dusk="app-nav-minhas-empresas"
+                   @click="navOpen = false">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 22V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v18M4 22h16M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2M9 18h2M13 18h2"/>
+                    </svg>
+                    <span>Minhas Empresas</span>
+                </a>
+                                                <a href="http://localhost:8090/empresas/nova"
+                   class="nav-item "
+                                      dusk="app-nav-adicionar-empresa"
+                   @click="navOpen = false">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    <span>Adicionar Empresa</span>
+                </a>
+                                                <a href="http://localhost:8090/diagnosticos/novo"
+                   class="nav-item  is-active "
+                    aria-current="page"                    dusk="app-nav-diagnosticos"
+                   @click="navOpen = false">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 3v18h18M7 14l4-4 4 4 6-6"/>
+                    </svg>
+                    <span>Diagnósticos</span>
+                </a>
+                                                <span class="nav-item is-disabled"
+                      aria-disabled="true"
+                      tabindex="-1"
+                      title="Em breve — Onda 2"
+                      data-tooltip="Em breve — Onda 2"
+                      dusk="app-nav-historico">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+                    </svg>
+                    <span>Histórico</span>
+                </span>
+                                                <span class="nav-item is-disabled"
+                      aria-disabled="true"
+                      tabindex="-1"
+                      title="Em breve — Onda 2"
+                      data-tooltip="Em breve — Onda 2"
+                      dusk="app-nav-conta">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>
+                    </svg>
+                    <span>Conta</span>
+                </span>
+                        </nav>
+</aside>
+
+            <div class="flex-1 flex flex-col min-w-0">
+                <main class="flex-1 px-4 sm:px-6 py-6 sm:py-8" data-testid="app-main">
+                    <div class="max-w-[960px] mx-auto w-full">
+                                                <div wire:snapshot="{&quot;data&quot;:[],&quot;memo&quot;:{&quot;id&quot;:&quot;wA82sQXqzLmtMh0s7VC3&quot;,&quot;name&quot;:&quot;diagnostico.selecionar-empresa&quot;,&quot;path&quot;:&quot;diagnosticos\/novo&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;pt_BR&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;c46c83c1b47e4cb273fb6cf8e82e140891e65b27b4967959e2d8c53e1494a63b&quot;}" wire:effects="[]" wire:id="wA82sQXqzLmtMh0s7VC3" wire:name="diagnostico.selecionar-empresa">
+    <header class="flex flex-col gap-2 mb-6 sm:flex-row sm:items-end sm:justify-between">
+    <div class="flex flex-col gap-1">
+        <!--[if BLOCK]><![endif]-->            <h1 class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)]">
+                Selecione uma empresa
+            </h1>
+        <!--[if ENDBLOCK]><![endif]-->        <!--[if BLOCK]><![endif]-->            <p class="text-[color:var(--color-secondary)] text-sm m-0">
+                Escolha a empresa que receberá o diagnóstico.
+            </p>
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></header>
+
+    <!--[if BLOCK]><![endif]-->        <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 list-none p-0 m-0"
+            dusk="selecionar-empresa-lista">
+            <!--[if BLOCK]><![endif]-->                <li dusk="selecionar-empresa-item-019e60af-e606-720b-91e1-06f41f90607a">
+                    <article class="card h-full flex flex-col gap-3">
+    <h3 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0">
+                            Demo · ncg_negativo
+                        </h3>
+                        <div class="flex flex-col gap-1 text-sm text-[color:var(--color-secondary)]">
+                            <span>01.***.***/6590-**</span>
+                            <span>Sophia d&#039;Oeste / PI</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-auto pt-2">
+                            <!--[if BLOCK]><![endif]-->                                <!--[if BLOCK]><![endif]-->    <a href="http://localhost:8090/diagnosticos/019e60af-e606-720b-91e1-06f41fca9e8d"
+              class="btn btn--secondary btn--sm" dusk="selecionar-empresa-ver-diagnostico-019e60af-e606-720b-91e1-06f41f90607a">
+        Ver último diagnóstico
+    </a>
+<!--[if ENDBLOCK]><![endif]-->                            <!--[if ENDBLOCK]><![endif]-->                            <!--[if BLOCK]><![endif]-->    <a href="http://localhost:8090/empresas/019e60af-e606-720b-91e1-06f41f90607a/diagnosticos/novo"
+              class="btn btn--primary btn--sm" dusk="selecionar-empresa-cta-019e60af-e606-720b-91e1-06f41f90607a">
+        Refazer diagnóstico
+    </a>
+<!--[if ENDBLOCK]><![endif]-->                        </div>
+</article>
+                </li>
+                            <li dusk="selecionar-empresa-item-019e60af-e5f9-7021-8b32-dd21098fc64c">
+                    <article class="card h-full flex flex-col gap-3">
+    <h3 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0">
+                            Demo · saudavel
+                        </h3>
+                        <div class="flex flex-col gap-1 text-sm text-[color:var(--color-secondary)]">
+                            <span>17.***.***/1131-**</span>
+                            <span>Porto Bruno do Leste / BA</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-auto pt-2">
+                            <!--[if BLOCK]><![endif]-->                                <!--[if BLOCK]><![endif]-->    <a href="http://localhost:8090/diagnosticos/019e61b7-9f09-7143-95e1-d947b1c28339"
+              class="btn btn--secondary btn--sm" dusk="selecionar-empresa-ver-diagnostico-019e60af-e5f9-7021-8b32-dd21098fc64c">
+        Ver último diagnóstico
+    </a>
+<!--[if ENDBLOCK]><![endif]-->                            <!--[if ENDBLOCK]><![endif]-->                            <!--[if BLOCK]><![endif]-->    <a href="http://localhost:8090/empresas/019e60af-e5f9-7021-8b32-dd21098fc64c/diagnosticos/novo"
+              class="btn btn--primary btn--sm" dusk="selecionar-empresa-cta-019e60af-e5f9-7021-8b32-dd21098fc64c">
+        Refazer diagnóstico
+    </a>
+<!--[if ENDBLOCK]><![endif]-->                        </div>
+</article>
+                </li>
+                            <li dusk="selecionar-empresa-item-019e60af-e602-70a7-ba19-852842fa589b">
+                    <article class="card h-full flex flex-col gap-3">
+    <h3 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0">
+                            Demo · atencao
+                        </h3>
+                        <div class="flex flex-col gap-1 text-sm text-[color:var(--color-secondary)]">
+                            <span>25.***.***/1293-**</span>
+                            <span>São Sara do Norte / AP</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-auto pt-2">
+                            <!--[if BLOCK]><![endif]-->                                <!--[if BLOCK]><![endif]-->    <a href="http://localhost:8090/diagnosticos/019e60af-e603-71a8-9fb4-a7b1f507ddd5"
+              class="btn btn--secondary btn--sm" dusk="selecionar-empresa-ver-diagnostico-019e60af-e602-70a7-ba19-852842fa589b">
+        Ver último diagnóstico
+    </a>
+<!--[if ENDBLOCK]><![endif]-->                            <!--[if ENDBLOCK]><![endif]-->                            <!--[if BLOCK]><![endif]-->    <a href="http://localhost:8090/empresas/019e60af-e602-70a7-ba19-852842fa589b/diagnosticos/novo"
+              class="btn btn--primary btn--sm" dusk="selecionar-empresa-cta-019e60af-e602-70a7-ba19-852842fa589b">
+        Refazer diagnóstico
+    </a>
+<!--[if ENDBLOCK]><![endif]-->                        </div>
+</article>
+                </li>
+                            <li dusk="selecionar-empresa-item-019e60af-e607-70ba-9357-6271094e37d0">
+                    <article class="card h-full flex flex-col gap-3">
+    <h3 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0">
+                            Demo · 70pct_indisponivel
+                        </h3>
+                        <div class="flex flex-col gap-1 text-sm text-[color:var(--color-secondary)]">
+                            <span>70.***.***/9565-**</span>
+                            <span>Campos do Norte / DF</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-auto pt-2">
+                            <!--[if BLOCK]><![endif]-->                                <!--[if BLOCK]><![endif]-->    <a href="http://localhost:8090/diagnosticos/019e60af-e608-7144-9e10-d993b7a187e1"
+              class="btn btn--secondary btn--sm" dusk="selecionar-empresa-ver-diagnostico-019e60af-e607-70ba-9357-6271094e37d0">
+        Ver último diagnóstico
+    </a>
+<!--[if ENDBLOCK]><![endif]-->                            <!--[if ENDBLOCK]><![endif]-->                            <!--[if BLOCK]><![endif]-->    <a href="http://localhost:8090/empresas/019e60af-e607-70ba-9357-6271094e37d0/diagnosticos/novo"
+              class="btn btn--primary btn--sm" dusk="selecionar-empresa-cta-019e60af-e607-70ba-9357-6271094e37d0">
+        Refazer diagnóstico
+    </a>
+<!--[if ENDBLOCK]><![endif]-->                        </div>
+</article>
+                </li>
+                            <li dusk="selecionar-empresa-item-019e60af-e604-7249-8ec5-fae9fe58ad08">
+                    <article class="card h-full flex flex-col gap-3">
+    <h3 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0">
+                            Demo · alerta
+                        </h3>
+                        <div class="flex flex-col gap-1 text-sm text-[color:var(--color-secondary)]">
+                            <span>82.***.***/4489-**</span>
+                            <span>Constância do Leste / TO</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-auto pt-2">
+                            <!--[if BLOCK]><![endif]-->                                <!--[if BLOCK]><![endif]-->    <a href="http://localhost:8090/diagnosticos/019e60af-e605-7047-adce-34a8b660eecf"
+              class="btn btn--secondary btn--sm" dusk="selecionar-empresa-ver-diagnostico-019e60af-e604-7249-8ec5-fae9fe58ad08">
+        Ver último diagnóstico
+    </a>
+<!--[if ENDBLOCK]><![endif]-->                            <!--[if ENDBLOCK]><![endif]-->                            <!--[if BLOCK]><![endif]-->    <a href="http://localhost:8090/empresas/019e60af-e604-7249-8ec5-fae9fe58ad08/diagnosticos/novo"
+              class="btn btn--primary btn--sm" dusk="selecionar-empresa-cta-019e60af-e604-7249-8ec5-fae9fe58ad08">
+        Refazer diagnóstico
+    </a>
+<!--[if ENDBLOCK]><![endif]-->                        </div>
+</article>
+                </li>
+                            <li dusk="selecionar-empresa-item-019e61e6-2971-725c-8efa-22bfaa865b8c">
+                    <article class="card h-full flex flex-col gap-3">
+    <h3 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0">
+                            Pontes S.A.
+                        </h3>
+                        <div class="flex flex-col gap-1 text-sm text-[color:var(--color-secondary)]">
+                            <span>28.***.***/7462-**</span>
+                            <span>Vila Ohana / RS</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-auto pt-2">
+                            <!--[if BLOCK]><![endif]-->                                <!--[if BLOCK]><![endif]-->    <a href="http://localhost:8090/diagnosticos/019e61e6-2987-73bd-bb30-00f6742726e2"
+              class="btn btn--secondary btn--sm" dusk="selecionar-empresa-ver-diagnostico-019e61e6-2971-725c-8efa-22bfaa865b8c">
+        Ver último diagnóstico
+    </a>
+<!--[if ENDBLOCK]><![endif]-->                            <!--[if ENDBLOCK]><![endif]-->                            <!--[if BLOCK]><![endif]-->    <a href="http://localhost:8090/empresas/019e61e6-2971-725c-8efa-22bfaa865b8c/diagnosticos/novo"
+              class="btn btn--primary btn--sm" dusk="selecionar-empresa-cta-019e61e6-2971-725c-8efa-22bfaa865b8c">
+        Refazer diagnóstico
+    </a>
+<!--[if ENDBLOCK]><![endif]-->                        </div>
+</article>
+                </li>
+            <!--[if ENDBLOCK]><![endif]-->        </ul>
+    <!--[if ENDBLOCK]><![endif]--></div>
+                    </div>
+                </main>
+
+                <footer data-testid="app-footer"
+        class="border-t border-[color:var(--color-border)] bg-[color:var(--color-surface)] px-4 sm:px-6 py-5">
+    <div class="max-w-[960px] mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm text-[color:var(--color-secondary)]">
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <a href="http://localhost:8090/termos/termo-adesao" class="link"
+                   dusk="app-footer-termo">Termo de Adesão</a>
+                <a href="http://localhost:8090/termos/politica-privacidade" class="link"
+                   dusk="app-footer-privacidade">Política de Privacidade</a>
+                <span>© DEFOnline 2026</span>
+            </div>
+        
+        <span class="text-[color:var(--color-secondary)] text-sm font-normal"
+      data-testid="footer-version"
+      dusk="footer-version">
+    dev · local</span>
+    </div>
+</footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- Livewire Scripts -->
+<script src="http://localhost:8090/livewire-5ca3fe4c/livewire.js?id=ab6b028c"   data-csrf="Cu8IsLesgjYIFeY0bb7775yERligZ9UgRrgrXkHN" data-module-url="http://localhost:8090/livewire-5ca3fe4c" data-update-uri="http://localhost:8090/livewire-5ca3fe4c/update" data-navigate-once="true"></script>
+</body>
+</html>

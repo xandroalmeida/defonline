@@ -1,0 +1,19 @@
+-[ RECORD 1 ]+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+nome_evento  | quiz_iniciado
+propriedades | {"quiz_id": "019e61e6-297d-713f-a8c2-999a9dd30bb8", "quiz_versao": "2026.1"}
+request_id   | 019e61e6-294f-710d-ab2a-295ea30b9d27
+tem_usuario  | t
+ocorrido_em  | 2026-05-25 22:28:54-03
+-[ RECORD 2 ]+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+nome_evento  | diagnostico_concluido
+propriedades | {"porte": "epp", "setor": "industria", "quiz_id": "019e61e6-297d-713f-a8c2-999a9dd30bb8", "diagnostico_id": "019e61e6-2985-7247-8e47-a389132bef1e", "duracao_preenchimento_seg": 137}
+request_id   | 019e61e6-294f-710d-ab2a-295ea30b9d27
+tem_usuario  | t
+ocorrido_em  | 2026-05-25 22:28:54-03
+-[ RECORD 3 ]+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+nome_evento  | diagnostico_concluido
+propriedades | {"porte": "epp", "setor": "industria", "quiz_id": "019e61e6-297d-713f-a8c2-999a9dd30bb8", "diagnostico_id": "019e61e6-2987-73bd-bb30-00f6742726e2", "duracao_preenchimento_seg": 140}
+request_id   | 019e61e6-294f-710d-ab2a-295ea30b9d27
+tem_usuario  | t
+ocorrido_em  | 2026-05-25 22:28:54-03
+

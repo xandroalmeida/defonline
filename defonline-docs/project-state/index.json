@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-05-25T23:48:49Z",
+  "generated_at": "2026-05-26T02:04:19Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -154,7 +154,7 @@
       "slug": "diagnostico-industria",
       "title": "Diagnóstico Econômico-Financeiro para Indústria",
       "wave": "WAVE-2026-01",
-      "status": "active",
+      "status": "done_under_review",
       "path": "epics/EPIC-002-diagnostico-industria/epic.md",
       "story_ids": [
         "STORY-026",
@@ -170,7 +170,7 @@
         "STORY-036",
         "STORY-037"
       ],
-      "validation_report": null,
+      "validation_report": "epics/EPIC-002-diagnostico-industria/validation/report.md",
       "blocked_by_epics": [
         "EPIC-000",
         "EPIC-001"
@@ -184,7 +184,7 @@
       "slug": "historico-basico",
       "title": "Histórico básico de diagnósticos",
       "wave": "WAVE-2026-01",
-      "status": "draft",
+      "status": "ready",
       "path": "epics/EPIC-003-historico-basico/epic.md",
       "story_ids": [],
       "validation_report": null,
@@ -192,7 +192,8 @@
         "EPIC-002"
       ],
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-20"
+      "updated_at": "2026-05-26T02:04:19Z",
+      "unblocked_by": "EPIC-002 done_under_review (2026-05-26)"
     },
     {
       "id": "EPIC-004",
@@ -1023,7 +1024,7 @@
       "title": "Eventos analíticos — quiz_iniciado e diagnostico_concluido",
       "type": "implementation",
       "target_role": "programador",
-      "status": "draft",
+      "status": "done",
       "estimated_session_size": "S",
       "blocked_by": [
         "STORY-027",
@@ -1036,7 +1037,10 @@
       "owner_agent": null,
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-035-eventos-analiticos-quiz-diagnostico.md",
       "created_at": "2026-05-25",
-      "updated_at": "2026-05-25T22:11:10Z"
+      "updated_at": "2026-05-26T01:08:17Z",
+      "closed_at": "2026-05-25",
+      "approved_by": "Alexandro",
+      "approved_at": "2026-05-25"
     },
     {
       "id": "STORY-036",
@@ -1059,7 +1063,7 @@
       "owner_agent": null,
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-036-validacao-externa-motor.md",
       "created_at": "2026-05-25",
-      "updated_at": "2026-05-25T22:11:10Z"
+      "updated_at": "2026-05-26T01:14:37Z"
     },
     {
       "id": "STORY-037",
@@ -1089,7 +1093,7 @@
       "owner_agent": null,
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-037-validacao-final-handoff.md",
       "created_at": "2026-05-25",
-      "updated_at": "2026-05-25T22:11:10Z"
+      "updated_at": "2026-05-26T01:14:37Z"
     }
   ],
   "sprints": [
@@ -1212,11 +1216,11 @@
     {
       "id": "SPRINT-2026-W25",
       "wave": "WAVE-2026-01",
-      "status": "planned",
+      "status": "closed",
       "start_date": "2026-05-25",
       "end_date": "2026-07-03",
       "goal": "Entregar o EPIC-002 pronto-para-beta sob otica tecnica em 5 semanas (12 estorias em 5 fatias verticais V1-V5), com validacao externa do motor (NRF §9.3) aprovada, validacao interna independente aprovada e pacote de handoff para comercial/implantacao. Recrutamento de Robertos, NPS e operacao do beta ficam fora desta sprint.",
-      "goal_achieved": null,
+      "goal_achieved": "partial_technical_done_under_review",
       "path": "sprints/SPRINT-2026-W25.md",
       "story_ids": [
         "STORY-026",
@@ -1272,7 +1276,9 @@
           "kill_switch": false
         }
       ],
-      "updated_at": "2026-05-25T23:48:49Z"
+      "updated_at": "2026-05-26T02:04:19Z",
+      "closed_at": "2026-05-26",
+      "closed_early": true
     }
   ],
   "decisions": {

@@ -81,6 +81,23 @@ Validador externo é especialista em finanças corporativas (CFA, auditor sênio
 
 Esta estória **não tem agente Claude executando** — é coordenação humana (PO contrata + Validador entrega). O fluxo de status updates no `index.json` é manual. Agente Claude **pode auxiliar** o PO em: (a) redigir briefing técnico para o Validador, (b) consolidar fixtures, (c) revisar o parecer recebido contra os 140 casos canônicos. **Não pode**: contratar, assinar contrato, ou emitir o parecer.
 
+## Decisão do PO em 2026-05-26 — pular no fechamento, manter como `pending`
+
+**PO decide adiar a validação externa formal NRF §9.3** após o fechamento técnico do EPIC-002. Justificativas:
+
+- Contratação de especialista externo demanda tempo (3–5 semanas) e custo financeiro que não cabe no cronograma desta sprint.
+- O Plano B (conselheiro informal) destrava o beta com ressalva, mas não satisfaz o §9.3 formalmente — equivale a empurrar a pendência com nome diferente.
+- **Caminho escolhido:** EPIC-002 fecha como `done_under_review` (técnica entregue + valida internamente) em vez de `done` puro. **Beta fechado só roda após a validação externa real ser contratada e o parecer ser `approved` ou `approved_with_pending`.**
+
+**Efeitos concretos:**
+
+- STORY-036 permanece em `draft` no `index.json` (não vai para `done` agora).
+- STORY-037 trata o gate CA-4 como `pending_external_validation` e não bloqueia o fechamento técnico do épico, mas **bloqueia explicitamente o lançamento do beta**.
+- O pacote de handoff (STORY-037 CA-6) registra essa condição como **risco de release** documentado para comercial/implantação — o beta não pode ser oferecido a Roberto real até esta estória virar `approved`.
+- A contratação do validador externo vira **épico próprio ou estória de débito** na onda seguinte, com janela e responsável definidos pelo PO antes do beta começar.
+
+Esta decisão também elimina o CA-0 (shortlist até 2026-05-29) e o CA-1 (contrato até 2026-06-05) — estavam atrelados ao caminho de contratar agora.
+
 ## Notas do agente
 
 *(N/A — estória conduzida pelo PO.)*

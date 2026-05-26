@@ -1,0 +1,42 @@
+Warning: TTY mode requires /dev/tty to be read/writable.
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Browser\CadastroEmpresaBrowserTest[39m
+  [32;1m✓[39;22m[90m [39m[90musuario autenticado cadastra empresa manualmente e ve tela read onl[39m[90m…[39m [90m1.67s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Browser\CadastroLoginHomeBrowserTest[39m
+  [32;1m✓[39;22m[90m [39m[90mvisitante cria conta faz login acessa home e sai[39m[90m                    [39m [90m1.38s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Browser\CadastroLoginSmokeBrowserTest[39m
+  [32;1m✓[39;22m[90m [39m[90mcadastro renderiza form visivel[39m[90m                                     [39m [90m0.27s[39m  
+  [32;1m✓[39;22m[90m [39m[90mtermos renderizam com banner placeholder[39m[90m                            [39m [90m0.10s[39m  
+  [32;1m✓[39;22m[90m [39m[90mlogin renderiza form visivel[39m[90m                                        [39m [90m0.06s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Browser\EmailConfirmacaoBrowserTest[39m
+  [32;1m✓[39;22m[90m [39m[90mvisitante cadastra recebe email clica e confirma[39m[90m                    [39m [90m1.23s[39m  
+  [32;1m✓[39;22m[90m [39m[90mlogin bloqueia enquanto email nao confirmado[39m[90m                        [39m [90m0.68s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Browser\EnriquecimentoRfbBrowserTest[39m
+  [32;1m✓[39;22m[90m [39m[90mfluxo completo de enriquecimento via rfb[39m[90m                            [39m [90m1.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mfallback mostra aviso amarelo quando provedor falha[39m[90m                 [39m [90m0.65s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Browser\LandingBrowserTest[39m
+  [32;1m✓[39;22m[90m [39m[90mvisitor sees landing with logo and ctas[39m[90m                             [39m [90m0.27s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Browser\MinhasEmpresasBrowserTest[39m
+  [32;1m✓[39;22m[90m [39m[90mfluxo completo cadastra empresa via rfb e ve em minhas empresas[39m[90m     [39m [90m1.65s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Browser\QuizTooltipsBrowserTest[39m
+  [32;1m✓[39;22m[90m [39m[90mdesktop click no icone revela popover e esc fecha[39m[90m                   [39m [90m0.85s[39m  
+  [32;1m✓[39;22m[90m [39m[90mmobile click revela bottom sheet e botao fechar fecha[39m[90m               [39m [90m0.63s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Browser\ShellMobileBrowserTest[39m
+  [32;1m✓[39;22m[90m [39m[90mdrawer mobile abre pelo hamburger e fecha pelo escape[39m[90m               [39m [90m0.90s[39m  
+  [32;1m✓[39;22m[90m [39m[90madicionar empresa cta visivel no mobile com empresa cadastrada[39m[90m      [39m [90m0.41s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Browser\ValidacoesCruzadasBrowserTest[39m
+  [32;1m✓[39;22m[90m [39m[90mbanner inconsistencia aparece continuar gera diagnostico com alerta[39m[90m…[39m [90m3.52s[39m  
+  [32;1m✓[39;22m[90m [39m[90mbanner exibe r1 e r2 juntas e corrigir leva ao campo[39m[90m                [39m [90m2.62s[39m  
+
+  [90mTests:[39m    [32;1m17 passed[39;22m[90m (105 assertions)[39m
+  [90mDuration:[39m [39m18.59s[39m
+

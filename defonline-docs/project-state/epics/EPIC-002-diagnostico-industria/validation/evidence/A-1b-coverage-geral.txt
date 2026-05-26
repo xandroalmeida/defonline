@@ -1,0 +1,1183 @@
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Arch/DesignTokensTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Domain/CnpjTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Domain/CpfTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Domain/Rfb/RfbCnpjResultTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Domain/Rfb/RfbCnpjStatusTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Domain/TermoTipoTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Domain/TipoDocumentoTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Domain/UfTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Features/HelloWorldEmailHabilitadoTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Mail/EmailConfirmacaoMessageTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Mail/HelloWorldMessageTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Observabilidade/LogSanitizerTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Services/Rfb/MockRfbCnpjClientTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Services/Rfb/RfbCnpjResultSerializerTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Support/HelpersTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Support/Relatorio/IndicadorFormatterTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Unit/Support/RequestIdTest.php to test suite "All" as it was already added to test suite "UnitPure"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Calculos/DreAdaptadaTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Farois/FarolIndustriaTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/GoldenHashesTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Indicadores/CicloFinanceiroTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Indicadores/CicloOperacionalTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Indicadores/DespesasFinEbitdaTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Indicadores/DividaLiquidaEbitdaTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Indicadores/FontesRecursosTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Indicadores/GiroAtivoTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Indicadores/InadimplenciaTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Indicadores/MargemBrutaTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Indicadores/MargemEbitdaTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Indicadores/MargemLiquidaTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Indicadores/NcgAbsolutoTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Indicadores/NcgVendasTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Indicadores/PmcTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Indicadores/PmeTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/Indicadores/PmrTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/MatrizArchTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/MatrizRecomendacoesTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/MotorLatenciaTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/MotorTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/QuizPayloadCanonicalizerTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Motor/ResumoExecutivoTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Domain/Quiz/ValidacoesCruzadasTest.php to test suite "All" as it was already added to test suite "Domain"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Console/MonitorarRfbErrorRateTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Console/PennantListOverdueTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Diagnosticos/CalcularDiagnosticoTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Diagnosticos/DiagnosticoCrossTenantTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Http/DiagnosticoShowTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Http/EmailConfirmacaoTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Http/EmpresaShowTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Http/HealthEndpointsTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Http/HomeLogoutTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Http/TermosRotaTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Http/TrustedProxiesTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Jobs/EnviarEmailConfirmacaoTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Jobs/HelloWorldEmailTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/LandingTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Livewire/CadastroAceitesTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Livewire/CadastroTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Livewire/Diagnostico/QuizTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Livewire/Diagnostico/QuizTooltipsTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Livewire/EmailConfirmacaoFluxoTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Livewire/Empresa/CadastrarComEnriquecimentoTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Livewire/Empresa/CadastrarEmpresaTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Livewire/Empresa/ConsultarReceitaTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Livewire/Home/MinhasEmpresasTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Livewire/LoginTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Models/EmpresaAnalisadaTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Observabilidade/AuditLoggerTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Observabilidade/CollectJobMetricsTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Observabilidade/EmissaoEventoArchTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Observabilidade/EventLoggerTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Observabilidade/EventosCadastroTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Observabilidade/EventosDiagnosticoTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Observabilidade/RequestIdPropagationTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Policies/EmpresaAnalisadaPolicyTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Services/Rfb/CnpjaRfbCnpjClientTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Services/Rfb/ReceitawsRfbCnpjClientTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Services/Rfb/RfbConsultarCnpjTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Services/Rfb/RfbProviderResolutionTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Shell/AppShellRenderTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Shell/CancelarEmpresaNovaTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Shell/LogoutFlashTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [30;43;1m WARN [39;49;22m Cannot add file /var/www/html/tests/Feature/Support/TermosVigentesTest.php to test suite "All" as it was already added to test suite "Feature"
+
+  [44;1m INFO [49;22m Warning: The use statement with non-compound name 'Mockery' has no effect in /var/www/html/tests/Domain/Motor/MatrizRecomendacoesTest.php on line 8.
+
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Arch\DesignTokensTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit nenhum hex literal de cor do design system aparece em views Blad[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit nenhum hex literal de cor do design system aparece em CSS fora de tokens.css (CA-6)[39m
+  [32;1m✓[39;22m[90m [39m[90mit tokens.css contém todos os tokens primários do design-system v1[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Domain\CnpjTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit aceita CNPJ válido formatado e cru with ('11.222.333/0001-81')[39m
+  [32;1m✓[39;22m[90m [39m[90mit aceita CNPJ válido formatado e cru with ('11222333000181')[39m
+  [32;1m✓[39;22m[90m [39m[90mit aceita CNPJ válido formatado e cru with ('04.252.011/0001-10')[39m
+  [32;1m✓[39;22m[90m [39m[90mit aceita CNPJ válido formatado e cru with ('00.000.000/0001-91')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CNPJ com dígito verificador errado[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CNPJ com tamanho diferente de 14 dígitos with ('')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CNPJ com tamanho diferente de 14 dígitos with ('123')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CNPJ com tamanho diferente de 14 dígitos with ('1122233300018')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CNPJ com tamanho diferente de 14 dígitos with ('112223330001811')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CNPJ com tamanho diferente de 14 dígitos with ('abc.def.ghi/jklm-no')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CNPJ com todos os dígitos iguais (sequência trivial)[39m
+  [32;1m✓[39;22m[90m [39m[90mit normaliza para somente dígitos[39m
+  [32;1m✓[39;22m[90m [39m[90mit formata CNPJ de 14 dígitos no padrão XX.XXX.XXX/XXXX-XX[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve a entrada quando não tem 14 dígitos para formatar[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Domain\CpfTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit aceita CPF válido formatado e cru with ('529.982.247-25')[39m
+  [32;1m✓[39;22m[90m [39m[90mit aceita CPF válido formatado e cru with ('52998224725')[39m
+  [32;1m✓[39;22m[90m [39m[90mit aceita CPF válido formatado e cru with ('111.444.777-35')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CPF com dígito verificador errado[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CPF com tamanho diferente de 11 dígitos with ('')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CPF com tamanho diferente de 11 dígitos with ('123')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CPF com tamanho diferente de 11 dígitos with ('1234567890')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CPF com tamanho diferente de 11 dígitos with ('123456789012')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CPF com tamanho diferente de 11 dígitos with ('abc.def.ghi-jk')[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CPFs com todos os dígitos iguais (sequência trivial)[39m
+  [32;1m✓[39;22m[90m [39m[90mit normaliza para somente dígitos[39m
+  [32;1m✓[39;22m[90m [39m[90mit formata CPF de 11 dígitos no padrão XXX.XXX.XXX-XX[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve a entrada quando não tem 11 dígitos para formatar[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Domain\Rfb\RfbCnpjResultTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit projeta dados completos para o formulário Livewire (CA-2)[39m[90m        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit projeta campos nullables como string vazia para o formulário[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Domain\Rfb\RfbCnpjStatusTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit classifica sucesso como ehSucesso=true e ehErroDoProvedor=false[39m
+  [32;1m✓[39;22m[90m [39m[90mit classifica cnpj_inexistente como nem sucesso nem erro do provedor[39m
+  [32;1m✓[39;22m[90m [39m[90mit classifica timeout/erro_5xx/erro_rede como erro do provedor with (App\Domain\Rfb\RfbCnpjStatus Enum (Timeout, 'timeout'))[39m
+  [32;1m✓[39;22m[90m [39m[90mit classifica timeout/erro_5xx/erro_rede como erro do provedor with (App\Domain\Rfb\RfbCnpjStatus Enum (Erro5xx, 'erro_5xx'))[39m
+  [32;1m✓[39;22m[90m [39m[90mit classifica timeout/erro_5xx/erro_rede como erro do provedor with (App\Domain\Rfb\RfbCnpjStatus Enum (ErroRede, 'erro_rede'))[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Domain\TermoTipoTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit marca termo_adesao e lgpd como obrigatórios e marketing como opcional[39m
+  [32;1m✓[39;22m[90m [39m[90mit expõe valores em snake_case alinhados ao check constraint do banco[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Domain\TipoDocumentoTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit CNPJ tem 14 dígitos e CPF tem 11[39m
+  [32;1m✓[39;22m[90m [39m[90mit valida documento conforme o tipo[39m
+  [32;1m✓[39;22m[90m [39m[90mit normaliza documento removendo máscaras[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Domain\UfTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit lista as 27 UFs brasileiras (26 estados + DF)[39m
+  [32;1m✓[39;22m[90m [39m[90mit expõe valores como strings de 2 letras maiúsculas[39m
+  [32;1m✓[39;22m[90m [39m[90mit garante unicidade dos códigos[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Features\HelloWorldEmailHabilitadoTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit resolves to true by default in the MVP[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Mail\EmailConfirmacaoMessageTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit expõe subject "Confirme seu email — DEFOnline"[39m[90m                   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit aponta para a view mail.email-confirmacao[39m
+  [32;1m✓[39;22m[90m [39m[90mit mantém nome e link como readonly properties[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Mail\HelloWorldMessageTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit builds an envelope with the request_id in the subject[39m
+  [32;1m✓[39;22m[90m [39m[90mit renders an HTML body mentioning the worker and the request_id[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Observabilidade\LogSanitizerTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit redacts credentials completely[39m
+  [32;1m✓[39;22m[90m [39m[90mit masks CPF preserving last two digits[39m
+  [32;1m✓[39;22m[90m [39m[90mit masks email preserving first local char and TLD[39m
+  [32;1m✓[39;22m[90m [39m[90mit masks CNPJ allowing only root segment[39m
+  [32;1m✓[39;22m[90m [39m[90mit redacts financial keys by regex[39m
+  [32;1m✓[39;22m[90m [39m[90mit recursively sanitizes nested arrays[39m
+  [32;1m✓[39;22m[90m [39m[90mit leaves non-sensitive keys untouched[39m
+  [32;1m✓[39;22m[90m [39m[90mit handles empty values gracefully[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Services\Rfb\MockRfbCnpjClientTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit dispara CnpjInexistente para CNPJs com prefixo 00 (CA-1)[39m
+  [32;1m✓[39;22m[90m [39m[90mit reporta o status correto para cada gatilho de prefixo with ('00112233', App\Domain\Rfb\RfbCnpjStatus Enum (CnpjInexistente, 'cnpj_inexistente'))[39m
+  [32;1m✓[39;22m[90m [39m[90mit reporta o status correto para cada gatilho de prefixo with ('99887766', App\Domain\Rfb\RfbCnpjStatus Enum (Timeout, 'timeout'))[39m
+  [32;1m✓[39;22m[90m [39m[90mit reporta o status correto para cada gatilho de prefixo with ('88776655', App\Domain\Rfb\RfbCnpjStatus Enum (Erro5xx, 'erro_5xx'))[39m
+  [32;1m✓[39;22m[90m [39m[90mit reporta o status correto para cada gatilho de prefixo with ('77665544', App\Domain\Rfb\RfbCnpjStatus Enum (ErroRede, 'erro_rede'))[39m
+  [32;1m✓[39;22m[90m [39m[90mit retorna dados sintéticos determinísticos para o caminho feliz (mesmo CNPJ → mesmos dados)[39m
+  [32;1m✓[39;22m[90m [39m[90mit retorna campos preenchidos para o caminho feliz[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CNPJ com DV inválido (defesa em camadas)[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Services\Rfb\RfbCnpjResultSerializerTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit faz roundtrip do DTO completo[39m
+  [32;1m✓[39;22m[90m [39m[90mit faz roundtrip preservando nullables[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Support\HelpersTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit returns the current RequestId via the global request_id() helper[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Support\Relatorio\IndicadorFormatterTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional) with ('margem_bruta', 'Margem Bruta')[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional) with ('margem_ebitda', 'Margem EBITDA')[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional) with ('margem_liquida', 'Margem Líquida')[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional) with ('divida_liquida_ebitda', 'Dívida Líquida / EBITDA')[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional) with ('despesas_fin_ebitda', 'Despesas Financeiras / EBITDA')[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional) with ('fontes_recursos', 'Fontes de Recursos (PC / PL)')[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional) with ('giro_ativo', 'Giro do Ativo')[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional) with ('ciclo_financeiro', 'Ciclo Financeiro')[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional) with ('ncg_absoluto', 'NCG — Necessidade de Capital de Giro')[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional) with ('ncg_vendas', 'NCG / Vendas')[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional) with ('pmc', 'PMC — Prazo médio de pagamento')[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional) with ('pme', 'PME — Prazo médio de estoque')[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional) with ('pmr', 'PMR — Prazo médio de recebimento')[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional) with ('inadimplencia', 'Inadimplência')[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional) with ('ciclo_operacional', 'Ciclo Operacional')[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve o próprio código quando o indicador não está no catálogo[39m
+  [32;1m✓[39;22m[90m [39m[90mit formata valor null como travessão[39m
+  [32;1m✓[39;22m[90m [39m[90mit formata margens como percentual com 1 casa e vírgula decimal BR[39m
+  [32;1m✓[39;22m[90m [39m[90mit formata despesas_fin_ebitda e inadimplência como percentual com 1 casa[39m
+  [32;1m✓[39;22m[90m [39m[90mit formata Dívida Líq./EBITDA, Fontes Recursos e Giro como múltiplo com 2 casas[39m
+  [32;1m✓[39;22m[90m [39m[90mit formata NCG/Vendas multiplicando razão por 100 (snapshot grava decimal)[39m
+  [32;1m✓[39;22m[90m [39m[90mit formata prazos médios, ciclo financeiro e ciclo operacional em dias inteiros[39m
+  [32;1m✓[39;22m[90m [39m[90mit formata NCG absoluto em moeda BR com sinal preservado[39m
+  [32;1m✓[39;22m[90m [39m[90mit formata indicador desconhecido como número BR com 2 casas (fallback)[39m
+  [32;1m✓[39;22m[90m [39m[90mit expõe a ordem canônica dos 13 essenciais (com farol) — alinhada ao Anexo D[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\Support\RequestIdTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit generates a valid UUID v7[39m[90m                                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit returns the same value across multiple get calls in the same request[39m
+  [32;1m✓[39;22m[90m [39m[90mit accepts a manually set request_id[39m
+  [32;1m✓[39;22m[90m [39m[90mit validates the scheduler prefix variant[39m
+  [32;1m✓[39;22m[90m [39m[90mit rejects malformed candidates[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Calculos\DreAdaptadaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit anualiza Q09 (vendas mensais x 12)[39m[90m                               [39m [90m0.10s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit anualiza Q08 (compras mensais x 12)[39m[90m                              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit calcula Lucro Bruto = Vendas − Compras[39m[90m                           [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit calcula EBITDA = LB − Despesas fixas anuais − Despesas variáveis[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit calcula LOL = EBITDA − Despesas Financeiras anuais[39m[90m               [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit calcula Ativo Total = Q02 + Q03 + Q04 + Q05[39m[90m                      [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit calcula Passivo Circulante = Q06 + Q07[39m[90m                           [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit calcula Patrimônio Líquido = AT − PC (simplificação Anexo B)[39m[90m     [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit retorna null em Vendas quando Q09 ausente[39m[90m                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit retorna null em LB quando Compras faltam[39m[90m                         [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit retorna null em EBITDA quando Q14 ausente[39m[90m                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit retorna null em LOL quando Q16 ausente (embora EBITDA seja calcu[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit retorna null em Ativo Total quando qualquer componente ausente[39m[90m   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit trata string vazia como null (defensa em profundidade — canonica[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit aceita valores decimais com casas (não força casas)[39m[90m              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit aceita valores como int ou float (não exige string)[39m[90m              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit aceita zero como valor válido (não confunde com null)[39m[90m            [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit detecta payload não-numérico e retorna null[39m[90m                      [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Farois\FarolIndustriaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit Margem Bruta — verde acima de 25%[39m[90m                                [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Margem Bruta — fronteira verde: 25.01 → verde (estritamente > 25[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Margem Bruta — fronteira amarelo superior: 25.0 exato → amarelo[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Margem Bruta — amarelo típico: 22.5[39m[90m                              [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Margem Bruta — fronteira amarelo inferior: 20.01 → amarelo (> 20[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Margem Bruta — fronteira vermelho superior: 20.0 → vermelho (≤ 2[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Margem Bruta — vermelho típico: 10.0[39m[90m                             [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Margem Bruta — vermelho extremo negativo[39m[90m                         [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Dívida Líq/EBITDA — verde abaixo de 2[39m[90m                            [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Dívida Líq/EBITDA — fronteira verde: 2.0 exato → verde (≤ 2)[39m[90m     [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Dívida Líq/EBITDA — fronteira amarelo: 2.01 → amarelo (> 2)[39m[90m      [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Dívida Líq/EBITDA — fronteira amarelo superior: 3.0 → amarelo (≤[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Dívida Líq/EBITDA — fronteira vermelho: 3.01 → vermelho (> 3)[39m[90m    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Dívida Líq/EBITDA — valor negativo (caixa líquido) → verde[39m[90m       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit valor null sempre retorna NENHUM[39m[90m                                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit lança exception se chave não está configurada[39m[90m                    [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit lança exception se config tem tipo inválido[39m[90m                      [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\GoldenHashesTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit motor produz saída bit-exata para cada fixture canônico with dat[39m[90m…[39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit motor produz saída bit-exata para cada fixture canônico with dat[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit motor produz saída bit-exata para cada fixture canônico with dat[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit motor produz saída bit-exata para cada fixture canônico with dat[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit motor produz saída bit-exata para cada fixture canônico with dat[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cada fixture é JSON puro (sem BOM, sem comentário) with ('quiz_i[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cada fixture é JSON puro (sem BOM, sem comentário) with ('quiz_i[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cada fixture é JSON puro (sem BOM, sem comentário) with ('quiz_i[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cada fixture é JSON puro (sem BOM, sem comentário) with ('quiz_i[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cada fixture é JSON puro (sem BOM, sem comentário) with ('quiz_i[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit garante que os 5 fixtures cobrem caminhos distintos do motor (sa[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Indicadores\CicloFinanceiroTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit verde — ciclo curto: PME 15 + PMR 15 − PMC 30 = 0[39m[90m                [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — ciclo negativo (PMC > PME+PMR — caso ideal extremo)[39m[90m      [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — fronteira 30 exato[39m[90m                                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira 30.01[39m[90m                                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — típico 45 dias[39m[90m                                         [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira superior 60[39m[90m                                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — fronteira 60.01[39m[90m                                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — ciclo 120 dias (típico alto)[39m[90m                          [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — ciclo extremo negativo (−100 dias)[39m[90m                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q11 (PME) ausente[39m[90m                                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q12 (PMR) ausente[39m[90m                                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q10 (PMC) ausente[39m[90m                                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — todos os prazos ausentes[39m[90m                          [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — algum prazo não-numérico[39m[90m                          [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Indicadores\CicloOperacionalTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit informativo — PME 15 + PMR 15 = 30 dias[39m[90m                          [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit informativo — PME 30 + PMR 45 = 75 dias[39m[90m                          [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit informativo — PME 0 + PMR 0 = 0 dias (extremo válido)[39m[90m            [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit informativo — PME 60 + PMR 90 = 150 dias (ciclo longo)[39m[90m           [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit informativo — aceita string numérica em Q11/Q12 (consistente com[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit informativo — PME 365 + PMR 365 = 730 (extremo atípico mas calcu[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit informativo — Q11 grande + Q12 pequeno[39m[90m                           [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q11 ausente (PME)[39m[90m                                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q12 ausente (PMR)[39m[90m                                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — ambos ausentes[39m[90m                                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q11 não-numérico[39m[90m                                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q12 não-numérico[39m[90m                                  [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Indicadores\DespesasFinEbitdaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit verde — 30% (típico saudável)[39m[90m                                    [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — fronteira 35.0% (≤ 35)[39m[90m                                   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira 35.01% (> 35)[39m[90m                                [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — típico 40%[39m[90m                                             [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira superior 50%[39m[90m                                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — fronteira 50.01% (> 50)[39m[90m                               [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — típico 60%[39m[90m                                            [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — 100% (despesas financeiras consomem todo o EBITDA)[39m[90m    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q16 ausente[39m[90m                                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q16 não-numérico[39m[90m                                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — EBITDA zero[39m[90m                                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — EBITDA negativo[39m[90m                                   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q14 ausente (despesas propagam)[39m[90m                   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q09 ausente (vendas propagam)[39m[90m                     [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q08 ausente (LB null → EBITDA null → despesas_fal[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Indicadores\DividaLiquidaEbitdaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit verde — dívida líquida negativa (caixa > dívida)[39m[90m                 [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — ratio típico 1.0[39m[90m                                         [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — fronteira 2.0 exato (≤ 2 → verde)[39m[90m                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira 2.01[39m[90m                                         [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira 3.0 exato (≤ 3 → amarelo)[39m[90m                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — fronteira 3.01[39m[90m                                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — ratio 5.0 (alavancagem alta)[39m[90m                          [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — EBITDA = 0[39m[90m                                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — EBITDA negativo (Q14 alto)[39m[90m                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q02 ausente[39m[90m                                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q06 ausente[39m[90m                                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q14 ausente (propaga EBITDA null → despesas_falta[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q02 não-numérico (defensa pós-check de null)[39m[90m      [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Indicadores\FontesRecursosTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit verde — Fontes 0.25 (típico saudável)[39m[90m                            [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — fronteira 0.5 (≤ 0.5)[39m[90m                                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira logo acima de 0.5 (> 0.5)[39m[90m                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — típico 0.6667 (PC = 600k, PL = 900k)[39m[90m                   [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira superior 1.0[39m[90m                                 [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — fronteira logo acima de 1.0[39m[90m                           [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — típico 2.0 (PC = 1M, PL = 500k)[39m[90m                       [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — extremo 5.0 (PC = 1.25M, PL = 250k)[39m[90m                   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — PL = 0 (PC = AT)[39m[90m                                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — PL < 0 (PC > AT, passivo maior que ativo)[39m[90m         [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q02 ausente (componente do AT)[39m[90m                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q05 ausente (componente do AT)[39m[90m                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q06 ausente (componente do PC)[39m[90m                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q07 ausente (componente do PC)[39m[90m                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q03 não-numérico (componente do AT via defensivo)[39m[90m [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q06 não-numérico (componente do PC via defensivo)[39m[90m [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Indicadores\GiroAtivoTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit verde — Giro 3.0 (típico saudável)[39m[90m                               [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — fronteira 2.01 (> 2)[39m[90m                                     [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira superior 2.0[39m[90m                                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — típico 1.5[39m[90m                                             [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira inferior 1.01[39m[90m                                [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — fronteira superior 1.0[39m[90m                                [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — típico 0.5[39m[90m                                            [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — vendas zero (Giro = 0)[39m[90m                                [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q02 ausente (componente do AT)[39m[90m                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q05 ausente (componente do AT)[39m[90m                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — AT = 0 (todos os componentes zerados)[39m[90m             [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q09 ausente (vendas faltante)[39m[90m                     [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q03 não-numérico (componente do AT)[39m[90m               [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q09 não-numérico (vendas)[39m[90m                         [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Indicadores\InadimplenciaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit verde — inadimplência 0% (extremo válido — carteira sem perdas)[39m[90m  [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — inadimplência 2%[39m[90m                                         [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — fronteira 3% (≤ 3)[39m[90m                                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira 3.01% (> 3)[39m[90m                                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — típico 4%[39m[90m                                              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira superior 5%[39m[90m                                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — fronteira 5.01% (> 5)[39m[90m                                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — típico 10%[39m[90m                                            [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — fronteira superior válida 100%[39m[90m                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q13 ausente (inadimplência faltante)[39m[90m              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q13 não-numérico[39m[90m                                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit exception — Q13 > 100% (invariante violada — quiz deveria ter bl[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Indicadores\MargemBrutaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit verde — margem 50% (vendas 100k, compras 50k)[39m[90m                    [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — margem limítrofe 25.01% (compras = 74.99% das vendas)[39m[90m    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — margem na fronteira superior 25.0% (compras = 75% das[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — margem típica 22.5%[39m[90m                                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira inferior 20.01%[39m[90m                              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — fronteira superior 20.0%[39m[90m                              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — margem 10%[39m[90m                                            [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — margem negativa (compras > vendas)[39m[90m                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q09 ausente (vendas faltante)[39m[90m                     [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — vendas zero (Q09 = 0)[39m[90m                             [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q08 ausente (compras faltante propaga via LB)[39m[90m     [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q09 não-numérico (defensa)[39m[90m                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mensagem da matriz dez-2025 para faixa verde[39m[90m                     [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Indicadores\MargemEbitdaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit verde — margem EBITDA 25% (saudável)[39m[90m                             [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — fronteira 20.01% (> 20)[39m[90m                                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira superior 20.0%[39m[90m                               [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — típico 17.5%[39m[90m                                           [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira inferior 15.01%[39m[90m                              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — fronteira superior 15.0%[39m[90m                              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — típico 10%[39m[90m                                            [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — EBITDA zero (margem 0%)[39m[90m                               [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — EBITDA negativo dentro do limite (margem −50%)[39m[90m        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — fronteira EBITDA = −Vendas (margem exatamente −100%,[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q09 ausente (vendas)[39m[90m                              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q09 = 0 (vendas zero)[39m[90m                             [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q14 ausente (despesas fixas)[39m[90m                      [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q15 ausente (despesas variáveis)[39m[90m                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q08 ausente (compras, propaga via LB null)[39m[90m        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q09 não-numérico (defensivo via DRE null)[39m[90m         [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — EBITDA extremo (< −Vendas / margem < −100%)[39m[90m       [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Indicadores\MargemLiquidaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit verde — margem líquida 20% (saudável)[39m[90m                            [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — fronteira 15.01% (LOL = 180120 com Vendas 1.2M)[39m[90m          [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira superior 15.0% (LOL = 180000)[39m[90m                [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — típico 10% (LOL = 120k)[39m[90m                                [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira inferior 8.01%[39m[90m                               [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — fronteira superior 8.0%[39m[90m                               [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — margem 0%[39m[90m                                             [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — margem negativa (prejuízo)[39m[90m                            [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q09 ausente (vendas)[39m[90m                              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q09 = 0 (vendas zero)[39m[90m                             [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q16 ausente (despesas financeiras)[39m[90m                [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q14 ausente (despesas fixas)[39m[90m                      [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q15 ausente (despesas variáveis)[39m[90m                  [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q08 não-numérico[39m[90m                                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q09 não-numérico (vendas faltante via DRE null de[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Indicadores\NcgAbsolutoTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit calcula NCG = Q03 + Q04 − Q07 (padrão 80+60−30 = 110k)[39m[90m           [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit NCG sempre tem farol nenhum (informativo)[39m[90m                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit motivo é null quando indicador calculável (não é "indisponivel:*[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Faixa 1 — NCG negativo (folga operacional)[39m[90m                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Faixa 1 — NCG = 0 exato (fronteira inclusiva)[39m[90m                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Faixa 2 — NCG positivo moderado (NCG 5% das vendas)[39m[90m              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Faixa 2 — fronteira superior NCG = 10% Vendas exato[39m[90m              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Faixa 3 — NCG positivo alto (12% das vendas)[39m[90m                     [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Faixa 3 — fronteira logo acima de 10% (120001)[39m[90m                   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit fallback Faixa 2 quando Vendas é null (e NCG > 0)[39m[90m                [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit fallback Faixa 2 quando Vendas = 0 (e NCG > 0)[39m[90m                   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit NCG ≤ 0 com vendas ausente continua Faixa 1 (folga)[39m[90m              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q03 ausente[39m[90m                                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q04 ausente[39m[90m                                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q07 ausente[39m[90m                                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — todos os componentes ausentes[39m[90m                     [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Indicadores\NcgVendasTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit verde — NCG negativo (folga operacional, fornecedores > clientes[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — fronteira 0.0 exato (≤ 0 → verde)[39m[90m                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira 0.01 (NCG positivo pequeno)[39m[90m                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — típico 5% das vendas[39m[90m                                   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira superior 10% exato[39m[90m                           [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — fronteira 10.01% (> 0.10)[39m[90m                             [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — 20% das vendas (NCG alto)[39m[90m                             [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q03 ausente[39m[90m                                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q04 ausente[39m[90m                                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q07 ausente[39m[90m                                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q09 ausente (vendas faltante)[39m[90m                     [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — vendas zero[39m[90m                                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q09 não-numérico[39m[90m                                  [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Indicadores\PmcTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit verde — PMC 90 dias[39m[90m                                              [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — fronteira inferior 60.01[39m[90m                                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira superior 60 (≤ 60 → amarelo)[39m[90m                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — típico 45 dias[39m[90m                                         [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira inferior 30.01[39m[90m                               [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — fronteira superior 30 (≤ 30 → vermelho)[39m[90m               [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — típico 15 dias[39m[90m                                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — PMC 0 (paga à vista — desvantagem)[39m[90m                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — atípico 365+ dias (passou validação cruzada no quiz)[39m[90m     [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q10 ausente (PMC faltante)[39m[90m                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q10 não-numérico[39m[90m                                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q10 string vazia (canonicalizer normaliza p/ null[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Indicadores\PmeTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit verde — PME 0 dias (extremo válido — produção sob encomenda)[39m[90m     [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — PME 15 dias[39m[90m                                              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — fronteira 30 (≤ 30)[39m[90m                                      [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira 30.01 (> 30)[39m[90m                                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — típico 45 dias[39m[90m                                         [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira superior 60[39m[90m                                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — fronteira 60.01 (> 60)[39m[90m                                [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — típico 90 dias[39m[90m                                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — atípico mas matematicamente válido 400 dias[39m[90m           [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q11 ausente (PME faltante)[39m[90m                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q11 não-numérico[39m[90m                                  [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\Indicadores\PmrTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit verde — PMR 15 dias[39m[90m                                              [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — PMR 0 dias (extremo válido — pagamento à vista)[39m[90m          [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit verde — fronteira 30 (≤ 30)[39m[90m                                      [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira 30.01 (> 30)[39m[90m                                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — típico 45 dias[39m[90m                                         [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit amarelo — fronteira superior 60[39m[90m                                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — fronteira 60.01 (> 60)[39m[90m                                [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — típico 90 dias[39m[90m                                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit vermelho — atípico mas matematicamente válido 365+ dias[39m[90m          [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q12 ausente (PMR faltante)[39m[90m                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit indisponível — Q12 não-numérico[39m[90m                                  [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\MatrizArchTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit config matriz dez-2025 industria tem entrada para os 13 indicado[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit nenhum indicador continua usando MensagensFarol::paraFarol para[39m[90m… [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\MatrizRecomendacoesTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve texto literal do Anexo F para cada par (codigo × farol)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit fallback gracioso — par (codigo × farol) sem texto retorna place[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit fallback gracioso — farol válido mas codigo conhecido sem essa c[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit determinismo — 100 chamadas para o mesmo par produzem string bit[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit auto-append idempotente em matriz-lacunas.md — escreve uma linha[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit auto-append silencia quando o diretório do path não existe[39m[90m       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit auto-append silencia quando matriz_lacunas_path é string vazia ([39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\MotorLatenciaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit p95 das 50 execuções do motor com fixtures variadas é menor que[39m[90m… [39m [90m0.06s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\MotorTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit retorna estrutura canônica com motor_version, matrix_version, se[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit produz exatamente 15 indicadores na V2 (14 do Anexo D + Ciclo Op[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cada indicador tem chaves valor/farol/motivo/mensagem[39m[90m            [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit é determinístico — chamadas repetidas produzem saída idêntica[39m[90m    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit determinismo sobrevive a reordenação de chaves do payload (canon[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita setor desconhecido com InvalidArgumentException[39m[90m          [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita comercio e servicos no motor V1 (só Indústria)[39m[90m           [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit NCG absoluto sempre tem farol nenhum (informativo)[39m[90m               [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit payload todo null → todos indicadores indisponíveis[39m[90m              [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit resumo executivo é populado pelo algoritmo §4.7.1 (STORY-031)[39m[90m    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit resumo executivo entra em fallback quando todos os indicadores s[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit aceita industria sem exception[39m[90m                                   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit MensagensFarol::paraFarol(nenhum) lança exception (esse caso é t[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit MotivosIndisponibilidade::mensagem(motivo desconhecido) lança ex[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit QuizPayloadCanonicalizer::toJson lança RuntimeException quando j[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\QuizPayloadCanonicalizerTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit ordena chaves lexicograficamente no nível raiz[39m[90m                   [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit ordena chaves recursivamente em sub-arrays[39m[90m                       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit preserva ordem de listas (arrays indexados sequenciais)[39m[90m          [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit normaliza string vazia para null[39m[90m                                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit normaliza string só com espaços para null[39m[90m                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit preserva string contendo apenas zero "0"[39m[90m                         [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit preserva int 0 e float 0.0 e false (não confunde com vazio)[39m[90m      [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit preserva null literal[39m[90m                                            [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit toJson serializa com flags determinísticas (UNESCAPED_UNICODE +[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit também conta com a Action no Provider — service container resolv[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit toJson é estável para duas execuções com mesma entrada (idempote[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit toJson produz JSON idêntico independente da ordem de inserção do[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit aplica NFC em strings com acentos decompostos[39m[90m                    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serializa false sem trocar por 0[39m[90m                                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit remove alertas_aceitos do canonical — não entra no hash (STORY-0[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Motor\ResumoExecutivoTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit CA-2 — todos verde produz veredito saudável + mensagem extra (Pa[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-2 — 1 vermelho, 0 amarelos → precisa_atenção (regra V≥1) + 1[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-2 — 5 amarelos sem vermelho → saudável (A/N = 5/13 < 0.50), c[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-2 — 7 amarelos sem vermelho → precisa_atenção (A/N = 7/13 ≥ 0[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-2 — 5 vermelhos → em_alerta (V/N = 5/13 ≈ 0.38 ≥ 0.30) + 2 de[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-2 + Passo 6 — todos vermelho → em_alerta + 2 destaques negati[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-2 — fallback ≥ 70% indisponíveis (10 de 14) → mensagem fixa[39m[90m   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-3 — empate de severidade em vermelhos: desempate pelo Anexo D[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-3 — empate de favorabilidade em verdes: desempate pelo Anexo[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-4 — truncamento em ~80 chars com "…" e sem cortar palavra[39m[90m     [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-5 — NCG abs e Ciclo Operacional ignorados na contagem V/A/Vd[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-5 — Ciclo Operacional indisponível NÃO conta no denominador 1[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit determinismo — 100 execuções produzem saída bit-exata[39m[90m            [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Passo 1 — caso "V/N borderline" com V=1 e N=4 (V/N=0.25 < 0.30)[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit defensivo — N=0 sem disparar fallback cai no resultado de fallba[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-4 — truncamento usa primeira frase quando ". " aparece antes[39m[90m… [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit contrato — caso fallback tem todos os campos esperados (NOT NULL[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Domain\Quiz\ValidacoesCruzadasTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit R1 dispara quando as despesas financeiras anualizadas passam de[39m[90m… [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit R1 não dispara quando as despesas financeiras estão dentro do es[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit R1 NÃO dispara no limiar exato (Q16×12 == 2×Q06) — comparação es[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit R1 traz mensagem acionável com o percentual e os valores (CA-4)[39m[90m  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit R2 dispara quando os custos anuais ultrapassam a receita anual[39m[90m   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit R2 não dispara quando a receita cobre os custos[39m[90m                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit R2 NÃO dispara no limiar exato (custos anuais == receita anual)[39m[90m  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit R3 dispara quando o passivo total supera o ativo total (PL negat[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit R3 não dispara em balanço saudável (ativo > passivo)[39m[90m             [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit R3 NÃO dispara no limiar exato (passivo == ativo)[39m[90m                [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não dispara nada quando faltam campos para avaliar a regra[39m[90m       [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit ignora regra com campo não-numérico em vez de quebrar[39m[90m            [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit aceita strings numéricas (formato canônico do motor)[39m[90m             [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit pode disparar mais de uma regra ao mesmo tempo[39m[90m                   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit avalia uma regra adicional definida só na config (CA-6)[39m[90m          [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit suporta os operadores >=, <, <= e ignora operador desconhecido w[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit suporta os operadores >=, <, <= e ignora operador desconhecido w[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit suporta os operadores >=, <, <= e ignora operador desconhecido w[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit suporta os operadores >=, <, <= e ignora operador desconhecido w[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit suporta os operadores >=, <, <= e ignora operador desconhecido w[39m[90m…[39m [90m0.01s[39m  
+{"message":"rfb.alert.enviado","context":{"module":"rfb","canal":"telegram","titulo":"título","provider":"cnpja"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:22.270166+00:00","extra":{}}
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Console\MonitorarRfbErrorRateTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit não alerta quando há menos de 5 consultas na janela[39m[90m              [39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não alerta quando a taxa de erro do provedor é ≤ 5%[39m[90m              [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit alerta quando a taxa de erro do provedor passa de 5% (CA-5)[39m[90m      [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cnpj_inexistente não conta como erro do provedor (não dispara al[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit ignora consultas fora da janela configurada[39m[90m                      [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit agrupa por provider e alerta apenas o que estourou[39m[90m               [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit RfbAlerter cai para Log::warning quando não há token Telegram (c[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit RfbAlerter envia para Telegram via HTTP quando token e chat_id e[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit RfbAlerter cai para Log::warning quando Telegram retorna erro de[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Console\PennantListOverdueTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit reports success when no flag is overdue[39m[90m                          [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit lists overdue flags and returns failure with --fail-on-overdue[39m[90m   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit does not fail without --fail-on-overdue, even if there is overdu[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit warns about flags missing @owner or @cleanup_due[39m[90m                 [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit warns about flags with malformed @cleanup_due[39m[90m                    [39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Diagnosticos\CalcularDiagnosticoTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit persiste um Diagnostico com snapshot completo[39m[90m                    [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit calcula payload_hash como SHA-256 do canonical JSON[39m[90m              [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit é idempotente de OUTPUT — dois execute() com mesmo input geram m[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit canonicalização funciona — payload reordenado produz mesmo hash[39m[90m  [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit quiz_payload persistido é o canonical (chaves ordenadas)[39m[90m         [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit gerado_em é setado pelo Action (não pelo motor — IDR-010 §sub-de[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rollback de transaction se algo falhar — exception inesperada nã[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit persiste alertas_aceitos no quiz_payload sem alterar o payload_h[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit valor de indicador é numérico quando calculável (margem_bruta ve[39m[90m…[39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Diagnosticos\DiagnosticoCrossTenantTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit Diagnostico::find devolve o registro do próprio usuário[39m[90m          [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Diagnostico::find devolve null para diagnóstico de outro usuário[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit Diagnostico::findOrFail levanta ModelNotFoundException cross-ten[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit listagem (Diagnostico::query()->get()) não vaza registros entre[39m[90m… [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit withoutGlobalScopes expõe todos os registros (caminho de admin/q[39m[90m…[39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Http\DiagnosticoShowTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit exige autenticação (redirect para /login)[39m[90m                        [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit renderiza o relatório do próprio Usuário (CA-1, CA-2, CA-3)[39m[90m      [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve 404 silente (IDR-009) quando outro Usuário tenta acessar[39m[90m [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve 404 quando o diagnóstico não existe[39m[90m                      [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit exibe texto da matriz dez-2025 (Anexo F Indústria) no lugar do p[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit exibe NCG absoluto em card separado, sem farol verde/amarelo/ver[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit exibe glossário inline com termos do Anexo I (CA-5)[39m[90m              [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit exibe rodapé com motor_version, matrix_version e data (CA-9)[39m[90m     [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rodapé reflete a versão do snapshot, não a do config atual[39m[90m       [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit renderiza linha cinza "Indisponível" sem farol quando valor é nu[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit contém estrutura semântica básica ([39m[90m<main>[39m[90m, [39m[90m<h1>[39m[90m, breadcrumb com aria) — CA[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit botão "Voltar" segue o Referer interno (Selecionar Empresa)[39m[90m      [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit botão "Voltar" segue o Referer interno (Minhas Empresas)[39m[90m         [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit botão "Voltar" cai em /home quando não há Referer (URL direta/bo[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit botão "Voltar" cai em /home quando Referer aponta para fora do a[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit botão "Voltar" cai em /home quando Referer é a própria página (r[39m[90m…[39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit renderiza o bloco "Resumo executivo" no topo do relatório (STORY[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit resumo executivo entra em modo fallback quando ≥70% indicadores[39m[90m… [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit snapshot legado em motor_version < 1.2.0 (placeholder) não quebr[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit exibe ambos os layouts (tabela em md+ e cards em <md) para mobil[39m[90m…[39m [90m0.03s[39m  
+{"message":"usuario.email_confirmado","context":{"request_id":"019e61df-47a2-710c-84aa-7f5676555086","user_id":null,"process":"web","usuario_id":"019e61df-47a1-721a-9aa8-0c16588ac588","email":"m**********@*******.org","module":"cadastro","action":"confirmar_email"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:23.367682+00:00","extra":{}}
+{"message":"usuario.email_confirmado","context":{"request_id":"019e61df-47ba-739c-891e-8dcac2c6e3d0","user_id":null,"process":"web","usuario_id":"019e61df-47b9-739e-8d08-a13a30259b5f","email":"l*******@*******.org","module":"cadastro","action":"confirmar_email"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:23.391040+00:00","extra":{}}
+{"message":"email_reenvio_enfileirado","context":{"request_id":"019e61df-4833-727a-816b-fa586dbb3332","user_id":null,"process":"web","usuario_id":"019e61df-4831-73cd-a247-98c9d910dd40","email":"r******@*******.br","module":"cadastro","action":"reenviar_confirmacao"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:23.519259+00:00","extra":{}}
+{"message":"email_reenvio_solicitado_invalido","context":{"request_id":"019e61df-4852-70ef-944e-a1e71ab1e0fb","user_id":null,"process":"web","email":"n*********@*******.br","module":"cadastro","action":"reenviar_confirmacao"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:23.541843+00:00","extra":{}}
+{"message":"email_reenvio_solicitado_invalido","context":{"request_id":"019e61df-4868-7199-b7bf-caaabb961aae","user_id":null,"process":"web","email":"j*@*******.br","module":"cadastro","action":"reenviar_confirmacao"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:23.562978+00:00","extra":{}}
+{"message":"email_reenvio_enfileirado","context":{"request_id":"019e61df-487c-7028-bd12-cd6cd6732b67","user_id":null,"process":"web","usuario_id":"019e61df-487a-71b8-b6de-8da8d1889d6b","email":"s***@*******.br","module":"cadastro","action":"reenviar_confirmacao"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:23.584554+00:00","extra":{}}
+{"message":"email_reenvio_enfileirado","context":{"request_id":"019e61df-4882-70fb-a84c-a37ebabbd5d6","user_id":null,"process":"web","usuario_id":"019e61df-487a-71b8-b6de-8da8d1889d6b","email":"s***@*******.br","module":"cadastro","action":"reenviar_confirmacao"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:23.589048+00:00","extra":{}}
+{"message":"email_reenvio_enfileirado","context":{"request_id":"019e61df-4886-73ba-ba6d-581a65be8851","user_id":null,"process":"web","usuario_id":"019e61df-487a-71b8-b6de-8da8d1889d6b","email":"s***@*******.br","module":"cadastro","action":"reenviar_confirmacao"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:23.592564+00:00","extra":{}}
+{"message":"email_reenvio_throttled","context":{"request_id":"019e61df-488c-712b-964e-2558291e983a","user_id":null,"process":"web","email":"s***@*******.br","module":"cadastro","action":"reenviar_confirmacao"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:23.597969+00:00","extra":{}}
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Http\EmailConfirmacaoTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit confirma email quando o link é válido (CA-3)[39m[90m                     [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit emite audit_log usuario.email_confirmado no sucesso (CA-3)[39m[90m       [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit redireciona com motivo "expirado" quando o link expira (CA-3)[39m[90m    [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita assinatura tampered (CA-3)[39m[90m                               [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit redireciona com motivo "ja_confirmado" se o usuário já está conf[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rota /email/confirmado mostra a mensagem amigável (CA-3)[39m[90m         [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rota /email/confirmar-erro tem o form de reenvio (CA-3)[39m[90m          [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reenvio enfileira EnviarEmailConfirmacao para email cadastrado p[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reenvio responde mensagem genérica para email não cadastrado (CA[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reenvio NÃO enfileira para usuário já confirmado (CA-5)[39m[90m          [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reenvio bloqueia após 3 disparos por hora para o mesmo email (CA[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reenvio rejeita formato de email inválido silenciosamente (CA-5)[39m[90m [39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Http\EmpresaShowTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit exige autenticação[39m[90m                                               [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mostra os dados da empresa do próprio Usuário em read-only (CA-5[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve 403 quando outro Usuário tenta acessar a empresa (CA-4)[39m[90m  [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit grava audit_log "empresa.acesso_negado" no cross-tenant (CA-6)[39m[90m   [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit devolve 404 quando a empresa não existe[39m[90m                          [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não inclui o documento no HTML mascarável apenas formatado[39m[90m       [39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Http\HealthEndpointsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit returns 200 from /health without touching the database[39m[90m           [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit returns 200 from /ready when dependencies are healthy[39m[90m            [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit propagates X-Request-Id from the request header into the respons[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit generates a fresh X-Request-Id when none is provided[39m[90m             [39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Http\HomeLogoutTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit faz logout via POST /logout, invalida sessão e redireciona para[39m[90m… [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita logout via GET (precisa de POST)[39m[90m                         [39m [90m0.14s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Http\TermosRotaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit serve /termos/termo-adesao sem autenticação, com versão e banner[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit serve /termos/politica-privacidade sem autenticação, com versão[39m[90m… [39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Http\TrustedProxiesTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit confia em X-Forwarded-Proto=https ao construir URLs (CA hist. —[39m[90m… [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit respeita X-Forwarded-Host para o host da URL[39m[90m                     [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit sem header X-Forwarded-Proto, comportamento default (http) perma[39m[90m…[39m [90m0.02s[39m  
+{"message":"email_confirmacao_enviado","context":{"request_id":"019e61df-4a63-7398-9ce9-0e9ff127fa14","job_class":"App\\Jobs\\EnviarEmailConfirmacao","process":"web","usuario_id":"019e61df-4a76-7296-9642-18ffbb39958a","email":"r******@*******.br"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:24.091016+00:00","extra":{}}
+{"message":"email_confirmacao_enviado","context":{"request_id":"0190b1aa-0000-7000-8000-000000000000","job_class":"App\\Jobs\\EnviarEmailConfirmacao","process":"web","usuario_id":"019e61df-4a8b-7322-9db6-50ae167631cc","email":"c**************@*******.com"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:24.109576+00:00","extra":{}}
+{"message":"email_confirmacao_ja_confirmado","context":{"request_id":"019e61df-4a9f-7363-a666-dbc9895f16ee","job_class":"App\\Jobs\\EnviarEmailConfirmacao","process":"web","usuario_id":"019e61df-4a9d-71d0-a6ca-bc9f2e6e7874","email":"s************@*******.org"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:24.128327+00:00","extra":{}}
+{"message":"email_confirmacao_falhou_total","context":{"usuario_id":"019e61df-4abe-7133-a696-31058effa5e0","error":"smtp_down"},"level":400,"level_name":"ERROR","channel":"testing","datetime":"2026-05-26T01:21:24.160313+00:00","extra":{}}
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Jobs\EnviarEmailConfirmacaoTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit envia EmailConfirmacaoMessage para usuário pendente com link ass[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit grava business_metrics email_confirmacao_enviado no sucesso (CA-[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não envia se o usuário já está confirmado (idempotente)[39m[90m          [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não falha quando o usuário foi removido entre dispatch e execuçã[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit grava business_metrics email_confirmacao_falhou no hook failed()[39m[90m [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit relança a exception quando Mail falha (para acionar retry da fil[39m[90m…[39m [90m0.02s[39m  
+{"message":"hello_world_email_enviado","context":{"request_id":"0190b1aa-0000-7000-8000-000000000000","job_class":"App\\Jobs\\HelloWorldEmail","process":"web","destinatario":"alice@indústria.example"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:24.198848+00:00","extra":{}}
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Jobs\HelloWorldEmailTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit sends the mailable and records a successful business_metrics row[39m[90m [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit records a failure row when Mail throws and rethrows the exceptio[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit handles business_metrics insertion failure gracefully (just logs[39m[90m…[39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\LandingTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit CA-2 — GET / responde 200 e renderiza a view landing[39m[90m             [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-2 — a rota raiz está nomeada como [39m[37mlanding[39m[90m                     [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-4 — landing contém o [39m[90m<title>[39m[90m normativo[39m[90m                               [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-4 — landing contém o H1 normativo com ponto final[39m[90m             [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-4 — landing contém o subtítulo normativo[39m[90m                      [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-4 — landing contém os dois CTAs com a copy exata e os hrefs c[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-4/CA-5 — landing tem o copyright literal no footer[39m[90m            [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-5 — header da landing tem logo + dois CTAs (Entrar + Criar co[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-7 — landing NÃO contém vestígios da página de debug (hello, H[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-8 — landing renderiza [39m[90m<x-footer-version>[39m[90m com a versão do APP_VERSION[39m[90m            [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-9 — landing tem main#conteudo, lang=pt-BR e h1 único[39m[90m          [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-10 — landing tem os atributos dusk dos dois CTAs do corpo[39m[90m     [39m [90m0.02s[39m  
+{"message":"usuario.cadastrado","context":{"usuario_id":"019e61df-4cc0-7023-96ea-65fe4c533f52","cpf":"***.***.***-25","email":"r**************@*******.br","telefone":"(**) *****-7777","module":"cadastro","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:24.677715+00:00","extra":{}}
+{"message":"email_confirmacao_enviado","context":{"request_id":"019e61df-4bfc-7292-877d-d868108b7917","job_class":"App\\Jobs\\EnviarEmailConfirmacao","process":"web","usuario_id":"019e61df-4cc0-7023-96ea-65fe4c533f52","email":"r**************@*******.br"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:24.729111+00:00","extra":{}}
+{"message":"usuario.cadastrado","context":{"usuario_id":"019e61df-4d48-7154-a0f1-b9a58050064c","cpf":"***.***.***-25","email":"r**************@*******.br","telefone":"(**) *****-7777","module":"cadastro","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:24.812936+00:00","extra":{}}
+{"message":"email_confirmacao_enviado","context":{"request_id":"019e61df-4bfc-7292-877d-d868108b7917","job_class":"App\\Jobs\\EnviarEmailConfirmacao","process":"web","usuario_id":"019e61df-4d48-7154-a0f1-b9a58050064c","email":"r**************@*******.br"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:24.856688+00:00","extra":{}}
+{"message":"usuario.cadastrado","context":{"usuario_id":"019e61df-4dbb-728a-b6bc-2de8ece26119","cpf":"***.***.***-25","email":"r**************@*******.br","telefone":"(**) *****-7777","module":"cadastro","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:24.927756+00:00","extra":{}}
+{"message":"email_confirmacao_enviado","context":{"request_id":"019e61df-4bfc-7292-877d-d868108b7917","job_class":"App\\Jobs\\EnviarEmailConfirmacao","process":"web","usuario_id":"019e61df-4dbb-728a-b6bc-2de8ece26119","email":"r**************@*******.br"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:24.971687+00:00","extra":{}}
+{"message":"usuario.cadastrado","context":{"usuario_id":"019e61df-4e4d-72de-b56f-9a0db1d3905c","cpf":"***.***.***-25","email":"r**************@*******.br","telefone":"(**) *****-7777","module":"cadastro","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:25.074411+00:00","extra":{}}
+{"message":"email_confirmacao_enviado","context":{"request_id":"019e61df-4bfc-7292-877d-d868108b7917","job_class":"App\\Jobs\\EnviarEmailConfirmacao","process":"web","usuario_id":"019e61df-4e4d-72de-b56f-9a0db1d3905c","email":"r**************@*******.br"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:25.119850+00:00","extra":{}}
+{"message":"usuario.cadastrado","context":{"usuario_id":"019e61df-4ec8-7098-bbf2-7def3a4423db","cpf":"***.***.***-25","email":"r**************@*******.br","telefone":"(**) *****-7777","module":"cadastro","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:25.197225+00:00","extra":{}}
+{"message":"email_confirmacao_enviado","context":{"request_id":"019e61df-4bfc-7292-877d-d868108b7917","job_class":"App\\Jobs\\EnviarEmailConfirmacao","process":"web","usuario_id":"019e61df-4ec8-7098-bbf2-7def3a4423db","email":"r**************@*******.br"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:25.241360+00:00","extra":{}}
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Livewire\CadastroAceitesTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit bloqueia submit quando o Termo de Adesão não foi aceito (CA-2)[39m[90m   [39m [90m0.08s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit bloqueia submit quando a Política de Privacidade/LGPD não foi ac[39m[90m…[39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cria Usuário e três registros em term_acceptances quando marketi[39m[90m…[39m [90m0.11s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit registra marketing recusado mesmo quando o opt-in fica desmarcad[39m[90m…[39m [90m0.13s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit hash registrado bate com o conteúdo da view placeholder vigente[39m[90m… [39m [90m0.12s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit emite audit log "termo.aceito" para os obrigatórios e "termo.rec[39m[90m…[39m [90m0.15s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit NÃO grava ip ou user-agent em audit_logs dos aceites (CA-6 — PII[39m[90m…[39m [90m0.12s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit term_acceptances bloqueia update e delete na aplicação (CA-3 — a[39m[90m…[39m [90m0.02s[39m  
+{"message":"usuario.cadastrado","context":{"usuario_id":"019e61df-4f5e-7068-a4c1-69735cf8e9cb","cpf":"***.***.***-25","email":"r******@*******.br","telefone":"(**) *****-7777","module":"cadastro","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:25.347416+00:00","extra":{}}
+{"message":"email_confirmacao_enviado","context":{"request_id":"019e61df-4f22-7242-b2b3-f95149c59c36","job_class":"App\\Jobs\\EnviarEmailConfirmacao","process":"web","usuario_id":"019e61df-4f5e-7068-a4c1-69735cf8e9cb","email":"r******@*******.br"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:25.391294+00:00","extra":{}}
+{"message":"usuario.cadastrado","context":{"usuario_id":"019e61df-4fc6-717c-8de7-6da1816d9a2f","cpf":"***.***.***-25","email":"r******@*******.br","telefone":"(**) *****-7777","module":"cadastro","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:25.450599+00:00","extra":{}}
+{"message":"email_confirmacao_enviado","context":{"request_id":"019e61df-4f22-7242-b2b3-f95149c59c36","job_class":"App\\Jobs\\EnviarEmailConfirmacao","process":"web","usuario_id":"019e61df-4fc6-717c-8de7-6da1816d9a2f","email":"r******@*******.br"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:25.494331+00:00","extra":{}}
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Livewire\CadastroTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit exibe o formulário de cadastro na rota /cadastro[39m[90m                 [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit persiste usuário em "usuarios" com senha hash e redireciona para[39m[90m…[39m [90m0.10s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit grava audit_log "usuario.cadastrado" após criar conta (CA-6)[39m[90m     [39m [90m0.10s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CPF inválido com mensagem específica (CA-2)[39m[90m              [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita email inválido (CA-2)[39m[90m                                    [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CPF já existente com mensagem genérica (CA-2)[39m[90m            [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita email já existente com mensagem genérica (CA-2)[39m[90m          [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit exige senha com mínimo de 8 caracteres + letras + números (CA-1)[39m[90m [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit exige confirmação de senha igual[39m[90m                                 [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita telefone fora do formato BR[39m[90m                              [39m [90m0.07s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit preserva o valor mascarado do usuário no estado após erro (para[39m[90m… [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit emite mensagens de validação em pt-BR (não em inglês)[39m[90m            [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit emite log info "usuario.cadastrado" com PII mascarada (CA-6)[39m[90m     [39m [90m0.10s[39m  
+{"message":"quiz.diagnostico.falha_inesperada","context":{"request_id":"85f6ab7b-a699-41f4-8ecc-81f1200f0124","empresa_id":"019e61df-5762-73ba-a539-644fcb59780f","exception":"InvalidArgumentException","message":"Setor 'comercio' não suportado pelo motor (1.2.0). Esta versão atende apenas Indústria; Comércio/Serviços entram em estória posterior do EPIC-002."},"level":400,"level_name":"ERROR","channel":"testing","datetime":"2026-05-26T01:21:27.506281+00:00","extra":{}}
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Livewire\Diagnostico\QuizTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit exige autenticação para acessar o quiz[39m[90m                           [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit renderiza o quiz começando no bloco 1 (Identificação)[39m[90m            [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit item Diagnósticos do menu deixou de ser disabled e aponta para o[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit seletor de empresa mostra a lista quando o usuário tem empresas[39m[90m  [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit seletor mostra estado vazio quando o usuário não tem empresas[39m[90m    [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cross-tenant retorna 404 (IDR-009)[39m[90m                               [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit avança do bloco 1 para o bloco 2 e persiste rascunho[39m[90m             [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit volta do bloco 2 para o bloco 1 sem perder dados[39m[90m                 [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit bloqueia avanço do bloco 2 quando campos obrigatórios estão vazi[39m[90m…[39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita inadimplência > 100% (Q13)[39m[90m                               [39m [90m0.10s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita PMC com texto inválido (Q10)[39m[90m                             [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit bloqueia bloco 4 quando Q20 >= Q09 (regra Anexo A)[39m[90m               [39m [90m0.16s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CPF inválido em Q21..Q23 quando Q17="sim"[39m[90m                [39m [90m0.16s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit quando Q17="nao" permite submeter sem Q18..Q23[39m[90m                   [39m [90m0.13s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit retoma o rascunho onde o usuário parou[39m[90m                           [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rascunho expirado não é hidratado e mostra banner[39m[90m                [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit scope ativos() exclui rascunhos expirados[39m[90m                        [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rascunho do usuário A não vaza para o usuário B (multi-tenant)[39m[90m   [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit submete o quiz completo e cria um Diagnostico (caminho feliz)[39m[90m    [39m [90m0.14s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit apaga o rascunho ativo após submit bem-sucedido[39m[90m                  [39m [90m0.12s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit emite quiz_iniciado em evento_produto na primeira transição 1 →[39m[90m… [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não reemite quiz_iniciado ao retomar rascunho do bloco 2+[39m[90m        [39m [90m0.08s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit QuizRascunho expõe relations usuario() e empresa()[39m[90m               [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit caminho de erro do submit não cria Diagnóstico e mostra mensagem[39m[90m…[39m [90m0.13s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit segura o avanço do Bloco 3 quando há inconsistência cruzada (R3)[39m[90m…[39m [90m0.12s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit é não-bloqueante: continuarComAlertas registra o aceito e avança[39m[90m…[39m [90m0.13s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit irParaCampo leva ao bloco do campo suspeito e fecha o banner (CA[39m[90m…[39m [90m0.14s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não duplica alertas_aceitos ao reaceitar a mesma regra[39m[90m           [39m [90m0.13s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit grava alertas_aceitos no Diagnóstico ao submeter (CA-3 ponta-a-p[39m[90m…[39m [90m0.14s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não mostra alertas com dados consistentes — sem falso positivo[39m[90m   [39m [90m0.12s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Livewire\Diagnostico\QuizTooltipsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit renderiza ícone de ajuda acessível para todos os 23 campos do qu[39m[90m…[39m [90m0.21s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cobre exatamente os 23 campos do Anexo A na config[39m[90m               [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit exibe o texto da config no painel de cada campo[39m[90m                  [39m [90m0.21s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit promove **negrito** da config para [39m[90m<strong>[39m[90m no painel[39m[90m                    [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit reflete na view um texto alterado apenas na config (CA-2)[39m[90m        [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit omite o ícone de ajuda quando a config não tem texto para o camp[39m[90m…[39m [90m0.02s[39m  
+{"message":"usuario.cadastrado","context":{"usuario_id":"019e61df-5d0f-715f-b931-1962b4488868","cpf":"***.***.***-25","email":"r******@*******.br","telefone":"(**) *****-7777","module":"cadastro","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:28.852887+00:00","extra":{}}
+{"message":"usuario.cadastrado","context":{"usuario_id":"019e61df-5d44-72a1-a744-49df759697c2","cpf":"***.***.***-25","email":"r******@*******.br","telefone":"(**) *****-7777","module":"cadastro","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:28.905070+00:00","extra":{}}
+{"message":"usuario.login_bloqueado_email_nao_confirmado","context":{"usuario_id":"019e61df-5d58-712d-8158-3cce0028e0a4","email":"r******@*******.br","module":"login","action":"bloqueio_email_nao_confirmado"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:28.933069+00:00","extra":{}}
+{"message":"usuario.login_sucesso","context":{"usuario_id":"019e61df-5d75-700b-94ee-cc9b8d98fc69","email":"o*@*******.br","module":"login","action":"autenticar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:28.962043+00:00","extra":{}}
+{"message":"usuario.login_falha","context":{"email":"p*******@*******.br","module":"login","action":"tentativa"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:29.188834+00:00","extra":{}}
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Livewire\EmailConfirmacaoFluxoTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit cadastro enfileira EnviarEmailConfirmacao (CA-2)[39m[90m                 [39m [90m0.06s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit flash de sucesso menciona email de confirmação após o cadastro ([39m[90m…[39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit login bloqueia usuário com email_confirmed_at = null e mostra em[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit login autentica normalmente se o email já foi confirmado (CA-4)[39m[90m  [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit login com senha errada NÃO leak info sobre confirmação (CA-4 + s[39m[90m…[39m [90m0.24s[39m  
+{"message":"empresa.cadastrada","context":{"empresa_id":"019e61df-5eaa-71ac-b90a-38c08b2bc576","usuario_id":"019e61df-5e8c-7248-a55a-ab1a57ff92c7","tipo_documento":"cnpj","fonte_enriquecimento":"rfb","module":"empresa","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:29.260231+00:00","extra":{}}
+{"message":"empresa.cadastrada","context":{"empresa_id":"019e61df-5ee5-712f-afc1-8bb3d92b4fac","usuario_id":"019e61df-5ebe-711e-b8db-ee88750f6e13","tipo_documento":"cnpj","fonte_enriquecimento":"manual","module":"empresa","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:29.319308+00:00","extra":{}}
+{"message":"empresa.cadastrada","context":{"empresa_id":"019e61df-5f1b-730b-bcec-63e485e79263","usuario_id":"019e61df-5ef7-7362-b5fb-b67c975ff285","tipo_documento":"cnpj","fonte_enriquecimento":"manual","module":"empresa","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:29.373820+00:00","extra":{}}
+{"message":"empresa.cadastrada","context":{"empresa_id":"019e61df-5f43-718a-94d6-7272a1924c67","usuario_id":"019e61df-5f2d-724c-b48b-d7f531d07d2d","tipo_documento":"cnpj","fonte_enriquecimento":"rfb","module":"empresa","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:29.413684+00:00","extra":{}}
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Livewire\Empresa\CadastrarComEnriquecimentoTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit grava fonte_enriquecimento=rfb e enriquecido_at quando o submit[39m[90m… [39m [90m0.06s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit grava fonte_enriquecimento=manual quando o CNPJ é editado após a[39m[90m…[39m [90m0.06s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cadastro manual puro continua gravando fonte=manual (regressão S[39m[90m…[39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit tela /empresas/{id} mostra badge "Receita Federal" para empresas[39m[90m…[39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit tela /empresas/{id} mostra badge "Preenchimento manual" para cad[39m[90m…[39m [90m0.02s[39m  
+{"message":"empresa.cadastrada","context":{"empresa_id":"019e61df-5fd0-719c-ab75-515a33ea894d","usuario_id":"019e61df-5f9e-7376-a7d1-3f8e1ecd8a61","tipo_documento":"cnpj","fonte_enriquecimento":"manual","module":"empresa","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:29.555219+00:00","extra":{}}
+{"message":"empresa.cadastrada","context":{"empresa_id":"019e61df-6002-7026-be39-405c54eb484b","usuario_id":"019e61df-5fe3-72f0-940d-5400bac92259","tipo_documento":"cpf","fonte_enriquecimento":"manual","module":"empresa","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:29.604991+00:00","extra":{}}
+{"message":"empresa.cadastrada","context":{"empresa_id":"019e61df-614e-72a9-b5fb-e694c19cb0b1","usuario_id":"019e61df-612e-7201-aad5-214e71229ceb","tipo_documento":"cnpj","fonte_enriquecimento":"manual","module":"empresa","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:29.937316+00:00","extra":{}}
+{"message":"empresa.cadastrada","context":{"empresa_id":"019e61df-617d-73de-853c-71302b5c96bb","usuario_id":"019e61df-6160-7043-b2e4-26a25ecb378a","tipo_documento":"cnpj","fonte_enriquecimento":"manual","module":"empresa","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:29.983692+00:00","extra":{}}
+{"message":"empresa.cadastrada","context":{"empresa_id":"019e61df-61db-736c-9569-081f289d1612","usuario_id":"019e61df-61c0-719a-877f-857b71b06cda","tipo_documento":"cnpj","fonte_enriquecimento":"manual","module":"empresa","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:30.077260+00:00","extra":{}}
+{"message":"empresa.cadastrada","context":{"empresa_id":"019e61df-6209-73fb-b711-b27896cd170d","usuario_id":"019e61df-61ec-71e9-a1b5-55f80acb27c8","tipo_documento":"cnpj","fonte_enriquecimento":"manual","module":"empresa","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:30.123843+00:00","extra":{}}
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Livewire\Empresa\CadastrarEmpresaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit exige autenticação para acessar /empresas/nova[39m[90m                   [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit exibe o formulário de cadastro em /empresas/nova[39m[90m                 [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cria empresa com CNPJ válido e redireciona para detalhes (CA-1,[39m[90m… [39m [90m0.07s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cria empresa com CPF válido (autônomo) e fonte manual (CA-2)[39m[90m     [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CNPJ inválido (DV errado) com mensagem específica (CA-3)[39m[90m [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CPF inválido com mensagem específica (CA-3)[39m[90m              [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit exige razão social, município e UF (CA-3)[39m[90m                        [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita UF fora da lista (CA-3)[39m[90m                                  [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CNAE com formato inválido (CA-3)[39m[90m                         [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita data de fundação no futuro (CA-3)[39m[90m                        [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit aceita CNAE no formato com pontuação e normaliza para 7 dígitos[39m[90m  [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit grava audit_log "empresa.cadastrada" SEM documento (CA-6)[39m[90m        [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit proíbe o mesmo Usuário cadastrar duas empresas com o mesmo docum[39m[90m…[39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit permite Usuário B cadastrar empresa com mesmo documento de Usuár[39m[90m…[39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit permite recadastrar empresa após soft delete (índice único parci[39m[90m…[39m [90m0.05s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Livewire\Empresa\ConsultarReceitaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit pré-preenche os campos do form após sucesso na consulta (CA-2)[39m[90m   [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mostra o aviso amarelo e mantém o form em branco em qualquer fal[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mostra o aviso amarelo e mantém o form em branco em qualquer fal[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mostra o aviso amarelo e mantém o form em branco em qualquer fal[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mostra o aviso amarelo e mantém o form em branco em qualquer fal[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita CNPJ inválido sem chamar o provedor e mostra aviso espec[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit é no-op quando tipo_documento=cpf (CA-2)[39m[90m                         [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit limpa o estado enriquecido quando o CNPJ é editado depois da con[39m[90m…[39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit limpa o estado enriquecido quando o tipo do documento muda[39m[90m       [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit renderiza o botão "Consultar Receita" para tipo CNPJ[39m[90m             [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não renderiza o botão "Consultar Receita" para tipo CPF[39m[90m          [39m [90m0.03s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Livewire\Home\MinhasEmpresasTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit redireciona para /login quando acessa /home sem sessão[39m[90m           [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit renderiza estado vazio com CTA para /empresas/nova quando não há[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit lista as empresas do usuário com nome, documento mascarado, muni[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit exibe badge "Manual" para empresa de fonte manual (CA-1)[39m[90m         [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit botão "Iniciar diagnóstico" leva ao quiz quando empresa não tem[39m[90m… [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mostra "Ver último diagnóstico" + "Refazer diagnóstico" quando e[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não vaza empresas de outros usuários — multi-tenancy via Global[39m[90m… [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não grava entrada em audit_logs ao acessar /home (CA-5)[39m[90m          [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-14 — botão "Adicionar empresa" aparece no header em todos os[39m[90m… [39m [90m0.04s[39m  
+{"message":"usuario.login_sucesso","context":{"usuario_id":"019e61df-64ae-72fc-b386-b7679c0f37d8","email":"r******@*******.br","module":"login","action":"autenticar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:30.811465+00:00","extra":{}}
+{"message":"usuario.login_sucesso","context":{"usuario_id":"019e61df-64ca-7175-885f-05f0911ff760","email":"r******@*******.br","module":"login","action":"autenticar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:30.839832+00:00","extra":{}}
+{"message":"usuario.login_falha","context":{"email":"r******@*******.br","module":"login","action":"tentativa"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:31.074280+00:00","extra":{}}
+{"message":"usuario.login_falha","context":{"email":"n********@*******.br","module":"login","action":"tentativa"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:31.305029+00:00","extra":{}}
+{"message":"usuario.login_falha","context":{"email":"r******@*******.br","module":"login","action":"tentativa"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:31.583021+00:00","extra":{}}
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Livewire\LoginTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit exibe formulário de login na rota /login[39m[90m                         [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit autentica com credenciais válidas e redireciona para /home (CA-3[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit grava audit_log "usuario.login_sucesso" em login bem-sucedido (C[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita senha errada com mensagem genérica (CA-3)[39m[90m                [39m [90m0.24s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita email inexistente com a mesma mensagem genérica (CA-3)[39m[90m   [39m [90m0.23s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit exige campos obrigatórios[39m[90m                                        [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não grava audit_log em falha de login[39m[90m                            [39m [90m0.23s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Models\EmpresaAnalisadaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit relaciona-se com Usuario via FK usuario_id[39m[90m                       [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit aplica Global Scope filtrando por auth()->id() (ADR-003)[39m[90m         [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit bypassa scope com withoutGlobalScope[39m[90m                             [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não aplica scope quando não há Usuário autenticado (jobs/comando[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit expõe documentoFormatado para CNPJ e CPF[39m[90m                         [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit ufEnum devolve o enum correspondente à coluna uf[39m[90m                 [39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Observabilidade\AuditLoggerTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit persists an audit log entry with request_id and action[39m[90m           [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit forbids update on AuditLog model[39m[90m                                 [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit forbids delete on AuditLog model[39m[90m                                 [39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Observabilidade\CollectJobMetricsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit populates job_metrics on successful job processing via the sync[39m[90m… [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit records status=failed on JobFailed event[39m[90m                         [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit keeps duration_ms at 0 when JobProcessed fires without a matchin[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit logs a warning when the job_metrics insert fails (table dropped)[39m[90m [39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Observabilidade\EmissaoEventoArchTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit só o EventLogger escreve em evento_produto (EventoProduto::creat[39m[90m…[39m [90m0.03s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Observabilidade\EventLoggerTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit persists an event with all required fields[39m[90m                       [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects forbidden PII keys with ('cpf')[39m[90m                          [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects forbidden PII keys with ('cnpj')[39m[90m                         [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects forbidden PII keys with ('email')[39m[90m                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects forbidden PII keys with ('telefone')[39m[90m                     [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects forbidden PII keys with ('password')[39m[90m                     [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects forbidden PII keys with ('token')[39m[90m                        [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects forbidden PII keys with ('nome_completo')[39m[90m                [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects financial keys matching the regex with ('faturamento_bru[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects financial keys matching the regex with ('balanco_2025')[39m[90m  [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects financial keys matching the regex with ('receita_q1')[39m[90m    [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects financial keys matching the regex with ('custo_total')[39m[90m   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejects PII nested inside arrays in propriedades[39m[90m                 [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit forbids update on EventoProduto model[39m[90m                            [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit forbids delete on EventoProduto model[39m[90m                            [39m [90m0.02s[39m  
+{"message":"usuario.email_confirmado","context":{"request_id":"019e61df-69e1-730b-bfac-dbc4b6abc3f9","user_id":null,"process":"web","usuario_id":"019e61df-69de-7093-bc79-0ece60d62364","email":"e******@*******.com","module":"cadastro","action":"confirmar_email"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:32.133161+00:00","extra":{}}
+{"message":"usuario.email_confirmado","context":{"request_id":"019e61df-69f9-7103-be4d-fb2cc30b729a","user_id":null,"process":"web","usuario_id":"019e61df-69f7-71c1-96c2-20d966a92595","email":"r*************@*******.br","module":"cadastro","action":"confirmar_email"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:32.159013+00:00","extra":{}}
+{"message":"empresa.cadastrada","context":{"empresa_id":"019e61df-6a79-72db-8b4b-553122b9a6d3","usuario_id":"019e61df-6a4e-70eb-8263-cb81da87cec4","tipo_documento":"cnpj","fonte_enriquecimento":"manual","module":"empresa","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:32.284469+00:00","extra":{}}
+{"message":"empresa.cadastrada","context":{"empresa_id":"019e61df-6ab0-7122-b034-fc3559b20ecb","usuario_id":"019e61df-6a8e-7041-be93-f0832c2f978e","tipo_documento":"cpf","fonte_enriquecimento":"manual","module":"empresa","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:32.339050+00:00","extra":{}}
+{"message":"empresa.cadastrada","context":{"empresa_id":"019e61df-6adb-726e-9730-6c6371f0e954","usuario_id":"019e61df-6ac3-71fc-bb55-585cbfe247d9","tipo_documento":"cnpj","fonte_enriquecimento":"rfb","module":"empresa","action":"cadastrar"},"level":200,"level_name":"INFO","channel":"testing","datetime":"2026-05-26T01:21:32.380958+00:00","extra":{}}
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Observabilidade\EventosCadastroTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit NÃO emite usuario_cadastrado no submit do cadastro — só após con[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit grava usuario_cadastrado com schema correto e sem PII após confi[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit NÃO emite usuario_cadastrado se o email já estava confirmado (id[39m[90m…[39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit grava empresa_cadastrada com schema correto e sem PII no cadastr[39m[90m…[39m [90m0.08s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cnae_2digitos vira null quando a empresa não tem CNAE informado[39m[90m… [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit emite empresa_cadastrada com fonte_enriquecimento=rfb quando con[39m[90m…[39m [90m0.04s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Observabilidade\EventosDiagnosticoTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit emite diagnostico_concluido com schema exato e sem PII (CA-3/CA-[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit deriva porte pelo faturamento anual estimado (Q09 × 12) with dat[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit deriva porte pelo faturamento anual estimado (Q09 × 12) with dat[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit deriva porte pelo faturamento anual estimado (Q09 × 12) with dat[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit deriva porte pelo faturamento anual estimado (Q09 × 12) with dat[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit porte é null quando Q09 ausente[39m[90m                                  [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit cada execute() emite exatamente um diagnostico_concluido — chave[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não emite diagnostico_concluido quando o cálculo falha (rollback[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit funil ponta-a-ponta: 1 quiz_iniciado + 1 diagnostico_concluido c[39m[90m…[39m [90m0.13s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Observabilidade\RequestIdPropagationTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit propagates request_id from dispatcher into job meta[39m[90m              [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit records the request_id in request_metrics for non-health routes[39m[90m  [39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Policies\EmpresaAnalisadaPolicyTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit libera view/update/delete quando o Usuário é dono da empresa[39m[90m     [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit nega view/update/delete quando o Usuário não é dono (multi-tenan[39m[90m…[39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Services\Rfb\CnpjaRfbCnpjClientTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit mapeia resposta 200 do cnpja (Open API atual) para RfbCnpjResult[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit aceita schema legado: address.municipality como string (sem addr[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit falha com Erro5xx quando address.city ausente e municipality vem[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mapeia 404 para cnpj_inexistente (CA-2)[39m[90m                          [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mapeia 429 do provedor para erro_5xx (CA-2)[39m[90m                      [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mapeia 5xx para erro_5xx (CA-2)[39m[90m                                  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mapeia ConnectionException com "timed out" para Timeout (CA-2)[39m[90m   [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mapeia ConnectionException sem timeout para ErroRede (CA-2)[39m[90m      [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit envia header Authorization quando api_key configurada[39m[90m            [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não envia header Authorization quando api_key vazia (plano gratu[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit respeita rate-limit por provedor com fail-fast (CA-5)[39m[90m            [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit falha com Erro5xx quando o corpo 200 está sem campo obrigatório[39m[90m  [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Services\Rfb\ReceitawsRfbCnpjClientTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit mapeia resposta status=OK para RfbCnpjResult (CA-3)[39m[90m              [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit normaliza fantasia vazia para null, UF para maiúsculo e mapeia I[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit distingue status=ERROR com "CNPJ inválido" como cnpj_inexistente[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit distingue status=ERROR com "Quota excedida" como erro_5xx (CA-3)[39m[90m [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mapeia HTTP 404 como cnpj_inexistente (CA-3)[39m[90m                     [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mapeia HTTP 429 (rate-limit do provedor) como erro_5xx (CA-3)[39m[90m    [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mapeia HTTP 5xx como erro_5xx (CA-3)[39m[90m                             [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mapeia ConnectionException com "timeout" para Timeout[39m[90m            [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit mapeia ConnectionException sem "timeout" para ErroRede[39m[90m           [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit envia Authorization Bearer apenas quando api_key configurada[39m[90m     [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit não envia Authorization quando api_key vazia[39m[90m                     [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit respeita rate-limit por provedor com fail-fast (CA-5)[39m[90m            [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit falha com Erro5xx quando o corpo 200 não traz status reconhecíve[39m[90m…[39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Services\Rfb\RfbConsultarCnpjTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit registra métrica e audit em sucesso com provider/status no meta[39m[90m… [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit registra métrica e audit em falha com status correto (CA-4) with[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit registra métrica e audit em falha com status correto (CA-4) with[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit registra métrica e audit em falha com status correto (CA-4) with[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit registra métrica e audit em falha com status correto (CA-4) with[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit nunca armazena o CNPJ cru no audit_logs (PII)[39m[90m                    [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit ignora cache quando provider=mock (sempre retorna fresh) — CA-6[39m[90m  [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit usa cache na 2ª chamada quando provider≠mock (CA-6)[39m[90m              [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit classifica throwable não-tipada do client como erro_rede[39m[90m         [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit rejeita DV inválido como cnpj_inexistente sem chamar o client[39m[90m    [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit grava enriquecido_at no DTO consultado_at coerente com a hora do[39m[90m…[39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Services\Rfb\RfbProviderResolutionTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit resolve MockRfbCnpjClient quando provider=mock[39m[90m                   [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit resolve CnpjaRfbCnpjClient quando provider=cnpja (CA-4)[39m[90m          [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit resolve ReceitawsRfbCnpjClient quando provider=receitaws (CA-4)[39m[90m  [39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit lança InvalidArgumentException nomeando o provider quando valor[39m[90m… [39m [90m0.01s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Shell\AppShellRenderTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit CA-1 — /home renderiza dentro do shell APP (header + nav + foote[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-1 — /empresas/nova renderiza dentro do shell APP[39m[90m              [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-1 — /empresas/{id} renderiza dentro do shell APP[39m[90m              [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-1 — /cadastro renderiza dentro do shell AUTH (sem nav)[39m[90m        [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-1 — /login renderiza dentro do shell AUTH (sem nav)[39m[90m           [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-2 — header autenticado mostra nome do usuário[39m[90m                 [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-3 — sidebar marca "Minhas Empresas" como ativo em /home[39m[90m       [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-3 — sidebar marca "Adicionar Empresa" como ativo em /empresas[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-3 — sidebar mantém "Minhas Empresas" ativo em /empresas/{id}[39m[90m  [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-3 — itens Diagnósticos, Histórico e Conta aparecem desabilita[39m[90m…[39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-4 — breadcrumb não aparece em /home (raiz)[39m[90m                    [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-4 — breadcrumb aparece em /empresas/nova com pai "Minhas Empr[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-4 — breadcrumb aparece em /empresas/{id} com pai "Minhas Empr[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-5 — footer mostra termo, política, copyright e versão[39m[90m         [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-16 — footer-version mostra "v0.4.2-test · local" em ambiente[39m[90m… [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-16 — footer-version mostra só versão em produção (sem sufixo)[39m[90m [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-17 — H1 e [39m[90m<title>[39m[90m de /home seguem o mapeamento canônico[39m[90m              [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-17 — H1 e [39m[90m<title>[39m[90m de /empresas/nova seguem o mapeamento canônico[39m[90m     [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-17 — H1 e [39m[90m<title>[39m[90m de /empresas/{id} seguem o mapeamento canônico (ra[39m[90m…[39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Shell\CancelarEmpresaNovaTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit CA-18 — /empresas/nova tem botão Cancelar com link para /home[39m[90m    [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-18 — /empresas/nova NÃO tem botão "Voltar" (só Cancelar; nunc[39m[90m…[39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-18 — /empresas/{id}/show tem botão "Voltar para Minhas Empres[39m[90m…[39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Shell\LogoutFlashTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit CA-19 — POST /logout redireciona para /login com flash logout_su[39m[90m…[39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit CA-19 — /login mostra o flash logout_sucesso no HTML quando vem[39m[90m… [39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Support\TermosVigentesTest[39m
+  [32;1m✓[39;22m[90m [39m[90mit expõe versão v1-placeholder e rota pública dos termos obrigatóri[39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit calcula conteudo_hash como SHA-256 do HTML renderizado da view ([39m[90m…[39m [90m0.01s[39m  
+  [32;1m✓[39;22m[90m [39m[90mit marketing tem hash determinístico baseado em tipo:versao (não há[39m[90m…[39m [90m0.01s[39m  
+
+  [90mTests:[39m    [32;1m787 passed[39;22m[90m (2424 assertions)[39m
+  [90mDuration:[39m [39m16.53s[39m
+
+=== Cobertura GERAL (clover, suite All) — validado 2026-05-26T01:23:13Z ===
+statements: 2498/2567 = 97.3% (>= 80% requerido) — EXIT=0

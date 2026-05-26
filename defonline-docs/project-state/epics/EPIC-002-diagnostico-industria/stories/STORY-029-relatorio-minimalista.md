@@ -44,17 +44,17 @@ Sem render, motor é invisível. Este é o entregável demonstrável do Checkpoi
 
 ## Critérios de aceite
 
-- [ ] **CA-1 (Rota e auth):** `/diagnosticos/{id}` autenticada, com policy: só `usuario_id` dono da empresa vê (alinha com STORY-021 — 403 vs 404 cross-tenant; aplica veredito da IDR daquela spike).
-- [ ] **CA-2 (Layout dentro do shell):** breadcrumb `Minhas Empresas › {nome} › Diagnóstico de {data}`. Header do shell e footer institucional preservados.
-- [ ] **CA-3 (7 indicadores renderizados):** cada indicador mostra nome, valor (formatado com casas decimais apropriadas), farol visual e mensagem curta. Para `disponivel = false`, mostra linha cinza com mensagem semântica.
-- [ ] **CA-4 (NCG absoluto sem farol):** card separado com valor + mensagem da faixa.
-- [ ] **CA-5 (Glossário):** texto do Anexo I disponível inline (expansível ou seção ao final). Sem link externo.
-- [ ] **CA-6 (Mobile-first):** viewport 360x800 mostra cards empilhados, sem scroll horizontal. Viewport 1280x800 mostra tabela densa.
-- [ ] **CA-7 (p95 ≤ 3s):** medição em homol — 50 navegações `quiz submit → relatório carregado completo (DOMContentLoaded)`. p95 ≤ 3s.
-- [ ] **CA-8 (Acessibilidade AA):** contraste ≥ 4.5:1; estados de farol não dependem só de cor (ícone + texto também); navegação por teclado.
-- [ ] **CA-9 (Versão visível no rodapé):** `motor v1.0.0 · matriz dez-2025 · gerado em DD/MM/AAAA HH:MM`. Estilo discreto.
-- [ ] **CA-10 (Testes):** Pest feature (200 OK, conteúdo presente, cross-tenant 403 ou 404 conforme IDR-007), Dusk smoke (caminho do quiz ao relatório).
-- [ ] **CA-11 (Cobertura ≥ 80%).**
+- [x] **CA-1 (Rota e auth):** `/diagnosticos/{id}` autenticada, com policy: só `usuario_id` dono da empresa vê (alinha com STORY-021 — 403 vs 404 cross-tenant; aplica veredito da IDR daquela spike).
+- [x] **CA-2 (Layout dentro do shell):** breadcrumb `Minhas Empresas › {nome} › Diagnóstico de {data}`. Header do shell e footer institucional preservados.
+- [x] **CA-3 (7 indicadores renderizados):** cada indicador mostra nome, valor (formatado com casas decimais apropriadas), farol visual e mensagem curta. Para `disponivel = false`, mostra linha cinza com mensagem semântica.
+- [x] **CA-4 (NCG absoluto sem farol):** card separado com valor + mensagem da faixa.
+- [x] **CA-5 (Glossário):** texto do Anexo I disponível inline (expansível ou seção ao final). Sem link externo.
+- [x] **CA-6 (Mobile-first):** viewport 360x800 mostra cards empilhados, sem scroll horizontal. Viewport 1280x800 mostra tabela densa.
+- [x] **CA-7 (p95 ≤ 3s):** medição em homol — 50 navegações `quiz submit → relatório carregado completo (DOMContentLoaded)`. p95 ≤ 3s.
+- [x] **CA-8 (Acessibilidade AA):** contraste ≥ 4.5:1; estados de farol não dependem só de cor (ícone + texto também); navegação por teclado.
+- [x] **CA-9 (Versão visível no rodapé):** `motor v1.0.0 · matriz dez-2025 · gerado em DD/MM/AAAA HH:MM`. Estilo discreto.
+- [x] **CA-10 (Testes):** Pest feature (200 OK, conteúdo presente, cross-tenant 403 ou 404 conforme IDR-007), Dusk smoke (caminho do quiz ao relatório).
+- [x] **CA-11 (Cobertura ≥ 80%).**
 
 ## Fora de escopo
 

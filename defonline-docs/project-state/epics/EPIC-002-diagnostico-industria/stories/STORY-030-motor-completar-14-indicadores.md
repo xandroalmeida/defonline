@@ -38,15 +38,15 @@ V1 (STORY-028) entregou 7 essenciais. Esta estória completa o conjunto canônic
 
 ## Critérios de aceite
 
-- [ ] **CA-1:** 7 classes novas, padrão STORY-028.
-- [ ] **CA-2:** Fórmulas batem com §4.5 (revisão do PO em par com Arquiteto).
-- [ ] **CA-3:** Faixas de farol revisadas para os 7 novos + ajuste fino dos 7 antigos se a leitura do Anexo F sinalizar inconsistência (registrar em decisão).
-- [ ] **CA-4:** ≥ 10 casos por indicador novo. Total ≥ 140 casos no pacote motor.
-- [ ] **CA-5:** Cobertura ≥ 98% mantida.
-- [ ] **CA-6:** `motor_version` bumpa para `"1.1.0"`. Golden hash da fixture canônica muda (esperado); novo hash registrado.
-- [ ] **CA-7:** Diagnósticos antigos (`motor_version = 1.0.0`) continuam reproduzíveis em `/diagnosticos/{id}` — snapshot `indicadores_calculados` é a fonte da verdade, não recalcula.
-- [ ] **CA-8 (latência):** p95 do motor com 14 indicadores ≤ 1s (parte do budget total ≤ 3s).
-- [ ] **CA-9 (relatório):** STORY-029 já lê dinamicamente os indicadores do snapshot — sem mudança de UI nesta estória? Verificar; se a tabela tem header hardcoded para 7, ajustar.
+- [x] **CA-1:** 7 classes novas, padrão STORY-028.
+- [x] **CA-2:** Fórmulas batem com §4.5 (revisão do PO em par com Arquiteto).
+- [x] **CA-3:** Faixas de farol revisadas para os 7 novos + ajuste fino dos 7 antigos se a leitura do Anexo F sinalizar inconsistência (registrar em decisão).
+- [x] **CA-4:** ≥ 10 casos por indicador novo. Total ≥ 140 casos no pacote motor.
+- [x] **CA-5:** Cobertura ≥ 98% mantida.
+- [x] **CA-6:** `motor_version` bumpa para `"1.1.0"`. Golden hash da fixture canônica muda (esperado); novo hash registrado.
+- [x] **CA-7:** Diagnósticos antigos (`motor_version = 1.0.0`) continuam reproduzíveis em `/diagnosticos/{id}` — snapshot `indicadores_calculados` é a fonte da verdade, não recalcula.
+- [x] **CA-8 (latência):** p95 do motor com 14 indicadores ≤ 1s (parte do budget total ≤ 3s).
+- [x] **CA-9 (relatório):** STORY-029 já lê dinamicamente os indicadores do snapshot — sem mudança de UI nesta estória? Verificar; se a tabela tem header hardcoded para 7, ajustar.
 
 ## Fora de escopo
 

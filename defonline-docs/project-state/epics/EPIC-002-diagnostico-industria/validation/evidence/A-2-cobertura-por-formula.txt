@@ -1,0 +1,15 @@
+CicloFinanceiroTest.php                                 14
+CicloOperacionalTest.php                                12
+DespesasFinEbitdaTest.php                               15
+DividaLiquidaEbitdaTest.php                             13
+FontesRecursosTest.php                                  16
+GiroAtivoTest.php                                       14
+InadimplenciaTest.php                                   12
+MargemBrutaTest.php                                     13
+MargemEbitdaTest.php                                    17
+MargemLiquidaTest.php                                   15
+NcgAbsolutoTest.php                                     16
+NcgVendasTest.php                                       13
+PmcTest.php                                             12
+PmeTest.php                                             11
+PmrTest.php                                             11

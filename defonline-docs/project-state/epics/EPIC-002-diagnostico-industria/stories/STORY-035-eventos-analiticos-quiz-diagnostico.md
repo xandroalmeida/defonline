@@ -6,10 +6,14 @@ epic_id: EPIC-002
 sprint_id: SPRINT-2026-W25
 type: implementation
 target_role: programador
-status: draft
+status: done
 owner_agent: claude-programador
+approved_by: Alexandro
+approved_at: 2026-05-25
+closed_at: 2026-05-25
+reconciled_at: 2026-05-26
 created_at: 2026-05-25
-updated_at: 2026-05-25
+updated_at: 2026-05-26
 estimated_session_size: S
 related_adrs: ["ADR-002", "ADR-004"]
 ---
@@ -48,18 +52,18 @@ Epic.md cita os eventos `quiz_iniciado` e `diagnostico_concluido`; o **contrato 
 
 ## Critérios de aceite
 
-- [ ] **CA-1:** `quiz_iniciado` emitido **uma única vez** na transição `null → rascunho` (Bloco 1 → 2). Re-saves do mesmo rascunho não duplicam.
-- [ ] **CA-2:** `diagnostico_concluido` emitido **uma única vez** por `diagnostico_id` após `CalcularDiagnostico::execute` retornar sucesso e o registro ser persistido. Re-submissão do mesmo `payload_hash` (idempotência IDR-010) **não** re-emite.
-- [ ] **CA-3 (payload conforme ADR-004 §2.2):**
+- [x] **CA-1:** `quiz_iniciado` emitido **uma única vez** na transição `null → rascunho` (Bloco 1 → 2). Re-saves do mesmo rascunho não duplicam.
+- [x] **CA-2:** `diagnostico_concluido` emitido **uma única vez** por `diagnostico_id` após `CalcularDiagnostico::execute` retornar sucesso e o registro ser persistido. Re-submissão do mesmo `payload_hash` (idempotência IDR-010) **não** re-emite.
+- [x] **CA-3 (payload conforme ADR-004 §2.2):**
     - `quiz_iniciado.propriedades` contém **exatamente** `quiz_id`, `quiz_versao`.
     - `diagnostico_concluido.propriedades` contém **exatamente** `quiz_id`, `diagnostico_id`, `duracao_preenchimento_seg`, `setor`, `porte`.
     - Ambos os eventos gravam `usuario_id`, `empresa_id`, `request_id` (UUID v7) e `ocorrido_em` (timestamptz).
-- [ ] **CA-4 (helper):** todas as emissões passam por `EventLogger::emit(...)` — busca de `evento_produto::create()` direto no código de aplicação retorna **zero ocorrências fora do `EventLogger`** (assert por teste arquitetural Pest).
-- [ ] **CA-5 (síncrono na transação):** evento é gravado **na mesma transação** do agregado que o originou (sem job, sem fila). Falha do `INSERT` em `evento_produto` faz **rollback** do quiz/diagnóstico — não há "tolerância" para evento perdido no MVP.
-- [ ] **CA-6 (sem PII em `propriedades`):** teste arquitetural assegura que `propriedades` JSONB não carrega chaves `cnpj`, `email`, `telefone`, `razao_social`, `nome_completo`, ou qualquer string que case com regex de CNPJ/CPF/e-mail/telefone.
-- [ ] **CA-7 (testes):** Pest unit ≥ 4 (cada evento × emite + idempotência). Pest feature: fluxo completo do quiz simulado, asserta exatamente 1 linha por evento no banco com payload conforme CA-3. Suíte cobre também o evento que **não** dispara (re-save de rascunho, re-submissão idempotente).
-- [ ] **CA-8 (cobertura):** ≥ 80% no pacote, ≥ 95% no `EventLogger` (helper hot path).
-- [ ] **CA-9 (homol):** PO consegue confirmar registros via SQL acima após smoke E2E da STORY-037 — esperado ≥ 1 linha por evento, com `request_id` igual ao da request que originou (rastreável via logs).
+- [x] **CA-4 (helper):** todas as emissões passam por `EventLogger::emit(...)` — busca de `evento_produto::create()` direto no código de aplicação retorna **zero ocorrências fora do `EventLogger`** (assert por teste arquitetural Pest).
+- [x] **CA-5 (síncrono na transação):** evento é gravado **na mesma transação** do agregado que o originou (sem job, sem fila). Falha do `INSERT` em `evento_produto` faz **rollback** do quiz/diagnóstico — não há "tolerância" para evento perdido no MVP.
+- [x] **CA-6 (sem PII em `propriedades`):** teste arquitetural assegura que `propriedades` JSONB não carrega chaves `cnpj`, `email`, `telefone`, `razao_social`, `nome_completo`, ou qualquer string que case com regex de CNPJ/CPF/e-mail/telefone.
+- [x] **CA-7 (testes):** Pest unit ≥ 4 (cada evento × emite + idempotência). Pest feature: fluxo completo do quiz simulado, asserta exatamente 1 linha por evento no banco com payload conforme CA-3. Suíte cobre também o evento que **não** dispara (re-save de rascunho, re-submissão idempotente).
+- [x] **CA-8 (cobertura):** ≥ 80% no pacote, ≥ 95% no `EventLogger` (helper hot path).
+- [x] **CA-9 (homol):** PO consegue confirmar registros via SQL acima após smoke E2E da STORY-037 — esperado ≥ 1 linha por evento, com `request_id` igual ao da request que originou (rastreável via logs).
 
 ## Fora de escopo
 
@@ -95,4 +99,27 @@ Padrão.
 
 ## Notas do agente
 
-*(A preencher.)*
+### 2026-05-25 — Implementação (claude-programador, commit `1249195`)
+
+Entregue:
+- `quiz_iniciado` emitido no primeiro `INSERT` do `QuizRascunho` (`wasRecentlyCreated`), com `quiz_id` = id do rascunho e `quiz_versao` = `config('quiz.versao')` = `"2026.1"`.
+- `diagnostico_concluido` emitido na mesma transação do `Diagnostico`, com `porte` derivado de Q09×12 (LC 123/155 categorizado, sem PII).
+- Remove `event QuizIniciado` obsoleto (payload `motor_version/matrix_version` divergia do ADR-004).
+- 7 arquivos / +346 linhas / +6 testes.
+
+Testes (verdes):
+- Schema (CA-3), idempotência por `diagnostico_id` (CA-2), não-reemissão (CA-1), rollback (CA-5), funil ponta-a-ponta (CA-7), arch `EventoProduto::create` só no `EventLogger` (CA-4).
+
+### 2026-05-26 — Reconciliação documental (PO)
+
+Front-matter estava `draft` mas commit `1249195` (25/mai 22:03) já marcou a estória como `done` no título. Validador identificou a defasagem ao tentar abrir a STORY-037 (pré-condição "todas done no index"). Reconciliação aplicada:
+
+- `status: draft → done`.
+- `closed_at: 2026-05-25` (data real do commit).
+- `approved_by/at: Alexandro / 2026-05-25` (aprovação retroativa após validação independente do épico em 26/mai cobrir CA-1 a CA-9 via Bloco B-10, D-5, D-6, D-7).
+- 9 CAs marcados `[x]`.
+- `reconciled_at: 2026-05-26`.
+
+Substância da estória 100% verde na validação independente — ver `validation/report.md` §Bloco B-10 (eventos com payload ADR-004 §2.2 confirmados em SQL), §D-5 (`EmissaoEventoArchTest` único caminho), §D-6 (zero PII), §D-7 (`request_id` UUID v7).
+
+Sinal de processo para a retro da sprint: o `done-checklist.md` do Programador precisa cobrir a atualização do arquivo da estória, não só do commit. (Registrado no F-NB-6 do relatório do Validador.)
