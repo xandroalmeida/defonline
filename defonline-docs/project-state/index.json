@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generated_at": "2026-05-26T02:04:19Z",
+  "generated_at": "2026-06-02T16:00:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
-    "current_sprint": null,
-    "last_closed_sprint": "SPRINT-2026-W22"
+    "current_sprint": "SPRINT-2026-W26",
+    "last_closed_sprint": "SPRINT-2026-W25"
   },
   "product": {
     "vision": {
@@ -168,7 +168,13 @@
         "STORY-034",
         "STORY-035",
         "STORY-036",
-        "STORY-037"
+        "STORY-037",
+        "STORY-038",
+        "STORY-039",
+        "STORY-040",
+        "STORY-041",
+        "STORY-042",
+        "STORY-043"
       ],
       "validation_report": "epics/EPIC-002-diagnostico-industria/validation/report.md",
       "blocked_by_epics": [
@@ -176,8 +182,9 @@
         "EPIC-001"
       ],
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-25",
-      "activated_at": "2026-05-25"
+      "updated_at": "2026-06-02",
+      "activated_at": "2026-05-25",
+      "post_mvp_hotfix_note": "STORY-038..043 são pós-devolutiva EBC (2026-05-27) — entram em SPRINT-2026-W26 como hotfixes do EPIC-002 já em `done_under_review`. Padrão de débito-pós-fechamento igual ao usado em STORY-021/022/023 do EPIC-001."
     },
     {
       "id": "EPIC-003",
@@ -1094,6 +1101,118 @@
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-037-validacao-final-handoff.md",
       "created_at": "2026-05-25",
       "updated_at": "2026-05-26T01:14:37Z"
+    },
+    {
+      "id": "STORY-038",
+      "slug": "socios-lista-dinamica",
+      "title": "Sócios como lista dinâmica (1+) — add/edit/remove",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "blocks": [],
+      "note": "Substitui Q23 fixa (CPF1/CPF2/CPF3) por lista dinâmica `quiz_payload.socios[]` com 1+ obrigatório / cap 10. Canonicalização alfabética pelo CPF (IDR-010). Rascunhos pré-W26 em homol descartados. Origem: devolutiva EBC 2026-05-27.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W26",
+      "owner_agent": null,
+      "briefing_path": "epics/EPIC-002-diagnostico-industria/briefings/STORY-038-abertura.md",
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-038-socios-lista-dinamica.md",
+      "created_at": "2026-06-02",
+      "updated_at": "2026-06-02"
+    },
+    {
+      "id": "STORY-039",
+      "slug": "inadimplencia-2-casas-decimais",
+      "title": "Validação do campo Inadimplência aceita 2 casas decimais (0,00 ≤ x ≤ 100,00)",
+      "type": "bugfix",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "XS",
+      "blocked_by": [],
+      "blocks": [],
+      "note": "Campo Q22 (Inadimplência) recusa valores com vírgula (3,46%) — provável parsing antes da conversão de vírgula decimal. Range inclusivo [0,00;100,00], 3+ decimais truncados. Origem: WhatsApp Edvan #2 2026-05-27.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W26",
+      "owner_agent": null,
+      "briefing_path": "epics/EPIC-002-diagnostico-industria/briefings/STORY-039-abertura.md",
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-039-inadimplencia-2-casas-decimais.md",
+      "created_at": "2026-06-02",
+      "updated_at": "2026-06-02"
+    },
+    {
+      "id": "STORY-040",
+      "slug": "card-resumo-executivo-clicavel",
+      "title": "Card de destaque do Resumo Executivo — scroll-to + highlight",
+      "type": "bugfix",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "S",
+      "blocked_by": [],
+      "blocks": [],
+      "note": "Cards de destaque do Resumo Executivo (STORY-031) truncam texto e não são clicáveis. Esta estória: clique faz scroll suave até a linha do indicador na tabela detalhada da STORY-029 + highlight de ~1s. NÃO mexe no algoritmo §4.7.1 (aguarda Edvan + STORY-036). Origem: áudio Edvan 2026-05-27.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W26",
+      "owner_agent": null,
+      "briefing_path": "epics/EPIC-002-diagnostico-industria/briefings/STORY-040-abertura.md",
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-040-card-resumo-executivo-clicavel.md",
+      "created_at": "2026-06-02",
+      "updated_at": "2026-06-02"
+    },
+    {
+      "id": "STORY-041",
+      "slug": "plural-acoes-veredito",
+      "title": "Plural \"ações\" no texto fixo do veredito em_alerta",
+      "type": "bugfix",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "XS",
+      "blocked_by": [],
+      "blocks": [],
+      "note": "Texto fixo do veredito `em_alerta` está em singular (\"ação\") — spec §4.7.1 e Edvan querem plural (\"ações\"). Decisão pendente com Arquiteto: bump motor_version 1.2.0→1.2.1 vs patch silencioso (default sugerido: silencioso se texto é render-time). Origem: áudio Edvan 2026-05-27.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W26",
+      "owner_agent": null,
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-041-plural-acoes-veredito.md",
+      "created_at": "2026-06-02",
+      "updated_at": "2026-06-02"
+    },
+    {
+      "id": "STORY-042",
+      "slug": "pacote-conteudo-ebc",
+      "title": "Pacote de conteúdo EBC — títulos, rótulos, textos auxiliares, glossário, NCG positivo",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "blocks": ["STORY-043"],
+      "note": "Coleção coordenada de mudanças textuais: Bloco 2 (remover anualização, exemplos itens 3/4), Bloco 3 (título + Imobilizado), Bloco 4 (Q17 ocultar 2 textos auxiliares), matriz NCG positivo, glossário (EBITDA 2º item). 2 itens com pendência ao Edvan (título Bloco 2 + item glossário) — default manter se sem resposta até 2026-06-04. Origem: .docx EBC 2026-05-27.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W26",
+      "owner_agent": null,
+      "briefing_path": "epics/EPIC-002-diagnostico-industria/briefings/STORY-042-abertura.md",
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-042-pacote-conteudo-ebc.md",
+      "created_at": "2026-06-02",
+      "updated_at": "2026-06-02"
+    },
+    {
+      "id": "STORY-043",
+      "slug": "validacao-cruzada-q17-recebiveis",
+      "title": "Validação cruzada R4 — Q17.recebíveis ≥ Q09.venda_mensal (bloqueante)",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "S",
+      "blocked_by": ["STORY-042"],
+      "blocks": [],
+      "note": "Nova regra R4 aditiva à engine declarativa da STORY-034 (`config/quiz/validacoes-cruzadas.php`). Diferente de R1/R2/R3 — R4 é **bloqueante** (consistência de input, não hipótese estatística). PO decidiu em 2026-06-02. Origem: .docx EBC Bloco 4 — vira regra de backend em vez de texto auxiliar.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W26",
+      "owner_agent": null,
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-043-validacao-cruzada-q17-recebiveis.md",
+      "created_at": "2026-06-02",
+      "updated_at": "2026-06-02"
     }
   ],
   "sprints": [
@@ -1279,6 +1398,38 @@
       "updated_at": "2026-05-26T02:04:19Z",
       "closed_at": "2026-05-26",
       "closed_early": true
+    },
+    {
+      "id": "SPRINT-2026-W26",
+      "wave": "WAVE-2026-01",
+      "status": "planned",
+      "start_date": "2026-06-03",
+      "end_date": "2026-06-09",
+      "goal": "Absorver a devolutiva da EBC (Edvan) sobre o MVP do diagnóstico Indústria — bugfixes que travam uso real + ajustes de UX/conteúdo — sem mexer no algoritmo §4.7.1 do Resumo Executivo (aguarda lista dos 3 indicadores determinantes do Edvan + validação externa STORY-036).",
+      "path": "sprints/SPRINT-2026-W26.md",
+      "story_ids": [
+        "STORY-038",
+        "STORY-039",
+        "STORY-040",
+        "STORY-041",
+        "STORY-042",
+        "STORY-043"
+      ],
+      "epic_ids": [
+        "EPIC-002"
+      ],
+      "opened_at": "2026-06-02",
+      "opened_by": "PO (Alexandro / Claude)",
+      "sprint_duration_weeks": 1,
+      "cadence_experiment": "hotfix-pos-devolutiva-ebc",
+      "related_devolutiva": "DEF on line - MVP 270526 - observações EBC.docx + áudio Edvan 2026-05-27 + 2 mensagens WhatsApp",
+      "out_of_scope": [
+        "Reescrita do algoritmo §4.7.1 do Resumo Executivo (aguarda Edvan + STORY-036)",
+        "STORY-036 (validador externo do motor) — paralelo, externo ao sprint",
+        "STORY-037 (validação final + handoff) — espera STORY-036",
+        "STORY-023 (fix bump-rc.yml) — débito antigo, bônus opcional",
+        "Comércio e Serviços (Onda 2)"
+      ]
     }
   ],
   "decisions": {

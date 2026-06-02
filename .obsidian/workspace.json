@@ -1,0 +1,205 @@
+{
+  "main": {
+    "id": "c7653da83aa334a4",
+    "type": "split",
+    "children": [
+      {
+        "id": "0f0925e12e97cce2",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "36e57bf0b9176d3f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "defonline-docs/project-state/sprints/SPRINT-2026-W26.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "SPRINT-2026-W26"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "6b79095367d26941",
+    "type": "split",
+    "children": [
+      {
+        "id": "f809fb1d0da94cd5",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "43ae98cbda389c90",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Explorador de arquivos"
+            }
+          },
+          {
+            "id": "5b738095fad3ea4c",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Procurar"
+            }
+          },
+          {
+            "id": "1cccb07e9929bfde",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Marcadores"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "7fc92d674880e81c",
+    "type": "split",
+    "children": [
+      {
+        "id": "b9b7bd0af71b2429",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a3c1102ae0e56fb8",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "defonline-docs/project-state/sprints/SPRINT-2026-W26.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Links inversos para SPRINT-2026-W26"
+            }
+          },
+          {
+            "id": "ec38afd6214b45df",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "defonline-docs/project-state/sprints/SPRINT-2026-W26.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Links de saída para SPRINT-2026-W26"
+            }
+          },
+          {
+            "id": "92a72a5e6575bde0",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etiquetas"
+            }
+          },
+          {
+            "id": "6d849bfa2cd16d23",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Todas as propriedades"
+            }
+          },
+          {
+            "id": "6496e89b6003a1b2",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "defonline-docs/project-state/sprints/SPRINT-2026-W26.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Sumário de SPRINT-2026-W26"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Abrir a troca rápida": false,
+      "graph:Abrir visualização em gráfico": false,
+      "canvas:Criar novo canvas": false,
+      "daily-notes:Abrir a nota de hoje": false,
+      "templates:Inserir modelo": false,
+      "command-palette:Abrir paleta de comandos": false,
+      "bases:Criar nova base": false
+    }
+  },
+  "active": "36e57bf0b9176d3f",
+  "lastOpenFiles": [
+    "defonline-docs/project-state/sprints/SPRINT-2026-W22.md",
+    "defonline-docs/project-state/epics/EPIC-002-diagnostico-industria/devolutivas/2026-05-27-EBC/README.md",
+    "defonline-docs/project-state/epics/EPIC-002-diagnostico-industria/devolutivas/2026-05-27-EBC/pauta-retorno.md",
+    "defonline-docs/project-state/epics/EPIC-002-diagnostico-industria/devolutivas/2026-05-27-EBC",
+    "defonline-docs/project-state/epics/EPIC-002-diagnostico-industria/devolutivas",
+    "defonline-docs/project-state/epics/EPIC-002-diagnostico-industria/stories/STORY-043-validacao-cruzada-q17-recebiveis.md",
+    "defonline-docs/project-state/epics/EPIC-002-diagnostico-industria/briefings/STORY-042-abertura.md",
+    "defonline-docs/project-state/epics/EPIC-002-diagnostico-industria/stories/STORY-042-pacote-conteudo-ebc.md",
+    "defonline-docs/project-state/epics/EPIC-002-diagnostico-industria/stories/STORY-041-plural-acoes-veredito.md",
+    "defonline-docs/project-state/epics/EPIC-002-diagnostico-industria/briefings/STORY-040-abertura.md",
+    "defonline-docs/project-state/epics/EPIC-002-diagnostico-industria/stories/STORY-040-card-resumo-executivo-clicavel.md",
+    "defonline-docs/project-state/epics/EPIC-002-diagnostico-industria/briefings/STORY-039-abertura.md",
+    "defonline-docs/project-state/epics/EPIC-002-diagnostico-industria/stories/STORY-039-inadimplencia-2-casas-decimais.md",
+    "defonline-docs/project-state/epics/EPIC-002-diagnostico-industria/briefings/STORY-038-abertura.md",
+    "defonline-docs/project-state/epics/EPIC-002-diagnostico-industria/stories/STORY-038-socios-lista-dinamica.md",
+    "defonline-docs/project-state/sprints/SPRINT-2026-W26.md"
+  ]
+}
