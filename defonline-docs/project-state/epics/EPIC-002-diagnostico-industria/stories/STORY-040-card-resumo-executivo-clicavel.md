@@ -7,8 +7,8 @@ sprint_id: SPRINT-2026-W26
 type: bugfix
 target_role: programador
 requires_design: true
-status: ready
-owner_agent: null
+status: in_progress
+owner_agent: programador (claude-opus-4-8)
 created_at: 2026-06-02
 updated_at: 2026-06-02
 estimated_session_size: S
@@ -90,14 +90,78 @@ Você decide:
 
 ## Notas do agente
 
+### Plano (registrado antes de codar — 2026-06-02)
+
+**Documentos lidos:** estória inteira + briefing; componentes `resumo-executivo`, `linha-indicador`,
+`card-indicador`, `card-informativo`, página `diagnosticos/show.blade.php`; `IndicadorFormatter`
+(ORDEM_ESSENCIAIS), `ResumoExecutivo` (CODIGOS_ANEXO_D, geração de destaques); `tokens.css`,
+`app.css`, `app-header` (sticky `h-16` = 64px, `z-30`); `DiagnosticoFactory`; testes existentes.
+
+**Entendimento consolidado:** os "cards de destaque" do Resumo Executivo são, na implementação real,
+itens `<li>` de uma `<ul>` (cada um com `data-codigo`). O texto completo de cada destaque já existe
+como linha na tabela de indicadores (desktop `<tr>`) e como card no mobile (`<article>`), ambos com
+`data-codigo`. Hoje os destaques não são clicáveis → dead-end. Objetivo: tornar cada destaque um
+link que rola suavemente até o indicador correspondente e o destaca por ~1s.
+
+**Descoberta importante (duplicidade de id):** os dois layouts (tabela ≥md e cards <md) renderizam o
+MESMO indicador simultaneamente no DOM. Usar `id="indicador-{codigo}"` nos dois geraria id duplicado
+(HTML inválido; `:target`/jump iria sempre para o primeiro = a tabela, escondida no mobile).
+**Decisão:** id canônico só na `<tr>` desktop (fallback no-JS + `:target`). O caminho real (JS leve,
+sem lib — Alpine/Livewire já presente, mas aqui basta vanilla em `app.js`) seleciona o alvo VISÍVEL
+no breakpoint atual via `[data-codigo]` dentro de `#indicadores-detalhados` (escopo que exclui os
+`<li>` do resumo, que também têm `data-codigo`).
+
+**Dúvidas:** nenhuma — decisões de UX (scroll-to + highlight ~1s, sem expand) já fechadas no briefing.
+
+**Plano (3–5 bullets):**
+1. Token `--color-highlight-pulse` em `tokens.css`; CSS de `scroll-behavior: smooth`, `.indicador-alvo`
+   (scroll-margin p/ header sticky) e animação de highlight (`:target` + classe `.is-highlight`) em
+   `app.css`, com `prefers-reduced-motion`.
+2. `resumo-executivo.blade.php`: cada destaque vira `<a href="#indicador-{codigo}" data-indicador-link>`
+   com afordância visual (sublinhado pontilhado tertiary + `cursor:pointer` nativo) e sufixo sr-only.
+3. `linha-indicador.blade.php`: `id` + classe `.indicador-alvo` na `<tr>`. `card-indicador.blade.php`:
+   só classe `.indicador-alvo` (sem id, p/ não duplicar). `show.blade.php`: `id="indicadores-detalhados"`.
+4. `app.js`: progressive enhancement — click nos `[data-indicador-link]` rola até o alvo visível +
+   highlight de 1s; sem JS, o `<a href>` ainda navega (CA-6).
+5. Testes: Pest (markup: links presentes c/ destaque, ausentes sem destaque [CA-7], id/classe na tabela)
+   + 2 Dusk (desktop: scrollY↑ + alvo visível + `.is-highlight`; mobile: scrollY↑ + card visível).
+
 ### Decisões tomadas
-- 
+- **Suavidade via JS, não CSS global.** A primeira tentativa usava `html { scroll-behavior: smooth }`
+  global — isso quebrou 9 testes Dusk NÃO relacionados com `ElementClickInterceptedException` (o
+  WebDriver rola o elemento p/ a viewport e clica antes da animação assentar; o alvo "foge"). Removido.
+  A suavidade vem do JS (`scrollIntoView({behavior:'smooth'})`); sem JS o fallback é um jump instantâneo
+  — explicitamente aceito pelo CA-6 ("jump, sem suavidade").
+- **id canônico só na `<tr>` desktop** (`card-indicador` mobile fica só com a classe `.indicador-alvo`,
+  sem id) para não duplicar id no DOM. O JS resolve o alvo VISÍVEL por `data-codigo` dentro de
+  `#indicadores-detalhados`.
+- **Componente `<x-relatorio.destaque-link>`** extraído p/ não duplicar o markup do link entre destaque
+  negativo e positivo (regra de dois usos + legibilidade do componente pai).
+- **Token novo `--color-highlight-pulse`** (`rgba(99,91,255,0.16)` — Tertiary suave) em `tokens.css`;
+  registrado no design-system canônico (mudança aditiva, sem bump de versão). Mantém single-accent.
+- **Afordância (CA-4):** sublinhado pontilhado em Tertiary + `cursor:pointer` nativo do `<a>`; vira
+  sólido no hover/foco. Texto não passou a truncar (não truncava antes; "não muda" satisfeito).
+- **A11y (CA-5):** cada destaque é um `<a href="#indicador-…">` nativo (role=link, focável por teclado,
+  Enter aciona) + sufixo `sr-only` explicando o destino. `prefers-reduced-motion` → realce estático.
 
 ### Descobertas
-- 
+- Os "cards de destaque" são, na prática, itens `<li>` de uma `<ul>` (não cards). Os `<li>` também
+  carregam `data-codigo` — por isso o JS escopa a busca em `#indicadores-detalhados` (exclui o resumo).
+- Os dois layouts (tabela ≥md / cards <md) coexistem no DOM — origem da decisão de id único na `<tr>`.
+- Códigos de destaque (CODIGOS_ANEXO_D) são subconjunto dos da tabela exceto `ncg_absoluto` (informativo,
+  farol=nenhum) — que nunca vira destaque; logo todo alvo de destaque existe na tabela.
+- `getClientRects().length` é o teste de visibilidade confiável p/ `<tr>` (offsetParent é null em
+  linhas de tabela mesmo visíveis).
 
 ### Cobertura final
-- 
+- **Pest:** 826 passed (2508 assertions). Cobertura geral **97,3%** (gate ≥80) · Domínio **99,6%** (gate ≥98).
+- **Dusk:** suíte completa 22 passed (incl. 2 novos: desktop scrollY↑ + `.is-highlight`; mobile scrollY↑ + card).
+- **Pint** limpo · **PHPStan** (nível 6) sem erros.
+- Novos testes: `DiagnosticoShowTest` (CA-1/CA-2/CA-5 links; CA-7 regressão sem destaque) +
+  `CardResumoExecutivoBrowserTest` (CA-1/CA-2/CA-3/CA-8).
 
 ### Links de evidência
-- 
+- Screenshots locais (gitignored, anexar no PR): `app/tests/Browser/screenshots/story-040-1-resumo-clicavel.png`,
+  `…-2-linha-destacada.png`, `…-3-mobile-card-destacado.png` — confirmam clicabilidade, scroll com offset
+  do header sticky e highlight na linha (desktop) e no card (mobile).
+- Pendente: PR + CI verde + deploy/screenshot em homologação + Lighthouse a11y ≥95 (rodar na URL de homol).

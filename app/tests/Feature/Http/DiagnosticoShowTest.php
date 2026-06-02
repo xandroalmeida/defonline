@@ -324,3 +324,81 @@ it('exibe ambos os layouts (tabela em md+ e cards em <md) para mobile-first — 
     // table com thead semântico (CA-8).
     expect($html)->toContain('<th scope="col"');
 });
+
+/*
+ * STORY-040 — destaques do Resumo Executivo clicáveis (scroll-to + highlight).
+ * Estes testes cobrem o MARKUP (Feature); o comportamento de scroll/highlight no
+ * navegador é coberto pelo CardResumoExecutivoBrowserTest (Dusk).
+ */
+function diagnosticoComDestaque(Usuario $dono, array $resumo): Diagnostico
+{
+    Auth::login($dono);
+    $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $dono->id]);
+    // motor 1.2.0 = resumo §4.7.1 válido; factory já popula ncg_vendas no snapshot.
+    $diag = Diagnostico::factory()->paraEmpresa($empresa)->create([
+        'motor_version' => '1.2.0',
+        'resumo_executivo' => $resumo,
+    ]);
+    Auth::logout();
+
+    return $diag;
+}
+
+it('CA-1/CA-5 — cada destaque vira um link <a href="#indicador-…"> focável por teclado', function () {
+    $dono = Usuario::factory()->create();
+    $diag = diagnosticoComDestaque($dono, [
+        'veredito' => 'em_alerta',
+        'veredito_texto' => 'Sua empresa está em alerta.',
+        'destaques_negativos' => [
+            ['codigo' => 'ncg_vendas', 'texto' => 'NCG / Vendas: atenção ao capital de giro.'],
+        ],
+        'destaque_positivo' => ['codigo' => 'margem_bruta', 'texto' => 'Por outro lado, Margem Bruta saudável.'],
+        'fallback_acionado' => false,
+    ]);
+
+    $html = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}")->assertOk()->getContent();
+
+    // O destaque negativo e o positivo são âncoras para o indicador correspondente.
+    expect($html)
+        ->toContain('href="#indicador-ncg_vendas"')
+        ->toContain('data-indicador-link="ncg_vendas"')
+        ->toContain('href="#indicador-margem_bruta"')
+        ->toContain('data-indicador-link="margem_bruta"');
+});
+
+it('CA-1/CA-2 — a linha da tabela é o alvo: id canônico + classe .indicador-alvo', function () {
+    $dono = Usuario::factory()->create();
+    $diag = diagnosticoComDestaque($dono, [
+        'veredito' => 'em_alerta',
+        'veredito_texto' => 'Sua empresa está em alerta.',
+        'destaques_negativos' => [
+            ['codigo' => 'ncg_vendas', 'texto' => 'NCG / Vendas: atenção ao capital de giro.'],
+        ],
+        'destaque_positivo' => null,
+        'fallback_acionado' => false,
+    ]);
+
+    $html = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}")->assertOk()->getContent();
+
+    expect($html)
+        ->toContain('id="indicador-ncg_vendas"')   // âncora canônica (no-JS + :target)
+        ->toContain('indicador-alvo')              // classe de scroll-margin + highlight
+        ->toContain('id="indicadores-detalhados"'); // escopo do JS
+});
+
+it('CA-7 (regressão) — resumo sem destaques NÃO renderiza nenhum link clicável', function () {
+    $dono = Usuario::factory()->create();
+    $diag = diagnosticoComDestaque($dono, [
+        'veredito' => 'saudavel',
+        'veredito_texto' => 'Sua empresa está saudável.',
+        'destaques_negativos' => [],
+        'destaque_positivo' => null,
+        'fallback_acionado' => false,
+    ]);
+
+    $html = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}")->assertOk()->getContent();
+
+    expect($html)
+        ->toContain('data-testid="resumo-executivo"') // resumo renderizado…
+        ->not->toContain('data-indicador-link');      // …mas sem destaques clicáveis
+});

@@ -41,6 +41,7 @@ Cores semânticas adicionais:
 | `border` | Bordas neutras de cards e inputs | `#E3E8EE` |
 | `input` | Borda de inputs em estado default | `#E3E8EE` (idem `border`) |
 | `ring` | Focus ring acessível | Tertiary com 40% alpha — `hsla(243, 100%, 67%, 0.4)` |
+| `highlight-pulse` | Realce temporário (~1s) da linha-alvo ao clicar num destaque do Resumo Executivo (STORY-040) | Tertiary com 16% alpha — `rgba(99, 91, 255, 0.16)` |
 
 ### Tipografia
 
@@ -211,6 +212,7 @@ Promovida de **alpha** para **v1** em 2026-05-25 após primeira aplicação real
 
 ## Histórico
 
+- **2026-06-02 — token `highlight-pulse` (STORY-040).** Adicionado token semântico `--color-highlight-pulse` (`rgba(99, 91, 255, 0.16)` — tonalidade suave do Tertiary) para o realce temporário (~1s) da linha/card-alvo quando o usuário clica num destaque do Resumo Executivo e a página rola até o indicador na tabela detalhada. Mantém a filosofia single-accent (deriva do Tertiary, não introduz nova matiz). Materializado em `app/resources/css/tokens.css`; consumido apenas via `var(--color-highlight-pulse)` na animação `indicador-highlight` de `app.css`. Não altera tokens existentes — mudança aditiva, sem bump de versão.
 - **2026-05-25 — promoção para v1.** Primeira aplicação real do design-system em código pela STORY-019. Tokens materializados em `app/resources/css/tokens.css` via Tailwind v4 `@theme` (IDR-008). Componentes-base Blade implementados (`<x-button>` 3 variants, `<x-card>`, `<x-input>`, `<x-label>`, `<x-link>`, `<x-logo>`, `<x-breadcrumb>`, `<x-page-header>`, `<x-footer-version>`) consumindo só CSS vars. Telas existentes do EPIC-001 (`/cadastro`, `/login`, `/home`, `/empresas/nova`, `/empresas/{id}/show`) refatoradas para usar o novo layout — drift de paleta da STORY-016 (`#1f2937`, `#2563eb`, `#f9fafb`) eliminado. Nenhuma mudança de token foi necessária: paleta, tipografia, espaçamento, raios e sombras passaram intactos no teste real. Único ajuste implícito foi a definição de variantes hover/active derivadas do Tertiary (`--color-tertiary-hover: #4F46E5`, `--color-tertiary-active: #4338CA`) — antes ficavam descritas como "8% darker" sem hex concreto. Próxima revisão de tokens só com sinal concreto de outra aplicação (EPIC-002 / EPIC-008).
 
 ---

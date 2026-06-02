@@ -80,7 +80,7 @@
          Renderiza dois layouts: tabela densa em ≥ md, stack de cards em < md.
          IDR-008 (tokens) + briefing §6 mobile-first.
     --}}
-    <section aria-labelledby="indicadores-titulo" class="mb-8">
+    <section id="indicadores-detalhados" aria-labelledby="indicadores-titulo" class="mb-8">
         <h2 id="indicadores-titulo" class="sr-only">Indicadores essenciais</h2>
 
         {{-- Desktop: tabela densa. --}}

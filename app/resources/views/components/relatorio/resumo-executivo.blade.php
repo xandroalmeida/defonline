@@ -68,13 +68,18 @@
         @endif
 
         @if (! empty($resumo['destaques_negativos']) || ! empty($resumo['destaque_positivo']))
+            {{-- STORY-040: cada destaque é um link para a linha/card do indicador na
+                 tabela detalhada (scroll suave + highlight ~1s). Sem JS, o href ainda
+                 navega (jump) — ver app.js / app.css. --}}
             <ul class="list-none p-0 m-0 mb-2 space-y-1 text-[color:var(--color-primary)] text-sm" data-testid="resumo-destaques">
                 @foreach ($resumo['destaques_negativos'] as $d)
-                    <li data-codigo="{{ $d['codigo'] }}" data-tipo="negativo">{{ $d['texto'] }}</li>
+                    <li data-codigo="{{ $d['codigo'] }}" data-tipo="negativo">
+                        <x-relatorio.destaque-link :codigo="$d['codigo']" :texto="$d['texto']"/>
+                    </li>
                 @endforeach
                 @if (! empty($resumo['destaque_positivo']))
                     <li data-codigo="{{ $resumo['destaque_positivo']['codigo'] }}" data-tipo="positivo">
-                        {{ $resumo['destaque_positivo']['texto'] }}
+                        <x-relatorio.destaque-link :codigo="$resumo['destaque_positivo']['codigo']" :texto="$resumo['destaque_positivo']['texto']"/>
                     </li>
                 @endif
             </ul>
