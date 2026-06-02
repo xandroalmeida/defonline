@@ -20,14 +20,14 @@ Entregar em homologação as correções da primeira rodada de devolutiva do ana
 
 ## Estórias incluídas
 
-| ID | Título | Épico | Tipo | Tamanho | Status |
-|---|---|---|---|---|---|
-| STORY-038 | Sócios como lista dinâmica (1+) — add/edit/remove | EPIC-002 | implementation | M | ready |
-| STORY-039 | Inadimplência aceita 2 casas decimais (0,00 ≤ x ≤ 100,00) | EPIC-002 | bugfix | XS | ready |
-| STORY-040 | Card de destaque do Resumo Executivo: scroll-to + highlight | EPIC-002 | bugfix | S | ready |
-| STORY-041 | Plural "ações" no veredito `em_alerta` | EPIC-002 | bugfix | XS | ready |
-| STORY-042 | Pacote de conteúdo EBC (títulos, rótulos, glossário, NCG positivo) | EPIC-002 | implementation | M | ready |
-| STORY-043 | Validação cruzada R4 — Q17.recebíveis ≥ Q09.venda_mensal | EPIC-002 | implementation | S | blocked_by:STORY-042 |
+| ID        | Título                                                             | Épico    | Tipo           | Tamanho | Status               |
+| --------- | ------------------------------------------------------------------ | -------- | -------------- | ------- | -------------------- |
+| STORY-038 | Sócios como lista dinâmica (1+) — add/edit/remove                  | EPIC-002 | implementation | M       | ready                |
+| STORY-039 | Inadimplência aceita 2 casas decimais (0,00 ≤ x ≤ 100,00)          | EPIC-002 | bugfix         | XS      | ready                |
+| STORY-040 | Card de destaque do Resumo Executivo: scroll-to + highlight        | EPIC-002 | bugfix         | S       | ready                |
+| STORY-041 | Plural "ações" no veredito `em_alerta`                             | EPIC-002 | bugfix         | XS      | ready                |
+| STORY-042 | Pacote de conteúdo EBC (títulos, rótulos, glossário, NCG positivo) | EPIC-002 | implementation | M       | ready                |
+| STORY-043 | Validação cruzada R4 — Q17.recebíveis ≥ Q09.venda_mensal           | EPIC-002 | implementation | S       | blocked_by:STORY-042 |
 
 **Carga estimada:** 1×M + 2×S + 2×XS + 1×M ≈ 3-4 dias úteis. Buffer de 1-2 dias para validação local + smoke em homol + tag rc.
 
