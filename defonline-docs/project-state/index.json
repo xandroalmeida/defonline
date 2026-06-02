@@ -1146,7 +1146,7 @@
       "title": "Card de destaque do Resumo Executivo — scroll-to + highlight",
       "type": "bugfix",
       "target_role": "programador",
-      "status": "in_progress",
+      "status": "in_review",
       "estimated_session_size": "S",
       "blocked_by": [],
       "blocks": [],

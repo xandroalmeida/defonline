@@ -7,7 +7,7 @@ sprint_id: SPRINT-2026-W26
 type: bugfix
 target_role: programador
 requires_design: true
-status: in_progress
+status: in_review
 owner_agent: programador (claude-opus-4-8)
 created_at: 2026-06-02
 updated_at: 2026-06-02
