@@ -146,23 +146,25 @@ it('bloqueia bloco 4 quando Q20 >= Q09 (regra Anexo A)', function () {
         ->set('Q18', '50.000,00')
         ->set('Q19', '20.000,00')
         ->set('Q20', '150.000,00')   // > Q09 = 100.000
-        ->set('Q21', '529.982.247-25')
-        ->set('Q22', '529.982.247-25')
-        ->set('Q23', '529.982.247-25')
+        ->set('socios', [['cpf' => '529.982.247-25', 'nome' => 'Ana Lima']])
         ->call('submeter')
         ->assertHasErrors('Q20');
 });
 
-it('rejeita CPF inválido em Q21..Q23 quando Q17="sim"', function () {
+it('rejeita CPF inválido em uma linha de sócio quando Q17="sim" (CA-4)', function () {
     $rascunho = quizPreencherAteBloco4($this);
 
     $rascunho->set('Q17', 'sim')
         ->set('Q18', '50000')->set('Q19', '20000')->set('Q20', '10000')
-        ->set('Q21', '111.111.111-11')   // sequência trivial → inválido
-        ->set('Q22', '529.982.247-25')
-        ->set('Q23', '529.982.247-25')
+        ->set('socios', [
+            ['cpf' => '111.111.111-11', 'nome' => 'Ana'],   // 1ª linha: CPF trivial → inválida
+            ['cpf' => '529.982.247-25', 'nome' => 'Bruno'],
+        ])
         ->call('submeter')
-        ->assertHasErrors('Q21');
+        ->assertHasErrors('socios.0.cpf')
+        ->assertHasNoErrors('socios.1.cpf');
+
+    expect(Diagnostico::query()->count())->toBe(0);
 });
 
 it('quando Q17="nao" permite submeter sem Q18..Q23', function () {
@@ -179,7 +181,7 @@ it('quando Q17="nao" permite submeter sem Q18..Q23', function () {
     $payload = (array) $diagnostico->quiz_payload;
     expect($payload['Q17'])->toBeFalse();
     expect($payload['Q18'])->toBeNull();
-    expect($payload['Q21'])->toBeNull();
+    expect($payload['socios'])->toBeNull();
 });
 
 // ============================================================================
@@ -447,6 +449,147 @@ it('não mostra alertas com dados consistentes — sem falso positivo', function
     quizPreencherAteBloco4($this)   // dados saudáveis: já avança 3 → 4
         ->assertSet('bloco_atual', 4)
         ->assertSet('alertas_cruzados', []);
+});
+
+// ============================================================================
+// STORY-038 — Sócios como lista dinâmica (1+)
+// ============================================================================
+
+it('submete com exatamente 1 sócio válido e grava socios[] no payload (CA-1)', function () {
+    Event::fake();
+
+    quizPreencherAteBloco4($this)
+        ->set('Q17', 'sim')
+        ->set('Q18', '50000')->set('Q19', '20000')->set('Q20', '10000')
+        ->set('socios', [['cpf' => '529.982.247-25', 'nome' => 'Ana Lima']])
+        ->call('submeter')
+        ->assertHasNoErrors()
+        ->assertRedirect();
+
+    $payload = (array) Diagnostico::query()->firstOrFail()->quiz_payload;
+    expect($payload['socios'])->toBe([['cpf' => '52998224725', 'nome' => 'Ana Lima']]);
+});
+
+it('adicionarSocio acrescenta uma linha vazia até o cap de 10 (CA-2/CA-6)', function () {
+    $component = Livewire::test(Quiz::class, ['empresa' => $this->empresa])
+        ->assertSet('socios', [['cpf' => '', 'nome' => '']])
+        ->call('adicionarSocio')
+        ->assertCount('socios', 2)
+        ->call('adicionarSocio')
+        ->assertCount('socios', 3);
+
+    // Cap: não passa de 10 por mais que clique.
+    for ($i = 0; $i < 20; $i++) {
+        $component->call('adicionarSocio');
+    }
+    $component->assertCount('socios', 10);
+});
+
+it('removerSocio remove a linha e renumera; não deixa ficar com 0 (CA-3)', function () {
+    $a = ['cpf' => '111.444.777-35', 'nome' => 'Ana'];
+    $b = ['cpf' => '123.456.789-09', 'nome' => 'Bruno'];
+    $c = ['cpf' => '529.982.247-25', 'nome' => 'Carla'];
+
+    Livewire::test(Quiz::class, ['empresa' => $this->empresa])
+        ->set('socios', [$a, $b, $c])
+        ->call('removerSocio', 1)
+        ->assertSet('socios', [$a, $c])
+        ->call('removerSocio', 0)
+        ->assertSet('socios', [$c])
+        // Só resta 1 → remover é no-op (botão fica desabilitado na UI).
+        ->call('removerSocio', 0)
+        ->assertSet('socios', [$c]);
+});
+
+it('bloqueia o submit com CPF duplicado na lista (CA-5)', function () {
+    quizPreencherAteBloco4($this)
+        ->set('Q17', 'sim')
+        ->set('Q18', '50000')->set('Q19', '20000')->set('Q20', '10000')
+        ->set('socios', [
+            ['cpf' => '529.982.247-25', 'nome' => 'Ana'],
+            ['cpf' => '529.982.247-25', 'nome' => 'Bruno'],
+        ])
+        ->call('submeter')
+        ->assertHasErrors('socios.1.cpf');
+
+    expect(Diagnostico::query()->count())->toBe(0);
+});
+
+it('exige ao menos 1 sócio preenchido quando Q17="sim" (CA-1 inverso)', function () {
+    quizPreencherAteBloco4($this)
+        ->set('Q17', 'sim')
+        ->set('Q18', '50000')->set('Q19', '20000')->set('Q20', '10000')
+        ->set('socios', [['cpf' => '', 'nome' => ''], ['cpf' => '  ', 'nome' => '  ']])
+        ->call('submeter')
+        ->assertHasErrors('socios.0.cpf');
+
+    expect(Diagnostico::query()->count())->toBe(0);
+});
+
+it('descarta linhas vazias entre preenchidas no payload (CA-7)', function () {
+    Event::fake();
+
+    quizPreencherAteBloco4($this)
+        ->set('Q17', 'sim')
+        ->set('Q18', '50000')->set('Q19', '20000')->set('Q20', '10000')
+        ->set('socios', [
+            ['cpf' => '529.982.247-25', 'nome' => 'Carla'],
+            ['cpf' => '', 'nome' => ''],
+            ['cpf' => '111.444.777-35', 'nome' => 'Ana'],
+        ])
+        ->call('submeter')
+        ->assertHasNoErrors();
+
+    $payload = (array) Diagnostico::query()->firstOrFail()->quiz_payload;
+    // Vazia descartada + ordenação alfabética canônica por CPF (CA-9).
+    expect($payload['socios'])->toBe([
+        ['cpf' => '11144477735', 'nome' => 'Ana'],
+        ['cpf' => '52998224725', 'nome' => 'Carla'],
+    ]);
+});
+
+it('persiste a lista de sócios no rascunho na mesma ordem ao avançar (CA-8)', function () {
+    $lista = [
+        ['cpf' => '529.982.247-25', 'nome' => 'Carla'],
+        ['cpf' => '111.444.777-35', 'nome' => 'Ana'],
+    ];
+
+    Livewire::test(Quiz::class, ['empresa' => $this->empresa])
+        ->set('socios', $lista)
+        ->call('proximoBloco');   // 1 → 2 persiste rascunho
+
+    $rascunho = QuizRascunho::query()->firstOrFail();
+    expect(((array) $rascunho->quiz_payload)['socios'])->toBe($lista);
+
+    // Reabrir o quiz devolve a mesma lista na mesma ordem.
+    Livewire::test(Quiz::class, ['empresa' => $this->empresa])
+        ->assertSet('socios', $lista);
+});
+
+it('payload_hash é idempotente à ordem de digitação dos sócios (CA-9)', function () {
+    Event::fake();
+
+    $submeter = function (array $socios): string {
+        QuizRascunho::query()->withTrashed()->forceDelete();
+
+        quizPreencherAteBloco4($this)
+            ->set('Q17', 'sim')
+            ->set('Q18', '50000')->set('Q19', '20000')->set('Q20', '10000')
+            ->set('socios', $socios)
+            ->call('submeter')
+            ->assertHasNoErrors();
+
+        return Diagnostico::query()->latest('gerado_em')->firstOrFail()->payload_hash;
+    };
+
+    $ana = ['cpf' => '111.444.777-35', 'nome' => 'Ana'];
+    $bruno = ['cpf' => '123.456.789-09', 'nome' => 'Bruno'];
+    $carla = ['cpf' => '529.982.247-25', 'nome' => 'Carla'];
+
+    $hashA = $submeter([$carla, $ana, $bruno]);
+    $hashB = $submeter([$bruno, $carla, $ana]);
+
+    expect($hashA)->toBe($hashB);
 });
 
 // ============================================================================

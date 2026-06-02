@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Livewire\Diagnostico;
 
 use App\Actions\CalcularDiagnostico;
-use App\Domain\Cpf;
 use App\Domain\Quiz\Alerta;
 use App\Domain\Quiz\ValidacoesCruzadas;
+use App\Domain\Quiz\ValidaSocios;
 use App\Models\EmpresaAnalisada;
 use App\Models\QuizRascunho;
 use App\Observabilidade\EventLogger;
@@ -27,7 +27,8 @@ use Throwable;
  * - **Bloco 1 (Identificação):** Q01 (setor — readonly = "industria" no EPIC-002).
  * - **Bloco 2 (DRE/Operação):** Q08, Q09, Q14, Q15, Q16, Q10, Q11, Q12, Q13.
  * - **Bloco 3 (Balanço):** Q02, Q03, Q04, Q05, Q06, Q07.
- * - **Bloco 4 (Contexto/Captação):** Q17 (sim/não) → Q18, Q19, Q20 (R$), Q21, Q22, Q23 (CPF).
+ * - **Bloco 4 (Contexto/Captação):** Q17 (sim/não) → Q18, Q19, Q20 (R$),
+ *   `socios[]` (lista dinâmica de CPFs, 1+ obrigatório / cap 10 — STORY-038).
  *
  * **Rascunho persistido (IDR-010 + STORY-027 CA-6).** A cada `Próximo` o payload
  * parcial é gravado em `quiz_rascunhos` (NÃO em `diagnosticos`). UNIQUE parcial
@@ -118,11 +119,15 @@ final class Quiz extends Component
 
     public ?string $Q20 = null;  // Venda mensal com cartão (R$, deve ser < Q09)
 
-    public ?string $Q21 = null;  // CPF sócio 1
-
-    public ?string $Q22 = null;  // CPF sócio 2
-
-    public ?string $Q23 = null;  // CPF sócio 3
+    /**
+     * Lista dinâmica de sócios (STORY-038) — substitui os antigos Q21/Q22/Q23
+     * fixos. Cada item é um objeto `{cpf, nome}` como digitado (CPF mascarado).
+     * Começa com 1 linha vazia; o usuário adiciona/remove (mín 1, cap 10 —
+     * {@see ValidaSocios}). Só é obrigatória/persistida quando Q17="sim".
+     *
+     * @var list<array{cpf: string, nome: string}>
+     */
+    public array $socios = [['cpf' => '', 'nome' => '']];
 
     public function mount(EmpresaAnalisada $empresa): void
     {
@@ -140,6 +145,13 @@ final class Quiz extends Component
             }
             $this->bloco_atual = max(1, min(4, $rascunho->ultimo_bloco_preenchido));
             $this->retomando_rascunho = true;
+
+            // Garante ao menos 1 linha de sócio mesmo se o rascunho veio sem a
+            // chave (rascunhos pré-STORY-038 são descartados em homol, mas a UI
+            // não pode ficar sem nenhuma linha para digitar).
+            if ($this->socios === []) {
+                $this->socios = [['cpf' => '', 'nome' => '']];
+            }
 
             return;
         }
@@ -210,6 +222,38 @@ final class Quiz extends Component
         $this->alertas_cruzados = [];
         $this->bloco_atual = $this->blocoDoCampo($campo);
         $this->dispatch('focar-campo', campo: $campo);
+    }
+
+    /**
+     * STORY-038 CA-2: acrescenta uma linha de sócio vazia (até o cap) e pede
+     * foco no novo input via evento de browser. Respeita o teto de
+     * {@see ValidaSocios::MAXIMO} — acima dele o botão já vem desabilitado, mas
+     * guardamos aqui também (defesa contra clique forjado).
+     */
+    public function adicionarSocio(): void
+    {
+        if (count($this->socios) >= ValidaSocios::MAXIMO) {
+            return;
+        }
+
+        $this->socios[] = ['cpf' => '', 'nome' => ''];
+        $this->dispatch('focar-socio', indice: array_key_last($this->socios));
+    }
+
+    /**
+     * STORY-038 CA-3: remove a linha do índice dado e renumera. Bloqueia a
+     * remoção quando só resta 1 sócio (a UI desabilita o botão; aqui é defesa).
+     * Limpa o error bag porque a renumeração desloca os índices das mensagens.
+     */
+    public function removerSocio(int $indice): void
+    {
+        if (count($this->socios) <= ValidaSocios::MINIMO) {
+            return;
+        }
+
+        unset($this->socios[$indice]);
+        $this->socios = array_values($this->socios);
+        $this->resetValidation();
     }
 
     /**
@@ -300,15 +344,12 @@ final class Quiz extends Component
             'Q18' => 'valor que precisa captar',
             'Q19' => 'endividamento total no mercado',
             'Q20' => 'venda mensal com cartão/duplicatas',
-            'Q21' => 'CPF do sócio 1',
-            'Q22' => 'CPF do sócio 2',
-            'Q23' => 'CPF do sócio 3',
         ];
     }
 
     /**
      * Mensagens PT-BR para regras nativas usadas no quiz. As Closures custom
-     * (regraBrl, regraCpf, etc.) já carregam mensagens próprias em português.
+     * (regraBrl, regraPercentual, etc.) já carregam mensagens próprias em português.
      *
      * @return array<string, string>
      */
@@ -323,6 +364,20 @@ final class Quiz extends Component
     public function submeter(CalcularDiagnostico $calcular): mixed
     {
         $this->validate($this->regrasDoBloco(4));
+
+        // STORY-038: lista de sócios só é exigida quando há captação (Q17="sim").
+        // Erros (CPF inválido, duplicado, mínimo, cap) são por linha — `addError`
+        // com a chave `socios.{i}` mostra a mensagem na linha certa e segura o submit.
+        if ($this->Q17 === 'sim') {
+            $errosSocios = ValidaSocios::erros($this->socios);
+            if ($errosSocios !== []) {
+                foreach ($errosSocios as $chave => $mensagem) {
+                    $this->addError($chave, $mensagem);
+                }
+
+                return null;
+            }
+        }
 
         // Correlação do funil (STORY-035): quiz_id = id do rascunho que originou
         // o diagnóstico; duração = segundos entre o início (created_at do rascunho)
@@ -410,8 +465,9 @@ final class Quiz extends Component
     }
 
     /**
-     * Bloco 4 tem regras condicionais (Q18..Q23 obrigatórios quando Q17="sim";
-     * Q20 < Q09).
+     * Bloco 4 tem regras condicionais: Q18..Q20 obrigatórios quando Q17="sim";
+     * Q20 < Q09. A lista de sócios (`socios[]`) é validada à parte em
+     * {@see submeter()} via {@see ValidaSocios} (erros por linha).
      *
      * @return array<string, array<int, mixed>|\Closure>
      */
@@ -425,18 +481,12 @@ final class Quiz extends Component
             $regras['Q18'] = ['required', 'string', $this->regraBrl()];
             $regras['Q19'] = ['required', 'string', $this->regraBrl()];
             $regras['Q20'] = ['required', 'string', $this->regraBrl(), $this->regraQ20MenorQueQ09()];
-            $regras['Q21'] = ['required', 'string', $this->regraCpf()];
-            $regras['Q22'] = ['required', 'string', $this->regraCpf()];
-            $regras['Q23'] = ['required', 'string', $this->regraCpf()];
         } else {
             // Quando Q17="nao", os campos opcionais devem permanecer nulos —
             // garantia de não vazar dado parcial para o motor.
             $regras['Q18'] = ['nullable'];
             $regras['Q19'] = ['nullable'];
             $regras['Q20'] = ['nullable'];
-            $regras['Q21'] = ['nullable'];
-            $regras['Q22'] = ['nullable'];
-            $regras['Q23'] = ['nullable'];
         }
 
         return $regras;
@@ -481,15 +531,6 @@ final class Quiz extends Component
             }
             if ($float < 0 || $float > 100) {
                 $fail('O percentual deve estar entre 0 e 100.');
-            }
-        };
-    }
-
-    private function regraCpf(): \Closure
-    {
-        return function (string $attr, mixed $value, \Closure $fail): void {
-            if (! Cpf::valido((string) $value)) {
-                $fail('CPF inválido — confira os dígitos.');
             }
         };
     }
@@ -567,17 +608,17 @@ final class Quiz extends Component
             'Q10' => $this->Q10, 'Q11' => $this->Q11, 'Q12' => $this->Q12, 'Q13' => $this->Q13,
             'Q14' => $this->Q14, 'Q15' => $this->Q15, 'Q16' => $this->Q16, 'Q17' => $this->Q17,
             'Q18' => $this->Q18, 'Q19' => $this->Q19, 'Q20' => $this->Q20,
-            'Q21' => $this->Q21 !== null ? Cpf::normalizar($this->Q21) : null,
-            'Q22' => $this->Q22 !== null ? Cpf::normalizar($this->Q22) : null,
-            'Q23' => $this->Q23 !== null ? Cpf::normalizar($this->Q23) : null,
+            // Sócios são guardados como digitados (ordem preservada) para que a
+            // retomada do rascunho devolva a mesma lista na mesma ordem (CA-8).
+            'socios' => $this->socios,
             'alertas_aceitos' => $this->alertas_aceitos,
         ];
     }
 
     /**
      * Payload canônico para o motor: decimais como string ponto-decimal, inteiros
-     * como int, CPFs só dígitos, Q17 booleanizado. Campos opcionais (Q18..Q23)
-     * viram null quando Q17="nao".
+     * como int, CPFs só dígitos, Q17 booleanizado. Campos de captação (Q18..Q20 e
+     * a lista `socios`) viram null quando Q17="nao".
      *
      * @return array<string, mixed>
      */
@@ -606,9 +647,10 @@ final class Quiz extends Component
             'Q18' => $captar ? self::strFloat($this->Q18) : null,
             'Q19' => $captar ? self::strFloat($this->Q19) : null,
             'Q20' => $captar ? self::strFloat($this->Q20) : null,
-            'Q21' => $captar && $this->Q21 !== null ? Cpf::normalizar($this->Q21) : null,
-            'Q22' => $captar && $this->Q22 !== null ? Cpf::normalizar($this->Q22) : null,
-            'Q23' => $captar && $this->Q23 !== null ? Cpf::normalizar($this->Q23) : null,
+            // Lista canônica (só-dígitos, ordenada alfabeticamente) — torna o
+            // payload_hash idempotente à ordem de digitação (CA-9, IDR-010).
+            // Sem captação (Q17="nao") os sócios não vão para o motor.
+            'socios' => $captar ? ValidaSocios::canonicalizar($this->socios) : null,
         ];
     }
 

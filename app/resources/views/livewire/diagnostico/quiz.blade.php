@@ -53,7 +53,8 @@
 @endphp
 
 <div x-data
-     x-on:focar-campo.window="$nextTick(() => document.getElementById($event.detail.campo)?.focus())">
+     x-on:focar-campo.window="$nextTick(() => document.getElementById($event.detail.campo)?.focus())"
+     x-on:focar-socio.window="$nextTick(() => document.getElementById('socio-' + $event.detail.indice + '-nome')?.focus())">
     <x-page-header :title="'Diagnóstico — ' . ($empresa->nome_fantasia ?: $empresa->razao_social)"
                    :subtitle="'Bloco ' . $bloco_atual . ' de 4 — ' . $tituloBloco"/>
 
@@ -267,17 +268,9 @@
                                 'help' => 'Base de cálculo da capacidade de garantia (3× esse valor). Deve ser inferior à venda mensal total (Q09).',
                                 'mask' => $maskBrl,
                             ])
-                            @include('livewire.diagnostico.partials.campo-cpf', [
-                                'id' => 'Q21', 'label' => 'CPF do sócio 1',
-                                'mask' => $maskCpf,
-                            ])
-                            @include('livewire.diagnostico.partials.campo-cpf', [
-                                'id' => 'Q22', 'label' => 'CPF do sócio 2',
-                                'mask' => $maskCpf,
-                            ])
-                            @include('livewire.diagnostico.partials.campo-cpf', [
-                                'id' => 'Q23', 'label' => 'CPF do sócio 3',
-                                'mask' => $maskCpf,
+                            @include('livewire.diagnostico.partials.socios-list', [
+                                'socios' => $socios,
+                                'maskCpf' => $maskCpf,
                             ])
                         </div>
                     @endif

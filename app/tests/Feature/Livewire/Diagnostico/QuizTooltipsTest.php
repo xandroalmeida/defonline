@@ -11,7 +11,7 @@ use Livewire\Livewire;
 /**
  * STORY-033 — tooltips/box de explicação por campo no quiz (§6.8 + Anexo A §A.6).
  *
- * Cobre CA-1 (23 campos com tooltip), CA-2 (texto editável só na config) e
+ * Cobre CA-1 (todos os campos com tooltip), CA-2 (texto editável só na config) e
  * CA-7 (view contém os textos esperados, lidos da config — nunca hard-coded).
  * O comportamento visual (popover vs bottom-sheet, Esc, click) é coberto pelo
  * Dusk em tests/Browser/QuizTooltipsBrowserTest.php (CA-3/CA-4/CA-5).
@@ -35,7 +35,7 @@ function camposPorBloco(): array
         1 => ['Q01'],
         2 => ['Q08', 'Q09', 'Q14', 'Q15', 'Q16', 'Q10', 'Q11', 'Q12', 'Q13'],
         3 => ['Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07'],
-        4 => ['Q17', 'Q18', 'Q19', 'Q20', 'Q21', 'Q22', 'Q23'],
+        4 => ['Q17', 'Q18', 'Q19', 'Q20', 'socios'],   // STORY-038: CPFs viraram a lista `socios`
     ];
 }
 
@@ -51,7 +51,7 @@ function helpEsperado(string $texto): string
 /**
  * Monta o componente já posicionado no bloco pedido. Valores válidos espelham
  * o fixture saudável (não disparam erro de validação ao avançar). Em bloco 4,
- * marca Q17="sim" para revelar os campos condicionais Q18..Q23.
+ * marca Q17="sim" para revelar os campos condicionais Q18..Q20 + a lista de sócios.
  */
 function quizNoBloco(EmpresaAnalisada $empresa, int $bloco): Testable
 {
@@ -77,10 +77,10 @@ function quizNoBloco(EmpresaAnalisada $empresa, int $bloco): Testable
 }
 
 // ============================================================================
-// CA-1 — todos os 23 campos têm tooltip funcional
+// CA-1 — todos os campos do quiz têm tooltip funcional
 // ============================================================================
 
-it('renderiza ícone de ajuda acessível para todos os 23 campos do quiz', function () {
+it('renderiza ícone de ajuda acessível para todos os campos do quiz', function () {
     foreach (camposPorBloco() as $bloco => $campos) {
         $c = quizNoBloco($this->empresa, $bloco);
 
@@ -93,8 +93,8 @@ it('renderiza ícone de ajuda acessível para todos os 23 campos do quiz', funct
     }
 });
 
-it('cobre exatamente os 23 campos do Anexo A na config', function () {
-    expect($this->help)->toBeArray()->toHaveCount(23);
+it('cobre exatamente os 21 campos do quiz na config (STORY-038)', function () {
+    expect($this->help)->toBeArray()->toHaveCount(21);
     $esperados = array_merge(...array_values(camposPorBloco()));
     expect(array_keys($this->help))->toEqualCanonicalizing($esperados);
 });

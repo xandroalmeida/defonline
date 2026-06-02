@@ -24,7 +24,7 @@ declare(strict_types=1);
  * incremente a versão deste arquivo no comentário `version` abaixo.
  */
 return [
-    'version' => '1.0.0', // 2026-05-25 — primeira versão consolidada (STORY-033 pré-entrega).
+    'version' => '1.1.0', // 2026-06-02 — STORY-038: Q21/Q22/Q23 (CPFs fixos) → chave única `socios` (lista dinâmica).
 
     'campos' => [
         'Q01' => 'Define o setor da Empresa Analisada — escolha o que mais se aproxima da sua atividade principal. Cada setor tem faixas de farol e textos de recomendação próprios (matriz dez/2025). Exemplo: marcenaria, metalúrgica, padaria com produção própria = Indústria. Loja de roupas, mercadinho = Comércio. Escritório de contabilidade, oficina mecânica, salão = Serviços. Dica: se a empresa **transforma matéria-prima** em produto vendido, é Indústria. Se **revende** sem transformar, é Comércio. Se **executa** trabalho/atendimento sem produto físico, é Serviços.',
@@ -67,16 +67,12 @@ return [
 
         'Q20' => 'Valor médio mensal das vendas que entram via cartão de crédito ou duplicatas (não inclui venda à vista em dinheiro/Pix). Deve ser **menor que Q09** (venda total mensal). Exemplo: vende R$ 40.000/mês no total e 65% é cartão/duplicata = R$ 26.000. Dica: base para calcular sua capacidade de garantia (limite aproximado de 3× esse valor). É o que os bancos olham para crédito com recebíveis.',
 
-        'Q21' => 'CPF do primeiro sócio responsável pela empresa. Usado para análise de capacidade dos sócios na captação. Dica: formato 000.000.000-00. Dígitos verificadores são checados automaticamente.',
-
-        'Q22' => 'CPF do segundo sócio, se houver. Opcional caso a empresa tenha apenas 1 sócio. Dica: deixe em branco se não aplicável. Quando preenchido, formato 000.000.000-00.',
-
-        'Q23' => 'CPF do terceiro sócio, se houver. Opcional. Dica: deixe em branco se não aplicável. Empresas com 4+ sócios serão tratadas em ondas futuras.',
+        'socios' => 'Nome e CPF de cada sócio responsável pela empresa. Informe ao menos um — use "Adicionar sócio" para incluir os demais (empresas unipessoais ficam só com um). Usado para análise de capacidade dos sócios na captação. Dica: CPF no formato 000.000.000-00; os dígitos verificadores são checados automaticamente e cada CPF só pode aparecer uma vez.',
     ],
 
     /**
      * Campos cujos textos foram redigidos pela equipe de produto (não vêm da
      * planilha QUIZ original da EBC). Mantém visibilidade até confirmação.
      */
-    'rascunhos_a_confirmar_ebc' => ['Q01', 'Q17', 'Q18', 'Q19', 'Q20', 'Q21', 'Q22', 'Q23'],
+    'rascunhos_a_confirmar_ebc' => ['Q01', 'Q17', 'Q18', 'Q19', 'Q20', 'socios'],
 ];

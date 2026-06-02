@@ -78,7 +78,7 @@ final class DiagnosticoFactory extends Factory
 
     /**
      * Payload de quiz canônico padrão (Indústria, perfil saudável genérico).
-     * Estruturado segundo Anexo A da spec — chaves Q01..Q23, decimais em string,
+     * Estruturado segundo Anexo A da spec — chaves Q01..Q20 + `socios[]`, decimais em string,
      * compatível com o canonicalizador de IDR-010.
      *
      * @return array<string, mixed>
@@ -106,9 +106,7 @@ final class DiagnosticoFactory extends Factory
             'Q18' => null,
             'Q19' => null,
             'Q20' => null,
-            'Q21' => null,
-            'Q22' => null,
-            'Q23' => null,
+            'socios' => null,      // STORY-038: sem captação → lista de sócios ausente
         ];
     }
 
