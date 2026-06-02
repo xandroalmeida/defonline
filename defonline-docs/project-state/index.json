@@ -1108,7 +1108,7 @@
       "title": "Sócios como lista dinâmica (1+) — add/edit/remove",
       "type": "implementation",
       "target_role": "programador",
-      "status": "in_review",
+      "status": "done",
       "estimated_session_size": "M",
       "blocked_by": [],
       "blocks": [],
