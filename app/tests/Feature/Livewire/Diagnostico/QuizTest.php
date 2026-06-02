@@ -131,6 +131,49 @@ it('rejeita inadimplência > 100% (Q13)', function () {
         ->assertHasErrors('Q13');
 });
 
+// ============================================================================
+// STORY-039 — Inadimplência (Q13) aceita 2 casas decimais no range [0,00;100,00]
+// ============================================================================
+
+it('CA-1/CA-2 — aceita inadimplência decimal BR dentro do range inclusivo', function (string $q13) {
+    quizAvancaBloco2ComQ13($this, $q13)
+        ->assertHasNoErrors('Q13')
+        ->assertSet('bloco_atual', 3);
+})->with(['3,46', '0,00', '100,00', '0', '100', '3.46']);
+
+it('CA-3/CA-4 — rejeita fora do range com a mensagem literal do Anexo A', function (string $q13) {
+    $c = quizAvancaBloco2ComQ13($this, $q13);
+    $c->assertHasErrors('Q13')->assertSet('bloco_atual', 2);
+    expect($c->errors()->first('Q13'))->toBe('Inadimplência deve ser entre 0,00% e 100,00%.');
+})->with(['100,01', '-1', '-0,01']);
+
+it('CA-6 — não-numérico rejeitado com mensagem genérica', function () {
+    $c = quizAvancaBloco2ComQ13($this, 'abc');
+    $c->assertHasErrors('Q13');
+    expect($c->errors()->first('Q13'))->toBe('Informe um percentual válido (ex.: 5,3).');
+});
+
+it('CA-5 — 3+ casas decimais são truncadas (não arredondadas) para 2 no canônico', function () {
+    Event::fake();
+
+    Livewire::test(Quiz::class, ['empresa' => $this->empresa])
+        ->call('proximoBloco')
+        ->set('Q08', '50000')->set('Q09', '100000')->set('Q14', '20000')
+        ->set('Q15', '8000')->set('Q16', '2000')
+        ->set('Q10', '90')->set('Q11', '15')->set('Q12', '15')
+        ->set('Q13', '3,469')   // 3.469 → trunca para 3.46 (arredondar daria 3.47)
+        ->call('proximoBloco')
+        ->set('Q02', '50000')->set('Q03', '20000')->set('Q04', '10000')
+        ->set('Q05', '300000')->set('Q06', '40000')->set('Q07', '80000')
+        ->call('proximoBloco')
+        ->set('Q17', 'nao')
+        ->call('submeter')
+        ->assertHasNoErrors();
+
+    $payload = (array) Diagnostico::query()->firstOrFail()->quiz_payload;
+    expect($payload['Q13'])->toBe('3.46');
+});
+
 it('rejeita PMC com texto inválido (Q10)', function () {
     Livewire::test(Quiz::class, ['empresa' => $this->empresa])
         ->call('proximoBloco')
@@ -602,6 +645,21 @@ it('payload_hash é idempotente à ordem de digitação dos sócios (CA-9)', fun
  * Valores espelham o fixture `quiz_industria_saudavel.json` para evitar surpresas
  * no motor (a STORY-028 valida que estes números produzem indicadores válidos).
  */
+/**
+ * STORY-039 — preenche o Bloco 2 com valores válidos, seta apenas o Q13 sob teste
+ * e tenta avançar. Devolve o testable já com erros (ou não) para inspeção.
+ */
+function quizAvancaBloco2ComQ13(TestCase $test, string $q13): Testable
+{
+    return Livewire::test(Quiz::class, ['empresa' => $test->empresa])
+        ->call('proximoBloco')
+        ->set('Q08', '1000')->set('Q09', '2000')
+        ->set('Q14', '500')->set('Q15', '200')->set('Q16', '100')
+        ->set('Q10', '30')->set('Q11', '15')->set('Q12', '45')
+        ->set('Q13', $q13)
+        ->call('proximoBloco');
+}
+
 function quizPreencherAteBloco4(TestCase $test): Testable
 {
     return Livewire::test(Quiz::class, ['empresa' => $test->empresa])

@@ -520,6 +520,12 @@ final class Quiz extends Component
         };
     }
 
+    /**
+     * Inadimplência (Q13, único campo % do quiz). Aceita decimal BR com até 2
+     * casas no range inclusivo [0,00 ; 100,00] (STORY-039). 3+ casas não são
+     * rejeitadas — a máscara limita a 2 e o canônico ({@see pctCanonico})
+     * trunca o que escapar (CA-5).
+     */
     private function regraPercentual(): \Closure
     {
         return function (string $attr, mixed $value, \Closure $fail): void {
@@ -530,7 +536,7 @@ final class Quiz extends Component
                 return;
             }
             if ($float < 0 || $float > 100) {
-                $fail('O percentual deve estar entre 0 e 100.');
+                $fail('Inadimplência deve ser entre 0,00% e 100,00%.');
             }
         };
     }
@@ -639,7 +645,7 @@ final class Quiz extends Component
             'Q10' => self::intDigitos($this->Q10),
             'Q11' => self::intDigitos($this->Q11),
             'Q12' => self::intDigitos($this->Q12),
-            'Q13' => self::strFloat($this->Q13),
+            'Q13' => self::pctCanonico($this->Q13),
             'Q14' => self::strFloat($this->Q14),
             'Q15' => self::strFloat($this->Q15),
             'Q16' => self::strFloat($this->Q16),
@@ -698,6 +704,24 @@ final class Quiz extends Component
         // entrega artefatos. number_format com 2 casas atende todos os casos do Anexo A
         // (R$ e %). Para inteiros (.0) o trailing 0 é aceito pelo motor.
         return number_format($float, 2, '.', '');
+    }
+
+    /**
+     * Canônico do campo % (Q13): trunca para 2 casas decimais (CA-5 — default
+     * "truncar", não arredondar: 3,461 → "3.46", 3,469 → "3.46") e devolve string
+     * ponto-decimal. O `round(_, 4)` antes do `floor` neutraliza ruído de ponto
+     * flutuante (ex.: 3.46*100 = 346.00000000000006). Retorna null se vazio/inválido.
+     */
+    private static function pctCanonico(?string $br): ?string
+    {
+        $float = self::parseDecimal($br);
+        if ($float === null) {
+            return null;
+        }
+
+        $truncado = floor(round($float * 100, 4)) / 100;
+
+        return number_format($truncado, 2, '.', '');
     }
 
     private static function intDigitos(?string $br): ?int

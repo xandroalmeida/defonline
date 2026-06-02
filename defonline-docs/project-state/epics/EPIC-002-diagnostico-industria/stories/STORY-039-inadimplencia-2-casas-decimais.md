@@ -7,8 +7,8 @@ sprint_id: SPRINT-2026-W26
 type: bugfix
 target_role: programador
 requires_design: false
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador (claude-opus-4-8)
 created_at: 2026-06-02
 updated_at: 2026-06-02
 estimated_session_size: XS
@@ -37,14 +37,14 @@ Sem isso, o quiz rejeita dado real (qualquer % com vírgula) — bloqueia uso po
 
 ## Critérios de aceite
 
-- [ ] **CA-1 (valor válido com vírgula):** Dado o input `3,46`, quando o usuário sai do campo (blur), então não há mensagem de erro e o valor persiste no rascunho como `3.46` (canônico) ou `"3,46"` (string mascarada) — consistente com os outros campos % do quiz.
-- [ ] **CA-2 (limites inclusivos):** `0,00` e `100,00` são aceitos.
-- [ ] **CA-3 (acima de 100):** `100,01` é rejeitado com mensagem `Inadimplência deve ser entre 0,00% e 100,00%.`
-- [ ] **CA-4 (negativo):** `-1` ou `-0,01` é rejeitado com a mesma mensagem.
-- [ ] **CA-5 (3 ou mais decimais):** `3,461` é rejeitado ou truncado para `3,46` (consistente com a máscara) — Programador decide qual UX é melhor (truncar silenciosamente é amigável; rejeitar é mais purista). Default: **truncar para 2 decimais** (alinhado com a máscara).
-- [ ] **CA-6 (não-numérico):** `abc` é rejeitado com mensagem genérica.
-- [ ] **CA-7 (cobertura):** ≥ 3 testes unitários cobrindo CA-1..CA-6 (parametrized se possível); 1 Dusk submetendo quiz com `3,46` e vendo diagnóstico.
-- [ ] **CA-8 (regressão):** nenhum outro campo % do quiz quebra (Margem Bruta, Margem EBITDA, etc — auditar lista).
+- [x] **CA-1 (valor válido com vírgula):** Dado o input `3,46`, quando o usuário sai do campo (blur), então não há mensagem de erro e o valor persiste no rascunho como `3.46` (canônico) ou `"3,46"` (string mascarada) — consistente com os outros campos % do quiz.
+- [x] **CA-2 (limites inclusivos):** `0,00` e `100,00` são aceitos.
+- [x] **CA-3 (acima de 100):** `100,01` é rejeitado com mensagem `Inadimplência deve ser entre 0,00% e 100,00%.`
+- [x] **CA-4 (negativo):** `-1` ou `-0,01` é rejeitado com a mesma mensagem.
+- [x] **CA-5 (3 ou mais decimais):** `3,461` é rejeitado ou truncado para `3,46` (consistente com a máscara) — Programador decide qual UX é melhor (truncar silenciosamente é amigável; rejeitar é mais purista). Default: **truncar para 2 decimais** (alinhado com a máscara). → **truncado** (não arredondado) em `pctCanonico`; `3,469 → 3.46`.
+- [x] **CA-6 (não-numérico):** `abc` é rejeitado com mensagem genérica.
+- [x] **CA-7 (cobertura):** ≥ 3 testes unitários cobrindo CA-1..CA-6 (parametrized se possível); 1 Dusk submetendo quiz com `3,46` e vendo diagnóstico.
+- [x] **CA-8 (regressão):** nenhum outro campo % do quiz quebra (Margem Bruta, Margem EBITDA, etc — auditar lista). → **Q13 é o único campo `%` do quiz** (1 só uso de `regraPercentual`/`maskPct`); R$ e dias inalterados. Dusk de regressão verde.
 
 ## Fora de escopo
 
@@ -76,26 +76,34 @@ Você decide:
 
 ## Definição de Pronto
 
-- [ ] CA-1..CA-8 passam.
-- [ ] Testes unitários e 1 Dusk verdes.
-- [ ] CI verde.
-- [ ] Deploy em homol verificado.
-- [ ] `index.json` atualizado.
-- [ ] "Notas do agente" preenchidas.
+- [x] CA-1..CA-8 passam.
+- [x] Testes unitários e 1 Dusk verdes.
+- [ ] CI verde. → suíte completa local verde (823 Pest + Dusk quiz); CI roda no push/PR (ainda não feito — aguardando o PO).
+- [ ] Deploy em homol verificado. → pendente de deploy.
+- [x] `index.json` atualizado.
+- [x] "Notas do agente" preenchidas.
 
 ## Notas do agente
 
 ### Decisões tomadas
-- 
+- **A causa-raiz NÃO era o servidor** — era a máscara JS estilo "centavos". Decisão (com aprovação do PO em chat 2026-06-02): trocar `$maskPct` por **máscara decimal natural BR** e registrar **[[IDR-011]]**. A estória marcava a máscara como fora de escopo; o PO autorizou incluí-la ao ver a evidência.
+- **Mensagem** alinhada à CA-3/CA-4: `Inadimplência deve ser entre 0,00% e 100,00%.`
+- **CA-5: truncar (não arredondar)** — `pctCanonico()` faz `floor(round(x*100,4))/100` → `3,469 → 3.46`. `round(_,4)` neutraliza ruído de float.
+- **Ponto digitado vira vírgula** na máscara `%` (percentual não tem separador de milhar) → `3.46` colado também funciona.
 
 ### Descobertas
-- 
+- `parseDecimal("3,46")` já devolvia `3.46` desde a STORY-027; `regraPercentual` (único validador `%`) já aceitava `3,46`/`0,00`/`100,00`. Provado por teste Livewire ponta-a-ponta **antes** de qualquer mudança.
+- A máscara antiga transformava `100 → 1,00` e `3,4 → 34`; re-digitar para "corrigir" produzia valores >100 (ex.: `343,46`) → daí o alerta "entre 0 e 100" que o Edvan viu.
+- **Q13 é o único campo `%` do quiz** — não há Margem Bruta/EBITDA como input `%` no quiz (esses são calculados pelo motor, não digitados). CA-8 sem outros campos para quebrar.
 
 ### Bloqueios encontrados
-- 
+- Nenhum. (PHPStan exige `--memory-limit=512M` no container — default 128M estoura; não relacionado à estória.)
 
 ### Cobertura final
-- 
+- Feature parametrizada em `QuizTest.php` (STORY-039): CA-1..CA-6 + truncamento CA-5.
+- Dusk: `tests/Browser/InadimplenciaDecimalBrowserTest.php` (digita `3,46`, submete, `quiz_payload['Q13']==='3.46'`).
+- `vendor/bin/pint --test` e `phpstan` (Quiz.php) limpos. Suíte Pest completa: **823 passed**. Dusk quiz (SociosLista, ValidacoesCruzadas, QuizTooltips + novo): verdes.
 
 ### Links de evidência
-- 
+- Código: `app/resources/views/livewire/diagnostico/quiz.blade.php` (`$maskPct`), `app/app/Livewire/Diagnostico/Quiz.php` (`regraPercentual`, `pctCanonico`).
+- Decisão: `decisions/idr/IDR-011-mascara-percentual-decimal-natural.md`.

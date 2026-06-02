@@ -32,13 +32,22 @@
         $el.value = ($el.value.replace(/\D/g, '') || '').slice(0, 4);
     JS;
 
-    // Máscara % — até XX,YY (0..100,99 visual; validação rígida no servidor).
+    // Máscara % decimal natural BR (STORY-039): o usuário digita como pensa —
+    // "3,46" → "3,46", "100" → "100", "3,4" → "3,4". Parte inteira até 3 dígitos,
+    // 1 vírgula, até 2 decimais. (A máscara antiga era estilo "centavos" e
+    // transformava "100" em "1,00" — bug reportado pelo Edvan.) Validação de
+    // range [0,00 ; 100,00] continua rígida no servidor (regraPercentual).
     $maskPct = <<<'JS'
-        const raw = $el.value.replace(/\D/g, '');
-        if (raw === '') { $el.value = ''; return; }
-        const trimmed = raw.slice(0, 5);
-        if (trimmed.length <= 2) { $el.value = trimmed; return; }
-        $el.value = trimmed.slice(0, -2).replace(/^0+(?=\d)/, '') + ',' + trimmed.slice(-2);
+        let v = $el.value.replace(/\./g, ',').replace(/[^\d,]/g, '');
+        const i = v.indexOf(',');
+        if (i === -1) {
+            v = v.slice(0, 3);
+        } else {
+            const inteiro = v.slice(0, i).slice(0, 3);
+            const decimal = v.slice(i + 1).replace(/,/g, '').slice(0, 2);
+            v = inteiro + ',' + decimal;
+        }
+        $el.value = v;
     JS;
 
     // Máscara CPF — 000.000.000-00.

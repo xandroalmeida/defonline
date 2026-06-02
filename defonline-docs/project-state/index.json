@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-06-02T16:00:00Z",
+  "generated_at": "2026-06-02T17:30:00Z",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-01",
@@ -1127,14 +1127,14 @@
       "title": "Validação do campo Inadimplência aceita 2 casas decimais (0,00 ≤ x ≤ 100,00)",
       "type": "bugfix",
       "target_role": "programador",
-      "status": "ready",
+      "status": "in_review",
       "estimated_session_size": "XS",
       "blocked_by": [],
       "blocks": [],
-      "note": "Campo Q22 (Inadimplência) recusa valores com vírgula (3,46%) — provável parsing antes da conversão de vírgula decimal. Range inclusivo [0,00;100,00], 3+ decimais truncados. Origem: WhatsApp Edvan #2 2026-05-27.",
+      "note": "Causa-raiz era a máscara JS estilo 'centavos' (100→1,00), não o servidor: parseDecimal/regraPercentual já aceitavam 3,46 desde a STORY-027. PO aprovou em chat incluir o conserto da máscara (decimal natural BR) — ver IDR-011. Mensagem alinhada à CA-3; 3+ decimais truncados (pctCanonico). Q13 é o único campo % do quiz. 823 Pest + Dusk verdes. Origem: WhatsApp Edvan #2 2026-05-27.",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W26",
-      "owner_agent": null,
+      "owner_agent": "programador (claude-opus-4-8)",
       "briefing_path": "epics/EPIC-002-diagnostico-industria/briefings/STORY-039-abertura.md",
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-039-inadimplencia-2-casas-decimais.md",
       "created_at": "2026-06-02",
@@ -1186,7 +1186,9 @@
       "status": "ready",
       "estimated_session_size": "M",
       "blocked_by": [],
-      "blocks": ["STORY-043"],
+      "blocks": [
+        "STORY-043"
+      ],
       "note": "Coleção coordenada de mudanças textuais: Bloco 2 (remover anualização, exemplos itens 3/4), Bloco 3 (título + Imobilizado), Bloco 4 (Q17 ocultar 2 textos auxiliares), matriz NCG positivo, glossário (EBITDA 2º item). 2 itens com pendência ao Edvan (título Bloco 2 + item glossário) — default manter se sem resposta até 2026-06-04. Origem: .docx EBC 2026-05-27.",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W26",
@@ -1204,7 +1206,9 @@
       "target_role": "programador",
       "status": "ready",
       "estimated_session_size": "S",
-      "blocked_by": ["STORY-042"],
+      "blocked_by": [
+        "STORY-042"
+      ],
       "blocks": [],
       "note": "Nova regra R4 aditiva à engine declarativa da STORY-034 (`config/quiz/validacoes-cruzadas.php`). Diferente de R1/R2/R3 — R4 é **bloqueante** (consistência de input, não hipótese estatística). PO decidiu em 2026-06-02. Origem: .docx EBC Bloco 4 — vira regra de backend em vez de texto auxiliar.",
       "epic_id": "EPIC-002",
@@ -1843,6 +1847,29 @@
         "created_at": "2026-05-25",
         "updated_at": "2026-05-25",
         "note": "Spike STORY-026 (EPIC-002), accepted pelo PO em 2026-05-25. Veredito: snapshot dos resultados + motor único (sem dispatcher V1/V2) + motor_version semver (1.0.0) + matrix_version datada (dez-2025). Idempotência por SHA-256 do quiz_payload canonicalizado, validada por golden hashes em tests/Domain/Motor. Casos extremos retornam null + motivo semântico (sem exception). Migration + Model esqueletos commitados (não rodados — STORY-028 roda). PO confirmou adicionalmente que rascunho do quiz (STORY-027) fica em tabela separada `quiz_rascunhos`."
+      },
+      {
+        "id": "IDR-011",
+        "slug": "mascara-percentual-decimal-natural",
+        "title": "Campo percentual usa máscara decimal natural (não \"centavos\") — correção da causa-raiz da inadimplência recusada",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-011-mascara-percentual-decimal-natural.md",
+        "decided_at": "2026-06-02",
+        "decided_by": "programador (claude-opus-4-8)",
+        "approved_by": "Alexandro",
+        "approved_at": "2026-06-02",
+        "related_story": "STORY-039",
+        "related_stories": [
+          "STORY-027",
+          "STORY-014"
+        ],
+        "related_idrs": [
+          "IDR-010"
+        ],
+        "related_adrs": [],
+        "created_at": "2026-06-02",
+        "updated_at": "2026-06-02",
+        "note": "Durante a STORY-039 descobriu-se que o servidor já aceitava 3,46 (parseDecimal desde STORY-027); a causa-raiz do alerta 'entre 0 e 100' era a máscara JS estilo 'centavos' do campo % (digitar 100 virava 1,00). Decisão (PO aprovou em chat 2026-06-02): trocar por máscara decimal natural BR só no campo % (Q13, único do quiz); R$ e dias inalterados. Mensagem alinhada à CA-3; 3+ decimais truncados (não arredondados) em pctCanonico. Convenção: máscara 'centavos' só para R$, nunca para percentual/quantidade. Sem bump de motor_version."
       }
     ],
     "ddr": []
