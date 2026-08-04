@@ -162,4 +162,5 @@ Nenhum. A única decisão que chegou perto de escalonamento — os 6 indicadores
 - **Cobertura de domínio: 99,6 %** (gate 98 %) — inalterada, como esperado de uma estória que não toca `app/Domain`.
 - **Pint:** 242 arquivos, limpo. **PHPStan:** sem erros.
 - **Evidência visual:** screenshots desktop (1280) e mobile (360) do relatório renderizado conferidos durante a execução.
+- **Commit:** `379c355` em `main` local (sem push — workflow do projeto exige pedido explícito do PO para push/PR/tag).
 - **Testes novos:** `tests/Unit/Support/Relatorio/ValoresNominaisTest.php` (regra de composição, bordas de faltante/negativo/zero/tipo), `tests/Feature/Http/DiagnosticoValoresNominaisTest.php` (HTML renderizado + prova do CA-2/CA-10 por comparação da linha crua), `tests/Browser/ValoresNominaisBrowserTest.php` (CA-5/CA-7 em navegador real).
