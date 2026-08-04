@@ -21,20 +21,36 @@
         4 => 'Contexto e Captação',
     ][$bloco_atual] ?? '';
 
+    /*
+     * Toda máscara termina aqui (BUG-001). Reescrever `$el.value` dentro do próprio
+     * handler de `input` NÃO gera um novo evento — então o `wire:model.live` sincroniza
+     * o texto do último keystroke **antes** da formatação. O sintoma era silencioso e
+     * grave: a tela mostrava "100.000,00", o componente guardava "10.000,000" (= 10 mil),
+     * e o motor calculava com 1/10 do valor informado. Vale para todo campo mascarado.
+     *
+     * A reemissão é idempotente e termina em 2 passes: na segunda, `$el.value` já é
+     * igual a `v` e nada é disparado. Cada máscara calcula `v` e delega o commit aqui,
+     * para que a invariante viva num lugar só — máscara nova herda a correção.
+     */
+    $commitMask = <<<'JS'
+        if ($el.value !== v) { $el.value = v; $el.dispatchEvent(new Event('input')); }
+    JS;
+
     // Máscara R$ inline (Alpine). Mantém vírgula brasileira; o submit canonicaliza.
     $maskBrl = <<<'JS'
+        let v = '';
         const raw = $el.value.replace(/\D/g, '');
-        if (raw === '') { $el.value = ''; return; }
-        const cents = raw.padStart(3, '0');
-        const inteiro = cents.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.').replace(/^0+(?=\d)/, '') || '0';
-        const decimal = cents.slice(-2);
-        $el.value = inteiro + ',' + decimal;
-    JS;
+        if (raw !== '') {
+            const cents = raw.padStart(3, '0');
+            const inteiro = cents.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.').replace(/^0+(?=\d)/, '') || '0';
+            v = inteiro + ',' + cents.slice(-2);
+        }
+    JS."\n".$commitMask;
 
     // Máscara dias (só dígitos, máx 4 — 9999 cobre prazo absurdo + folga para warning).
     $maskDias = <<<'JS'
-        $el.value = ($el.value.replace(/\D/g, '') || '').slice(0, 4);
-    JS;
+        const v = ($el.value.replace(/\D/g, '') || '').slice(0, 4);
+    JS."\n".$commitMask;
 
     // Máscara % decimal natural BR (STORY-039): o usuário digita como pensa —
     // "3,46" → "3,46", "100" → "100", "3,4" → "3,4". Parte inteira até 3 dígitos,
@@ -51,18 +67,16 @@
             const decimal = v.slice(i + 1).replace(/,/g, '').slice(0, 2);
             v = inteiro + ',' + decimal;
         }
-        $el.value = v;
-    JS;
+    JS."\n".$commitMask;
 
     // Máscara CPF — 000.000.000-00.
     $maskCpf = <<<'JS'
         const d = $el.value.replace(/\D/g, '').slice(0, 11);
-        let m = d;
-        if (d.length > 9) m = d.slice(0,3) + '.' + d.slice(3,6) + '.' + d.slice(6,9) + '-' + d.slice(9);
-        else if (d.length > 6) m = d.slice(0,3) + '.' + d.slice(3,6) + '.' + d.slice(6);
-        else if (d.length > 3) m = d.slice(0,3) + '.' + d.slice(3);
-        $el.value = m;
-    JS;
+        let v = d;
+        if (d.length > 9) v = d.slice(0,3) + '.' + d.slice(3,6) + '.' + d.slice(6,9) + '-' + d.slice(9);
+        else if (d.length > 6) v = d.slice(0,3) + '.' + d.slice(3,6) + '.' + d.slice(6);
+        else if (d.length > 3) v = d.slice(0,3) + '.' + d.slice(3);
+    JS."\n".$commitMask;
 @endphp
 
 <div x-data

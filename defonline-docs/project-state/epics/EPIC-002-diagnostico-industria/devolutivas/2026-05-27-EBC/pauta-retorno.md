@@ -14,13 +14,13 @@ target: Edvan / EB Parcerias
 
 # Pauta de retorno EBC — Devolutiva 2026-05-27
 
-Edvan, obrigado pela devolutiva detalhada. Segue um resumo do que **já entrou em sprint** para implementação imediata e os **4 pontos abertos** em que preciso da sua confirmação para fechar o ciclo.
+Edvan, obrigado pela devolutiva detalhada. Segue um resumo do que **já entrou em sprint** para implementação imediata e os **5 pontos abertos** em que preciso da sua confirmação para fechar o ciclo.
 
 ---
 
 ## ✅ O que já entrou em sprint (SPRINT-2026-W26, 03-09/06)
 
-Sprint curta de hotfixes pós-devolutiva, sem mexer no algoritmo do Resumo Executivo (esse aguarda você voltar com a lista dos 3 indicadores — ver §5 abaixo).
+Sprint curta de hotfixes pós-devolutiva, sem mexer no algoritmo do Resumo Executivo (esse aguarda você voltar com a lista dos 3 indicadores — ver §1 abaixo).
 
 1. **Sócios como lista dinâmica** (STORY-038) — substitui os 3 CPFs fixos por uma lista com 1 sócio obrigatório, adicionar/editar/remover livres, cap 10. Resolve o problema do teste em que você precisou repetir o CPF.
 2. **Inadimplência aceita 2 casas decimais** (STORY-039) — `3,46%` passa a ser aceito; bug do limite "ZERO e CEM" corrigido.
@@ -32,11 +32,11 @@ Sprint curta de hotfixes pós-devolutiva, sem mexer no algoritmo do Resumo Execu
    - Bloco 4 (Q17): oculta os 2 textos auxiliares.
    - Matriz dez-2025: nova recomendação para NCG positivo.
    - Glossário: EBITDA como 2º item.
-6. **Validação cruzada nova** (STORY-043) — Q17 (recebíveis) **bloqueante** se for menor que Q09 (venda mensal média). Vira regra de checagem em vez de texto auxiliar.
+6. **Validação cruzada nova** (STORY-043) — o campo de recebíveis (venda mensal com cartão/duplicatas) passou a ter **bloqueio** quando o valor informado é **maior ou igual** à venda mensal média. Vira regra de checagem em vez de texto auxiliar — ver §5 abaixo, onde peço sua confirmação sobre o sentido.
 
 ---
 
-## 🔲 4 pontos em que preciso da sua confirmação
+## 🔲 5 pontos em que preciso da sua confirmação
 
 ### 1. Algoritmo do Resumo Executivo / farol geral por 3 indicadores eleitos
 
@@ -52,7 +52,7 @@ Para contexto, hoje o critério interno de **escolher quais 3 indicadores aparec
 severidade = |valor_calculado − fronteira_amarela| / amplitude_faixa_vermelha
 ```
 
-Ou seja: quanto mais o indicador está fora da faixa segura, mais alta a severidade — top 3 viram destaque. Você acha esse critério razoável? Se sim, talvez bastasse explicarmos isso ao usuário (um "?" no resumo) em vez de mudar o algoritmo. Se não, sua proposta de "3 indicadores eleitos a priori" vira a nova regra — mas vai precisar passar pelo validador externo (item §5 abaixo).
+Ou seja: quanto mais o indicador está fora da faixa segura, mais alta a severidade — top 3 viram destaque. Você acha esse critério razoável? Se sim, talvez bastasse explicarmos isso ao usuário (um "?" no resumo) em vez de mudar o algoritmo. Se não, sua proposta de "3 indicadores eleitos a priori" vira a nova regra — mas vai precisar passar pelo validador externo (item §6 abaixo).
 
 ### 2. Lista do que é anualizado (×12)
 
@@ -78,13 +78,27 @@ O `.docx` especificou novo título do Bloco 3 ("Saldos Atuais...") e ajustes em 
 
 **Política se você não responder até 04/06:** manter o título atual.
 
+### 5. Recebíveis × venda mensal — confirmar o sentido da regra
+
+No `.docx` você escreveu, sobre o campo de recebíveis do Bloco 4:
+
+> "também deve ser ocultada a informação sobre ser inferior à venda mensal, pois também deve ser uma regra para checagem e não aceitar informação neste campo (recebíveis) de valor **inferior** ao contido no campo 2 do bloco 2 (vendas – média mensal)"
+
+Implementamos o texto auxiliar como regra, conforme você pediu — mas **no sentido inverso do que a frase diz ao pé da letra**, e quero confirmar com você:
+
+- O texto que estava na tela dizia *"deve ser inferior à venda mensal"*, e o Anexo A já registra, desde as suas correções de 22/04/2026, a validação **"recebíveis ≥ venda mensal: bloqueio rígido"**.
+- Além disso, recebíveis (vendas por cartão/duplicata) são um **subconjunto** das vendas totais — não podem ser maiores que elas.
+- Aplicar a frase ao pé da letra tornaria o bloco impossível de preencher: o campo teria que ser ao mesmo tempo menor e maior que a venda mensal.
+
+**Entendemos que você quis dizer:** o sistema não deve aceitar recebíveis **iguais ou maiores** que a venda mensal média — e foi assim que ficou (inclusive a igualdade bloqueia, já que o texto dizia "inferior"). **Confirma?** Se a intenção era mesmo a literal, isso não é ajuste de regra: muda a definição do campo, e precisamos rever o Anexo A junto.
+
 ---
 
 ## 📌 Status do projeto e próximos marcos
 
-- **EPIC-002 (Diagnóstico Indústria):** entregue tecnicamente em 26/05, status `done_under_review`. Aguarda 3 marcos para fechar de vez: (a) sua devolutiva absorvida — esta sprint, (b) validação externa formal do motor — item §5 abaixo, (c) validação interna final + handoff.
+- **EPIC-002 (Diagnóstico Indústria):** entregue tecnicamente em 26/05, status `done_under_review`. Aguarda 3 marcos para fechar de vez: (a) sua devolutiva absorvida — esta sprint, (b) validação externa formal do motor — item §6 abaixo, (c) validação interna final + handoff.
 
-### 5. Validação externa formal do motor (STORY-036)
+### 6. Validação externa formal do motor (STORY-036)
 
 A spec V2 §9.3 exige um **parecer técnico** de especialista financeiro antes do uso real do motor por terceiros. Esse parecer formalizará a discussão dos 3 indicadores do farol geral e arbitrará qualquer divergência com o algoritmo §4.7.1 atual. Estou começando o processo de contratação — você (ou a EBC como organização) tem disponibilidade/interesse em fazer esse parecer técnico estruturado? Se sim, fechamos escopo + entregáveis em uma reunião curta. Se não, indique alguém de confiança da rede da EBC.
 
