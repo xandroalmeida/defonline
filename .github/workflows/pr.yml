@@ -274,6 +274,13 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+      # EmailConfirmacaoBrowserTest lê a caixa via HTTP API do Mailpit (hostname
+      # `mailpit` hardcoded no teste — resolvido via /etc/hosts abaixo).
+      mailpit:
+        image: axllent/mailpit:latest
+        ports:
+          - 1025:1025
+          - 8025:8025
     env:
       DB_CONNECTION: pgsql
       DB_HOST: 127.0.0.1
@@ -302,8 +309,17 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run build
 
-      - name: Gera .env e .env.testing (Postgres do service; APP_URL local p/ Dusk)
+      # O teste de email bate em http://mailpit:8025 (hostname fixo). O job roda no
+      # host do runner (não em container), então o service Mailpit fica em 127.0.0.1
+      # — este alias faz o nome `mailpit` resolver para lá (SMTP 1025 + API 8025).
+      - name: Alias mailpit -> 127.0.0.1
+        run: echo "127.0.0.1 mailpit" | sudo tee -a /etc/hosts
+
+      - name: Gera .env e .env.testing (Postgres + Mailpit dos services)
         run: |
+          # SESSION/CACHE em database (NÃO array): o serve roda com múltiplos workers
+          # (PHP_CLI_SERVER_WORKERS) p/ suportar o XHR do Livewire durante o request;
+          # com array, cada worker teria sessão isolada e o login não persistiria.
           ENV_BODY='APP_NAME=DEFOnline
           APP_ENV=testing
           APP_KEY=base64:7gf3GPBbCPBAFBDe0OJnHWkXyTkT5LnIXYA+7QIwqHg=
@@ -320,10 +336,13 @@ jobs:
           DB_DATABASE=defonline_test
           DB_USERNAME=defonline
           DB_PASSWORD=defonline
-          SESSION_DRIVER=array
-          CACHE_STORE=array
+          SESSION_DRIVER=database
+          CACHE_STORE=database
           QUEUE_CONNECTION=sync
-          MAIL_MAILER=array
+          MAIL_MAILER=smtp
+          MAIL_HOST=mailpit
+          MAIL_PORT=1025
+          MAIL_FROM_ADDRESS=hello@defonline.local
           BROADCAST_CONNECTION=null
           TELEGRAM_BOT_TOKEN=
           PULSE_ENABLED=false
@@ -352,8 +371,10 @@ jobs:
         env:
           APP_URL: http://127.0.0.1:8000
           DUSK_DRIVER_URL: http://localhost:9515
+          # --no-reload é exigido pelo artisan serve p/ honrar múltiplos workers.
+          PHP_CLI_SERVER_WORKERS: '5'
         run: |
-          php artisan serve --host=127.0.0.1 --port=8000 >/tmp/serve.log 2>&1 &
+          php artisan serve --no-reload --host=127.0.0.1 --port=8000 >/tmp/serve.log 2>&1 &
           until curl -fsS http://127.0.0.1:8000/health >/dev/null 2>&1; do sleep 1; done
           chromedriver --port=9515 --whitelisted-ips='' >/tmp/chromedriver.log 2>&1 &
           sleep 3
