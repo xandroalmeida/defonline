@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
-# DEFOnline — pre-push hook obrigatório (ADR-006 §Decisão 4).
+# DEFOnline — pre-push hook (ADR-006 §Decisão 4 — revisado 2026-08 p/ agilidade).
 #
-# Roda LOCAL antes de cada `git push`:
-#  - Pint (lint)
-#  - Larastan nível 6
-#  - Pest suíte completa (UnitPure + Feature contra Postgres real do compose)
-#  - Dusk E2E (browser Chromium dentro do container web)
+# Gate LOCAL, agora PROPORCIONAL ao diff e ENXUTO:
+#  - Push que toca só infra/docs/scripts/workflows (nada em app/) → passa direto,
+#    sem exigir a stack de pé. (Antes: rodava a suíte inteira até para mexer em YAML.)
+#  - Push com mudança em código → gate RÁPIDO: Pint + Larastan + Pest (SEM cobertura)
+#    + Pennant. Feedback local em segundos.
+#  - Cobertura (≥80/≥98) e Dusk NÃO rodam mais aqui: migraram para o CI (pr.yml, jobs
+#    `test-coverage` e `test-dusk`), onde rodam em paralelo e fora da sua máquina. A
+#    cobertura já era duplicada com o CI; o Dusk (browser, lento/flaky) saiu do caminho
+#    crítico local. O CI continua sendo o gate de merge que segura tudo isso.
 #
-# Falha em qualquer passo → push abortado. Bypass com `git push --no-verify` é
-# **proibido por política** (ADR-006 §1.2 + culture). Use SOMENTE em emergência
-# e justifique no PR.
-#
-# Pré-requisitos: `docker compose up -d` rodando (db + web + worker + scheduler).
+# `git push --no-verify` continua proibido por política salvo emergência (ADR-006 §1.2).
+# Pré-requisito (só quando há mudança em app/): stack `./up.sh` de pé.
 
 set -euo pipefail
 
@@ -24,22 +25,42 @@ ylw()  { printf '\033[33m%s\033[0m\n' "$1"; }
 
 bold "▶ pre-push hook do DEFOnline"
 
-# Aborta cedo se os containers não estão rodando.
+# ── Proporcional ao diff: o que está saindo neste push? ─────────────────────
+# Base = origin/main do último fetch. Sem base (repo novo) → roda o gate por segurança.
+if git rev-parse --verify --quiet origin/main >/dev/null 2>&1; then
+    changed="$(git diff --name-only origin/main HEAD 2>/dev/null || true)"
+else
+    changed="__no_base__"
+fi
+
+# Caminhos que NÃO exigem gate PHP (infra, docs, tooling, workflows, qualquer *.md).
+skip_re='^(infra/|defonline-docs/|docs/|scripts/|\.github/)|(^|/)[^/]*\.md$'
+
+needs_gate=0
+if [ "$changed" = "__no_base__" ]; then
+    needs_gate=1                        # sem base p/ comparar → não arrisca
+elif [ -z "$changed" ]; then
+    needs_gate=0                        # diff vazio (ex.: push de tag já validada) → skip
+else
+    while IFS= read -r f; do
+        [ -z "$f" ] && continue
+        if ! printf '%s\n' "$f" | grep -Eq "$skip_re"; then
+            needs_gate=1                # achou arquivo fora do skip-list → roda gate
+            break
+        fi
+    done <<< "$changed"
+fi
+
+if [ "$needs_gate" -eq 0 ]; then
+    grn "  ✓ push sem mudança em código (só infra/docs/tooling) — gate PHP dispensado."
+    bold "✔ pre-push verde (fast-path)."
+    exit 0
+fi
+
+# ── Gate rápido (precisa da stack) ──────────────────────────────────────────
 if ! docker compose ps --status running --services 2>/dev/null | grep -q '^web$'; then
     red "✖ Container 'web' não está rodando. Execute ./up.sh antes do push."
     exit 1
-fi
-
-# web-test é o espelho APP_ENV=testing que Dusk usa para NÃO derrubar tabelas
-# do banco `defonline` (smoke manual). Sobe sob demanda se não estiver vivo
-# (acontece em volumes que vieram de antes do commit 9859416/STORY-015).
-if ! docker compose ps --status running --services 2>/dev/null | grep -q '^web-test$'; then
-    ylw "  subindo container web-test (APP_ENV=testing)…"
-    docker compose up -d web-test >/dev/null
-    # Pequena janela pro `artisan serve` aceitar conexões antes do Dusk.
-    until docker compose exec -T web sh -c "curl -fsS http://web-test:8000/health >/dev/null 2>&1"; do
-        sleep 1
-    done
 fi
 
 step() {
@@ -53,34 +74,11 @@ step() {
     fi
 }
 
-step "Pint (lint)"     docker compose exec -T web ./vendor/bin/pint --test
-step "Larastan"        docker compose exec -T web ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M
-# Pest + cobertura geral (STORY-010 CA-2; ADR-006 §Decisão 4; quality-standards §2.2).
-# Usa `./vendor/bin/pest` direto em vez de `php artisan test` porque artisan engole
-# o exit code do plugin de cobertura do Pest 4.7 — o gate `--min=80` reporta FAIL
-# mas o wrapper retorna 0, e o hook passaria silenciosamente.
-#
-# `memory_limit=1G` é necessário porque o relatório de cobertura do pcov cresceu
-# com o codebase e estoura o default 128M do PHP CLI a partir da STORY-031.
-step "Pest (All, coverage ≥80%)" \
-    docker compose exec -T web php -d memory_limit=1G ./vendor/bin/pest --testsuite=All --coverage --min=80
-
-# Gate adicional 98% sobre app/Domain quando essa pasta existir (nasce no EPIC-001).
-# CA-5: estrutura pronta — usa phpunit-domain.xml com source restrito a app/Domain.
-# Sem custo enquanto a pasta não existe (o `test -d` é o único trabalho extra).
-if docker compose exec -T web test -d app/Domain; then
-    step "Pest Domain coverage ≥98%" \
-        docker compose exec -T web php -d memory_limit=1G ./vendor/bin/pest --configuration=phpunit-domain.xml --coverage --min=98
-fi
-
-step "Pennant overdue" docker compose exec -T web php artisan pennant:list-overdue --fail-on-overdue
-
-# Dusk: chromedriver precisa estar de pé dentro do container web. Inicia se necessário.
-if ! docker compose exec -T web pgrep chromedriver >/dev/null 2>&1; then
-    ylw "  iniciando chromedriver no container web…"
-    docker compose exec -T web sh -c "chromedriver --port=9515 --whitelisted-ips='' >/tmp/chromedriver.log 2>&1 &"
-    sleep 2
-fi
-step "Dusk E2E"        docker compose exec -T web php artisan dusk
+step "Pint (lint)"  docker compose exec -T web ./vendor/bin/pint --test
+step "Larastan"     docker compose exec -T web ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M
+# Pest SEM cobertura: exit code confiável (o swallow do exit code era só com o plugin
+# de cobertura do Pest 4.7 + --min). A cobertura ≥80/≥98 é enforced no CI (pr.yml).
+step "Pest (All, sem cobertura)"  docker compose exec -T web php artisan test --testsuite=All
+step "Pennant overdue"  docker compose exec -T web php artisan pennant:list-overdue --fail-on-overdue
 
 bold "✔ pre-push verde — pode dar push."

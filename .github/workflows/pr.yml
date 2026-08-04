@@ -1,10 +1,12 @@
 name: PR — lint + segurança + Unit puros
 
-# ADR-006 §3.1 — Pipeline de PR (leve, ~2-3 min).
-# CI remoto NÃO sobe Postgres nem Chromium. Testes pesados (Pest Feature + Dusk) e
-# cobertura ficam no pre-push hook local (scripts/git-hooks/pre-push.sh).
+# ADR-006 §3.1 — Pipeline de PR. Jobs em paralelo; falha em qualquer um = bloqueio.
 #
-# Jobs em paralelo. Falha em qualquer um = bloqueio de merge.
+# Revisado 2026-08 (agilidade): o CI passou a ser o dono da cobertura E do Dusk.
+# Antes a cobertura + Dusk viviam no pre-push local (caminho crítico, minutos). Agora
+# `test-coverage` (Postgres + pcov) e `test-dusk` (Postgres + Chromium) rodam aqui, em
+# paralelo e fora da máquina do dev. O pre-push ficou enxuto (Pint+Larastan+Pest sem
+# cobertura) e proporcional ao diff. Ver scripts/git-hooks/pre-push.sh.
 
 on:
   pull_request:
@@ -247,6 +249,115 @@ jobs:
           path: app/coverage-summary.txt
           if-no-files-found: warn
           retention-days: 30
+
+  test-dusk:
+    # Dusk E2E migrado do pre-push para o CI (revisão 2026-08). Mesmo setup do
+    # test-coverage (Postgres service + npm build + migrate), servindo o app com
+    # `artisan serve` e batendo com Chromium headless — o mesmo padrão do job de
+    # smoke pós-deploy do release-homolog.yml.
+    name: Dusk E2E (browser)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: app
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: defonline
+          POSTGRES_PASSWORD: defonline
+          POSTGRES_DB: defonline_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U defonline -d defonline_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: defonline_test
+      DB_USERNAME: defonline
+      DB_PASSWORD: defonline
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, zip, bcmath, intl, mbstring
+          coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: app/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
+      - run: composer install --prefer-dist --no-progress --no-interaction
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+
+      - name: Gera .env e .env.testing (Postgres do service; APP_URL local p/ Dusk)
+        run: |
+          ENV_BODY='APP_NAME=DEFOnline
+          APP_ENV=testing
+          APP_KEY=base64:7gf3GPBbCPBAFBDe0OJnHWkXyTkT5LnIXYA+7QIwqHg=
+          APP_DEBUG=true
+          APP_URL=http://127.0.0.1:8000
+          APP_VERSION=ci
+          LOG_CHANNEL=stack
+          LOG_STACK=daily
+          LOG_LEVEL=debug
+          LOG_DAILY_DAYS=1
+          DB_CONNECTION=pgsql
+          DB_HOST=127.0.0.1
+          DB_PORT=5432
+          DB_DATABASE=defonline_test
+          DB_USERNAME=defonline
+          DB_PASSWORD=defonline
+          SESSION_DRIVER=array
+          CACHE_STORE=array
+          QUEUE_CONNECTION=sync
+          MAIL_MAILER=array
+          BROADCAST_CONNECTION=null
+          TELEGRAM_BOT_TOKEN=
+          PULSE_ENABLED=false
+          TELESCOPE_ENABLED=false
+          NIGHTWATCH_ENABLED=false'
+          printf '%s\n' "$ENV_BODY" > .env
+          printf '%s\n' "$ENV_BODY" > .env.testing
+
+      - name: Habilita extensões Postgres (IDR-001 — normalmente initdb script)
+        env:
+          PGPASSWORD: defonline
+        run: |
+          psql -h 127.0.0.1 -U defonline -d defonline_test -v ON_ERROR_STOP=1 -c "
+            CREATE EXTENSION IF NOT EXISTS pgcrypto;
+            CREATE EXTENSION IF NOT EXISTS pg_trgm;
+            CREATE EXTENSION IF NOT EXISTS citext;
+            CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+          "
+
+      - name: Migrate
+        run: php artisan migrate --force
+
+      - uses: browser-actions/setup-chrome@v1
+
+      - name: Serve app + Dusk (Chromium headless)
+        env:
+          APP_URL: http://127.0.0.1:8000
+          DUSK_DRIVER_URL: http://localhost:9515
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8000 >/tmp/serve.log 2>&1 &
+          until curl -fsS http://127.0.0.1:8000/health >/dev/null 2>&1; do sleep 1; done
+          chromedriver --port=9515 --whitelisted-ips='' >/tmp/chromedriver.log 2>&1 &
+          sleep 3
+          php artisan dusk || { echo '--- serve.log ---'; cat /tmp/serve.log; echo '--- chromedriver.log ---'; cat /tmp/chromedriver.log; exit 1; }
 
   security-deps:
     name: composer audit

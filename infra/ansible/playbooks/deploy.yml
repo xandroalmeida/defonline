@@ -38,14 +38,14 @@
         password: "{{ ghcr_pull_token }}"
       when: ghcr_pull_token | length > 0
 
-    # Libera espaço ANTES do pull. Mesmo sem chromium na imagem runtime
-    # (STORY-025 split de targets dev/runtime), layers de várias tags rc
-    # acumulam rápido na VM (~300MB cada). Sem prune o pull quebra com
-    # "no space left on device" depois de algumas tags. Tira só imagens/build
-    # cache não-referenciados (containers rodando preservados).
-    - name: Limpar imagens e cache de build não-utilizados (pré-pull)
+    # Libera espaço ANTES do pull removendo imagens de tags rc antigas (~300MB cada;
+    # sem isso o pull quebra com "no space left" após várias tags). `image prune -af`
+    # remove só imagens SEM container associado — postgres/caddy/app-atual (em
+    # execução) são preservados, então não há re-download de camadas base. Mais
+    # enxuto que `system prune -af`, que também zerava cache de build e redes à toa.
+    - name: Limpar imagens não-utilizadas (pré-pull)
       ansible.builtin.command:
-        cmd: docker system prune -af
+        cmd: docker image prune -af
       changed_when: false
 
     - name: Docker compose pull (nova tag)

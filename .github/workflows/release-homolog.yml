@@ -11,6 +11,15 @@ on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+'
+  # 1-clique: o bump-rc dispara este workflow via API (workflow_dispatch é uma das
+  # exceções que o GITHUB_TOKEN PODE acionar — push de tag pelo bot, não). Também
+  # permite re-deploy manual de qualquer tag rc pelo painel Actions.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag rc a deployar (ex.: v0.10.2-rc.1)'
+        required: true
+        type: string
 
 concurrency:
   group: deploy-homolog
@@ -24,20 +33,19 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/app
   ENVIRONMENT: homolog
+  # Tag alvo: input do dispatch OU o ref do push de tag. Usada em checkout, build e deploy.
+  RC_TAG: ${{ github.event.inputs.tag || github.ref_name }}
 
 jobs:
-  validate:
-    uses: ./.github/workflows/pr.yml
-    secrets: inherit
-    permissions:
-      contents: read
-      pull-requests: read
-
+  # O job `validate` foi removido (revisão 2026-08): a tag é cortada de main, que já
+  # passou pelo pr.yml completo no push (main.yml). Re-rodar a suíte aqui era ~2min de
+  # trabalho duplicado a cada deploy. O gate de merge continua no pr.yml/main.yml.
   build-and-push:
-    needs: validate
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RC_TAG }}
       - uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -50,10 +58,10 @@ jobs:
           file: infra/docker/Dockerfile
           target: runtime
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.RC_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: APP_VERSION=${{ github.ref_name }}
+          build-args: APP_VERSION=${{ env.RC_TAG }}
 
   deploy:
     needs: build-and-push
@@ -97,7 +105,7 @@ jobs:
             -i inventories/homolog/hosts.yml \
             playbooks/deploy.yml \
             --vault-password-file ~/.vault-pass \
-            -e image_tag=${{ github.ref_name }}
+            -e image_tag=${{ env.RC_TAG }}
 
   smoke:
     needs: deploy
@@ -146,7 +154,7 @@ jobs:
       - name: Status do deploy
         run: |
           STATUS="${{ (needs.deploy.result == 'success' && needs.smoke.result == 'success') && '✅' || '❌' }}"
-          MSG="${STATUS} DEFOnline homol: ${{ github.ref_name }} — deploy=${{ needs.deploy.result }} smoke=${{ needs.smoke.result }}"
+          MSG="${STATUS} DEFOnline homol: ${{ env.RC_TAG }} — deploy=${{ needs.deploy.result }} smoke=${{ needs.smoke.result }}"
           echo "$MSG"
           if [ -n "${{ secrets.TELEGRAM_BOT_TOKEN }}" ] && [ -n "${{ secrets.TELEGRAM_CHAT_ID_HOMOLOG }}" ]; then
             curl -fsS -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
