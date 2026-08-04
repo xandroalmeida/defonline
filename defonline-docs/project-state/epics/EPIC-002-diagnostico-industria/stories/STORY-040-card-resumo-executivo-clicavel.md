@@ -10,7 +10,7 @@ requires_design: true
 status: in_review
 owner_agent: programador (claude-opus-4-8)
 created_at: 2026-06-02
-updated_at: 2026-06-02
+updated_at: 2026-08-04
 estimated_session_size: S
 related_devolutiva: "Áudio Edvan 2026-05-27 — 'pega o primeiro, NCG sobrevivendo, aí ele começa, tem duas linhas e o texto lá embaixo tem quatro, ele não complementa. E clicando nele não abre.'"
 ---
@@ -38,14 +38,14 @@ Resolve dois problemas simultaneamente: (a) usuário tenta clicar e não acontec
 
 ## Critérios de aceite
 
-- [ ] **CA-1 (clique navega):** Dado um Resumo Executivo com ≥1 card de destaque, quando o usuário clica em um card, então a página rola suavemente até a linha do mesmo indicador na tabela detalhada e ela fica destacada por ~1s.
-- [ ] **CA-2 (offset correto):** O scroll para no topo da linha alvo + offset suficiente para que ela fique visível abaixo do header (não escondida atrás dele em mobile).
-- [ ] **CA-3 (mobile - cards):** A tabela detalhada é renderizada como cards em ≤ 768px (STORY-029); o scroll/highlight funciona igual — alvo é o card correspondente.
-- [ ] **CA-4 (3+ casas decimais no texto):** O texto truncado no card continua truncando com elipse CSS (não muda); cursor `pointer`; visual indica clicabilidade (sublinhado sutil ou cor do título distinta — Designer decide entre opções v1).
-- [ ] **CA-5 (a11y):** Card tem `role="link"` ou é um `<a href="#indicador-X">`; foco visível por keyboard; navegação por keyboard funciona (Enter ou Espaço aciona o scroll).
-- [ ] **CA-6 (sem-JS-gracioso):** Sem JS, o clique no `<a href="#indicador-X">` ainda navega (jump, sem suavidade). Suavidade vem de CSS `scroll-behavior: smooth` + `:target` highlight — Programador pode também usar JS leve, mas SEM dependência externa.
-- [ ] **CA-7 (regressão):** Card sem destaque (apenas card de status, sem indicador específico) não vira clicável.
-- [ ] **CA-8 (cobertura):** 2 Dusk: (a) clicar no primeiro card e asserir que `window.scrollY` aumentou e a linha alvo está visível; (b) verificar `:target` ou classe `.highlight` na linha após clique.
+- [x] **CA-1 (clique navega):** Dado um Resumo Executivo com ≥1 card de destaque, quando o usuário clica em um card, então a página rola suavemente até a linha do mesmo indicador na tabela detalhada e ela fica destacada por ~1s.
+- [x] **CA-2 (offset correto):** O scroll para no topo da linha alvo + offset suficiente para que ela fique visível abaixo do header (não escondida atrás dele em mobile).
+- [x] **CA-3 (mobile - cards):** A tabela detalhada é renderizada como cards em ≤ 768px (STORY-029); o scroll/highlight funciona igual — alvo é o card correspondente.
+- [x] **CA-4 (3+ casas decimais no texto):** O texto truncado no card continua truncando com elipse CSS (não muda); cursor `pointer`; visual indica clicabilidade (sublinhado sutil ou cor do título distinta — Designer decide entre opções v1).
+- [x] **CA-5 (a11y):** Card tem `role="link"` ou é um `<a href="#indicador-X">`; foco visível por keyboard; navegação por keyboard funciona (Enter ou Espaço aciona o scroll).
+- [x] **CA-6 (sem-JS-gracioso):** Sem JS, o clique no `<a href="#indicador-X">` ainda navega (jump, sem suavidade). Suavidade vem de CSS `scroll-behavior: smooth` + `:target` highlight — Programador pode também usar JS leve, mas SEM dependência externa.
+- [x] **CA-7 (regressão):** Card sem destaque (apenas card de status, sem indicador específico) não vira clicável.
+- [x] **CA-8 (cobertura):** 2 Dusk: (a) clicar no primeiro card e asserir que `window.scrollY` aumentou e a linha alvo está visível; (b) verificar `:target` ou classe `.highlight` na linha após clique.
 
 ## Fora de escopo
 
@@ -80,13 +80,13 @@ Você decide:
 
 ## Definição de Pronto
 
-- [ ] CA-1..CA-8 passam.
-- [ ] 2 Dusk verdes.
-- [ ] A11y auditado (Lighthouse a11y ≥ 95 na página do diagnóstico).
-- [ ] CI verde.
-- [ ] Deploy em homol verificado (screenshot/video curto no PR).
-- [ ] `index.json` atualizado.
-- [ ] "Notas do agente" preenchidas.
+- [x] CA-1..CA-8 passam. — reverificados em homologação (desktop e mobile) no release `v0.11.0-rc.1`.
+- [x] 2 Dusk verdes.
+- [ ] **A11y auditado (Lighthouse a11y ≥ 95 na página do diagnóstico). → 85. GATE NÃO ATINGIDO.** As 3 falhas são todas pré-existentes e fora do escopo desta estória; ver "Auditoria de a11y em homologação" e `[ESCALONAMENTO-PO]`.
+- [x] CI verde. — run [30941074737](https://github.com/xandroalmeida/defonline/actions/runs/30941074737) em `main@5d7d192` (2026-08-04).
+- [x] Deploy em homol verificado (screenshot/video curto no PR). — `v0.11.0-rc.1`; screenshots em "Verificação em homologação".
+- [x] `index.json` atualizado.
+- [x] "Notas do agente" preenchidas.
 
 ## Notas do agente
 
@@ -165,3 +165,60 @@ no breakpoint atual via `[data-codigo]` dentro de `#indicadores-detalhados` (esc
   `…-2-linha-destacada.png`, `…-3-mobile-card-destacado.png` — confirmam clicabilidade, scroll com offset
   do header sticky e highlight na linha (desktop) e no card (mobile).
 - Pendente: PR + CI verde + deploy/screenshot em homologação + Lighthouse a11y ≥95 (rodar na URL de homol).
+
+### Verificação em homologação — 2026-08-04 (release `v0.11.0-rc.1`)
+
+`main` empurrada (`5d7d192`) → CI verde
+([run 30941074737](https://github.com/xandroalmeida/defonline/actions/runs/30941074737)) → tag
+`v0.11.0-rc.1` → `release-homolog.yml`
+([run 30941264096](https://github.com/xandroalmeida/defonline/actions/runs/30941264096)) verde nas 4
+etapas. `/health` de `https://defonline.xandrix.com.br` reporta `v0.11.0-rc.1`.
+
+Diagnóstico novo gerado pela UI real em homologação (cenário Vermelho, 2 destaques negativos —
+`margem_liquida` e `ciclo_financeiro` — e 1 positivo, `pmc`) e conferido em navegador real contra a
+URL pública:
+
+- **CA-1 / CA-8 (desktop 1280×900) ✅** — clique no destaque `margem_liquida`: `window.pageYOffset`
+  aumenta, a `<tr data-codigo="margem_liquida">` recebe a classe `.is-highlight` dentro da janela do
+  realce e `#indicador-margem_liquida` fica visível ao fim do scroll.
+- **CA-2 ✅** — a linha-alvo para **abaixo** do header sticky (`h-16`), não atrás dele.
+- **CA-3 (mobile 360×800) ✅** — mesmo clique rola até o `<article data-codigo="margem_liquida">`,
+  que recebe `.is-highlight`; o alvo é o card, não a `<tr>` oculta.
+- **CA-4 / CA-5 ✅ (visual)** — os três destaques aparecem com o sublinhado pontilhado de afordância
+  e são `<a href="#indicador-…">` nativos (foco por teclado, Enter aciona).
+
+Evidências: `app/tests/Browser/screenshots/homolog-w32-resumo-executivo.png` (topo do relatório com
+os 3 destaques em forma de link), `homolog-w32-relatorio.png` (desktop, após o clique, na linha
+Margem Líquida) e `homolog-w32-mobile.png` (360×800, no card) — gitignored.
+
+### Auditoria de a11y em homologação — **gate NÃO atingido**
+
+Lighthouse 12.8.2, categoria `accessibility`, contra
+`https://defonline.xandrix.com.br/diagnosticos/{id}` autenticado (cookie de sessão real, extraído da
+sessão do WebDriver): **85** — o DoD exige **≥ 95**.
+
+As 3 falhas foram inspecionadas nó a nó. **Nenhuma delas está nos elementos desta estória** — os
+`[data-indicador-link]`, a `.indicador-alvo`, o `#indicador-…` e o realce passam em tudo:
+
+| Auditoria | Peso | Nó que falha | Origem |
+|---|---|---|---|
+| `button-name` | 10 | `<button dusk="app-header-conta-toggle">` (só ícone, sem nome acessível) | app shell (STORY-019) |
+| `aria-hidden-focus` | 7 | `#app-nav-drawer` com `aria-hidden="true"` mantendo filhos focáveis quando fechado | app shell (STORY-019) |
+| `color-contrast` | 7 | pills de farol (`Vermelho`/`Amarelo`/`Verde`), badge `VERSÃO MVP` | tokens do design system |
+
+**Aritmética do gate** (pesos do próprio relatório): corrigir só as duas do app shell leva a página
+a **95,6** — passa. Corrigir as três leva a **100**. Só o contraste, sozinho, deixaria em 93.
+
+`[ESCALONAMENTO-PO]` — **esta estória não pode ser marcada `done` sem decisão do PO.** O gate é da
+página inteira, mas a dívida é de outras estórias. Três caminhos:
+
+1. **Corrigir as duas do app shell nesta sessão** (`aria-label` no toggle de conta + `inert` no
+   drawer fechado): ~4 linhas, com teste, em código do EPIC-004 — fora do escopo desta estória, e
+   exige um novo ciclo de release (`v0.11.0-rc.2`). Atinge 95,6 e fecha a STORY-040.
+2. **Abrir estória de bug de a11y** para o app shell + revisão de contraste dos pills com o Designer
+   (o contraste é decisão de design system, não minha), e fechar a STORY-040 com **ressalva
+   registrada** de que os CAs dela estão 100% verdes.
+3. **Reinterpretar o gate como escopo-da-estória** (a11y dos elementos introduzidos), que é o que de
+   fato foi entregue — decisão de PO, não minha.
+
+Não escolhi nenhuma: o DoD é do PO e nenhuma das três é decisão de implementação local.

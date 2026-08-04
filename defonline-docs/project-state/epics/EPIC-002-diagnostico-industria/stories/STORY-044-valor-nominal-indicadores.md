@@ -7,7 +7,7 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: true
-status: in_review
+status: done
 owner_agent: programador (claude-opus-5)
 created_at: 2026-08-04
 updated_at: 2026-08-04
@@ -83,7 +83,7 @@ Se descobrir que algum indicador não tem valor nominal derivável do snapshot a
 ## Definição de Pronto
 
 - [x] CA-1 a CA-11 passam.
-- [ ] Pipeline verde; deploy em homologação verificado.
+- [x] Pipeline verde; deploy em homologação verificado. — CI [run 30941074737](https://github.com/xandroalmeida/defonline/actions/runs/30941074737) em `main@5d7d192`; release `v0.11.0-rc.1` em homolog ([run 30941264096](https://github.com/xandroalmeida/defonline/actions/runs/30941264096)). Ver "Verificação em homologação".
 - [x] `index.json` atualizado; notas preenchidas.
 
 ## Protocolo do agente
@@ -164,3 +164,29 @@ Nenhum. A única decisão que chegou perto de escalonamento — os 6 indicadores
 - **Evidência visual:** screenshots desktop (1280) e mobile (360) do relatório renderizado conferidos durante a execução.
 - **Commit:** `379c355` em `main` local (sem push — workflow do projeto exige pedido explícito do PO para push/PR/tag).
 - **Testes novos:** `tests/Unit/Support/Relatorio/ValoresNominaisTest.php` (regra de composição, bordas de faltante/negativo/zero/tipo), `tests/Feature/Http/DiagnosticoValoresNominaisTest.php` (HTML renderizado + prova do CA-2/CA-10 por comparação da linha crua), `tests/Browser/ValoresNominaisBrowserTest.php` (CA-5/CA-7 em navegador real).
+
+### Verificação em homologação — 2026-08-04 (release `v0.11.0-rc.1`)
+
+`main` empurrada (`5d7d192`) → CI verde
+([run 30941074737](https://github.com/xandroalmeida/defonline/actions/runs/30941074737)) → tag
+`v0.11.0-rc.1` → `release-homolog.yml`
+([run 30941264096](https://github.com/xandroalmeida/defonline/actions/runs/30941264096)) verde nas 4
+etapas. `/health` de `https://defonline.xandrix.com.br` reporta `v0.11.0-rc.1`.
+
+Diagnóstico gerado pela UI real em homologação (`Q09 = R$ 100.000,00/mês`,
+`Q08 = R$ 85.000,00/mês`) e conferido em navegador real contra a URL pública:
+
+- **Desktop 1280×900 (CA-5/CA-7) ✅** — a tabela exibe o valor nominal sob o indicador
+  (`Vendas (12 meses): R$ 1.200.000,00`, `Lucro bruto (12 meses): R$ 180.000,00`,
+  `EBITDA (12 meses): -R$ 168.000,00`, `Resultado líquido (12 meses): -R$ 348.000,00`,
+  `NCG: R$ 340.000,00`, `Passivo circulante / Patrimônio líquido`, `Ativo total`), com
+  `[data-testid="nominais-margem_bruta"]` presente e **sem scroll horizontal**.
+- **Mobile 360×800 (CA-7) ✅** — o bloco nominal está visível dentro do card (altura > 0, não só
+  no DOM da tabela oculta) e a página **não** ganha scroll horizontal.
+- **CA-3 ✅ na prática** — os indicadores sem origem monetária (`ciclo_financeiro`, `pmc`, `pme`,
+  `pmr`, `inadimplencia`) aparecem sem bloco nominal e **sem placeholder**, exatamente como o CA
+  previa. O que estava documentado como `[PARA O PO]` continua valendo e é comportamento, não falha.
+
+Evidências visuais: `app/tests/Browser/screenshots/homolog-w32-relatorio.png` (desktop) e
+`homolog-w32-mobile.png` (360×800) — gitignored; anexar ao registro de release se o PO quiser
+arquivar.

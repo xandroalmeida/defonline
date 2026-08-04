@@ -7,10 +7,10 @@ sprint_id: SPRINT-2026-W26
 type: bugfix
 target_role: programador
 requires_design: false
-status: in_review
+status: done
 owner_agent: programador (claude-opus-4-8)
 created_at: 2026-06-02
-updated_at: 2026-06-02
+updated_at: 2026-08-04
 estimated_session_size: XS
 related_devolutiva: "WhatsApp Edvan #2 — 'inadimplência exata, em balanço, é 3,46%... como o padrão é a plataforma considerar 2 casas decimais, neste caso não aceitou, mostrando alerta de que só admite informação entre ZERO e CEM'"
 ---
@@ -78,8 +78,8 @@ Você decide:
 
 - [x] CA-1..CA-8 passam.
 - [x] Testes unitários e 1 Dusk verdes.
-- [ ] CI verde. → suíte completa local verde (823 Pest + Dusk quiz); CI roda no push/PR (ainda não feito — aguardando o PO).
-- [ ] Deploy em homol verificado. → pendente de deploy.
+- [x] CI verde. → run [30941074737](https://github.com/xandroalmeida/defonline/actions/runs/30941074737) em `main@5d7d192` (2026-08-04): Pest com cobertura ≥80%, Dusk E2E, Larastan, Pint, `composer audit`, Gitleaks e Trivy verdes.
+- [x] Deploy em homol verificado. → `v0.11.0-rc.1` no ar (`/health` reporta a versão); CA-1/CA-2/CA-3 reverificados no navegador contra a URL pública. Ver "Verificação em homologação".
 - [x] `index.json` atualizado.
 - [x] "Notas do agente" preenchidas.
 
@@ -107,3 +107,27 @@ Você decide:
 ### Links de evidência
 - Código: `app/resources/views/livewire/diagnostico/quiz.blade.php` (`$maskPct`), `app/app/Livewire/Diagnostico/Quiz.php` (`regraPercentual`, `pctCanonico`).
 - Decisão: `decisions/idr/IDR-011-mascara-percentual-decimal-natural.md`.
+
+### Verificação em homologação — 2026-08-04 (release `v0.11.0-rc.1`)
+
+Fechamento do Bloco 1 da SPRINT-2026-W32. `main` empurrada (`5d7d192`), CI verde, tag
+`v0.11.0-rc.1` criada e empurrada, `release-homolog.yml`
+([run 30941264096](https://github.com/xandroalmeida/defonline/actions/runs/30941264096)) verde nas 4
+etapas (build → deploy → smoke → notify). `/health` e `/ready` de
+`https://defonline.xandrix.com.br` reportam `v0.11.0-rc.1`.
+
+Os CAs pendentes de deploy foram reverificados **em navegador real contra a URL pública**, pela UI,
+sem factory e sem `loginAs` (conta criada pelo fluxo de cadastro; email confirmado por URL assinada
+gerada no servidor — nenhuma escrita direta no banco de homologação):
+
+- **CA-3 ✅** — `100,01` no Q13 é recusado com a mensagem canônica
+  `Inadimplência deve ser entre 0,00% e 100,00%.` e o quiz **não** avança de bloco.
+- **CA-2 ✅** — `100,00` é aceito: o campo mantém `100,00` e o bloco avança.
+- **CA-1 ✅** — `3,46` é aceito, o campo mantém `3,46` formatado, sem mensagem de erro, e o
+  diagnóstico é gerado (relatório renderizado com os 15 indicadores).
+
+**Observação de UX registrada (não é regressão, não bloqueia o CA):** depois de um valor recusado,
+a mensagem de erro do Q13 **permanece na tela até a próxima tentativa de avançar** — o componente
+não tem hook `updated` que limpe o error bag, então corrigir o valor não apaga o aviso na hora.
+Vale em qualquer ambiente (é do componente, não do deploy) e o CA-1 não exige limpeza ao vivo. Fica
+como candidato a polimento, para o PO decidir.

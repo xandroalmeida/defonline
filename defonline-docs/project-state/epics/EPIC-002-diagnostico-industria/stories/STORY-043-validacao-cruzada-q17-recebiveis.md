@@ -7,7 +7,7 @@ sprint_id: SPRINT-2026-W26
 type: implementation
 target_role: programador
 requires_design: false
-status: in_review
+status: done
 owner_agent: programador (claude-opus-5)
 created_at: 2026-06-02
 updated_at: 2026-08-04
@@ -89,8 +89,8 @@ Captura consistência de input mínima para o motor: `recebíveis` é base da ca
 
 - [x] CA-1..CA-9 passam. — os 9, com o rótulo (Q17 → Q20) e o sentido corrigidos pelo PO antes da implementação; cada desvio anotado no próprio CA.
 - [x] Suíte completa Pest verde (777+ testes). — **870 passed / 2627 asserções**, mais 24 Dusk em browser real.
-- [ ] CI verde. — **pendente de push** (ver "Bloqueios / pendências").
-- [ ] Deploy em homol verificado. — **pendente de deploy**. Verificação equivalente feita localmente em Chromium.
+- [x] CI verde. — run [30941074737](https://github.com/xandroalmeida/defonline/actions/runs/30941074737) em `main@5d7d192` (2026-08-04), todos os jobs do `pr.yml` verdes.
+- [x] Deploy em homol verificado. — `v0.11.0-rc.1`; R4 exercitada em navegador real contra a URL pública. Ver "Verificação em homologação".
 - [x] `index.json` atualizado.
 
 ## Notas do agente
@@ -177,7 +177,7 @@ Captura consistência de input mínima para o motor: `recebíveis` é base da ca
   - **Fica aberta a decisão sobre o dado histórico.** A correção vale daqui para a frente; **diagnósticos já gerados pela UI seguem gravados com valores até 10× menores que os digitados**, sempre que o último gesto do usuário no campo foi digitar um dígito. Não há como distinguir no banco um valor errado de um valor legítimo — só o usuário sabe o que digitou. As opções são reprocessar (impossível sem o input original), invalidar/marcar os diagnósticos afetados, ou avisar os usuários. **É decisão de produto e não foi tomada.**
   - **Fora do quiz, 3 máscaras compartilham o anti-padrão e NÃO foram tocadas** — CPF e telefone em `livewire/cadastro.blade.php`, documento (CPF/CNPJ) em `livewire/empresa/cadastrar.blade.php`. Verifiquei antes de decidir: nelas o efeito é nulo, porque (a) têm `maxlength`, o que fecha o caminho de truncamento, e (b) o servidor normaliza para só-dígitos, e o texto pré-máscara do último keystroke tem exatamente os mesmos dígitos do texto formatado. O que torna o bug grave no quiz é a máscara alterar o **significado numérico** (posição da vírgula), não a pontuação. Mexer nelas seria mudança sem defeito observável.
 
-- **Push, CI e deploy em homologação não foram feitos** — o workflow do projeto é commit direto em `main` local, sem push/PR/tag sem pedido explícito do PO. Quando autorizado, faltam CI verde e a verificação em homol. A verificação equivalente foi feita localmente em browser real.
+- ~~**Push, CI e deploy em homologação não foram feitos**~~ — **resolvido em 2026-08-04**: `main` empurrada, CI verde e `v0.11.0-rc.1` em homologação, com a R4 reverificada em navegador real contra a URL pública (ver "Verificação em homologação").
 
 - **Divergência de `sprint_id` mantida:** o arquivo diz `SPRINT-2026-W26`, o `index.json` diz `SPRINT-2026-W32`. Mesma situação da STORY-042; não é minha para reconciliar.
 
@@ -191,3 +191,30 @@ Captura consistência de input mínima para o motor: `recebíveis` é base da ca
   - `app/Livewire/Diagnostico/Quiz.php` — gate no submit, `alertas_bloqueantes`, `valoresParaValidacao()`, `blocoDoCampo` com Bloco 4, closure `regraQ20MenorQueQ09` removida (CA-2/CA-4).
   - `resources/views/livewire/diagnostico/quiz.blade.php` — bloco de erro acima do `Calcular diagnóstico` (CA-3/CA-4).
 - **Verificação em browser real:** `ValidacaoBloqueanteR4BrowserTest` (Chromium headless) — 9 asserções no caminho do bloqueio + fluxo de correção até o relatório.
+
+### Verificação em homologação — 2026-08-04 (release `v0.11.0-rc.1`)
+
+`main` empurrada (`5d7d192`) → CI verde
+([run 30941074737](https://github.com/xandroalmeida/defonline/actions/runs/30941074737)) → tag
+`v0.11.0-rc.1` → `release-homolog.yml`
+([run 30941264096](https://github.com/xandroalmeida/defonline/actions/runs/30941264096)) verde nas 4
+etapas. `/health` de `https://defonline.xandrix.com.br` reporta `v0.11.0-rc.1`.
+
+Quiz percorrido em navegador real contra a URL pública, pela UI (sem factory, sem `loginAs`):
+
+- **Bloqueio dispara ✅** — Bloco 4 com `Q17 = sim`, `Q20 = R$ 150.000,00` e `Q09 = R$ 100.000,00`
+  (portanto `Q20 >= Q09`): o clique em **Calcular diagnóstico** não submete e o painel
+  `quiz-bloqueios` aparece com a mensagem da R4 (`…deve ser inferior à venda mensal`).
+- **Sem escape ✅** — a página não oferece "Continuar mesmo assim" (asserção negativa explícita),
+  confirmando a diferença entre bloqueio e aviso.
+- **Correção libera ✅** — trocando `Q17` para `não` na mesma sessão, o submit passa e o diagnóstico
+  é gerado (relatório renderizado). O bloqueio é reavaliado a cada tentativa, como previsto.
+
+Também confirmada indiretamente a correção do **`[BUG-001]`** (commit `5088258`, no mesmo release):
+os valores digitados com máscara chegaram íntegros ao motor — o relatório mostra
+`Vendas (12 meses): R$ 1.200.000,00` para `Q09 = R$ 100.000,00/mês`, isto é, sem o fator 10 de
+perda do último dígito.
+
+**Segue aberta para o PO** a decisão sobre o dado histórico do `[BUG-001]` (diagnósticos gerados
+pela UI antes deste release podem ter valores até 10× menores que os digitados). Nada mudou nesse
+ponto — a correção vale daqui para a frente.

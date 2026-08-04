@@ -7,7 +7,7 @@ sprint_id: SPRINT-2026-W26
 type: bugfix
 target_role: programador
 requires_design: false
-status: in_review
+status: done
 owner_agent: programador (claude-opus-5)
 created_at: 2026-06-02
 updated_at: 2026-08-04
@@ -73,8 +73,8 @@ Alinha implementação com spec §4.7.1 e absorve devolutiva sem custo.
 
 - [x] CA-1..CA-5 passam.
 - [x] Suíte Pest verde — **828 testes / 2515 asserções** (a suíte cresceu desde os "511+" escritos na estória). Dusk E2E: 22/22. Pint limpo, PHPStan sem erros. Cobertura: 97,3% geral (mín. 80) e 99,6% no domínio (mín. 98), com `ResumoExecutivo` e `Motor` em 100%.
-- [ ] CI verde. — **pendente de push** (ver nota abaixo).
-- [ ] Deploy em homol verificado (re-abrir diagnóstico Vermelho e ver "ações"). — **pendente de deploy** (ver nota abaixo). Verificação equivalente feita **localmente**, ponta a ponta.
+- [x] CI verde. — run [30941074737](https://github.com/xandroalmeida/defonline/actions/runs/30941074737) em `main@5d7d192` (2026-08-04), todos os jobs do `pr.yml` verdes.
+- [x] Deploy em homol verificado (re-abrir diagnóstico Vermelho e ver "ações"). — feito em `v0.11.0-rc.1`; ver "Verificação em homologação".
 - [x] `index.json` atualizado (entrada da STORY-041; o arquivo segue não-commitado porque carrega trabalho em andamento do PO da WAVE-2026-02 — ver "Bloqueios / pendências").
 
 ## Notas do agente
@@ -144,7 +144,7 @@ Alinha implementação com spec §4.7.1 e absorve devolutiva sem custo.
 
 ### Bloqueios / pendências (para o PO)
 
-- **Push, CI e deploy em homologação não foram feitos** — o workflow do projeto é commit direto em `main` local, sem push/PR/tag sem pedido explícito do PO. Commit local: `a7be1d1`. Quando o PO autorizar o push, faltam: CI verde e a verificação em homologação (**gerar um diagnóstico novo** em cenário Vermelho e conferir "ações" — diagnóstico antigo mostra o singular por design, ver "Descobertas").
+- ~~**Push, CI e deploy em homologação não foram feitos**~~ — **resolvido em 2026-08-04** (PO autorizou o fechamento do Bloco 1 da SPRINT-2026-W32). Commit `a7be1d1` foi ao ar em `v0.11.0-rc.1`; ver "Verificação em homologação".
 - **`index.json` foi atualizado no disco mas não commitado**: o arquivo carrega trabalho em andamento do PO (fechamento da WAVE-2026-01, WAVE-2026-02, EPIC-010, PDR-003/004/005), e commitá-lo varreria essa WIP para dentro do commit desta estória. A entrada da STORY-041 está correta no arquivo; deixo para o PO commitar junto com o trabalho de onda.
 
 ### Links de evidência
@@ -161,3 +161,24 @@ Alinha implementação com spec §4.7.1 e absorve devolutiva sem custo.
   contém plural  : SIM
   contém singular: NAO
   ```
+
+### Verificação em homologação — 2026-08-04 (release `v0.11.0-rc.1`)
+
+`main` empurrada (`5d7d192`) → CI verde
+([run 30941074737](https://github.com/xandroalmeida/defonline/actions/runs/30941074737)) → tag
+`v0.11.0-rc.1` → `release-homolog.yml`
+([run 30941264096](https://github.com/xandroalmeida/defonline/actions/runs/30941264096)) verde nas 4
+etapas. `/health` de `https://defonline.xandrix.com.br` reporta `v0.11.0-rc.1`.
+
+Verificação exatamente como o DoD pedia — **diagnóstico novo**, gerado pela UI real em homologação
+(quiz preenchido em navegador com payload calibrado para cair em Vermelho: margem líquida −29%,
+ciclo financeiro 180 dias, fontes de recursos 2,00×):
+
+```
+Resumo Executivo (homolog, diagnóstico 019fce32-02f2-72a8-92a0-4caf153bb855):
+"Sua empresa apresenta indicadores em estado de alerta que demandam ações."
+```
+
+Plural confirmado no snapshot renderizado, com `motor_version 1.3.1` no rodapé do relatório.
+Evidência visual capturada em `app/tests/Browser/screenshots/homolog-w32-resumo-executivo.png`
+(gitignored — anexar ao registro de release se o PO quiser arquivar).

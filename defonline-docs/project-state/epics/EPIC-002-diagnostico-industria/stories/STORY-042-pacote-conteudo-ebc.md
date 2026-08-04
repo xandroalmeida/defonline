@@ -109,8 +109,8 @@ Devolutiva da EBC aumenta a clareza para o Roberto e absorve o feedback do anali
 - [ ] CA-1..CA-10 passam. — **9 de 10.** CA-7 tem metade escalada ao PO (ver acima); os outros 9 passam com teste.
 - [x] Snapshot tests onde aplicável. — matriz (`MatrizNcgPositivoTest`, igualdade estrita) e glossário (ordem do DOM, `DiagnosticoShowTest`). **Os 5 golden hashes do motor não mudaram**, e isso é resultado, não sorte: prova de que a edição da matriz não vaza para diagnóstico nenhum.
 - [x] Dusk percorrendo quiz com textos novos. — `PacoteConteudoEbcBrowserTest`, Bloco 1 → 4 + relatório, 17 asserções.
-- [ ] CI verde. — **pendente de push** (ver "Bloqueios / pendências").
-- [ ] Deploy em homol verificado (sweep visual + smoke). — **pendente de deploy**. Verificação equivalente feita localmente em browser real.
+- [x] CI verde. — run [30941074737](https://github.com/xandroalmeida/defonline/actions/runs/30941074737) em `main@5d7d192` (2026-08-04), todos os jobs do `pr.yml` verdes.
+- [x] Deploy em homol verificado (sweep visual + smoke). — `v0.11.0-rc.1`; sweep feito em navegador real contra a URL pública. Ver "Verificação em homologação". **Não fecha a estória:** o CA-7 segue escalado.
 - [x] `index.json` atualizado.
 
 ## Notas do agente
@@ -223,3 +223,36 @@ Verifiquei o estado real antes de aplicar default: a pasta `devolutivas/2026-05-
   - `app/resources/views/diagnosticos/show.blade.php` — CA-8.
   - `app/config/motor/matriz-dez-2025-industria.php` — CA-7 (metade viável).
 - **Verificação em browser real** (`PacoteConteudoEbcBrowserTest`, Chromium headless): percorre Bloco 1 → 2 → 3 → 4 com `Q17 = sim`, submete e checa a ordem do glossário no relatório gerado — 17 asserções, todas verdes.
+
+### Verificação em homologação — 2026-08-04 (release `v0.11.0-rc.1`)
+
+`main` empurrada (`5d7d192`) → CI verde
+([run 30941074737](https://github.com/xandroalmeida/defonline/actions/runs/30941074737)) → tag
+`v0.11.0-rc.1` → `release-homolog.yml`
+([run 30941264096](https://github.com/xandroalmeida/defonline/actions/runs/30941264096)) verde nas 4
+etapas, incluindo o smoke read-only pós-deploy. `/health` de `https://defonline.xandrix.com.br`
+reporta `v0.11.0-rc.1`.
+
+Sweep visual feito em navegador real contra a URL pública, percorrendo o quiz pela UI:
+
+- **CA-1 ✅** — o Bloco 2 renderizado em homologação **não contém a palavra "anualiza"** (asserção
+  negativa sobre a página inteira).
+- **CA-4 ✅** — o Bloco 3 exibe o título revisado
+  `Saldos Atuais – uma foto da situação econômica do negócio hoje`, e a string antiga
+  `Bloco 3 de 4 — Balanço` **não** aparece.
+- **CA-6 ✅** — verificado por consequência: o sub-bloco de captação (`Q17 = sim`) abriu com o Q20
+  sem os 2 textos auxiliares, e a regra que os substituiu (R4, STORY-043) disparou corretamente.
+- **CA-8 ✅** — no relatório renderizado, o **2º item do glossário** é o do EBITDA (leitura da ordem
+  real do DOM, não `assertSee`).
+
+**O CA-7 não foi verificado em homologação porque não é verificável ali** — e essa é exatamente a
+questão escalada: a entrada `ncg_absoluto.positiva` não é consumida por nenhum caminho de render, em
+diagnóstico novo ou legado. O deploy não muda esse fato.
+
+### `[ESCALONAMENTO-PO]` reiterado em 2026-08-04 — a estória segue `in_review`
+
+Com CI verde e deploy verificado, **o único item que impede o `done` é o CA-7**, e ele é decisão de
+produto, não de implementação: fazer o texto revisado da matriz chegar ao usuário exige reabrir a
+decisão da STORY-032 (o `NcgAbsoluto` não consome a matriz). As 3 opções registradas acima seguem
+sobre a mesa, sem resposta. Enquanto isso, o **EPIC-002 não pode ser promovido a `done`**, porque o
+`promote_to_done_when` exige STORY-039..044 todas em `done`.
