@@ -27,14 +27,14 @@ jobs:
       run:
         working-directory: app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
           extensions: pdo_pgsql, zip, bcmath, intl, mbstring
           coverage: none
       - name: Cache Composer
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: app/vendor
           key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
@@ -48,13 +48,13 @@ jobs:
       run:
         working-directory: app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
           extensions: pdo_pgsql, zip, bcmath, intl, mbstring
           coverage: none
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: app/vendor
           key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
@@ -97,13 +97,13 @@ jobs:
       run:
         working-directory: app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
           extensions: pdo_pgsql, zip, bcmath, intl, mbstring
           coverage: none
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: app/vendor
           key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
@@ -151,13 +151,13 @@ jobs:
       DB_USERNAME: defonline
       DB_PASSWORD: defonline
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
           extensions: pdo_pgsql, zip, bcmath, intl, mbstring
           coverage: pcov
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: app/vendor
           key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
@@ -166,7 +166,7 @@ jobs:
       # STORY-019/024 — views autenticadas e a landing pública consomem `@vite(['resources/css/app.css', 'resources/js/app.js'])`.
       # Sem manifest no `public/build/`, qualquer feature test que renderize view explode com ViteManifestNotFoundException → 500.
       # `public/build/` é gitignored; CI precisa buildar antes do Pest.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'npm'
@@ -243,7 +243,7 @@ jobs:
 
       - name: Upload coverage-summary
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-summary
           path: app/coverage-summary.txt
@@ -289,19 +289,19 @@ jobs:
       DB_USERNAME: defonline
       DB_PASSWORD: defonline
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
           extensions: pdo_pgsql, zip, bcmath, intl, mbstring
           coverage: none
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: app/vendor
           key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
       - run: composer install --prefer-dist --no-progress --no-interaction
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'npm'
@@ -365,7 +365,12 @@ jobs:
       - name: Migrate
         run: php artisan migrate --force
 
-      - uses: browser-actions/setup-chrome@v1
+      # A v2 mudou o default de `chrome-version` de `latest` para `stable`.
+      # Fixado em `latest` para que este bump seja só de runtime (Node 20 → 24)
+      # e não troque por tabela a versão do Chrome que o Dusk exercita.
+      - uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: latest
 
       - name: Serve app + Dusk (Chromium headless)
         env:
@@ -387,7 +392,7 @@ jobs:
       run:
         working-directory: app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
@@ -398,7 +403,7 @@ jobs:
     name: Trivy filesystem scan
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: 'fs'
@@ -412,10 +417,10 @@ jobs:
     name: Gitleaks
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -426,7 +431,7 @@ jobs:
     name: Arch — sem pgAdmin/Adminer em Ansible
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: ./scripts/check-no-pgadmin-in-ansible.sh
 
   flags-check:
@@ -437,13 +442,13 @@ jobs:
         working-directory: app
     continue-on-error: true # warning, não bloqueia merge (ADR-006 §3.1)
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
           extensions: pdo_pgsql, zip, bcmath, intl, mbstring
           coverage: none
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: app/vendor
           key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
