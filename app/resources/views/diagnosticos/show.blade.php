@@ -1,5 +1,6 @@
 @php
     use App\Support\Relatorio\IndicadorFormatter;
+    use App\Support\Relatorio\ValoresNominais;
 
     /** @var \App\Models\Diagnostico $diagnostico */
     $empresa = $diagnostico->empresa;
@@ -12,6 +13,14 @@
 
     $ncgAbsoluto = $snapshot['ncg_absoluto'] ?? null;
     $cicloOperacional = $snapshot['ciclo_operacional'] ?? null;
+
+    /*
+     * Valores nominais (STORY-044) — derivados da OUTRA coluna do mesmo snapshot,
+     * o `quiz_payload` persistido e imutável. Leitura pura: o motor não é
+     * invocado, nada é gravado, `payload_hash` e `motor_version` não mudam
+     * (CA-2 + IDR-013). Instanciado uma vez e consultado por indicador.
+     */
+    $nominais = ValoresNominais::doSnapshot((array) $diagnostico->quiz_payload);
 
     // Resumo Executivo §4.7.1 — coluna NOT NULL desde STORY-028 (placeholder até a 030,
     // populada de verdade pela 031). Snapshots em motor_version < 1.2.0 (placeholder
@@ -98,7 +107,10 @@
                 <thead class="bg-[color:var(--color-neutral)]">
                     <tr class="text-left">
                         <th scope="col" class="px-4 py-3 text-[color:var(--color-secondary)] text-xs uppercase tracking-wider font-semibold">Indicador</th>
-                        <th scope="col" class="px-4 py-3 text-[color:var(--color-secondary)] text-xs uppercase tracking-wider font-semibold">Valor</th>
+                        {{-- Largura reservada para o valor + os termos nominais (STORY-044).
+                             Sem ela a coluna encolhe contra a Mensagem e cada par
+                             "rótulo: R$ x" quebra no meio, ficando ilegível. --}}
+                        <th scope="col" class="px-4 py-3 w-64 text-[color:var(--color-secondary)] text-xs uppercase tracking-wider font-semibold">Valor</th>
                         <th scope="col" class="px-4 py-3 text-[color:var(--color-secondary)] text-xs uppercase tracking-wider font-semibold">Farol</th>
                         <th scope="col" class="px-4 py-3 text-[color:var(--color-secondary)] text-xs uppercase tracking-wider font-semibold">Mensagem</th>
                     </tr>
@@ -106,7 +118,9 @@
                 <tbody class="[&_th]:px-4 [&_td]:px-4">
                     @foreach (IndicadorFormatter::ORDEM_ESSENCIAIS as $codigo)
                         @if (isset($snapshot[$codigo]))
-                            <x-relatorio.linha-indicador :codigo="$codigo" :indicador="$snapshot[$codigo]"/>
+                            <x-relatorio.linha-indicador :codigo="$codigo"
+                                                         :indicador="$snapshot[$codigo]"
+                                                         :nominais="$nominais->paraIndicador($codigo)"/>
                         @endif
                     @endforeach
                 </tbody>
@@ -117,7 +131,9 @@
         <div class="md:hidden flex flex-col gap-3" data-testid="indicadores-cards">
             @foreach (IndicadorFormatter::ORDEM_ESSENCIAIS as $codigo)
                 @if (isset($snapshot[$codigo]))
-                    <x-relatorio.card-indicador :codigo="$codigo" :indicador="$snapshot[$codigo]"/>
+                    <x-relatorio.card-indicador :codigo="$codigo"
+                                                :indicador="$snapshot[$codigo]"
+                                                :nominais="$nominais->paraIndicador($codigo)"/>
                 @endif
             @endforeach
         </div>
@@ -127,7 +143,9 @@
     @if ($ncgAbsoluto !== null || $cicloOperacional !== null)
         <div class="mb-8 grid gap-4 md:grid-cols-2">
             @if ($ncgAbsoluto !== null)
-                <x-relatorio.card-informativo codigo="ncg_absoluto" :indicador="$ncgAbsoluto"/>
+                <x-relatorio.card-informativo codigo="ncg_absoluto"
+                                             :indicador="$ncgAbsoluto"
+                                             :nominais="$nominais->paraIndicador('ncg_absoluto')"/>
             @endif
             @if ($cicloOperacional !== null)
                 <x-relatorio.card-informativo codigo="ciclo_operacional" :indicador="$cicloOperacional"/>

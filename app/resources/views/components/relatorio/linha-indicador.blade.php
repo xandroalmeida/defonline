@@ -1,6 +1,7 @@
 @props([
     'codigo',
     'indicador', // array{valor: ?float|int, farol: string, motivo: ?string, mensagem: string}
+    'nominais' => [], // STORY-044 — list<array{rotulo, valor}> derivada do quiz_payload do snapshot
 ])
 
 @php
@@ -22,11 +23,14 @@
     <th scope="row" class="py-3 pr-4 text-left text-[color:var(--color-primary)] font-medium">
         {{ $nome }}
     </th>
-    <td class="py-3 pr-4 text-[color:var(--color-primary)] tabular-nums whitespace-nowrap">
+    {{-- `whitespace-nowrap` fica só no valor do indicador; o bloco nominal precisa
+         quebrar linha, senão a tabela densa passa a rolar na horizontal (CA-7). --}}
+    <td class="py-3 pr-4 text-[color:var(--color-primary)] tabular-nums">
         @if ($indisponivel)
             <span class="text-[color:var(--color-secondary)] italic">Indisponível</span>
         @else
-            {{ IndicadorFormatter::valor($codigo, $valor) }}
+            <span class="whitespace-nowrap">{{ IndicadorFormatter::valor($codigo, $valor) }}</span>
+            <x-relatorio.valores-nominais :codigo="$codigo" :nominais="$nominais"/>
         @endif
     </td>
     <td class="py-3 pr-4">

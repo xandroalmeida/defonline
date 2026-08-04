@@ -91,7 +91,7 @@ final class IndicadorFormatter
             'pme',
             'ciclo_financeiro',
             'ciclo_operacional' => self::dias((float) $valor),
-            'ncg_absoluto' => self::moedaBr((float) $valor),
+            'ncg_absoluto' => self::moeda((float) $valor),
             default => self::numeroBr((float) $valor, 2),
         };
     }
@@ -111,7 +111,12 @@ final class IndicadorFormatter
         return ((int) round($v)).' dias';
     }
 
-    private static function moedaBr(float $v): string
+    /**
+     * Moeda BR — única implementação do formato monetário do relatório
+     * (usada tanto pelo NCG absoluto quanto pelos valores nominais da STORY-044).
+     * Negativo leva o sinal ANTES do símbolo: `-R$ 10.000,00`.
+     */
+    public static function moeda(float $v): string
     {
         $sinal = $v < 0 ? '-' : '';
 

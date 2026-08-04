@@ -1324,18 +1324,21 @@
       "title": "Valor nominal junto a cada indicador do relatório de Diagnóstico",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "in_review",
       "estimated_session_size": "S",
       "blocked_by": [],
       "blocks": [],
-      "note": "Item 1 do feedback de José Marques (2026-08-03). Melhoria do relatório do EPIC-002 — NÃO faz parte do módulo DRM. Só apresentação: lê o snapshot, não toca motor nem payload_hash (IDR-010). Padrão de débito pós-devolutiva, igual STORY-038..043.",
+      "note": "Item 1 do feedback de José Marques (2026-08-03). Melhoria do relatório do EPIC-002 — NÃO faz parte do módulo DRM. Executada em 2026-08-04: CA-1..CA-11 verdes (912 Pest / 29 Dusk; cobertura geral 97,4%, ValoresNominais 100%, domínio 99,6% inalterada). Restrição dura respeitada e provada por teste: nenhum arquivo de app/Domain tocado, motor_version segue 1.3.1, golden hashes idênticos, e a renderização do relatório não altera nenhuma coluna de `diagnosticos` (comparação da linha crua antes/depois do GET). 9 dos 15 indicadores ganharam valor nominal. **[PARA O PO]** os outros 6 (pmc, pme, pmr, ciclo_financeiro, ciclo_operacional, inadimplencia) não têm origem monetária no produto — são prazos declarados em dias (Q10/Q11/Q12) ou percentual declarado (Q13, base 'vendas a prazo' que o quiz não captura). Não é lacuna de motor: só pergunta nova no quiz os criaria, o que é decisão de produto e vai contra o §F11 do próprio parecer. CA-3 já previa o comportamento (nada é exibido, sem placeholder). Gerou IDR-013. Achado fora de escopo: IDR-008 e IDR-012 existem em disco mas não constam de decisions.idr neste índice.",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W32",
-      "owner_agent": null,
+      "owner_agent": "programador (claude-opus-5)",
       "requires_design": true,
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-044-valor-nominal-indicadores.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-04"
+      "updated_at": "2026-08-04",
+      "related_idrs": [
+        "IDR-013"
+      ]
     },
     {
       "id": "STORY-045",
@@ -2501,6 +2504,29 @@
         "created_at": "2026-06-02",
         "updated_at": "2026-06-02",
         "note": "Durante a STORY-039 descobriu-se que o servidor já aceitava 3,46 (parseDecimal desde STORY-027); a causa-raiz do alerta 'entre 0 e 100' era a máscara JS estilo 'centavos' do campo % (digitar 100 virava 1,00). Decisão (PO aprovou em chat 2026-06-02): trocar por máscara decimal natural BR só no campo % (Q13, único do quiz); R$ e dias inalterados. Mensagem alinhada à CA-3; 3+ decimais truncados (não arredondados) em pctCanonico. Convenção: máscara 'centavos' só para R$, nunca para percentual/quantidade. Sem bump de motor_version."
+      },
+      {
+        "id": "IDR-013",
+        "slug": "derivacao-valores-nominais-apresentacao",
+        "title": "Agregados monetários de exibição derivados do quiz_payload na camada de apresentação (sem tocar o snapshot do motor)",
+        "status": "proposed",
+        "path": "decisions/idr/IDR-013-derivacao-valores-nominais-apresentacao.md",
+        "decided_at": "2026-08-04",
+        "decided_by": "programador (claude-opus-5)",
+        "approved_by": null,
+        "approved_at": null,
+        "related_story": "STORY-044",
+        "related_stories": [
+          "STORY-029",
+          "STORY-030"
+        ],
+        "related_idrs": [
+          "IDR-010"
+        ],
+        "related_adrs": [],
+        "created_at": "2026-08-04",
+        "updated_at": "2026-08-04",
+        "note": "Descoberta da STORY-044: `indicadores_calculados` guarda só {valor, farol, motivo, mensagem} — os agregados (LB, EBITDA, LOL, AT, PL, NCG) nunca foram carimbados no snapshot. Carimbá-los exigiria bump de motor_version, proibido pela estória, e deixaria todo diagnóstico já emitido sem os nominais (IDR-010 proíbe recálculo retroativo). Decisão: derivar do `quiz_payload` persistido, na camada de apresentação (App\\Support\\Relatorio\\ValoresNominais), reusando DreAdaptada em leitura — sem instanciar Motor, sem escrever nada. Fórmula financeira continua morando só na DreAdaptada. Trade-off aceito: drift se uma fórmula da DRE mudar em bump MAJOR (ex.: pró-labore dentro do EBITDA, `[DECIDIR-B]` do parecer de 2026-08-04) — gatilho de reabertura escrito no IDR."
       }
     ],
     "ddr": []

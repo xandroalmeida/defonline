@@ -1,6 +1,7 @@
 @props([
     'codigo',
     'indicador', // array{valor: ?float|int, farol: 'nenhum', motivo: ?string, mensagem: string}
+    'nominais' => [], // STORY-044 — list<array{rotulo, valor}> derivada do quiz_payload do snapshot
 ])
 
 @php
@@ -30,6 +31,7 @@
             <span class="text-[color:var(--color-secondary)] italic text-lg">Indisponível</span>
         @else
             {{ IndicadorFormatter::valor($codigo, $valor) }}
+            <x-relatorio.valores-nominais :codigo="$codigo" :nominais="$nominais"/>
         @endif
     </p>
 
