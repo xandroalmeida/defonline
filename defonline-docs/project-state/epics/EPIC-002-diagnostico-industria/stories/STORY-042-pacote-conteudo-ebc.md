@@ -217,7 +217,7 @@ Verifiquei o estado real antes de aplicar default: a pasta `devolutivas/2026-05-
 
 ### Links de evidência
 
-- **Commit:** `feat(conteudo): pacote editorial da devolutiva EBC — STORY-042` (ver hash abaixo, preenchido no commit).
+- **Commit:** `9686148` — `feat(conteudo): pacote editorial da devolutiva EBC — STORY-042`.
 - **Arquivos de produção tocados (3):**
   - `app/resources/views/livewire/diagnostico/quiz.blade.php` — CA-1 a CA-6.
   - `app/resources/views/diagnosticos/show.blade.php` — CA-8.
