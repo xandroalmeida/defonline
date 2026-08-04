@@ -1,7 +1,12 @@
-name: bump-rc — incrementa próxima tag de release-candidate
+name: bump-rc — sugere a próxima tag de release-candidate
 
-# ADR-006 §1.4 — workflow_dispatch para criar tag vX.Y.Z-rc.N automaticamente.
-# Lê a última tag, decide bump (patch por default; minor com input) e abre tag nova.
+# ADR-006 §1.4 — helper de versão. Calcula a próxima tag vX.Y.Z-rc.N e imprime o
+# comando para você criá-la LOCALMENTE.
+#
+# O deploy de homolog é disparado pelo PUSH da tag no git (release-homolog.yml
+# `on: push: tags`). Tag criada por bot (GITHUB_TOKEN) NÃO dispara deploy — regra
+# anti-recursão do GitHub. Por isso este workflow NÃO cria a tag: só sugere. Rode o
+# comando no seu terminal para que o push (com sua credencial) dispare o release.
 
 on:
   workflow_dispatch:
@@ -17,8 +22,7 @@ on:
           - major
 
 permissions:
-  contents: write
-  actions: write        # para disparar o release-homolog (workflow_dispatch) após a tag
+  contents: read
 
 jobs:
   bump:
@@ -29,8 +33,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Calcular próxima tag
-        id: next
+      - name: Calcular e sugerir a próxima tag
         run: |
           last_release=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-version:refname | head -n1 || true)
           if [ -z "$last_release" ]; then
@@ -48,29 +51,20 @@ jobs:
           esac
 
           BASE="v${MAJ}.${MIN}.${PAT}"
-          # Acha o próximo -rc.N para essa BASE.
+          # Acha o próximo -rc.N livre para essa BASE.
           RC=1
           while git tag --list "${BASE}-rc.${RC}" | grep -q "${BASE}-rc.${RC}"; do
               RC=$((RC + 1))
           done
           NEW_TAG="${BASE}-rc.${RC}"
-          echo "Próxima tag: ${NEW_TAG}"
-          echo "tag=${NEW_TAG}" >> "$GITHUB_OUTPUT"
 
-      - name: Criar e enviar tag
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag "${{ steps.next.outputs.tag }}" -m "release-candidate ${{ steps.next.outputs.tag }}"
-          git push origin "${{ steps.next.outputs.tag }}"
-
-      # O push de tag pelo GITHUB_TOKEN (bot) NÃO dispara o release-homolog (regra
-      # anti-recursão do GitHub). workflow_dispatch é a exceção que o token PODE
-      # acionar — então disparamos explicitamente. Resultado: 1 clique no bump-rc
-      # → tag criada + deploy em homologação, sem re-push manual.
-      - name: Disparar deploy em homologação para a nova tag
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh workflow run release-homolog.yml --ref main -f tag="${{ steps.next.outputs.tag }}"
-          echo "release-homolog disparado para ${{ steps.next.outputs.tag }}"
+          echo "Próxima tag sugerida: ${NEW_TAG}"
+          {
+            echo "## Próxima tag rc: \`${NEW_TAG}\`"
+            echo ""
+            echo "Rode no seu terminal — o **push da tag** dispara o deploy de homolog:"
+            echo '```bash'
+            echo "git tag ${NEW_TAG}"
+            echo "git push origin ${NEW_TAG}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
