@@ -149,7 +149,7 @@ Antes de mexer em código, ler os documentos a seguir:
   - ADR-002 — Topologia (monolito modular + web/worker/scheduler + request_id UUID v7).
   - ADR-003 — Persistência (Eloquent + multi-tenancy + audit log + soft delete + LGPD).
   - ADR-004 — Observabilidade (logs JSON + métricas no PG + Telegram + 6 eventos de produto).
-  - ADR-005 — Infra (VPS BR + Ansible + Caddy + Docker Compose + Backblaze B2).
+  - ADR-005 — Infra (VPS BR + Ansible + Caddy + Docker Compose + Cloudflare R2).
   - ADR-006 — CI/CD (GHA + pre-push hook + tag-based dual + Pennant).
 - **Spec funcional** em `defonline-docs/especificacao/V2/especificacao-funcional.md`.
 - **RNFs** em `defonline-docs/especificacao/V2/requisitos-nao-funcionais-e-juridicos.md`.

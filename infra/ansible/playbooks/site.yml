@@ -15,5 +15,5 @@
 - name: App (compose up + migrate)
   import_playbook: app.yml
 
-- name: Backup off-site (cron pg_dump → GPG → Backblaze B2)
+- name: Backup off-site (cron pg_dump → GPG → Cloudflare R2)
   import_playbook: backup.yml

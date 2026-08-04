@@ -27,8 +27,8 @@ cat <<EOF
 PROTOCOLO:
 1. Guarde uma cópia desta passphrase em um cofre fora do projeto
    (1Password / Bitwarden / pen drive físico em local seguro).
-   Se perder a passphrase, os backups B2 são irrecuperáveis (são bytes opacos
-   para a Backblaze).
+   Se perder a passphrase, os backups na R2 são irrecuperáveis (são bytes
+   opacos para a Cloudflare).
 
 2. Coloque o valor em infra/ansible/inventories/homolog/group_vars/vault.yml:
      vault_backup_gpg_passphrase: $(cat secrets/backup-gpg-passphrase)

@@ -13,10 +13,14 @@ vault_db_app_password: "REPLACE_ME"
 vault_db_backup_password: "REPLACE_ME"
 vault_db_superuser_password: "REPLACE_ME"
 
-# Backblaze B2 — Application Key (https://secure.backblaze.com/app_keys.htm)
-# Crie com escopo restrito ao bucket `defonline-backups-homolog`.
-vault_b2_app_key_id: "REPLACE_ME"
-vault_b2_app_key: "REPLACE_ME"
+# Cloudflare R2 — token S3 escopado no bucket do ambiente.
+# Passo a passo: defonline-docs/project-state/runbooks/runbook-backup-r2.md
+#   Dash Cloudflare → R2 → API → Manage API tokens → Create Account API token
+#   Permissão: "Object Read & Write", aplicada APENAS a `defonline-backup-homolog`.
+# O Account ID aparece na home da R2 e compõe o endpoint S3.
+vault_r2_account_id: "REPLACE_ME"
+vault_r2_access_key_id: "REPLACE_ME"
+vault_r2_secret_access_key: "REPLACE_ME"
 
 # GPG passphrase usado para cifrar pg_dump (gere com `openssl rand -base64 32`).
 # A chave GPG própria é gerada por scripts/gen-backup-gpg-key.sh e instalada na VPS.

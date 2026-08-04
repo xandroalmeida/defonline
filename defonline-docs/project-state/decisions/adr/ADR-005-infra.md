@@ -423,6 +423,16 @@ homolog.defonline.com.br {
 
 ### 4.2 Backup do PostgreSQL
 
+> **Emenda 2026-08-04 — [IDR-012](../idr/IDR-012-backup-offsite-cloudflare-r2.md).**
+> O provedor off-site passou de **Backblaze B2** para **Cloudflare R2** (egress
+> zero, free tier cobre o MVP, fornecedor já em uso pelo DNS). Leia a linha
+> "Provedor off-site" e o bloco "Por que Backblaze B2" abaixo como **históricos**.
+> Também mudou o layout de prefixos: `daily/` e `monthly/` separados, para que a
+> retenção "30 rolantes + 12 mensais" desta seção seja de fato aplicável. Todo o
+> resto da política (frequência, mecanismo, encriptação, restore trimestral, PITR
+> fora do MVP) permanece vigente. Operação em
+> [`runbooks/runbook-backup-r2.md`](../../runbooks/runbook-backup-r2.md).
+
 **Política (RNF §5.1):**
 
 | Item | Configuração |

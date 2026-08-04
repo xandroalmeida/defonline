@@ -1,6 +1,11 @@
 ---
 # Restore de backup (ADR-005 §4.2 — RTO ~4h, exercitado trimestralmente).
-# Uso: ansible-playbook -i inventories/homolog playbooks/restore.yml -e dump_date=YYYYMMDD-HHMM
+#
+# Diário:  ansible-playbook -i inventories/homolog playbooks/restore.yml -e dump_date=YYYYMMDD-HHMM
+# Mensal:  ansible-playbook -i inventories/homolog playbooks/restore.yml -e dump_month=YYYYMM
+#
+# Para listar o que existe na R2 antes de escolher:
+#   ssh deploy@<vps> 'rclone tree r2:defonline-backup-homolog/postgres/homolog'
 #
 # CUIDADO: este playbook DROPA o banco atual antes de restaurar. Confirmação manual obrigatória.
 
@@ -19,23 +24,31 @@
         msg: "Confirmação inválida."
       when: confirm != 'RESTAURAR'
 
-    - name: Validar que dump_date foi passado
+    - name: Validar que dump_date OU dump_month foi passado
       ansible.builtin.fail:
-        msg: "Passe -e dump_date=YYYYMMDD-HHMM"
-      when: dump_date is not defined
+        msg: "Passe -e dump_date=YYYYMMDD-HHMM (diário) ou -e dump_month=YYYYMM (mensal)."
+      when: dump_date is not defined and dump_month is not defined
 
   tasks:
-    - name: Calcular ano/mês a partir de dump_date
+    # Os dois prefixos criados pelo pg-backup.sh têm layouts distintos:
+    #   daily/YYYY/MM/dump-YYYYMMDD-HHMM.sql.gz.gpg
+    #   monthly/YYYY/dump-YYYYMM.sql.gz.gpg
+    - name: Resolver caminho remoto e nome local do dump
       ansible.builtin.set_fact:
-        dump_year: "{{ dump_date[:4] }}"
-        dump_month: "{{ dump_date[4:6] }}"
+        dump_id: "{{ dump_date | default(dump_month) }}"
+        dump_remote: >-
+          {%- if dump_date is defined -%}
+          r2:{{ r2_bucket }}/postgres/{{ env_name }}/daily/{{ dump_date[:4] }}/{{ dump_date[4:6] }}/dump-{{ dump_date }}.sql.gz.gpg
+          {%- else -%}
+          r2:{{ r2_bucket }}/postgres/{{ env_name }}/monthly/{{ dump_month[:4] }}/dump-{{ dump_month }}.sql.gz.gpg
+          {%- endif -%}
 
-    - name: Download do dump cifrado de B2
+    - name: Download do dump cifrado da R2
       ansible.builtin.command:
         cmd: >-
           rclone copyto
-          b2:{{ b2_bucket }}/postgres/{{ env_name }}/{{ dump_year }}/{{ dump_month }}/dump-{{ dump_date }}.sql.gz.gpg
-          {{ deploy_dir }}/backups/dump-{{ dump_date }}.sql.gz.gpg
+          {{ dump_remote }}
+          {{ deploy_dir }}/backups/dump-{{ dump_id }}.sql.gz.gpg
       become: true
       become_user: "{{ deploy_user }}"
       changed_when: true
@@ -46,7 +59,7 @@
         cd {{ deploy_dir }}
         gpg --batch --yes --decrypt \
             --passphrase-file /home/{{ deploy_user }}/.backup-gpg-pass \
-            backups/dump-{{ dump_date }}.sql.gz.gpg \
+            backups/dump-{{ dump_id }}.sql.gz.gpg \
           | gunzip \
           | docker compose exec -T db pg_restore \
               --username={{ postgres_superuser }} \
