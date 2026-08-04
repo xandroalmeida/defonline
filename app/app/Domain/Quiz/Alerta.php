@@ -6,8 +6,12 @@ namespace App\Domain\Quiz;
 
 /**
  * Alerta de validação cruzada — uma inconsistência detectada entre blocos do
- * quiz (STORY-034, espec §6.6). Não-bloqueante: descreve o problema e aponta o
- * campo suspeito para correção (mensagem acionável, CA-4).
+ * quiz (STORY-034, espec §6.6). Descreve o problema e aponta o campo suspeito
+ * para correção (mensagem acionável, CA-4).
+ *
+ * A `$severidade` decide o que o componente faz com ele — aviso que Roberto pode
+ * ignorar ou bloqueio que segura o submit. Vocabulário em
+ * {@see ValidacoesCruzadas::SEVERIDADE_AVISO} / `SEVERIDADE_BLOQUEIO`.
  */
 final class Alerta
 {

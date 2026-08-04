@@ -8,8 +8,7 @@ namespace App\Domain\Quiz;
  * Validações cruzadas DRE × Balanço (STORY-034, espec §6.6).
  *
  * Avalia as regras declaradas em `config/quiz/validacoes-cruzadas.php` contra os
- * valores do quiz e devolve a lista de {@see Alerta}s disparados. Regras são
- * **avisos não-bloqueantes** — quem decide continuar é o usuário (no componente).
+ * valores do quiz e devolve a lista de {@see Alerta}s disparados.
  *
  * Cada regra dispara quando:
  *
@@ -18,20 +17,43 @@ namespace App\Domain\Quiz;
  * Toda a lógica de negócio (quais campos, quais pesos, qual fórmula, qual texto)
  * vive na config — esta classe só interpreta o formato. Adicionar regra nova não
  * exige mexer aqui (CA-6).
+ *
+ * **Severidade (STORY-043).** Cada regra declara o que fazer quando dispara, e
+ * quem consome escolhe o que quer ver:
+ *
+ *   - {@see SEVERIDADE_AVISO} — hipótese de erro estatístico. O componente mostra
+ *     o banner inline no gate Bloco 3 → 4 e Roberto decide continuar mesmo assim.
+ *   - {@see SEVERIDADE_BLOQUEIO} — inconsistência de input que o motor não deve
+ *     receber. O componente segura o submit até o valor ser corrigido; não há
+ *     "continuar mesmo assim" e nada é registrado em `alertas_aceitos`.
+ *
+ * O filtro é explícito de propósito: uma regra bloqueante nova não pode vazar
+ * para o banner não-bloqueante só por ter sido acrescentada à config.
  */
 final class ValidacoesCruzadas
 {
+    /** Aviso não-bloqueante — Roberto decide seguir (STORY-034). */
+    public const SEVERIDADE_AVISO = 'warning';
+
+    /** Bloqueio de consistência — segura o submit até correção (STORY-043). */
+    public const SEVERIDADE_BLOQUEIO = 'blocking';
+
     /**
      * @param  array<string, float|int|string|null>  $valores  Mapa código do Anexo A → valor numérico.
+     * @param  string|null  $severidade  Filtra as regras avaliadas; `null` avalia todas.
      * @return list<Alerta>
      */
-    public function validar(array $valores): array
+    public function validar(array $valores, ?string $severidade = null): array
     {
         /** @var array<string, array<string, mixed>> $regras */
         $regras = (array) config('quiz.validacoes-cruzadas.regras', []);
 
         $alertas = [];
         foreach ($regras as $id => $regra) {
+            if ($severidade !== null && ($regra['severidade'] ?? null) !== $severidade) {
+                continue;
+            }
+
             $alerta = $this->avaliar((string) $id, $regra, $valores);
             if ($alerta !== null) {
                 $alertas[] = $alerta;

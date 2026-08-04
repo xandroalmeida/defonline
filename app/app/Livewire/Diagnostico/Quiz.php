@@ -75,6 +75,16 @@ final class Quiz extends Component
      */
     public array $alertas_aceitos = [];
 
+    /**
+     * Bloqueios de consistência detectados no submit (STORY-043 — regras de
+     * severidade `blocking`). Diferente de {@see $alertas_cruzados}: não há
+     * "continuar mesmo assim" e nada vai para `alertas_aceitos` — o submit só
+     * passa quando esta lista está vazia. Vazio = nenhum bloqueio aberto.
+     *
+     * @var list<array<string, mixed>>
+     */
+    public array $alertas_bloqueantes = [];
+
     // -------- Bloco 1: Identificação --------
     public string $Q01 = 'industria';   // EPIC-002 só Indústria.
 
@@ -172,8 +182,9 @@ final class Quiz extends Component
 
         // CA-5: ao sair do Bloco 3 (Balanço), checa inconsistências entre blocos.
         // Se houver alerta ainda não aceito, segura o avanço e mostra o banner inline.
+        // Só avisos: bloqueios (STORY-043) são do submit, não deste gate.
         if ($this->bloco_atual === 3) {
-            $alertas = $this->detectarAlertasCruzados();
+            $alertas = $this->avaliarValidacoesCruzadas(ValidacoesCruzadas::SEVERIDADE_AVISO);
             if ($alertas !== [] && ! $this->todosAlertasJaAceitos($alertas)) {
                 $this->alertas_cruzados = $alertas;
 
@@ -188,6 +199,7 @@ final class Quiz extends Component
     {
         $this->bloco_atual = max(1, $this->bloco_atual - 1);
         $this->alertas_cruzados = [];
+        $this->alertas_bloqueantes = [];
     }
 
     /**
@@ -220,6 +232,7 @@ final class Quiz extends Component
     public function irParaCampo(string $campo): void
     {
         $this->alertas_cruzados = [];
+        $this->alertas_bloqueantes = [];
         $this->bloco_atual = $this->blocoDoCampo($campo);
         $this->dispatch('focar-campo', campo: $campo);
     }
@@ -270,12 +283,29 @@ final class Quiz extends Component
     }
 
     /**
-     * Roda as validações cruzadas (STORY-034 §6.6) sobre os valores atuais,
-     * convertidos para float canônico. Retorna a lista serializável de alertas.
+     * Roda as validações cruzadas (STORY-034 §6.6) da severidade pedida sobre os
+     * valores atuais. Retorna a lista serializável de alertas.
      *
      * @return list<array<string, mixed>>
      */
-    private function detectarAlertasCruzados(): array
+    private function avaliarValidacoesCruzadas(string $severidade): array
+    {
+        return array_map(
+            fn (Alerta $alerta): array => $alerta->toArray(),
+            app(ValidacoesCruzadas::class)->validar($this->valoresParaValidacao(), $severidade),
+        );
+    }
+
+    /**
+     * Valores do quiz em float canônico para as validações cruzadas.
+     *
+     * Q20 só entra quando há captação (Q17="sim") — sem captação o campo nem é
+     * exibido e vira `null` no payload canônico, então um resto de digitação não
+     * pode segurar o submit por uma inconsistência que o motor jamais veria.
+     *
+     * @return array<string, float|null>
+     */
+    private function valoresParaValidacao(): array
     {
         $campos = ['Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07', 'Q09', 'Q14', 'Q15', 'Q16'];
 
@@ -284,10 +314,9 @@ final class Quiz extends Component
             $valores[$campo] = self::parseDecimal($this->{$campo});
         }
 
-        return array_map(
-            fn (Alerta $alerta): array => $alerta->toArray(),
-            app(ValidacoesCruzadas::class)->validar($valores),
-        );
+        $valores['Q20'] = $this->Q17 === 'sim' ? self::parseDecimal($this->Q20) : null;
+
+        return $valores;
     }
 
     /**
@@ -309,10 +338,14 @@ final class Quiz extends Component
         return true;
     }
 
-    /** Bloco do quiz (2 = DRE/Operação, 3 = Balanço) que contém o campo dado. */
+    /** Bloco do quiz (2 = DRE/Operação, 3 = Balanço, 4 = Contexto/Captação) que contém o campo dado. */
     private function blocoDoCampo(string $campo): int
     {
-        return in_array($campo, ['Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07'], true) ? 3 : 2;
+        return match (true) {
+            in_array($campo, ['Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07'], true) => 3,
+            in_array($campo, ['Q17', 'Q18', 'Q19', 'Q20'], true) => 4,
+            default => 2,
+        };
     }
 
     /**
@@ -364,6 +397,14 @@ final class Quiz extends Component
     public function submeter(CalcularDiagnostico $calcular): mixed
     {
         $this->validate($this->regrasDoBloco(4));
+
+        // STORY-043: bloqueios de consistência entre blocos. Reavaliados a cada
+        // tentativa — corrigir o valor e reenviar limpa a lista sozinho. Segura o
+        // submit sem escape (diferente do banner não-bloqueante do Bloco 3).
+        $this->alertas_bloqueantes = $this->avaliarValidacoesCruzadas(ValidacoesCruzadas::SEVERIDADE_BLOQUEIO);
+        if ($this->alertas_bloqueantes !== []) {
+            return null;
+        }
 
         // STORY-038: lista de sócios só é exigida quando há captação (Q17="sim").
         // Erros (CPF inválido, duplicado, mínimo, cap) são por linha — `addError`
@@ -465,9 +506,12 @@ final class Quiz extends Component
     }
 
     /**
-     * Bloco 4 tem regras condicionais: Q18..Q20 obrigatórios quando Q17="sim";
-     * Q20 < Q09. A lista de sócios (`socios[]`) é validada à parte em
-     * {@see submeter()} via {@see ValidaSocios} (erros por linha).
+     * Bloco 4 tem regras condicionais: Q18..Q20 obrigatórios quando Q17="sim".
+     *
+     * A consistência `Q20 < Q09` (Anexo A §validações) **não mora mais aqui** —
+     * virou a R4 `blocking` da engine de validações cruzadas (STORY-043),
+     * avaliada em {@see submeter()}. A lista de sócios (`socios[]`) é validada à
+     * parte, também no submit, via {@see ValidaSocios} (erros por linha).
      *
      * @return array<string, array<int, mixed>|\Closure>
      */
@@ -480,7 +524,7 @@ final class Quiz extends Component
         if ($this->Q17 === 'sim') {
             $regras['Q18'] = ['required', 'string', $this->regraBrl()];
             $regras['Q19'] = ['required', 'string', $this->regraBrl()];
-            $regras['Q20'] = ['required', 'string', $this->regraBrl(), $this->regraQ20MenorQueQ09()];
+            $regras['Q20'] = ['required', 'string', $this->regraBrl()];
         } else {
             // Quando Q17="nao", os campos opcionais devem permanecer nulos —
             // garantia de não vazar dado parcial para o motor.
@@ -537,25 +581,6 @@ final class Quiz extends Component
             }
             if ($float < 0 || $float > 100) {
                 $fail('Inadimplência deve ser entre 0,00% e 100,00%.');
-            }
-        };
-    }
-
-    /**
-     * Regra do Anexo A: Q20 (venda mensal com cartão) deve ser inferior a Q09
-     * (venda mensal total). Bloqueio rígido.
-     */
-    private function regraQ20MenorQueQ09(): \Closure
-    {
-        return function (string $attr, mixed $value, \Closure $fail): void {
-            $q20 = self::parseDecimal((string) $value);
-            $q09 = self::parseDecimal((string) ($this->Q09 ?? ''));
-
-            if ($q20 === null || $q09 === null) {
-                return;
-            }
-            if ($q20 >= $q09) {
-                $fail('A venda mensal com cartão/duplicatas deve ser inferior à venda mensal total (Q09).');
             }
         };
     }

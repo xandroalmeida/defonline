@@ -117,3 +117,34 @@ it('remove alertas_aceitos do canonical — não entra no hash (STORY-034 CA-3)'
     // Mesmos inputs Q0X ⇒ mesmo payload_hash, independentemente dos alertas aceitos.
     expect($hashComAlertas)->toBe($hashBase);
 });
+
+it('R4 não altera o payload_hash: a regra bloqueante não deixa rastro no payload (STORY-043 CA-8)', function () {
+    // O payload que o quiz entrega ao motor é exatamente o mesmo antes e depois da R4:
+    // um bloqueio nunca é "aceito", logo nunca vira entrada de `alertas_aceitos` — e
+    // mesmo se virasse, a chave inteira sai no canonicalize.
+    $payload = [
+        'Q01' => 'industria',
+        'Q09' => '100000.00',
+        'Q17' => true,
+        'Q20' => '26000.00',
+    ];
+
+    $hashSemAuditoria = hash('sha256', QuizPayloadCanonicalizer::toJson(
+        QuizPayloadCanonicalizer::canonicalize($payload),
+    ));
+
+    $hashComR4 = hash('sha256', QuizPayloadCanonicalizer::toJson(
+        QuizPayloadCanonicalizer::canonicalize($payload + [
+            'alertas_aceitos' => [
+                ['regra' => 'R4', 'ocorrido_em' => '2026-08-04T10:00:00+00:00', 'valor_envolvido' => 150000.0],
+            ],
+        ]),
+    ));
+
+    expect($hashComR4)->toBe($hashSemAuditoria);
+
+    // E a regra em si não vaza para o JSON canônico sob nenhuma forma.
+    expect(QuizPayloadCanonicalizer::toJson(QuizPayloadCanonicalizer::canonicalize($payload)))
+        ->not->toContain('R4')
+        ->not->toContain('blocking');
+});

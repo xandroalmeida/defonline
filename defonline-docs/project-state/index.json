@@ -1301,19 +1301,19 @@
     {
       "id": "STORY-043",
       "slug": "validacao-cruzada-q17-recebiveis",
-      "title": "Validação cruzada R4 — Q17.recebíveis ≥ Q09.venda_mensal (bloqueante)",
+      "title": "Validação cruzada R4 — Q20.recebíveis < Q09.venda_mensal (bloqueante)",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "in_review",
       "estimated_session_size": "S",
       "blocked_by": [
         "STORY-042"
       ],
       "blocks": [],
-      "note": "Nova regra R4 aditiva à engine declarativa da STORY-034 (`config/quiz/validacoes-cruzadas.php`). Diferente de R1/R2/R3 — R4 é **bloqueante** (consistência de input, não hipótese estatística). PO decidiu em 2026-06-02. Origem: .docx EBC Bloco 4 — vira regra de backend em vez de texto auxiliar.",
+      "note": "R4 declarativa com severidade `blocking` na engine da STORY-034, avaliada no submit. Executada em 2026-08-04, CA-1..CA-9 verdes (870 Pest / 24 Dusk). `[ESCALONAMENTO-PO]` resolvido antes de codar: o campo é o **Q20** (venda mensal com cartão/duplicatas), não o Q17, e o sentido da estória estava invertido em relação ao Anexo A §validações (\"Q20 ≥ Q09: bloqueio rígido\", correção da própria EBC em 22/04/2026) — somar a regra literal deixaria o Bloco 4 insatisfazível com captação. PO decidiu: R4 dispara em `Q20 >= Q09` e a closure `regraQ20MenorQueQ09` foi migrada para a config (uma fonte de verdade só). **Achado fora de escopo `[BUG-001]`:** a máscara BRL sincroniza com o Livewire o valor pré-formatação do último keystroke — todo campo monetário do quiz registra 1/10 do que a tela mostra. Correção validada em browser real e revertida; precisa de estória própria (impacto retroativo em diagnósticos gerados via UI).",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W32",
-      "owner_agent": null,
+      "owner_agent": "programador (claude-opus-5)",
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-043-validacao-cruzada-q17-recebiveis.md",
       "created_at": "2026-06-02",
       "updated_at": "2026-08-04"

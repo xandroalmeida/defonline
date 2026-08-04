@@ -183,15 +183,21 @@ it('rejeita PMC com texto inválido (Q10)', function () {
 });
 
 it('bloqueia bloco 4 quando Q20 >= Q09 (regra Anexo A)', function () {
+    // STORY-043: a regra continua valendo, mas mudou de mecanismo — saiu da closure
+    // de validação do campo e virou a R4 `blocking` da engine de validações cruzadas.
+    // O efeito para Roberto é o mesmo: não submete. Detalhes em ValidacaoBloqueanteR4Test.
     $rascunho = quizPreencherAteBloco4($this);
 
-    $rascunho->set('Q17', 'sim')
+    $component = $rascunho->set('Q17', 'sim')
         ->set('Q18', '50.000,00')
         ->set('Q19', '20.000,00')
         ->set('Q20', '150.000,00')   // > Q09 = 100.000
         ->set('socios', [['cpf' => '529.982.247-25', 'nome' => 'Ana Lima']])
         ->call('submeter')
-        ->assertHasErrors('Q20');
+        ->assertNoRedirect();
+
+    expect($component->get('alertas_bloqueantes'))->toHaveCount(1)
+        ->and(Diagnostico::query()->count())->toBe(0);
 });
 
 it('rejeita CPF inválido em uma linha de sócio quando Q17="sim" (CA-4)', function () {

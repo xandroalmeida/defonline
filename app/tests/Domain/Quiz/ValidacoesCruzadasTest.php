@@ -211,3 +211,116 @@ it('suporta os operadores >=, <, <= e ignora operador desconhecido', function (s
     'menor-ou-igual no limiar dispara' => ['<=', 50.0, 50.0, true],
     'operador desconhecido nunca dispara' => ['??', 999.0, 1.0, false],
 ]);
+
+// ============================================================================
+// R4 — Recebíveis × venda mensal: Q20 >= Q09 (STORY-043, severidade `blocking`)
+//
+// Sentido: recebíveis (venda por cartão/duplicatas) são um subconjunto da venda
+// total, logo devem ser INFERIORES a ela — Anexo A §validações ("Q20 ≥ Q09:
+// bloqueio rígido"). A regra saiu da closure `Quiz::regraQ20MenorQueQ09()` e
+// virou entrada declarativa para não haver duas fontes de verdade.
+// ============================================================================
+
+it('R4 dispara quando os recebíveis passam da venda mensal', function () {
+    $alertas = vcValidar(['Q20' => 150000.0, 'Q09' => 100000.0]);
+
+    expect($alertas)->toHaveCount(1)
+        ->and($alertas[0])->toBeInstanceOf(Alerta::class)
+        ->and($alertas[0]->regra)->toBe('R4')
+        ->and($alertas[0]->severidade)->toBe(ValidacoesCruzadas::SEVERIDADE_BLOQUEIO)
+        ->and($alertas[0]->camposEnvolvidos)->toBe(['Q20', 'Q09'])
+        ->and($alertas[0]->campoFoco)->toBe('Q20');
+});
+
+it('R4 não dispara quando os recebíveis são inferiores à venda mensal', function () {
+    expect(vcAlertasPorRegra(['Q20' => 26000.0, 'Q09' => 40000.0]))->not->toHaveKey('R4');
+});
+
+it('R4 DISPARA no limiar exato (Q20 == Q09) — o Anexo A exige "inferior"', function () {
+    expect(vcAlertasPorRegra(['Q20' => 100000.0, 'Q09' => 100000.0]))->toHaveKey('R4');
+
+    // 1 centavo abaixo do limiar já passa.
+    expect(vcAlertasPorRegra(['Q20' => 99999.99, 'Q09' => 100000.0]))->not->toHaveKey('R4');
+});
+
+it('R4 traz a mensagem acionável do CA-3 com os dois valores e o botão de foco', function () {
+    $alertas = vcValidar(['Q20' => 150000.0, 'Q09' => 100000.0]);
+
+    expect($alertas[0]->mensagem)
+        ->toContain('Recebíveis (R$ 150.000,00)')     // :Q20
+        ->toContain('venda mensal média (R$ 100.000,00)')  // :Q09
+        ->toContain('deve ser inferior à venda mensal')
+        ->and($alertas[0]->botaoLabel)->toBe('Ir para Recebíveis (Q20)');
+});
+
+it('R4 é pulada quando os recebíveis não foram informados (sem captação)', function () {
+    // Q17="não" → o componente entrega Q20 nulo; a regra não pode bloquear ninguém.
+    expect(vcValidar(['Q20' => null, 'Q09' => 100000.0]))->toBe([]);
+    expect(vcValidar(['Q09' => 100000.0]))->toBe([]);
+});
+
+// ============================================================================
+// Filtro por severidade (STORY-043 CA-4) — o gate do Bloco 3 só vê avisos; o
+// submit só vê bloqueios. Uma engine só, dois pontos de consumo.
+// ============================================================================
+
+it('filtra por severidade sem misturar aviso com bloqueio', function () {
+    // Dados que disparam R3 (aviso: passivo > ativo) E R4 (bloqueio: Q20 >= Q09).
+    $valores = [
+        'Q02' => 1000.0, 'Q03' => 1000.0, 'Q04' => 1000.0, 'Q05' => 1000.0,
+        'Q06' => 100000.0, 'Q07' => 100000.0,
+        'Q09' => 100000.0, 'Q20' => 150000.0,
+    ];
+
+    $engine = new ValidacoesCruzadas;
+
+    $todas = array_map(fn (Alerta $a): string => $a->regra, $engine->validar($valores));
+    $avisos = array_map(fn (Alerta $a): string => $a->regra, $engine->validar($valores, ValidacoesCruzadas::SEVERIDADE_AVISO));
+    $bloqueios = array_map(fn (Alerta $a): string => $a->regra, $engine->validar($valores, ValidacoesCruzadas::SEVERIDADE_BLOQUEIO));
+
+    expect($todas)->toContain('R3')->toContain('R4')
+        ->and($avisos)->toContain('R3')->not->toContain('R4')
+        ->and($bloqueios)->toBe(['R4']);
+});
+
+it('filtro por severidade desconhecida não devolve nada (fail-closed)', function () {
+    expect((new ValidacoesCruzadas)->validar(['Q20' => 150000.0, 'Q09' => 100000.0], 'inexistente'))->toBe([]);
+});
+
+// ============================================================================
+// Arquiteturais da config (CA-1) — formato declarativo e severidades conhecidas.
+// ============================================================================
+
+it('toda regra da config declara uma severidade conhecida pela engine', function () {
+    $regras = (array) config('quiz.validacoes-cruzadas.regras');
+
+    expect($regras)->not->toBeEmpty();
+
+    foreach ($regras as $id => $regra) {
+        expect($regra['severidade'] ?? null)->toBeIn(
+            [ValidacoesCruzadas::SEVERIDADE_AVISO, ValidacoesCruzadas::SEVERIDADE_BLOQUEIO],
+            "Regra {$id} declara severidade fora do vocabulário da engine.",
+        );
+    }
+});
+
+it('a config de validações cruzadas é config:cache-safe (nenhuma closure)', function () {
+    $temClosure = function (mixed $valor) use (&$temClosure): bool {
+        if ($valor instanceof Closure) {
+            return true;
+        }
+        if (! is_array($valor)) {
+            return false;
+        }
+
+        foreach ($valor as $item) {
+            if ($temClosure($item)) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    expect($temClosure(config('quiz.validacoes-cruzadas')))->toBeFalse();
+});

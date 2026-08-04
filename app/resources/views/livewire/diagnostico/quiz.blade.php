@@ -299,6 +299,34 @@
             @endif
 
             {{-- ============================== NAVEGAÇÃO ============================== --}}
+
+            {{-- STORY-043 — bloqueios de consistência (severidade `blocking`). Bloco fixo
+                 acima do botão de submit, não banner de bloco: aparece ao tentar calcular
+                 o diagnóstico e some quando o valor é corrigido. Sem "Continuar mesmo
+                 assim" de propósito — é o que separa um bloqueio de um aviso. --}}
+            @if (count($alertas_bloqueantes) > 0)
+                <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4 flex flex-col gap-3"
+                     role="alert" aria-live="assertive" dusk="quiz-bloqueios">
+                    <p class="font-semibold text-[color:var(--color-destructive)] m-0">
+                        Corrija antes de calcular o diagnóstico.
+                    </p>
+                    <ul class="flex flex-col gap-3 list-none m-0 p-0">
+                        @foreach ($alertas_bloqueantes as $bloqueio)
+                            <li class="flex flex-col gap-1.5" dusk="quiz-bloqueio-{{ $bloqueio['regra'] }}">
+                                <p class="text-sm text-[color:var(--color-primary)] m-0">{{ $bloqueio['mensagem'] }}</p>
+                                <div>
+                                    <x-button type="button" variant="secondary" size="sm"
+                                              wire:click="irParaCampo('{{ $bloqueio['campo_foco'] }}')"
+                                              dusk="quiz-bloqueio-corrigir-{{ $bloqueio['regra'] }}">
+                                        {{ $bloqueio['botao_label'] }}
+                                    </x-button>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             @error('submeter')
                 <p class="text-[color:var(--color-destructive)] text-sm m-0 rounded-md border border-[color:var(--color-destructive)]/30 bg-[color:var(--color-destructive)]/5 px-3 py-2"
                    dusk="quiz-erro-submeter">{{ $message }}</p>
