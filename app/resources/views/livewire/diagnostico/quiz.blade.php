@@ -10,10 +10,14 @@
      *   - %:    decimal com vírgula, sufixo "%".
      *   - CPF:  000.000.000-00.
      */
+    // STORY-042 — títulos revisados na devolutiva EBC de 27/05/2026 (Edvan).
+    // O Bloco 2 segue com o título original: o `.docx` não propôs troca e a
+    // pergunta ao Edvan (pauta-retorno §4) não teve resposta até o prazo de
+    // 2026-06-04 — default documentado é manter.
     $tituloBloco = [
         1 => 'Identificação',
         2 => 'DRE e Operação',
-        3 => 'Balanço',
+        3 => 'Saldos Atuais – uma foto da situação econômica do negócio hoje',
         4 => 'Contexto e Captação',
     ][$bloco_atual] ?? '';
 
@@ -115,7 +119,9 @@
             @if ($bloco_atual === 2)
                 <div class="flex flex-col gap-4" dusk="quiz-bloco-2">
                     <p class="text-sm text-[color:var(--color-secondary)] m-0">
-                        Médias mensais dos últimos 12 meses — o motor anualiza (× 12) no cálculo.
+                        {{-- STORY-042: a menção à anualização (× 12) saiu da UI a pedido do
+                             Edvan. O motor continua anualizando em silêncio (DreAdaptada). --}}
+                        Médias mensais dos últimos 12 meses.
                     </p>
 
                     @include('livewire.diagnostico.partials.campo-brl', [
@@ -130,12 +136,12 @@
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
                         'id' => 'Q14', 'label' => 'Custos e despesas fixas',
-                        'help' => 'Folha, contador, aluguel, condomínio, energia, água, telefone, internet, retirada de sócios.',
+                        'help' => 'Folha de Pagamento, Encargos sociais, contador, aluguel, condomínio, energia, água, telefone, internet, franquia, retirada de sócios, etc.',
                         'mask' => $maskBrl,
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
                         'id' => 'Q15', 'label' => 'Custos e despesas variáveis',
-                        'help' => 'Fretes, comissões, tributos, despesas variáveis.',
+                        'help' => 'Fretes, comissões, tributos, despesas de vendas, outras despesas variáveis, etc.',
                         'mask' => $maskBrl,
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
@@ -169,9 +175,10 @@
             {{-- ============================== BLOCO 3 ============================== --}}
             @if ($bloco_atual === 3)
                 <div class="flex flex-col gap-4" dusk="quiz-bloco-3">
-                    <p class="text-sm text-[color:var(--color-secondary)] m-0">
-                        Saldos atuais — uma foto do balanço de hoje.
-                    </p>
+                    {{-- STORY-042: este parágrafo era a versão curta de "Saldos atuais — uma
+                         foto…". O texto revisado do Edvan foi promovido a título do bloco
+                         (ver $tituloBloco acima); manter os dois repetiria a mesma frase
+                         duas vezes na mesma dobra. --}}
 
                     @include('livewire.diagnostico.partials.campo-brl', [
                         'id' => 'Q02', 'label' => 'Recursos disponíveis',
@@ -190,7 +197,7 @@
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
                         'id' => 'Q05', 'label' => 'Patrimônio (imobilizado)',
-                        'help' => 'Imóveis, equipamentos, veículos — valor de venda rápida.',
+                        'help' => 'Imóveis, equipamentos e veículos livres de ônus – valor estimado para venda rápida',
                         'mask' => $maskBrl,
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
@@ -272,9 +279,14 @@
                                 'help' => 'Bancos + particulares.',
                                 'mask' => $maskBrl,
                             ])
+                            {{-- STORY-042 — `help` vazio de propósito: os 2 textos auxiliares do Q20
+                                 saíram da UI a pedido do Edvan. O do multiplicador 3× vira regra
+                                 interna, e o "deve ser inferior à venda mensal" vira validação
+                                 cruzada no backend (STORY-043). O box explicativo do campo é outra
+                                 superfície (config quiz.help-industria) e continua no ar. --}}
                             @include('livewire.diagnostico.partials.campo-brl', [
                                 'id' => 'Q20', 'label' => 'Venda mensal com cartão / duplicatas',
-                                'help' => 'Base de cálculo da capacidade de garantia (3× esse valor). Deve ser inferior à venda mensal total (Q09).',
+                                'help' => '',
                                 'mask' => $maskBrl,
                             ])
                             @include('livewire.diagnostico.partials.socios-list', [

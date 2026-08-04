@@ -7,6 +7,7 @@ use App\Models\Diagnostico;
 use App\Models\EmpresaAnalisada;
 use App\Models\Usuario;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 /**
  * Relatório minimalista `/diagnosticos/{diagnostico}` — STORY-029.
@@ -401,4 +402,71 @@ it('CA-7 (regressão) — resumo sem destaques NÃO renderiza nenhum link clicá
     expect($html)
         ->toContain('data-testid="resumo-executivo"') // resumo renderizado…
         ->not->toContain('data-indicador-link');      // …mas sem destaques clicáveis
+});
+
+// ============================================================================
+// STORY-042 — glossário: ordem dos itens (CA-8) + default vencido da pendência
+// ============================================================================
+
+/**
+ * Termos do glossário na ordem em que aparecem no DOM.
+ *
+ * A ordem é o objeto do CA-8, e `assertSee` é cego a ela — passa com o item em
+ * qualquer posição. Por isso extraímos os `<summary>` do bloco do glossário e
+ * comparamos posições de verdade.
+ *
+ * @return list<string>
+ */
+function termosDoGlossario(string $html): array
+{
+    $glossario = (string) Str::of($html)->after('data-testid="glossario"')->before('</section>');
+
+    preg_match_all('/<summary[^>]*>\s*<span>(.*?)<\/span>/s', $glossario, $m);
+
+    return array_map(fn (string $t): string => html_entity_decode(trim($t), ENT_QUOTES), $m[1]);
+}
+
+it('CA-8 — o item do EBITDA é o 2º da lista do glossário', function () {
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnostico($dono);
+
+    $html = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}")->assertOk()->getContent();
+
+    $termos = termosDoGlossario($html);
+
+    expect($termos)->not->toBeEmpty()
+        ->and($termos[1])->toContain('EBITDA')
+        ->and($termos[1])->toContain('Margem Operacional');
+});
+
+it('CA-8 (borda) — reordenar não pode ter mexido no 1º item nem no total de termos', function () {
+    // O default vencido da pendência com o Edvan manda **manter** o glossário
+    // como está (nenhuma remoção). Uma reordenação feita com corta-e-cola erra
+    // exatamente por aqui: perde ou duplica um item.
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnostico($dono);
+
+    $html = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}")->assertOk()->getContent();
+
+    $termos = termosDoGlossario($html);
+
+    expect($termos)->toHaveCount(12)
+        ->and($termos[0])->toContain('Margem Bruta')
+        ->and(array_unique($termos))->toHaveCount(12);
+});
+
+it('CA-9 (borda) — o item anterior a "Farol / Semáforo" continua no glossário (pendência diferida)', function () {
+    // Edvan pediu "excluir o item que está antes do Farol/Semáforo" sem nomear
+    // qual. Sem resposta até 2026-06-04 → manter. Este teste trava o default:
+    // uma remoção futura sem decisão do PO derruba o build.
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnostico($dono);
+
+    $html = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}")->assertOk()->getContent();
+
+    $termos = termosDoGlossario($html);
+    $posFarol = array_search('Farol / Semáforo', $termos, strict: true);
+
+    expect($posFarol)->toBeInt()->toBeGreaterThan(0)
+        ->and($termos[$posFarol - 1])->toBe('Necessidade de Capital de Giro (NCG)');
 });

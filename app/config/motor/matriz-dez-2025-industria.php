@@ -117,8 +117,15 @@ return [
     // F.13 NCG absoluto — informativo, NÃO consumido por NcgAbsoluto.php (manteve 3 mensagens hardcoded).
     // Entrada presente para satisfazer CA-2 da STORY-032 (cobertura editorial completa
     // do Anexo F) e roadmap futuro de exibição educativa.
+    //
+    // **Divergência deliberada em relação ao Anexo F** (STORY-042, devolutiva EBC de
+    // 27/05/2026): o cenário `positiva` perdeu a primeira frase ("O crescimento das
+    // vendas e o aumento do prazo concedido a clientes gera maior NCG.") por revisão
+    // do próprio autor do Anexo F (Edvan / EB Parcerias). Este arquivo passa a ser a
+    // versão vigente; o Anexo F §F.13 ainda carrega o texto longo e precisa ser
+    // atualizado pelo PO — é documento editorial de propriedade da EBC.
     'ncg_absoluto' => [
-        'positiva' => 'O crescimento das vendas e o aumento do prazo concedido a clientes gera maior NCG. A elevação deve ser acompanhada, na mesma proporção, pelo aumento das fontes de financiamento de longo prazo, preferencialmente de fornecedores.',
+        'positiva' => 'A elevação deve ser acompanhada, na mesma proporção, pelo aumento das fontes de financiamento de longo prazo, preferencialmente de fornecedores.',
         'negativa' => 'Teoricamente, a empresa não necessita de recursos para o giro. NCG negativa significa Investimento Operacional em Giro (IOG).',
     ],
 
