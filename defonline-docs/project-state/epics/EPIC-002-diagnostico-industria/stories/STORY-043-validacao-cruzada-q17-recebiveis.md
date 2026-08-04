@@ -181,6 +181,7 @@ Captura consistência de input mínima para o motor: `recebíveis` é base da ca
 
 ### Links de evidência
 
+- **Commit:** `5c27eed` — `feat(quiz): R4 bloqueante de recebíveis na engine de validações cruzadas — STORY-043`.
 - **Arquivos de produção tocados (5):**
   - `app/Domain/Quiz/ValidacoesCruzadas.php` — constantes de severidade + filtro (CA-7).
   - `app/Domain/Quiz/Alerta.php` — docblock do contrato de severidade.
