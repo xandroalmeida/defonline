@@ -60,8 +60,11 @@ final class Motor
     public function calcular(array $payload, string $setor): array
     {
         if ($setor !== 'industria') {
+            // Versão lida do config: hardcodá-la aqui já tinha deixado a mensagem
+            // desatualizada uma vez (dizia 1.2.0 com o motor em 1.3.0).
             throw new \InvalidArgumentException(
-                "Setor '{$setor}' não suportado pelo motor (1.2.0). Esta versão atende apenas Indústria; ".
+                "Setor '{$setor}' não suportado pelo motor (".config('motor.version').'). '.
+                'Esta versão atende apenas Indústria; '.
                 'Comércio/Serviços entram em estória posterior do EPIC-002.',
             );
         }

@@ -26,29 +26,38 @@ use App\Domain\Motor\Motor;
 */
 
 dataset('golden_fixtures', [
-    // Hashes re-emitidos na STORY-032 (motor 1.2.0 → 1.3.0):
-    // mensagem placeholder "Faixa verde/amarela/vermelha." substituída pelo
-    // texto literal da matriz dez-2025 (Anexo F, coluna Indústria).
-    // Destaques do resumo_executivo herdam os textos novos automaticamente.
+    // Hashes re-emitidos na STORY-041 (motor 1.3.0 → 1.3.1):
+    // veredito `em_alerta` passou de "demandam ação" para "demandam ações"
+    // (texto canônico da spec §4.7.1). **Os 5 hashes mudam, mas por dois
+    // motivos distintos** — verificado isolando o bump:
+    //   - `alerta` é o único cujo texto de veredito mudou de fato;
+    //   - os outros 4 mudam só porque `motor_version` faz parte do payload
+    //     hasheado (Motor::calcular devolve `motor_version` na saída).
+    // Com a versão fixada de volta em 1.3.0, os 4 voltam ao hash anterior —
+    // ou seja, não há regressão de cálculo escondida atrás deste re-emit.
+    //
+    // Hashes anteriores (STORY-032, motor 1.3.0): mensagem placeholder
+    // "Faixa verde/amarela/vermelha." substituída pelo texto literal da
+    // matriz dez-2025 (Anexo F, coluna Indústria).
     'saudavel' => [
         'quiz_industria_saudavel.json',
-        '96cdd0e777eeea8aef00a614946c356014e60091cb7137f3353c263fb2fff018',
+        '9eaa789e676f8668ac1aa9ffb2c589c1a1da58c39fb87d4877bc032a482816a9',
     ],
     'atencao' => [
         'quiz_industria_atencao.json',
-        '33f6baf8aa3d02bbd7b373b3452e1774b565d05156deb3c46f1192456ba118cc',
+        '71ce9a88f2ef0c8d735ada976fd3b78af7b278fe1830db5b16d37fdc79743829',
     ],
     'alerta' => [
         'quiz_industria_alerta.json',
-        'b77ec453af3ce4fa54a7e88da6dbe60f831e0eb29ee7523d58cfcc5321525038',
+        '9d89a89ce3f764637d7522862bf28bcdd76380553ca02ab02b8ec8631fdab64c',
     ],
     'ncg_negativo' => [
         'quiz_industria_ncg_negativo.json',
-        '25e11b1279b3599865642716c6ee03850594e57d07ed59e87930f35ac1ea0848',
+        '5a3a855d6ace5c8fb11cfee9994171bce8e73ff2a426ca74989fa823d825b10b',
     ],
     '70pct_indisponivel' => [
         'quiz_industria_70pct_indisponivel.json',
-        '0011bb5d1d2d82bae24e210ba69ce515b45690a93ca6f1fc9ee08c570ae9e318',
+        'a858410d56aa98d6a677e14f25b4bfdf53692b11a4fca263fcf0b5a775dbafa8',
     ],
 ]);
 

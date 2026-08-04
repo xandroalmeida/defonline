@@ -481,7 +481,7 @@ Linha 5: Veja a tabela abaixo para análise detalhada e recomendações específ
 Textos do veredito (linha 1):
 - **Saudável:** *"Sua empresa apresenta indicadores saudáveis no período avaliado."*
 - **Precisa de atenção:** *"Sua empresa apresenta pontos de atenção que merecem acompanhamento."*
-- **Em alerta:** *"Sua empresa apresenta indicadores em estado de alerta que demandam ação."*
+- **Em alerta:** *"Sua empresa apresenta indicadores em estado de alerta que demandam ações."*
 
 Linha 5 é fixa: *"Veja a tabela abaixo para análise detalhada e recomendações específicas."*
 

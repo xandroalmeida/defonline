@@ -395,3 +395,70 @@ it('contrato — caso fallback tem todos os campos esperados (NOT NULL no banco)
     ]);
     expect($out['mensagem_fallback'])->toBeString()->not->toBe('');
 });
+
+/*
+| ----------------------------------------------------------------------
+| STORY-041 — texto canônico dos vereditos (spec §4.7.1, Passo 4).
+|
+| O `veredito_texto` NÃO é texto de render: ele sai do motor, entra no
+| snapshot imutável `diagnosticos.resumo_executivo` (IDR-010 §sub-decisão 2)
+| e no JSON que alimenta os golden hashes. Por isso a tabela de textos é
+| congelada aqui por igualdade estrita da string inteira — qualquer troca
+| de palavra é mudança de output do motor e exige bump de `motor_version`.
+| ----------------------------------------------------------------------
+*/
+
+it('CA-1/STORY-041 — veredito em_alerta usa "demandam ações" (plural)', function () {
+    // Mesmo cenário do teste de em_alerta acima: 5 vermelhos → V/N = 5/13 ≈ 0,38 ≥ 0,30.
+    $out = $this->resumo->gerar(snapshot([
+        'margem_bruta' => indicador(5.0, Farol::VERMELHO),
+        'margem_ebitda' => indicador(0.0, Farol::VERMELHO),
+        'margem_liquida' => indicador(0.0, Farol::VERMELHO),
+        'divida_liquida_ebitda' => indicador(9.0, Farol::VERMELHO),
+        'despesas_fin_ebitda' => indicador(70.0, Farol::VERMELHO),
+    ]), '1.3.1');
+
+    expect($out['veredito'])->toBe('em_alerta');
+    expect($out['veredito_texto'])
+        ->toBe('Sua empresa apresenta indicadores em estado de alerta que demandam ações.');
+});
+
+it('CA-2/STORY-041 — textos dos 3 vereditos + fallback ficam congelados', function () {
+    // Um cenário por saída possível do classificador, exercitando a API pública
+    // (nada de reflection na constante — o que importa é o que o motor devolve).
+    $indispo = indicador(null, Farol::NENHUM, '', 'indisponivel:teste');
+
+    $cenarios = [
+        // Todos verdes → saudavel.
+        'saudavel' => [],
+        // 1 vermelho, 0 amarelos → precisa_atencao (regra V ≥ 1, V/N < 0,30).
+        'precisa_atencao' => [
+            'margem_liquida' => indicador(2.0, Farol::VERMELHO),
+        ],
+        // 5 vermelhos → em_alerta (V/N ≈ 0,38 ≥ 0,30).
+        'em_alerta' => [
+            'margem_bruta' => indicador(5.0, Farol::VERMELHO),
+            'margem_ebitda' => indicador(0.0, Farol::VERMELHO),
+            'margem_liquida' => indicador(0.0, Farol::VERMELHO),
+            'divida_liquida_ebitda' => indicador(9.0, Farol::VERMELHO),
+            'despesas_fin_ebitda' => indicador(70.0, Farol::VERMELHO),
+        ],
+        // 100% indisponíveis → fallback (I/14 ≥ 0,70).
+        'fallback' => array_fill_keys(ResumoExecutivo::CODIGOS_ANEXO_D, $indispo),
+    ];
+
+    $textos = [];
+    foreach ($cenarios as $esperado => $overrides) {
+        $out = $this->resumo->gerar(snapshot($overrides), '1.3.1');
+        expect($out['veredito'])->toBe($esperado, "Cenário montado para '{$esperado}' não produziu esse veredito.");
+        $textos[$esperado] = $out['veredito_texto'];
+    }
+
+    expect($textos)->toBe([
+        'saudavel' => 'Sua empresa apresenta indicadores saudáveis no período avaliado.',
+        'precisa_atencao' => 'Sua empresa apresenta pontos de atenção que merecem acompanhamento.',
+        'em_alerta' => 'Sua empresa apresenta indicadores em estado de alerta que demandam ações.',
+        // Fallback não tem texto de veredito — tem `mensagem_fallback` (Passo 5).
+        'fallback' => null,
+    ]);
+});

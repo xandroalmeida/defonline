@@ -62,10 +62,20 @@ final class ResumoExecutivo
         'inadimplencia',          // #14
     ];
 
+    /**
+     * Textos literais do veredito (spec §4.7.1, Passo 4).
+     *
+     * **Estes textos são output do motor, não texto de render.** Eles entram no
+     * snapshot imutável `diagnosticos.resumo_executivo` (IDR-010 §sub-decisão 2)
+     * e no JSON que alimenta os golden hashes. Trocar uma palavra aqui muda o
+     * output do motor → exige **bump de `motor_version`** + re-emissão dos golden
+     * hashes afetados, no mesmo PR (IDR-010 §sub-decisão 3). Diagnósticos já
+     * emitidos mantêm o texto antigo — é o snapshot, não o config, que Roberto vê.
+     */
     private const VEREDITOS_TEXTO = [
         'saudavel' => 'Sua empresa apresenta indicadores saudáveis no período avaliado.',
         'precisa_atencao' => 'Sua empresa apresenta pontos de atenção que merecem acompanhamento.',
-        'em_alerta' => 'Sua empresa apresenta indicadores em estado de alerta que demandam ação.',
+        'em_alerta' => 'Sua empresa apresenta indicadores em estado de alerta que demandam ações.',
     ];
 
     private const LINHA_FIXA = 'Veja a tabela abaixo para análise detalhada e recomendações específicas.';
