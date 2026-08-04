@@ -53,14 +53,26 @@
         create_home: true
         state: present
 
-    - name: Sudoers — deploy NOPASSWD apenas para `docker compose`, `systemctl restart`
+    # NOPASSWD irrestrito — divergência consciente da ADR-005 §7.4, que previa
+    # uma lista de binários. A lista não funciona: `docker.yml` e `backup.yml`
+    # usam `become: true` no play inteiro, e o Ansible precisa executar Python
+    # arbitrário como root (nem o `setup` de facts roda). Como o `deploy` foi
+    # criado sem senha, o fallback interativo do sudo é impossível e o play
+    # morre com "interactive authentication is required".
+    #
+    # Não amplia o risco real: o `deploy` está no grupo `docker` (docker.yml), e
+    # acesso ao socket do Docker já é equivalente a root — basta subir um
+    # container montando `/`. A lista restrita era simbólica, não efetiva.
+    # `validate` com visudo evita gravar um sudoers quebrado (lockout).
+    - name: Sudoers — deploy NOPASSWD (provisionamento Ansible exige root irrestrito)
       ansible.builtin.copy:
         dest: /etc/sudoers.d/deploy
         owner: root
         group: root
         mode: "0440"
+        validate: /usr/sbin/visudo -cf %s
         content: |
-          {{ deploy_user }} ALL=(root) NOPASSWD: /usr/bin/docker, /usr/bin/docker-compose, /usr/local/bin/docker-compose, /usr/bin/systemctl, /usr/sbin/ufw
+          {{ deploy_user }} ALL=(root) NOPASSWD: ALL
 
     - name: Authorized keys do deploy (chave pública do CI/dev)
       ansible.posix.authorized_key:

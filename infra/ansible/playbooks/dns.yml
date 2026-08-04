@@ -1,0 +1,61 @@
+---
+# DNS Cloudflare — aponta {{ app_domain }} para o IPv4 da VPS (ADR-005 §3).
+#
+# Roda ANTES do app.yml de propósito: o Caddy só consegue emitir o certificado
+# Let's Encrypt (desafio HTTP-01) depois que o nome já resolve para o IP da VPS,
+# e o smoke final do app.yml bate em https://{{ app_domain }}/health.
+#
+# `solo: true` garante que o A record seja o único daquele nome — é o que torna
+# a troca de VPS idempotente: o IP antigo é substituído, não acumulado.
+#
+# A tarefa é uma chamada de API: roda em localhost, não na VPS.
+
+- name: Apontar DNS Cloudflare para a VPS
+  hosts: homolog
+  gather_facts: false
+
+  tasks:
+    - name: Abortar se o provedor de DNS do inventário não for cloudflare
+      ansible.builtin.assert:
+        that: dns_provider == 'cloudflare'
+        fail_msg: >-
+          dns_provider={{ dns_provider }} — este playbook só gerencia Cloudflare.
+          Ajuste inventories/{{ env_name }}/hosts.yml ou pule com --skip-tags dns.
+
+    - name: "A record {{ app_domain }} -> {{ ansible_host }} (proxy off)"
+      community.general.cloudflare_dns:
+        api_token: "{{ cloudflare_api_token }}"
+        zone: "{{ cloudflare_zone }}"
+        record: "{{ app_domain }}"
+        type: A
+        value: "{{ ansible_host }}"
+        proxied: "{{ cloudflare_record_proxied }}"
+        ttl: "{{ cloudflare_record_ttl }}"
+        solo: true
+        state: present
+      delegate_to: localhost
+      register: cf_record
+
+    - name: Resultado
+      ansible.builtin.debug:
+        msg: >-
+          {{ app_domain }} -> {{ ansible_host }}
+          (proxied={{ cloudflare_record_proxied }}, ttl={{ cloudflare_record_ttl }}s,
+          changed={{ cf_record.changed }})
+
+    # A propagação é quase imediata com a zona já autoritativa na Cloudflare,
+    # mas o resolver local pode ter cacheado o NXDOMAIN anterior. Consultamos o
+    # NS autoritativo direto para não depender de cache.
+    - name: Aguardar o nome resolver no NS autoritativo
+      ansible.builtin.command:
+        cmd: "dig +short {{ app_domain }} A @dina.ns.cloudflare.com"
+      delegate_to: localhost
+      register: dns_check
+      changed_when: false
+      # Read-only: precisa rodar mesmo em --check, senão o `until` esgota as
+      # tentativas ("Command would have run if not in check mode") e o drift-run
+      # da ADR-005 (site.yml --check --diff) reporta falha falsa.
+      check_mode: false
+      retries: 12
+      delay: 5
+      until: ansible_host in dns_check.stdout

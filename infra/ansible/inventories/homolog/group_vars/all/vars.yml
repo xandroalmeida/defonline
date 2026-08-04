@@ -19,6 +19,21 @@ repo_branch: main                      # imagem vem de tag git; código só serv
 container_registry: ghcr.io
 container_image: xandroalmeida/defonline/app
 
+# Chave pública instalada no authorized_keys do usuário `deploy` pelo bootstrap.yml.
+# Par privado em `secrets/deploy-homolog.key` (gitignored) — usado pelo CI e pelo dev.
+# Caminho relativo ao playbook (infra/ansible/playbooks) → raiz do repo.
+deploy_authorized_key_path: "{{ playbook_dir }}/../../../secrets/deploy-homolog.key.pub"
+
+# DNS Cloudflare (ADR-005 §3 + §"Pós-MVP: automatizar via cloudflare_dns").
+# A zona xandrix.com.br já é autoritativa na Cloudflare (dina/corey.ns.cloudflare.com).
+# `proxied: false` é obrigatório, não preferência: o Caddy emite o certificado
+# Let's Encrypt via desafio HTTP-01, e o proxy laranja termina o TLS na borda da
+# Cloudflare, quebrando a emissão. ADR-005 §"Modo proxy desligado no MVP".
+cloudflare_zone: xandrix.com.br
+cloudflare_record_proxied: false
+cloudflare_record_ttl: 300
+cloudflare_api_token: "{{ vault_cloudflare_api_token }}"
+
 # Postgres (ADR-001 + ADR-003 + ADR-005)
 postgres_image: postgres:18-alpine
 postgres_db: defonline

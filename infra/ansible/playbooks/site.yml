@@ -7,6 +7,11 @@
 - name: Docker Engine + Compose plugin
   import_playbook: docker.yml
 
+# Antes do app.yml: o Caddy precisa do nome resolvendo para emitir o
+# certificado Let's Encrypt (HTTP-01), e o smoke do app.yml usa a URL pública.
+- name: DNS Cloudflare (A record -> IP da VPS)
+  import_playbook: dns.yml
+
 - name: App (compose up + migrate)
   import_playbook: app.yml
 

@@ -19,7 +19,13 @@
     image_tag: "{{ app_version | default('latest') }}"
 
   tasks:
+    # Única task que exige root: /opt é de propriedade do root, então criar
+    # /opt/defonline e transferir a posse para o deploy precisa de become. As
+    # subpastas seguintes já caem dentro deste diretório (deploy) e dispensam
+    # become. (O comentário do play que atribuía essa criação ao bootstrap.yml
+    # estava incorreto — nada lá cria /opt/defonline.)
     - name: Diretório base /opt/defonline
+      become: true
       ansible.builtin.file:
         path: "{{ deploy_dir }}"
         state: directory
@@ -58,6 +64,9 @@
         owner: "{{ deploy_user }}"
         group: "{{ deploy_user }}"
         mode: "0640"
+      # env.j2 tem APP_VERSION={{ app_version }} — mesmo motivo do compose.
+      vars:
+        app_version: "{{ image_tag }}"
       no_log: true
 
     - name: Docker-compose.yml (template renderizado para produção/homologação)
@@ -67,6 +76,11 @@
         owner: "{{ deploy_user }}"
         group: "{{ deploy_user }}"
         mode: "0644"
+      # O template usa {{ app_version }} para a tag da imagem. Sem este mapeamento,
+      # o `-e image_tag=` da invocação não chegava ao compose e caía no
+      # `rc-placeholder` do group_vars. Espelha o que o deploy.yml já faz.
+      vars:
+        app_version: "{{ image_tag }}"
 
     - name: Caddyfile (TLS automático Let's Encrypt — ADR-005 §3)
       ansible.builtin.template:
