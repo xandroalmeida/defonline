@@ -21,7 +21,7 @@ decisoes: [PDR-003, PDR-004]
 O coração do módulo, e a parte mais simples dele: somas e subtrações encadeadas sobre até 36 entradas, produzindo 11 linhas com valor nominal e percentual sobre a receita. A dificuldade não é o cálculo — é o rigor. Este motor produz o número que o usuário vai usar para decidir preço e contratação, e que vai alimentar a série histórica pelos próximos anos. Erro aqui é erro que se propaga e que ninguém percebe.
 
 - Épico: `epics/EPIC-010-drm-demonstracao-resultado-mensal/epic.md`
-- Ler antes: `epics/EPIC-010-*/design/estrutura-drm.md` (**referência aritmética canônica — é o contrato desta estória**); `especificacao/V2/anexos/anexo-K-campos-lancamento-drm.md`; a decisão da STORY-045
+- Ler antes: `epics/EPIC-010-*/design/estrutura-drm.md` (**referência aritmética canônica — é o contrato desta estória**); `especificacao/V2/anexos/anexo-K-campos-lancamento-drm.md`; **`decisions/adr/ADR-007-modelo-dados-drm-versionamento-retificacao.md`** (decisão da STORY-045; ver §*Para o time — impacto por estória*)
 - Código existente a estudar: o motor de Diagnóstico e seus indicadores. Ele já resolveu pureza, aritmética exata, versionamento, resultado indisponível com motivo semântico e teste arquitetural de pureza. **Siga o mesmo padrão.**
 
 ## O quê
@@ -45,7 +45,7 @@ Implementar o motor que transforma um lançamento mensal na Demonstração de Re
 - [ ] **CA-6 (EBITDA padrão):** o motor calcula `L5 − (L6 + pró-labore)`, que é o Resultado Operacional do modo `dentro`. Com o `PDR-004`, este valor **deixou de ser um cálculo paralelo oculto** e passou a ser exibido quando o modo `dentro` está ativo — é o mesmo número, agora com uso.
 - [ ] **CA-7 (Pureza):** o motor não lê banco, não usa relógio, não usa sessão nem usuário autenticado. Competência e carimbo de tempo entram como parâmetro. Garantido por **teste arquitetural**, no mesmo padrão já usado pelo motor de Diagnóstico.
 - [ ] **CA-8 (Aritmética exata):** sem ponto flutuante. Arredondamento apenas na formatação. Resultado bit-exato e reprodutível.
-- [ ] **CA-9 (Versionamento):** o motor tem versão semântica própria, independente do motor de Diagnóstico, gravada em cada snapshot. Diagnósticos e lançamentos antigos **nunca** são recalculados.
+- [ ] **CA-9 (Versionamento):** o motor tem versão semântica própria, independente do motor de Diagnóstico, gravada em cada snapshot. Diagnósticos e lançamentos antigos **nunca** são recalculados. Conforme o `ADR-007`: campo `motor_drm_version`, `config/drm.php` com `version = '1.0.0'`, **contador independente** (bumpar um nunca bumpa o outro) e **sem `matrix_version`** — o DRM não usa a matriz do Diagnóstico.
 - [ ] **CA-10 (Golden tests):** conjunto de casos congelados cobrindo, no mínimo: um mês saudável por setor, um mês com prejuízo, um mês sem faturamento, um mês com todos os grupos agregados, um mês com todos detalhados, um mês misto, e cada um dos dois modos de pró-labore. Alteração de saída deve quebrar o teste — é esse o objetivo.
 - [ ] **CA-11 (Conferência com a planilha original):** teste que reproduz, para um conjunto de entradas, exatamente os valores que a planilha `Demonstração de Resultado Mensal - DRM.xlsx` produziria, célula a célula, conforme o mapeamento do Anexo K §K.11. Evidência anexada nas notas.
 - [ ] **CA-12 (Cobertura):** ≥ 98% — é núcleo de regra de negócio.
@@ -74,7 +74,9 @@ Esta estória estava `blocked` por `[DECIDIR-B]` e `[DECIDIR-E]`. **Ambas resolv
 
 - `design/estrutura-drm.md` v1.1 é o contrato aritmético. Divergiu, é bug.
 - PDR-004 — dois modos de pró-labore (default `fora`), percentual em todas as linhas, rótulo "antes do pró-labore", linhas não operacionais aprovadas.
-- PDR-003; Anexo K v1.1; decisão da STORY-045; IDR-010 (padrão snapshot, não recálculo).
+- PDR-003; Anexo K v1.1; **ADR-007** (decisão da STORY-045); IDR-010 (padrão snapshot, não recálculo — estendido pelo ADR-007, não revogado).
+
+**Do `ADR-007`, o que muda para você:** a `demonstracao` que você devolve é **auto-descritiva** (lista de linhas com código, nível, rótulo, nominal, percentual e motivo) e carrega **os dois modos de pró-labore já resolvidos, com rótulos** — `demonstracao.linhas.fora[]` e `demonstracao.linhas.dentro[]`. Persistir os rótulos é obrigatório, não conveniência: é a lição do aditivo de 04/08/2026 do IDR-010, quando trocar uma palavra num texto de veredito se revelou output do motor. Com isso, o CA-1b sai do motor e a troca de modo da tela vira escolher o outro array. Nominais serializados como string com casas fixas.
 
 ## Liberdade técnica do agente
 

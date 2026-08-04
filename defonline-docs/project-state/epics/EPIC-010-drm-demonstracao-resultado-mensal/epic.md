@@ -66,14 +66,14 @@ Ao fim deste épico, **o dono de um pequeno negócio — indústria, comércio o
 
 - **Bloqueia:** EPIC-005 (cobrança) — o modelo de assinatura pressupõe a recorrência que este épico cria.
 - **Bloqueado por:** EPIC-001 (Empresa Analisada) e EPIC-004 (app shell + design system) — ambos `done`. EPIC-002 não é pré-requisito.
-- **Decisões arquiteturais necessárias:** versionamento e retificação de competência (`STORY-045`, colide com IDR-010); motor de exportação em planilha e PDF (`STORY-053`, compartilhado com EPIC-007). Ambas abertas como spike **antes** da implementação correspondente.
+- **Decisões arquiteturais necessárias:** versionamento e retificação de competência — **resolvida em 04/08/2026 pelo `ADR-007`** (`STORY-045` `done`; `STORY-047` a `STORY-051` destravadas); motor de exportação em planilha e PDF (`STORY-053`, compartilhado com EPIC-007), ainda aberta como spike **antes** da implementação correspondente.
 - **Decisões de negócio:** `[DECIDIR-B]`, `[DECIDIR-C]`, `[DECIDIR-D]` e `[DECIDIR-E]` **resolvidas em 04/08/2026** pelo `PDR-004` — a `STORY-048` está desbloqueada. Permanecem: `[DECIDIR-A]` (nome "Raio X do Negócio", não bloqueia nada) e as **faixas de farol por setor**, que exigem validação externa da EBC e mantêm a `STORY-052` bloqueada.
 
 ## Estórias
 
 **Checkpoint 1 — caminho feliz vivo** (lança um mês e vê a demonstração)
 
-- [ ] STORY-045 (spike, arquiteto) — Modelo de dados, versionamento e retificação de competência
+- [x] STORY-045 (spike, arquiteto) — Modelo de dados, versionamento e retificação de competência → **`ADR-007` accepted (04/08/2026)**
 - [ ] STORY-046 (design) — Specs das telas do módulo DRM
 - [ ] STORY-047 — Lançamento mensal: formulário adaptativo, modos agregado/detalhado, rascunho
 - [ ] STORY-048 — Motor do DRM: estrutura canônica, três setores, nominal e percentual
@@ -111,11 +111,12 @@ Critérios em `validation/checklist.md`. Relatório do validador em `validation/
 | Faixas de farol sem validação externa | Médio — módulo entrega sem semáforo | Faixa não validada simplesmente não recebe farol. A demonstração e os comparativos entregam valor sem ele; o farol é camada adicional, não requisito |
 | **Provisão de férias e 13º (`PDR-004`, decisão D) não caber no épico** | Médio — expectativa de negócio não atendida nesta onda | Spike próprio (`STORY-058`) com três saídas legítimas, incluindo virar EPIC-011. A `STORY-051` entrega o tratamento interino independentemente, e responde à dor concreta |
 | Dois modos de pró-labore dobram a superfície de teste | Baixo | O modo é apresentação, não cálculo — o custo é de teste de tela e exportação, não de modelagem. Invariante testável: Lucro Líquido idêntico nos dois modos |
-| Retificação conflita com o IDR-010 | Alto se decidido tarde | Spike é a primeira estória do épico, antes de qualquer linha de implementação |
+| ~~Retificação conflita com o IDR-010~~ | **Resolvido** | O `ADR-007` mostrou que a colisão era aparente — ela some ao separar *imutabilidade do registro* de *mutabilidade do conceito*. O IDR-010 é **estendido**, não revogado nem restringido, e nenhuma linha dele mudou |
 | ~~Divergência de EBITDA entre DRM e Diagnóstico~~ | **Resolvido** | O `PDR-004` tornou a posição do pró-labore parametrizável: quem quiser reconciliar os dois módulos liga o modo "dentro" e os números passam a conversar |
 | PDF abre frente técnica nova | Médio — é o EPIC-007 antecipado | Spike próprio (STORY-053), no Checkpoint 3; se a decisão for cara, a exportação em planilha entrega sozinha e o PDF volta ao EPIC-007 |
 
 ## Histórico
 
 - 2026-08-04 — criado pelo PO a partir do feedback do Key User José Marques (03/08/2026) e do parecer favorável da EBC. Decisão de escopo em PDR-003.
+- 2026-08-04 — **`ADR-007` aceito** (spike `STORY-045`). Modelo de dados do DRM fechado: três tabelas `drm_*`, competência versionada append-only com ponteiro de vigência, snapshot imutável por versão carregando os dois modos de pró-labore, comparativos e faróis derivados na leitura. Risco "retificação conflita com o IDR-010" **eliminado** — o IDR-010 é estendido, não revogado. `STORY-047` a `STORY-051` destravadas; o Checkpoint 1 pode começar. Duas consequências para estórias adiante: a `STORY-054` precisa deixar legível que o farol é leitura (pode mudar de cor retroativamente quando a EBC calibrar as faixas; valores nunca mudam), e a `STORY-049` precisa renderizar o snapshot genericamente, sem hardcode das linhas.
 - 2026-08-04 — `PDR-004` resolveu as quatro decisões de negócio pendentes. `STORY-048` desbloqueada e promovida a `L` (dois modos de pró-labore + linhas não operacionais); `STORY-049` e `STORY-051` ajustadas; `STORY-058` (spike de provisão) criada; `STORY-052` segue bloqueada só pelas faixas de farol. Risco de divergência de EBITDA eliminado pela parametrização.

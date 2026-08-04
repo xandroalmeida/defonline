@@ -20,7 +20,7 @@ estimated_session_size: L
 Esta é a estória de maior risco do épico. Não pelo cálculo — que é trivial — mas porque é aqui que o usuário decide se volta no mês seguinte. Os três mecanismos anti-atrito do PDR-003 não são "nice to have": são o produto.
 
 - Épico: `epics/EPIC-010-drm-demonstracao-resultado-mensal/epic.md`
-- Ler antes: `especificacao/V2/anexos/anexo-K-campos-lancamento-drm.md` (integral — é a referência canônica dos campos); a decisão da STORY-045; os specs da STORY-046; `decisions/pdr/PDR-003-*.md`
+- Ler antes: `especificacao/V2/anexos/anexo-K-campos-lancamento-drm.md` (integral — é a referência canônica dos campos); **`decisions/adr/ADR-007-modelo-dados-drm-versionamento-retificacao.md`** (decisão da STORY-045 — modelo de persistência; ver §*Para o time — impacto por estória*); os specs da STORY-046; `decisions/pdr/PDR-003-*.md`
 - Código existente a estudar antes: o componente de Quiz do Diagnóstico e o mecanismo de rascunho. Reaproveite padrões — máscara BRL, validação declarativa, persistência de rascunho, tooltips. **Não crie um segundo dialeto de formulário no produto.**
 
 ## O quê
@@ -42,7 +42,7 @@ Sem entrada não há módulo. E sem entrada de baixo atrito não há segundo mê
 - [ ] **CA-7 (Entrada em reais):** todos os campos monetários com máscara BRL, valor mínimo zero, negativos rejeitados (regra B3). **Nenhum campo pede valor "em mil reais"** (PDR-003, decisão 1).
 - [ ] **CA-8 (Regras bloqueantes):** B1 a B4 do Anexo K §K.6 impedem o fechamento, com mensagem específica por regra.
 - [ ] **CA-9 (Alertas):** A1, A2, A3 e A5 sinalizam e permitem prosseguir mediante aceite explícito, registrado junto ao lançamento — mesmo padrão do `alertas_aceitos` do Diagnóstico. A4 e A6 dependem de histórico e entram na STORY-051; deixe o ponto de extensão preparado, sem implementá-las.
-- [ ] **CA-10 (Persistência):** lançamento fechado é persistido conforme a decisão da STORY-045, incluindo o modo de cada grupo e os alertas aceitos.
+- [ ] **CA-10 (Persistência):** lançamento fechado é persistido conforme o `ADR-007` — `versao = 1` em `drm_lancamentos`, com o **modo de cada grupo dentro do `lancamento_payload`** (entra no `payload_hash`) e os **alertas aceitos em coluna própria** (fora do hash). Regra B1 é atendida pelo índice único parcial: trate a violação de unicidade como "já existe" e ofereça abrir/retificar — **não** dependa de um `exists()` prévio, que sempre tem janela de corrida. Regra B2 (competência futura) é validação de aplicação, não `CHECK` (depende de `now()`, que o Postgres recusa em constraint).
 - [ ] **CA-11 (Mobile):** fluxo completável em viewport 360×800 sem scroll horizontal, alvo de toque ≥ 44×44px.
 - [ ] **CA-12 (Testes):** unitários das regras de validação e da adaptação por setor; feature cobrindo o fluxo completo nos três setores, os dois modos, retomada de rascunho e cada regra bloqueante; E2E em browser percorrendo lançamento completo em pelo menos um setor.
 - [ ] **CA-13 (Cobertura):** ≥ 80% no código novo; ≥ 98% no que for regra de negócio.
@@ -65,11 +65,13 @@ Sem entrada não há módulo. E sem entrada de baixo atrito não há segundo mê
 
 ## Decisões já tomadas (não as reabra)
 
-- PDR-003 (todas as decisões de escopo); Anexo K; a decisão da STORY-045; ADR-003; IDR-008; IDR-009.
+- PDR-003 (todas as decisões de escopo); Anexo K; **ADR-007** (decisão da STORY-045); ADR-003; IDR-008; IDR-009.
 
 ## Liberdade técnica do agente
 
-Você decide estrutura de código, composição de componentes, forma da validação declarativa e desenho dos testes. Você **não** decide: quais campos existem (Anexo K), o modelo de persistência (STORY-045), o layout (STORY-046), nem os critérios de aceite.
+Você decide estrutura de código, composição de componentes, forma da validação declarativa e desenho dos testes. Você **não** decide: quais campos existem (Anexo K), o modelo de persistência (`ADR-007`), o layout (STORY-046), nem os critérios de aceite.
+
+Um ponto que o `ADR-007` deixou explicitamente para você, e que merece IDR: **como garantir que o DRM não seja capaz de alterar `diagnosticos.payload_hash`.** A canonicalização do DRM segue as mesmas cinco regras do IDR-010; se você optar por extrair um canonicalizador compartilhado em vez de manter dois, os golden hashes do Diagnóstico são o estopim obrigatório em CI. O mecanismo é seu; a restrição não é negociável.
 
 Se descobrir que o Anexo K é ambíguo ou incompleto, **pare e registre** — não invente campo nem regra.
 

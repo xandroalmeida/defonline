@@ -1346,7 +1346,7 @@
       "title": "Spike — modelo de dados do DRM, versionamento e retificação de competência",
       "type": "spike",
       "target_role": "arquiteto",
-      "status": "ready",
+      "status": "done",
       "estimated_session_size": "M",
       "blocked_by": [],
       "blocks": [
@@ -1358,10 +1358,10 @@
         "STORY-057",
         "STORY-058"
       ],
-      "note": "Estória mais crítica do épico. O DRM é o primeiro objeto retificável do produto e colide com o IDR-010 (snapshot imutável). IDR-010 não é revogado. 8 perguntas a responder. Abre o épico junto com STORY-046.",
+      "note": "Estória mais crítica do épico. O DRM é o primeiro objeto retificável do produto e colide com o IDR-010 (snapshot imutável). IDR-010 não é revogado. 8 perguntas a responder. Abre o épico junto com STORY-046. Entregue: ADR-007 (proposed) responde às 8 perguntas; ACEITO pelo PO em 2026-08-04 (4 pontos confirmados). STORY-047..051 destravadas.",
       "epic_id": "EPIC-010",
       "sprint_id": "SPRINT-2026-W32",
-      "owner_agent": null,
+      "owner_agent": "arquiteto (claude-opus-5)",
       "requires_design": false,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-045-spike-modelo-versionamento-retificacao.md",
       "created_at": "2026-08-04",
@@ -1609,7 +1609,7 @@
       "blocks": [
         "STORY-057"
       ],
-      "note": "Reaproveita a mecânica de farol e resumo executivo do Diagnóstico, com faixas e textos próprios (STORY-052). Leitura determinística, nunca generativa. Ganhou CA-1b (grau zero: todas as faixas não calibradas, tela funciona) e CA-1c (calibrar não exige deploy de código). Cobertura ≥98%.",
+      "note": "Reaproveita a mecânica de farol e resumo executivo do Diagnóstico, com faixas e textos próprios (STORY-052). Leitura determinística, nunca generativa. Ganhou CA-1b (grau zero: todas as faixas não calibradas, tela funciona) e CA-1c (calibrar não exige deploy de código). Cobertura ≥98%. | [CONFLITO-PO] aberto em 2026-08-04 pelo Arquiteto: o CA-8 (versão do pacote de conteúdo gravada no snapshot do lançamento) colide com o ADR-007 e com a ratificação do PO (faróis fora do snapshot), e não é implementável como está — o snapshot nasce no CP1 e os faróis são do CP3, então carimbá-lo depois exigiria escrever em coluna imutável (mesmo beco do IDR-013). RESOLVIDO em 2026-08-04 pela saída (a), por delegação do PO ao Arquiteto: CA-8 reescrito — a interpretação é derivada na exibição, nunca gravada no snapshot, e a tela nomeia a diferença entre medição (valores, imutáveis) e leitura (farol, recalibrável). Fundamento decisivo: congelar deixaria permanentemente sem farol todo mês lançado antes da calibração da EBC.",
       "epic_id": "EPIC-010",
       "sprint_id": null,
       "owner_agent": null,
@@ -2287,6 +2287,49 @@
         "created_at": "2026-05-21",
         "updated_at": "2026-05-23",
         "last_amendment_note": "2026-05-23 — §3.2 revisada: main.yml deixa de buildar imagem `main-<sha>`/`latest` em todo push (imagem nunca era consumida; release-homolog.yml builda do zero a partir do SHA da tag rc). Workflow fica só com job `validate`. Sem mudança de decisão estrutural."
+      },
+      {
+        "id": "ADR-007",
+        "slug": "modelo-dados-drm-versionamento-retificacao",
+        "title": "Modelo de dados do DRM — competência versionada append-only, snapshot imutável por versão e retificação com ponteiro de vigência",
+        "type": "persistencia",
+        "status": "accepted",
+        "path": "decisions/adr/ADR-007-modelo-dados-drm-versionamento-retificacao.md",
+        "decided_at": "2026-08-04",
+        "decided_by": "arquiteto (claude-opus-5)",
+        "approved_by": "Alexandro",
+        "related_adrs": [
+          "ADR-001",
+          "ADR-002",
+          "ADR-003"
+        ],
+        "related_pdrs": [
+          "PDR-003",
+          "PDR-004"
+        ],
+        "related_idrs": [
+          "IDR-009",
+          "IDR-010",
+          "IDR-013"
+        ],
+        "related_epics": [
+          "EPIC-010"
+        ],
+        "related_stories": [
+          "STORY-045",
+          "STORY-047",
+          "STORY-048",
+          "STORY-049",
+          "STORY-050",
+          "STORY-051",
+          "STORY-054",
+          "STORY-055",
+          "STORY-058"
+        ],
+        "created_at": "2026-08-04",
+        "updated_at": "2026-08-04",
+        "note": "Resposta às 8 perguntas da STORY-045. Retificação = nova versão append-only em `drm_lancamentos` com ponteiro `substituido_por_id` (vigente = ponteiro NULL, garantido por índice único parcial); versão anterior é registro de primeira classe, recuperável por SELECT. Snapshot persistido por versão, auto-descritivo, com os DOIS modos de pró-labore resolvidos (PDR-004 §B vira propriedade do modelo). `motor_drm_version` semver com contador independente do Diagnóstico; sem matrix_version. Competência é `date` com dia 01. Idempotência em 2 camadas: índice único parcial (duplo submit) + payload_hash contra a vigente (bloqueia retificação no-op) — divergência deliberada do IDR-010, justificada. Ausência de lançamento = ausência de linha; COALESCE(...,0) proibido em série. Rascunho reusa o padrão quiz_rascunhos + competência na chave + origem/base_versao (concorrência otimista na retificação). Comparativos e faróis NÃO são persistidos — derivados na leitura, o que torna STORY-050 CA-5 impossível de violar. 3 tabelas novas com prefixo `drm_`, zero FK para tabelas do Diagnóstico. RELAÇÃO COM IDR-010: estende, não revoga nem restringe. ACEITO pelo PO em 2026-08-04 com confirmação explícita dos 4 pontos submetidos: (1) CA-3 atendido; (2) faróis fora do snapshot — recalibrar faixas pode mudar cor de meses antigos, valores nunca mudam, e a STORY-054 deve tornar isso legível; (3) retificação no-op não incrementa versao; (4) sem campo 'motivo da retificação' e sem exclusão de lançamento no MVP. STORY-045 done; STORY-047..051 destravadas. ADITIVO 2026-08-04: conflito com o CA-8 da STORY-054 resolvido por delegação do PO ao Arquiteto — a camada de interpretação (faixa, farol, texto) NÃO entra no snapshot, é derivada na exibição. Fundamento decisivo: o módulo vai ao ar com todas as faixas nao_calibrada, então congelar deixaria permanentemente sem farol todo mês lançado antes da calibração da EBC, punindo o usuário que adotou primeiro; derivando, a história inteira ganha interpretação de uma vez quando a EBC calibrar. Contrapartida no CA-8 reescrito: a tela nomeia a diferença entre medição (valores, imutáveis) e leitura (farol, recalibrável).",
+        "approved_at": "2026-08-04"
       }
     ],
     "idr": [
@@ -2476,11 +2519,13 @@
         "related_idrs": [],
         "related_adrs": [
           "ADR-001",
-          "ADR-003"
+          "ADR-003",
+          "ADR-007"
         ],
         "created_at": "2026-05-25",
-        "updated_at": "2026-05-25",
-        "note": "Spike STORY-026 (EPIC-002), accepted pelo PO em 2026-05-25. Veredito: snapshot dos resultados + motor único (sem dispatcher V1/V2) + motor_version semver (1.0.0) + matrix_version datada (dez-2025). Idempotência por SHA-256 do quiz_payload canonicalizado, validada por golden hashes em tests/Domain/Motor. Casos extremos retornam null + motivo semântico (sem exception). Migration + Model esqueletos commitados (não rodados — STORY-028 roda). PO confirmou adicionalmente que rascunho do quiz (STORY-027) fica em tabela separada `quiz_rascunhos`."
+        "updated_at": "2026-08-04",
+        "note": "Spike STORY-026 (EPIC-002), accepted pelo PO em 2026-05-25. Veredito: snapshot dos resultados + motor único (sem dispatcher V1/V2) + motor_version semver (1.0.0) + matrix_version datada (dez-2025). Idempotência por SHA-256 do quiz_payload canonicalizado, validada por golden hashes em tests/Domain/Motor. Casos extremos retornam null + motivo semântico (sem exception). Migration + Model esqueletos commitados (não rodados — STORY-028 roda). PO confirmou adicionalmente que rascunho do quiz (STORY-027) fica em tabela separada `quiz_rascunhos`. | 2026-08-04: ADR-007 (módulo DRM) ESTENDE esta IDR — não revoga, não substitui, não restringe alcance; nenhuma linha alterada. Ponto de contato: o ADR-007 aplica literalmente 'Edição = novo diagnóstico (novo id)'. Uma divergência deliberada: o ADR-007 dá papel de unicidade ao payload_hash (bloqueia retificação no-op), que esta IDR recusou — semântica de domínio diferente, correta dos dois lados. Contadores de versão de motor são independentes (motor_drm_version × motor_version).",
+        "extended_by": "ADR-007"
       },
       {
         "id": "IDR-011",

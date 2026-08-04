@@ -42,7 +42,8 @@ Motor sem tela é invisível. E é aqui que o pedido do Key User — valor nomin
 - [ ] **CA-5 (Sem faturamento):** percentuais exibidos como indisponíveis com a mensagem semântica; valores nominais presentes; a tela não parece quebrada nem culpa o usuário.
 - [ ] **CA-6 (Prejuízo):** resultado negativo é exibido com clareza e neutralidade — sinalizado, não dramatizado.
 - [ ] **CA-7 (Alertas aceitos):** alertas que o usuário aceitou no lançamento aparecem como nota de contexto na demonstração, para que o número seja lido junto com a ressalva.
-- [ ] **CA-8 (Snapshot, não recálculo):** a tela lê o resultado persistido. Não invoca o motor. Rodapé exibe versão do motor e data de geração, refletindo o snapshot e não a configuração atual.
+- [ ] **CA-8 (Snapshot, não recálculo):** a tela lê o resultado persistido da versão vigente. Não invoca o motor. Rodapé exibe `motor_drm_version` e `gerado_em` **do snapshot**, não da configuração atual.
+- [ ] **CA-8b (Render genérico — `ADR-007`):** a tela renderiza a lista de linhas **como ela vem do snapshot**, sem hardcode de `L1..L11`. O snapshot é auto-descritivo (código, nível, rótulo, nominal, percentual, motivo) justamente para que um bump MAJOR do motor não quebre a exibição de meses antigos. Teste: um snapshot com estrutura de linhas diferente da atual renderiza sem erro.
 - [ ] **CA-9 (Mobile-first):** tabela densa em desktop, cards empilhados em mobile, sem scroll horizontal em 360×800.
 - [ ] **CA-10 (Acessibilidade AA):** semântica de tabela com cabeçalhos associados, contraste ≥ 4.5:1, navegação por teclado, nenhum estado comunicado só por cor.
 - [ ] **CA-11 (Navegação):** breadcrumb coerente com o app shell e caminho de volta para a empresa e para o lançamento.
@@ -65,7 +66,9 @@ Motor sem tela é invisível. E é aqui que o pedido do Key User — valor nomin
 
 ## Decisões já tomadas (não as reabra)
 
-- `design/estrutura-drm.md` (ordem e conteúdo das linhas); spec da STORY-046 (layout); IDR-008 (tokens, sem hex literal); IDR-009; padrão snapshot.
+- `design/estrutura-drm.md` (ordem e conteúdo das linhas); spec da STORY-046 (layout); IDR-008 (tokens, sem hex literal); IDR-009; **ADR-007** (padrão snapshot, render genérico, troca de modo).
+
+**Do `ADR-007`:** a troca de modo do pró-labore (CA-3b) é **escolher o outro array do snapshot** e gravar `posicao_prolabore` em `drm_preferencias` — não recalcula e não migra nada, exatamente como o `PDR-004` §B promete. `alertas_aceitos` (CA-7) vêm de coluna própria do lançamento. O selo de retificação está disponível via `versao > 1` da linha vigente, embora a UI plena seja da STORY-050.
 
 ## Definição de Pronto
 
