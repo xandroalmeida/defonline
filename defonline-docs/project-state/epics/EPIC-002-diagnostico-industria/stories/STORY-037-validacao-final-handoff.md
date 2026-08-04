@@ -6,10 +6,11 @@ epic_id: EPIC-002
 sprint_id: SPRINT-2026-W25
 type: validation
 target_role: validador
-status: draft
+status: done
 owner_agent: claude-validador
 created_at: 2026-05-25
-updated_at: 2026-05-25
+updated_at: 2026-08-04
+closed_at: 2026-08-04
 estimated_session_size: M
 ---
 
@@ -101,3 +102,25 @@ Padrão. Validador roda o checklist sistematicamente. PO revisa e assina.
 ## Notas do agente
 
 *(A preencher.)*
+
+
+## Reconciliação do PO — 2026-08-04
+
+O relatório de validação foi produzido em 25/05/2026 com veredito `approved_with_pending` — 51 itens, 39 `pass`, 4 `pass` com ressalva, 8 `fail`, **nenhum bloqueante**. Os 8 fails eram deliverables de fechamento e itens de processo, não defeitos de produto.
+
+Na reconciliação de hoje, verifiquei um a um:
+
+| Item | Estado real em 04/08 |
+|---|---|
+| G-2 — frase pré-beta no handoff | **Resolvido** — `handoff/README.md` §6 trata o parecer externo |
+| G-3 — débito da validação externa no backlog | **Sem objeto** — STORY-036 aprovada |
+| H-1 — `handoff/README.md` | **Resolvido** — criado em 25/05 às 23:01, 24 minutos depois do relatório |
+| H-2 — decisão "sem dry-run" + §Riscos | **Resolvido** — seção §Riscos presente no handoff |
+| H-3 — tag `v1.0.0` | **Adiado** por decisão do PO até o go-live real de produção (PDR-005) |
+| I-2 — EPIC-003 → `ready` | **Resolvido** |
+| I-3 — fechamento da sprint W25 | **Resolvido** — seção preenchida em 26/05 |
+| I-4 — comunicação ao stakeholder | **Resolvido de facto** — devolutiva da EBC em 27/05 |
+
+Seis dos oito já estavam resolvidos e não haviam sido registrados no índice. Essa defasagem entre o que foi feito e o que estava anotado é o achado de processo do PDR-005.
+
+Fechada como `done` na reconciliação de 04/08/2026.

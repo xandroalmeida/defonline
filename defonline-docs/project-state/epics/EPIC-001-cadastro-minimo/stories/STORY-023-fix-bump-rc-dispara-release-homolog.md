@@ -7,10 +7,11 @@ sprint_id: null
 type: bugfix
 target_role: programador
 requires_design: false
-status: ready
+status: done
 owner_agent: null
 created_at: 2026-05-24
-updated_at: 2026-05-24
+updated_at: 2026-08-04
+closed_at: 2026-08-04
 estimated_session_size: S
 ---
 
@@ -115,3 +116,16 @@ Padrão `agent-task-format.md`. **Importante**: a mudança envolve secret do rep
 
 ### Observações úteis ao PO
 - <opcional>
+
+
+## Reconciliação do PO — 2026-08-04
+
+**Resolvida por redesenho, não pelos critérios de aceite escritos.**
+
+O commit `ci(bump-rc): vira calculadora de versão; gatilho de deploy volta a ser a tag no git` (04/08/2026) atacou o problema por um caminho que não estava entre as opções A, B e C do CA-1: em vez de fazer o `bump-rc.yml` disparar o release, **o workflow deixou de criar a tag**. Ele passou a apenas calcular e sugerir a próxima `vX.Y.Z-rc.N`; o humano cria a tag, e o push da tag dispara o `release-homolog.yml`.
+
+Isso contorna a regra anti-recursão do GitHub em vez de lutar contra ela, e resolve o atrito original que motivou a estória — o passo manual de "deletar tag remota + re-empurrar do host local" deixou de existir. A decisão está documentada no cabeçalho do próprio workflow, com referência ao ADR-006 §1.4.
+
+CA-1, CA-2 e CA-3 ficam **superados** pela mudança de desenho: não há release automático a testar empiricamente, porque a criação da tag passou a ser deliberadamente humana. CA-4 não se aplica (nenhum secret novo).
+
+Fechada como `done` na reconciliação de estado de 04/08/2026.

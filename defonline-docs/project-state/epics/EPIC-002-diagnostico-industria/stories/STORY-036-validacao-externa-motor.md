@@ -6,10 +6,11 @@ epic_id: EPIC-002
 sprint_id: SPRINT-2026-W25
 type: validation
 target_role: validador-externo
-status: draft
+status: done
 owner_agent: especialista-externo
 created_at: 2026-05-25
-updated_at: 2026-05-25
+updated_at: 2026-08-04
+closed_at: 2026-08-04
 estimated_session_size: M-L
 ---
 
@@ -101,3 +102,12 @@ Esta decisão também elimina o CA-0 (shortlist até 2026-05-29) e o CA-1 (contr
 ## Notas do agente
 
 *(N/A — estória conduzida pelo PO.)*
+
+
+## Reconciliação do PO — 2026-08-04
+
+**Validação externa APROVADA.** Declarada concluída e aprovada pelo PO (Alexandro) em 04/08/2026. O gate normativo do NRF §9.3 está satisfeito e o beta com usuários reais está liberado.
+
+Com isso, o EPIC-002 sobe de `done_under_review` para `done` — ver `validation/report.md` e `PDR-005`.
+
+**Pendência documental (não bloqueia):** o parecer do especialista precisa ser arquivado em `epics/EPIC-002-diagnostico-industria/validation/evidence/` para completar a trilha de auditoria exigida pelo NRF §9.3. Enquanto o documento não estiver no repositório, a aprovação está registrada apenas por declaração do PO.

@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generated_at": "2026-06-02T17:30:00Z",
+  "generated_at": "2026-08-04T17:15:41Z",
   "project": {
     "name": "DEFOnline",
-    "current_wave": "WAVE-2026-01",
-    "current_sprint": "SPRINT-2026-W26",
-    "last_closed_sprint": "SPRINT-2026-W25"
+    "current_wave": "WAVE-2026-02",
+    "current_sprint": "SPRINT-2026-W32",
+    "last_closed_sprint": "SPRINT-2026-W26"
   },
   "product": {
     "vision": {
@@ -32,7 +32,7 @@
     {
       "id": "WAVE-2026-01",
       "title": "Hipótese do Roberto",
-      "status": "active",
+      "status": "closed",
       "goal": "Validar que o DEFOnline entrega valor real ao dono de pequena indústria, entregando em homologação o ciclo cadastro → diagnóstico → histórico no setor Indústria, sem cobrança.",
       "start_date": "2026-05-20",
       "target_end_date": "2026-08-26",
@@ -40,18 +40,38 @@
         "EPIC-000",
         "EPIC-001",
         "EPIC-004",
-        "EPIC-002",
-        "EPIC-003"
+        "EPIC-002"
       ],
       "path": "roadmap/current-wave.md",
-      "related_pdr": "PDR-001"
+      "related_pdr": "PDR-001",
+      "closed_at": "2026-08-04",
+      "goal_achieved": "partial",
+      "closing_pdr": "PDR-005",
+      "note": "Encerrada em 2026-08-04 (PDR-005). Quatro épicos entregues e validados. EPIC-003 adiado para a WAVE-2026-02. A hipótese central da onda — Roberto voltar para um segundo diagnóstico — NÃO foi testada: o beta ficou bloqueado pelo gate NRF §9.3 durante toda a onda e só foi liberado no fechamento. EPIC-002 fica em `in_review` no fechamento da onda: escopo validado e aprovado, mas 6 estórias pós-devolutiva foram transferidas para a SPRINT-2026-W32, já na onda 2. Sobe para `done` quando aquela sprint fechar."
     },
     {
       "id": "WAVE-2026-02",
-      "title": "Comercialização + cobertura de setores (rascunho)",
-      "status": "planned",
-      "goal": "(rascunho — a confirmar após retro da WAVE-2026-01)",
-      "path": "roadmap/next-wave.md"
+      "title": "Comercialização + recorrência (rascunho — DRM como épico âncora)",
+      "status": "active",
+      "goal": "Entregar recorrência mensal via módulo DRM (EPIC-010), atendendo MEI e Simples Nacional nos três setores, e preparar a comercialização.",
+      "path": "roadmap/next-wave.md",
+      "epic_ids": [
+        "EPIC-010",
+        "EPIC-005",
+        "EPIC-007",
+        "EPIC-003",
+        "EPIC-006",
+        "EPIC-008",
+        "EPIC-009"
+      ],
+      "related_pdr": [
+        "PDR-003",
+        "PDR-004",
+        "PDR-005"
+      ],
+      "note": "Aberta em 2026-08-04 (PDR-005). EPIC-010 (DRM) é o épico âncora. EPIC-003 realocado da onda 1.",
+      "start_date": "2026-08-04",
+      "target_end_date": "2026-11-30"
     }
   ],
   "epics": [
@@ -72,7 +92,8 @@
         "STORY-007",
         "STORY-009",
         "STORY-008",
-        "STORY-010"
+        "STORY-010",
+        "STORY-025"
       ],
       "validation_report": {
         "path": "epics/EPIC-000-foundation/validation/report.md",
@@ -96,7 +117,8 @@
         "revalidation_pending": false
       },
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-22"
+      "updated_at": "2026-08-04",
+      "note": " | 2026-08-04: STORY-025 (imagem runtime sem chromium) estava done mas órfã do índice — vinculada na reconciliação."
     },
     {
       "id": "EPIC-001",
@@ -154,7 +176,7 @@
       "slug": "diagnostico-industria",
       "title": "Diagnóstico Econômico-Financeiro para Indústria",
       "wave": "WAVE-2026-01",
-      "status": "done_under_review",
+      "status": "in_review",
       "path": "epics/EPIC-002-diagnostico-industria/epic.md",
       "story_ids": [
         "STORY-026",
@@ -174,23 +196,51 @@
         "STORY-040",
         "STORY-041",
         "STORY-042",
-        "STORY-043"
+        "STORY-043",
+        "STORY-044"
       ],
-      "validation_report": "epics/EPIC-002-diagnostico-industria/validation/report.md",
+      "validation_report": {
+        "path": "epics/EPIC-002-diagnostico-industria/validation/report.md",
+        "verdict": "approved",
+        "validated_at": "2026-05-25",
+        "validated_by": "validador (agente Claude — sessão STORY-037)",
+        "verdict_history": [
+          {
+            "at": "2026-05-25",
+            "verdict": "approved_with_pending",
+            "by": "validador",
+            "reason": "51 itens: 39 pass, 4 pass c/ ressalva, 8 fail não-bloqueantes (todos de handoff/release/processo, nenhum defeito de produto). Cobertura motor 99.6%, geral 97.3%, 787 Pest + 17 Dusk verdes."
+          },
+          {
+            "at": "2026-08-04",
+            "verdict": "approved",
+            "by": "po (Alexandro)",
+            "reason": "Gate normativo NRF §9.3 (STORY-036) aprovado. Dos 8 fails não-bloqueantes, 6 já estavam resolvidos sem registro, 1 (G-3) tornou-se sem objeto e 1 (H-3, tag v1.0.0) foi adiado por decisão do PO até o go-live real de produção — ver PDR-005."
+          }
+        ],
+        "external_validation": {
+          "story": "STORY-036",
+          "status": "approved",
+          "declared_by": "PO (Alexandro)",
+          "at": "2026-08-04",
+          "pendencia_documental": "arquivar o parecer do especialista em validation/evidence/"
+        }
+      },
       "blocked_by_epics": [
         "EPIC-000",
         "EPIC-001"
       ],
       "created_at": "2026-05-20",
-      "updated_at": "2026-06-02",
+      "updated_at": "2026-08-04",
       "activated_at": "2026-05-25",
-      "post_mvp_hotfix_note": "STORY-038..043 são pós-devolutiva EBC (2026-05-27) — entram em SPRINT-2026-W26 como hotfixes do EPIC-002 já em `done_under_review`. Padrão de débito-pós-fechamento igual ao usado em STORY-021/022/023 do EPIC-001."
+      "note": "Validação interna e externa APROVADAS em 2026-08-04 (PDR-005) — o gate normativo NRF §9.3 caiu. O épico NÃO sobe para `done` ainda porque 6 estórias seguem abertas: 039 e 040 em in_review aguardando deploy, e 041/042/043/044 transferidas para SPRINT-2026-W32. Promover a `done` no fechamento da W32. Divergência deliberada do precedente do EPIC-001, que fechou como `done` com 3 débitos abertos — aquele padrão deixou a STORY-023 parada por 2,5 meses (PDR-005 §5).",
+      "promote_to_done_when": "SPRINT-2026-W32 fechar com STORY-039..044 em done"
     },
     {
       "id": "EPIC-003",
       "slug": "historico-basico",
       "title": "Histórico básico de diagnósticos",
-      "wave": "WAVE-2026-01",
+      "wave": "WAVE-2026-02",
       "status": "ready",
       "path": "epics/EPIC-003-historico-basico/epic.md",
       "story_ids": [],
@@ -199,8 +249,9 @@
         "EPIC-002"
       ],
       "created_at": "2026-05-20",
-      "updated_at": "2026-05-26T02:04:19Z",
-      "unblocked_by": "EPIC-002 done_under_review (2026-05-26)"
+      "updated_at": "2026-08-04",
+      "unblocked_by": "EPIC-002 done_under_review (2026-05-26)",
+      "note": "Adiado da WAVE-2026-01 para a WAVE-2026-02 em 2026-08-04 (PDR-005). Nunca foi decomposto em estórias. Serve a uso episódico — o usuário típico tem 1 ou 2 diagnósticos —, enquanto o EPIC-010 (DRM) cria recorrência mensal. Entra depois do DRM. Não é substituído pela série histórica do DRM: são objetos diferentes (diagnósticos anuais vs. competências mensais)."
     },
     {
       "id": "EPIC-004",
@@ -246,6 +297,51 @@
       "created_at": "2026-05-24",
       "updated_at": "2026-05-24",
       "note": "Criado pelo PO em 2026-05-24 após análise de gap: nenhum item priorizado previa app shell, menu de navegação, breadcrumb ou materialização do design system em código. Drift de paleta confirmado entre design-system.md (oficial: #0A2540/#635BFF/#F6F9FC) e STORY-011/STORY-016 (#1f2937/#2563eb/#f9fafb). Inserido na WAVE-2026-01 antes do início efetivo do EPIC-002 para evitar retrabalho de UI. STORY-019 entra na próxima sprint (após SPRINT-2026-W22 fechar) — não entra na sprint ativa do EPIC-001. Epic placeholder homônimo da WAVE-2026-02 ('Cobrança e Plano Básico') renumerado para EPIC-005, com cascata."
+    },
+    {
+      "id": "EPIC-010",
+      "slug": "drm-demonstracao-resultado-mensal",
+      "title": "DRM — Demonstração de Resultado Mensal (o negócio deu lucro este mês?)",
+      "wave": "WAVE-2026-02",
+      "status": "in_progress",
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/epic.md",
+      "story_ids": [
+        "STORY-045",
+        "STORY-046",
+        "STORY-047",
+        "STORY-048",
+        "STORY-049",
+        "STORY-050",
+        "STORY-051",
+        "STORY-052",
+        "STORY-053",
+        "STORY-054",
+        "STORY-055",
+        "STORY-056",
+        "STORY-057",
+        "STORY-058"
+      ],
+      "validation_report": null,
+      "blocked_by_epics": [],
+      "blocks_epics": [
+        "EPIC-005"
+      ],
+      "related_pdr": [
+        "PDR-003",
+        "PDR-004"
+      ],
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04",
+      "design_notes": [
+        "epics/EPIC-010-drm-demonstracao-resultado-mensal/design/estrutura-drm.md"
+      ],
+      "handoff": "epics/EPIC-010-drm-demonstracao-resultado-mensal/handoff/README.md",
+      "validation_checklist": "epics/EPIC-010-drm-demonstracao-resultado-mensal/validation/checklist.md",
+      "open_decisions": [
+        "[DECIDIR-A]"
+      ],
+      "note": "Criado em 2026-08-04 a partir do feedback do Key User José Marques (2026-08-03) e do parecer favorável da EBC. Parecer do PO em revisao/analise-po-feedback-jose-marques-2026ago03.md. Módulo independente do Diagnóstico, 3 setores, sem paywall. [DECIDIR-B] e [DECIDIR-E] bloqueiam STORY-048. | 2026-08-04: PDR-004 resolveu [DECIDIR-B/C/D/E]. STORY-048 desbloqueada; STORY-058 (spike de provisão) criada; STORY-052 segue blocked só pelas faixas de farol.",
+      "activated_at": "2026-08-04"
     }
   ],
   "stories": [
@@ -690,7 +786,7 @@
       "title": "Fix — `bump-rc.yml` precisa disparar `release-homolog.yml` automaticamente",
       "type": "bugfix",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "owner_agent": null,
       "sprint_id": null,
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-023-fix-bump-rc-dispara-release-homolog.md",
@@ -698,8 +794,9 @@
       "blocks": [],
       "estimated_session_size": "S",
       "created_at": "2026-05-24",
-      "updated_at": "2026-05-24",
-      "note": "Débito de tooling CI derivado das Notas da STORY-018 (gotcha do `GITHUB_TOKEN` não dispara workflows downstream). Entrou na SPRINT-2026-W24 e foi DEFERIDA pelo PO em 2026-05-24 — Opção A (PAT) complicou além do tamanho S. Volta ao backlog. Recomendação ao reabrir: partir da Opção B (`gh release create`) como default, que não exige secret novo."
+      "updated_at": "2026-08-04",
+      "note": "RESOLVIDA POR REDESENHO em 2026-08-04 (commit `ci(bump-rc): vira calculadora de versão; gatilho de deploy volta a ser a tag no git`). A solução adotada NÃO foi nenhuma das 3 opções dos CAs: em vez de fazer o bump-rc disparar o release, o workflow deixou de criar a tag e virou calculadora de versão — o humano cria a tag, e o push da tag dispara o deploy. Resolve o atrito original (fim do 'deletar tag remota + re-empurrar') contornando a regra anti-recursão do GitHub. CA-1/2/3 superados pela mudança de desenho; decisão documentada no cabeçalho do próprio workflow (ADR-006 §1.4).",
+      "closed_at": "2026-08-04"
     },
     {
       "id": "STORY-019",
@@ -1055,7 +1152,7 @@
       "title": "Validação externa do motor (NRF §9.3) — parecer técnico de especialista financeiro",
       "type": "validation",
       "target_role": "validador-externo",
-      "status": "draft",
+      "status": "done",
       "estimated_session_size": "M-L",
       "blocked_by": [
         "STORY-030",
@@ -1064,13 +1161,15 @@
       "blocks": [
         "STORY-037"
       ],
-      "note": "Estória atípica (não-código). Especialista externo contratado pelo PO. Gate técnico de qualidade exigido pela spec antes de liberar uso real. PO inicia contratação na Semana 1, contrato fechado até Checkpoint 2 (2026-06-05).",
+      "note": "Validação externa do motor (NRF §9.3) APROVADA. Declarada concluída e aprovada pelo PO em 2026-08-04. Gate normativo do beta liberado. PENDÊNCIA DOCUMENTAL (em andamento, não bloqueia): arquivar o parecer do especialista em epics/EPIC-002-diagnostico-industria/validation/evidence/ para a trilha de auditoria do NRF §9.3.",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W25",
       "owner_agent": null,
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-036-validacao-externa-motor.md",
       "created_at": "2026-05-25",
-      "updated_at": "2026-05-26T01:14:37Z"
+      "updated_at": "2026-08-04",
+      "closed_at": "2026-08-04",
+      "approved_by": "PO (Alexandro)"
     },
     {
       "id": "STORY-037",
@@ -1078,7 +1177,7 @@
       "title": "Validação final EPIC-002 (interna) + smoke E2E + pacote de handoff para comercial/implantação",
       "type": "validation",
       "target_role": "validador",
-      "status": "draft",
+      "status": "done",
       "estimated_session_size": "M",
       "blocked_by": [
         "STORY-026",
@@ -1094,13 +1193,14 @@
         "STORY-036"
       ],
       "blocks": [],
-      "note": "Fecha EPIC-002 sob ótica técnica. Smoke E2E + validação independente + pacote de handoff em epics/EPIC-002-.../handoff/README.md para comercial/implantação tocar o beta. Recrutamento de Robertos, NPS e operação do beta de 60 dias FORA desta sprint.",
+      "note": "Relatório de validação produzido em 2026-05-25 (verdict approved_with_pending, 51 itens: 39 pass, 4 pass c/ ressalva, 8 fail não-bloqueantes). Reconciliado em 2026-08-04: dos 8 fails, 6 estavam resolvidos e não haviam sido registrados (H-1 handoff/README.md existe desde 25/05 23:01; H-2 §Riscos presente; I-2 EPIC-003 já ready; I-3 fechamento W25 preenchido; G-2 frase pré-beta no handoff §6; I-4 comunicação de facto pela devolutiva EBC de 27/05). G-3 tornou-se sem objeto com a aprovação da STORY-036. H-3 (tag v1.0.0) adiado por decisão do PO — ver PDR-005.",
       "epic_id": "EPIC-002",
       "sprint_id": "SPRINT-2026-W25",
       "owner_agent": null,
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-037-validacao-final-handoff.md",
       "created_at": "2026-05-25",
-      "updated_at": "2026-05-26T01:14:37Z"
+      "updated_at": "2026-08-04",
+      "closed_at": "2026-08-04"
     },
     {
       "id": "STORY-038",
@@ -1165,17 +1265,17 @@
       "title": "Plural \"ações\" no texto fixo do veredito em_alerta",
       "type": "bugfix",
       "target_role": "programador",
-      "status": "ready",
+      "status": "in_review",
       "estimated_session_size": "XS",
       "blocked_by": [],
       "blocks": [],
-      "note": "Texto fixo do veredito `em_alerta` está em singular (\"ação\") — spec §4.7.1 e Edvan querem plural (\"ações\"). Decisão pendente com Arquiteto: bump motor_version 1.2.0→1.2.1 vs patch silencioso (default sugerido: silencioso se texto é render-time). Origem: áudio Edvan 2026-05-27.",
+      "note": "Veredito `em_alerta` corrigido para o plural \"demandam ações\" (texto canônico spec §4.7.1). CA-3 resolvido: NÃO é patch silencioso — `veredito_texto` entra no snapshot imutável `diagnosticos.resumo_executivo` e nos golden hashes, então bump obrigatório: motor_version 1.3.0 → 1.3.1 (PATCH). Aditivo registrado na IDR-010. 5 golden hashes re-emitidos (só `alerta` mudou por texto; os outros 4 só porque motor_version entra no payload hasheado — verificado, sem regressão de cálculo). Spec §4.7.1 também estava em singular e foi corrigida. Commit local a7be1d1; push/CI/homolog pendentes de autorização do PO. Origem: áudio Edvan 2026-05-27.",
       "epic_id": "EPIC-002",
-      "sprint_id": "SPRINT-2026-W26",
-      "owner_agent": null,
+      "sprint_id": "SPRINT-2026-W32",
+      "owner_agent": "programador (claude-opus-5)",
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-041-plural-acoes-veredito.md",
       "created_at": "2026-06-02",
-      "updated_at": "2026-06-02"
+      "updated_at": "2026-08-04"
     },
     {
       "id": "STORY-042",
@@ -1191,12 +1291,12 @@
       ],
       "note": "Coleção coordenada de mudanças textuais: Bloco 2 (remover anualização, exemplos itens 3/4), Bloco 3 (título + Imobilizado), Bloco 4 (Q17 ocultar 2 textos auxiliares), matriz NCG positivo, glossário (EBITDA 2º item). 2 itens com pendência ao Edvan (título Bloco 2 + item glossário) — default manter se sem resposta até 2026-06-04. Origem: .docx EBC 2026-05-27.",
       "epic_id": "EPIC-002",
-      "sprint_id": "SPRINT-2026-W26",
+      "sprint_id": "SPRINT-2026-W32",
       "owner_agent": null,
       "briefing_path": "epics/EPIC-002-diagnostico-industria/briefings/STORY-042-abertura.md",
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-042-pacote-conteudo-ebc.md",
       "created_at": "2026-06-02",
-      "updated_at": "2026-06-02"
+      "updated_at": "2026-08-04"
     },
     {
       "id": "STORY-043",
@@ -1212,11 +1312,420 @@
       "blocks": [],
       "note": "Nova regra R4 aditiva à engine declarativa da STORY-034 (`config/quiz/validacoes-cruzadas.php`). Diferente de R1/R2/R3 — R4 é **bloqueante** (consistência de input, não hipótese estatística). PO decidiu em 2026-06-02. Origem: .docx EBC Bloco 4 — vira regra de backend em vez de texto auxiliar.",
       "epic_id": "EPIC-002",
-      "sprint_id": "SPRINT-2026-W26",
+      "sprint_id": "SPRINT-2026-W32",
       "owner_agent": null,
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-043-validacao-cruzada-q17-recebiveis.md",
       "created_at": "2026-06-02",
-      "updated_at": "2026-06-02"
+      "updated_at": "2026-08-04"
+    },
+    {
+      "id": "STORY-044",
+      "slug": "valor-nominal-indicadores",
+      "title": "Valor nominal junto a cada indicador do relatório de Diagnóstico",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "S",
+      "blocked_by": [],
+      "blocks": [],
+      "note": "Item 1 do feedback de José Marques (2026-08-03). Melhoria do relatório do EPIC-002 — NÃO faz parte do módulo DRM. Só apresentação: lê o snapshot, não toca motor nem payload_hash (IDR-010). Padrão de débito pós-devolutiva, igual STORY-038..043.",
+      "epic_id": "EPIC-002",
+      "sprint_id": "SPRINT-2026-W32",
+      "owner_agent": null,
+      "requires_design": true,
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-044-valor-nominal-indicadores.md",
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04"
+    },
+    {
+      "id": "STORY-045",
+      "slug": "spike-modelo-versionamento-retificacao",
+      "title": "Spike — modelo de dados do DRM, versionamento e retificação de competência",
+      "type": "spike",
+      "target_role": "arquiteto",
+      "status": "ready",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "blocks": [
+        "STORY-047",
+        "STORY-048",
+        "STORY-049",
+        "STORY-050",
+        "STORY-051",
+        "STORY-057",
+        "STORY-058"
+      ],
+      "note": "Estória mais crítica do épico. O DRM é o primeiro objeto retificável do produto e colide com o IDR-010 (snapshot imutável). IDR-010 não é revogado. 8 perguntas a responder. Abre o épico junto com STORY-046.",
+      "epic_id": "EPIC-010",
+      "sprint_id": "SPRINT-2026-W32",
+      "owner_agent": null,
+      "requires_design": false,
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-045-spike-modelo-versionamento-retificacao.md",
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04"
+    },
+    {
+      "id": "STORY-046",
+      "slug": "design-telas-drm",
+      "title": "Specs de tela do módulo DRM — lançamento, demonstração do mês e série histórica",
+      "type": "implementation",
+      "target_role": "designer",
+      "status": "ready",
+      "estimated_session_size": "L",
+      "blocked_by": [],
+      "blocks": [
+        "STORY-047",
+        "STORY-049",
+        "STORY-051",
+        "STORY-057"
+      ],
+      "note": "3 specs de tela. O problema central é a tela de lançamento: até 36 campos monetários, 12x/ano, no celular. Precisa materializar visualmente os 3 mecanismos anti-atrito do PDR-003. Roda em paralelo à STORY-045.",
+      "epic_id": "EPIC-010",
+      "sprint_id": "SPRINT-2026-W32",
+      "owner_agent": null,
+      "requires_design": true,
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-046-design-telas-drm.md",
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04"
+    },
+    {
+      "id": "STORY-047",
+      "slug": "lancamento-mensal",
+      "title": "Lançamento mensal — formulário adaptativo por setor, modos agregado/detalhado, rascunho e pré-preenchimento",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "L",
+      "blocked_by": [
+        "STORY-045",
+        "STORY-046"
+      ],
+      "blocks": [
+        "STORY-048",
+        "STORY-049",
+        "STORY-050",
+        "STORY-051",
+        "STORY-056",
+        "STORY-057"
+      ],
+      "note": "Maior risco do épico — é aqui que o usuário decide se volta no mês seguinte. Campos no Anexo K. Alertas A4/A6 ficam para STORY-051 (dependem de histórico).",
+      "epic_id": "EPIC-010",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-047-lancamento-mensal.md",
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04"
+    },
+    {
+      "id": "STORY-048",
+      "slug": "motor-drm",
+      "title": "Motor do DRM — estrutura canônica em três setores, valores nominais e percentuais",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "L",
+      "blocked_by": [
+        "STORY-045",
+        "STORY-047",
+        "STORY-052"
+      ],
+      "blocks": [
+        "STORY-049",
+        "STORY-050",
+        "STORY-051",
+        "STORY-054",
+        "STORY-055",
+        "STORY-057"
+      ],
+      "note": "DESBLOQUEADA em 2026-08-04 pelo PDR-004. Contrato aritmético: design/estrutura-drm.md v1.1 §1. Entrega os DOIS modos de pró-labore (apresentação, não cálculo) + linhas não operacionais. CA-1c é invariante obrigatório: Lucro Líquido idêntico nos 2 modos. Cobertura ≥98%.",
+      "epic_id": "EPIC-010",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-048-motor-drm.md",
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04"
+    },
+    {
+      "id": "STORY-049",
+      "slug": "tela-demonstracao-mes",
+      "title": "Tela da Demonstração do Mês — valor nominal e percentual em cada linha",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-045",
+        "STORY-046",
+        "STORY-047",
+        "STORY-048"
+      ],
+      "blocks": [
+        "STORY-050",
+        "STORY-051",
+        "STORY-054",
+        "STORY-055",
+        "STORY-056",
+        "STORY-057"
+      ],
+      "note": "Fecha o Checkpoint 1 — caminho feliz vivo em homologação. Materializa o pedido do Key User (valor nominal junto ao indicador). Lê snapshot, não invoca motor. Ganhou CA-3b (troca de modo de pró-labore) e CA-3c (linhas não operacionais) pelo PDR-004.",
+      "epic_id": "EPIC-010",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-049-tela-demonstracao-mes.md",
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04",
+      "checkpoint": "CP1"
+    },
+    {
+      "id": "STORY-050",
+      "slug": "retificacao-competencia",
+      "title": "Retificação de competência — corrigir um mês já lançado sem perder o histórico",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-045",
+        "STORY-047",
+        "STORY-048",
+        "STORY-049"
+      ],
+      "blocks": [
+        "STORY-051",
+        "STORY-056",
+        "STORY-057"
+      ],
+      "note": "Materializa a decisão da STORY-045. Retificar altera comparativos dos meses seguintes (derivado esperado), mas nenhuma outra competência é recalculada.",
+      "epic_id": "EPIC-010",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-050-retificacao-competencia.md",
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04",
+      "checkpoint": "CP2"
+    },
+    {
+      "id": "STORY-051",
+      "slug": "serie-historica-comparativos",
+      "title": "Série histórica e comparativos — o que mudou em relação ao mês passado e à média",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "L",
+      "blocked_by": [
+        "STORY-045",
+        "STORY-046",
+        "STORY-047",
+        "STORY-048",
+        "STORY-049",
+        "STORY-050",
+        "STORY-052"
+      ],
+      "blocks": [
+        "STORY-054",
+        "STORY-055",
+        "STORY-056",
+        "STORY-057"
+      ],
+      "note": "Fecha o Checkpoint 2. É o que transforma o DRM de planilha em produto e justifica assinatura anual. [DECIDIR-D] resolvida pelo PDR-004: entrega o tratamento interino de rubricas sazonais (alerta A4 + marcação de atípico), sem conta patrimonial. A provisão completa está sob spike na STORY-058 e não altera esta estória.",
+      "epic_id": "EPIC-010",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-051-serie-historica-comparativos.md",
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04",
+      "checkpoint": "CP2"
+    },
+    {
+      "id": "STORY-052",
+      "slug": "pacote-conteudo-ebc-drm",
+      "title": "Pacote de conteúdo do DRM — rótulos, tooltips, textos de leitura e estrutura paramétrica de faixas",
+      "type": "enablement",
+      "target_role": "po",
+      "status": "ready",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "blocks": [
+        "STORY-048",
+        "STORY-051",
+        "STORY-054",
+        "STORY-057"
+      ],
+      "note": "DESBLOQUEADA em 2026-08-04 por decisão do PO: em vez de esperar as faixas de farol da EBC, entrega a ESTRUTURA paramétrica com faixas em estado `nao_calibrada`; a EBC popula depois sem tocar em código. Regra dura mantida: faixa não calibrada NÃO produz farol. CA-1 e CA-2 já concluídos pelo PDR-004.",
+      "epic_id": "EPIC-010",
+      "sprint_id": "SPRINT-2026-W32",
+      "owner_agent": null,
+      "requires_design": false,
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-052-pacote-conteudo-ebc-drm.md",
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04"
+    },
+    {
+      "id": "STORY-053",
+      "slug": "spike-exportacao",
+      "title": "Spike — motor de exportação: planilha e PDF",
+      "type": "spike",
+      "target_role": "arquiteto",
+      "status": "ready",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "blocks": [
+        "STORY-055",
+        "STORY-057"
+      ],
+      "note": "Decisão extrapola o EPIC-010 — o EPIC-007 (PDF do Diagnóstico) depende dela. Produto ainda não gera nenhum documento; a fila `pdf` existe sem consumidor. Saída legítima: recomendar adiar o PDF e entregar só planilha.",
+      "epic_id": "EPIC-010",
+      "sprint_id": "SPRINT-2026-W32",
+      "owner_agent": null,
+      "requires_design": false,
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-053-spike-exportacao.md",
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04",
+      "checkpoint": "CP3",
+      "shared_with_epic": "EPIC-007"
+    },
+    {
+      "id": "STORY-054",
+      "slug": "farois-leitura-simples",
+      "title": "Faróis e leitura em linguagem simples — o que este mês está dizendo",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-048",
+        "STORY-049",
+        "STORY-051",
+        "STORY-052"
+      ],
+      "blocks": [
+        "STORY-057"
+      ],
+      "note": "Reaproveita a mecânica de farol e resumo executivo do Diagnóstico, com faixas e textos próprios (STORY-052). Leitura determinística, nunca generativa. Ganhou CA-1b (grau zero: todas as faixas não calibradas, tela funciona) e CA-1c (calibrar não exige deploy de código). Cobertura ≥98%.",
+      "epic_id": "EPIC-010",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-054-farois-leitura-simples.md",
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04",
+      "checkpoint": "CP3"
+    },
+    {
+      "id": "STORY-055",
+      "slug": "exportacao-planilha-pdf",
+      "title": "Exportação da Demonstração — planilha e PDF",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-048",
+        "STORY-049",
+        "STORY-051",
+        "STORY-053"
+      ],
+      "blocks": [
+        "STORY-057"
+      ],
+      "note": "CA-3 (PDF) pode ser n/a se o ADR da STORY-053 recomendar adiar. Fonte é o snapshot, nunca recálculo. A planilha original do Key User é a referência de layout já validada.",
+      "epic_id": "EPIC-010",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-055-exportacao-planilha-pdf.md",
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04",
+      "checkpoint": "CP3"
+    },
+    {
+      "id": "STORY-056",
+      "slug": "eventos-analiticos-drm",
+      "title": "Eventos analíticos do DRM — instrumentar recorrência, atrito e alcance",
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "S",
+      "blocked_by": [
+        "STORY-047",
+        "STORY-049",
+        "STORY-050",
+        "STORY-051"
+      ],
+      "blocks": [
+        "STORY-057"
+      ],
+      "note": "Cumpre a condição do PDR-003 de medir adesão antes de construir cobrança. Sem esta estória o épico fecha sem poder responder se a hipótese se confirmou. Zero PII, zero valor financeiro absoluto.",
+      "epic_id": "EPIC-010",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-056-eventos-analiticos-drm.md",
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04",
+      "checkpoint": "CP3"
+    },
+    {
+      "id": "STORY-057",
+      "slug": "validacao-final-drm",
+      "title": "Validação final do EPIC-010",
+      "type": "validation",
+      "target_role": "validador",
+      "status": "ready",
+      "estimated_session_size": "L",
+      "blocked_by": [
+        "STORY-045",
+        "STORY-046",
+        "STORY-047",
+        "STORY-048",
+        "STORY-049",
+        "STORY-050",
+        "STORY-051",
+        "STORY-052",
+        "STORY-053",
+        "STORY-054",
+        "STORY-055",
+        "STORY-056",
+        "STORY-058"
+      ],
+      "blocks": [],
+      "note": "Checklist de 14 seções. Seção 2 (correção aritmética) é bloqueante por si só. Seção 6 inclui percurso cronometrado do 2º lançamento (≤5 min) — único item não verificável por teste automatizado.",
+      "epic_id": "EPIC-010",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-057-validacao-final-drm.md",
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04"
+    },
+    {
+      "id": "STORY-058",
+      "slug": "spike-provisao-rubricas-sazonais",
+      "title": "Spike — provisão de férias e 13º: onde mora o saldo num módulo que só tem resultado",
+      "type": "spike",
+      "target_role": "arquiteto",
+      "status": "ready",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-045"
+      ],
+      "blocks": [
+        "STORY-057"
+      ],
+      "epic_id": "EPIC-010",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "checkpoint": "CP3",
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-058-spike-provisao-rubricas-sazonais.md",
+      "created_at": "2026-08-04",
+      "updated_at": "2026-08-04",
+      "note": "Origem: PDR-004 decisão D. A EBC pediu provisão contábil completa, que exige saldo acumulado entre meses — conta patrimonial que o DRM não tem por desenho (PDR-003, caixa puro). 3 saídas legítimas: cabe no EPIC-010 / vira EPIC-011 na onda seguinte (mais provável) / não vale a pena frente ao tratamento da STORY-051. STORY-051 entrega o interino independentemente."
     }
   ],
   "sprints": [
@@ -1406,7 +1915,7 @@
     {
       "id": "SPRINT-2026-W26",
       "wave": "WAVE-2026-01",
-      "status": "planned",
+      "status": "closed",
       "start_date": "2026-06-03",
       "end_date": "2026-06-09",
       "goal": "Absorver a devolutiva da EBC (Edvan) sobre o MVP do diagnóstico Indústria — bugfixes que travam uso real + ajustes de UX/conteúdo — sem mexer no algoritmo §4.7.1 do Resumo Executivo (aguarda lista dos 3 indicadores determinantes do Edvan + validação externa STORY-036).",
@@ -1433,7 +1942,54 @@
         "STORY-037 (validação final + handoff) — espera STORY-036",
         "STORY-023 (fix bump-rc.yml) — débito antigo, bônus opcional",
         "Comércio e Serviços (Onda 2)"
-      ]
+      ],
+      "closed_at": "2026-08-04",
+      "closed_by": "PO (Alexandro / Claude)",
+      "goal_achieved": "partial",
+      "outcome": {
+        "stories_planned": 6,
+        "stories_delivered": 3,
+        "delivered": [
+          "STORY-038",
+          "STORY-039",
+          "STORY-040"
+        ],
+        "carried_forward": [
+          "STORY-041",
+          "STORY-042",
+          "STORY-043"
+        ],
+        "carried_to": "SPRINT-2026-W32"
+      },
+      "note": "Sprint órfão: planejado para 03–09/06, executado parcialmente e nunca fechado. STORY-038 done; 039 e 040 implementadas com CI verde e testes completos, mantidas em in_review aguardando verificação de deploy em homologação; 041/042/043 nunca iniciadas. Encerrado formalmente em 04/08 na reconciliação de estado. Entre 02/06 e 04/08 o time trabalhou em infraestrutura e CI fora do fluxo de estórias — ver PDR-005 §Trabalho não rastreado."
+    },
+    {
+      "id": "SPRINT-2026-W32",
+      "wave": "WAVE-2026-02",
+      "status": "active",
+      "start_date": "2026-08-04",
+      "end_date": "2026-08-21",
+      "goal": "Zerar os débitos remanescentes da WAVE-2026-01 e destravar o EPIC-010 pelas três decisões que precedem qualquer código — sem que os dois esforços disputem a mesma pessoa.",
+      "path": "sprints/SPRINT-2026-W32.md",
+      "story_ids": [
+        "STORY-041",
+        "STORY-042",
+        "STORY-043",
+        "STORY-044",
+        "STORY-045",
+        "STORY-046",
+        "STORY-053",
+        "STORY-052"
+      ],
+      "epic_ids": [
+        "EPIC-002",
+        "EPIC-010"
+      ],
+      "opened_at": "2026-08-04",
+      "opened_by": "PO (Alexandro / Claude)",
+      "related_pdr": "PDR-005",
+      "note": "Duas frentes por papel: limpeza da onda 1 (programador) e fundação do DRM (arquiteto + designer). STORY-039 e STORY-040 fecham com o primeiro deploy da sprint — verificação, não estória nova.",
+      "execution_queue": "sprints/SPRINT-2026-W32-fila-execucao.md"
     }
   ],
   "decisions": {
@@ -1474,6 +2030,81 @@
         "schema_migration": "v1 -> v2",
         "created_at": "2026-05-24",
         "updated_at": "2026-05-24"
+      },
+      {
+        "id": "PDR-003",
+        "slug": "modulo-drm-raio-x-do-negocio",
+        "title": "Criação do módulo DRM — Demonstração de Resultado Mensal para MEI e Simples Nacional",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-003-modulo-drm-raio-x-do-negocio.md",
+        "decided_at": "2026-08-04",
+        "decided_by": "PO (Alexandro / Claude)",
+        "related_epics": [
+          "EPIC-010",
+          "EPIC-002",
+          "EPIC-005",
+          "EPIC-006"
+        ],
+        "related_adrs": [
+          "ADR-003"
+        ],
+        "related_idrs": [
+          "IDR-010"
+        ],
+        "origem": "revisao/analise-po-feedback-jose-marques-2026ago03.md",
+        "created_at": "2026-08-04",
+        "updated_at": "2026-08-04",
+        "open_items": [
+          "[DECIDIR-A]"
+        ],
+        "note": "Módulo independente do Diagnóstico, 3 setores desde o MVP, sem paywall. 8 decisões de escopo derivadas dos achados F1–F12 do parecer do PO.",
+        "resolved_by": "PDR-004 (2026-08-04) resolveu [DECIDIR-B], [DECIDIR-C], [DECIDIR-D] e [DECIDIR-E]."
+      },
+      {
+        "id": "PDR-004",
+        "slug": "decisoes-estruturais-drm",
+        "title": "Resolução das decisões estruturais e editoriais do DRM — pró-labore, percentuais, rubricas sazonais e linhas não operacionais",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-004-decisoes-estruturais-drm.md",
+        "decided_at": "2026-08-04",
+        "decided_by": "PO (Alexandro / Claude) — respostas de negócio da EBC",
+        "related_epics": [
+          "EPIC-010"
+        ],
+        "related_pdrs": [
+          "PDR-003"
+        ],
+        "resolves": [
+          "[DECIDIR-B]",
+          "[DECIDIR-C]",
+          "[DECIDIR-D]",
+          "[DECIDIR-E]"
+        ],
+        "created_at": "2026-08-04",
+        "updated_at": "2026-08-04",
+        "note": "B: pró-labore parametrizável, default 'fora' — parâmetro de apresentação, não de cálculo; Lucro Líquido idêntico nos 2 modos (verificado em 2000 casos). C: percentual em todas as linhas + rótulo 'antes do pró-labore'. E: linhas não operacionais aprovadas. D: provisão contábil aceita como alvo, mas exige conta patrimonial que o DRM não tem — escalada para spike (STORY-058) com 3 saídas legítimas. Desbloqueou STORY-048."
+      },
+      {
+        "id": "PDR-005",
+        "slug": "encerramento-wave-2026-01",
+        "title": "Encerramento da WAVE-2026-01 e abertura da WAVE-2026-02",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-005-encerramento-wave-2026-01.md",
+        "decided_at": "2026-08-04",
+        "decided_by": "PO (Alexandro / Claude)",
+        "related_epics": [
+          "EPIC-002",
+          "EPIC-003",
+          "EPIC-010"
+        ],
+        "related_pdrs": [
+          "PDR-001",
+          "PDR-003",
+          "PDR-004"
+        ],
+        "created_at": "2026-08-04",
+        "updated_at": "2026-08-04",
+        "note": "Fecha a onda 1 com objetivo parcial (hipótese não testada — beta bloqueado pelo gate NRF §9.3 durante toda a onda). EPIC-002 → done. EPIC-003 adiado para a onda 2. Tag v1.0.0 adiada até o go-live real. Registra 8 commits de infra não rastreados entre 02/06 e 04/08 e a correção de processo."
       }
     ],
     "adr": [
@@ -1900,6 +2531,15 @@
       "wave": "WAVE-2026-01",
       "related_epic": "EPIC-000",
       "path": "reports/status-2026-05-22.md"
+    },
+    {
+      "date": "2026-08-04",
+      "type": "key_user_feedback_analysis",
+      "wave": "WAVE-2026-02",
+      "related_epic": "EPIC-010",
+      "related_pdr": "PDR-003",
+      "path": "../revisao/analise-po-feedback-jose-marques-2026ago03.md",
+      "note": "Parecer do PO sobre o feedback de José Marques (2026-08-03). 12 achados (F1–F12), 3 itens encaminhados (STORY-044, [DECIDIR-A], EPIC-010)."
     }
   ]
 }

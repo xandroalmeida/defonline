@@ -1,10 +1,12 @@
 ---
 wave_id: WAVE-2026-02
 slug: rascunho-comercializacao-e-cobertura
-title: Comercialização + cobertura de setores (rascunho)
+title: Comercialização + recorrência (rascunho — DRM como épico âncora)
 status: planned
 created_at: 2026-05-20
-note: Rascunho. Detalhamento real só após retro da WAVE-2026-01 e aprendizado do beta fechado.
+updated_at: 2026-08-04
+related_pdr: PDR-003
+note: Rascunho. Detalhamento real só após retro da WAVE-2026-01 e aprendizado do beta fechado. Em 2026-08-04 o EPIC-010 (DRM) foi inserido como épico âncora — ver PDR-003.
 ---
 
 # WAVE-2026-02 — Rascunho
@@ -18,6 +20,10 @@ Se a hipótese central da onda 1 se confirmar com Roberto (NPS sustentado, recor
 Se a hipótese **não** se confirmar, esta onda muda inteiramente. Cenários possíveis: revisitar o motor/relatório (insistir e iterar), reorientar persona alvo (pivot suave para Marcos como cliente B2B do início), ou — em caso extremo — repensar a tese central via PDR.
 
 ## Épicos esboçados (a confirmar)
+
+> **Atualização de 2026-08-04.** O feedback do Key User José Marques (03/08/2026), com parecer favorável da EBC, gerou o **EPIC-010 — DRM (Demonstração de Resultado Mensal)**, que passa a ser o **épico âncora desta onda**, à frente do EPIC-006. Dois motivos, registrados no `PDR-003`: o DRM entrega Comércio e Serviços **sem depender** da validação externa de faixas que bloqueia o EPIC-006, e cria a recorrência mensal que o EPIC-005 pressupõe para fazer sentido comercial. Sequência revisada: **EPIC-010 → EPIC-005 → EPIC-007 → EPIC-006 → EPIC-008 → EPIC-009**.
+
+- **EPIC-010 — DRM: Demonstração de Resultado Mensal.** O dono de um pequeno negócio — indústria, comércio ou serviços — lança o movimento do mês em poucos minutos e vê se deu lucro, quanto sobrou depois da retirada dele, e como o mês se compara aos anteriores. Sem cobrança; instrumentado para medir adesão antes de o EPIC-005 investir em gateway. Outcome: o produto passa a servir de fato MEI e Simples Nacional, e ganha um motivo mensal para o usuário voltar. Detalhado em `epics/EPIC-010-drm-demonstracao-resultado-mensal/epic.md`; decisão em `decisions/pdr/PDR-003-modulo-drm-raio-x-do-negocio.md`; parecer em `../../revisao/analise-po-feedback-jose-marques-2026ago03.md`.
 
 > Nota: a numeração foi deslocada em 2026-05-24 — o `EPIC-004` deixou de ser placeholder de "Cobrança e Plano Básico" e foi atribuído ao **App shell + materialização do design system v1** dentro da WAVE-2026-01 (ver `roadmap/current-wave.md`). Todos os placeholders abaixo subiram um número.
 
@@ -39,7 +45,9 @@ Se esta onda fechar com sucesso, o DEFOnline alcança "MVP comercializável" —
 
 - **LGPD e jurídico:** Termo de Adesão revisado por advogado (NRF §8) é gatilho que destrava EPIC-005; sem ele, não se pode cobrar.
 - **Gateway de pagamento:** ADR específica de gateway sai como spike antecipado, talvez no fim da WAVE-2026-01.
-- **Matriz multi-setor:** validação externa das faixas para Comércio e Serviços (NRF §9.3) precisa estar pronta antes do EPIC-006.
+- **Matriz multi-setor:** validação externa das faixas para Comércio e Serviços (NRF §9.3) precisa estar pronta antes do EPIC-006. **O EPIC-010 não depende dela** — é justamente por isso que vem antes.
+- **Atrito do lançamento mensal (EPIC-010):** até 36 campos monetários, doze vezes por ano. É o risco nº 1 da onda e é de retenção, não de construção. Mitigado por três mecanismos obrigatórios no MVP (PDR-003, decisão 6) e detectado pela métrica primária do épico — 2º lançamento em 45 dias.
+- **Pendências editoriais da EBC (EPIC-010):** `[DECIDIR-B]` e `[DECIDIR-E]` bloqueiam o motor do DRM. Consulta única recomendada antes da abertura do sprint; defaults registrados em cada estória.
 
 ## O que NÃO entra nesta onda
 
@@ -51,4 +59,5 @@ Se esta onda fechar com sucesso, o DEFOnline alcança "MVP comercializável" —
 ## Histórico
 
 - 2026-05-20 — Rascunho inicial criado junto com a abertura da WAVE-2026-01.
+- 2026-08-04 — **EPIC-010 (DRM) inserido como épico âncora**, à frente do EPIC-006, com 13 estórias detalhadas. Origem: feedback do Key User José Marques (03/08/2026) + parecer favorável da EBC. Decisão em PDR-003, parecer do PO em `../../revisao/analise-po-feedback-jose-marques-2026ago03.md`. Sequência da onda revisada e dois riscos novos registrados. Exceção deliberada à regra de "só épicos e outcomes" neste arquivo: o EPIC-010 foi detalhado antes da retro da onda 1 porque o feedback do Key User e o parecer da EBC já dão base suficiente, e porque as decisões pendentes da EBC têm prazo longo — adiar a especificação atrasaria a consulta, não o contrário.
 - 2026-05-24 — Numeração dos placeholders deslocada (+1) porque o `EPIC-004` foi reatribuído ao "App shell + materialização do design system v1" dentro da WAVE-2026-01 (ver `roadmap/current-wave.md`). Cobrança virou EPIC-005, Cobertura virou EPIC-006, PDF virou EPIC-007, Captação virou EPIC-008, Hotsite virou EPIC-009. Riscos atualizados para refletir nova numeração.
