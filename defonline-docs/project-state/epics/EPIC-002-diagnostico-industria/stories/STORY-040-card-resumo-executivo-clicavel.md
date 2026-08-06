@@ -7,10 +7,12 @@ sprint_id: SPRINT-2026-W26
 type: bugfix
 target_role: programador
 requires_design: true
-status: in_review
+status: done
 owner_agent: programador (claude-opus-4-8)
 created_at: 2026-06-02
 updated_at: 2026-08-04
+closed_at: 2026-08-04
+approved_by: Alexandro
 estimated_session_size: S
 related_devolutiva: "Áudio Edvan 2026-05-27 — 'pega o primeiro, NCG sobrevivendo, aí ele começa, tem duas linhas e o texto lá embaixo tem quatro, ele não complementa. E clicando nele não abre.'"
 ---
@@ -222,3 +224,16 @@ página inteira, mas a dívida é de outras estórias. Três caminhos:
    fato foi entregue — decisão de PO, não minha.
 
 Não escolhi nenhuma: o DoD é do PO e nenhuma das três é decisão de implementação local.
+
+
+## Decisão do PO — 2026-08-04
+
+`[ESCALONAMENTO-PO]` **resolvido: caminho 2.** Registrado em `decisions/pdr/PDR-006-escalacoes-sprint-w32.md` §1.
+
+A estória fecha como `done`. Todos os seus critérios de aceite estão verdes; os três achados que reprovam o gate da página são dívida de outras estórias — dois do app shell (EPIC-004) e um dos tokens do design system.
+
+Mantê-la aberta até que alguém conserte o app shell é exatamente o mecanismo que deixou a `STORY-023` parada por dois meses e meio (`PDR-005` §5): a estória não fecha, e a dívida também não anda, porque fica escondida dentro de algo cujo título não fala dela.
+
+**Não reinterpretei o gate como "escopo da estória"** (caminho 3). O gate é da página porque a experiência do usuário é da página. Baixar a régua para caber no que foi entregue é o começo da erosão que o princípio de qualidade existe para impedir.
+
+A dívida foi para a **`STORY-059`**, com título próprio e dono claro, já na `SPRINT-2026-W32`. O contraste dos pills de farol é o mais grave dos três: contraste insuficiente ataca justamente o usuário que a exigência de "cor + ícone" pretendia proteger.

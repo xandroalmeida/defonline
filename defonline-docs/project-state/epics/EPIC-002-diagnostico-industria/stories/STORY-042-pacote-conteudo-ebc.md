@@ -7,10 +7,12 @@ sprint_id: SPRINT-2026-W26
 type: implementation
 target_role: programador
 requires_design: false
-status: in_review
+status: done
 owner_agent: programador (claude-opus-5)
 created_at: 2026-06-02
 updated_at: 2026-08-04
+closed_at: 2026-08-04
+approved_by: Alexandro
 estimated_session_size: M
 related_devolutiva: ".docx 'DEF on line - MVP 270526 - observações ebc' — blocos 2, 3, 4 + diagnóstico + glossário"
 ---
@@ -256,3 +258,16 @@ produto, não de implementação: fazer o texto revisado da matriz chegar ao usu
 decisão da STORY-032 (o `NcgAbsoluto` não consome a matriz). As 3 opções registradas acima seguem
 sobre a mesa, sem resposta. Enquanto isso, o **EPIC-002 não pode ser promovido a `done`**, porque o
 `promote_to_done_when` exige STORY-039..044 todas em `done`.
+
+
+## Decisão do PO — 2026-08-04
+
+`[ESCALONAMENTO-PO]` **resolvido: CA-7 marcado `n/a`.** Registrado em `decisions/pdr/PDR-006-escalacoes-sprint-w32.md` §2.
+
+A estória fecha como `done` com **9 critérios verdes e 1 não aplicável**.
+
+O CA-7 foi escrito sobre uma premissa errada — a de que o `NcgAbsoluto` lê a matriz. Ele não lê, por decisão deliberada e documentada da `STORY-032`: o Anexo F oferece 2 cenários e o motor entrega 3 faixas semânticas, e a granularidade maior é mais útil ao usuário. Fazer o CA passar exigiria desfazer aquela decisão e trocar três mensagens por duas, **piorando o produto para satisfazer um critério de aceite mal formulado**. O erro é meu, na redação do CA; a resposta certa é corrigir o critério, não o produto.
+
+O agente acertou em não decidir sozinho, e acertou em entregar a metade que era dele — o texto está na matriz e o legado está intocado, ambos com teste.
+
+**O resíduo legítimo virou a `STORY-060`:** a intenção editorial da EBC de fato não chegou ao usuário, e a entrada da matriz virou configuração inerte que vai confundir o próximo agente. Aquela estória leva a intenção para as três mensagens de faixa que o produto realmente exibe — com bump de versão do motor e legado preservado — e resolve a entrada inerte.
