@@ -8,7 +8,11 @@ destino: Claude Code
 
 # Fila de execução — SPRINT-2026-W32
 
-> **Atualizado em 2026-08-04, após validação.** Bloco 1 concluído (STORY-041 a 044 + deploy `v0.11.0-rc.1`), STORY-045 concluída com a ADR-007 aceita. Restam **5 itens**, listados abaixo como Blocos 2, 3 e 4. As três escalações ao PO que surgiram na execução foram decididas no `PDR-006` e viraram as STORY-059 e STORY-060.
+> **FILA CONCLUÍDA — 2026-08-06.** Todos os blocos foram executados. As dez estórias da sprint estão entregues; as três últimas (`STORY-052`, `STORY-059`, `STORY-060`) aguardam apenas o deploy `v0.12.0-rc.1` para ir a `done`.
+>
+> O documento fica como histórico do que foi pedido a cada sessão. O fechamento da sprint, com o que foi entregue e o que se aprendeu, está em `SPRINT-2026-W32.md` §Fechamento; o relatório de validação, em `SPRINT-2026-W32-validacao.md`.
+>
+> **Dois achados viraram estória** e entram na fila da próxima sprint, não desta: `STORY-061` (o gate do `IDR-008` é cego a `rgba()`) e `STORY-062` (o inventário de lacunas não escreve em ambiente local).
 
 Cada bloco abaixo é um **prompt pronto para colar no Claude Code**, um por sessão. Execute na ordem. Não junte dois numa sessão só — as estórias foram dimensionadas para caber em uma sessão cada.
 
@@ -105,7 +109,7 @@ Registre tudo nas notas das estórias envolvidas.
 
 ---
 
-## Bloco 2 — Fundação do EPIC-010 (nenhum código de produção)
+## ~~Bloco 2 — Fundação do EPIC-010~~ — CONCLUÍDO
 
 > **STORY-045 concluída** — `ADR-007` aceita, fixando competência versionada append-only, snapshot imutável por versão e retificação com ponteiro de vigência. O IDR-010 foi estendido, não revogado. Restam 2.1 já feita, 2.2 e 2.3 pendentes.
 
@@ -179,7 +183,7 @@ Leia a estória inteira antes de começar.
 
 ---
 
-## Bloco 3 — Conteúdo do DRM
+## ~~Bloco 3 — Conteúdo do DRM~~ — CONCLUÍDO
 
 Não bloqueia nada, mas destrava a STORY-054 mais adiante.
 
@@ -204,7 +208,7 @@ Leia a estória inteira antes de começar.
 
 ---
 
-## Bloco 4 — Dívidas decididas no PDR-006
+## ~~Bloco 4 — Dívidas decididas no PDR-006~~ — CONCLUÍDO
 
 Duas estórias curtas, nascidas de escalações que os agentes corretamente não decidiram sozinhos.
 
@@ -258,11 +262,11 @@ A `2.3` (specs de tela) vem primeiro porque é a única que ainda bloqueia a imp
 
 Com **sessões em paralelo**: `2.3` (designer) e `2.2` (arquiteto) juntas, e `4.1`/`4.2` (programador) em outra. Papéis diferentes, arquivos diferentes, sem conflito.
 
-## Quando esta fila termina
+## Quando esta fila termina — e como terminou
 
-O EPIC-002 e o EPIC-004 estarão fechados, a `STORY-047` (lançamento mensal do DRM) poderá abrir sem nenhuma decisão pendente à frente, e a próxima sprint entrega o **Checkpoint 1**: o usuário lança um mês e vê se o negócio deu lucro.
+A previsão era: EPIC-002 e EPIC-004 fechados, `STORY-047` podendo abrir sem decisão pendente, e a próxima sprint entregando o Checkpoint 1.
 
-**Só a 2.3 é caminho crítico.** As outras quatro podem escorregar para a sprint seguinte sem atrasar o DRM.
+**Cumprido, com uma ressalva de forma.** A `STORY-047` pode abrir — nenhuma decisão de negócio ou de arquitetura sobrou à frente dela, e o `PDR-009` fechou o último `[DECIDIR-A]`. Os dois épicos ficam em `in_review` até a verificação do `v0.12.0-rc.1` em homologação, que é ato do PO e não trabalho de fila.
 
 ## O que NÃO está nesta fila
 

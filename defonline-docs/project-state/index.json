@@ -1786,6 +1786,44 @@
       "created_at": "2026-08-04",
       "updated_at": "2026-08-06",
       "note": "Origem: escalação do CA-7 da STORY-042 (PDR-006 §2). Leva a intenção editorial da EBC para as 3 mensagens de faixa que o produto exibe (bump de motor_version, legado preservado por IDR-010) e resolve a entrada inerte ncg_absoluto na matriz. NÃO reverte a STORY-032. | 2026-08-06: entregue. Motor 1.3.1 → 1.3.2 (PATCH), 5 golden hashes re-emitidos com diff conferido por reconstrução, entrada `ncg_absoluto` da matriz movida para a seção `_referencia_editorial` (não consumida em runtime), IDR-010 estendido com aditivo generalizando a regra de bump para constantes de mensagem de indicador. Em `in_review`: falta só o deploy em homologação, que depende de tag do PO. A redação final das 3 mensagens é conteúdo editorial e aguarda ratificação do PO — registrada nas notas da estória. | 2026-08-06 (revisão do PO): a redação da faixa 1 foi derrubada na revisão editorial prevista pelo protocolo — \"folga operacional\" era lido como \"sobra\", quando o número diz o oposto (dívida com fornecedor maior do que o que o ciclo devolve). O texto passou a nomear o financiamento do fornecedor e a dependência que ele cria. Motor 1.3.2 → 1.3.3 (PATCH), 5 golden hashes reemitidos com a mesma prova por reconstrução — só 2 fixtures trocam texto (os de NCG ≤ 0). IDR-010 ganhou aditivo: revisão editorial do PO também é bump, é o terceiro caso em três meses."
+    },
+    {
+      "id": "STORY-061",
+      "slug": "gate-de-tokens-cego-a-cor-nao-hex",
+      "title": "Gate de tokens — fechar o furo que deixa `rgba()` e `hsl()` passarem por baixo do IDR-008",
+      "type": "bugfix",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "S",
+      "blocked_by": [],
+      "blocks": [],
+      "epic_id": "EPIC-004",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "path": "epics/EPIC-004-app-shell-navegacao/stories/STORY-061-gate-de-tokens-cego-a-cor-nao-hex.md",
+      "created_at": "2026-08-06",
+      "updated_at": "2026-08-06",
+      "note": "Achado da STORY-059, aprovado pelo PO para virar estória em 2026-08-06. O DesignTokensTest procura só #RRGGBB: o badge 'Versão MVP' carregava rgba(99,91,255,…) inline em produção e passava pelo gate. O badge foi corrigido na 059; o furo do gate, não. Gate que pega uma notação e ignora as outras dá falsa segurança, que é pior que gate nenhum. Atenção ao CA-2: color-mix com token é padrão aprovado pelo DDR-006 e não pode virar falso positivo."
+    },
+    {
+      "id": "STORY-062",
+      "slug": "inventario-de-lacunas-nao-escreve-em-dev",
+      "title": "Inventário de lacunas — o mecanismo silencia em desenvolvimento e ninguém percebe",
+      "type": "bugfix",
+      "target_role": "programador",
+      "status": "ready",
+      "estimated_session_size": "S",
+      "blocked_by": [],
+      "blocks": [],
+      "epic_id": "EPIC-002",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-062-inventario-de-lacunas-nao-escreve-em-dev.md",
+      "created_at": "2026-08-06",
+      "updated_at": "2026-08-06",
+      "note": "Achado da STORY-052, aprovado pelo PO para virar estória em 2026-08-06. Os dois mecanismos de inventário (matriz_lacunas_path desde a STORY-032, drm.lacunas_path desde a STORY-052) apontam para defonline-docs/, que fica fora do que o container monta — o guard is_dir() silencia o I/O e nunca registram nada em desenvolvimento. O PDR-009 §2 deu esse arquivo ao PO como instrumento de planejamento, e instrumento que só funciona em produção não planeja. CA-3 pede que o silêncio deixe de ser silencioso."
     }
   ],
   "sprints": [
@@ -2026,7 +2064,7 @@
     {
       "id": "SPRINT-2026-W32",
       "wave": "WAVE-2026-02",
-      "status": "active",
+      "status": "closed",
       "start_date": "2026-08-04",
       "end_date": "2026-08-21",
       "goal": "Zerar os débitos remanescentes da WAVE-2026-01 e destravar o EPIC-010 pelas três decisões que precedem qualquer código — sem que os dois esforços disputem a mesma pessoa.",
@@ -2050,7 +2088,7 @@
       "opened_at": "2026-08-04",
       "opened_by": "PO (Alexandro / Claude)",
       "related_pdr": "PDR-005",
-      "note": "Duas frentes por papel: limpeza da onda 1 (programador) e fundação do DRM (arquiteto + designer). STORY-039 e STORY-040 fecham com o primeiro deploy da sprint — verificação, não estória nova. | 2026-08-04: STORY-059 e STORY-060 acrescentadas — dívidas escaladas ao PO e decididas no PDR-006, colocadas em sprint em vez de deixadas soltas.",
+      "note": "Duas frentes por papel: limpeza da onda 1 (programador) e fundação do DRM (arquiteto + designer). STORY-039 e STORY-040 fecham com o primeiro deploy da sprint — verificação, não estória nova. | 2026-08-04: STORY-059 e STORY-060 acrescentadas — dívidas escaladas ao PO e decididas no PDR-006, colocadas em sprint em vez de deixadas soltas. | 2026-08-06: ENCERRADO com as 10 estórias entregues e nenhuma transferida. Três em `in_review` aguardando só o deploy v0.12.0-rc.1 — com ele, o EPIC-002 é promovido a `done`. Gate de acessibilidade da página do relatório: 85 → 100. DS canônico em v1.1 (primeiros tokens novos desde a promoção a v1, todos vindos de medição de contraste, nenhum de tela querendo cor). Dois achados viraram STORY-061 e STORY-062 em vez de sumir. Validação em sprints/SPRINT-2026-W32-validacao.md: aprovada na rodada 2, depois de reprovar a 1 com dois fails não-bloqueantes.",
       "execution_queue": "sprints/SPRINT-2026-W32-fila-execucao.md",
       "validation_report": {
         "path": "sprints/SPRINT-2026-W32-validacao.md",
@@ -2074,6 +2112,49 @@
             "by": "validador",
             "reason": "Os 2 fails corrigidos e reverificados: geometria restaurada (12px/24px) e travada por FarolGeometriaBrowserTest, com adendo no DDR-006 dizendo que ele decide cor e não geometria; ConteudoDrm em 100%. Restam 3 pendências de release fora do mandato do agente — deploy em homologação para as 3 estórias e reexecução do gate de acessibilidade na URL pública. 984 Pest + 36 Dusk verdes; cobertura geral 97,4% e domínio 99,7%; Lighthouse a11y 100 em ambiente local."
           }
+        ]
+      },
+      "closed_at": "2026-08-06",
+      "closed_by": "PO (Alexandro / Claude)",
+      "goal_achieved": "yes",
+      "outcome": {
+        "stories_planned": 10,
+        "stories_delivered": 10,
+        "delivered": [
+          "STORY-041",
+          "STORY-042",
+          "STORY-043",
+          "STORY-044",
+          "STORY-045",
+          "STORY-046",
+          "STORY-053",
+          "STORY-052",
+          "STORY-059",
+          "STORY-060"
+        ],
+        "carried_forward": [],
+        "in_review_awaiting_deploy": [
+          "STORY-052",
+          "STORY-059",
+          "STORY-060"
+        ],
+        "release": "v0.12.0-rc.1",
+        "spin_off_stories": [
+          "STORY-061",
+          "STORY-062"
+        ],
+        "decisions_produced": [
+          "PDR-006",
+          "PDR-007",
+          "PDR-008",
+          "PDR-009",
+          "ADR-007",
+          "ADR-008",
+          "DDR-006",
+          "DDR-007"
+        ],
+        "bugs_found_and_fixed": [
+          "BUG-001"
         ]
       }
     }
