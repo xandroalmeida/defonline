@@ -102,6 +102,68 @@ it('NCG ≤ 0 com vendas ausente continua Faixa 1 (folga)', function () {
         ->and($r['mensagem'])->toContain('Folga operacional');
 });
 
+// ---------- STORY-060 CA-1: intenção editorial da EBC nas três faixas ----------
+
+/*
+| O texto revisado da EBC (Anexo F §F.13, cenário "NCG positiva", coluna
+| Indústria) diz: a elevação da NCG deve ser acompanhada, **na mesma
+| proporção**, pelo aumento das **fontes de financiamento de longo prazo**,
+| **preferencialmente de fornecedores**. Esses três elementos são a intenção
+| editorial — é isso que precisa chegar ao usuário nas faixas MODERADO e ALTO.
+|
+| Os testes abaixo checam os elementos, não a frase inteira: a redação pode ser
+| ajustada pelo PO sem quebrar a suíte, mas remover qualquer um dos três
+| elementos quebra — e é exatamente o que esta estória existe para impedir.
+*/
+
+it('CA-1 — a faixa MODERADO carrega os três elementos da orientação da EBC', function () {
+    expect(NcgAbsoluto::MSG_MODERADO)
+        ->toContain('na mesma proporção')
+        ->toContain('longo prazo')
+        ->toContain('fornecedores');
+});
+
+it('CA-1 — a faixa ALTO carrega os três elementos da orientação da EBC', function () {
+    expect(NcgAbsoluto::MSG_ALTO)
+        ->toContain('na mesma proporção')
+        ->toContain('longo prazo')
+        ->toContain('fornecedores');
+});
+
+it('CA-1 — a faixa FOLGA reflete o cenário "NCG negativa" do Anexo F: o giro não exige recursos', function () {
+    // §F.13/negativa: "Teoricamente, a empresa não necessita de recursos para o
+    // giro." Dito em linguagem de microempresário, sem o jargão IOG.
+    expect(NcgAbsoluto::MSG_FOLGA)
+        ->toContain('Folga operacional')
+        ->toContain('giro')
+        ->not->toContain('IOG');
+});
+
+it('CA-2 — continuam sendo três faixas distintas (a STORY-032 não é revertida)', function () {
+    $mensagens = [NcgAbsoluto::MSG_FOLGA, NcgAbsoluto::MSG_MODERADO, NcgAbsoluto::MSG_ALTO];
+
+    expect(array_unique($mensagens))->toHaveCount(3);
+    foreach ($mensagens as $mensagem) {
+        expect($mensagem)->toBeString()->not->toBe('');
+    }
+});
+
+it('CA-1 (borda) — a orientação de financiamento NÃO aparece na faixa de folga', function () {
+    // Quem tem NCG negativo não precisa financiar giro nenhum. Repetir a
+    // orientação ali seria conselho errado para o cenário certo.
+    expect(NcgAbsoluto::MSG_FOLGA)->not->toContain('na mesma proporção');
+});
+
+it('CA-1 — as três faixas continuam saindo pelo caminho de cálculo, não só pelas constantes', function () {
+    $folga = calcNcgAbs(pBaseNa(['Q03' => '20000', 'Q04' => '10000', 'Q07' => '50000']));
+    $moderado = calcNcgAbs(pBaseNa(['Q03' => '50000', 'Q04' => '40000', 'Q07' => '30000']));
+    $alto = calcNcgAbs(pBaseNa(['Q03' => '120000', 'Q04' => '50000', 'Q07' => '26000']));
+
+    expect($folga['mensagem'])->toBe(NcgAbsoluto::MSG_FOLGA)
+        ->and($moderado['mensagem'])->toBe(NcgAbsoluto::MSG_MODERADO)
+        ->and($alto['mensagem'])->toBe(NcgAbsoluto::MSG_ALTO);
+});
+
 // ---------- casos extremos (catálogo §9) ----------
 
 it('indisponível — Q03 ausente', function () {

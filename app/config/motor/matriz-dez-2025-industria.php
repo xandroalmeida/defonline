@@ -14,15 +14,13 @@ declare(strict_types=1);
  *
  * Estrutura:
  *
- *   13 indicadores com farol verde/amarelo/vermelho:
+ *   13 indicadores com farol verde/amarelo/vermelho — **tudo o que o runtime lê**:
  *     [codigo_indicador => ['verde' => texto, 'amarelo' => texto, 'vermelho' => texto]]
  *
- *   1 indicador informativo (NCG absoluto) com cenários positiva/negativa
- *   conforme F.13 do Anexo F. Esta entrada NÃO é consumida pelo motor 1.3.0:
- *   `NcgAbsoluto.php` segue usando suas 3 mensagens hardcoded (FOLGA/MODERADO/
- *   ALTO) por decisão da STORY-032 — preservando a granularidade entregue pela
- *   STORY-028. A entrada fica disponível aqui para auditoria editorial e roadmap
- *   futuro (eventual exibição educativa em outra superfície do relatório).
+ *   1 seção `_referencia_editorial`, no fim do arquivo: transcrição do Anexo F
+ *   que **nenhum código consome** (hoje, só o NCG absoluto §F.13). Está lá por
+ *   auditoria editorial, não por configuração. Ver o bloco de comentário da
+ *   própria seção e o CA-5 da STORY-060.
  *
  * **Imutabilidade.** Esta versão da matriz é `matrix_version = "dez-2025"`. Para
  * editar textos: criar `matriz-<nova-versao>-industria.php`, incrementar
@@ -114,26 +112,48 @@ return [
         'vermelho' => 'Vender com prazo menor, ampliar a carteira de clientes, a participação no mercado e aumentar o prazo para pagamento a fornecedores, reduzir o descasamento das contas a pagar e a receber.',
     ],
 
-    // F.13 NCG absoluto — informativo, NÃO consumido por NcgAbsoluto.php (manteve 3 mensagens hardcoded).
-    // Entrada presente para satisfazer CA-2 da STORY-032 (cobertura editorial completa
-    // do Anexo F) e roadmap futuro de exibição educativa.
-    //
-    // **Divergência deliberada em relação ao Anexo F** (STORY-042, devolutiva EBC de
-    // 27/05/2026): o cenário `positiva` perdeu a primeira frase ("O crescimento das
-    // vendas e o aumento do prazo concedido a clientes gera maior NCG.") por revisão
-    // do próprio autor do Anexo F (Edvan / EB Parcerias). Este arquivo passa a ser a
-    // versão vigente; o Anexo F §F.13 ainda carrega o texto longo e precisa ser
-    // atualizado pelo PO — é documento editorial de propriedade da EBC.
-    'ncg_absoluto' => [
-        'positiva' => 'A elevação deve ser acompanhada, na mesma proporção, pelo aumento das fontes de financiamento de longo prazo, preferencialmente de fornecedores.',
-        'negativa' => 'Teoricamente, a empresa não necessita de recursos para o giro. NCG negativa significa Investimento Operacional em Giro (IOG).',
-    ],
-
     // F.14 NCG / Vendas — faixas próprias (Negativa / 0,01–10% / Acima de 10%) mapeadas para verde/amarelo/vermelho.
     // O motor (NcgVendas.php) classifica via faroes-industria.php — verde=Negativa, amarelo=0,01–10%, vermelho=>10%.
     'ncg_vendas' => [
         'verde' => 'Pode indicar que a empresa não necessita de recursos para o giro de seus negócios.',
         'amarelo' => 'Manter-se alerta às vendas a prazo, acompanhar o crescimento da rentabilidade e disponibilidade de capital de giro para financiar as vendas a prazo.',
         'vermelho' => 'Não é recomendável a elevação das atividades e da NCG, se não acompanhada do aumento do prazo para pagamento a fornecedores.',
+    ],
+
+    /*
+    |---------------------------------------------------------------------------
+    | Referência editorial — NÃO consumida em runtime (STORY-060 CA-5).
+    |---------------------------------------------------------------------------
+    |
+    | Tudo acima é servido por `MatrizRecomendacoes::texto($codigo, $farol)`, e a
+    | chave de primeiro nível é sempre o código de um indicador com farol. O que
+    | está aqui embaixo **não é**: é transcrição do Anexo F guardada para
+    | auditoria editorial, sob uma chave que nenhum código procura.
+    |
+    | Por que existe uma seção só para isso. Até a STORY-060, `ncg_absoluto`
+    | morava lá em cima, entre os indicadores consumidos, e parecia configuração
+    | ativa — mas `NcgAbsoluto.php` nunca a leu (decisão da STORY-032, reafirmada
+    | pelo PDR-006 §2). Quem editasse aquele texto mudaria nada no produto e
+    | levaria um tempo até descobrir por quê. A STORY-060 desarmou a armadilha em
+    | dois movimentos: a **intenção** deste texto foi para as constantes de
+    | `NcgAbsoluto` (que é o que o usuário lê), e a transcrição desceu para cá.
+    |
+    | Efeito colateral desejado: se alguém um dia chamar
+    | `texto('ncg_absoluto', ...)`, cai no fallback e vira lacuna registrada, em
+    | vez de receber em silêncio um texto que o produto não exibe.
+    |
+    | Divergência deliberada em relação ao Anexo F (STORY-042, devolutiva EBC de
+    | 27/05/2026): o cenário `positiva` perdeu a primeira frase ("O crescimento
+    | das vendas e o aumento do prazo concedido a clientes gera maior NCG.") por
+    | revisão do próprio autor do Anexo F (Edvan / EB Parcerias). Este arquivo é
+    | a versão vigente; o Anexo F §F.13 ainda carrega o texto longo e precisa ser
+    | atualizado pelo PO — é documento editorial de propriedade da EBC.
+    */
+    '_referencia_editorial' => [
+        // F.13 NCG absoluto — informativo, sem farol; 2 cenários no Anexo F.
+        'ncg_absoluto' => [
+            'positiva' => 'A elevação deve ser acompanhada, na mesma proporção, pelo aumento das fontes de financiamento de longo prazo, preferencialmente de fornecedores.',
+            'negativa' => 'Teoricamente, a empresa não necessita de recursos para o giro. NCG negativa significa Investimento Operacional em Giro (IOG).',
+        ],
     ],
 ];

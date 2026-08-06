@@ -22,7 +22,13 @@ return [
     // 1.3.1 — STORY-041 (PATCH: veredito `em_alerta` corrige "demandam ação" → "demandam ações",
     //         alinhando ao texto canônico da spec §4.7.1. Altera output do motor porque
     //         `resumo_executivo.veredito_texto` entra no snapshot imutável — ver aditivo da IDR-010).
-    'version' => '1.3.1',
+    // 1.3.2 — STORY-060 (PATCH: as três mensagens de faixa do NCG absoluto passam a
+    //         carregar a intenção editorial da EBC do Anexo F §F.13 — elevação da NCG
+    //         acompanhada, na mesma proporção, do aumento das fontes de financiamento
+    //         de longo prazo, preferencialmente fornecedores. Texto, não fórmula: nenhum
+    //         valor calculado muda. É PATCH pelo mesmo critério da 1.3.1 — altera output
+    //         porque a mensagem entra no snapshot imutável (IDR-010).
+    'version' => '1.3.2',
     'matrix_version' => 'dez-2025',
 
     // Path do arquivo de lacunas auto-append por MatrizRecomendacoes (CA-5/STORY-032).

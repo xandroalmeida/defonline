@@ -20,25 +20,34 @@ use App\Domain\Motor\Motor;
 | motor segue intocado. A metade do CA-7 que fala em "diagnóstico novo
 | exibe a recomendação revisada" depende de uma decisão de produto que não
 | é minha — está escalada em "Notas do agente" da estória.
+|
+| **Atualizado pela STORY-060.** A escalação acima foi decidida no PDR-006 §2:
+| o CA-7 virou `n/a` e o resíduo real — a intenção editorial não chegar ao
+| usuário — foi resolvido levando-a para as constantes de faixa de
+| `NcgAbsoluto` (ver `Indicadores/NcgAbsolutoTest.php`). A transcrição do
+| Anexo F desceu para a seção `_referencia_editorial` da matriz, e os testes
+| deste arquivo passaram a apontar para lá. O que eles provam continua
+| valendo, com um item a mais: a entrada editorial segue intacta **e** segue
+| fora do runtime.
 |-------------------------------------------------------------------------
 */
 
 $textoNovo = 'A elevação deve ser acompanhada, na mesma proporção, pelo aumento das fontes de financiamento de longo prazo, preferencialmente de fornecedores.';
 
-it('CA-7 — `ncg_absoluto.positiva` da matriz dez-2025 é exatamente o texto revisado', function () use ($textoNovo) {
-    /** @var array<string, array<string, string>> $matriz */
+it('CA-7 — `ncg_absoluto.positiva` da referência editorial é exatamente o texto revisado', function () use ($textoNovo) {
+    /** @var array<string, array<string, array<string, string>>> $matriz */
     $matriz = config('motor.matriz-dez-2025-industria');
 
     // Igualdade estrita: `toContain` passaria com o texto antigo, do qual o
     // texto novo é literalmente a segunda frase.
-    expect($matriz['ncg_absoluto']['positiva'])->toBe($textoNovo);
+    expect($matriz['_referencia_editorial']['ncg_absoluto']['positiva'])->toBe($textoNovo);
 });
 
 it('CA-7 (borda) — o cenário `negativa` não foi tocado', function () {
-    /** @var array<string, array<string, string>> $matriz */
+    /** @var array<string, array<string, array<string, string>>> $matriz */
     $matriz = config('motor.matriz-dez-2025-industria');
 
-    expect($matriz['ncg_absoluto']['negativa'])->toBe(
+    expect($matriz['_referencia_editorial']['ncg_absoluto']['negativa'])->toBe(
         'Teoricamente, a empresa não necessita de recursos para o giro. NCG negativa significa Investimento Operacional em Giro (IOG).',
     );
 });
@@ -59,7 +68,10 @@ it('CA-7 (borda) — a edição não vazou para o `ncg_vendas`, que tem faixas p
     );
 });
 
-it('CA-7 (não-regressão) — a troca não altera o texto que um diagnóstico com NCG positivo grava no snapshot', function () use ($textoNovo) {
+it('CA-7 (não-regressão) — a mensagem gravada no snapshot não é cópia literal da matriz', function () use ($textoNovo) {
+    // Depois da STORY-060 a mensagem de faixa carrega a **intenção** deste texto,
+    // não o texto. A asserção de não-igualdade continua provando o que interessa:
+    // o indicador não lê a matriz, então editar a matriz não muda o produto.
     // NCG = Clientes + Estoques − Fornecedores = 20.000 + 10.000 − 5.000 > 0.
     $payload = [
         'Q01' => 1, 'Q02' => '50000', 'Q03' => '20000', 'Q04' => '10000',
