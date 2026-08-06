@@ -3,9 +3,11 @@ id: SCREEN-STORY-046-serie-historica
 story: STORY-046-design-telas-drm
 implemented_by: STORY-051
 epic: EPIC-010-drm-demonstracao-resultado-mensal
-status: draft
+status: ready
 created_at: 2026-08-04
-updated_at: 2026-08-04
+updated_at: 2026-08-06
+approved_by: Alexandro
+approved_at: 2026-08-06
 owner_designer: designer (claude-opus-5)
 related_ddrs: [DDR-005, DDR-004, DDR-001]
 ds_components_used:
@@ -413,3 +415,4 @@ A estória convida: *"Sem gráfico obrigatório no MVP. Se propuser um, justifiq
 | Data | Mudança | Quem | Motivo |
 |---|---|---|---|
 | 2026-08-04 | criação — spec completo, 4 estados de competência, indisponibilidades, justificativa da ausência de gráfico | designer (claude-opus-5) | `STORY-046` |
+| 2026-08-06 | aprovada pelo PO — `draft` → `ready` | PO (Alexandro) | `PDR-007` §1. Destrava a `STORY-051` |

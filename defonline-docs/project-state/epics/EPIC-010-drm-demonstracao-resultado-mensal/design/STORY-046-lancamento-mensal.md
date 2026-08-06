@@ -3,9 +3,11 @@ id: SCREEN-STORY-046-lancamento-mensal
 story: STORY-046-design-telas-drm
 implemented_by: STORY-047
 epic: EPIC-010-drm-demonstracao-resultado-mensal
-status: draft
+status: ready
 created_at: 2026-08-04
-updated_at: 2026-08-04
+updated_at: 2026-08-06
+approved_by: Alexandro
+approved_at: 2026-08-06
 owner_designer: designer (claude-opus-5)
 related_ddrs: [DDR-001, DDR-002, DDR-003, DDR-005]
 ds_components_used:
@@ -302,7 +304,7 @@ O caminho inverso (era detalhado, agora agregado) **não** é degradado — o to
 | Bloco 1 | orientação de primeira vez (§4.3) | oferta de conferência total |
 | Alertas A4/A6 | não se aplicam | A4 a partir do 4º; A6 quando há lacuna |
 
-¹ **Decisão de design, aberta ao PO:** o default do 1º lançamento é `detalhado`. Razão: quem chega sem histórico não sabe o que perde ao agregar, e o seletor está ali para ele reduzir se quiser — enquanto o caminho inverso (nasce agregado e o usuário nunca descobre o detalhe) é irreversível para aquele mês. **Contra-argumento honesto:** 38 campos no primeiro contato é o pior momento possível para o atrito, e o 1º lançamento é a porta de entrada do módulo. É uma escolha de produto, não de design — anotada na §9 para decisão do PO, com implementação idêntica nos dois casos.
+¹ **Decidido pelo PO em 2026-08-06 (`PDR-007` §2): `detalhado`, confirmando a recomendação.** Razão: quem chega sem histórico não sabe o que perde ao agregar, e o seletor está ali para ele reduzir se quiser — enquanto o caminho inverso (nasce agregado e o usuário nunca descobre o detalhe) é irreversível para aquele mês. **Contra-argumento registrado:** 38 campos no primeiro contato é o pior momento possível para o atrito, e o 1º lançamento é a porta de entrada do módulo. **Gatilho de reabertura:** se o abandono se concentrar no 1º lançamento, este default é o primeiro suspeito — inverter custa o mesmo que hoje.
 
 ### 4.8. Troca de modo de um grupo
 
@@ -549,7 +551,7 @@ Nomes lógicos; o atributo concreto é decisão do Programador (em Dusk, `dusk="
 
 ### Escalado ao PO — decisões que não são minhas
 
-1. **Default do modo dos grupos no 1º lançamento** (§4.7). Proponho `detalhado` pelo argumento da irreversibilidade; o contra-argumento (38 campos no primeiro contato) é de produto. Custo de implementação idêntico nos dois casos. **Decisão do PO.**
+1. ~~**Default do modo dos grupos no 1º lançamento** (§4.7).~~ **RESOLVIDO em 2026-08-06 — `PDR-007` §2: `detalhado`**, confirmando a recomendação pelo argumento da irreversibilidade. Gatilho de reabertura registrado no PDR e na nota da §4.7.
 2. **Descartar rascunho.** Não há ação de descarte no MVP; o rascunho expira. Nenhuma estória pede — registro para que a ausência seja deliberada e não esquecimento.
 3. **Alvo de toque do `<x-help>` (18×18px).** Viola o piso de 44px em produção, no Quiz e agora aqui. É bug de acessibilidade, e o piso *"vence qualquer outro princípio em conflito"*. Sugiro anexá-lo à `STORY-059`, que já é a estória de dívida de acessibilidade — **não** cabe no `EPIC-010`.
 4. **Contraste da borda de input (1,23:1, WCAG 1.4.11).** Dívida de token; corrigir afeta todas as telas e exige DDR próprio. Sugiro avaliar junto com a `STORY-059`.
@@ -563,5 +565,6 @@ Nenhuma vinda desta tela. A proposta de acrescentar `tipo` e `destaque` às linh
 | Data | Mudança | Quem | Motivo |
 |---|---|---|---|
 | 2026-08-04 | criação — spec completo, 12 estados, microcopy provisória | designer (claude-opus-5) | `STORY-046`. Sem sync prévio com Programador: a `STORY-047` ainda não tem `owner_agent`; as restrições técnicas vieram do `ADR-007` e do código do Quiz em produção |
+| 2026-08-06 | aprovada pelo PO — `draft` → `ready`; default do modo no 1º lançamento confirmado como `detalhado` (§4.7) | PO (Alexandro) | `PDR-007` §1 e §2. Destrava a `STORY-047` |
 
 > Mudança depois que o código começar é mudança consciente — registre aqui **e** nas Notas do agente da `STORY-047`.

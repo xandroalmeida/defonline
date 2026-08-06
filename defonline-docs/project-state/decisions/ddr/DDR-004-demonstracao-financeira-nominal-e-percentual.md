@@ -1,10 +1,10 @@
 ---
 id: DDR-004
 title: Demonstração financeira — par nominal + percentual em toda linha, três níveis de hierarquia e cards por trecho da conta no mobile
-status: proposed
+status: accepted
 created_at: 2026-08-04
-decided_at: ~
-approved_by: ~
+decided_at: 2026-08-06
+approved_by: Alexandro
 supersedes: ~
 superseded_by: ~
 related_ddrs: [DDR-005]

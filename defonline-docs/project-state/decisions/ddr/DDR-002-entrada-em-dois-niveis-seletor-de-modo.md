@@ -1,10 +1,10 @@
 ---
 id: DDR-002
 title: Entrada em dois níveis — seletor de modo por grupo, com o custo em campos declarado na própria escolha
-status: proposed
+status: accepted
 created_at: 2026-08-04
-decided_at: ~
-approved_by: ~
+decided_at: 2026-08-06
+approved_by: Alexandro
 supersedes: ~
 superseded_by: ~
 related_ddrs: [DDR-001, DDR-003, DDR-005]

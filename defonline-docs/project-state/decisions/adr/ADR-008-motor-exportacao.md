@@ -2,19 +2,19 @@
 adr_id: ADR-008
 slug: motor-exportacao
 title: Motor de exportação — planilha XLSX síncrona sem retenção agora; PDF gerado no servidor adiado ao EPIC-007, com impressão do navegador como saída interina
-status: proposed
-decided_at: null
+status: accepted
+decided_at: 2026-08-06
 decided_by: arquiteto (claude-opus-5)
-approved_by: null
+approved_by: Alexandro
 supersedes: null
 superseded_by: null
 related_adrs: ["ADR-002", "ADR-003", "ADR-004", "ADR-005", "ADR-006", "ADR-007"]
-related_pdrs: ["PDR-003", "PDR-004"]
+related_pdrs: ["PDR-003", "PDR-004", "PDR-007"]
 related_idrs: ["IDR-008", "IDR-010"]
 related_epics: ["EPIC-010", "EPIC-007"]
 related_stories: ["STORY-053", "STORY-055"]
 created_at: 2026-08-04
-updated_at: 2026-08-04
+updated_at: 2026-08-06
 type: topologico
 ---
 
@@ -400,17 +400,28 @@ Decisões deliberadamente **não** tomadas aqui:
 
 > Esta seção é o registro formal do aceite.
 
-- **Status final:** ⬜ pendente
-- **Aprovado por:** —
-- **Data:** —
-- **Forma do aceite:** —
-- **Condicionantes do aceite:** —
+- **Status final:** ✅ **aceita**
+- **Aprovado por:** Alexandro (PO)
+- **Data:** 2026-08-06
+- **Forma do aceite:** decisão registrada no `PDR-007` §3 e §4
+- **Condicionantes do aceite:** nenhuma. A ADR vale **como escrita** — incluindo a Decisão 4, confirmada pela resposta à pergunta aberta abaixo.
 
-### Pergunta aberta ao PO (não é decisão do Arquiteto)
+### Pergunta aberta ao PO — **RESPONDIDA em 2026-08-06**
+
+> **Resposta do PO (`PDR-007` §4): o PDF deve ser gerado pela plataforma, para garantir consistência sem depender do navegador do usuário.**
+>
+> A alternativa de aceitar a impressão do navegador **em definitivo** foi recusada. O documento em questão é o que o Roberto leva à reunião com o banco; um artefato que muda de paginação e possivelmente de cor conforme o navegador de quem imprime não é um documento nosso.
+>
+> **Consequências:** a **Decisão 4 vale como está** — Chromium isolado em container (direção Gotenberg, a validar em spike próprio), com `dompdf`, `mPDF` e SaaS de HTML→PDF seguindo desqualificados por antecipação. A camada `@media print` da Decisão 3 permanece **saída interina, não solução final**. O **EPIC-007 abre com o spike de motor de PDF** como primeira estória.
+
+<details>
+<summary>Texto original da pergunta (histórico)</summary>
 
 A Decisão 4 assume que o EPIC-007 vai querer um **documento gerado pelo produto**, com nossa paginação e rodapé de versão. Há uma alternativa legítima que **elimina o EPIC-007 técnico inteiro**: aceitar que "Salvar PDF" seja, em definitivo, a impressão do navegador sobre uma folha de estilo bem-feita. Isso trocaria o épico por uma estória, ao custo de o documento que o Roberto leva ao banco variar conforme o navegador dele.
 
 Essa é uma decisão de **qualidade de produto**, não de arquitetura — por isso não a tomo. Se o PO responder "a impressão basta", esta ADR é substituída por uma versão mais simples e o EPIC-007 encolhe drasticamente. Se responder "quero documento nosso", a Decisão 4 vale como está.
+
+</details>
 
 ### Em caso de rejeição
 
@@ -421,4 +432,5 @@ Essa é uma decisão de **qualidade de produto**, não de arquitetura — por is
 
 ## Histórico
 
+- 2026-08-06 — **aceita pelo PO** (`PDR-007` §3 e §4), sem condicionantes. A pergunta aberta foi respondida: **PDF é documento da plataforma**, não impressão do navegador — a Decisão 4 vale como está e o EPIC-007 abre com spike de motor de PDF. A camada `@media print` fica registrada como saída interina, não como solução final.
 - 2026-08-04 — criada como `proposed` pelo Arquiteto (STORY-053, spike de motor de exportação). Números de imagem (1,81 GB do target `dev`; camada de 566 MB do Chromium; 55 MB de vendor) medidos nesta sessão com `docker history` sobre `defonline/app:dev`. Requisitos de extensão de `phpoffice/phpspreadsheet` 5.9.0 e `openspout/openspout` 5.10.1 conferidos no Packagist. O "~1 GB" atribuído ao Gotenberg é **estimativa declarada**, a medir no spike do EPIC-007.

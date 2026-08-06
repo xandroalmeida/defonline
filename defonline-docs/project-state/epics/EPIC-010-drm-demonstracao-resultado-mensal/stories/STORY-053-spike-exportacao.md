@@ -6,10 +6,12 @@ epic_id: EPIC-010
 type: spike
 target_role: arquiteto
 requires_design: false
-status: in_review
+status: done
 owner_agent: arquiteto (claude-opus-5)
 created_at: 2026-08-04
-updated_at: 2026-08-04
+updated_at: 2026-08-06
+closed_at: 2026-08-06
+approved_by: Alexandro
 estimated_session_size: M
 checkpoint: CP3
 ---
@@ -120,3 +122,14 @@ Se a resposta for "a impressão basta", o `ADR-008` é substituído por uma vers
 ### ADRs criados
 
 - **`ADR-008` — Motor de exportação** (`decisions/adr/ADR-008-motor-exportacao.md`), `status: proposed`, aguardando aprovação do PO.
+
+
+## Decisão do PO — 2026-08-06
+
+Registrada em `decisions/pdr/PDR-007-aprovacao-specs-drm-e-motor-exportacao.md`. A estória fecha como `done`.
+
+**`ADR-008` aceita como escrita, sem condicionantes (§3).** A separação entre planilha e PDF é a parte que importa: pagar o custo de abertura do EPIC-007 dentro do Checkpoint 3 do EPIC-010, por um documento de uma página que o usuário não pediu, seria dívida disfarçada de entrega. Vale para o DRM: XLSX síncrono, sem retenção, lendo o snapshot, com fórmulas nas linhas derivadas.
+
+**Pergunta aberta respondida (§4): o PDF é documento da plataforma.** A alternativa de aceitar a impressão do navegador em definitivo foi **recusada** — o documento que o Roberto leva ao banco não pode variar conforme o navegador de quem imprime. Consequências: a **Decisão 4 do ADR vale como está** (Chromium isolado em container, direção Gotenberg, a validar em spike próprio); a camada `@media print` permanece **saída interina, não solução final**; e o **EPIC-007 abre com o spike de motor de PDF** como primeira estória.
+
+**Segue aberto:** o ajuste dos CAs da `STORY-055` por consequência desta ADR (CA-3 → `n/a`, CA-4, CA-9, CA-10) e a alocação da camada de impressão entre a `STORY-055` e a `STORY-049`. Não bloqueia nada agora — a `STORY-055` é do Checkpoint 3.

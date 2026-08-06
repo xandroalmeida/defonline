@@ -1,10 +1,10 @@
 ---
 id: DDR-001
 title: Formulário longo é wizard por blocos com rascunho por bloco — dialeto único de formulário do produto
-status: proposed
+status: accepted
 created_at: 2026-08-04
-decided_at: ~
-approved_by: ~
+decided_at: 2026-08-06
+approved_by: Alexandro
 supersedes: ~
 superseded_by: ~
 related_ddrs: [DDR-002, DDR-003]

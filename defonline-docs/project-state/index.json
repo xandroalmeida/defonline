@@ -1380,7 +1380,7 @@
       "title": "Specs de tela do módulo DRM — lançamento, demonstração do mês e série histórica",
       "type": "implementation",
       "target_role": "designer",
-      "status": "in_review",
+      "status": "done",
       "estimated_session_size": "L",
       "blocked_by": [],
       "blocks": [
@@ -1389,14 +1389,16 @@
         "STORY-051",
         "STORY-057"
       ],
-      "note": "3 specs de tela + 5 DDRs + inicialização do Design System vivo em design/system/. ENTREGUE 2026-08-04, aguardando revisão do PO (CA-8). Specs em status `draft` e DDRs em `proposed` — viram `ready`/`accepted` só com aprovação humana explícita, e a invariante 12 exige `ready` antes de a STORY-047 codificar UI. Zero tokens novos: as 3 telas couberam na paleta v1. Nota: a estória cita '36 campos'; o Anexo K v1.1 (pós-PDR-004) fixa 38 — 36 é o número correto para o setor Serviços, não há divergência de escopo. 4 itens escalados ao PO nas Notas do agente, sendo 2 dívidas de acessibilidade de produção (alvo de toque do <x-help> em 18px; borda de input em 1,23:1) sugeridas para a STORY-059, 1 decisão de produto (default do modo no 1º lançamento) e 1 proposta ao Arquiteto (acrescentar `tipo`/`destaque` às linhas do snapshot da STORY-048 — barato agora porque o motor não foi construído).",
+      "note": "3 specs de tela + 5 DDRs + inicialização do Design System vivo em design/system/. ENTREGUE 2026-08-04, aguardando revisão do PO (CA-8). Specs em status `draft` e DDRs em `proposed` — viram `ready`/`accepted` só com aprovação humana explícita, e a invariante 12 exige `ready` antes de a STORY-047 codificar UI. Zero tokens novos: as 3 telas couberam na paleta v1. Nota: a estória cita '36 campos'; o Anexo K v1.1 (pós-PDR-004) fixa 38 — 36 é o número correto para o setor Serviços, não há divergência de escopo. 4 itens escalados ao PO nas Notas do agente, sendo 2 dívidas de acessibilidade de produção (alvo de toque do <x-help> em 18px; borda de input em 1,23:1) sugeridas para a STORY-059, 1 decisão de produto (default do modo no 1º lançamento) e 1 proposta ao Arquiteto (acrescentar `tipo`/`destaque` às linhas do snapshot da STORY-048 — barato agora porque o motor não foi construído). | FECHADA em 2026-08-06 (PDR-007 §1 e §2): specs -> ready, DDRs -> accepted, STORY-047/049/051 destravadas. Default do modo no 1º lançamento decidido: `detalhado`. Dos 5 itens escalados, o item 1 foi decidido; os itens 2 a 5 seguem abertos e não bloqueiam o CP1.",
       "epic_id": "EPIC-010",
       "sprint_id": "SPRINT-2026-W32",
       "owner_agent": "designer (claude-opus-5)",
       "requires_design": true,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-046-design-telas-drm.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-04"
+      "updated_at": "2026-08-06",
+      "closed_at": "2026-08-06",
+      "approved_by": "Alexandro"
     },
     {
       "id": "STORY-047",
@@ -1418,14 +1420,14 @@
         "STORY-056",
         "STORY-057"
       ],
-      "note": "Maior risco do épico — é aqui que o usuário decide se volta no mês seguinte. Campos no Anexo K. Alertas A4/A6 ficam para STORY-051 (dependem de histórico).",
+      "note": "Maior risco do épico — é aqui que o usuário decide se volta no mês seguinte. Campos no Anexo K. Alertas A4/A6 ficam para STORY-051 (dependem de histórico). | 2026-08-06: spec SCREEN-STORY-046-lancamento-mensal em `ready` e DDRs `accepted` (PDR-007) — invariante 12 satisfeita, sem decisão de design pendente à frente.",
       "epic_id": "EPIC-010",
       "sprint_id": null,
       "owner_agent": null,
       "requires_design": true,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-047-lancamento-mensal.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-04",
+      "updated_at": "2026-08-06",
       "design_screen_id": "SCREEN-STORY-046-lancamento-mensal"
     },
     {
@@ -1480,14 +1482,14 @@
         "STORY-056",
         "STORY-057"
       ],
-      "note": "Fecha o Checkpoint 1 — caminho feliz vivo em homologação. Materializa o pedido do Key User (valor nominal junto ao indicador). Lê snapshot, não invoca motor. Ganhou CA-3b (troca de modo de pró-labore) e CA-3c (linhas não operacionais) pelo PDR-004.",
+      "note": "Fecha o Checkpoint 1 — caminho feliz vivo em homologação. Materializa o pedido do Key User (valor nominal junto ao indicador). Lê snapshot, não invoca motor. Ganhou CA-3b (troca de modo de pró-labore) e CA-3c (linhas não operacionais) pelo PDR-004. | 2026-08-06: spec SCREEN-STORY-046-demonstracao-mes em `ready` e DDRs `accepted` (PDR-007) — invariante 12 satisfeita, sem decisão de design pendente à frente.",
       "epic_id": "EPIC-010",
       "sprint_id": null,
       "owner_agent": null,
       "requires_design": true,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-049-tela-demonstracao-mes.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-04",
+      "updated_at": "2026-08-06",
       "checkpoint": "CP1",
       "design_screen_id": "SCREEN-STORY-046-demonstracao-mes"
     },
@@ -1543,14 +1545,14 @@
         "STORY-056",
         "STORY-057"
       ],
-      "note": "Fecha o Checkpoint 2. É o que transforma o DRM de planilha em produto e justifica assinatura anual. [DECIDIR-D] resolvida pelo PDR-004: entrega o tratamento interino de rubricas sazonais (alerta A4 + marcação de atípico), sem conta patrimonial. A provisão completa está sob spike na STORY-058 e não altera esta estória.",
+      "note": "Fecha o Checkpoint 2. É o que transforma o DRM de planilha em produto e justifica assinatura anual. [DECIDIR-D] resolvida pelo PDR-004: entrega o tratamento interino de rubricas sazonais (alerta A4 + marcação de atípico), sem conta patrimonial. A provisão completa está sob spike na STORY-058 e não altera esta estória. | 2026-08-06: spec SCREEN-STORY-046-serie-historica em `ready` e DDRs `accepted` (PDR-007) — invariante 12 satisfeita, sem decisão de design pendente à frente.",
       "epic_id": "EPIC-010",
       "sprint_id": null,
       "owner_agent": null,
       "requires_design": true,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-051-serie-historica-comparativos.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-04",
+      "updated_at": "2026-08-06",
       "checkpoint": "CP2",
       "design_screen_id": "SCREEN-STORY-046-serie-historica"
     },
@@ -1584,23 +1586,25 @@
       "title": "Spike — motor de exportação: planilha e PDF",
       "type": "spike",
       "target_role": "arquiteto",
-      "status": "in_review",
+      "status": "done",
       "estimated_session_size": "M",
       "blocked_by": [],
       "blocks": [
         "STORY-055",
         "STORY-057"
       ],
-      "note": "Decisão extrapola o EPIC-010 — o EPIC-007 (PDF do Diagnóstico) depende dela. Produto ainda não gera nenhum documento; a fila `pdf` existe sem consumidor. Entregue: ADR-008 (proposed) responde às 7 perguntas e SEPARA os dois eixos — planilha XLSX síncrona sem retenção AGORA; PDF gerado no servidor ADIADO ao EPIC-007 (saída legítima do CA-8), com impressão do navegador (@media print) como saída interina. Aguardando aprovação do PO para virar accepted.",
+      "note": "Decisão extrapola o EPIC-010 — o EPIC-007 (PDF do Diagnóstico) depende dela. Produto ainda não gera nenhum documento; a fila `pdf` existe sem consumidor. Entregue: ADR-008 (proposed) responde às 7 perguntas e SEPARA os dois eixos — planilha XLSX síncrona sem retenção AGORA; PDF gerado no servidor ADIADO ao EPIC-007 (saída legítima do CA-8), com impressão do navegador (@media print) como saída interina. FECHADA em 2026-08-06: ADR-008 ACEITA (PDR-007 §3), sem condicionantes. Pergunta aberta respondida (§4): PDF é documento da plataforma, não impressão do navegador — Decisão 4 do ADR mantida e EPIC-007 abre com spike de motor. Pendência registrada, não bloqueante: ajustar os CAs da STORY-055 (CA-3 -> n/a; CA-4/9/10) e alocar a camada @media print entre a STORY-055 e a STORY-049.",
       "epic_id": "EPIC-010",
       "sprint_id": "SPRINT-2026-W32",
       "owner_agent": "arquiteto (claude-opus-5)",
       "requires_design": false,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-053-spike-exportacao.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-04",
+      "updated_at": "2026-08-06",
       "checkpoint": "CP3",
-      "shared_with_epic": "EPIC-007"
+      "shared_with_epic": "EPIC-007",
+      "closed_at": "2026-08-06",
+      "approved_by": "Alexandro"
     },
     {
       "id": "STORY-054",
@@ -2186,6 +2190,48 @@
         "created_at": "2026-08-04",
         "updated_at": "2026-08-04",
         "note": "§1 STORY-040 fecha; dívida de a11y vai para STORY-059. §2 CA-7 da STORY-042 é n/a (premissa errada); resíduo vai para STORY-060. §3 BUG-001: sem remediação de dados históricos (não houve beta, razões não afetadas, só valores absolutos), mas avisar a EBC de que a devolutiva de 27/05 pode ter se apoiado em valores absolutos errados."
+      },
+      {
+        "id": "PDR-007",
+        "slug": "aprovacao-specs-drm-e-motor-exportacao",
+        "title": "Aprovação das specs de tela do DRM, do default do modo no 1º lançamento e do motor de exportação — com o PDF confirmado como documento da plataforma",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-007-aprovacao-specs-drm-e-motor-exportacao.md",
+        "decided_at": "2026-08-06",
+        "decided_by": "PO (Alexandro / Claude)",
+        "approved_by": "Alexandro",
+        "approved_at": "2026-08-06",
+        "related_epics": [
+          "EPIC-010",
+          "EPIC-007"
+        ],
+        "related_stories": [
+          "STORY-046",
+          "STORY-047",
+          "STORY-049",
+          "STORY-051",
+          "STORY-053",
+          "STORY-055"
+        ],
+        "related_adrs": [
+          "ADR-007",
+          "ADR-008"
+        ],
+        "related_ddrs": [
+          "DDR-001",
+          "DDR-002",
+          "DDR-003",
+          "DDR-004",
+          "DDR-005"
+        ],
+        "related_pdrs": [
+          "PDR-003",
+          "PDR-004",
+          "PDR-006"
+        ],
+        "created_at": "2026-08-06",
+        "updated_at": "2026-08-06",
+        "note": "Quatro decisões. (1) As 3 specs de tela sobem a `ready` e os DDR-001..005 a `accepted` — invariante 12 satisfeita, STORY-047/049/051 destravadas, o Checkpoint 1 abre. (2) Default do modo dos grupos no 1º lançamento = `detalhado`, confirmando a recomendação do Designer pelo argumento da irreversibilidade (agregar é irreversível para aquele mês; reduzir depois não é); gatilho de reabertura atrelado à métrica primária do épico (2º lançamento em 45 dias). (3) ADR-008 aceita como escrita, sem condicionantes: planilha XLSX no CP3, PDF devolvido ao EPIC-007. (4) Pergunta aberta do Arquiteto RESPONDIDA: o PDF é documento gerado pela plataforma, não impressão do navegador — a alternativa que eliminaria o EPIC-007 técnico foi recusada porque o documento que vai ao gerente do banco não pode variar conforme o navegador de quem imprime. Consequências: Decisão 4 do ADR-008 vale como está (Chromium isolado em container), @media print é saída interina e não solução final, e o EPIC-007 abre com spike de motor de PDF. Seguem abertos por escolha, sem bloquear o CP1: tipo/destaque no snapshot (STORY-048), ajuste dos CAs da STORY-055, as 2 dívidas de a11y sugeridas para a STORY-059 e a leitura literal da invariante 9."
       }
     ],
     "adr": [
@@ -2414,11 +2460,11 @@
         "slug": "motor-exportacao",
         "title": "Motor de exportação — planilha XLSX síncrona sem retenção agora; PDF gerado no servidor adiado ao EPIC-007, com impressão do navegador como saída interina",
         "type": "topologico",
-        "status": "proposed",
+        "status": "accepted",
         "path": "decisions/adr/ADR-008-motor-exportacao.md",
-        "decided_at": null,
+        "decided_at": "2026-08-06",
         "decided_by": "arquiteto (claude-opus-5)",
-        "approved_by": null,
+        "approved_by": "Alexandro",
         "related_adrs": [
           "ADR-002",
           "ADR-003",
@@ -2429,7 +2475,8 @@
         ],
         "related_pdrs": [
           "PDR-003",
-          "PDR-004"
+          "PDR-004",
+          "PDR-007"
         ],
         "related_idrs": [
           "IDR-008",
@@ -2446,8 +2493,9 @@
           "STORY-056"
         ],
         "created_at": "2026-08-04",
-        "updated_at": "2026-08-04",
-        "note": "Resposta às 7 perguntas da STORY-053. DUAS decisões, não uma. (1) PLANILHA agora: XLSX via phpoffice/phpspreadsheet, SÍNCRONA (streamDownload), NUNCA armazenada, fonte = snapshot (ADR-007), fórmulas nas linhas derivadas (o Key User quer mexer), um arquivo com duas abas (competência aberta + série histórica), sem seletor de intervalo. Custo: ~9 MB de vendor + ext-gd (~3 MB) na imagem; R$ 0/mês; ZERO novo dado pessoal em repouso (sem artefato = sem LGPD nova). (2) PDF gerado no servidor: ADIADO ao EPIC-007 — é a saída prevista no CA-8 da STORY-053. Fundamento medido: Chromium na imagem custa 566 MB (docker history), +45% sobre os ~1,25 GB do runtime, em todo push/pull. (3) Saída INTERINA: camada @media print sobre o MESMO markup + botão 'Imprimir / Salvar em PDF' — a especificação funcional §4.7 já previa isso. (4) Direção registrada para o EPIC-007: Chromium ISOLADO em container (Gotenberg), não biblioteca PHP pura. dompdf/mPDF DESQUALIFICADOS: não resolvem CSS custom properties do Tailwind v4 (IDR-008), obrigariam um segundo layout com uma TERCEIRA cópia da paleta fora do tokens.css — terceira exclusão no tests/Unit/Arch/DesignTokensTest.php. SaaS de HTML→PDF descartado por princípio #6 + LGPD (operador terceiro). CONSEQUÊNCIA PARA A STORY-055: CA-3 (PDF) vira n/a; CA-4 = competência + aba de série; CA-9 = síncrono e sem retenção. Fila `pdf` do worker fica declarada e VAZIA até o EPIC-007 — configuração intencionalmente morta. PERGUNTA ABERTA AO PO: se a impressão do navegador bastar como resposta definitiva, o EPIC-007 encolhe de épico para estória — decisão de qualidade de produto, não de arquitetura."
+        "updated_at": "2026-08-06",
+        "note": "Resposta às 7 perguntas da STORY-053. DUAS decisões, não uma. (1) PLANILHA agora: XLSX via phpoffice/phpspreadsheet, SÍNCRONA (streamDownload), NUNCA armazenada, fonte = snapshot (ADR-007), fórmulas nas linhas derivadas (o Key User quer mexer), um arquivo com duas abas (competência aberta + série histórica), sem seletor de intervalo. Custo: ~9 MB de vendor + ext-gd (~3 MB) na imagem; R$ 0/mês; ZERO novo dado pessoal em repouso (sem artefato = sem LGPD nova). (2) PDF gerado no servidor: ADIADO ao EPIC-007 — é a saída prevista no CA-8 da STORY-053. Fundamento medido: Chromium na imagem custa 566 MB (docker history), +45% sobre os ~1,25 GB do runtime, em todo push/pull. (3) Saída INTERINA: camada @media print sobre o MESMO markup + botão 'Imprimir / Salvar em PDF' — a especificação funcional §4.7 já previa isso. (4) Direção registrada para o EPIC-007: Chromium ISOLADO em container (Gotenberg), não biblioteca PHP pura. dompdf/mPDF DESQUALIFICADOS: não resolvem CSS custom properties do Tailwind v4 (IDR-008), obrigariam um segundo layout com uma TERCEIRA cópia da paleta fora do tokens.css — terceira exclusão no tests/Unit/Arch/DesignTokensTest.php. SaaS de HTML→PDF descartado por princípio #6 + LGPD (operador terceiro). CONSEQUÊNCIA PARA A STORY-055: CA-3 (PDF) vira n/a; CA-4 = competência + aba de série; CA-9 = síncrono e sem retenção. Fila `pdf` do worker fica declarada e VAZIA até o EPIC-007 — configuração intencionalmente morta. ACEITA pelo PO em 2026-08-06 (PDR-007 §3 e §4), sem condicionantes. A pergunta aberta foi RESPONDIDA: o PDF é documento gerado pela plataforma, não impressão do navegador — a alternativa que encolheria o EPIC-007 de épico para estória foi RECUSADA (o documento que vai ao gerente do banco não pode variar conforme o navegador de quem imprime). Logo: a Decisão 4 vale como está (Chromium isolado em container, direção Gotenberg, a validar em spike próprio), a camada @media print é saída INTERINA e não solução final, e o EPIC-007 abre com spike de motor de PDF como primeira estória.",
+        "approved_at": "2026-08-06"
       }
     ],
     "idr": [
@@ -2737,11 +2785,11 @@
         "id": "DDR-001",
         "slug": "formulario-longo-em-blocos",
         "title": "Formulário longo é wizard por blocos com rascunho por bloco — dialeto único de formulário do produto",
-        "status": "proposed",
+        "status": "accepted",
         "path": "decisions/ddr/DDR-001-formulario-longo-em-blocos.md",
-        "decided_at": null,
+        "decided_at": "2026-08-06",
         "decided_by": "designer (claude-opus-5)",
-        "approved_by": null,
+        "approved_by": "Alexandro",
         "scope": "formulários",
         "related_ddrs": [
           "DDR-002",
@@ -2752,7 +2800,8 @@
           "ADR-007"
         ],
         "related_pdrs": [
-          "PDR-003"
+          "PDR-003",
+          "PDR-007"
         ],
         "related_stories": [
           "STORY-046",
@@ -2766,18 +2815,19 @@
           "SCREEN-STORY-046-lancamento-mensal"
         ],
         "created_at": "2026-08-04",
-        "updated_at": "2026-08-04",
-        "note": "Promove ao DS o padrão de formulário longo que JÁ está em produção no Quiz (STORY-027), com a extensão mínima que o DRM exige — a STORY-046 é explícita: 'não crie um segundo dialeto de formulário dentro do mesmo produto'. Fixa 7 itens: um bloco por tela; progresso = barra + linha textual com o NOME do bloco; rascunho salvo ao concluir bloco (nunca debounce silencioso); retomada nomeia o bloco, não o número; rodapé permanente de salvamento; três severidades de aviso inline (info/alerta/bloqueio) em que a AUSÊNCIA de botão de seguir em frente é o que faz de um bloqueio um bloqueio; bloco final de conferência. Cria os componentes progresso-blocos e aviso-inline (este consolida 3 construções quase idênticas hoje espalhadas no quiz.blade.php). Zero token novo. Refatorar o Quiz para consumir os componentes é dívida cosmética explicitamente FORA do EPIC-010."
+        "updated_at": "2026-08-06",
+        "note": "Promove ao DS o padrão de formulário longo que JÁ está em produção no Quiz (STORY-027), com a extensão mínima que o DRM exige — a STORY-046 é explícita: 'não crie um segundo dialeto de formulário dentro do mesmo produto'. Fixa 7 itens: um bloco por tela; progresso = barra + linha textual com o NOME do bloco; rascunho salvo ao concluir bloco (nunca debounce silencioso); retomada nomeia o bloco, não o número; rodapé permanente de salvamento; três severidades de aviso inline (info/alerta/bloqueio) em que a AUSÊNCIA de botão de seguir em frente é o que faz de um bloqueio um bloqueio; bloco final de conferência. Cria os componentes progresso-blocos e aviso-inline (este consolida 3 construções quase idênticas hoje espalhadas no quiz.blade.php). Zero token novo. Refatorar o Quiz para consumir os componentes é dívida cosmética explicitamente FORA do EPIC-010. | Aceito pelo PO em 2026-08-06 (PDR-007 §1).",
+        "approved_at": "2026-08-06"
       },
       {
         "id": "DDR-002",
         "slug": "entrada-em-dois-niveis-seletor-de-modo",
         "title": "Entrada em dois níveis — seletor de modo por grupo, com o custo em campos declarado na própria escolha",
-        "status": "proposed",
+        "status": "accepted",
         "path": "decisions/ddr/DDR-002-entrada-em-dois-niveis-seletor-de-modo.md",
-        "decided_at": null,
+        "decided_at": "2026-08-06",
         "decided_by": "designer (claude-opus-5)",
-        "approved_by": null,
+        "approved_by": "Alexandro",
         "scope": "formulários",
         "related_ddrs": [
           "DDR-001",
@@ -2789,7 +2839,8 @@
         ],
         "related_pdrs": [
           "PDR-003",
-          "PDR-004"
+          "PDR-004",
+          "PDR-007"
         ],
         "related_stories": [
           "STORY-046",
@@ -2804,18 +2855,19 @@
           "SCREEN-STORY-046-serie-historica"
         ],
         "created_at": "2026-08-04",
-        "updated_at": "2026-08-04",
-        "note": "Mecanismo anti-atrito de maior alcance do módulo: 38 campos monetários caem para 9 com os 4 grupos agregados. Decisão: seletor de duas opções no cabeçalho de cada bloco de grupo, com O CUSTO EM CAMPOS declarado na própria opção ('1 campo' vs '21 campos'), contado DEPOIS da supressão por setor — é assim que 'menos campos em Serviços' parece natural em vez de incompleto. O número de campos é o argumento honesto: informa sem persuadir, e nenhuma das opções é enquadrada como melhor (Anexo K §K.5 proíbe culpabilizar quem escolhe agregado). Rótulos factuais, nunca 'Rápido/Completo'. Caminho destrutivo (agregado→detalhado) confirmado INLINE, não em modal — o DS não tem diálogo modal e não introduzimos um. Cria o componente seletor-modo. Restrição de contraste descoberta: tertiary sobre neutral mede 4,45:1 e reprova AA, então tertiary aparece só em borda/marcador e o rótulo é primary."
+        "updated_at": "2026-08-06",
+        "note": "Mecanismo anti-atrito de maior alcance do módulo: 38 campos monetários caem para 9 com os 4 grupos agregados. Decisão: seletor de duas opções no cabeçalho de cada bloco de grupo, com O CUSTO EM CAMPOS declarado na própria opção ('1 campo' vs '21 campos'), contado DEPOIS da supressão por setor — é assim que 'menos campos em Serviços' parece natural em vez de incompleto. O número de campos é o argumento honesto: informa sem persuadir, e nenhuma das opções é enquadrada como melhor (Anexo K §K.5 proíbe culpabilizar quem escolhe agregado). Rótulos factuais, nunca 'Rápido/Completo'. Caminho destrutivo (agregado→detalhado) confirmado INLINE, não em modal — o DS não tem diálogo modal e não introduzimos um. Cria o componente seletor-modo. Restrição de contraste descoberta: tertiary sobre neutral mede 4,45:1 e reprova AA, então tertiary aparece só em borda/marcador e o rótulo é primary. | Aceito pelo PO em 2026-08-06 (PDR-007 §1).",
+        "approved_at": "2026-08-06"
       },
       {
         "id": "DDR-003",
         "slug": "valores-herdados-do-periodo-anterior",
         "title": "Valores herdados do período anterior — a marca some quando o usuário confirma, e o silêncio é o progresso",
-        "status": "proposed",
+        "status": "accepted",
         "path": "decisions/ddr/DDR-003-valores-herdados-do-periodo-anterior.md",
-        "decided_at": null,
+        "decided_at": "2026-08-06",
         "decided_by": "designer (claude-opus-5)",
-        "approved_by": null,
+        "approved_by": "Alexandro",
         "scope": "formulários",
         "related_ddrs": [
           "DDR-001",
@@ -2825,7 +2877,8 @@
           "ADR-007"
         ],
         "related_pdrs": [
-          "PDR-003"
+          "PDR-003",
+          "PDR-007"
         ],
         "related_stories": [
           "STORY-046",
@@ -2838,18 +2891,19 @@
           "SCREEN-STORY-046-lancamento-mensal"
         ],
         "created_at": "2026-08-04",
-        "updated_at": "2026-08-04",
-        "note": "Responde à pergunta que o Anexo K §K.9 não responde: como marcar valores herdados sem poluir a tela com 21 badges. A inversão que sustenta a decisão: o usuário não precisa saber quais campos vieram de julho — precisa saber quais ainda não olhou. Marca = legenda de uma linha ('veio de julho'), sem cor, sem ícone, sem badge, sem mudar o fundo (--color-neutral em input JÁ significa disabled no app.css — colisão que derrubou a alternativa óbvia). A marca SOME ao editar ou confirmar e não volta, então a marcação decresce conforme o trabalho avança e o progresso fica visível sem indicador extra. Confirmação em 3 níveis: por campo (editar), por bloco, e total na entrada — esta última leva ao bloco de CONFERÊNCIA, nunca ao fechamento; confirmar em massa nunca é o último ato. Herança parcial (grupo era agregado, agora é detalhado) vira estado de primeira classe: itens vazios + explicação, nunca inferir item a partir do total."
+        "updated_at": "2026-08-06",
+        "note": "Responde à pergunta que o Anexo K §K.9 não responde: como marcar valores herdados sem poluir a tela com 21 badges. A inversão que sustenta a decisão: o usuário não precisa saber quais campos vieram de julho — precisa saber quais ainda não olhou. Marca = legenda de uma linha ('veio de julho'), sem cor, sem ícone, sem badge, sem mudar o fundo (--color-neutral em input JÁ significa disabled no app.css — colisão que derrubou a alternativa óbvia). A marca SOME ao editar ou confirmar e não volta, então a marcação decresce conforme o trabalho avança e o progresso fica visível sem indicador extra. Confirmação em 3 níveis: por campo (editar), por bloco, e total na entrada — esta última leva ao bloco de CONFERÊNCIA, nunca ao fechamento; confirmar em massa nunca é o último ato. Herança parcial (grupo era agregado, agora é detalhado) vira estado de primeira classe: itens vazios + explicação, nunca inferir item a partir do total. | Aceito pelo PO em 2026-08-06 (PDR-007 §1).",
+        "approved_at": "2026-08-06"
       },
       {
         "id": "DDR-004",
         "slug": "demonstracao-financeira-nominal-e-percentual",
         "title": "Demonstração financeira — par nominal + percentual em toda linha, três níveis de hierarquia e cards por trecho da conta no mobile",
-        "status": "proposed",
+        "status": "accepted",
         "path": "decisions/ddr/DDR-004-demonstracao-financeira-nominal-e-percentual.md",
-        "decided_at": null,
+        "decided_at": "2026-08-06",
         "decided_by": "designer (claude-opus-5)",
-        "approved_by": null,
+        "approved_by": "Alexandro",
         "scope": "apresentação de dados financeiros",
         "related_ddrs": [
           "DDR-005"
@@ -2859,7 +2913,8 @@
         ],
         "related_pdrs": [
           "PDR-003",
-          "PDR-004"
+          "PDR-004",
+          "PDR-007"
         ],
         "related_stories": [
           "STORY-046",
@@ -2876,18 +2931,19 @@
           "SCREEN-STORY-046-serie-historica"
         ],
         "created_at": "2026-08-04",
-        "updated_at": "2026-08-04",
-        "note": "Como carregar valor nominal E percentual em até 17 linhas sem virar planilha. Três destaques (quanto vendeu / sobrou antes da retirada / sobrou depois) antes da conta. No mobile, cards POR TRECHO DA CONTA — cada card fecha num totalizador — e não por linha: as linhas da demonstração não são objetos independentes como os 13 indicadores do Diagnóstico, são elos de uma conta encadeada, e uma borda entre '(–) Custo' e '= Lucro Bruto' cortaria exatamente a subtração que o usuário precisa ver. Reduz 17 cards a 5 e atende o CA-9 da STORY-049 sem pagar o preço da paridade literal. Três níveis por 4 canais (recuo+tamanho+cor+marcador), porque recuo sozinho não é anunciado por leitor de tela. Prejuízo SEM COR: sinal aritmético + troca de verbo no destaque (SOBROU→FALTOU) + pill neutro — vermelho no produto já significa erro ou farol. Farol e leitura são ausentes até a STORY-054, nunca coluna vazia. Cria demonstracao-linha e a variante `link` do button. Zero token novo."
+        "updated_at": "2026-08-06",
+        "note": "Como carregar valor nominal E percentual em até 17 linhas sem virar planilha. Três destaques (quanto vendeu / sobrou antes da retirada / sobrou depois) antes da conta. No mobile, cards POR TRECHO DA CONTA — cada card fecha num totalizador — e não por linha: as linhas da demonstração não são objetos independentes como os 13 indicadores do Diagnóstico, são elos de uma conta encadeada, e uma borda entre '(–) Custo' e '= Lucro Bruto' cortaria exatamente a subtração que o usuário precisa ver. Reduz 17 cards a 5 e atende o CA-9 da STORY-049 sem pagar o preço da paridade literal. Três níveis por 4 canais (recuo+tamanho+cor+marcador), porque recuo sozinho não é anunciado por leitor de tela. Prejuízo SEM COR: sinal aritmético + troca de verbo no destaque (SOBROU→FALTOU) + pill neutro — vermelho no produto já significa erro ou farol. Farol e leitura são ausentes até a STORY-054, nunca coluna vazia. Cria demonstracao-linha e a variante `link` do button. Zero token novo. | Aceito pelo PO em 2026-08-06 (PDR-007 §1).",
+        "approved_at": "2026-08-06"
       },
       {
         "id": "DDR-005",
         "slug": "vocabulario-visual-de-indisponibilidade",
         "title": "Vocabulário visual de indisponibilidade — \"não dá para calcular\", \"não existe\" e \"é zero\" são três coisas diferentes na tela",
-        "status": "proposed",
+        "status": "accepted",
         "path": "decisions/ddr/DDR-005-vocabulario-visual-de-indisponibilidade.md",
-        "decided_at": null,
+        "decided_at": "2026-08-06",
         "decided_by": "designer (claude-opus-5)",
-        "approved_by": null,
+        "approved_by": "Alexandro",
         "scope": "transversal",
         "related_ddrs": [
           "DDR-002",
@@ -2898,7 +2954,8 @@
         ],
         "related_pdrs": [
           "PDR-003",
-          "PDR-004"
+          "PDR-004",
+          "PDR-007"
         ],
         "related_stories": [
           "STORY-046",
@@ -2915,8 +2972,9 @@
           "SCREEN-STORY-046-lancamento-mensal"
         ],
         "created_at": "2026-08-04",
-        "updated_at": "2026-08-04",
-        "note": "O ADR-007 gastou modelo de dados (espinha de meses na leitura, proibição de COALESCE) para tornar 'ausência ≠ zero' impossível de violar — e essa garantia MORRE na última camada se a tela apresentar as duas coisas com a mesma aparência. Fixa: marca única de célula (— visual + motivo em texto acessível, nunca branco/0/N-A); o motivo em português dito UMA VEZ, no escopo em que vale (coluna → aviso acima da tabela; grupo → nota no cabeçalho; competência → estado da própria linha), evitando repetir o motivo em 17 linhas; ausência é ESTRUTURAL, não numérica (borda tracejada + sem área de valor + rótulo textual + CTA, 4 canais simultâneos, nenhum deles cor); indisponível não é erro (sem destructive, sem ícone de alerta); indisponibilidade PARCIAL é normal (nominal presente + percentual indisponível na mesma linha, sem degradar a linha inteira); vocabulário fixo por motivo. Compatível com o 'Indisponível' do relatório de Diagnóstico em produção — alinhá-lo é oportunidade para o PO, fora do EPIC-010."
+        "updated_at": "2026-08-06",
+        "note": "O ADR-007 gastou modelo de dados (espinha de meses na leitura, proibição de COALESCE) para tornar 'ausência ≠ zero' impossível de violar — e essa garantia MORRE na última camada se a tela apresentar as duas coisas com a mesma aparência. Fixa: marca única de célula (— visual + motivo em texto acessível, nunca branco/0/N-A); o motivo em português dito UMA VEZ, no escopo em que vale (coluna → aviso acima da tabela; grupo → nota no cabeçalho; competência → estado da própria linha), evitando repetir o motivo em 17 linhas; ausência é ESTRUTURAL, não numérica (borda tracejada + sem área de valor + rótulo textual + CTA, 4 canais simultâneos, nenhum deles cor); indisponível não é erro (sem destructive, sem ícone de alerta); indisponibilidade PARCIAL é normal (nominal presente + percentual indisponível na mesma linha, sem degradar a linha inteira); vocabulário fixo por motivo. Compatível com o 'Indisponível' do relatório de Diagnóstico em produção — alinhá-lo é oportunidade para o PO, fora do EPIC-010. | Aceito pelo PO em 2026-08-06 (PDR-007 §1).",
+        "approved_at": "2026-08-06"
       }
     ]
   },
@@ -2927,7 +2985,7 @@
         "story": "STORY-046",
         "epic": "EPIC-010",
         "implemented_by": "STORY-047",
-        "status": "draft",
+        "status": "ready",
         "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/design/STORY-046-lancamento-mensal.md",
         "viewports": [
           "mobile",
@@ -2954,15 +3012,17 @@
         ],
         "owner_designer": "designer (claude-opus-5)",
         "created_at": "2026-08-04",
-        "updated_at": "2026-08-04",
-        "note": "Tela 1 — o centro do problema do épico. 6 blocos (5 de entrada + conferência). Materializa os 3 mecanismos anti-atrito do PDR-003: seletor de modo por grupo com o custo em campos declarado (DDR-002), marca de herança que some ao conferir (DDR-003) e rascunho por bloco com retomada nomeada (DDR-001). Caminho de 2 toques do mês sem alterações desemboca na conferência, nunca no fechamento. 12 estados, incluindo herança parcial e os 4 bloqueios / 4 alertas do Anexo K §K.6. Microcopy provisória (STORY-052)."
+        "updated_at": "2026-08-06",
+        "note": "Tela 1 — o centro do problema do épico. 6 blocos (5 de entrada + conferência). Materializa os 3 mecanismos anti-atrito do PDR-003: seletor de modo por grupo com o custo em campos declarado (DDR-002), marca de herança que some ao conferir (DDR-003) e rascunho por bloco com retomada nomeada (DDR-001). Caminho de 2 toques do mês sem alterações desemboca na conferência, nunca no fechamento. 12 estados, incluindo herança parcial e os 4 bloqueios / 4 alertas do Anexo K §K.6. Microcopy provisória (STORY-052). | Aprovada pelo PO em 2026-08-06 (PDR-007 §1): draft -> ready.",
+        "approved_by": "Alexandro",
+        "approved_at": "2026-08-06"
       },
       {
         "id": "SCREEN-STORY-046-demonstracao-mes",
         "story": "STORY-046",
         "epic": "EPIC-010",
         "implemented_by": "STORY-049",
-        "status": "draft",
+        "status": "ready",
         "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/design/STORY-046-demonstracao-mes.md",
         "viewports": [
           "mobile",
@@ -2985,15 +3045,17 @@
         ],
         "owner_designer": "designer (claude-opus-5)",
         "created_at": "2026-08-04",
-        "updated_at": "2026-08-04",
-        "note": "Tela 2 — saída principal. Três destaques (quanto vendeu / sobrou antes / sobrou depois) acima da conta; par nominal+percentual em toda linha; 3 níveis de hierarquia. Mobile agrupa em cards POR TRECHO DA CONTA, não por linha — card por linha cortaria a subtração (DDR-004). Prejuízo sem cor: sinal + troca de verbo + pill. Farol e leitura são AUSENTES até a STORY-054, não vazios. Contém proposta ao Arquiteto: acrescentar `tipo` e `destaque` às linhas do snapshot (barato agora, caro depois) — a tela não depende disso."
+        "updated_at": "2026-08-06",
+        "note": "Tela 2 — saída principal. Três destaques (quanto vendeu / sobrou antes / sobrou depois) acima da conta; par nominal+percentual em toda linha; 3 níveis de hierarquia. Mobile agrupa em cards POR TRECHO DA CONTA, não por linha — card por linha cortaria a subtração (DDR-004). Prejuízo sem cor: sinal + troca de verbo + pill. Farol e leitura são AUSENTES até a STORY-054, não vazios. Contém proposta ao Arquiteto: acrescentar `tipo` e `destaque` às linhas do snapshot (barato agora, caro depois) — a tela não depende disso. | Aprovada pelo PO em 2026-08-06 (PDR-007 §1): draft -> ready.",
+        "approved_by": "Alexandro",
+        "approved_at": "2026-08-06"
       },
       {
         "id": "SCREEN-STORY-046-serie-historica",
         "story": "STORY-046",
         "epic": "EPIC-010",
         "implemented_by": "STORY-051",
-        "status": "draft",
+        "status": "ready",
         "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/design/STORY-046-serie-historica.md",
         "viewports": [
           "mobile",
@@ -3016,8 +3078,10 @@
         ],
         "owner_designer": "designer (claude-opus-5)",
         "created_at": "2026-08-04",
-        "updated_at": "2026-08-04",
-        "note": "Tela 3 — lista de competências com os 4 estados (lançada, retificada, não lançada, rascunho). Mês não lançado difere de mês zerado por 4 canais simultâneos, nenhum deles cor (DDR-005) — é a garantia 'ausência ≠ zero' do ADR-007 chegando à tela. Variações sem cor: a direção não tem semântica fixa. Ausência de gráfico no MVP justificada no spec §5 (série com lacunas + meses atípicos = gráfico que mente), com gatilho de reabertura."
+        "updated_at": "2026-08-06",
+        "note": "Tela 3 — lista de competências com os 4 estados (lançada, retificada, não lançada, rascunho). Mês não lançado difere de mês zerado por 4 canais simultâneos, nenhum deles cor (DDR-005) — é a garantia 'ausência ≠ zero' do ADR-007 chegando à tela. Variações sem cor: a direção não tem semântica fixa. Ausência de gráfico no MVP justificada no spec §5 (série com lacunas + meses atípicos = gráfico que mente), com gatilho de reabertura. | Aprovada pelo PO em 2026-08-06 (PDR-007 §1): draft -> ready.",
+        "approved_by": "Alexandro",
+        "approved_at": "2026-08-06"
       }
     ],
     "system": {

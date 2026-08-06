@@ -6,10 +6,12 @@ epic_id: EPIC-010
 type: implementation
 target_role: designer
 requires_design: true
-status: in_review
+status: done
 owner_agent: "designer (claude-opus-5)"
 created_at: 2026-08-04
-updated_at: 2026-08-04
+updated_at: 2026-08-06
+closed_at: 2026-08-06
+approved_by: Alexandro
 estimated_session_size: L
 design_screen_ids: [SCREEN-STORY-046-lancamento-mensal, SCREEN-STORY-046-demonstracao-mes, SCREEN-STORY-046-serie-historica]
 ---
@@ -197,3 +199,14 @@ Inicializado em `design/system/` (não existia — `index.json` marcava `status:
 - **12 componentes** em produção registrados · **5 especificados** (`progresso-blocos`, `aviso-inline`, `seletor-modo`, `demonstracao-linha`, `serie-linha-competencia`) + o estado `herdado` do `campo-monetario` e a variante `link` do `button`
 - **4 padrões compostos:** `formulario-longo`, `pre-preenchimento-periodo-anterior`, `demonstracao-financeira`, `indisponibilidade`
 - **0 tokens novos** · **3 dívidas de acessibilidade do produto** documentadas com evidência numérica em `tokens.md`
+
+
+## Decisão do PO — 2026-08-06
+
+Registrada em `decisions/pdr/PDR-007-aprovacao-specs-drm-e-motor-exportacao.md`. A estória fecha como `done`.
+
+**Aprovado (§1):** as três specs sobem de `draft` para `ready` e os `DDR-001` a `DDR-005` de `proposed` para `accepted`. Com isso a `STORY-047`, a `STORY-049` e a `STORY-051` estão destravadas — a invariante 12 está satisfeita e o Checkpoint 1 pode abrir.
+
+**Item 1 da escalação — default do modo no 1º lançamento (§2):** `detalhado`, confirmando a recomendação. O argumento da irreversibilidade venceu: agregar é irreversível para aquele mês, reduzir depois não é. O contra-argumento (38 campos no primeiro contato) ficou registrado como gatilho de reabertura, atrelado à métrica primária do épico.
+
+**Itens 2 a 5 da escalação:** seguem abertos, deliberadamente. Nenhum bloqueia o Checkpoint 1 — a proposta de `tipo`/`destaque` ao Arquiteto, as duas dívidas de acessibilidade sugeridas para a `STORY-059` e a leitura literal da invariante 9 do índice.

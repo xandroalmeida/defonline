@@ -74,7 +74,7 @@ Ao fim deste épico, **o dono de um pequeno negócio — indústria, comércio o
 **Checkpoint 1 — caminho feliz vivo** (lança um mês e vê a demonstração)
 
 - [x] STORY-045 (spike, arquiteto) — Modelo de dados, versionamento e retificação de competência → **`ADR-007` accepted (04/08/2026)**
-- [ ] STORY-046 (design) — Specs das telas do módulo DRM
+- [x] STORY-046 (design) — Specs das telas do módulo DRM → **3 specs `ready` + DDR-001..005 `accepted` (06/08/2026, `PDR-007`)**
 - [ ] STORY-047 — Lançamento mensal: formulário adaptativo, modos agregado/detalhado, rascunho
 - [ ] STORY-048 — Motor do DRM: estrutura canônica, três setores, nominal e percentual
 - [ ] STORY-049 — Tela da Demonstração do Mês
@@ -87,7 +87,7 @@ Ao fim deste épico, **o dono de um pequeno negócio — indústria, comércio o
 
 **Checkpoint 3 — leitura e saída**
 
-- [ ] STORY-053 (spike, arquiteto) — Motor de exportação: planilha e PDF
+- [x] STORY-053 (spike, arquiteto) — Motor de exportação: planilha e PDF → **`ADR-008` accepted (06/08/2026)**
 - [ ] STORY-058 (spike, arquiteto) — Provisão de férias e 13º: onde mora o saldo
 - [ ] STORY-054 — Faróis e leitura em linguagem simples
 - [ ] STORY-055 — Exportação em planilha e PDF
@@ -118,5 +118,6 @@ Critérios em `validation/checklist.md`. Relatório do validador em `validation/
 ## Histórico
 
 - 2026-08-04 — criado pelo PO a partir do feedback do Key User José Marques (03/08/2026) e do parecer favorável da EBC. Decisão de escopo em PDR-003.
+- 2026-08-06 — **`STORY-046` e `STORY-053` aprovadas pelo PO** (`PDR-007`). As três specs de tela sobem a `ready` e os `DDR-001` a `DDR-005` a `accepted`: com o `ADR-007` já aceito, **o Checkpoint 1 abre sem nenhuma decisão pendente à frente** — `STORY-047`, `STORY-049` e `STORY-051` destravadas. Default do modo dos grupos no 1º lançamento fixado em `detalhado`, com gatilho de reabertura atrelado à métrica primária do épico. `ADR-008` aceita: **planilha XLSX no CP3, PDF devolvido ao EPIC-007** — e o PDF será documento gerado pela plataforma, não impressão do navegador, o que mantém a Decisão 4 (Chromium isolado em container) de pé e faz o EPIC-007 abrir com spike de motor. A camada `@media print` é saída interina. Consequência para a `STORY-055`: CA-3 (PDF) vira `n/a` e os CA-4/9/10 precisam de ajuste — pendência registrada, não bloqueia o CP1.
 - 2026-08-04 — **`ADR-007` aceito** (spike `STORY-045`). Modelo de dados do DRM fechado: três tabelas `drm_*`, competência versionada append-only com ponteiro de vigência, snapshot imutável por versão carregando os dois modos de pró-labore, comparativos e faróis derivados na leitura. Risco "retificação conflita com o IDR-010" **eliminado** — o IDR-010 é estendido, não revogado. `STORY-047` a `STORY-051` destravadas; o Checkpoint 1 pode começar. Duas consequências para estórias adiante: a `STORY-054` precisa deixar legível que o farol é leitura (pode mudar de cor retroativamente quando a EBC calibrar as faixas; valores nunca mudam), e a `STORY-049` precisa renderizar o snapshot genericamente, sem hardcode das linhas.
 - 2026-08-04 — `PDR-004` resolveu as quatro decisões de negócio pendentes. `STORY-048` desbloqueada e promovida a `L` (dois modos de pró-labore + linhas não operacionais); `STORY-049` e `STORY-051` ajustadas; `STORY-058` (spike de provisão) criada; `STORY-052` segue bloqueada só pelas faixas de farol. Risco de divergência de EBITDA eliminado pela parametrização.

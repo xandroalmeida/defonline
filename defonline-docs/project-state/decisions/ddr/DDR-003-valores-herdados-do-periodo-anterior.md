@@ -1,10 +1,10 @@
 ---
 id: DDR-003
 title: Valores herdados do período anterior — a marca some quando o usuário confirma, e o silêncio é o progresso
-status: proposed
+status: accepted
 created_at: 2026-08-04
-decided_at: ~
-approved_by: ~
+decided_at: 2026-08-06
+approved_by: Alexandro
 supersedes: ~
 superseded_by: ~
 related_ddrs: [DDR-001, DDR-002]
