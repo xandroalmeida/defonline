@@ -17,9 +17,27 @@ use App\Domain\Motor\MotivosIndisponibilidade;
  * 17/05/2026 pelo item §6.3): farol = `Farol::NENHUM` sempre que calculado.
  * A interpretação semântica entra via 3 faixas de mensagem:
  *
- *   - Faixa 1 (`NCG ≤ 0`): folga operacional — o giro não exige recursos.
+ *   - Faixa 1 (`NCG ≤ 0`): ciclo financiado pelo fornecedor.
  *   - Faixa 2 (`0 < NCG ≤ 10% Vendas anualizadas`): patamar moderado, atenção a prazos.
  *   - Faixa 3 (`NCG > 10% Vendas anualizadas`): pressão sobre o caixa.
+ *
+ * **Por que a faixa 1 não fala em "folga" (revisão do PO, 06/08/2026).** A
+ * redação original da STORY-060 dizia "folga operacional", e a palavra foi lida
+ * — corretamente — como "sobra". Não é: não há dinheiro disponível, há dívida
+ * com fornecedor maior do que o que o ciclo devolve. Dois problemas somados:
+ *
+ *   1. **O indicador não distingue prazo negociado de atraso.** Quem combinou
+ *      60 dias com o fornecedor e quem está atrasado com ele produzem o mesmo
+ *      número. A primeira situação é vantagem competitiva; a segunda é
+ *      problema. Afirmar a leitura favorável escolhe uma das duas sem saber.
+ *   2. **A própria EBC é mais cautelosa.** O texto do Anexo F para `ncg_vendas`
+ *      verde — o mesmo cenário, no mesmo relatório — diz "**pode indicar** que
+ *      a empresa não necessita de recursos para o giro". Afirmar aqui o que a
+ *      fonte apenas sugere é inconsistência editorial dentro da mesma página.
+ *
+ * O texto atual nomeia o que o número é (financiamento do fornecedor), evita a
+ * palavra "folga" e diz a dependência que ele cria. Vale para `NCG ≤ 0`
+ * inclusive no zero exato — daí "não supera", e não "é menor que".
  *
  * **Quando Vendas anuais é null ou zero** mas o NCG é calculável e positivo,
  * a referência "10% das Vendas" não existe — usamos a Faixa 2 como fallback
@@ -50,7 +68,7 @@ use App\Domain\Motor\MotivosIndisponibilidade;
  */
 final class NcgAbsoluto implements Indicador
 {
-    public const MSG_FOLGA = 'Folga operacional: o prazo que você tem para pagar fornecedores cobre o ciclo de estoques e de recebimento dos clientes. Na prática, o giro do negócio não exige dinheiro seu para funcionar — preserve os prazos que produzem essa folga.';
+    public const MSG_FOLGA = 'Seu ciclo operacional é financiado pelos fornecedores: o que você tem a receber e em estoque não supera o que deve a eles. Enquanto os prazos combinados se mantiverem, o giro não consome dinheiro seu. Atenção ao outro lado: quanto maior essa diferença, maior a sua dependência do crédito do fornecedor — se ele encurtar o prazo, a pressão aparece de uma vez.';
 
     public const MSG_MODERADO = 'NCG positivo moderado: patamar gerenciável. Se ele crescer — por aumento das vendas ou do prazo concedido a clientes —, o crescimento precisa vir acompanhado, na mesma proporção, do aumento das fontes de financiamento de longo prazo, preferencialmente o prazo de pagamento a fornecedores. Acompanhe seus prazos médios (PMC, PME e PMR).';
 

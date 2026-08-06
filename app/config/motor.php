@@ -28,7 +28,13 @@ return [
     //         de longo prazo, preferencialmente fornecedores. Texto, não fórmula: nenhum
     //         valor calculado muda. É PATCH pelo mesmo critério da 1.3.1 — altera output
     //         porque a mensagem entra no snapshot imutável (IDR-010).
-    'version' => '1.3.2',
+    // 1.3.3 — STORY-060, revisão do PO em 06/08/2026 (PATCH: a faixa 1 do NCG absoluto
+    //         deixa de dizer "folga operacional". A palavra era lida como "sobra", e o
+    //         número diz o contrário — há dívida com fornecedor maior do que o que o
+    //         ciclo devolve. O texto passou a nomear o financiamento do fornecedor e a
+    //         dependência que ele cria. Só a mensagem da faixa 1 muda; nenhum valor,
+    //         farol ou veredito é afetado.
+    'version' => '1.3.3',
     'matrix_version' => 'dez-2025',
 
     // Path do arquivo de lacunas auto-append por MatrizRecomendacoes (CA-5/STORY-032).

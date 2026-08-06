@@ -17,7 +17,7 @@ use App\Domain\Motor\Motor;
 | que muda o comportamento. NÃO atualizar o hash silenciosamente.
 |
 | Os 5 cenários cobrem:
-|   - saudavel: todos os indicadores em verde + NCG abs Faixa 1 (folga).
+|   - saudavel: todos os indicadores em verde + NCG abs Faixa 1 (NCG ≤ 0).
 |   - atencao: todos amarelo + NCG abs Faixa 2 (moderado).
 |   - alerta: todos vermelho + Div Líq/EBITDA INDISPONÍVEL (ebitda_negativo) + NCG abs Faixa 3 (alto).
 |   - ncg_negativo: mistura verde/amarelo, NCG abs claramente negativo.
@@ -26,7 +26,22 @@ use App\Domain\Motor\Motor;
 */
 
 dataset('golden_fixtures', [
-    // Hashes re-emitidos na STORY-060 (motor 1.3.1 → 1.3.2): as três mensagens de
+    // Hashes re-emitidos na revisão de redação do PO (motor 1.3.2 → 1.3.3),
+    // 06/08/2026: a faixa 1 do NCG absoluto deixou de dizer "folga operacional".
+    // Mesma conferência por reconstrução — com a versão fixada de volta em 1.3.2
+    // e a mensagem nova trocada pela de 1.3.2 no JSON, os 5 hashes voltaram bit a
+    // bit aos anteriores. **Só 2 fixtures trocam texto** (`saudavel` e
+    // `ncg_negativo`, os únicos com NCG ≤ 0); os outros 3 mudam apenas porque
+    // `motor_version` entra no payload hasheado.
+    //
+    // Hashes anteriores (motor 1.3.2):
+    //   saudavel           840deb658bfe850d7f6a90300a7041eb64e0141ee4e557d22745325c4af8648c
+    //   atencao            9ecd69df6bc5a909a5aef9948611e42df430fcb0c230aec7584a9396f3ec6579
+    //   alerta             1d6a4ff27ce77d12d5b271a8d3712476d68ac640c0811e9350f6a27eff2bfcb2
+    //   ncg_negativo       67d4ef83cb588eaef3a95cd97f0d00953a325b6754219d9cead5b30647c6c05f
+    //   70pct_indisponivel 79b7c237195918c49f97b8de916e704afdc5e25178ff96d7c5b74715a311d2f3
+    //
+    // Contexto do re-emit anterior — STORY-060 (motor 1.3.1 → 1.3.2): as três mensagens de
     // faixa do NCG absoluto passaram a carregar a intenção editorial da EBC
     // (Anexo F §F.13). **Os 5 hashes mudam; a mudança de conteúdo atinge só o
     // NCG** — verificado assim, e o método fica registrado porque a conferência é
@@ -63,23 +78,23 @@ dataset('golden_fixtures', [
     // matriz dez-2025 (Anexo F, coluna Indústria).
     'saudavel' => [
         'quiz_industria_saudavel.json',
-        '840deb658bfe850d7f6a90300a7041eb64e0141ee4e557d22745325c4af8648c',
+        'dd804d9f8be7e6c0d00378bc02008e9f69d6499b18d1f4511bbc04b321589cb8',
     ],
     'atencao' => [
         'quiz_industria_atencao.json',
-        '9ecd69df6bc5a909a5aef9948611e42df430fcb0c230aec7584a9396f3ec6579',
+        '0ef6bbc5152207a4c51914d0be7c821b1ed465abbee031b0604498255fc8bd18',
     ],
     'alerta' => [
         'quiz_industria_alerta.json',
-        '1d6a4ff27ce77d12d5b271a8d3712476d68ac640c0811e9350f6a27eff2bfcb2',
+        'fe61411e23655a220eb3a925f3e3bbd33d8e19d8308be3319441d488649ce437',
     ],
     'ncg_negativo' => [
         'quiz_industria_ncg_negativo.json',
-        '67d4ef83cb588eaef3a95cd97f0d00953a325b6754219d9cead5b30647c6c05f',
+        '761e5bae6b1634c254ce370bfcf391e61c3ef1d4fb22775ed65dab6e98049e0d',
     ],
     '70pct_indisponivel' => [
         'quiz_industria_70pct_indisponivel.json',
-        '79b7c237195918c49f97b8de916e704afdc5e25178ff96d7c5b74715a311d2f3',
+        'fe2c664e8e8b9585d82c0b1c350d72c4c9103ed681c896568346bf1254caf333',
     ],
 ]);
 

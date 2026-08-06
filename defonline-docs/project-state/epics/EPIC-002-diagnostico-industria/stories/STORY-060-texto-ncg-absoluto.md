@@ -102,7 +102,7 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. A redação fin
 
 | Faixa | Texto entregue |
 |---|---|
-| FOLGA (`NCG ≤ 0`) | *"Folga operacional: o prazo que você tem para pagar fornecedores cobre o ciclo de estoques e de recebimento dos clientes. Na prática, o giro do negócio não exige dinheiro seu para funcionar — preserve os prazos que produzem essa folga."* |
+| FOLGA (`NCG ≤ 0`) | *"Seu ciclo operacional é financiado pelos fornecedores: o que você tem a receber e em estoque não supera o que deve a eles. Enquanto os prazos combinados se mantiverem, o giro não consome dinheiro seu. Atenção ao outro lado: quanto maior essa diferença, maior a sua dependência do crédito do fornecedor — se ele encurtar o prazo, a pressão aparece de uma vez."* — **revisada pelo PO, ver abaixo** |
 | MODERADO (`0 < NCG ≤ 10% Vendas`) | *"NCG positivo moderado: patamar gerenciável. Se ele crescer — por aumento das vendas ou do prazo concedido a clientes —, o crescimento precisa vir acompanhado, na mesma proporção, do aumento das fontes de financiamento de longo prazo, preferencialmente o prazo de pagamento a fornecedores. Acompanhe seus prazos médios (PMC, PME e PMR)."* |
 | ALTO (`NCG > 10% Vendas`) | *"NCG positivo alto: pressão sobre o caixa. Antes de ampliar vendas a prazo ou estoques, aumente na mesma proporção as fontes de financiamento de longo prazo, preferencialmente o prazo de pagamento a fornecedores. Sem isso, reveja seus prazos médios ou estruture captação de longo prazo."* |
 
@@ -117,6 +117,32 @@ Os testes checam **os elementos** da orientação (`na mesma proporção`, `long
 **2. Entrada inerte da matriz (CA-5) — mantida, com marcação, não removida.** A matriz é transcrição literal do Anexo F e serve de fonte de auditoria editorial; apagar a entrada perderia isso. Ela desceu para uma seção `_referencia_editorial` no fim do arquivo, sob uma chave que **nenhum código procura**. Três consequências verificadas por teste: a chave `ncg_absoluto` não é mais de primeiro nível; qualquer chave nova de primeiro nível que não seja indicador com farol é acusada pelo teste arquitetural (a exceção é uma lista declarada, não um `if` escondido); e chamar `MatrizRecomendacoes::texto('ncg_absoluto', …)` agora cai no fallback e vira lacuna registrada, em vez de devolver em silêncio um texto que o produto nunca exibiu — que era exatamente a armadilha descrita na estória.
 
 **3. PATCH, não MINOR (CA-3).** `motor_version` 1.3.1 → 1.3.2, pelo mesmo critério da STORY-041: texto de saída muda, fórmula não. Nenhum valor, farol, ordenação de destaque ou veredito é afetado. `matrix_version` **não** sobe — nenhum texto da matriz foi editado e a entrada movida nunca foi consumida.
+
+### Revisão do PO — 06/08/2026, motor 1.3.3
+
+O Protocolo desta estória mandava sinalizar a redação ao PO antes do merge. Sinalizado, revisado, **e a faixa 1 foi reescrita**. A pergunta que abriu a revisão foi direta: *"se tenho a receber 20K e em estoque 10K, e ainda tenho que pagar 80K, é estranho eu ter 50K de folga, não é?"*
+
+**É.** Três problemas na redação anterior, todos meus:
+
+1. **"Folga" foi lido como "sobra", e o número diz o contrário.** Não há 50 mil disponíveis; há 50 mil de dívida com fornecedor além do que o ciclo devolve. Naquele diagnóstico, 50 mil em caixa contra 80 mil a pagar a fornecedores — não é um quadro que a palavra "folga" descreva.
+2. **O indicador não distingue prazo negociado de atraso.** Quem combinou 60 dias com o fornecedor e quem está atrasado com ele produzem exatamente o mesmo número. A primeira situação é vantagem competitiva; a segunda é problema. Afirmar a leitura favorável escolhe uma das duas sem ter como saber.
+3. **A própria EBC é mais cautelosa, no mesmo relatório.** O texto do Anexo F para `ncg_vendas` verde — mesmo cenário, exibido a três linhas de distância — diz *"**pode indicar** que a empresa não necessita de recursos para o giro"*. Eu afirmava o que a fonte apenas sugere. Inconsistência editorial dentro da mesma página.
+
+O texto novo nomeia o mecanismo (financiamento do fornecedor, não sobra), abandona a palavra "folga" e diz a dependência que o arranjo cria. Detalhe de precisão: diz **"não supera"**, e não "é menor que", porque a faixa 1 inclui `NCG = 0` exato — na fronteira os dois lados são iguais, e "menor" seria falso ali.
+
+**Consequências, no mesmo procedimento do CA-3:** `motor_version` 1.3.2 → **1.3.3** (PATCH), 5 golden hashes reemitidos com a conferência por reconstrução. Desta vez **só 2 fixtures trocam texto** — `saudavel` e `ncg_negativo`, os únicos com `NCG ≤ 0`; os outros 3 mudam apenas porque `motor_version` entra no payload hasheado. Com a versão fixada de volta em 1.3.2 e a mensagem antiga restaurada no JSON, os 5 voltam bit a bit.
+
+Três testes novos travam o que a revisão decidiu: a mensagem nomeia o financiamento e a dependência; **não** contém "folga" nem "sobra"; e usa "não supera", que é o que vale na fronteira do zero.
+
+| Fixture | Hash 1.3.2 | Hash 1.3.3 |
+|---|---|---|
+| `saudavel` | `840deb65…648c` | `dd804d9f…9cb8` |
+| `atencao` | `9ecd69df…6579` | `0ef6bbc5…bd18` |
+| `alerta` | `1d6a4ff2…fcb2` | `fe61411e…e437` |
+| `ncg_negativo` | `67d4ef83…c05f` | `761e5bae…9e0d` |
+| `70pct_indisponivel` | `79b7c237…d2f3` | `fe2c664e…f333` |
+
+**Fica um resíduo que não é desta estória.** O `ncg_vendas` verde continua dizendo *"pode indicar que a empresa não necessita de recursos para o giro"* — texto literal do Anexo F, e a matriz é transcrição, não reescrita. Agora as duas linhas dizem coisas alinhadas em tom, mas quem tratar a matriz dez-2025 numa revisão futura deve olhar as duas juntas.
 
 ### Descobertas
 
