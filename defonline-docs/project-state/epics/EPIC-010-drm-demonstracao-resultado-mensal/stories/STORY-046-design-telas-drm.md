@@ -6,11 +6,12 @@ epic_id: EPIC-010
 type: implementation
 target_role: designer
 requires_design: true
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: "designer (claude-opus-5)"
 created_at: 2026-08-04
 updated_at: 2026-08-04
 estimated_session_size: L
+design_screen_ids: [SCREEN-STORY-046-lancamento-mensal, SCREEN-STORY-046-demonstracao-mes, SCREEN-STORY-046-serie-historica]
 ---
 
 # STORY-046 — Specs de tela do módulo DRM
@@ -66,14 +67,14 @@ Conecta com as duas primeiras métricas do épico: recorrência (2º lançamento
 
 ## Critérios de aceite
 
-- [ ] **CA-1:** Três specs publicados em `epics/EPIC-010-*/design/`, seguindo o template, com mobile e desktop.
-- [ ] **CA-2:** O spec de lançamento apresenta **solução explícita para cada um dos três mecanismos anti-atrito** do PDR-003, com o raciocínio de por que aquela solução reduz esforço percebido.
-- [ ] **CA-3:** A Demonstração do Mês exibe nominal e percentual em cada linha, com hierarquia visual clara entre os três níveis.
-- [ ] **CA-4:** Todos os estados de indisponibilidade e alerta do Anexo K §K.6 e §K.7 estão especificados — nenhum estado fica "a definir na implementação".
-- [ ] **CA-5:** Só componentes e tokens do design system existente. Componente novo exige justificativa no spec e entra no DS. **Nenhum hex literal** (IDR-008).
-- [ ] **CA-6:** Acessibilidade AA: contraste ≥ 4.5:1, alvo de toque ≥ 44×44px, farol nunca só por cor, navegação por teclado no formulário longo, ordem de tabulação coerente.
-- [ ] **CA-7:** DDR registrado para cada decisão de design com efeito além destas três telas.
-- [ ] **CA-8:** Specs revisados com o PO antes de `ready`.
+- [x] **CA-1:** Três specs publicados em `epics/EPIC-010-*/design/`, seguindo o template, com mobile e desktop.
+- [x] **CA-2:** O spec de lançamento apresenta **solução explícita para cada um dos três mecanismos anti-atrito** do PDR-003, com o raciocínio de por que aquela solução reduz esforço percebido.
+- [x] **CA-3:** A Demonstração do Mês exibe nominal e percentual em cada linha, com hierarquia visual clara entre os três níveis.
+- [x] **CA-4:** Todos os estados de indisponibilidade e alerta do Anexo K §K.6 e §K.7 estão especificados — nenhum estado fica "a definir na implementação".
+- [x] **CA-5:** Só componentes e tokens do design system existente. Componente novo exige justificativa no spec e entra no DS. **Nenhum hex literal** (IDR-008).
+- [x] **CA-6:** Acessibilidade AA: contraste ≥ 4.5:1, alvo de toque ≥ 44×44px, farol nunca só por cor, navegação por teclado no formulário longo, ordem de tabulação coerente. *(Com duas ressalvas de produção declaradas nas Notas — não criadas por esta estória.)*
+- [x] **CA-7:** DDR registrado para cada decisão de design com efeito além destas três telas.
+- [ ] **CA-8:** Specs revisados com o PO antes de `ready`. **← único CA em aberto; depende do PO.**
 
 ## Fora de escopo
 
@@ -99,9 +100,9 @@ Conecta com as duas primeiras métricas do épico: recorrência (2º lançamento
 
 ## Definição de Pronto
 
-- [ ] CA-1 a CA-8 atendidos.
-- [ ] `index.json` atualizado (seção `design.screens`).
-- [ ] Notas do agente preenchidas.
+- [ ] CA-1 a CA-8 atendidos. *(CA-1 a CA-7 ✅; CA-8 depende da revisão do PO.)*
+- [x] `index.json` atualizado (seção `design.screens`).
+- [x] Notas do agente preenchidas.
 
 ## Protocolo do agente
 
@@ -109,7 +110,90 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`.
 
 ## Notas do agente
 
+> Executada em 2026-08-04 pelo Designer (`claude-opus-5`). **Entregue e aguardando revisão do PO (CA-8).**
+> Specs em `status: draft` e DDRs em `status: proposed` — sobem para `ready`/`accepted` **só com aprovação humana explícita**. A invariante 12 do índice exige spec `ready` antes de a `STORY-047` codificar UI, então essa aprovação é o que destrava o Checkpoint 1.
+
+### Entregáveis
+
+| Artefato | Caminho |
+|---|---|
+| Tela 1 — Lançamento mensal | `epics/EPIC-010-*/design/STORY-046-lancamento-mensal.md` |
+| Tela 2 — Demonstração do Mês | `epics/EPIC-010-*/design/STORY-046-demonstracao-mes.md` |
+| Tela 3 — Série histórica | `epics/EPIC-010-*/design/STORY-046-serie-historica.md` |
+| DDR-001 a DDR-005 | `decisions/ddr/` |
+| Design System vivo (inicializado) | `design/system/` — README, tokens, components, patterns, voice-and-tone |
+
 ### Decisões tomadas
+
+**Os três mecanismos anti-atrito (CA-2).**
+
+1. **Modo agregado — o número de campos é o argumento** (DDR-002). Seletor de duas opções no cabeçalho de cada bloco de grupo, com o custo declarado **na própria opção**: `Informar o total · 1 campo` contra `Detalhar por item · 21 campos`. O custo é contado **depois** da supressão por setor, o que resolve a adaptação por setor de graça — Serviços lê "2 campos" onde Indústria lê "4", e ninguém precisa explicar a ausência. Rótulos factuais, nunca "Rápido/Completo": o Anexo K §K.5 proíbe culpabilizar quem escolhe agregado, e adjetivo de valor faria exatamente isso. **Por que reduz esforço percebido:** o usuário decide o tamanho do bloco antes de ver 21 campos, e decide com o número na frente em vez de com uma intuição.
+
+2. **Pré-preenchimento — a marca some ao conferir, e o silêncio é o progresso** (DDR-003). Marcar 21 campos com badge é ruído que ninguém lê. A inversão: o usuário não precisa saber o que veio de julho — precisa saber **o que ainda não olhou**. Legenda mínima (`veio de julho`) que **desaparece ao editar ou confirmar**; o que resta marcado é exatamente o que falta. **Por que reduz esforço percebido:** a tela converge para o silêncio conforme o trabalho avança, então o progresso fica visível sem nenhum indicador adicional — e o caminho de 2 toques do mês sem alterações (`Conferir tudo` → conferência → `Fechar`) ataca a meta de ≤5 min. Ele desemboca na **conferência**, nunca no fechamento: confirmar em massa não pode ser o último ato.
+
+3. **Rascunho e retomada — o bloco é o ponto de corte** (DDR-001). Wizard de 6 blocos, salvo ao concluir cada um. A retomada nomeia o bloco (`você parou em Despesas administrativas`), não o número. **Por que reduz esforço percebido:** "onde eu parei" passa a ter resposta exata em vez de aproximada, e o rodapé permanente (*"pode sair e voltar depois"*) torna o abandono seguro — abandono seguro é pré-requisito de retomada.
+
+**Decisões estruturais.**
+
+- **Nenhum dialeto novo de formulário.** O padrão do Quiz em produção foi promovido a DDR-001 e virou o padrão único do produto. Os três blocos inline quase idênticos do `quiz.blade.php` (retomada, alertas cruzados, bloqueios) foram consolidados no componente `aviso-inline`, com a regra que faltava: **a ausência de botão de seguir em frente é o que faz de um bloqueio um bloqueio.**
+- **Nenhum diálogo modal introduzido.** A confirmação destrutiva de troca de modo é bloco inline — o DS não tem modal, e um formulário longo em celular não precisa de foco-trap onde um bloco resolve.
+- **Cards por trecho da conta, não por linha** (DDR-004). O CA-9 da `STORY-049` pede "cards empilhados no mobile, como o relatório de Diagnóstico". Copiar literalmente quebraria a aritmética: os 13 indicadores do Diagnóstico são objetos independentes, mas as linhas da demonstração são elos de uma conta — uma borda entre `(–) Custo` e `= Lucro Bruto` corta a subtração que o usuário precisa ver. Cortar por trecho (cada card fecha num totalizador) entrega cards empilhados, reduz 17 cards a 5 e preserva a conta.
+- **Prejuízo sem cor** (DDR-004, item 6). Sinal aritmético + troca de verbo no destaque (`SOBROU` → `FALTOU`) + `pill` neutro. Vermelho no produto já significa erro (`destructive`) ou farol (`farol-vermelho`, que é interpretação e é da `STORY-054`); prejuízo não é nenhum dos dois.
+- **Farol e leitura são ausentes, não vazios.** Coluna com cabeçalho e sem conteúdo é literalmente o que "parecer incompleto" significa. Antes da `STORY-054` a tabela tem 3 colunas; depois, o farol entra como badge dentro da célula de rótulo e a leitura num card acima — **nenhum dos dois muda a grade**.
+- **Sem gráfico na série histórica**, com justificativa e gatilho de reabertura no spec §5. Razão decisiva: a série tem lacunas por desenho, e um gráfico de linha **desenha uma reta onde não há dado** — é a "queda fantasma" do `estrutura-drm` §4 em forma visual, no produto que proibiu `COALESCE(…, 0)` no banco justamente para evitá-la.
+- **Variações sem cor** na série. Queda de custo é boa, queda de lucro é ruim: a direção não tem semântica fixa, e verde/vermelho estariam errados metade do tempo.
+
 ### Descobertas
+
+1. **`--color-neutral` como fundo de input já significa `disabled`** (`app.css`). Isso derrubou a solução mais óbvia para marcar campo herdado — 21 campos editáveis pareceriam bloqueados, o pior mal-entendido possível num formulário. Foi o que levou à solução textual do DDR-003.
+
+2. **Duas combinações de token reprovam AA por margem fina, e são fáceis de usar por engano.** `tertiary` sobre `neutral` = **4,45:1**; `destructive` sobre `neutral` = **4,45:1** (ambas passam sobre branco, com 4,70:1). Consequência concreta no `seletor-modo`: a opção selecionada usa `tertiary` **só** em borda e marcador, com o rótulo em `primary`. Registrado em `design/system/tokens.md` como restrição vinculante.
+
+3. **A garantia "ausência ≠ zero" do `ADR-007` não tinha correspondente na tela.** O modelo gastou espinha de meses na leitura e proibição de `COALESCE` para torná-la impossível de violar no banco — mas uma garantia que não chega ao pixel não é garantia, porque a tela é a única superfície onde o usuário encontra o dado. Daí o DDR-005 e os **quatro canais simultâneos** (borda tracejada, ausência de área de valor, rótulo textual, presença de CTA) que separam mês não lançado de mês zerado. Nenhum deles é cor.
+
+4. **Herança parcial é estado frequente, não caso de borda.** Grupo agregado no mês anterior e detalhado agora ⇒ os itens não têm de onde herdar, e o total **não pode** ser distribuído entre eles (`ADR-007`). Estava fora de todos os documentos. Desenhado no spec §4.6: campos vazios, sem marca, com o total anterior exibido como referência de ordem de grandeza — é o máximo que se pode dizer sem inventar a distribuição.
+
+5. **A contagem de campos.** A estória cita "36 campos" duas vezes; o Anexo K **v1.1** (pós-`PDR-004`, que aprovou D41/D42) fixa **38**. Não é divergência de escopo — **36 é o número correto para o setor Serviços** (Indústria 38, Comércio 37, Serviços 36), pela supressão de D04/D05. Os specs usam 38 como teto e declaram o número por setor onde ele importa.
+
+6. **Zero tokens novos.** Cinco situações pareciam pedir cor nova (herança, prejuízo, mês atípico, variação, indisponibilidade) e nenhuma precisou. O padrão que emergiu: **quando a informação precisava de um canal, o canal certo era texto** — o que resolve acessibilidade e economia de token de uma vez.
+
 ### Bloqueios encontrados
+
+Nenhum. As três telas foram especificadas integralmente.
+
+Duas restrições contornadas sem escalar:
+
+- **Sem sync prévio com o Programador** (`references/collaboration-with-developer.md` prevê um): a `STORY-047` ainda não tem `owner_agent`. As restrições técnicas vieram do `ADR-007` e da leitura do código do Quiz em produção. Os specs declaram as premissas para que o sync aconteça na abertura da `STORY-047`, não depois.
+- **Invariante 9 do índice, leitura literal.** Ela pede entrada em `design.screens[]` com `story == story.id` para cada estória com `requires_design`. Como as três specs nasceram de uma estória de design dedicada (`STORY-046`) e não do modelo paralelo que o `PDR-002` assumiu, as entradas têm `story: STORY-046` + `implemented_by: STORY-047/049/051`, e as estórias consumidoras receberam `design_screen_id` (invariante 10 ✅). A intenção protetiva da invariante 9 está atendida; **a leitura literal, não.** Não editei o esquema — é do PO. Item 5 da escalação abaixo. *(Observação: a invariante 9 já está frouxa hoje — `STORY-044` está `done` com `requires_design: true` e sem entrada.)*
+
+### Escalado ao PO — 5 itens
+
+| # | Item | Por quê é do PO, não meu |
+|---|---|---|
+| 1 | **Default do modo dos grupos no 1º lançamento.** Proponho `detalhado`, pelo argumento da irreversibilidade: quem chega sem histórico não sabe o que perde ao agregar, e agregar é irreversível para aquele mês. **Contra-argumento honesto:** 38 campos no primeiro contato é o pior momento possível para o atrito, e o 1º lançamento é a porta de entrada do módulo | É escolha de produto entre atrito e granularidade. Custo de implementação idêntico nos dois casos |
+| 2 | **`<x-help>` tem alvo de toque de 18×18px**, contra o piso de 44px. Está em produção no Quiz e seria herdado pelo DRM, que usa `<x-help>` em dezenas de campos — multiplicando o problema. É **bug**, não decisão. Sugiro anexar à `STORY-059`, que já é a estória de dívida de acessibilidade | Não é criado por esta estória e não cabe no `EPIC-010` |
+| 3 | **Borda de input mede 1,23:1**, contra os 3:1 da WCAG 1.4.11 para limite de componente interativo. Atinge todas as telas de formulário do produto. Corrigir mexe num token da fundação e **exige DDR próprio**. Sugiro avaliar junto com a `STORY-059` | Idem |
+| 4 | **Proposta ao Arquiteto / `STORY-048`:** acrescentar `tipo` (`total\|deducao\|subtotal\|item`) e `destaque` (bool) às linhas do snapshot. Hoje duas regras da Tela 2 (quais linhas são os três destaques; onde um card de trecho fecha) dependem de configuração porque o snapshot não diz o suficiente. **O motor não foi construído**, então o custo agora é ~zero; depois seria mudança em snapshot imutável — o beco do `IDR-013`. **A tela não depende disso**: a regra por configuração está especificada e tem fallback que não quebra | Contrato do motor é do Arquiteto |
+| 5 | **Invariante 9 do índice** — ver acima. Esquema é do PO | Não edito esquema sem PDR |
+
+Três decisões conscientes de **não fazer**, registradas para que sejam deliberadas e não esquecimento: sem ação de descartar rascunho (ele expira); sem paginação ou filtro por ano na série (24 competências cabem numa lista); sem gráfico no MVP (justificado no spec, com gatilho de reabertura).
+
 ### DDRs criados
+
+Todos em `status: proposed` — **nenhum vai para `accepted` sem aprovação humana explícita**.
+
+| DDR | Título | Escopo |
+|---|---|---|
+| **DDR-001** | Formulário longo é wizard por blocos com rascunho por bloco — dialeto único do produto | formulários |
+| **DDR-002** | Entrada em dois níveis — seletor de modo por grupo, com o custo em campos declarado na escolha | formulários |
+| **DDR-003** | Valores herdados do período anterior — a marca some ao confirmar, e o silêncio é o progresso | formulários |
+| **DDR-004** | Demonstração financeira — nominal + percentual, três níveis, cards por trecho da conta | dados financeiros |
+| **DDR-005** | Vocabulário visual de indisponibilidade — "não dá para calcular", "não existe" e "é zero" | **transversal** |
+
+### Design System
+
+Inicializado em `design/system/` (não existia — `index.json` marcava `status: canonical_only`). **Herda** do DS canônico em `especificacao/V2/design-system.md` v1; `tokens.md` e `voice-and-tone.md` são **ponteiros** que carregam só o que não está nas fontes canônicas — duplicar a tabela de tokens criaria uma terceira verdade.
+
+- **12 componentes** em produção registrados · **5 especificados** (`progresso-blocos`, `aviso-inline`, `seletor-modo`, `demonstracao-linha`, `serie-linha-competencia`) + o estado `herdado` do `campo-monetario` e a variante `link` do `button`
+- **4 padrões compostos:** `formulario-longo`, `pre-preenchimento-periodo-anterior`, `demonstracao-financeira`, `indisponibilidade`
+- **0 tokens novos** · **3 dívidas de acessibilidade do produto** documentadas com evidência numérica em `tokens.md`
