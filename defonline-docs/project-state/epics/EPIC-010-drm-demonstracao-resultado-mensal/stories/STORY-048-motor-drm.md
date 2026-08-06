@@ -9,9 +9,9 @@ requires_design: false
 status: ready
 owner_agent: null
 created_at: 2026-08-04
-updated_at: 2026-08-04
+updated_at: 2026-08-06
 estimated_session_size: L
-decisoes: [PDR-003, PDR-004]
+decisoes: [PDR-003, PDR-004, PDR-008]
 ---
 
 # STORY-048 — Motor do DRM
@@ -38,6 +38,7 @@ Implementar o motor que transforma um lançamento mensal na Demonstração de Re
 - [ ] **CA-1b (Dois modos):** o motor entrega os dois modos de apresentação do pró-labore — §1.1 (`fora`, default) e §1.2 (`dentro`) —, com os rótulos, o número de linhas e a ordem de cada um. **O modo é aplicado na leitura, não no cálculo persistido:** o snapshot guarda os valores que permitem derivar ambos, e alternar o modo não recalcula nem migra nada.
 - [ ] **CA-1c (Invariante entre modos — obrigatório):** teste dedicado prova que o **Lucro Líquido do Mês é idêntico nos dois modos**, sobre um conjunto amplo de entradas. Divergência aqui é bug grave: a resposta a "meu negócio deu lucro?" não pode depender de uma preferência de exibição.
 - [ ] **CA-1d (Linhas não operacionais):** L7b (`D41 − D42`) implementada nos dois modos, posicionada após o Resultado Operacional. **Omitida quando ambos os campos são zero** — sem linha zerada na tela.
+- [ ] **CA-1e (Linha auto-descritiva — `tipo` e `destaque`):** cada linha da `demonstracao` carrega, além de código, nível, rótulo, nominal e percentual, mais dois campos: **`tipo`** (`total | deducao | subtotal | item`) e **`destaque`** (bool). Valem para os dois modos de pró-labore e são persistidos no snapshot como qualquer outro campo da linha. Os três destaques da tela (quanto vendeu / sobrou antes / sobrou depois) e o ponto em que um card de trecho fecha no mobile passam a ser **propriedade do dado**, não configuração no código — mesmo fundamento com que o `ADR-007` mandou persistir os rótulos. Decidido no `PDR-008` §1; proposta original no spec `SCREEN-STORY-046-demonstracao-mes` §9.
 - [ ] **CA-2 (Nominal e percentual):** cada linha carrega valor nominal **e** percentual sobre a Receita Bruta. Percentual com 1 casa decimal na apresentação.
 - [ ] **CA-3 (Três setores):** o mesmo motor atende Indústria, Comércio e Serviços. Campos suprimidos por setor entram como ausentes, não como zero, e não alteram a estrutura de linhas.
 - [ ] **CA-4 (Modo agregado):** grupo em modo agregado usa o total informado; em modo detalhado, a soma dos itens. Ambos produzem a mesma estrutura de saída.
@@ -74,9 +75,11 @@ Esta estória estava `blocked` por `[DECIDIR-B]` e `[DECIDIR-E]`. **Ambas resolv
 
 - `design/estrutura-drm.md` v1.1 é o contrato aritmético. Divergiu, é bug.
 - PDR-004 — dois modos de pró-labore (default `fora`), percentual em todas as linhas, rótulo "antes do pró-labore", linhas não operacionais aprovadas.
-- PDR-003; Anexo K v1.1; **ADR-007** (decisão da STORY-045); IDR-010 (padrão snapshot, não recálculo — estendido pelo ADR-007, não revogado).
+- PDR-003; Anexo K v1.1; **ADR-007** (decisão da STORY-045); **PDR-008 §1** (`tipo` e `destaque` na linha — CA-1e); IDR-010 (padrão snapshot, não recálculo — estendido pelo ADR-007, não revogado).
 
 **Do `ADR-007`, o que muda para você:** a `demonstracao` que você devolve é **auto-descritiva** (lista de linhas com código, nível, rótulo, nominal, percentual e motivo) e carrega **os dois modos de pró-labore já resolvidos, com rótulos** — `demonstracao.linhas.fora[]` e `demonstracao.linhas.dentro[]`. Persistir os rótulos é obrigatório, não conveniência: é a lição do aditivo de 04/08/2026 do IDR-010, quando trocar uma palavra num texto de veredito se revelou output do motor. Com isso, o CA-1b sai do motor e a troca de modo da tela vira escolher o outro array. Nominais serializados como string com casas fixas.
+
+**Do `PDR-008` §1, o que se acrescenta:** a linha ganha `tipo` e `destaque` (CA-1e). É extensão do mesmo princípio — a linha se explica sozinha, e quem lê o snapshot daqui a três anos não precisa da configuração vigente hoje para renderizá-lo. **A janela para isso é agora:** snapshot é imutável (`ADR-007`, `IDR-010`), então meses já fechados nunca ganhariam os campos, e a configuração paralela viraria permanente — o beco em que o `IDR-013` já entrou uma vez.
 
 ## Liberdade técnica do agente
 
@@ -84,7 +87,7 @@ Você decide como estruturar as linhas em código, como representar a saída, e 
 
 ## Definição de Pronto
 
-- [ ] CA-1 a CA-12 passam.
+- [ ] CA-1 a CA-12 passam (inclusive o CA-1e, acrescentado pelo `PDR-008`).
 - [ ] Golden tests congelados e commitados.
 - [ ] Evidência de CA-11 nas notas.
 - [ ] Pipeline verde; `index.json` atualizado; notas preenchidas.

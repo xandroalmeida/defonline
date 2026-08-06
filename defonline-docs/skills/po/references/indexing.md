@@ -145,7 +145,8 @@
 6. Uma estória só pode ser `done` se nenhum `blocked_by` está aberto.
 7. `updated_at` é atualizado em toda alteração.
 8. `path` é relativo a `project-state/`.
-9. **(v2)** Se `story.requires_design == true`, deve existir entrada em `design.screens[]` com `story == story.id` antes do `status` da estória passar de `in_progress` para `in_review`. (Garantia de que UI não vai para revisão sem spec.)
+9. **(v2, redação revista pelo `PDR-008` §4)** Se `story.requires_design == true`, deve existir entrada em `design.screens[]` cujo **`story` OU `implemented_by`** seja `story.id`, antes do `status` da estória passar de `in_progress` para `in_review`. (Garantia de que UI não vai para revisão sem spec.)
+   > A redação original exigia `story == story.id`, o que só descrevia o **modelo paralelo** do `PDR-002` — spec produzida dentro da própria estória de implementação. Quando as specs nascem de uma **estória de design dedicada** (`STORY-046` gerou três telas, implementadas pela `STORY-047`, `049` e `051`), a entrada carrega `story: STORY-046` e `implemented_by: STORY-047`, e a leitura literal reprovava estórias que **têm** spec. `implemented_by` é o campo que liga a spec a quem a codifica; a invariante 10 (`design_screen_id`) faz o caminho de volta.
 10. **(v2)** `story.design_screen_id`, quando preenchido, aponta para `design.screens[].id` existente.
 11. **(v2)** `decisions.ddr[*].status: accepted` exige `approved_by` preenchido (aprovação humana explícita — análogo a ADR).
 12. **(v2)** `design.screens[*].status: ready` é pré-condição para o Programador codificar UI (modelo paralelo descrito em `designer/references/collaboration-with-developer.md`).

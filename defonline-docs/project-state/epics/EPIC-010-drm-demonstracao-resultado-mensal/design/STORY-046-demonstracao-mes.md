@@ -460,7 +460,14 @@ Se cada linha do snapshot carregasse dois campos a mais — `tipo` (`total | ded
 
 **O motor ainda não foi construído** (`STORY-048` não começou), então o custo agora é ~zero. Depois seria mudança em snapshot imutável — o beco do `IDR-013`.
 
+**ACEITA pelo PO em 2026-08-06 (`PDR-008` §1).** Os dois campos entram no contrato do motor como **CA-1e da `STORY-048`**. As duas regras desta tela passam a ler o dado em vez da configuração; o fallback especificado deixa de ser necessário e fica como salvaguarda.
+
+<details>
+<summary>Texto original da proposta (histórico)</summary>
+
 **A tela não depende disso.** A regra por configuração está especificada e tem fallback que não quebra. É proposta, não requisito — e a decisão é do Arquiteto com o PO, não minha.
+
+</details>
 
 ## 10. Histórico de mudanças
 
@@ -468,3 +475,4 @@ Se cada linha do snapshot carregasse dois campos a mais — `tipo` (`total | ded
 |---|---|---|---|
 | 2026-08-04 | criação — spec completo, 12 estados, dois modos de pró-labore | designer (claude-opus-5) | `STORY-046` |
 | 2026-08-06 | aprovada pelo PO — `draft` → `ready` | PO (Alexandro) | `PDR-007` §1. Destrava a `STORY-049` |
+| 2026-08-06 | proposta de `tipo`/`destaque` ao Arquiteto **aceita** (§9) | PO (Alexandro) | `PDR-008` §1. Vira CA-1e da `STORY-048` |
