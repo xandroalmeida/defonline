@@ -133,6 +133,12 @@ A conta em papel não pegaria isso, porque ela assume um fundo por vez. O gate p
 
 **A regra que fica, e vale além do farol:** componente com fundo tingido usa **cor opaca**, não alpha. Contraste de componente não pode depender do que estiver atrás dele. Gate final: **100**.
 
+### Adendo 2 — a geometria do pill não muda, e isso agora tem teste
+
+A migração das utilities do Tailwind para a classe de componente trouxe junto uma mudança que **este DDR não decidiu**: o `font-size` passou a herdar `--text-body-sm` e o pill cresceu de 12px para 14px de fonte, de 24px para 28px de altura. Foi pego na validação da sprint (achado F-1) e revertido — `0.75rem` / `1rem`, os valores exatos de `text-xs`, que era o que já estava em produção.
+
+Fica explícito, porque a frase "o pill mantém exatamente a aparência de hoje" é o compromisso deste DDR e agora é verificável: **cor é o que este DDR muda; geometria, não.** `FarolGeometriaBrowserTest` trava fonte, altura, padding e gap. Alterar qualquer um deles exige aditivo aqui, não um refactor de classe.
+
 ## Consequências
 
 ### Positivas

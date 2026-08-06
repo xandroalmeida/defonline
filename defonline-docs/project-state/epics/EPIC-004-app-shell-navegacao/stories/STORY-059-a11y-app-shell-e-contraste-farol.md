@@ -116,6 +116,14 @@ De quebra, as classes saíram do utilitário arbitrário do Tailwind para `.faro
 
 **O `<x-help>` não precisou de JavaScript nem de mudança de layout.** O pseudo-elemento fica fora do fluxo, então nada se desloca, e não tem conteúdo — a área ampliada não acrescenta nada à árvore de acessibilidade, só ao hit-testing. O teste de browser mede os dois lados: acerta o botão a 20px do centro, **não** acerta a 40px, que era o risco real de exagerar e roubar toque do campo vizinho.
 
+### Correção após a validação (rodada 1)
+
+**F-1 — o pill cresceu de 12px para 14px, e ninguém tinha pedido.** Ao trazer o pill das utilities do Tailwind para `.farol` no `app.css`, o `font-size` passou a herdar `--text-body-sm` (0,875rem). Medido em browser: fonte 12px → **14px**, altura 24px → **28px**. O `DDR-006` decidiu sobre **cor** e afirma que *"o pill mantém exatamente a aparência de hoje"* — a geometria mudou de carona.
+
+Passou por um motivo que vale registrar: **os testes desta estória medem contraste, semântica e comportamento; nenhum media geometria.** E a captura de tela do CA-7 não denuncia 2px de fonte — o pill continuava legível e distinguível nas três cores, que é o que o olho confere. Foi a medição em browser real, feita na validação, que expôs.
+
+Corrigido restaurando `font-size: 0.75rem` e `line-height: 1rem` — os valores exatos de `text-xs`, que era o que estava lá. Não viraram token porque não são decisão nova: são o que o DS já tinha em produção. `FarolGeometriaBrowserTest` trava os quatro números (fonte, altura, padding, gap), senão o próximo refactor de classe repete o episódio. Gate reexecutado depois da correção: **100**.
+
 ### Bloqueios encontrados
 
 **Deploy e gate em homologação não executados — falta de mandato, não de trabalho.** Mesma situação da `STORY-060`: o deploy nasce do push de uma tag `rc`, ato do PO. O gate foi rodado **em ambiente local**, com Lighthouse 12.8.2 (a mesma versão da medição de 85 da `STORY-040`), contra a página real do relatório com sessão autenticada — resultado **100**, categoria `accessibility`, zero auditorias reprovadas. Falta reexecutar em homologação depois do release.

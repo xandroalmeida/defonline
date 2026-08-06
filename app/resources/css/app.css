@@ -314,15 +314,30 @@
      * de `farol.blade.php` documentava. Em CSS de componente, o problema não
      * existe.
      */
+    /*
+     * Geometria: **idêntica à de antes da STORY-059**, e é de propósito.
+     *
+     * Ao trazer o pill das utilities do Tailwind para cá, `font-size` passou a
+     * herdar `--text-body-sm` (0,875rem) — o pill cresceu de 12px para 14px de
+     * fonte e de 24px para 28px de altura. Ninguém pediu: o DDR-006 decidiu
+     * sobre **cor**, e afirma que "o pill mantém exatamente a aparência de hoje".
+     * Achado F-1 da validação da SPRINT-2026-W32.
+     *
+     * `0.75rem` / `1rem` são os valores exatos de `text-xs`, que era o que
+     * estava lá. Não viram token porque não são decisão nova de design — são a
+     * restauração do que o DS já tinha em produção. `FarolGeometriaBrowserTest`
+     * trava os dois números, senão o próximo refactor de classe repete o
+     * episódio: contraste e semântica têm teste, geometria não tinha.
+     */
     .farol {
         display: inline-flex;
         align-items: center;
         gap: 6px;
         padding: 4px 10px;
         border-radius: var(--radius-full);
-        font-size: var(--text-body-sm);
+        font-size: 0.75rem;
+        line-height: 1rem;
         font-weight: var(--font-weight-medium);
-        line-height: 1.4;
     }
     .farol--verde {
         background: color-mix(in srgb, var(--color-farol-verde) 10%, var(--color-surface));

@@ -2051,7 +2051,31 @@
       "opened_by": "PO (Alexandro / Claude)",
       "related_pdr": "PDR-005",
       "note": "Duas frentes por papel: limpeza da onda 1 (programador) e fundação do DRM (arquiteto + designer). STORY-039 e STORY-040 fecham com o primeiro deploy da sprint — verificação, não estória nova. | 2026-08-04: STORY-059 e STORY-060 acrescentadas — dívidas escaladas ao PO e decididas no PDR-006, colocadas em sprint em vez de deixadas soltas.",
-      "execution_queue": "sprints/SPRINT-2026-W32-fila-execucao.md"
+      "execution_queue": "sprints/SPRINT-2026-W32-fila-execucao.md",
+      "validation_report": {
+        "path": "sprints/SPRINT-2026-W32-validacao.md",
+        "escopo": "estorias (STORY-052, STORY-059, STORY-060) — não é validação de fechamento de épico",
+        "verdict": "approved_with_pending",
+        "validated_at": "2026-08-06",
+        "validated_by": "validador (agente Claude — sessão W32)",
+        "rodadas": 2,
+        "verdict_history": [
+          {
+            "rodada": 1,
+            "at": "2026-08-06",
+            "verdict": "rejected",
+            "by": "validador",
+            "reason": "2 fails não-bloqueantes: F-1 — o pill de farol cresceu de 12px para 14px ao migrar das utilities do Tailwind para classe de componente, contrariando o próprio DDR-006 ('mantém exatamente a aparência de hoje'); F-2 — rotuloCampo() era método público sem teste, deixando Drm/ConteudoDrm em 97,1%, abaixo dos 98% de núcleo."
+          },
+          {
+            "rodada": 2,
+            "at": "2026-08-06",
+            "verdict": "approved_with_pending",
+            "by": "validador",
+            "reason": "Os 2 fails corrigidos e reverificados: geometria restaurada (12px/24px) e travada por FarolGeometriaBrowserTest, com adendo no DDR-006 dizendo que ele decide cor e não geometria; ConteudoDrm em 100%. Restam 3 pendências de release fora do mandato do agente — deploy em homologação para as 3 estórias e reexecução do gate de acessibilidade na URL pública. 984 Pest + 36 Dusk verdes; cobertura geral 97,4% e domínio 99,7%; Lighthouse a11y 100 em ambiente local."
+          }
+        ]
+      }
     }
   ],
   "decisions": {

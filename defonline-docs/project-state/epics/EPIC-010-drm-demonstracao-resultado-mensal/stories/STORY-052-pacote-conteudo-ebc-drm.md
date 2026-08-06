@@ -147,7 +147,11 @@ Nenhum. Os defaults do `PDR-009` §1 cobriram todos os itens sem resposta da EBC
 
 Como as demais desta sprint, o **deploy em homologação** depende de tag do PO e não foi executado.
 
+### Correção após a validação (rodada 1)
+
+**F-2 — `rotuloCampo()` era método público sem teste**, e deixava `ConteudoDrm` em 97,1%, abaixo dos 98% que o PO exige de núcleo. O total do domínio (99,6%) mascarava o arquivo. Corrigido com dois testes: o contrato do método (rótulo existente, e `null` — não string vazia — para campo inexistente) e a sobreposição validado × provisório aplicada a rótulos, que hoje não têm contrapartida provisória mas terão o mesmo comportamento no dia em que tiverem. `ConteudoDrm` passou a **100%**.
+
 ### Cobertura
 
-- 33 testes novos: 18 em `Domain/Drm/ConteudoDrmTest.php` (CA-2 a CA-4, CA-6 a CA-8, CA-11), 8 em `Domain/Drm/FaixasTest.php` (CA-5) e 7 em `Domain/Drm/ConteudoDrmArchTest.php` (CA-10).
-- Suíte completa: **982 testes Pest**, 3.233 asserções, verde. Pint e PHPStan limpos.
+- 35 testes novos: 20 em `Domain/Drm/ConteudoDrmTest.php` (CA-2 a CA-4, CA-6 a CA-8, CA-11), 8 em `Domain/Drm/FaixasTest.php` (CA-5) e 7 em `Domain/Drm/ConteudoDrmArchTest.php` (CA-10).
+- Suíte completa: **984 testes Pest**, 3.237 asserções, verde. Pint e PHPStan limpos. Cobertura de `Drm/ConteudoDrm` e `Drm/Faixas`: **100%**.

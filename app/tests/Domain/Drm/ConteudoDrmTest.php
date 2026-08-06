@@ -143,6 +143,26 @@ it('CA-3 — a linha L4 resolve o rótulo por setor, e as demais não', function
         ->and($conteudo->rotuloLinha('L5', 'fora', 'servicos'))->toBe('Lucro Bruto');
 });
 
+it('CA-8 — os rótulos de campo saem pelo resolvedor, com o mesmo contrato dos demais', function () {
+    $conteudo = new ConteudoDrm;
+
+    // Achado F-2 da validação: o método era público e não tinha teste.
+    expect($conteudo->rotuloCampo('D01'))->toBe('Quanto vendeu no mês')
+        ->and($conteudo->rotuloCampo('D40'))->toBe('Pró-labore (retirada dos sócios/dono)')
+        // Campo inexistente devolve null como qualquer outra chave ausente — a
+        // tela não recebe string vazia para renderizar como rótulo em branco.
+        ->and($conteudo->rotuloCampo('D99'))->toBeNull();
+});
+
+it('CA-8 — rótulo de campo validado ganha do provisório, como o resto do pacote', function () {
+    // Rótulos nascem validados e não têm contrapartida provisória hoje. O teste
+    // existe porque o dia em que alguém criar `provisorio/rotulos.php` sem
+    // decisão de PO, a sobreposição precisa se comportar como no resto.
+    config()->set('drm.rotulos.campos.D01', 'Faturamento do mês');
+
+    expect((new ConteudoDrm)->rotuloCampo('D01'))->toBe('Faturamento do mês');
+});
+
 it('CA-2 — a linha L7 só se chama EBITDA no modo em que ela é EBITDA', function () {
     $conteudo = new ConteudoDrm;
 
