@@ -3,7 +3,7 @@ epic_id: EPIC-001
 slug: cadastro-minimo
 title: Cadastro mínimo de Usuário e Empresa Analisada
 wave: WAVE-2026-01
-status: ready
+status: done
 owner_role: po
 created_at: 2026-05-20
 updated_at: 2026-05-22

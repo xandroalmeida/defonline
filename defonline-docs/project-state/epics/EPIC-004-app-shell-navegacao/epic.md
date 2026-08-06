@@ -3,7 +3,7 @@ epic_id: EPIC-004
 slug: app-shell-navegacao
 title: App shell + materialização do design system v1 (chassi visual e navegação)
 wave: WAVE-2026-01
-status: ready
+status: in_review
 owner_role: po
 created_at: 2026-05-24
 updated_at: 2026-05-24

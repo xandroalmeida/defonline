@@ -3,7 +3,7 @@ epic_id: EPIC-010
 slug: drm-demonstracao-resultado-mensal
 title: "DRM — Demonstração de Resultado Mensal (o negócio deu lucro este mês?)"
 wave: WAVE-2026-02
-status: ready
+status: in_progress
 owner_role: po
 created_at: 2026-08-04
 updated_at: 2026-08-04

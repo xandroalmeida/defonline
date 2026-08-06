@@ -2595,6 +2595,25 @@
         "note": "Fecha o débito \"mail_mailer: log apenas; sem provedor SMTP real ainda\" aberto desde a STORY-013. Lib transversal resend/resend-php adicionada; wiring Ansible no env.j2 + vars.yml + vault.example pronto. Chave ainda não está no vault — PO criando conta + verificando domínio defonline.xandrix.com.br + gerando key."
       },
       {
+        "id": "IDR-008",
+        "slug": "framework-css-tailwind-v4-theme",
+        "title": "Framework CSS — Tailwind v4 com @theme materializando os tokens do design-system",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-008-framework-css-tailwind-v4-theme.md",
+        "decided_at": "2026-05-25",
+        "decided_by": "PO (Alexandro)",
+        "owner_agent": "programador (claude-opus-4-7)",
+        "related_story": "STORY-019",
+        "related_stories": [],
+        "related_idrs": [],
+        "related_adrs": [
+          "ADR-001"
+        ],
+        "created_at": "2026-05-25",
+        "updated_at": "2026-05-25",
+        "note": "Tailwind v4 com os tokens do design-system num único bloco @theme em resources/css/tokens.css — o único arquivo autorizado a conter hex literal de design system, cobrado por teste arquitetural Pest (tests/Unit/Arch/DesignTokensTest.php). Fonte Inter no lugar da Instrument Sans do scaffold. Consequência viva: qualquer motor de documento que não consuma CSS custom properties (dompdf, mPDF) exigiria copiar a paleta à mão — é o argumento decisivo do ADR-008. Entrada acrescentada ao índice em 2026-08-06; a decisão é de 2026-05-25."
+      },
+      {
         "id": "IDR-009",
         "slug": "cross-tenant-403-vs-404",
         "title": "Acesso cross-tenant em rotas autenticadas — 404 silente via Global Scope (sem audit log dedicado)",
@@ -2667,6 +2686,27 @@
         "created_at": "2026-06-02",
         "updated_at": "2026-06-02",
         "note": "Durante a STORY-039 descobriu-se que o servidor já aceitava 3,46 (parseDecimal desde STORY-027); a causa-raiz do alerta 'entre 0 e 100' era a máscara JS estilo 'centavos' do campo % (digitar 100 virava 1,00). Decisão (PO aprovou em chat 2026-06-02): trocar por máscara decimal natural BR só no campo % (Q13, único do quiz); R$ e dias inalterados. Mensagem alinhada à CA-3; 3+ decimais truncados (não arredondados) em pctCanonico. Convenção: máscara 'centavos' só para R$, nunca para percentual/quantidade. Sem bump de motor_version."
+      },
+      {
+        "id": "IDR-012",
+        "slug": "backup-offsite-cloudflare-r2",
+        "title": "Provedor de backup off-site — Cloudflare R2 no lugar do Backblaze B2",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-012-backup-offsite-cloudflare-r2.md",
+        "decided_at": "2026-08-04",
+        "decided_by": "PO (Alexandro)",
+        "owner_agent": "programador (claude-opus-5)",
+        "related_story": null,
+        "related_stories": [],
+        "related_idrs": [
+          "IDR-002"
+        ],
+        "related_adrs": [
+          "ADR-005"
+        ],
+        "created_at": "2026-08-04",
+        "updated_at": "2026-08-04",
+        "note": "Destino do backup off-site passa a ser o Cloudflare R2 via API S3-compatível, com um bucket e um token por ambiente (defonline-backup-homolog / defonline-backups-producao), cada token escopado no seu bucket. O mecanismo da ADR-005 §4.2 não muda: pg_dump --format=custom às 03:00 BRT pelo role read-only defonline_backup, gzip, gpg AES256, upload por rclone. Muda o remote (b2: → r2:) e o layout de prefixos. Entrada acrescentada ao índice em 2026-08-06; a decisão é de 2026-08-04."
       },
       {
         "id": "IDR-013",

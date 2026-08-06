@@ -3,7 +3,7 @@ epic_id: EPIC-003
 slug: historico-basico
 title: Histórico básico de diagnósticos
 wave: WAVE-2026-01
-status: draft
+status: ready
 owner_role: po
 created_at: 2026-05-20
 updated_at: 2026-05-20

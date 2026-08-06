@@ -3,7 +3,7 @@ epic_id: EPIC-002
 slug: diagnostico-industria
 title: Diagnóstico Econômico-Financeiro para Indústria
 wave: WAVE-2026-01
-status: active
+status: in_review
 owner_role: po
 created_at: 2026-05-20
 updated_at: 2026-05-25
