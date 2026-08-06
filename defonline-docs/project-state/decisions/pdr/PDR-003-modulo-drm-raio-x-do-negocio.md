@@ -106,7 +106,7 @@ A Opção 3 foi descartada por razão de integridade: acoplar o DRM ao motor de 
 
 | ID | Questão | Dono | Prazo |
 |---|---|---|---|
-| `[DECIDIR-A]` | "Raio X do Negócio" nomeia o módulo DRM, o relatório de Diagnóstico ou a plataforma? | EBC / negócio | Até o fim do EPIC-010 |
+| ~~`[DECIDIR-A]`~~ | ~~"Raio X do Negócio" nomeia o módulo DRM, o relatório de Diagnóstico ou a plataforma?~~ **RESOLVIDO em 2026-08-06 (`PDR-009` §3): nomeia o módulo DRM.** O Diagnóstico segue "Diagnóstico" e a plataforma segue "DEFOnline". É nome de **interface**; "DRM" continua sendo o nome técnico em tabelas, config, rotas e documentação. | PO | ✅ 2026-08-06 |
 | `[DECIDIR-B]` | Pró-labore dentro ou fora do EBITDA, e rótulo da linha de Resultado Operacional | EBC | **Antes da `STORY-048`** |
 | `[DECIDIR-C]` | Percentual nas linhas de Receita Bruta, Deduções e Receita Líquida; rótulo "antes do IR/CSLL" | EBC | Antes da `STORY-052` |
 | `[DECIDIR-D]` | Tratamento de férias e 13º: caixa puro, provisão sugerida ou detecção de mês atípico | EBC | Antes da `STORY-051` |

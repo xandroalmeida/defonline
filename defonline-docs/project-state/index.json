@@ -1571,14 +1571,14 @@
         "STORY-054",
         "STORY-057"
       ],
-      "note": "DESBLOQUEADA em 2026-08-04 por decisão do PO: em vez de esperar as faixas de farol da EBC, entrega a ESTRUTURA paramétrica com faixas em estado `nao_calibrada`; a EBC popula depois sem tocar em código. Regra dura mantida: faixa não calibrada NÃO produz farol. CA-1 e CA-2 já concluídos pelo PDR-004.",
+      "note": "DESBLOQUEADA em 2026-08-04 por decisão do PO: em vez de esperar as faixas de farol da EBC, entrega a ESTRUTURA paramétrica com faixas em estado `nao_calibrada`; a EBC popula depois sem tocar em código. Regra dura mantida: faixa não calibrada NÃO produz farol. CA-1 e CA-2 já concluídos pelo PDR-004. | 2026-08-06 (PDR-009): DESBLOQUEADA — a consulta à EBC segue aberta mas não bloqueia mais. Defaults fixados pelo PO antes da execução (faixas todas nao_calibrada e sem farol; leitura ausente por consequência; tooltip ausente não renderiza <x-help>; alertas presentes desde o dia um). Ganha CA-10 (isolamento do provisório em config/drm/provisorio/, com sobreposição, teste contra chave duplicada, estado nas faixas no motor, inventário de lacunas e conteudo_version) e CA-11 (nome de interface 'Raio X do Negócio'; DRM segue técnico).",
       "epic_id": "EPIC-010",
       "sprint_id": "SPRINT-2026-W32",
       "owner_agent": null,
       "requires_design": false,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-052-pacote-conteudo-ebc-drm.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-04"
+      "updated_at": "2026-08-06"
     },
     {
       "id": "STORY-053",
@@ -1623,14 +1623,14 @@
       "blocks": [
         "STORY-057"
       ],
-      "note": "Reaproveita a mecânica de farol e resumo executivo do Diagnóstico, com faixas e textos próprios (STORY-052). Leitura determinística, nunca generativa. Ganhou CA-1b (grau zero: todas as faixas não calibradas, tela funciona) e CA-1c (calibrar não exige deploy de código). Cobertura ≥98%. | [CONFLITO-PO] aberto em 2026-08-04 pelo Arquiteto: o CA-8 (versão do pacote de conteúdo gravada no snapshot do lançamento) colide com o ADR-007 e com a ratificação do PO (faróis fora do snapshot), e não é implementável como está — o snapshot nasce no CP1 e os faróis são do CP3, então carimbá-lo depois exigiria escrever em coluna imutável (mesmo beco do IDR-013). RESOLVIDO em 2026-08-04 pela saída (a), por delegação do PO ao Arquiteto: CA-8 reescrito — a interpretação é derivada na exibição, nunca gravada no snapshot, e a tela nomeia a diferença entre medição (valores, imutáveis) e leitura (farol, recalibrável). Fundamento decisivo: congelar deixaria permanentemente sem farol todo mês lançado antes da calibração da EBC.",
+      "note": "Reaproveita a mecânica de farol e resumo executivo do Diagnóstico, com faixas e textos próprios (STORY-052). Leitura determinística, nunca generativa. Ganhou CA-1b (grau zero: todas as faixas não calibradas, tela funciona) e CA-1c (calibrar não exige deploy de código). Cobertura ≥98%. | [CONFLITO-PO] aberto em 2026-08-04 pelo Arquiteto: o CA-8 (versão do pacote de conteúdo gravada no snapshot do lançamento) colide com o ADR-007 e com a ratificação do PO (faróis fora do snapshot), e não é implementável como está — o snapshot nasce no CP1 e os faróis são do CP3, então carimbá-lo depois exigiria escrever em coluna imutável (mesmo beco do IDR-013). RESOLVIDO em 2026-08-04 pela saída (a), por delegação do PO ao Arquiteto: CA-8 reescrito — a interpretação é derivada na exibição, nunca gravada no snapshot, e a tela nomeia a diferença entre medição (valores, imutáveis) e leitura (farol, recalibrável). Fundamento decisivo: congelar deixaria permanentemente sem farol todo mês lançado antes da calibração da EBC. | 2026-08-06 (PDR-009 §1): nasce sabendo que pode entregar ZERO farol e ZERO leitura em homologação — com todas as faixas `nao_calibrada`, isso é aprovação e não reprovação. A regra 'faixa não calibrada não produz farol' é do motor, não da tela.",
       "epic_id": "EPIC-010",
       "sprint_id": null,
       "owner_agent": null,
       "requires_design": true,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-054-farois-leitura-simples.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-04",
+      "updated_at": "2026-08-06",
       "checkpoint": "CP3"
     },
     {
@@ -2271,6 +2271,43 @@
         "updated_at": "2026-08-06",
         "schema_change": "invariante 9 — redação revista em skills/po/references/indexing.md",
         "note": "Fecha os 4 itens que o PDR-007 deixou abertos. (1) `tipo` e `destaque` entram na linha do snapshot como CA-1e da STORY-048 — decidido pela JANELA, não pelo mérito: depois da 048 o snapshot é imutável e a configuração paralela viraria permanente (beco do IDR-013). (2) CAs da STORY-055 corrigidos pela ADR-008: CA-1 vira XLSX explícito, CA-3 resolvido como n/a, CA-4 = 1 arquivo com 2 abas e fórmulas, CA-9 = síncrono via streamDownload sem retenção, CA-10 = relê o XLSX e avalia fórmulas; novos CA-12 (camada @media print) e CA-13 (o botão NÃO se chama 'Exportar PDF' — saída interina que se apresenta bem demais deixa de ser interina). A camada de impressão fica na 055, não na 049, para não engordar o caminho crítico do CP1. (3) As 2 dívidas de a11y herdadas de produção viram CA-9 e CA-10 da STORY-059 (S -> M): alvo de toque do <x-help> 18px vs piso 44px é BUG e não precisa de DDR, e é o mais urgente por sequência — o formulário do DRM usa <x-help> em dezenas de campos, então corrigir depois da STORY-047 multiplica o defeito; borda de input 1,23:1 vs 3:1 da WCAG 1.4.11 exige DDR do Designer e NÃO segura a estória. (4) Invariante 9 passa a aceitar `story` OU `implemented_by`: a redação original só descrevia o modelo paralelo do PDR-002 e reprovava estórias que TÊM spec. Regra que falha em caso legítimo ensina a ser ignorada — e ela já estava frouxa (STORY-044 done com requires_design e sem entrada). Intenção protetiva intacta."
+      },
+      {
+        "id": "PDR-009",
+        "slug": "defaults-do-conteudo-drm-e-nome-comercial",
+        "title": "Defaults do pacote de conteúdo do DRM, isolamento do provisório em código e nome comercial do módulo",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-009-defaults-do-conteudo-drm-e-nome-comercial.md",
+        "decided_at": "2026-08-06",
+        "decided_by": "PO (Alexandro / Claude)",
+        "approved_by": "Alexandro",
+        "approved_at": "2026-08-06",
+        "related_epics": [
+          "EPIC-010"
+        ],
+        "related_stories": [
+          "STORY-052",
+          "STORY-047",
+          "STORY-048",
+          "STORY-049",
+          "STORY-054"
+        ],
+        "related_adrs": [
+          "ADR-007"
+        ],
+        "related_idrs": [
+          "IDR-010"
+        ],
+        "related_pdrs": [
+          "PDR-003",
+          "PDR-004"
+        ],
+        "resolves": [
+          "[DECIDIR-A]"
+        ],
+        "created_at": "2026-08-06",
+        "updated_at": "2026-08-06",
+        "note": "Desbloqueia a STORY-052 sem esperar a EBC. DEFAULTS (§1): rótulos por setor já nascem validados (Anexo K §K.4); tooltips provisórios, e campo SEM tooltip não renderiza <x-help> (ícone que abre texto genérico é pior que ícone nenhum); TODAS as faixas de farol `nao_calibrada` -> nenhum farol, comportamento correto e não lacuna; textos de leitura AUSENTES por consequência (onde o farol cala, a leitura cala — leitura sobre faixa não calibrada é o farol vestido de prosa, risco do NRF §9.3); alertas e bloqueios presentes desde o dia um, única exceção, porque bloqueio é FUNÇÃO e não explicação. ISOLAMENTO (§2): tudo o que a EBC não validou vive em config/drm/provisorio/, com resolução por sobreposição (validado vence), promover = mover a linha entre arquivos sem tocar em código, teste arquitetural contra a mesma chave nos dois lugares, faixa carrega estado/origem/validado_em com a regra 'não calibrada não produz farol' no MOTOR e não na tela, inventário de lacunas legível pelo PO no padrão do MatrizRecomendacoes (STORY-032), e conteudo_version própria em config/drm.php no padrão de config/quiz/versao.php. Diretório separado em vez de campo `origem` por entrada: o provisório precisa ser desconfortável de ver, senão vira permanente — lição da entrada inerte do ncg_absoluto, que virou a STORY-060 dois meses depois. NOME (§3): [DECIDIR-A] resolvido — 'Raio X do Negócio' nomeia o MÓDULO DRM (o Diagnóstico segue Diagnóstico; a plataforma segue DEFOnline). É nome de INTERFACE; DRM segue como nome técnico em tabelas drm_*, config, motor_drm_version, rotas, classes e docs — nome comercial muda, nome técnico não deve mudar junto, senão revisão de marca vira migração de banco."
       }
     ],
     "adr": [
