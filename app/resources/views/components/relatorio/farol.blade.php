@@ -6,37 +6,32 @@
     $cor = in_array($cor, ['verde', 'amarelo', 'vermelho', 'nenhum'], true) ? $cor : 'nenhum';
 
     /*
-     * Mapeia a cor para um par fixo de classes utility (text + bg). Inline
-     * `style="color: var(--color-farol-*)"` não funciona porque o Tailwind v4
-     * faz tree-shake dos tokens do @theme quando eles não aparecem dentro de
-     * `class=` — a variável fica undefined e a cor herda do <body>. Já o
-     * arbitrary value `text-[color:var(--color-farol-*)]` é reconhecido pelo
-     * scanner do Tailwind e força a emissão da var no bundle.
+     * **Fundo opaco na cor viva, texto na tinta (STORY-059 CA-3, DDR-006).**
      *
-     * As classes precisam estar em string literal completa (sem interpolação)
-     * para o scanner do Tailwind v4 detectá-las.
+     * Aparência e cores vivem em `.farol--<cor>` no app.css. Duas razões:
+     *
+     *   1. O fundo precisa ser **opaco** (`color-mix` com `--color-surface`).
+     *      Como alpha, ele somava com o tingimento do cabeçalho do card do
+     *      Resumo Executivo e derrubava o contraste do rótulo de 4,76 para
+     *      4,2:1 — o pill mudava de legibilidade conforme onde era colocado.
+     *   2. O truque antigo (`bg-[color:var(--color-farol-*)]/10` em string
+     *      literal, para o scanner do Tailwind v4 não fazer tree-shake da var)
+     *      deixa de ser necessário quando a regra mora em CSS de componente.
+     *
+     * O ícone herda `currentColor`, então acompanha a tinta sem elemento
+     * próprio — e sobe junto de 2,27–4,13 para ≥4,5:1, folgado em relação ao
+     * piso de 3:1 da WCAG 1.4.11 para gráfico significativo.
      */
-    $estilos = [
-        'verde' => [
-            'cor' => 'text-[color:var(--color-farol-verde)] bg-[color:var(--color-farol-verde)]/10',
-            'rotulo' => 'Verde',
-        ],
-        'amarelo' => [
-            'cor' => 'text-[color:var(--color-farol-amarelo)] bg-[color:var(--color-farol-amarelo)]/12',
-            'rotulo' => 'Amarelo',
-        ],
-        'vermelho' => [
-            'cor' => 'text-[color:var(--color-farol-vermelho)] bg-[color:var(--color-farol-vermelho)]/10',
-            'rotulo' => 'Vermelho',
-        ],
-        'nenhum' => [
-            'cor' => 'text-[color:var(--color-farol-cinza)] bg-[color:var(--color-farol-cinza)]/15',
-            'rotulo' => 'Sem classificação',
-        ],
-    ][$cor];
+    $rotulos = [
+        'verde' => 'Verde',
+        'amarelo' => 'Amarelo',
+        'vermelho' => 'Vermelho',
+        'nenhum' => 'Sem classificação',
+    ];
+    $estilos = ['rotulo' => $rotulos[$cor]];
 @endphp
 
-<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium {{ $estilos['cor'] }}"
+<span class="farol farol--{{ $cor }}"
       role="img"
       aria-label="Farol: {{ $estilos['rotulo'] }}"
       data-farol="{{ $cor }}">

@@ -68,19 +68,54 @@
 
     /* Semânticas. */
     --color-destructive: #E11D48;
+
+    /*
+     * `border` e `input` foram idênticos do DS v1 até a STORY-059, e a
+     * distinção parecia decorativa. Não é (DDR-007): `border` **separa** —
+     * divisória de seção, contorno de card, nada com que se interaja; `input`
+     * **delimita componente interativo**, e é aí que a WCAG 2.1 §1.4.11 pede
+     * 3:1. Em #E3E8EE a borda de campo media 1,23:1 sobre branco, um quarto do
+     * exigido, em todas as telas de formulário do produto. Não são
+     * intercambiáveis: usar `input` como divisória deixa a tela pesada; usar
+     * `border` em campo devolve o defeito.
+     */
     --color-border: #E3E8EE;
-    --color-input: #E3E8EE;
+    --color-input: #7C8798; /* 3,64:1 sobre surface, 3,44:1 sobre neutral — DDR-007. */
     --color-ring: hsla(243, 100%, 67%, 0.4);
 
     /* Variantes de hover/active derivadas do design-system (tertiary 8% darker etc.). */
     --color-tertiary-hover: #4F46E5;
     --color-tertiary-active: #4338CA;
 
-    /* Faróis semáforos — usados pelo relatório do EPIC-002. Aqui só registrados como tokens. */
+    /*
+     * Faróis semáforos — usados pelo relatório do EPIC-002 e, adiante, pelo DRM.
+     *
+     * **Dois tokens por farol, e a diferença importa (DDR-006):**
+     *   - `--color-farol-<cor>`        → cor VIVA: tinge fundo e borda (pigmento).
+     *   - `--color-farol-<cor>-texto`  → TINTA: escreve texto e ícone.
+     *
+     * O par existe porque o pill pinta o fundo com 10–12% da própria cor: quanto
+     * mais a cor tinge o fundo, menos ela contrasta com o próprio texto. Na cor
+     * viva, os rótulos mediam 2,27–4,13:1 contra o piso de 4,5:1 — e o farol
+     * ganhou ícone e texto justamente para proteger quem não distingue cores,
+     * que era exatamente quem o contraste de baixo atacava.
+     *
+     * As tintas foram calculadas contra o fundo gerado pela cor VIVA, no fundo
+     * pior (`neutral`), e por isso o pill continua com a aparência de sempre —
+     * o que mudou foi a densidade da tinta, não o pigmento.
+     *
+     * Trocar os dois de lugar (tinta no fundo, viva no texto) produz um pill
+     * escuro e ilegível. `FarolContrasteTest` reprova o uso trocado.
+     */
     --color-farol-verde: #0E9F6E;
     --color-farol-amarelo: #D97706;
     --color-farol-vermelho: #DC2626;
     --color-farol-cinza: #94A3B8;
+
+    --color-farol-verde-texto: #0B7A55;    /* 4,76:1 sobre o tingido de surface; 4,54:1 sobre o de neutral. */
+    --color-farol-amarelo-texto: #9E5704;  /* 4,84:1 / 4,59:1 */
+    --color-farol-vermelho-texto: #CA2121; /* 4,79:1 / 4,55:1 */
+    --color-farol-cinza-texto: #596B86;    /* 4,79:1 / 4,57:1 */
 
     /* Highlight temporário (~1s) da linha-alvo quando o usuário clica num destaque do
        Resumo Executivo (STORY-040). Tonalidade suave do tertiary (#635BFF). */

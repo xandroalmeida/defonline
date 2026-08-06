@@ -24,7 +24,38 @@
     <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="min-h-screen flex flex-col">
-    <div x-data="{ navOpen: false }"
+    {{--
+        STORY-059 CA-2 — o shell precisa saber se a navegação está off-canvas.
+
+        `navOpen` sozinho não responde à pergunta "o drawer está escondido?":
+        em ≥1024px a navegação é sidebar fixa e visível **com `navOpen` false**.
+        Era daí que vinha o defeito — o `aria-hidden` era ligado só a `navOpen`,
+        então a sidebar do desktop, plenamente visível, saía da árvore de
+        acessibilidade; e no celular o drawer fechado continuava com os filhos
+        na ordem de tabulação, que é o `aria-hidden-focus` acusado pelo gate.
+
+        `telaLarga` acompanha o mesmo breakpoint do CSS (`lg`) via matchMedia,
+        e `navFechado` é a condição real de "escondido": estreito **e** fechado.
+    --}}
+    <div x-data="{
+             navOpen: false,
+             telaLarga: window.matchMedia('(min-width: 1024px)').matches,
+             init() {
+                 window.matchMedia('(min-width: 1024px)').addEventListener('change', (e) => {
+                     this.telaLarga = e.matches;
+                     if (e.matches) this.navOpen = false;
+                 });
+             },
+             get navFechado() { return ! this.telaLarga && ! this.navOpen },
+             sincronizarInerte(el) {
+                 el.toggleAttribute('inert', this.navFechado);
+                 if (this.navFechado) {
+                     el.setAttribute('aria-hidden', 'true');
+                 } else {
+                     el.removeAttribute('aria-hidden');
+                 }
+             },
+         }"
          @keydown.escape.window="navOpen = false"
          class="flex-1 flex flex-col">
 

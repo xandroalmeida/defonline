@@ -272,6 +272,74 @@
         font-weight: var(--font-weight-medium);
         line-height: 1.4;
     }
+    /*
+     * Badge de versão do relatório ("Versão MVP") — STORY-059 CA-3/CA-4.
+     *
+     * Vinha como `style` inline no Blade, com três rgba literais: violava o
+     * IDR-008 e media 4,13:1 (piso 4,5). A cor de texto passa a ser
+     * `--color-tertiary-hover`, que **já existe** no DS e mede 5,53:1 sobre
+     * este mesmo fundo — não foi preciso token novo, só parar de usar o
+     * `tertiary` puro como tinta sobre fundo tingido de tertiary.
+     */
+    .pill--versao {
+        padding: 4px 10px;
+        background: color-mix(in srgb, var(--color-tertiary) 10%, transparent);
+        color: var(--color-tertiary-hover);
+        border: 1px solid color-mix(in srgb, var(--color-tertiary) 30%, transparent);
+        font-size: var(--text-label);
+        font-weight: var(--font-weight-semibold);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    /*
+     * Pill de farol (STORY-059 CA-3 — DDR-006).
+     *
+     * **Por que o fundo é `color-mix` e não alpha.** O pill vivia com
+     * `bg-[color:var(--color-farol-verde)]/10`, um fundo translúcido — logo o
+     * contraste do rótulo dependia do que estivesse **atrás** dele. E há um
+     * lugar onde tem coisa atrás: o cabeçalho do card do Resumo Executivo já é
+     * `bg-farol-verde/8`. Os dois tingimentos se somavam, o fundo real ia de
+     * `#E7F5F0` para `#CEEAE4`, e o mesmo pill que media 4,76:1 na tabela media
+     * 4,2:1 ali dentro — reprovando o gate num só nó da página.
+     *
+     * `color-mix(... , var(--color-surface))` produz **cor opaca**: a mesma em
+     * qualquer superfície. O pill passa a ter contraste determinístico, que é o
+     * que se espera de um componente — ele não deveria mudar de legibilidade
+     * conforme onde é colocado.
+     *
+     * As classes vivem aqui, e não como utilitários arbitrários no Blade,
+     * porque `color-mix` com var em utilitário arbitrário depende do scanner do
+     * Tailwind enxergar a string inteira — a fragilidade que o docblock antigo
+     * de `farol.blade.php` documentava. Em CSS de componente, o problema não
+     * existe.
+     */
+    .farol {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: var(--radius-full);
+        font-size: var(--text-body-sm);
+        font-weight: var(--font-weight-medium);
+        line-height: 1.4;
+    }
+    .farol--verde {
+        background: color-mix(in srgb, var(--color-farol-verde) 10%, var(--color-surface));
+        color: var(--color-farol-verde-texto);
+    }
+    .farol--amarelo {
+        background: color-mix(in srgb, var(--color-farol-amarelo) 12%, var(--color-surface));
+        color: var(--color-farol-amarelo-texto);
+    }
+    .farol--vermelho {
+        background: color-mix(in srgb, var(--color-farol-vermelho) 10%, var(--color-surface));
+        color: var(--color-farol-vermelho-texto);
+    }
+    .farol--nenhum {
+        background: color-mix(in srgb, var(--color-farol-cinza) 15%, var(--color-surface));
+        color: var(--color-farol-cinza-texto);
+    }
 
     /*
      * Help / box explicativo por campo (STORY-033 — espec §6.8).
@@ -285,6 +353,7 @@
         vertical-align: middle;
     }
     .help__trigger {
+        position: relative;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -301,6 +370,31 @@
         line-height: 1;
         cursor: pointer;
         transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+    }
+    /*
+     * STORY-059 CA-9 — alvo de toque de 44×44px sem inflar o círculo.
+     *
+     * O círculo visível tem 18px porque ele acompanha um label de formulário;
+     * crescer para 44px roubaria a hierarquia do campo. O piso de 44px
+     * (accessibility-basics §7) é de **área de toque**, não de pixel pintado,
+     * então a área cresce por um pseudo-elemento transparente centrado no
+     * botão. Ele fica fora do fluxo (`position: absolute`), logo não desloca o
+     * label nem o campo ao lado.
+     *
+     * O `?` interno é `aria-hidden`, e o pseudo-elemento não tem conteúdo — a
+     * área ampliada não acrescenta nada à árvore de acessibilidade, só ao
+     * hit-testing. Vale em todas as telas que usam `<x-help>`, o Quiz
+     * inclusive, e é o motivo de o conserto vir antes da STORY-047: o
+     * formulário do DRM usa o componente em dezenas de campos.
+     */
+    .help__trigger::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 44px;
+        height: 44px;
+        transform: translate(-50%, -50%);
     }
     .help__trigger:hover {
         background: var(--color-neutral);

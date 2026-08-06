@@ -80,8 +80,7 @@
     <x-page-header :title="$nomeEmpresa"
                    :subtitle="'Diagnóstico de ' . $dataDiagnostico">
         <x-slot:actions>
-            <span class="pill" dusk="diagnostico-mvp-badge"
-                  style="background-color: rgba(99, 91, 255, 0.10); color: var(--color-tertiary); border: 1px solid rgba(99, 91, 255, 0.3); padding: 4px 10px; border-radius: 9999px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;">
+            <span class="pill pill--versao" dusk="diagnostico-mvp-badge">
                 Versão MVP
             </span>
         </x-slot:actions>

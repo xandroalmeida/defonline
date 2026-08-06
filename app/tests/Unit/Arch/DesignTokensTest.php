@@ -25,6 +25,8 @@ $tokensProibidos = [
     '#0A2540', '#425466', '#635BFF', '#F6F9FC', '#FFFFFF', '#E3E8EE',
     '#E11D48', '#0E9F6E', '#D97706', '#DC2626', '#94A3B8',
     '#4F46E5', '#4338CA',
+    // Tintas do farol e borda de campo (STORY-059 — DDR-006 e DDR-007).
+    '#0B7A55', '#9E5704', '#CA2121', '#596B86', '#7C8798',
     // Drift conhecido (paleta antiga do scaffold + STORY-016).
     '#2563eb', '#1d4ed8', '#1f2937', '#111827', '#f9fafb', '#f3f4f6',
     '#374151', '#6b7280', '#9ca3af', '#4b5563',

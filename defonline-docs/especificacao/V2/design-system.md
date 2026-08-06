@@ -1,6 +1,6 @@
 # DEFOnline — Design System
 
-**Versão:** v1
+**Versão:** v1.1
 **Inspiração:** Stripe (payment-infrastructure aesthetic)
 **Status:** especificação ativa
 
@@ -38,8 +38,8 @@ Cores semânticas adicionais:
 | Token | Uso | Valor |
 |---|---|---|
 | `destructive` | Erro, validação negativa, ação irreversível | `#E11D48` |
-| `border` | Bordas neutras de cards e inputs | `#E3E8EE` |
-| `input` | Borda de inputs em estado default | `#E3E8EE` (idem `border`) |
+| `border` | **Separa** — divisória de seção, contorno de card. Não delimita nada com que se interaja | `#E3E8EE` |
+| `input` | **Delimita componente interativo** — a borda que identifica um campo como campo. Piso de 3:1 (WCAG 2.1 §1.4.11) | `#7C8798` (v1.1 — DDR-007) |
 | `ring` | Focus ring acessível | Tertiary com 40% alpha — `hsla(243, 100%, 67%, 0.4)` |
 | `highlight-pulse` | Realce temporário (~1s) da linha-alvo ao clicar num destaque do Resumo Executivo (STORY-040) | Tertiary com 16% alpha — `rgba(99, 91, 255, 0.16)` |
 
@@ -185,14 +185,18 @@ Sombras sutis. Nunca sombras pretas saturadas.
 
 O farol semáforo (`verde | amarelo | vermelho | cinza`) é uma exceção ao single-accent. Ele é informação semântica, não interação. Cores propostas (alinhadas com Anexo E):
 
-| Farol | Hex | Token |
-|---|---|---|
-| Verde | `#0E9F6E` | `farol-verde` |
-| Amarelo | `#D97706` | `farol-amarelo` |
-| Vermelho | `#DC2626` | `farol-vermelho` |
-| Cinza (indisponível / NCG absoluto) | `#94A3B8` | `farol-cinza` |
+**Dois tokens por farol (v1.1 — DDR-006).** A cor viva é **pigmento**: tinge fundo e borda. A tinta (`-texto`) é o que **escreve** — texto e ícone sobre esse fundo tingido. O par existe porque o pill pinta o fundo com 10–15% da própria cor, e nessa composição a cor viva reprova AA como texto (2,27–4,13:1 contra piso de 4,5:1).
+
+| Farol | Pigmento | Tinta | Contraste da tinta sobre o pill |
+|---|---|---|---|
+| Verde | `#0E9F6E` — `farol-verde` | `#0B7A55` — `farol-verde-texto` | 4,76:1 |
+| Amarelo | `#D97706` — `farol-amarelo` | `#9E5704` — `farol-amarelo-texto` | 4,84:1 |
+| Vermelho | `#DC2626` — `farol-vermelho` | `#CA2121` — `farol-vermelho-texto` | 4,79:1 |
+| Cinza (indisponível / NCG absoluto) | `#94A3B8` — `farol-cinza` | `#596B86` — `farol-cinza-texto` | 4,79:1 |
 
 Use em badges, ícones ou pequenos blocos de cor — **nunca** como background de tela ou de card grande.
+
+O fundo do pill é **opaco** (`color-mix` com `surface`), não alpha: como translúcido, ele somava com o tingimento do card do Resumo Executivo e o mesmo componente mudava de legibilidade conforme onde era colocado.
 
 ---
 
@@ -212,6 +216,7 @@ Promovida de **alpha** para **v1** em 2026-05-25 após primeira aplicação real
 
 ## Histórico
 
+- **2026-08-06 — v1.1: tinta do farol e borda de campo (STORY-059, DDR-006 e DDR-007).** Primeiro bump desde a promoção a v1, e o motivo não foi tela nova — foi contraste. (a) **Quatro tokens novos** `--color-farol-<cor>-texto`: a cor viva do farol reprovava AA como texto sobre o próprio fundo tingido (2,27–4,13:1), e o ícone reprovava até o piso de 3:1 nos casos amarelo e cinza. A separação pigmento/tinta preserva a identidade cromática do pill — a alternativa, escurecer o token único, levaria junto o fundo e o amarelo viraria marrom, além de escurecer sem necessidade a borda do card do Resumo Executivo e a faixa de alerta do Quiz, que consomem os mesmos tokens sem ter problema de contraste. O fundo do pill passou de alpha para `color-mix` opaco: como translúcido, somava com o tingimento do card do Resumo Executivo e derrubava o rótulo de 4,76 para 4,2:1. (b) **`--color-input` mudou de valor** (`#E3E8EE` → `#7C8798`): media 1,23:1 contra os 3:1 da WCAG 2.1 §1.4.11 em **todas** as telas de formulário do produto. `border` e `input` eram idênticos desde o v1, o que fazia a distinção parecer decorativa — passam a significar coisas diferentes: `border` separa, `input` delimita componente interativo. Impacto assumido: cadastro, login, nova empresa e o Quiz inteiro mudam de aparência, e o produto se afasta um passo da leveza Stripe em favor de legibilidade. Ratificado pelo PO em 2026-08-06. Gate de acessibilidade da página do relatório: **85 → 100** (Lighthouse 12.8.2).
 - **2026-06-02 — token `highlight-pulse` (STORY-040).** Adicionado token semântico `--color-highlight-pulse` (`rgba(99, 91, 255, 0.16)` — tonalidade suave do Tertiary) para o realce temporário (~1s) da linha/card-alvo quando o usuário clica num destaque do Resumo Executivo e a página rola até o indicador na tabela detalhada. Mantém a filosofia single-accent (deriva do Tertiary, não introduz nova matiz). Materializado em `app/resources/css/tokens.css`; consumido apenas via `var(--color-highlight-pulse)` na animação `indicador-highlight` de `app.css`. Não altera tokens existentes — mudança aditiva, sem bump de versão.
 - **2026-05-25 — promoção para v1.** Primeira aplicação real do design-system em código pela STORY-019. Tokens materializados em `app/resources/css/tokens.css` via Tailwind v4 `@theme` (IDR-008). Componentes-base Blade implementados (`<x-button>` 3 variants, `<x-card>`, `<x-input>`, `<x-label>`, `<x-link>`, `<x-logo>`, `<x-breadcrumb>`, `<x-page-header>`, `<x-footer-version>`) consumindo só CSS vars. Telas existentes do EPIC-001 (`/cadastro`, `/login`, `/home`, `/empresas/nova`, `/empresas/{id}/show`) refatoradas para usar o novo layout — drift de paleta da STORY-016 (`#1f2937`, `#2563eb`, `#f9fafb`) eliminado. Nenhuma mudança de token foi necessária: paleta, tipografia, espaçamento, raios e sombras passaram intactos no teste real. Único ajuste implícito foi a definição de variantes hover/active derivadas do Tertiary (`--color-tertiary-hover: #4F46E5`, `--color-tertiary-active: #4338CA`) — antes ficavam descritas como "8% darker" sem hex concreto. Próxima revisão de tokens só com sinal concreto de outra aplicação (EPIC-002 / EPIC-008).
 

@@ -1749,18 +1749,22 @@
       "title": "Acessibilidade — nome acessível no toggle de conta, drawer inerte, contraste dos pills de farol, alvo de toque do help e borda de input",
       "type": "bugfix",
       "target_role": "programador",
-      "status": "ready",
+      "status": "in_review",
       "estimated_session_size": "M",
       "blocked_by": [],
       "blocks": [],
       "epic_id": "EPIC-004",
       "sprint_id": "SPRINT-2026-W32",
-      "owner_agent": null,
+      "owner_agent": "programador + designer (agente Claude — sessão W32 fila 4.1)",
       "requires_design": true,
       "path": "epics/EPIC-004-app-shell-navegacao/stories/STORY-059-a11y-app-shell-e-contraste-farol.md",
       "created_at": "2026-08-04",
       "updated_at": "2026-08-06",
-      "note": "Origem: escalação da STORY-040 (PDR-006 §1). 3 achados: button-name no toggle de conta e aria-hidden-focus no drawer (ambos EPIC-004), e contraste dos pills de farol + badge de versão (tokens do DS — CA-3 é decisão do Designer). Resolve também o F-NB-2 pendente da validação do EPIC-004. | 2026-08-06 (PDR-008 §3): ampliada de 3 para 5 achados com as 2 dívidas de produção levantadas na STORY-046. CA-9 = alvo de toque do <x-help> (18x18 vs piso 44x44) — é bug, não precisa de DDR, e é o mais urgente por sequência: o formulário do DRM usa <x-help> em dezenas de campos, então esta estória DEVERIA vir antes da STORY-047. CA-10 = contraste da borda de input (1,23:1 vs 3:1, WCAG 1.4.11) — exige DDR do Designer e pode ficar aberto sem segurar a estória. Sobe de S para M."
+      "note": "Origem: escalação da STORY-040 (PDR-006 §1). 3 achados: button-name no toggle de conta e aria-hidden-focus no drawer (ambos EPIC-004), e contraste dos pills de farol + badge de versão (tokens do DS — CA-3 é decisão do Designer). Resolve também o F-NB-2 pendente da validação do EPIC-004. | 2026-08-06 (PDR-008 §3): ampliada de 3 para 5 achados com as 2 dívidas de produção levantadas na STORY-046. CA-9 = alvo de toque do <x-help> (18x18 vs piso 44x44) — é bug, não precisa de DDR, e é o mais urgente por sequência: o formulário do DRM usa <x-help> em dezenas de campos, então esta estória DEVERIA vir antes da STORY-047. CA-10 = contraste da borda de input (1,23:1 vs 3:1, WCAG 1.4.11) — exige DDR do Designer e pode ficar aberto sem segurar a estória. Sobe de S para M. | 2026-08-06: entregue com os 10 CAs verdes — o CA-10 NÃO ficou aberto, porque o PO ratificou o DDR-007 na mesma sessão. DDR-006 (tinta do farol separada do pigmento + fundo opaco do pill) e DDR-007 (--color-input #E3E8EE → #7C8798) aceitos; DS canônico bumpado para v1.1. Gate de acessibilidade da página do relatório: 85 → 100 (Lighthouse 12.8.2, ambiente local). Descoberta que mudou a regra: fundo tingido de componente tem que ser OPACO — translúcido, o pill somava com o tingimento do card do Resumo Executivo e reprovava num nó só. Em `in_review`: falta deploy + gate reexecutado em homologação, que dependem de tag do PO.",
+      "related_ddrs": [
+        "DDR-006",
+        "DDR-007"
+      ]
     },
     {
       "id": "STORY-060",
@@ -3051,6 +3055,78 @@
         "updated_at": "2026-08-06",
         "note": "O ADR-007 gastou modelo de dados (espinha de meses na leitura, proibição de COALESCE) para tornar 'ausência ≠ zero' impossível de violar — e essa garantia MORRE na última camada se a tela apresentar as duas coisas com a mesma aparência. Fixa: marca única de célula (— visual + motivo em texto acessível, nunca branco/0/N-A); o motivo em português dito UMA VEZ, no escopo em que vale (coluna → aviso acima da tabela; grupo → nota no cabeçalho; competência → estado da própria linha), evitando repetir o motivo em 17 linhas; ausência é ESTRUTURAL, não numérica (borda tracejada + sem área de valor + rótulo textual + CTA, 4 canais simultâneos, nenhum deles cor); indisponível não é erro (sem destructive, sem ícone de alerta); indisponibilidade PARCIAL é normal (nominal presente + percentual indisponível na mesma linha, sem degradar a linha inteira); vocabulário fixo por motivo. Compatível com o 'Indisponível' do relatório de Diagnóstico em produção — alinhá-lo é oportunidade para o PO, fora do EPIC-010. | Aceito pelo PO em 2026-08-06 (PDR-007 §1).",
         "approved_at": "2026-08-06"
+      },
+      {
+        "id": "DDR-006",
+        "slug": "tinta-do-farol-e-contraste-de-badges",
+        "title": "Tinta do farol — a cor que pinta o fundo não é a cor que escreve o texto",
+        "status": "accepted",
+        "path": "decisions/ddr/DDR-006-tinta-do-farol-e-contraste-de-badges.md",
+        "decided_at": "2026-08-06",
+        "decided_by": "designer (claude-opus-5)",
+        "approved_by": "Alexandro",
+        "approved_at": "2026-08-06",
+        "scope": "transversal",
+        "related_ddrs": [
+          "DDR-005"
+        ],
+        "related_adrs": [],
+        "related_pdrs": [
+          "PDR-006",
+          "PDR-008"
+        ],
+        "related_stories": [
+          "STORY-040",
+          "STORY-046",
+          "STORY-054",
+          "STORY-059"
+        ],
+        "related_epics": [
+          "EPIC-002",
+          "EPIC-004",
+          "EPIC-010"
+        ],
+        "affects_screens": [
+          "SCREEN-STORY-046-demonstracao-mes",
+          "SCREEN-STORY-046-serie-historica"
+        ],
+        "created_at": "2026-08-06",
+        "updated_at": "2026-08-06",
+        "note": "Os pills de farol e o badge de versão reprovavam AA (2,27–4,13:1 contra piso de 4,5) porque texto e fundo saíam da MESMA cor: quanto mais ela tinge o fundo, menos contrasta com o próprio texto. Decisão: dois tokens por farol — cor viva é pigmento (fundo, borda), token `-texto` é tinta (texto, ícone). Escolhida contra escurecer o token único, que levaria o fundo junto (amarelo vira marrom) e escureceria sem necessidade a borda do card do Resumo Executivo e o alerta do Quiz. Vale em token, não em componente, porque a STORY-054 do DRM herda sem renegociar. Badge usa tertiary-hover, que já existia. ADENDO da implementação: o fundo do pill passou de alpha para color-mix OPACO — translúcido ele somava com o tingimento do card do Resumo Executivo e derrubava o rótulo para 4,2:1 num nó só, achado pelo gate e não pela conta. Regra que fica: componente com fundo tingido usa cor opaca. Gate da página: 85 → 100 (Lighthouse 12.8.2, local)."
+      },
+      {
+        "id": "DDR-007",
+        "slug": "borda-de-campo-e-limite-de-componente",
+        "title": "Borda de campo — o que separa `--color-border` de `--color-input` é a WCAG 1.4.11",
+        "status": "accepted",
+        "path": "decisions/ddr/DDR-007-borda-de-campo-e-limite-de-componente.md",
+        "decided_at": "2026-08-06",
+        "decided_by": "designer (claude-opus-5)",
+        "approved_by": "Alexandro",
+        "approved_at": "2026-08-06",
+        "scope": "formulários",
+        "related_ddrs": [
+          "DDR-006"
+        ],
+        "related_adrs": [],
+        "related_pdrs": [
+          "PDR-008"
+        ],
+        "related_stories": [
+          "STORY-046",
+          "STORY-047",
+          "STORY-059"
+        ],
+        "related_epics": [
+          "EPIC-004",
+          "EPIC-010"
+        ],
+        "affects_screens": [
+          "SCREEN-STORY-046-lancamento-mensal"
+        ],
+        "created_at": "2026-08-06",
+        "updated_at": "2026-08-06",
+        "note": "--color-input media 1,23:1 sobre surface, contra os 3:1 que a WCAG 2.1 §1.4.11 pede para o limite de componente interativo — em TODAS as telas de formulário do produto. Os dois tokens eram idênticos desde o DS v1, o que fazia a distinção parecer decorativa; o DDR a exerce: `border` separa, `input` delimita componente interativo. Valor: #E3E8EE → #7C8798 (3,64:1 sobre surface, 3,44:1 sobre neutral). Rejeitada a variante de 3:1 exato (#8792A5) porque reprova sobre fundo neutro (2,97). Trade-off assumido e declarado: cadastro, login, nova empresa e Quiz ficam visualmente mais densos e o produto se afasta um passo da leveza Stripe do DS v1 — o PO ratificou aplicar agora, fechando o CA-10 em vez de deixá-lo aberto. Exige conferência visual em homologação, não só teste."
       }
     ]
   },

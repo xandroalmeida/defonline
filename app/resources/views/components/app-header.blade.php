@@ -48,11 +48,26 @@
         <div class="relative" x-data="{ open: false }"
              @keydown.escape.window="open = false"
              @click.outside="open = false">
+            {{--
+                STORY-059 CA-1 — nome acessível fixo.
+
+                O botão tinha três filhos e nenhum servia de nome: a inicial é
+                `aria-hidden`, o chevron também, e a saudação some abaixo de
+                640px (`hidden`, que a remove da árvore de acessibilidade). Em
+                celular o botão chegava ao leitor de tela como "botão", sem
+                mais nada — era o que o gate acusava como `button-name`.
+
+                O `aria-label` não depende de viewport e nomeia a ação, não o
+                elemento. Fica no botão (e não numa `sr-only` interna) porque a
+                saudação visível já ocupa o papel de rótulo em telas largas: um
+                `sr-only` a mais seria lido em duplicidade ali.
+            --}}
             <button type="button"
                     class="inline-flex items-center gap-2 h-11 px-3 rounded-md hover:bg-[color:var(--color-neutral)]"
                     @click="open = !open"
                     :aria-expanded="open ? 'true' : 'false'"
                     aria-haspopup="menu"
+                    aria-label="Menu da conta de {{ $usuario->primeiroNome() }}"
                     dusk="app-header-conta-toggle">
                 <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[color:var(--color-neutral)] border border-[color:var(--color-border)] text-[color:var(--color-primary)] text-sm font-medium"
                       aria-hidden="true">

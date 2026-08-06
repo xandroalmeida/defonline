@@ -73,7 +73,17 @@
        data-testid="app-nav"
        class="fixed top-0 left-0 z-50 h-full w-[280px] max-w-[80vw] bg-[color:var(--color-surface)] border-r border-[color:var(--color-border)] transform transition-transform duration-200 ease-out lg:translate-x-0 lg:sticky lg:top-0 lg:z-auto lg:w-60 lg:h-screen lg:max-w-none lg:transform-none"
        :class="navOpen ? 'translate-x-0' : '-translate-x-full'"
-       :aria-hidden="navOpen ? 'false' : 'true'"
+       {{--
+           STORY-059 CA-2 — drawer fechado sai da tabulação E da árvore de
+           acessibilidade; sidebar visível (≥1024px) fica em ambas.
+
+           `inert` é o que tira os filhos do foco — `aria-hidden` sozinho os
+           esconde do leitor de tela mas deixa o Tab entrar, que é exatamente a
+           combinação que o gate acusa. Os dois andam juntos e são aplicados
+           por `sincronizarInerte()` (definido no x-data do shell), porque a
+           condição depende do breakpoint, não só de `navOpen`.
+       --}}
+       x-effect="sincronizarInerte($el)"
        aria-label="Navegação principal">
 
     {{-- Cabeçalho do drawer (mobile só): logo + botão fechar. Desktop não precisa. --}}
