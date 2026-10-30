@@ -57,6 +57,13 @@ RUN apk add --no-cache \
         && apk del .build-deps \
         && rm -rf /var/cache/apk/* /tmp/pear
 
+# PHP2Shell (CVE-2026-109618/109619): exige o PHP corrigido. A tag 8.5-cli-alpine
+# é flutuante — se o build usar uma base em cache anterior ao patch, falha aqui.
+RUN php -r 'exit(version_compare(PHP_VERSION, "8.5.12", ">=") ? 0 : 1);' \
+    || (echo "PHP $(php -r 'echo PHP_VERSION;') < 8.5.12 — vulnerável a PHP2Shell; rebuild com --pull" >&2 && exit 1)
+
+COPY infra/docker/php/security.ini /usr/local/etc/php/conf.d/zz-security.ini
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 ENV PATH="/var/www/html/vendor/bin:${PATH}"

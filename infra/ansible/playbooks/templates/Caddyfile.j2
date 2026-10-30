@@ -4,6 +4,13 @@
     tls {{ caddy_admin_email }}
     encode zstd gzip
 
+    # Limita o corpo das requisições antes de chegar ao PHP (mitigação de
+    # PHP2Shell / CVE-2026-109618: POST grande esgotando memory_limit). O app
+    # não aceita upload de arquivo; payloads de form/Livewire ficam bem abaixo.
+    request_body {
+        max_size 2MB
+    }
+
     # rate_limit em endpoints sensíveis (/login, /forgot-password, /cadastro)
     # exige plugin externo `caddy-rate-limit` (não nativo no Caddy 2). Registrado
     # como débito técnico — Phase 4 vai compilar Caddy custom OU usar middleware
