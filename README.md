@@ -125,7 +125,7 @@ docker compose exec web ./vendor/bin/pest --configuration=phpunit-domain.xml --c
 ```bash
 # Declarar uma flag em app/Features/<NomeFlag>.php com @owner + @cleanup_due
 # Resolver/ativar/desativar:
-docker compose exec web php artisan pennant:feature:check App\\Features\\HelloWorldEmailHabilitado
+docker compose exec web php artisan pennant:feature:check App\\Features\\<NomeFlag>
 docker compose exec web php artisan pennant:list-overdue --fail-on-overdue
 ```
 
