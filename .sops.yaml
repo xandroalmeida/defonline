@@ -1,0 +1,8 @@
+# Destinatários de secrets/*.sops (scripts/segredos.sh). Cada entrada é uma chave SSH pública (o age
+# aceita ssh-rsa e ssh-ed25519); a chave privada correspondente decifra. Para incluir/remover: edite a
+# lista, rode 'scripts/segredos.sh rekey' e faça commit. Remover uma chave não revoga o que ela já
+# decifrou: rotacione.
+creation_rules:
+  - path_regex: (^|/)secrets/.+\.sops$
+    age: >-
+      ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCwqvhnl9/BIlAQUBDLL1b1VrH577sfBAMGyrohmntWZrPxxnMfK15Be1cDbevb/Kptkx0oJLTU6+JPEq+haAAPvVDqfFxTbSOUwaAJFAdokAqF2qUQY3sZelXaDIi+Ny3hjoI0ls4RWX0G/SKwPms5k3vQ0SkP2B0AAYzmnzUio8lasAYjOtL4AYFbq7qLtezTdCcQmW4r16CUsFPB5rrQqiRw8RCwQrlY1Zg/IjJ8ZrDub9fbmM/NEeSHPiBGZmEy+sMOJSxGjgLJUMGDInA+ER6WepI+tNHXgkjONLHMOnzongKkzeKSlfFRx6lI6ed+gtz0XuVnq0La7DjIPYf1a6KqCK25Noh+41HLhUFYCW7qlYRDZ5NAk/dKzRMpQjZE2oCYhhImz+j2/W2o2uSIRPI+4JKDy/Ucp3s9TP6P6ZO9Uwb5DjxiXHqN92ur/VAmOQByiXI8M55fXuUZStlpXXApb/tbpcJrEBOebtSDY9KA5KxMDI4JIrv6JP+qhqk=

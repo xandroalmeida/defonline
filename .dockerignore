@@ -30,6 +30,9 @@ app/.env.*
 .vscode/
 .DS_Store
 infra/zalk/
+secrets/
+.tools/
+.sops.yaml
 defonline-docs/
 **/__pycache__/
 **/*.log

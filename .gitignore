@@ -31,3 +31,7 @@ coverage/
 # .env.dusk.local — config do Laravel Dusk (DUSK_DRIVER_URL, APP_URL). Mesma
 # justificativa: APP_KEY local + sem segredo.
 !.env.dusk.local
+
+# Segredos: cópias cifradas em secrets/ (scripts/segredos.sh); .tools/ = sops fixado.
+.tools/
+*.incoming

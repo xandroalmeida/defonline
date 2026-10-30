@@ -32,7 +32,8 @@ Plataforma SaaS de Diagnóstico Econômico-Financeiro para Micro e Pequenas Empr
 ├── scripts/
 │   ├── git-hooks/pre-push.sh           gates locais (Pint + Larastan + Pest + Dusk) — ADR-006 §4
 │   ├── install-hooks.sh                instala pre-push (rodado por up.sh)
-│   └── check-no-pgadmin-in-deploy.sh   STORY-009 CA-10 — pgAdmin nunca no compose do servidor
+│   ├── check-no-pgadmin-in-deploy.sh   STORY-009 CA-10 — pgAdmin nunca no compose do servidor
+│   └── segredos.sh                     segredos cifrados com SOPS em secrets/ (ver "Segredos versionados")
 │
 ├── .github/workflows/              CI/CD GitHub Actions (ADR-006)
 │   ├── pr.yml                          lint + segurança + Unit puros (~2-3 min)
@@ -136,6 +137,25 @@ docker compose exec web php artisan pennant:list-overdue --fail-on-overdue
 | **prod** (ZalkVPS) | usuário `defonline-prod`, `/srv/zalk/projects/defonline-prod`, Postgres do host (`defonline_prod`) | https://defonline.zalk.com.br |
 
 Deploy: push de tag `vX.Y.Z-rc.N` ou `vX.Y.Z` dispara `zalk-deploy.yml`. Rollback sem rebuild: `ssh defonline-prod@<host>` e `zalk-deploy --rollback`. Backup do Postgres é da plataforma (pgBackRest + `pg_dump` diário em S3 e R2); restauração é pedida ao administrador do ZalkVPS.
+
+## Segredos versionados
+
+O `.env.prod` (segredos do `defonline-prod` na ZalkVPS, vira o secret `APP_ENV_FILE`) e o `app/.env`
+(dev local) ficam em claro só na máquina, fora do git. As cópias cifradas com SOPS ficam em `secrets/`
+e vão para o git; só as chaves listadas em `.sops.yaml` abrem (hoje: `~/.ssh/id_rsa`, a mesma do
+ZalkVPS e do LeilaoFacil).
+
+```bash
+scripts/segredos.sh instalar   # uma vez por clone: sops fixado em .tools/bin + hooks do git
+scripts/segredos.sh pull       # decifra (os hooks também, após pull/checkout/rebase, só na main)
+scripts/segredos.sh push       # depois de alterar qualquer um deles; em seguida, commit de secrets/
+scripts/segredos.sh status     # sincronizado / mudança local não enviada / cópia cifrada mais nova / conflito
+```
+
+O `pull` nunca sobrescreve edição local: se os dois lados mudaram, a versão do git fica em
+`<arquivo>.incoming` para juntar à mão. O hook de pre-commit recusa commit com segredo em claro ou com
+arquivo local alterado e não enviado (`SKIP_SECRETS_CHECK=1` ignora). Perdeu a `id_rsa`, perdeu o
+acesso: ela fica no gerenciador de senhas.
 
 ## Documentação canônica
 

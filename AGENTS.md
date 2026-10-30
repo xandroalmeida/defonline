@@ -11,3 +11,7 @@ O estado vivo do projeto (épicos, estórias, sprints, decisões, relatórios) v
 ## Deploy / infraestrutura
 
 Deploy no ZalkVPS: siga `ZALKVPS.md`. Neste repo o compose do servidor é `infra/zalk/docker-compose.yml` (o `docker-compose.yml` da raiz é o de desenvolvimento local) e o workflow é `.github/workflows/zalk-deploy.yml`.
+
+## Segredos
+
+`.env.prod` e `app/.env` são versionados cifrados em `secrets/` via `scripts/segredos.sh` (SOPS; uso no README). Nunca commitar segredo em claro; depois de alterar um deles, `scripts/segredos.sh push` e commit de `secrets/`.
