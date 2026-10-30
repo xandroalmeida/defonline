@@ -151,7 +151,7 @@ Fonte da verdade = **banco aplicado** (não os arquivos de migration, que podem 
 
 **Manual — dump do schema de homolog:**
 ```bash
-ssh -i secrets/deploy-homolog.key deploy@162.35.189.71 \
+ssh -i secrets/deploy-homolog.key deploy@<HOST_HOMOLOG> \
   'cd /opt/defonline && docker compose exec -T db pg_dump -U postgres -d defonline \
      --schema-only --no-owner --no-privileges'
 ```

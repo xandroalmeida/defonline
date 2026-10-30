@@ -27,10 +27,10 @@ Modelos Eloquent: `app/app/Models/`. Namespace `App\` em `app/app/`.
 
 ## Conexões
 
-**Homolog (VPS 162.35.189.71):**
+**Homolog (host `<HOST_HOMOLOG>` — nova infra a definir):**
 ```bash
 # prefixo p/ qualquer psql em homolog:
-ssh -i secrets/deploy-homolog.key -o IdentitiesOnly=yes -o BatchMode=yes deploy@162.35.189.71 \
+ssh -i secrets/deploy-homolog.key -o IdentitiesOnly=yes -o BatchMode=yes deploy@<HOST_HOMOLOG> \
   'cd /opt/defonline && docker compose exec -T db psql -U postgres -d defonline -c "SQL_AQUI"'
 ```
 
@@ -86,7 +86,7 @@ Após qualquer migration nova, atualize `defonline-docs/project-state/database-s
 
 1. Dump autoritativo do banco aplicado:
    ```bash
-   ssh -i secrets/deploy-homolog.key -o IdentitiesOnly=yes -o BatchMode=yes deploy@162.35.189.71 \
+   ssh -i secrets/deploy-homolog.key -o IdentitiesOnly=yes -o BatchMode=yes deploy@<HOST_HOMOLOG> \
      'cd /opt/defonline && docker compose exec -T db pg_dump -U postgres -d defonline \
         --schema-only --no-owner --no-privileges'
    ```

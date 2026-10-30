@@ -86,7 +86,7 @@ Preencha, para homologação:
 | Permissions | **Object Read & Write** |
 | Specify bucket(s) | **Apply to specific buckets only** → `defonline-backup-homolog` |
 | TTL | `Forever` (ou 1 ano, se preferir rotação obrigatória) |
-| Client IP Address Filtering | *(opcional)* `162.35.189.71` — o IP da VPS de homologação |
+| Client IP Address Filtering | *(opcional)* o IP do host de homologação |
 
 Sobre as escolhas:
 
@@ -171,14 +171,14 @@ Sem esperar o cron:
 
 ```bash
 ssh -i secrets/deploy-homolog.key -o UserKnownHostsFile=secrets/deploy-homolog.known_hosts \
-  deploy@162.35.189.71 '/opt/defonline/scripts/pg-backup.sh'
+  deploy@<HOST_HOMOLOG> '/opt/defonline/scripts/pg-backup.sh'
 ```
 
 Esperado: linhas `pg_dump → gzip → GPG`, tamanho do dump, `Upload → r2:...` e
 `Backup ok.` Depois, confira o que chegou:
 
 ```bash
-ssh ... deploy@162.35.189.71 'rclone tree r2:defonline-backup-homolog/postgres/homolog'
+ssh ... deploy@<HOST_HOMOLOG> 'rclone tree r2:defonline-backup-homolog/postgres/homolog'
 ```
 
 Layout esperado no bucket:
