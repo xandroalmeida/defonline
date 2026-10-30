@@ -114,7 +114,7 @@ jobs:
     # STORY-010 CA-3/4 — gate de cobertura no PR.
     #
     # Roda Pest All (UnitPure + Feature) com PCOV contra Postgres real (mesmo padrão
-    # que release-homolog.yml usa). Falha o PR se a cobertura geral cair abaixo de 80%,
+    # que zalk-deploy.yml usa). Falha o PR se a cobertura geral cair abaixo de 80%,
     # ou se app/Domain (quando existir) cair abaixo de 98% — gates prescritos em
     # ADR-006 §3.1 + quality-standards §1.1+§2.2.
     #
@@ -254,7 +254,7 @@ jobs:
     # Dusk E2E migrado do pre-push para o CI (revisão 2026-08). Mesmo setup do
     # test-coverage (Postgres service + npm build + migrate), servindo o app com
     # `artisan serve` e batendo com Chromium headless — o mesmo padrão do job de
-    # smoke pós-deploy do release-homolog.yml.
+    # smoke pós-deploy do zalk-deploy.yml.
     name: Dusk E2E (browser)
     runs-on: ubuntu-24.04
     defaults:
@@ -424,15 +424,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  arch-no-pgadmin-in-ansible:
-    # STORY-009 CA-10 — bloqueia merge se algum playbook/role Ansible referenciar
-    # pgadmin / phppgadmin / adminer / dbgate. Ferramentas administrativas são
-    # DEV LOCAL APENAS (ADR-005 §1.1, §6, §7.5).
-    name: Arch — sem pgAdmin/Adminer em Ansible
+  arch-no-pgadmin-in-deploy:
+    # STORY-009 CA-10 — bloqueia merge se o compose do servidor (infra/zalk/)
+    # referenciar pgadmin / phppgadmin / adminer / dbgate. Ferramentas
+    # administrativas são DEV LOCAL APENAS (ADR-009).
+    name: Arch — sem pgAdmin/Adminer no deploy
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - run: ./scripts/check-no-pgadmin-in-ansible.sh
+      - run: ./scripts/check-no-pgadmin-in-deploy.sh
 
   flags-check:
     name: Feature flags (overdue)

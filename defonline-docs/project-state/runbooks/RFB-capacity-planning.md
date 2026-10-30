@@ -49,14 +49,14 @@ Os defaults conservadores (3 RPM) foram fixados pelo plano gratuito público. Qu
 | Plano comercial (pós-WAVE-2026-01, multi-setor + canal contábil) | **60 RPM** | Cobre o teto da NRF §1.3 (300 concorrentes) com fator de pico de 5 cadastros/min sustentado. |
 | Pós-MVP (WAVE-2026-03+) com hotsite aberto e parceiros B2B2C | **revisar conforme volume** | Reabrir IDR-004 §"Defaults iniciais" — possivelmente diferenciar RPM por janela (minuto, hora, dia). |
 
-**Aplicação operacional:** mudar via `inventories/<ambiente>/group_vars/vault.yml`:
+**Aplicação operacional:** mudar no `.env` do ambiente (secret `APP_ENV_FILE`, ADR-009):
 
-```yaml
-rfb_cnpja_rpm: 15           # antes: 3
-rfb_receitaws_rpm: 15       # antes: 3
+```bash
+RFB_CNPJA_RATE_LIMIT_PER_MINUTE=15       # antes: 3
+RFB_RECEITAWS_RATE_LIMIT_PER_MINUTE=15   # antes: 3
 ```
 
-E rodar `ansible-playbook ... --tags env` + restart `web`/`worker` (mesmo procedimento do runbook `RFB-provider-switch.md` §2-§3).
+E re-deploy da tag em execução (mesmo procedimento do runbook `RFB-provider-switch.md` §2-§3).
 
 ## Sinais de revisão deste plano
 

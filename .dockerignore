@@ -29,8 +29,7 @@ app/.env.*
 .idea/
 .vscode/
 .DS_Store
-secrets/
-infra/ansible/
+infra/zalk/
 defonline-docs/
 **/__pycache__/
 **/*.log

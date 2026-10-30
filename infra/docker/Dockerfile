@@ -2,7 +2,7 @@
 # Multistage:
 #   - composer-deps: gera vendor sem dev deps (cacheável).
 #   - vite-build:    compila public/build com Tailwind v4 + Inter.
-#   - runtime:       imagem final deployada em homol/prod (SEM chromium).
+#   - runtime:       imagem final deployada no ZalkVPS (SEM chromium).
 #   - dev:           FROM runtime + chromium + chromedriver — usada pelo
 #                    docker-compose.yml local (Dusk via pre-push). NÃO é a
 #                    imagem deployada — ADR-002 §"imagem única" continua
@@ -35,7 +35,7 @@ COPY app/resources ./resources
 COPY app/vite.config.js ./vite.config.js
 RUN npm run build
 
-# ─── Stage 3: runtime (SEM chromium — usado em homol/prod) ──────────────────
+# ─── Stage 3: runtime (SEM chromium — usado no ZalkVPS) ───────────────────────
 FROM php:8.5-cli-alpine AS runtime
 
 ARG APP_VERSION=dev
@@ -98,7 +98,7 @@ EXPOSE 8000
 # ─── Stage 4: dev (= runtime + chromium para Dusk local) ────────────────────
 # Usado APENAS pelo docker-compose.yml local (pre-push roda
 # `docker compose exec -T web php artisan dusk` dentro deste container).
-# CI smoke (release-homolog.yml) usa chromium do runner do GitHub Actions
+# CI smoke (zalk-deploy.yml) usa chromium do runner do GitHub Actions
 # — não desta imagem. Homol/prod nunca constroem este target.
 #
 # Chromium fica na ÚLTIMA layer significativa: mudanças de código (stage

@@ -2,22 +2,24 @@
 adr_id: ADR-005
 slug: infra
 title: Infra do DEFOnline — VPS BR genérica + Ansible + Caddy + Docker Compose, homologação real e produção como código
-status: accepted
+status: superseded
 decided_at: 2026-05-21
 decided_by: arquiteto
 approved_by: Alexandro
 supersedes: null
-superseded_by: null
+superseded_by: ADR-009
 related_adrs: ["ADR-001", "ADR-002", "ADR-003", "ADR-004"]
 related_pdrs: ["PDR-001"]
 related_epics: ["EPIC-000", "EPIC-001", "EPIC-002", "EPIC-003"]
 related_stories: ["STORY-004"]
 created_at: 2026-05-21
-updated_at: 2026-05-21
+updated_at: 2026-10-30
 type: infra
 ---
 
 # ADR-005 — Infra do DEFOnline
+
+> **Substituída pela [ADR-009](ADR-009-infra-zalkvps.md) em 2026-10-30.** A infra desta decisão foi desligada; o DEFOnline roda no ZalkVPS. Mantida como registro histórico.
 
 ## Contexto
 

@@ -50,62 +50,38 @@ DB::table("business_metrics")
 '
 ```
 
-### 2. Atualização do `.env`
+### 2. Atualização do `.env` (ADR-009)
 
-**Método correto — via Ansible Vault** (não edite `.env` direto no host; o playbook sobrescreve no próximo deploy):
-
-```bash
-# laptop do operador
-cd infra/ansible
-
-# abre o vault de produção
-ansible-vault edit inventories/producao/group_vars/vault.yml
-
-# Mude:
-#   rfb_provider: cnpja
-# Para:
-#   rfb_provider: receitaws
-
-# Salva e fecha.
-
-# Renderiza o .env no host e aplica
-ansible-playbook -i inventories/producao playbooks/app.yml --ask-vault-pass --tags env
-```
-
-O playbook `app.yml --tags env` renderiza o template `.env.j2` no host e termina sem restart. **Restart é o passo 3.**
-
-### 3. Restart dos processos `web` e `worker`
+O `.env` do servidor é regravado a cada deploy a partir do secret `APP_ENV_FILE` do
+GitHub Environment `prod`. **Não edite o `.env` direto no host** — o próximo deploy
+sobrescreve.
 
 ```bash
-# no host de produção (via ansible ad-hoc)
-ansible producao -i inventories/producao -m shell \
-  -a 'cd /opt/defonline && docker compose restart web worker' \
-  --ask-vault-pass
+# laptop do operador: pegue o .env vigente do seu cofre local, mude
+#   RFB_PROVIDER=cnpja  →  RFB_PROVIDER=receitaws
+gh secret set APP_ENV_FILE --env prod --repo xandroalmeida/defonline < .env.prod
 ```
 
-**Scheduler não precisa restart** — não usa `RfbCnpjClient` (consulta RFB acontece no `web` durante o cadastro de Empresa Analisada).
+### 3. Re-deploy da tag em execução
+
+```bash
+# a tag em execução está em .deploy.env no servidor
+ssh defonline-prod@<host> 'cat /srv/zalk/projects/defonline-prod/.deploy.env'
+gh workflow run zalk-deploy.yml -f tag=<tag-em-execução>
+```
+
+O workflow grava o `.env` novo e roda `zalk-deploy`, que recria `web`, `worker` e
+`scheduler` (o compose detecta a mudança de ambiente).
 
 ### 4. Validação pós-troca
 
 ```bash
-# health
-curl -fsS https://app.defonline.com.br/health | jq .
-curl -fsS https://app.defonline.com.br/ready  | jq .
+curl -fsS https://defonline.zalk.com.br/health | jq .
+curl -fsS https://defonline.zalk.com.br/ready  | jq .
 
 # confirmar bind do novo cliente
-ansible producao -i inventories/producao -m shell \
-  -a 'cd /opt/defonline && docker compose exec -T web php artisan tinker --execute="echo get_class(app(App\\Services\\Rfb\\RfbCnpjClient::class));"'
+ssh defonline-prod@<host> 'cd /srv/zalk/projects/defonline-prod && docker compose --env-file .env.zalk --env-file .env --env-file .deploy.env exec -T web php artisan tinker --execute="echo get_class(app(App\\Services\\Rfb\\RfbCnpjClient::class));"'
 # Esperado: App\Services\Rfb\ReceitawsRfbCnpjClient   (ou Cnpja..., conforme troca)
-
-# aguardar 5 min e validar que novas consultas estão indo no provedor correto
-docker compose exec web php artisan tinker --execute='
-DB::table("business_metrics")
-  ->where("tipo", "rfb_consulta")
-  ->where("inserido_em", ">", now()->subMinutes(5))
-  ->selectRaw("meta->>\"provider\" as provider, count(*) total, sum(case when sucesso then 1 else 0 end) ok")
-  ->groupBy("provider")
-  ->get();
-'
 ```
 
 **Critério de sucesso:**
@@ -122,19 +98,8 @@ DB::table("business_metrics")
 ## Rollback
 
 Se a validação do passo 4 falhar (bind errado, `/ready` 503, ou alerta A2 persiste no **novo** provedor):
-
-```bash
-# reverte o vault para o valor anterior
-ansible-vault edit inventories/producao/group_vars/vault.yml
-# (mudar rfb_provider de volta)
-
-ansible-playbook -i inventories/producao playbooks/app.yml --ask-vault-pass --tags env
-ansible producao -i inventories/producao -m shell \
-  -a 'cd /opt/defonline && docker compose restart web worker' \
-  --ask-vault-pass
-```
-
-Tempo de rollback: ~5 min.
+volte o `RFB_PROVIDER` no `.env.prod`, regrave o `APP_ENV_FILE` (passo 2) e repita o
+passo 3. Tempo de rollback: ~5 min.
 
 ## O que NÃO fazer
 

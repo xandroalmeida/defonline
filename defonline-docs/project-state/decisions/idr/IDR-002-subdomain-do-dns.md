@@ -2,7 +2,7 @@
 idr_id: IDR-002
 slug: subdomain-do-dns
 title: Subdomínio defonline.xandrix.com.br no DNS DigitalOcean (em vez de defonline.com.br/Cloudflare)
-status: accepted
+status: superseded
 decided_at: 2026-05-22
 decided_by: programador
 owner_agent: programador (claude-opus-4-7)
@@ -10,12 +10,14 @@ related_story: STORY-007
 related_adrs: ["ADR-005"]
 related_idrs: []
 supersedes: null
-superseded_by: null
+superseded_by: ADR-009
 created_at: 2026-05-22
-updated_at: 2026-05-22
+updated_at: 2026-10-30
 ---
 
 # IDR-002 — Subdomínio em zona existente do PO + DNS DigitalOcean
+
+> **Substituída pela [ADR-009](../adr/ADR-009-infra-zalkvps.md) em 2026-10-30.** A infra desta decisão foi desligada; o DEFOnline roda no ZalkVPS. Mantida como registro histórico.
 
 ## Contexto
 

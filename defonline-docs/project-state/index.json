@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-08-06",
+  "generated_at": "2026-10-30",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-02",
@@ -2538,7 +2538,7 @@
         "slug": "infra",
         "title": "Infra do DEFOnline — VPS BR genérica + Ansible + Caddy + Docker Compose, homologação real e produção como código",
         "type": "infra",
-        "status": "accepted",
+        "status": "superseded",
         "path": "decisions/adr/ADR-005-infra.md",
         "decided_at": "2026-05-21",
         "decided_by": "arquiteto",
@@ -2562,7 +2562,8 @@
           "STORY-004"
         ],
         "created_at": "2026-05-21",
-        "updated_at": "2026-05-21"
+        "updated_at": "2026-10-30",
+        "superseded_by": "ADR-009"
       },
       {
         "id": "ADR-006",
@@ -2681,6 +2682,31 @@
         "updated_at": "2026-08-06",
         "note": "Resposta às 7 perguntas da STORY-053. DUAS decisões, não uma. (1) PLANILHA agora: XLSX via phpoffice/phpspreadsheet, SÍNCRONA (streamDownload), NUNCA armazenada, fonte = snapshot (ADR-007), fórmulas nas linhas derivadas (o Key User quer mexer), um arquivo com duas abas (competência aberta + série histórica), sem seletor de intervalo. Custo: ~9 MB de vendor + ext-gd (~3 MB) na imagem; R$ 0/mês; ZERO novo dado pessoal em repouso (sem artefato = sem LGPD nova). (2) PDF gerado no servidor: ADIADO ao EPIC-007 — é a saída prevista no CA-8 da STORY-053. Fundamento medido: Chromium na imagem custa 566 MB (docker history), +45% sobre os ~1,25 GB do runtime, em todo push/pull. (3) Saída INTERINA: camada @media print sobre o MESMO markup + botão 'Imprimir / Salvar em PDF' — a especificação funcional §4.7 já previa isso. (4) Direção registrada para o EPIC-007: Chromium ISOLADO em container (Gotenberg), não biblioteca PHP pura. dompdf/mPDF DESQUALIFICADOS: não resolvem CSS custom properties do Tailwind v4 (IDR-008), obrigariam um segundo layout com uma TERCEIRA cópia da paleta fora do tokens.css — terceira exclusão no tests/Unit/Arch/DesignTokensTest.php. SaaS de HTML→PDF descartado por princípio #6 + LGPD (operador terceiro). CONSEQUÊNCIA PARA A STORY-055: CA-3 (PDF) vira n/a; CA-4 = competência + aba de série; CA-9 = síncrono e sem retenção. Fila `pdf` do worker fica declarada e VAZIA até o EPIC-007 — configuração intencionalmente morta. ACEITA pelo PO em 2026-08-06 (PDR-007 §3 e §4), sem condicionantes. A pergunta aberta foi RESPONDIDA: o PDF é documento gerado pela plataforma, não impressão do navegador — a alternativa que encolheria o EPIC-007 de épico para estória foi RECUSADA (o documento que vai ao gerente do banco não pode variar conforme o navegador de quem imprime). Logo: a Decisão 4 vale como está (Chromium isolado em container, direção Gotenberg, a validar em spike próprio), a camada @media print é saída INTERINA e não solução final, e o EPIC-007 abre com spike de motor de PDF como primeira estória.",
         "approved_at": "2026-08-06"
+      },
+      {
+        "id": "ADR-009",
+        "slug": "infra-zalkvps",
+        "title": "Infra no ZalkVPS — ambiente defonline-prod em plataforma multi-projeto, com Postgres, Caddy e backup do host",
+        "type": "infra",
+        "status": "accepted",
+        "path": "decisions/adr/ADR-009-infra-zalkvps.md",
+        "decided_at": "2026-10-30",
+        "decided_by": "PO (Alexandro)",
+        "approved_by": "Alexandro",
+        "supersedes": "ADR-005",
+        "related_adrs": [
+          "ADR-002",
+          "ADR-004",
+          "ADR-005",
+          "ADR-006"
+        ],
+        "related_idrs": [
+          "IDR-002",
+          "IDR-012"
+        ],
+        "created_at": "2026-10-30",
+        "updated_at": "2026-10-30",
+        "note": "VPS de homolog da ADR-005 desligada em 2026-10-30. Ambiente único defonline-prod em https://defonline.zalk.com.br; Ansible/vault/backup próprios removidos do repo."
       }
     ],
     "idr": [
@@ -2704,7 +2730,7 @@
         "id": "IDR-002",
         "slug": "subdomain-do-dns",
         "title": "Subdomínio defonline.xandrix.com.br no DNS DigitalOcean (em vez de defonline.com.br/Cloudflare)",
-        "status": "accepted",
+        "status": "superseded",
         "path": "decisions/idr/IDR-002-subdomain-do-dns.md",
         "decided_at": "2026-05-22",
         "decided_by": "programador",
@@ -2713,7 +2739,8 @@
           "ADR-005"
         ],
         "created_at": "2026-05-22",
-        "updated_at": "2026-05-22"
+        "updated_at": "2026-10-30",
+        "superseded_by": "ADR-009"
       },
       {
         "id": "IDR-003",
@@ -2924,7 +2951,7 @@
         "id": "IDR-012",
         "slug": "backup-offsite-cloudflare-r2",
         "title": "Provedor de backup off-site — Cloudflare R2 no lugar do Backblaze B2",
-        "status": "accepted",
+        "status": "superseded",
         "path": "decisions/idr/IDR-012-backup-offsite-cloudflare-r2.md",
         "decided_at": "2026-08-04",
         "decided_by": "PO (Alexandro)",
@@ -2938,8 +2965,9 @@
           "ADR-005"
         ],
         "created_at": "2026-08-04",
-        "updated_at": "2026-08-04",
-        "note": "Destino do backup off-site passa a ser o Cloudflare R2 via API S3-compatível, com um bucket e um token por ambiente (defonline-backup-homolog / defonline-backups-producao), cada token escopado no seu bucket. O mecanismo da ADR-005 §4.2 não muda: pg_dump --format=custom às 03:00 BRT pelo role read-only defonline_backup, gzip, gpg AES256, upload por rclone. Muda o remote (b2: → r2:) e o layout de prefixos. Entrada acrescentada ao índice em 2026-08-06; a decisão é de 2026-08-04."
+        "updated_at": "2026-10-30",
+        "note": "Destino do backup off-site passa a ser o Cloudflare R2 via API S3-compatível, com um bucket e um token por ambiente (defonline-backup-homolog / defonline-backups-producao), cada token escopado no seu bucket. O mecanismo da ADR-005 §4.2 não muda: pg_dump --format=custom às 03:00 BRT pelo role read-only defonline_backup, gzip, gpg AES256, upload por rclone. Muda o remote (b2: → r2:) e o layout de prefixos. Entrada acrescentada ao índice em 2026-08-06; a decisão é de 2026-08-04.",
+        "superseded_by": "ADR-009"
       },
       {
         "id": "IDR-013",

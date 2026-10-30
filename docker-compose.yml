@@ -1,5 +1,5 @@
 # DEFOnline — topologia local (ADR-002): web + worker + scheduler + db + mailpit.
-# Em homologação/produção, esta mesma topologia é reproduzida (princípio #6).
+# No servidor (ZalkVPS, ADR-009) a mesma topologia roda via infra/zalk/docker-compose.yml (princípio #6).
 name: defonline
 
 x-app: &app-base
@@ -9,7 +9,7 @@ x-app: &app-base
     # `dev` = `runtime` + chromium + chromedriver (Dockerfile stage 4).
     # Necessário porque o pre-push (scripts/git-hooks/pre-push.sh) roda
     # `docker compose exec -T web php artisan dusk` dentro deste container.
-    # CI homol/prod buildam `--target runtime` (sem chromium, ~500MB menor).
+    # CI (zalk-deploy) builda `--target runtime` (sem chromium, ~500MB menor).
     # STORY-025 / ADR-002.
     target: dev
   image: defonline/app:dev
@@ -118,8 +118,8 @@ services:
       - "1025:1025"
       - "8025:8025"
 
-  # PhpPgAdmin — DEV LOCAL APENAS. Nunca portar para playbooks de homol/prod
-  # (STORY-009, ADR-005 §1.1, §6, §7.5). Em homol/prod o canal é ssh + psql.
+  # PhpPgAdmin — DEV LOCAL APENAS. Nunca portar para o compose do servidor
+  # (STORY-009, ADR-009 — infra/zalk/). No servidor o canal é ssh + psql.
   # Porta publicada apenas em 127.0.0.1 (loopback). Credenciais são fixas de dev.
   pgadmin:
     image: dpage/pgadmin4:9

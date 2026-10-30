@@ -3,7 +3,7 @@ name: bump-rc — sugere a próxima tag de release-candidate
 # ADR-006 §1.4 — helper de versão. Calcula a próxima tag vX.Y.Z-rc.N e imprime o
 # comando para você criá-la LOCALMENTE.
 #
-# O deploy de homolog é disparado pelo PUSH da tag no git (release-homolog.yml
+# O deploy no ZalkVPS é disparado pelo PUSH da tag no git (zalk-deploy.yml
 # `on: push: tags`). Tag criada por bot (GITHUB_TOKEN) NÃO dispara deploy — regra
 # anti-recursão do GitHub. Por isso este workflow NÃO cria a tag: só sugere. Rode o
 # comando no seu terminal para que o push (com sua credencial) dispare o release.
@@ -62,7 +62,7 @@ jobs:
           {
             echo "## Próxima tag rc: \`${NEW_TAG}\`"
             echo ""
-            echo "Rode no seu terminal — o **push da tag** dispara o deploy de homolog:"
+            echo "Rode no seu terminal — o **push da tag** dispara o deploy no ZalkVPS:"
             echo '```bash'
             echo "git tag ${NEW_TAG}"
             echo "git push origin ${NEW_TAG}"

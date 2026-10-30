@@ -1,0 +1,70 @@
+# Compose do ambiente defonline-prod no ZalkVPS (ADR-009) — ver ZALKVPS.md.
+# O workflow zalk-deploy.yml copia este arquivo para /srv/zalk/projects/defonline-prod/
+# como docker-compose.yml. Valide no servidor com `zalk-check`.
+#
+# Mesma imagem em web + worker + scheduler (ADR-002). Postgres é o do host
+# (10.254.0.1), com base/role `defonline_prod` — nada de container `db`.
+# O compose local (raiz do repo) continua sendo o de desenvolvimento.
+
+x-app: &app
+  image: ${IMAGE:?defina IMAGE}
+  restart: unless-stopped
+  working_dir: /var/www/html
+  env_file:
+    - path: .env.zalk
+    - path: .env
+      required: false
+
+# .env.zalk usa DB_NAME/DB_USER; o Laravel lê DB_DATABASE/DB_USERNAME.
+# Nomes explícitos (e não DB_URL) porque as migrations append-only leem
+# `database.connections.pgsql.username` para o REVOKE.
+x-db: &db
+  DB_CONNECTION: pgsql
+  DB_HOST: ${DB_HOST}
+  DB_PORT: ${DB_PORT}
+  DB_DATABASE: ${DB_NAME}
+  DB_USERNAME: ${DB_USER}
+  DB_PASSWORD: ${DB_PASSWORD}
+
+services:
+  web:
+    <<: *app
+    environment:
+      <<: *db
+      PROCESS_TYPE: web
+    command: ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+    ports:
+      - "127.0.0.1:${APP_PORT}:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8000/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+
+  worker:
+    <<: *app
+    environment:
+      <<: *db
+      PROCESS_TYPE: worker
+    command: ["php", "artisan", "queue:work", "--queue=pdf,emails,lgpd,default",
+              "--tries=3", "--backoff=60,180,600", "--max-time=3600"]
+
+  scheduler:
+    <<: *app
+    environment:
+      <<: *db
+      PROCESS_TYPE: scheduler
+    command: ["php", "artisan", "schedule:work"]
+
+  # Roda com a imagem nova antes do `up` (zalk-deploy). Se falhar, a versão
+  # em execução continua no ar. Migrations precisam ser compatíveis com a
+  # versão anterior: o --rollback volta o código, nunca o banco.
+  migrate:
+    <<: *app
+    restart: "no"
+    profiles: [predeploy]
+    environment:
+      <<: *db
+      PROCESS_TYPE: migrate
+    command: ["php", "artisan", "migrate", "--force"]

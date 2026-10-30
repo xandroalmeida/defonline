@@ -8,7 +8,7 @@
 > - **Timezone do servidor:** `America/Sao_Paulo`
 > - **Bancos:** `defonline` (app) · `defonline_test` (Pest/Dusk, isolado — [[project-banco-test-isolado]])
 > - **Última sincronização:** 2026-08-04 · **migrations aplicadas:** 14 · **tabelas:** 21
-> - **Extensões:** `citext` (email case-insensitive), `pgcrypto`, `pg_trgm`, `pg_stat_statements`
+> - **Extensões:** `citext` (email case-insensitive), `pgcrypto`, `pg_trgm`, `pg_stat_statements` — instaladas no Postgres **local** pelo initdb; no ZalkVPS (ADR-009) não há `pg_stat_statements`
 
 ---
 
@@ -149,11 +149,10 @@ Fonte da verdade = **banco aplicado** (não os arquivos de migration, que podem 
 
 **Via skill (recomendado):** `/analisar-banco` → peça "regenerar a doc do schema".
 
-**Manual — dump do schema de homolog:**
+**Manual — dump do schema do servidor (ZalkVPS, ADR-009):**
 ```bash
-ssh -i secrets/deploy-homolog.key deploy@<HOST_HOMOLOG> \
-  'cd /opt/defonline && docker compose exec -T db pg_dump -U postgres -d defonline \
-     --schema-only --no-owner --no-privileges'
+ssh defonline-prod@<ZALK_HOST> \
+  'cd /srv/zalk/projects/defonline-prod && . ./.env.zalk && pg_dump "$DATABASE_URL" --schema-only --no-owner --no-privileges'
 ```
 **Manual — local (dev):**
 ```bash

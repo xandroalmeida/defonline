@@ -1,0 +1,170 @@
+name: zalk-deploy — build + deploy no ZalkVPS
+
+# ADR-009 — substitui release-homolog / release-production / deploy-by-tag (Ansible).
+# Adaptado do project-kit do ZalkVPS (ver ZALKVPS.md):
+#  1. Build da imagem `runtime` → ghcr.io/<repo>/app:<tag>.
+#  2. SSH como `defonline-prod`: copia infra/zalk/docker-compose.yml e grava o .env
+#     a partir de APP_ENV_FILE.
+#  3. `zalk-deploy <imagem>` — zalk-check, migrations (predeploy), up --wait.
+#  4. Smoke pós-deploy read-only (curl /health + /ready + Dusk --group=smoke).
+#  5. Notifica Telegram.
+#
+# Gatilhos: push de tag `vX.Y.Z-rc.N` ou `vX.Y.Z`, ou manual com a tag (re-deploy de
+# uma tag já publicada). Rollback rápido sem rebuild: `zalk-deploy --rollback` no
+# servidor, como `defonline-prod`.
+#
+# GitHub Environment `prod` (criado com `make gh-env` no repo ZalkVPS):
+#   vars:    ZALK_HOST, ZALK_USER, ZALK_KNOWN_HOSTS
+#   secrets: ZALK_SSH_KEY, APP_ENV_FILE (conteúdo do .env da aplicação)
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  # O bump-rc só sugere a tag (tag criada por bot não dispara workflow); o dispatch
+  # manual permite re-deploy de qualquer tag pelo painel Actions.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag a deployar (ex.: v0.11.0-rc.3)'
+        required: true
+        type: string
+
+concurrency:
+  group: zalk-deploy-prod
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/app
+  APP_URL: https://defonline.zalk.com.br
+  TAG: ${{ github.event.inputs.tag || github.ref_name }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-24.04
+    permissions: { contents: read, packages: write }
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
+      - id: meta
+        run: echo "image=${REGISTRY}/${IMAGE_NAME,,}:${TAG}" >> "$GITHUB_OUTPUT"
+      - uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: infra/docker/Dockerfile
+          target: runtime
+          push: true
+          pull: true
+          tags: ${{ steps.meta.outputs.image }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: APP_VERSION=${{ env.TAG }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-24.04
+    permissions: { contents: read, packages: read }
+    environment:
+      name: prod
+      url: ${{ env.APP_URL }}
+    env:
+      TARGET: ${{ vars.ZALK_USER }}@${{ vars.ZALK_HOST }}
+      DIR: /srv/zalk/projects/${{ vars.ZALK_USER }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
+      - name: SSH
+        env:
+          KEY: ${{ secrets.ZALK_SSH_KEY }}
+          KNOWN_HOSTS: ${{ vars.ZALK_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Enviar compose e .env
+        env:
+          APP_ENV_FILE: ${{ secrets.APP_ENV_FILE }}
+        run: |
+          scp infra/zalk/docker-compose.yml "$TARGET:$DIR/docker-compose.yml"
+          printf '%s\n' "$APP_ENV_FILE" | ssh "$TARGET" "umask 077 && cat > $DIR/.env"
+      - name: Login no GHCR (no servidor)
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$TOKEN" | ssh "$TARGET" docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+      - name: zalk-deploy
+        run: ssh "$TARGET" "cd $DIR && zalk-deploy ${{ needs.build-and-push.outputs.image }}"
+
+  smoke:
+    needs: deploy
+    runs-on: ubuntu-24.04
+    permissions: { contents: read }
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, zip, bcmath, intl, mbstring
+          coverage: none
+      - uses: actions/cache@v5
+        with:
+          path: app/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
+      # A v2 mudou o default de `chrome-version` de `latest` para `stable`.
+      # Fixado em `latest` para não trocar por tabela a versão do Chrome do Dusk.
+      - uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: latest
+
+      - name: HTTP smoke (curl /health + /ready)
+        run: |
+          set -e
+          for endpoint in health ready; do
+              echo "→ GET ${APP_URL}/${endpoint}"
+              curl -fsSL "${APP_URL}/${endpoint}" | grep -E '"status":"ok"'
+          done
+
+      - name: Composer install (para Dusk smoke)
+        working-directory: app
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Dusk smoke (1 cenário crítico contra URL real, read-only)
+        working-directory: app
+        env:
+          DUSK_DRIVER_URL: http://localhost:9515
+        run: |
+          chromedriver --port=9515 --whitelisted-ips='' >/tmp/chromedriver.log 2>&1 &
+          sleep 3
+          php artisan dusk --group=smoke || (cat /tmp/chromedriver.log && exit 1)
+
+  notify:
+    needs: [deploy, smoke]
+    if: always()
+    runs-on: ubuntu-24.04
+    permissions: {}
+    steps:
+      - name: Status do deploy
+        env:
+          BOT: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT: ${{ secrets.TELEGRAM_CHAT_ID_HOMOLOG }}
+        run: |
+          STATUS="${{ (needs.deploy.result == 'success' && needs.smoke.result == 'success') && '✅' || '❌' }}"
+          MSG="${STATUS} DEFOnline (ZalkVPS): ${TAG} — deploy=${{ needs.deploy.result }} smoke=${{ needs.smoke.result }}"
+          echo "$MSG"
+          if [ -n "$BOT" ] && [ -n "$CHAT" ]; then
+            curl -fsS -X POST "https://api.telegram.org/bot${BOT}/sendMessage" \
+              -d "chat_id=${CHAT}" -d "text=${MSG}" || true
+          fi

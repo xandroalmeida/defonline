@@ -2,7 +2,7 @@
 name: analisar-banco
 description: >-
   Analisar/inspecionar o banco PostgreSQL do DEFOnline (schema, tabelas, colunas,
-  índices, FKs, constraints, volumes) em homolog ou local, e manter a doc de schema
+  índices, FKs, constraints, volumes) no servidor (ZalkVPS) ou local, e manter a doc de schema
   atualizada. Use quando precisar entender a estrutura do banco, escrever queries,
   investigar dados, ou regenerar defonline-docs/project-state/database-schema.md —
   em vez de descobrir o schema do zero.
@@ -14,7 +14,7 @@ PostgreSQL 18, Postgres-first (ADR-001/002/003 — fonte única de estado). Ante
 o schema por conta própria, **leia a doc**: `defonline-docs/project-state/database-schema.md`.
 
 ## Fonte da verdade (nesta ordem)
-1. **Banco aplicado** (homolog/local) — o que existe de fato. Autoritativo.
+1. **Banco aplicado** (servidor/local) — o que existe de fato. Autoritativo.
 2. **Migrations** (`app/database/migrations/`) — podem estar À FRENTE do que foi deployado.
 3. **A doc** (`database-schema.md`) — resumo humano; pode estar defasada. Confirme no banco antes de afirmar.
 
@@ -23,15 +23,17 @@ Modelos Eloquent: `app/app/Models/`. Namespace `App\` em `app/app/`.
 ## ⚠️ Segurança — leitura por padrão
 - Homolog é ambiente com dados reais em potencial: **SELECT/introspecção à vontade; NUNCA INSERT/UPDATE/DELETE/DDL sem pedido explícito do PO** (alinha com [[feedback-smoke-read-only]]).
 - Banco local (`defonline`) e de teste (`defonline_test`) podem ser escritos livremente em dev.
-- Nunca rode `db:seed`/`migrate:fresh` contra homolog.
+- Nunca rode `db:seed`/`migrate:fresh` contra o servidor.
 
 ## Conexões
 
-**Homolog (host `<HOST_HOMOLOG>` — nova infra a definir):**
+**Servidor — ZalkVPS, ambiente `defonline-prod` (ADR-009):**
 ```bash
-# prefixo p/ qualquer psql em homolog:
-ssh -i secrets/deploy-homolog.key -o IdentitiesOnly=yes -o BatchMode=yes deploy@<HOST_HOMOLOG> \
-  'cd /opt/defonline && docker compose exec -T db psql -U postgres -d defonline -c "SQL_AQUI"'
+# <ZALK_HOST> = var ZALK_HOST do GitHub Environment `prod`; a chave precisa estar
+# autorizada no usuário defonline-prod (pedido ao administrador do ZalkVPS).
+# Postgres do host (10.254.0.1), base/role defonline_prod — sem superuser.
+ssh defonline-prod@<ZALK_HOST> \
+  'cd /srv/zalk/projects/defonline-prod && . ./.env.zalk && psql "$DATABASE_URL" -c "SQL_AQUI"'
 ```
 
 **Local (dev — stack do `./up.sh`):**
@@ -86,9 +88,8 @@ Após qualquer migration nova, atualize `defonline-docs/project-state/database-s
 
 1. Dump autoritativo do banco aplicado:
    ```bash
-   ssh -i secrets/deploy-homolog.key -o IdentitiesOnly=yes -o BatchMode=yes deploy@<HOST_HOMOLOG> \
-     'cd /opt/defonline && docker compose exec -T db pg_dump -U postgres -d defonline \
-        --schema-only --no-owner --no-privileges'
+   ssh defonline-prod@<ZALK_HOST> \
+     'cd /srv/zalk/projects/defonline-prod && . ./.env.zalk && pg_dump "$DATABASE_URL" --schema-only --no-owner --no-privileges'
    ```
    (ou local: `docker compose exec -T db pg_dump -U postgres -d defonline --schema-only --no-owner --no-privileges`)
 2. Compare com a doc; reescreva só as seções afetadas (mantendo o formato: tabelas de domínio, observabilidade, framework).

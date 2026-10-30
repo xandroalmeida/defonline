@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\URL;
  * Regressão do Mixed Content em homologação (2026-05-24, descoberto no smoke
  * manual da STORY-018).
  *
- * Cenário do bug: Caddy faz TLS termination e envia `X-Forwarded-Proto: https`
+ * Cenário do bug: o Caddy (hoje o do host ZalkVPS) faz TLS termination e envia `X-Forwarded-Proto: https`
  * para o container `web`, que internamente recebe a conexão como HTTP. Sem
  * `trustProxies` registrado em `bootstrap/app.php`, o Laravel ignora o header,
  * `$request->isSecure()` retorna `false`, e `asset()`/`url()` geram URLs
@@ -21,10 +21,10 @@ use Illuminate\Support\Facades\URL;
 it('confia em X-Forwarded-Proto=https ao construir URLs (CA hist. — Mixed Content fix)', function () {
     $response = $this->withServerVariables([
         'HTTP_X_FORWARDED_PROTO' => 'https',
-        'HTTP_X_FORWARDED_HOST' => 'defonline.xandrix.com.br',
+        'HTTP_X_FORWARDED_HOST' => 'defonline.zalk.com.br',
         'HTTPS' => 'off',
         'REMOTE_ADDR' => '172.20.0.5', // IP arbitrário simulando proxy upstream
-    ])->get('http://defonline.xandrix.com.br/health');
+    ])->get('http://defonline.zalk.com.br/health');
 
     $response->assertOk();
 
@@ -38,12 +38,12 @@ it('confia em X-Forwarded-Proto=https ao construir URLs (CA hist. — Mixed Cont
 it('respeita X-Forwarded-Host para o host da URL', function () {
     $this->withServerVariables([
         'HTTP_X_FORWARDED_PROTO' => 'https',
-        'HTTP_X_FORWARDED_HOST' => 'defonline.xandrix.com.br',
+        'HTTP_X_FORWARDED_HOST' => 'defonline.zalk.com.br',
         'HTTPS' => 'off',
-    ])->get('http://defonline.xandrix.com.br/health');
+    ])->get('http://defonline.zalk.com.br/health');
 
-    expect(request()->getHost())->toBe('defonline.xandrix.com.br');
-    expect(URL::asset('app.css'))->toBe('https://defonline.xandrix.com.br/app.css');
+    expect(request()->getHost())->toBe('defonline.zalk.com.br');
+    expect(URL::asset('app.css'))->toBe('https://defonline.zalk.com.br/app.css');
 });
 
 it('sem header X-Forwarded-Proto, comportamento default (http) permanece — local dev intocado', function () {

@@ -2,7 +2,7 @@
 idr_id: IDR-012
 slug: backup-offsite-cloudflare-r2
 title: Provedor de backup off-site — Cloudflare R2 no lugar do Backblaze B2
-status: accepted
+status: superseded
 decided_at: 2026-08-04
 decided_by: PO (Alexandro)
 owner_agent: programador (claude-opus-5)
@@ -10,12 +10,14 @@ related_story: null
 related_adrs: ["ADR-005"]
 related_idrs: ["IDR-002"]
 supersedes: null
-superseded_by: null
+superseded_by: ADR-009
 created_at: 2026-08-04
-updated_at: 2026-08-04
+updated_at: 2026-10-30
 ---
 
 # IDR-012 — Backup off-site em Cloudflare R2 (substitui Backblaze B2)
+
+> **Substituída pela [ADR-009](../adr/ADR-009-infra-zalkvps.md) em 2026-10-30.** A infra desta decisão foi desligada; o DEFOnline roda no ZalkVPS. Mantida como registro histórico.
 
 ## Contexto
 

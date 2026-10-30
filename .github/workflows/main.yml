@@ -2,7 +2,7 @@ name: main — re-valida SHA mergeado
 
 # ADR-006 §3.2 (revisado 2026-05-23) — Após push em main, re-roda o pipeline do PR
 # contra o SHA real (defesa contra interferência de merge / regressão silenciosa).
-# NÃO builda imagem aqui: a imagem nasce no `release-homolog.yml` quando uma tag
+# NÃO builda imagem aqui: a imagem nasce no `zalk-deploy.yml` quando uma tag
 # `vX.Y.Z-rc.N` é empurrada — só então existe consumidor (deploy). Builds em main
 # eram puro custo (~3 min + camadas no GHCR) sem nenhum job que consumisse o
 # resultado.
