@@ -65,8 +65,10 @@ muda para o DEFOnline.
   A defesa passa a depender de nenhum código fazer `GRANT` — aceitável no MVP;
   reavaliar se a auditoria exigir garantia no banco.
 - **Extensões:** `pg_stat_statements` deixa de existir no servidor (não é trusted).
-  `pgcrypto`, `pg_trgm` e `citext` não são usadas pelo código hoje; se forem, criar
-  por migration (trusted, a role dona pode).
+  `citext` (tipo de `usuarios.email`) é criada pela migration
+  `2026_05_22_000015_create_citext_extension` — antes vinha do initdb; o primeiro deploy
+  (v0.11.0) falhou sem ela. `pgcrypto` e `pg_trgm` não são usadas pelo código; se forem,
+  mesma receita (trusted, a role dona cria).
 - **Limites da plataforma:** 1 vCPU, memória por cgroup (default 768M), 20 conexões
   por role. Web + worker + scheduler cabem com folga.
 - **Sem volume com backup:** nada de arquivo de usuário em volume local (o app não
