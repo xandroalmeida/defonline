@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: true
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador (claude-opus-5-5)
 created_at: 2026-11-02
 updated_at: 2026-11-02
 estimated_session_size: L
@@ -98,9 +98,36 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`.
 
 ## Notas do agente
 
+### Entendimento e plano (2026-11-02)
+- Li: PDR-010, STORY-014/015/018, IDR-004/005, espec §1.5.2/§3.3, código de `Livewire/Empresa/Cadastrar`, `Services/Rfb/*` e `EmpresaController`.
+- Plano: (1) objetos de valor da ficha em `app/Domain/Rfb`; (2) mapeamento nos 3 provedores; (3) coluna `ficha_rfb` + `observacoes`; (4) componente em dois modos (CNPJ com ficha `#[Locked]`, CPF manual); (5) ficha + observações em `/empresas/{id}`; (6) testes unitários, feature e Dusk.
+
 ### Decisões tomadas
+- 2026-11-02 — Ficha inteira em `ficha_rfb` jsonb; campos-núcleo continuam em colunas (IDR-014).
+- 2026-11-02 — Imutabilidade por `#[Locked]` no resultado da consulta: o "confirmar" não lê nada digitado, exceto as observações. Sem rota de edição.
+- 2026-11-02 — Botão "Consultar" virou submit do form do CNPJ (Enter consulta). O antigo radio CNPJ/CPF deu lugar ao link "Não tenho CNPJ (sou autônomo)" / "Tenho CNPJ — buscar na Receita".
+- 2026-11-02 — CNPJ já cadastrado é checado **antes** da consulta (não gasta cota do provedor) e de novo no confirmar (corrida entre abas).
+- 2026-11-02 — Observações editadas em `/empresas/{id}` por um componente Livewire próprio. O audit `empresa.observacoes_alteradas` leva só o tamanho do texto, nunca o conteúdo.
+- 2026-11-02 — Mock: os dígitos 3–5 do CNPJ escolhem regime, nº de CNAEs secundários e nº de sócios; o 3º dígito `9` gera empresa BAIXADA (CA-8).
+
 ### Descobertas
+- 2026-11-02 — O receitaws não traz documento nem data de entrada do sócio. No cnpja, a data de exclusão do Simples/SIMEI só existe no `history` (formato inferido; a amostra real veio vazia). Detalhes e verificação pendente no IDR-014.
+- 2026-11-02 — O jsonb do Postgres reordena chaves; comparar a ficha com `toEqual`, não com `toBe`.
+- 2026-11-02 — A normalização do CNAE estava duplicada nos dois clientes. Passou a usar `Atividade::normalizarCodigo`, e `00.00-0-00` (o "sem atividade" do receitaws) agora vira null.
+
 ### Bloqueios encontrados
+- Nenhum.
+
 ### IDRs criados
+- IDR-014 — Ficha RFB em jsonb, proteção por propriedades Locked e o que cada provedor entrega — `decisions/idr/IDR-014-ficha-rfb-jsonb-e-cobertura-dos-provedores.md`
+
 ### Cobertura final
+- Pest: 1046 testes verdes. Cobertura geral 97,8%; `Domain/Rfb/*` 100%; `Livewire/Empresa/Cadastrar` e `Observacoes` 100%.
+- Dusk: 36 verdes. Novos/ajustados: `EnriquecimentoRfbBrowserTest` (CNPJ → ficha → observação → confirmar → tela da empresa → editar observação; falha bloqueando), `CadastroEmpresaBrowserTest` (CPF manual), `MinhasEmpresasBrowserTest`.
+
+### Pendências do DoD
+- Deploy em homologação com CNPJ real (`cnpja`) — depende de push/tag, que o PO não pediu nesta sessão.
+- Spec e revisão do Designer (`requires_design: true`). A tela foi montada só com componentes e tokens do DS v1.1, sem cor nova.
+
 ### Links de evidência
+- Commit local em `main` (sem push).

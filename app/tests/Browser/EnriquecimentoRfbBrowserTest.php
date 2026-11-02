@@ -12,8 +12,9 @@ use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 
 /**
- * Dusk E2E da STORY-015 CA-7 — fluxo `cadastrar empresa com CNPJ → consultar
- * Receita → ver pré-preenchimento → submit → badge Receita Federal`.
+ * Dusk E2E da STORY-063 CA-11 (antes STORY-015 CA-7) — CNPJ → ficha RFB
+ * só-leitura → observação → confirmar → tela da empresa; e falha da Receita
+ * bloqueando o cadastro (PDR-010).
  *
  * Não está no grupo `smoke` por design (escreve no banco). Smoke pós-deploy
  * read-only é responsabilidade da bateria CadastroLoginSmokeBrowserTest.
@@ -25,38 +26,51 @@ final class EnriquecimentoRfbBrowserTest extends DuskTestCase
     /** @var list<string> */
     protected array $tablesToTruncate = ['empresas_analisadas', 'usuarios', 'audit_logs', 'business_metrics', 'term_acceptances', 'sessions'];
 
-    public function test_fluxo_completo_de_enriquecimento_via_rfb(): void
+    public function test_cnpj_ficha_observacao_confirmar_e_tela_da_empresa(): void
     {
         $usuario = Usuario::factory()->create([
             'email' => 'roberto.rfb@exemplo.com.br',
         ]);
-        $cnpj = EmpresaAnalisadaFactory::cnpjComRaiz('12345678');
+        // Mock: Simples optante, 3 CNAEs secundários, 3 sócios (STORY-063 CA-10).
+        $cnpj = EmpresaAnalisadaFactory::cnpjComRaiz('45237000');
 
         $this->browse(function (Browser $browser) use ($usuario, $cnpj) {
             $browser->loginAs($usuario)
                 ->visit('/empresas/nova')
                 ->assertSee('Cadastrar empresa')
-                ->radio('@empresa-tipo-cnpj', 'cnpj')
+                ->assertMissing('@empresa-razao-social')
                 ->type('@empresa-documento', $cnpj)
-                ->waitFor('@empresa-consultar-receita')
-                ->waitUntilEnabled('@empresa-consultar-receita')
-                ->click('@empresa-consultar-receita')
-                ->waitFor('@empresa-enriquecido-ok')
+                ->press('@empresa-consultar-receita')
+                ->waitFor('@ficha-rfb')
                 ->assertSeeIn('@empresa-enriquecido-ok', 'Receita Federal')
-                ->assertInputValueIsNot('@empresa-razao-social', '')
-                ->assertInputValueIsNot('@empresa-municipio', '')
-                ->press('@empresa-submit')
+                ->assertSeeIn('@ficha-simples', 'Optante')
+                ->assertVisible('@ficha-cnaes-secundarios')
+                ->assertMissing('@empresa-razao-social')
+                ->type('@empresa-observacoes', 'Indicação do contador Marcos.')
+                ->press('@empresa-confirmar')
                 ->waitFor('@empresa-show-fonte')
-                ->assertSeeIn('@empresa-show-fonte', 'Receita Federal');
+                ->assertSeeIn('@empresa-show-fonte', 'Receita Federal')
+                ->assertVisible('@ficha-rfb')
+                ->assertSeeIn('@ficha-simples', 'Optante')
+                ->assertInputValue('@empresa-show-observacoes', 'Indicação do contador Marcos.')
+                ->clear('@empresa-show-observacoes')
+                ->type('@empresa-show-observacoes', 'Retornar em dezembro.')
+                ->press('@empresa-show-salvar-observacoes')
+                ->waitFor('@empresa-show-observacoes-salvas');
+
+            $this->assertCount(3, $browser->elements('@ficha-cnae-secundario'));
+            $this->assertCount(3, $browser->elements('@ficha-socio'));
         });
 
         $empresa = EmpresaAnalisada::firstWhere('usuario_id', $usuario->id);
         $this->assertNotNull($empresa);
         $this->assertSame('rfb', $empresa->fonte_enriquecimento->value);
         $this->assertNotNull($empresa->enriquecido_at);
+        $this->assertNotNull($empresa->ficha_rfb);
+        $this->assertSame('Retornar em dezembro.', $empresa->observacoes);
     }
 
-    public function test_fallback_mostra_aviso_amarelo_quando_provedor_falha(): void
+    public function test_falha_da_receita_bloqueia_sem_liberar_preenchimento_manual(): void
     {
         $usuario = Usuario::factory()->create([
             'email' => 'roberto.fallback@exemplo.com.br',
@@ -66,14 +80,15 @@ final class EnriquecimentoRfbBrowserTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($usuario, $cnpjTimeout) {
             $browser->loginAs($usuario)
                 ->visit('/empresas/nova')
-                ->radio('@empresa-tipo-cnpj', 'cnpj')
                 ->type('@empresa-documento', $cnpjTimeout)
-                ->waitFor('@empresa-consultar-receita')
-                ->waitUntilEnabled('@empresa-consultar-receita')
-                ->click('@empresa-consultar-receita')
-                ->waitFor('@empresa-fallback')
-                ->assertSeeIn('@empresa-fallback', 'Não conseguimos consultar a Receita agora')
-                ->assertInputValue('@empresa-razao-social', '');
+                ->press('@empresa-consultar-receita')
+                ->waitFor('@empresa-erro-consulta')
+                ->assertSeeIn('@empresa-erro-consulta', 'Tente novamente em alguns minutos')
+                ->assertMissing('@ficha-rfb')
+                ->assertMissing('@empresa-razao-social')
+                ->assertMissing('@empresa-confirmar');
         });
+
+        $this->assertSame(0, EmpresaAnalisada::count());
     }
 }

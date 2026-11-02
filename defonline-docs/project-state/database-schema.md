@@ -70,6 +70,8 @@ PK `id uuid`. FK `usuario_id → usuarios` (RESTRICT). **UNIQUE parcial** `(usua
 | `situacao_cadastral` | varchar(16) | CHECK `ativa\|inapta\|baixada\|suspensa\|nao_informada` (default `nao_informada`) |
 | `fonte_enriquecimento` | varchar(8) | CHECK `manual\|rfb` (default `manual`) — origem RFB via cnpja (IDR-004/005) |
 | `data_fundacao` | date / `enriquecido_at` timestamptz | |
+| `ficha_rfb` | jsonb | nullable — ficha RFB completa (natureza, porte, capital, CNAEs secundários, endereço, sócios, `simples`/`simei`). Só escrita por consulta à Receita (PDR-010, STORY-063); null em CPF e em empresas anteriores à STORY-063 |
+| `observacoes` | text | nullable — única informação livre do usuário (até 2.000 caracteres, validado na app) |
 
 ### `quiz_rascunhos` — rascunhos do quiz (23 campos, Anexo A)
 PK `id uuid`. FKs `usuario_id`, `empresa_analisada_id` (RESTRICT). **UNIQUE parcial** `(usuario_id, empresa_analisada_id) WHERE deleted_at IS NULL`.

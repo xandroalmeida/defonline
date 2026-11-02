@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Rfb;
 
+use App\Domain\Rfb\FichaRfb;
 use App\Domain\Rfb\RfbCnpjResult;
 use App\Domain\SituacaoCadastral;
 use Illuminate\Support\Carbon;
@@ -32,6 +33,7 @@ final class RfbCnpjResultSerializer
             'data_fundacao' => $resultado->dataFundacao?->toIso8601String(),
             'fonte_provedor' => $resultado->fonteProvedor,
             'consultado_at' => $resultado->consultadoAt->toIso8601String(),
+            'ficha' => $resultado->ficha->toArray(),
         ];
     }
 
@@ -50,6 +52,7 @@ final class RfbCnpjResultSerializer
             dataFundacao: isset($dados['data_fundacao']) ? Carbon::parse((string) $dados['data_fundacao']) : null,
             fonteProvedor: (string) $dados['fonte_provedor'],
             consultadoAt: Carbon::parse((string) $dados['consultado_at']),
+            ficha: FichaRfb::fromArray(is_array($dados['ficha'] ?? null) ? $dados['ficha'] : []),
         );
     }
 }

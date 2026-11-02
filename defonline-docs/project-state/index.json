@@ -1830,13 +1830,13 @@
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "in_review",
       "blocks": [
         "STORY-064"
       ],
       "epic_id": "EPIC-001",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-opus-5-5)",
       "requires_design": true,
       "created_at": "2026-11-02",
       "updated_at": "2026-11-02",
@@ -1847,7 +1847,7 @@
       "blocked_by": [],
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-063-cadastro-empresa-cnpj-first-ficha-rfb.md",
       "related_pdr": "PDR-010",
-      "note": "CNPJ primeiro; ficha com CNAEs secundários, endereço, sócios, MEI/Simples; nada editável; observações; falha bloqueia; CPF manual preservado."
+      "note": "CNPJ primeiro; ficha com CNAEs secundários, endereço, sócios, MEI/Simples; nada editável; observações; falha bloqueia; CPF manual preservado. | 2026-11-02: implementada (1046 Pest + 36 Dusk verdes; cobertura 97,8% geral, 100% em Domain/Rfb). Pendências do DoD: deploy em homologação com CNPJ real (cnpja) e spec/revisão do Designer (requires_design). IDR-014."
     },
     {
       "type": "implementation",
@@ -3063,6 +3063,29 @@
         "created_at": "2026-08-04",
         "updated_at": "2026-08-04",
         "note": "Descoberta da STORY-044: `indicadores_calculados` guarda só {valor, farol, motivo, mensagem} — os agregados (LB, EBITDA, LOL, AT, PL, NCG) nunca foram carimbados no snapshot. Carimbá-los exigiria bump de motor_version, proibido pela estória, e deixaria todo diagnóstico já emitido sem os nominais (IDR-010 proíbe recálculo retroativo). Decisão: derivar do `quiz_payload` persistido, na camada de apresentação (App\\Support\\Relatorio\\ValoresNominais), reusando DreAdaptada em leitura — sem instanciar Motor, sem escrever nada. Fórmula financeira continua morando só na DreAdaptada. Trade-off aceito: drift se uma fórmula da DRE mudar em bump MAJOR (ex.: pró-labore dentro do EBITDA, `[DECIDIR-B]` do parecer de 2026-08-04) — gatilho de reabertura escrito no IDR."
+      },
+      {
+        "id": "IDR-014",
+        "slug": "ficha-rfb-jsonb-e-cobertura-dos-provedores",
+        "title": "Ficha RFB em jsonb, proteção por propriedades Locked e o que cada provedor entrega",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-014-ficha-rfb-jsonb-e-cobertura-dos-provedores.md",
+        "decided_at": "2026-11-02",
+        "decided_by": "programador (claude-opus-5-5)",
+        "related_story": "STORY-063",
+        "related_pdrs": [
+          "PDR-010"
+        ],
+        "related_idrs": [
+          "IDR-004",
+          "IDR-005"
+        ],
+        "related_adrs": [
+          "ADR-003"
+        ],
+        "created_at": "2026-11-02",
+        "updated_at": "2026-11-02",
+        "note": "jsonb único em empresas_analisadas.ficha_rfb (sem consumidor para tabelas filhas). Imutabilidade via #[Locked]. receitaws não traz documento/data de entrada do sócio; data de exclusão do Simples no cnpja é derivada de history (formato inferido, verificar na 1ª consulta real de empresa excluída)."
       }
     ],
     "ddr": [

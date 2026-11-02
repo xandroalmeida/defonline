@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Rfb\RfbCnpjStatus;
+use App\Domain\SituacaoCadastral;
 use App\Services\Rfb\MockRfbCnpjClient;
 use App\Services\Rfb\RfbCnpjFalhouException;
 use Database\Factories\EmpresaAnalisadaFactory;
@@ -69,3 +70,32 @@ it('retorna campos preenchidos para o caminho feliz', function () {
 it('rejeita CNPJ com DV inválido (defesa em camadas)', function () {
     $this->client->consultarCnpj('11111111111111');
 })->throws(RfbCnpjFalhouException::class);
+
+it('gera ficha completa controlada pelos dígitos 3 a 5 do CNPJ (STORY-063 CA-10)', function (string $raiz, ?bool $simei, ?bool $simples, int $secundarios, int $socios) {
+    $ficha = (new MockRfbCnpjClient)->consultarCnpj(EmpresaAnalisadaFactory::cnpjComRaiz($raiz))->ficha;
+
+    expect($ficha->simei->optante)->toBe($simei);
+    expect($ficha->simples->optante)->toBe($simples);
+    expect($ficha->cnaesSecundarios)->toHaveCount($secundarios);
+    expect($ficha->socios)->toHaveCount($socios);
+    expect($ficha->cnaePrincipal)->not->toBeNull();
+    expect($ficha->endereco->logradouro)->not->toBeNull();
+    expect($ficha->capitalSocial)->not->toBeNull();
+    foreach ($ficha->socios as $socio) {
+        expect($socio->documento)->toMatch('/^\*{3}\d{6}\*{2}$/');
+    }
+})->with([
+    'MEI, nada além' => ['41100000', true, true, 0, 0],
+    'Simples, 3 secundárias, 3 sócios' => ['45237000', false, true, 3, 3],
+    'excluído do Simples, 1 secundária, 1 sócio' => ['45315000', false, false, 1, 1],
+    'não optante, 2 secundárias, 2 sócios' => ['45526000', false, false, 2, 2],
+]);
+
+it('marca data de exclusão para o excluído do Simples e BAIXADA para o 3º dígito 9 (STORY-063 CA-8)', function () {
+    $excluido = (new MockRfbCnpjClient)->consultarCnpj(EmpresaAnalisadaFactory::cnpjComRaiz('45315000'));
+    expect($excluido->ficha->simples->dataExclusao)->toBe('2024-01-01');
+
+    $baixada = (new MockRfbCnpjClient)->consultarCnpj(EmpresaAnalisadaFactory::cnpjComRaiz('42900000'));
+    expect($baixada->situacaoCadastral)->toBe(SituacaoCadastral::Baixada);
+    expect($baixada->ficha->dataSituacao)->toBe('2025-06-30');
+});

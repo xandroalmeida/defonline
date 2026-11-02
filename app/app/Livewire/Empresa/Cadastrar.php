@@ -6,6 +6,7 @@ namespace App\Livewire\Empresa;
 
 use App\Domain\Cnpj;
 use App\Domain\FonteEnriquecimento;
+use App\Domain\Rfb\RfbCnpjStatus;
 use App\Domain\SituacaoCadastral;
 use App\Domain\TipoDocumento;
 use App\Domain\Uf;
@@ -13,9 +14,9 @@ use App\Models\EmpresaAnalisada;
 use App\Observabilidade\AuditLogger;
 use App\Observabilidade\EventLogger;
 use App\Services\Rfb\RfbCnpjFalhouException;
+use App\Services\Rfb\RfbCnpjResultSerializer;
 use App\Services\Rfb\RfbConsultarCnpj;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -23,19 +24,22 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
- * Cadastro de Empresa Analisada — caminho manual (STORY-014) + enriquecimento
- * via RFB com fallback transparente (STORY-015).
+ * Cadastro de Empresa Analisada em `/empresas/nova` (autenticado).
  *
- * Form Livewire em `/empresas/nova` (autenticado). Cria registro com
- * `fonte_enriquecimento = 'manual'` (sem botão) ou `= 'rfb'` (depois do botão
- * "Consultar Receita") e redireciona para `/empresas/{id}`.
+ * Dois caminhos (PDR-010):
  *
- * O caminho RFB delega o trabalho de cache+métrica+audit ao
- * {@see RfbConsultarCnpj}. Falha tipada vira aviso amarelo + form em branco
- * (espec V2 §3.3, NRF §3.1).
+ * - **CNPJ (default, STORY-063).** O usuário informa só o CNPJ; a consulta à
+ *   RFB traz a ficha completa, exibida só-leitura. O resultado fica em
+ *   propriedades `#[Locked]` — o cliente não consegue forjar nem alterar dado
+ *   da Receita. "Confirmar" grava com `fonte_enriquecimento = 'rfb'`. Falha
+ *   da consulta bloqueia o cadastro (sem fallback manual).
+ * - **CPF (autônomo, STORY-014).** Formulário manual editável, como antes.
+ *
+ * O caminho RFB delega cache+métrica+audit ao {@see RfbConsultarCnpj}.
  *
  * Audit log `empresa.cadastrada` sem `documento` (PII — espec V2 §1.5.2,
  * STORY-014 CA-6); `documento` vive apenas em `empresas_analisadas` + log
@@ -62,25 +66,47 @@ final class Cadastrar extends Component
 
     public string $data_fundacao = '';
 
-    /** Verdadeiro depois de uma consulta RFB bem-sucedida; cai para falso ao editar o CNPJ. */
-    public bool $enriquecido = false;
+    public const MSG_RECEITA_INDISPONIVEL = 'Não conseguimos consultar a Receita agora. Tente novamente em alguns minutos.';
 
-    /** Carimbo do `consultado_at` do provedor RFB, em ISO 8601; vira `enriquecido_at` no submit. */
-    public ?string $enriquecidoAt = null;
+    public const MSG_CNPJ_INEXISTENTE = 'Não encontramos este CNPJ na Receita. Confira os números.';
 
-    /** Mensagem amarela do CA-2 quando a consulta RFB falha (qualquer status). */
-    public ?string $mensagemFallback = null;
+    public const MSG_CNPJ_INVALIDO = 'Informe um CNPJ válido.';
+
+    public const MSG_JA_CADASTRADA = 'Você já cadastrou esta empresa.';
+
+    public const OBSERVACOES_MAX = 2000;
+
+    /**
+     * Resultado serializado da última consulta RFB bem-sucedida. Locked: só o
+     * servidor escreve (STORY-063 CA-4).
+     *
+     * @var array<string, mixed>|null
+     */
+    #[Locked]
+    public ?array $resultadoRfb = null;
+
+    /** CNPJ (14 dígitos) a que o {@see $resultadoRfb} se refere. */
+    #[Locked]
+    public ?string $cnpjConsultado = null;
+
+    /** Observações livres do usuário (STORY-063 CA-5). */
+    public string $observacoes = '';
+
+    /** Mensagem de erro da consulta (CNPJ inválido, inexistente, Receita fora). */
+    public ?string $mensagemErro = null;
+
+    /** Empresa do próprio usuário com o mesmo CNPJ (CA-2) — vira link na mensagem. */
+    #[Locked]
+    public ?string $empresaExistenteId = null;
 
     /** Status determinístico da última consulta RFB — apoio para testes/Dusk. */
+    #[Locked]
     public ?string $statusConsultaRfb = null;
 
     public function consultarReceita(RfbConsultarCnpj $consultar): void
     {
-        $this->mensagemFallback = null;
-        $this->statusConsultaRfb = null;
+        $this->limparConsulta();
 
-        // CA-2: botão só faz sentido para CNPJ. Defesa em camadas — o Blade
-        // também esconde quando tipo=CPF, mas se chegou aqui no CPF é no-op.
         if ($this->tipo_documento !== TipoDocumento::Cnpj->value) {
             return;
         }
@@ -88,53 +114,112 @@ final class Cadastrar extends Component
         $digitos = Cnpj::normalizar($this->documento);
 
         if (! Cnpj::valido($digitos)) {
-            $this->limparEnriquecimentoDoForm();
-            $this->mensagemFallback = 'Informe um CNPJ válido para consultar a Receita.';
+            $this->mensagemErro = self::MSG_CNPJ_INVALIDO;
             $this->statusConsultaRfb = 'cnpj_invalido';
 
+            return;
+        }
+
+        if ($this->bloquearSeJaCadastrada($digitos)) {
             return;
         }
 
         try {
             $resultado = $consultar->executar($digitos);
         } catch (RfbCnpjFalhouException $falha) {
-            $this->limparEnriquecimentoDoForm();
-            // Mensagem literal do CA-2 — não personalizar para evitar exposição de
-            // detalhes do erro do provedor (status interno só viaja em
-            // statusConsultaRfb para fins de teste/audit).
-            $this->mensagemFallback = 'Não conseguimos consultar a Receita agora — preencha os campos manualmente.';
+            $this->mensagemErro = $falha->status === RfbCnpjStatus::CnpjInexistente
+                ? self::MSG_CNPJ_INEXISTENTE
+                : self::MSG_RECEITA_INDISPONIVEL;
             $this->statusConsultaRfb = $falha->status->value;
 
             return;
         }
 
-        $dados = $resultado->paraFormulario();
-        $this->razao_social = $dados['razao_social'];
-        $this->nome_fantasia = $dados['nome_fantasia'];
-        $this->cnae = $dados['cnae'];
-        $this->municipio = $dados['municipio'];
-        $this->uf = $dados['uf'];
-        $this->situacao_cadastral = $dados['situacao_cadastral'];
-        $this->data_fundacao = $dados['data_fundacao'];
-
-        $this->enriquecido = true;
-        $this->enriquecidoAt = $resultado->consultadoAt->toIso8601String();
+        $this->resultadoRfb = RfbCnpjResultSerializer::toArray($resultado);
+        $this->cnpjConsultado = $digitos;
         $this->statusConsultaRfb = 'sucesso';
+    }
+
+    /**
+     * Grava a empresa a partir da ficha RFB consultada (STORY-063 CA-6). Nada
+     * do que o usuário digitou entra, exceto as observações.
+     */
+    public function confirmar(): mixed
+    {
+        if ($this->resultadoRfb === null || $this->cnpjConsultado === null) {
+            $this->mensagemErro = 'Consulte o CNPJ na Receita antes de confirmar.';
+
+            return null;
+        }
+
+        $this->validate(
+            ['observacoes' => ['nullable', 'string', 'max:'.self::OBSERVACOES_MAX]],
+            ['observacoes.max' => 'As observações podem ter até '.self::OBSERVACOES_MAX.' caracteres.'],
+        );
+
+        if ($this->bloquearSeJaCadastrada($this->cnpjConsultado)) {
+            return null;
+        }
+
+        $r = RfbCnpjResultSerializer::fromArray($this->resultadoRfb);
+
+        $empresa = $this->criarEmpresa([
+            'tipo_documento' => TipoDocumento::Cnpj->value,
+            'documento' => $this->cnpjConsultado,
+            'razao_social' => $r->razaoSocial,
+            'nome_fantasia' => $r->nomeFantasia,
+            'cnae' => $r->cnae,
+            'municipio' => $r->municipio,
+            'uf' => $r->uf,
+            'situacao_cadastral' => $r->situacaoCadastral->value,
+            'data_fundacao' => $r->dataFundacao?->format('Y-m-d'),
+            'fonte_enriquecimento' => FonteEnriquecimento::Rfb->value,
+            'enriquecido_at' => $r->consultadoAt,
+            'ficha_rfb' => $r->ficha->toArray(),
+            'observacoes' => self::observacoesOuNull($this->observacoes),
+        ]);
+
+        return $this->redirect("/empresas/{$empresa->id}", navigate: false);
+    }
+
+    public function usarCpf(): void
+    {
+        $this->tipo_documento = TipoDocumento::Cpf->value;
+        $this->updatedTipoDocumento();
+    }
+
+    public function usarCnpj(): void
+    {
+        $this->tipo_documento = TipoDocumento::Cnpj->value;
+        $this->updatedTipoDocumento();
     }
 
     public function updatedDocumento(): void
     {
-        $this->limparEnriquecimentoCompleto();
+        $this->limparConsulta();
     }
 
     public function updatedTipoDocumento(): void
     {
-        $this->limparEnriquecimentoCompleto();
+        if (TipoDocumento::tryFrom($this->tipo_documento) === null) {
+            $this->tipo_documento = TipoDocumento::Cnpj->value;
+        }
+        $this->documento = '';
+        $this->resetErrorBag();
+        $this->limparConsulta();
     }
 
+    /**
+     * Cadastro manual — exclusivo do autônomo com CPF (PDR-010 item 6). CNPJ
+     * só entra pela ficha da Receita ({@see confirmar()}).
+     */
     public function submit(): mixed
     {
-        $tipo = TipoDocumento::tryFrom($this->tipo_documento) ?? TipoDocumento::Cnpj;
+        if ($this->tipo_documento !== TipoDocumento::Cpf->value) {
+            return $this->confirmar();
+        }
+
+        $tipo = TipoDocumento::Cpf;
 
         // Normaliza o documento e o CNAE em uma fronteira só — UI mantém formato
         // mascarado, persistência fica em dígitos puros (mesma estratégia da
@@ -149,6 +234,7 @@ final class Cadastrar extends Component
             'uf' => strtoupper(trim($this->uf)),
             'situacao_cadastral' => $this->situacao_cadastral,
             'data_fundacao' => trim($this->data_fundacao) === '' ? null : trim($this->data_fundacao),
+            'observacoes' => $this->observacoes,
         ];
 
         $tamanhoDocumento = $tipo->tamanho();
@@ -161,9 +247,7 @@ final class Cadastrar extends Component
                 "size:{$tamanhoDocumento}",
                 function (string $attr, mixed $valor, \Closure $fail) use ($tipo): void {
                     if (! is_string($valor) || ! $tipo->validar($valor)) {
-                        $fail($tipo === TipoDocumento::Cnpj
-                            ? 'Informe um CNPJ válido.'
-                            : 'Informe um CPF válido.');
+                        $fail('Informe um CPF válido.');
                     }
                 },
                 // Unique por (usuario_id, documento) — ignora soft-delete.
@@ -177,11 +261,10 @@ final class Cadastrar extends Component
             'uf' => ['required', 'string', Rule::in(Uf::valores())],
             'situacao_cadastral' => ['required', Rule::in(array_map(static fn (SituacaoCadastral $s) => $s->value, SituacaoCadastral::cases()))],
             'data_fundacao' => ['nullable', 'date', 'before_or_equal:today'],
+            'observacoes' => ['nullable', 'string', 'max:'.self::OBSERVACOES_MAX],
         ], [
             'documento.required' => 'Informe o documento.',
-            'documento.size' => $tipo === TipoDocumento::Cnpj
-                ? 'O CNPJ deve ter 14 dígitos.'
-                : 'O CPF deve ter 11 dígitos.',
+            'documento.size' => 'O CPF deve ter 11 dígitos.',
             'documento.unique' => 'Você já cadastrou uma empresa com este documento.',
             'razao_social.required' => 'Informe a razão social.',
             'razao_social.min' => 'A razão social deve ter pelo menos 2 caracteres.',
@@ -190,33 +273,34 @@ final class Cadastrar extends Component
             'uf.required' => 'Informe a UF.',
             'uf.in' => 'Informe uma UF válida.',
             'data_fundacao.before_or_equal' => 'A data de fundação não pode ser no futuro.',
+            'observacoes.max' => 'As observações podem ter até '.self::OBSERVACOES_MAX.' caracteres.',
         ])->validate();
 
-        // CA-3: fonte vira `rfb` se houve consulta bem-sucedida E o CNPJ não foi
-        // editado depois (updatedDocumento limpa a flag). CPF nunca passa por RFB.
-        $fonteRfb = $this->enriquecido && $tipo === TipoDocumento::Cnpj;
-        $fonte = $fonteRfb ? FonteEnriquecimento::Rfb : FonteEnriquecimento::Manual;
-        $enriquecidoAt = $fonteRfb && $this->enriquecidoAt !== null
-            ? Carbon::parse($this->enriquecidoAt)
-            : null;
+        $empresa = $this->criarEmpresa([
+            ...$validados,
+            'fonte_enriquecimento' => FonteEnriquecimento::Manual->value,
+            'enriquecido_at' => null,
+            'observacoes' => self::observacoesOuNull($this->observacoes),
+        ]);
 
+        return $this->redirect("/empresas/{$empresa->id}", navigate: false);
+    }
+
+    /**
+     * Persistência comum aos dois caminhos: transação + audit + evento
+     * `empresa_cadastrada` (STORY-016) + log estruturado. Sem PII.
+     *
+     * @param  array<string, mixed>  $atributos
+     */
+    private function criarEmpresa(array $atributos): EmpresaAnalisada
+    {
         $usuarioId = (string) Auth::id();
 
-        $empresa = DB::transaction(function () use ($validados, $usuarioId, $fonte, $enriquecidoAt): EmpresaAnalisada {
+        $empresa = DB::transaction(function () use ($atributos, $usuarioId): EmpresaAnalisada {
             $e = EmpresaAnalisada::create([
+                ...$atributos,
                 'id' => (string) Str::uuid7(),
                 'usuario_id' => $usuarioId,
-                'tipo_documento' => $validados['tipo_documento'],
-                'documento' => $validados['documento'],
-                'razao_social' => $validados['razao_social'],
-                'nome_fantasia' => $validados['nome_fantasia'],
-                'cnae' => $validados['cnae'],
-                'municipio' => $validados['municipio'],
-                'uf' => $validados['uf'],
-                'situacao_cadastral' => $validados['situacao_cadastral'],
-                'data_fundacao' => $validados['data_fundacao'],
-                'fonte_enriquecimento' => $fonte->value,
-                'enriquecido_at' => $enriquecidoAt,
             ]);
 
             AuditLogger::log(
@@ -265,20 +349,38 @@ final class Cadastrar extends Component
             'action' => 'cadastrar',
         ]);
 
-        return $this->redirect("/empresas/{$empresa->id}", navigate: false);
+        return $empresa;
     }
 
-    private function limparEnriquecimentoCompleto(): void
+    private function bloquearSeJaCadastrada(string $cnpj): bool
     {
-        $this->limparEnriquecimentoDoForm();
-        $this->mensagemFallback = null;
+        $existente = EmpresaAnalisada::query()->where('documento', $cnpj)->value('id');
+        if ($existente === null) {
+            return false;
+        }
+
+        $this->limparConsulta();
+        $this->mensagemErro = self::MSG_JA_CADASTRADA;
+        $this->empresaExistenteId = (string) $existente;
+        $this->statusConsultaRfb = 'ja_cadastrada';
+
+        return true;
+    }
+
+    private function limparConsulta(): void
+    {
+        $this->resultadoRfb = null;
+        $this->cnpjConsultado = null;
+        $this->mensagemErro = null;
+        $this->empresaExistenteId = null;
         $this->statusConsultaRfb = null;
     }
 
-    private function limparEnriquecimentoDoForm(): void
+    private static function observacoesOuNull(string $texto): ?string
     {
-        $this->enriquecido = false;
-        $this->enriquecidoAt = null;
+        $texto = trim($texto);
+
+        return $texto === '' ? null : $texto;
     }
 
     private static function normalizarCnae(string $cnae): ?string
@@ -291,6 +393,7 @@ final class Cadastrar extends Component
     public function render(): View
     {
         return view('livewire.empresa.cadastrar', [
+            'resultado' => $this->resultadoRfb !== null ? RfbCnpjResultSerializer::fromArray($this->resultadoRfb) : null,
             'ufs' => Uf::cases(),
             'situacoes' => SituacaoCadastral::cases(),
             'tipos' => TipoDocumento::cases(),

@@ -77,21 +77,16 @@ it('NÃO emite usuario_cadastrado se o email já estava confirmado (idempotênci
     expect(EventoProduto::where('nome_evento', 'usuario_cadastrado')->count())->toBe(0);
 });
 
-it('grava empresa_cadastrada com schema correto e sem PII no cadastro manual de CNPJ (CA-4)', function () {
+it('grava empresa_cadastrada com schema correto e sem PII no cadastro por CNPJ (CA-4)', function () {
     $usuario = Usuario::factory()->create();
     $this->actingAs($usuario);
 
-    $cnpj = EmpresaAnalisadaFactory::gerarCnpjValido();
+    $cnpj = EmpresaAnalisadaFactory::cnpjComRaiz('12345678');
 
     Livewire::test(Cadastrar::class)
-        ->set('tipo_documento', TipoDocumento::Cnpj->value)
         ->set('documento', $cnpj)
-        ->set('razao_social', 'Marcenaria Roberto LTDA')
-        ->set('cnae', '3101200')
-        ->set('municipio', 'Curitiba')
-        ->set('uf', 'PR')
-        ->set('situacao_cadastral', SituacaoCadastral::Ativa->value)
-        ->call('submit')
+        ->call('consultarReceita')
+        ->call('confirmar')
         ->assertRedirect();
 
     /** @var EmpresaAnalisada $empresa */
@@ -110,15 +105,18 @@ it('grava empresa_cadastrada com schema correto e sem PII no cadastro manual de 
     expect($propriedades)->toMatchArray([
         'empresa_id' => $empresa->id,
         'tipo_documento' => 'cnpj',
-        'fonte_enriquecimento' => 'manual',
-        'uf' => 'PR',
-        'cnae_2digitos' => '31',
+        'fonte_enriquecimento' => 'rfb',
+        'uf' => $empresa->uf,
+        'cnae_2digitos' => substr((string) $empresa->cnae, 0, 2),
     ]);
 
-    // PII ausente do payload.
+    // PII ausente do payload — inclusive nomes de sócios da ficha.
     $serializado = json_encode($propriedades);
     expect($serializado)->not->toContain($cnpj);
     expect($serializado)->not->toContain($empresa->razao_social);
+    foreach ($empresa->fichaRfb()->socios as $socio) {
+        expect($serializado)->not->toContain($socio->nome);
+    }
 });
 
 it('cnae_2digitos vira null quando a empresa não tem CNAE informado (CPF autônomo)', function () {
@@ -157,7 +155,7 @@ it('emite empresa_cadastrada com fonte_enriquecimento=rfb quando consulta foi be
         ->set('tipo_documento', TipoDocumento::Cnpj->value)
         ->set('documento', $cnpj)
         ->call('consultarReceita')
-        ->call('submit')
+        ->call('confirmar')
         ->assertRedirect();
 
     $empresa = EmpresaAnalisada::firstWhere('documento', $cnpj);

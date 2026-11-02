@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Domain\Cnpj;
 use App\Domain\Cpf;
 use App\Domain\FonteEnriquecimento;
+use App\Domain\Rfb\FichaRfb;
 use App\Domain\SituacaoCadastral;
 use App\Domain\TipoDocumento;
 use App\Domain\Uf;
@@ -45,6 +46,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $data_fundacao
  * @property FonteEnriquecimento $fonte_enriquecimento
  * @property Carbon|null $enriquecido_at
+ * @property array<string, mixed>|null $ficha_rfb
+ * @property string|null $observacoes
  * @property Carbon|null $deleted_at
  */
 #[Fillable([
@@ -60,6 +63,8 @@ use Illuminate\Support\Carbon;
     'data_fundacao',
     'fonte_enriquecimento',
     'enriquecido_at',
+    'ficha_rfb',
+    'observacoes',
 ])]
 #[ScopedBy([BelongsToUsuarioScope::class])]
 final class EmpresaAnalisada extends Model
@@ -75,6 +80,7 @@ final class EmpresaAnalisada extends Model
         'fonte_enriquecimento' => FonteEnriquecimento::class,
         'data_fundacao' => 'date',
         'enriquecido_at' => 'datetime',
+        'ficha_rfb' => 'array',
         'deleted_at' => 'datetime',
     ];
 
@@ -116,6 +122,15 @@ final class EmpresaAnalisada extends Model
                 ->latest('gerado_em')
                 ->limit(1),
         ]);
+    }
+
+    /**
+     * Ficha completa da RFB (STORY-063). Null para CPF e para empresas
+     * cadastradas antes da ficha existir.
+     */
+    public function fichaRfb(): ?FichaRfb
+    {
+        return is_array($this->ficha_rfb) ? FichaRfb::fromArray($this->ficha_rfb) : null;
     }
 
     public function ufEnum(): Uf

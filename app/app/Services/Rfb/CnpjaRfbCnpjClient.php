@@ -4,8 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\Rfb;
 
+use App\Domain\Rfb\Atividade;
+use App\Domain\Rfb\DataRfb;
+use App\Domain\Rfb\Endereco;
+use App\Domain\Rfb\FichaRfb;
+use App\Domain\Rfb\OpcaoRegime;
 use App\Domain\Rfb\RfbCnpjResult;
 use App\Domain\Rfb\RfbCnpjStatus;
+use App\Domain\Rfb\Socio;
 use App\Domain\SituacaoCadastral;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Carbon;
@@ -69,13 +75,78 @@ final class CnpjaRfbCnpjClient extends AbstractHttpRfbCnpjClient
         return new RfbCnpjResult(
             razaoSocial: $razaoSocial,
             nomeFantasia: self::stringOpcional($body, 'alias'),
-            cnae: self::cnaeNormalizado($body['mainActivity']['id'] ?? null),
+            cnae: Atividade::normalizarCodigo($body['mainActivity']['id'] ?? null),
             municipio: $municipio,
             uf: strtoupper($uf),
             situacaoCadastral: self::mapearSituacao(self::stringOpcional($body, 'status.text')),
             dataFundacao: self::parseDataIso(self::stringOpcional($body, 'founded')),
             fonteProvedor: self::PROVEDOR,
             consultadoAt: Carbon::now(),
+            ficha: self::ficha($body, $municipio, strtoupper($uf)),
+        );
+    }
+
+    /**
+     * Ficha completa (STORY-063 CA-3/CA-10). Formato conferido contra a
+     * resposta real do Open API em 2026-11-02 (fixture `sucesso-completo.json`).
+     *
+     * @param  array<string, mixed>  $body
+     */
+    private static function ficha(array $body, string $municipio, string $uf): FichaRfb
+    {
+        $lista = static fn (mixed $v): array => is_array($v) ? array_values(array_filter($v, 'is_array')) : [];
+
+        return new FichaRfb(
+            naturezaJuridica: self::stringOpcional($body, 'company.nature.text'),
+            porte: self::stringOpcional($body, 'company.size.text'),
+            capitalSocial: FichaRfb::normalizarCapital(data_get($body, 'company.equity')),
+            dataSituacao: DataRfb::normalizar($body['statusDate'] ?? null),
+            cnaePrincipal: Atividade::deBruto(data_get($body, 'mainActivity.id'), data_get($body, 'mainActivity.text')),
+            cnaesSecundarios: array_values(array_filter(array_map(
+                static fn (array $a): ?Atividade => Atividade::deBruto($a['id'] ?? null, $a['text'] ?? null),
+                $lista($body['sideActivities'] ?? null),
+            ))),
+            endereco: Endereco::deBruto([
+                'logradouro' => data_get($body, 'address.street'),
+                'numero' => data_get($body, 'address.number'),
+                'complemento' => data_get($body, 'address.details'),
+                'bairro' => data_get($body, 'address.district'),
+                'cep' => data_get($body, 'address.zip'),
+                'municipio' => $municipio,
+                'uf' => $uf,
+            ]),
+            socios: array_values(array_filter(array_map(
+                static fn (array $m): ?Socio => Socio::deBruto(
+                    data_get($m, 'person.name'),
+                    data_get($m, 'role.text'),
+                    data_get($m, 'person.taxId'),
+                    $m['since'] ?? null,
+                ),
+                $lista(data_get($body, 'company.members')),
+            ))),
+            simples: self::regime(data_get($body, 'company.simples')),
+            simei: self::regime(data_get($body, 'company.simei')),
+        );
+    }
+
+    /**
+     * `{optant, since, history: [{from, until}]}` — quando não optante, a data
+     * de exclusão é o `until` do último período do histórico.
+     */
+    private static function regime(mixed $bruto): OpcaoRegime
+    {
+        if (! is_array($bruto)) {
+            return new OpcaoRegime;
+        }
+
+        $optante = $bruto['optant'] ?? null;
+        $historico = is_array($bruto['history'] ?? null) ? array_values(array_filter($bruto['history'], 'is_array')) : [];
+        $ultimo = $historico === [] ? [] : $historico[count($historico) - 1];
+
+        return OpcaoRegime::deBruto(
+            $optante,
+            $bruto['since'] ?? ($ultimo['from'] ?? null),
+            $optante === false ? ($ultimo['until'] ?? null) : null,
         );
     }
 
@@ -138,17 +209,6 @@ final class CnpjaRfbCnpjClient extends AbstractHttpRfbCnpjClient
         }
 
         return $valor;
-    }
-
-    private static function cnaeNormalizado(mixed $bruto): ?string
-    {
-        if ($bruto === null || $bruto === '') {
-            return null;
-        }
-
-        $apenasDigitos = preg_replace('/\D+/', '', (string) $bruto) ?? '';
-
-        return $apenasDigitos === '' ? null : str_pad($apenasDigitos, 7, '0', STR_PAD_LEFT);
     }
 
     private static function mapearSituacao(?string $texto): SituacaoCadastral

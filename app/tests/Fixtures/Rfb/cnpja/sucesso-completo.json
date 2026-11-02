@@ -1,0 +1,109 @@
+{
+  "updated": "2026-11-01T23:36:33.842Z",
+  "taxId": "00000000000191",
+  "alias": "Direcao Geral",
+  "founded": "1966-08-01",
+  "head": true,
+  "company": {
+    "members": [
+      {
+        "since": "2023-06-12",
+        "person": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "type": "NATURAL",
+          "name": "Fulana de Tal Souza",
+          "taxId": "***123456**",
+          "age": "41-50",
+          "country": {
+            "id": 76,
+            "name": "Brasil"
+          }
+        },
+        "role": {
+          "id": 10,
+          "text": "Diretor"
+        }
+      },
+      {
+        "since": null,
+        "person": {
+          "id": "00000000-0000-0000-0000-000000000002",
+          "type": "UNKNOWN",
+          "name": "Beltrano Pereira Lima",
+          "taxId": null,
+          "country": {
+            "id": 999,
+            "name": "Desconhecido"
+          }
+        },
+        "role": {
+          "id": 10,
+          "text": "Diretor"
+        }
+      }
+    ],
+    "name": "BANCO DO BRASIL SA",
+    "jurisdiction": "União",
+    "equity": 120000000000,
+    "nature": {
+      "id": 2038,
+      "text": "Sociedade de Economia Mista"
+    },
+    "size": {
+      "id": 5,
+      "acronym": "DEMAIS",
+      "text": "Demais"
+    },
+    "simples": {
+      "optant": false,
+      "since": null,
+      "history": [
+        {
+          "from": "2007-07-01",
+          "until": "2012-12-31"
+        }
+      ],
+      "events": []
+    },
+    "simei": {
+      "optant": false,
+      "since": null,
+      "history": []
+    },
+    "id": "00000000"
+  },
+  "statusDate": "2005-11-03",
+  "status": {
+    "id": 2,
+    "text": "Ativa"
+  },
+  "address": {
+    "municipality": 5300108,
+    "street": "Quadra Saun Quadra 5 Bloco B Torre I, II, III",
+    "number": "SN",
+    "district": "Asa Norte",
+    "city": "Brasília",
+    "state": "DF",
+    "details": "Andar T I SL S101 a S1602 T II SL C101 a C1602 Tiii SL N101 a N1602",
+    "zip": "70040912",
+    "country": {
+      "id": 76,
+      "name": "Brasil"
+    }
+  },
+  "mainActivity": {
+    "id": 6422100,
+    "text": "Bancos múltiplos, com carteira comercial"
+  },
+  "sideActivities": [
+    {
+      "id": 6499999,
+      "text": "Outras atividades de serviços financeiros não especificadas anteriormente"
+    },
+    {
+      "id": 6463800,
+      "text": "Outras sociedades de participação, exceto holdings"
+    }
+  ],
+  "suframa": []
+}

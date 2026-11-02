@@ -24,38 +24,59 @@
          para Dusk compatível com testes anteriores (dusk="empresa-show-titulo"). --}}
     <p class="sr-only" dusk="empresa-show-titulo">{{ $empresa->razao_social }}</p>
 
+    @php($ficha = $empresa->fichaRfb())
+
     <x-card>
-        <div class="mb-4">
+        <div class="mb-4 flex flex-wrap gap-2 items-center">
             <span class="pill" dusk="empresa-show-fonte">
                 Fonte: {{ $empresa->fonte_enriquecimento->rotulo() }}
             </span>
+            @if ($ficha && $empresa->enriquecido_at)
+                <span class="text-sm text-[color:var(--color-secondary)]" dusk="empresa-show-consultado-em">
+                    Dados da Receita de {{ $empresa->enriquecido_at->format('d/m/Y') }}
+                </span>
+            @endif
         </div>
 
-        <dl class="grid grid-cols-1 sm:grid-cols-[max-content_1fr] gap-x-6 gap-y-2 m-0">
-            <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">Tipo do documento</dt>
-            <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-tipo">{{ strtoupper($empresa->tipo_documento->value) }}</dd>
+        @if ($ficha)
+            {{-- STORY-063: ficha RFB completa, só-leitura (PDR-010). --}}
+            <x-empresa.ficha-rfb :cnpj="$empresa->documento"
+                                 :razao-social="$empresa->razao_social"
+                                 :nome-fantasia="$empresa->nome_fantasia"
+                                 :situacao="$empresa->situacao_cadastral"
+                                 :data-abertura="$empresa->data_fundacao?->format('Y-m-d')"
+                                 :ficha="$ficha"/>
+        @else
+            <dl class="grid grid-cols-1 sm:grid-cols-[max-content_1fr] gap-x-6 gap-y-2 m-0">
+                <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">Tipo do documento</dt>
+                <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-tipo">{{ strtoupper($empresa->tipo_documento->value) }}</dd>
 
-            <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">{{ strtoupper($empresa->tipo_documento->value) }}</dt>
-            <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-documento">{{ $empresa->documentoFormatado() }}</dd>
+                <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">{{ strtoupper($empresa->tipo_documento->value) }}</dt>
+                <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-documento">{{ $empresa->documentoFormatado() }}</dd>
 
-            <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">Razão social</dt>
-            <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-razao-social">{{ $empresa->razao_social }}</dd>
+                <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">Razão social</dt>
+                <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-razao-social">{{ $empresa->razao_social }}</dd>
 
-            <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">Nome fantasia</dt>
-            <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-nome-fantasia">{{ $empresa->nome_fantasia ?: '—' }}</dd>
+                <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">Nome fantasia</dt>
+                <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-nome-fantasia">{{ $empresa->nome_fantasia ?: '—' }}</dd>
 
-            <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">CNAE</dt>
-            <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-cnae">{{ $empresa->cnae ?: '—' }}</dd>
+                <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">CNAE</dt>
+                <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-cnae">{{ $empresa->cnae ?: '—' }}</dd>
 
-            <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">Município / UF</dt>
-            <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-localizacao">{{ $empresa->municipio }} / {{ $empresa->uf }}</dd>
+                <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">Município / UF</dt>
+                <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-localizacao">{{ $empresa->municipio }} / {{ $empresa->uf }}</dd>
 
-            <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">Situação cadastral</dt>
-            <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-situacao">{{ $empresa->situacao_cadastral->rotulo() }}</dd>
+                <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">Situação cadastral</dt>
+                <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-situacao">{{ $empresa->situacao_cadastral->rotulo() }}</dd>
 
-            <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">Data de fundação</dt>
-            <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-data-fundacao">{{ $empresa->data_fundacao?->format('d/m/Y') ?: '—' }}</dd>
-        </dl>
+                <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">Data de fundação</dt>
+                <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-data-fundacao">{{ $empresa->data_fundacao?->format('d/m/Y') ?: '—' }}</dd>
+            </dl>
+        @endif
+    </x-card>
+
+    <x-card class="mt-6">
+        <livewire:empresa.observacoes :empresa="$empresa"/>
     </x-card>
 
     {{-- CA-18: Voltar para Minhas Empresas (secondary com ícone seta-esquerda). --}}

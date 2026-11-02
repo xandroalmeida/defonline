@@ -212,3 +212,49 @@ it('falha com Erro5xx quando o corpo 200 não traz status reconhecível', functi
         expect($e->status)->toBe(RfbCnpjStatus::Erro5xx);
     }
 });
+
+it('mapeia a ficha completa do receitaws: CNAEs secundários, endereço, QSA e regime (STORY-063 CA-10)', function () {
+    // Formato da resposta real em 2026-11-02 (nomes do QSA anonimizados).
+    Http::fake([
+        'receitaws.com.br/*' => Http::response(carregarFixtureReceitaws('sucesso-completo.json'), 200),
+    ]);
+
+    $ficha = (new ReceitawsRfbCnpjClient)->consultarCnpj('00000000000191')->ficha;
+
+    expect($ficha->naturezaJuridica)->toBe('Sociedade de Economia Mista');
+    expect($ficha->porte)->toBe('DEMAIS');
+    expect($ficha->capitalSocial)->toBe('120000000000.00');
+    expect($ficha->dataSituacao)->toBe('2005-11-03');
+    expect($ficha->cnaePrincipal?->codigo)->toBe('6422100');
+    expect(array_map(fn ($a) => $a->codigo, $ficha->cnaesSecundarios))->toBe(['6499999']);
+    expect($ficha->endereco->logradouro)->toBe('Q SAUN QUADRA 5 BLOCO B TORRE I, II, III');
+    expect($ficha->endereco->numero)->toBe('SN');
+    expect($ficha->endereco->bairro)->toBe('ASA NORTE');
+    expect($ficha->endereco->cep)->toBe('70040912');
+    expect($ficha->endereco->municipio)->toBe('BRASILIA');
+    expect($ficha->socios)->toHaveCount(2);
+    expect($ficha->socios[0]->nome)->toBe('FULANA DE TAL SOUZA');
+    expect($ficha->socios[0]->qualificacao)->toBe('Diretor');
+    expect($ficha->socios[1]->qualificacao)->toBe('Sócio-Administrador');
+    expect($ficha->socios[0]->documento)->toBeNull();
+    expect($ficha->simples->optante)->toBeFalse();
+    expect($ficha->simples->dataOpcao)->toBe('2007-07-01');
+    expect($ficha->simples->dataExclusao)->toBe('2007-07-01');
+    expect($ficha->simei->optante)->toBeFalse();
+});
+
+it('ficha do receitaws tolera resposta mínima e ignora atividade "00.00-0-00" (STORY-063 CA-3)', function () {
+    $body = carregarFixtureReceitaws('sucesso-fantasia-vazia.json');
+    $body['atividades_secundarias'] = [['code' => '00.00-0-00', 'text' => 'Não informada']];
+    $body['simples'] = 'formato inesperado';
+    Http::fake(['receitaws.com.br/*' => Http::response($body, 200)]);
+
+    $ficha = (new ReceitawsRfbCnpjClient)->consultarCnpj('12345678000195')->ficha;
+
+    expect($ficha->naturezaJuridica)->toBeNull();
+    expect($ficha->cnaesSecundarios)->toBe([]);
+    expect($ficha->socios)->toBe([]);
+    expect($ficha->simples->optante)->toBeNull();
+    expect($ficha->simei->optante)->toBeNull();
+    expect($ficha->endereco->municipio)->toBe('Sao Paulo');
+});

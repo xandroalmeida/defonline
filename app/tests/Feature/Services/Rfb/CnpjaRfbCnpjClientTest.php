@@ -226,3 +226,72 @@ it('falha com Erro5xx quando o corpo 200 está sem campo obrigatório', function
         expect($e->status)->toBe(RfbCnpjStatus::Erro5xx);
     }
 });
+
+it('mapeia a ficha completa do cnpja: CNAEs secundários, endereço, sócios e regime (STORY-063 CA-10)', function () {
+    // Formato da resposta real do Open API em 2026-11-02 (nomes de sócios anonimizados).
+    Http::fake([
+        'open.cnpja.com/office/*' => Http::response(carregarFixtureCnpja('sucesso-completo.json'), 200),
+    ]);
+
+    $ficha = (new CnpjaRfbCnpjClient)->consultarCnpj('00000000000191')->ficha;
+
+    expect($ficha->naturezaJuridica)->toBe('Sociedade de Economia Mista');
+    expect($ficha->porte)->toBe('Demais');
+    expect($ficha->capitalSocial)->toBe('120000000000.00');
+    expect($ficha->dataSituacao)->toBe('2005-11-03');
+    expect($ficha->cnaePrincipal?->codigo)->toBe('6422100');
+    expect($ficha->cnaePrincipal?->descricao)->toBe('Bancos múltiplos, com carteira comercial');
+    expect(array_map(fn ($a) => $a->codigo, $ficha->cnaesSecundarios))->toBe(['6499999', '6463800']);
+    expect($ficha->endereco->logradouro)->toBe('Quadra Saun Quadra 5 Bloco B Torre I, II, III');
+    expect($ficha->endereco->numero)->toBe('SN');
+    expect($ficha->endereco->bairro)->toBe('Asa Norte');
+    expect($ficha->endereco->cep)->toBe('70040912');
+    expect($ficha->endereco->complemento)->not->toBeNull();
+    expect($ficha->endereco->municipio)->toBe('Brasília');
+    expect($ficha->endereco->uf)->toBe('DF');
+    expect($ficha->socios)->toHaveCount(2);
+    expect($ficha->socios[0]->nome)->toBe('Fulana de Tal Souza');
+    expect($ficha->socios[0]->qualificacao)->toBe('Diretor');
+    expect($ficha->socios[0]->documento)->toBe('***123456**');
+    expect($ficha->socios[0]->dataEntrada)->toBe('2023-06-12');
+    expect($ficha->socios[1]->documento)->toBeNull();
+    expect($ficha->socios[1]->dataEntrada)->toBeNull();
+    // Excluído do Simples: data de opção e de exclusão vêm do último período do histórico.
+    expect($ficha->simples->optante)->toBeFalse();
+    expect($ficha->simples->dataOpcao)->toBe('2007-07-01');
+    expect($ficha->simples->dataExclusao)->toBe('2012-12-31');
+    expect($ficha->simei->optante)->toBeFalse();
+    expect($ficha->simei->dataOpcao)->toBeNull();
+});
+
+it('mapeia optante do Simples/SIMEI do cnpja sem data de exclusão (STORY-063 CA-10)', function () {
+    $body = carregarFixtureCnpja('sucesso-completo.json');
+    $body['company']['simples'] = ['optant' => true, 'since' => '2019-01-01', 'history' => []];
+    $body['company']['simei'] = ['optant' => true, 'since' => '2019-01-01', 'history' => [['from' => '2010-01-01', 'until' => '2015-01-01']]];
+    Http::fake(['open.cnpja.com/office/*' => Http::response($body, 200)]);
+
+    $ficha = (new CnpjaRfbCnpjClient)->consultarCnpj('00000000000191')->ficha;
+
+    expect($ficha->simples->optante)->toBeTrue();
+    expect($ficha->simples->dataOpcao)->toBe('2019-01-01');
+    expect($ficha->simples->dataExclusao)->toBeNull();
+    expect($ficha->simei->dataExclusao)->toBeNull();
+});
+
+it('ficha do cnpja tolera resposta mínima — campos ausentes viram null/listas vazias (STORY-063 CA-3)', function () {
+    Http::fake([
+        'open.cnpja.com/office/*' => Http::response(carregarFixtureCnpja('sucesso-schema-legado.json'), 200),
+    ]);
+
+    $ficha = (new CnpjaRfbCnpjClient)->consultarCnpj('12345678000195')->ficha;
+
+    expect($ficha->naturezaJuridica)->toBeNull();
+    expect($ficha->capitalSocial)->toBeNull();
+    expect($ficha->cnaesSecundarios)->toBe([]);
+    expect($ficha->socios)->toBe([]);
+    expect($ficha->simples->optante)->toBeNull();
+    expect($ficha->simei->optante)->toBeNull();
+    expect($ficha->endereco->logradouro)->toBeNull();
+    expect($ficha->endereco->municipio)->toBe('Sao Paulo');
+    expect($ficha->endereco->uf)->toBe('SP');
+});

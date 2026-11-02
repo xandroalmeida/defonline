@@ -31,6 +31,7 @@ final readonly class RfbCnpjResult
         public ?Carbon $dataFundacao,
         public string $fonteProvedor,
         public Carbon $consultadoAt,
+        public FichaRfb $ficha = new FichaRfb,
     ) {}
 
     /**

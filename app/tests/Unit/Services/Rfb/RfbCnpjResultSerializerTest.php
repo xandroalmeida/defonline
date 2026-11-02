@@ -2,7 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Domain\Rfb\Atividade;
+use App\Domain\Rfb\FichaRfb;
+use App\Domain\Rfb\OpcaoRegime;
 use App\Domain\Rfb\RfbCnpjResult;
+use App\Domain\Rfb\Socio;
 use App\Domain\SituacaoCadastral;
 use App\Services\Rfb\RfbCnpjResultSerializer;
 use Illuminate\Support\Carbon;
@@ -62,4 +66,31 @@ it('faz roundtrip preservando nullables', function () {
     expect($r->cnae)->toBeNull();
     expect($r->dataFundacao)->toBeNull();
     expect($r->situacaoCadastral)->toBe(SituacaoCadastral::Suspensa);
+});
+
+it('faz roundtrip da ficha completa e tolera cache antigo sem ficha (STORY-063)', function () {
+    $ficha = new FichaRfb(
+        porte: 'Microempresa',
+        cnaesSecundarios: [new Atividade('4724500', 'Hortifruti')],
+        socios: [new Socio('Fulana', 'Sócio-Administrador', '***123456**', '2020-01-01')],
+        simei: new OpcaoRegime(true, '2020-01-01'),
+    );
+    $original = new RfbCnpjResult(
+        razaoSocial: 'Padaria Boa Vista ME',
+        nomeFantasia: null,
+        cnae: '4721102',
+        municipio: 'Recife',
+        uf: 'PE',
+        situacaoCadastral: SituacaoCadastral::Ativa,
+        dataFundacao: null,
+        fonteProvedor: 'mock',
+        consultadoAt: Carbon::create(2026, 11, 2),
+        ficha: $ficha,
+    );
+
+    $array = RfbCnpjResultSerializer::toArray($original);
+    expect(RfbCnpjResultSerializer::fromArray($array)->ficha)->toEqual($ficha);
+
+    unset($array['ficha']);
+    expect(RfbCnpjResultSerializer::fromArray($array)->ficha)->toEqual(new FichaRfb);
 });

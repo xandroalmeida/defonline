@@ -4,8 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\Rfb;
 
+use App\Domain\Rfb\Atividade;
+use App\Domain\Rfb\DataRfb;
+use App\Domain\Rfb\Endereco;
+use App\Domain\Rfb\FichaRfb;
+use App\Domain\Rfb\OpcaoRegime;
 use App\Domain\Rfb\RfbCnpjResult;
 use App\Domain\Rfb\RfbCnpjStatus;
+use App\Domain\Rfb\Socio;
 use App\Domain\SituacaoCadastral;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -83,14 +89,66 @@ final class ReceitawsRfbCnpjClient extends AbstractHttpRfbCnpjClient
         return new RfbCnpjResult(
             razaoSocial: $razaoSocial,
             nomeFantasia: self::stringOpcional($body, 'fantasia'),
-            cnae: self::cnaeNormalizado($body['atividade_principal'][0]['code'] ?? null),
+            cnae: Atividade::normalizarCodigo($body['atividade_principal'][0]['code'] ?? null),
             municipio: $municipio,
             uf: strtoupper($uf),
             situacaoCadastral: self::mapearSituacao(self::stringOpcional($body, 'situacao')),
             dataFundacao: self::parseDataBr(self::stringOpcional($body, 'abertura')),
             fonteProvedor: self::PROVEDOR,
             consultadoAt: Carbon::now(),
+            ficha: self::ficha($body, $municipio, strtoupper($uf)),
         );
+    }
+
+    /**
+     * Ficha completa (STORY-063 CA-3/CA-10). Formato conferido contra a
+     * resposta real em 2026-11-02 (fixture `sucesso-completo.json`). O QSA do
+     * receitaws não traz documento nem data de entrada do sócio.
+     *
+     * @param  array<string, mixed>  $body
+     */
+    private static function ficha(array $body, string $municipio, string $uf): FichaRfb
+    {
+        $lista = static fn (mixed $v): array => is_array($v) ? array_values(array_filter($v, 'is_array')) : [];
+        $principal = $lista($body['atividade_principal'] ?? null)[0] ?? [];
+        $natureza = self::stringOpcional($body, 'natureza_juridica');
+
+        return new FichaRfb(
+            // "203-8 - Sociedade de Economia Mista" → só o texto, como no cnpja.
+            naturezaJuridica: $natureza === null ? null : (preg_replace('/^[\d-]+\s*-\s*/', '', $natureza) ?? $natureza),
+            porte: self::stringOpcional($body, 'porte'),
+            capitalSocial: FichaRfb::normalizarCapital($body['capital_social'] ?? null),
+            dataSituacao: DataRfb::normalizar($body['data_situacao'] ?? null),
+            cnaePrincipal: Atividade::deBruto($principal['code'] ?? null, $principal['text'] ?? null),
+            cnaesSecundarios: array_values(array_filter(array_map(
+                static fn (array $a): ?Atividade => Atividade::deBruto($a['code'] ?? null, $a['text'] ?? null),
+                $lista($body['atividades_secundarias'] ?? null),
+            ))),
+            endereco: Endereco::deBruto([
+                'logradouro' => $body['logradouro'] ?? null,
+                'numero' => $body['numero'] ?? null,
+                'complemento' => $body['complemento'] ?? null,
+                'bairro' => $body['bairro'] ?? null,
+                'cep' => $body['cep'] ?? null,
+                'municipio' => $municipio,
+                'uf' => $uf,
+            ]),
+            socios: array_values(array_filter(array_map(
+                static fn (array $q): ?Socio => Socio::deBruto($q['nome'] ?? null, $q['qual'] ?? null),
+                $lista($body['qsa'] ?? null),
+            ))),
+            simples: self::regime($body['simples'] ?? null),
+            simei: self::regime($body['simei'] ?? null),
+        );
+    }
+
+    private static function regime(mixed $bruto): OpcaoRegime
+    {
+        if (! is_array($bruto)) {
+            return new OpcaoRegime;
+        }
+
+        return OpcaoRegime::deBruto($bruto['optante'] ?? null, $bruto['data_opcao'] ?? null, $bruto['data_exclusao'] ?? null);
     }
 
     /**
@@ -151,17 +209,6 @@ final class ReceitawsRfbCnpjClient extends AbstractHttpRfbCnpjClient
         }
 
         return $valor;
-    }
-
-    private static function cnaeNormalizado(mixed $bruto): ?string
-    {
-        if ($bruto === null || $bruto === '') {
-            return null;
-        }
-
-        $apenasDigitos = preg_replace('/\D+/', '', (string) $bruto) ?? '';
-
-        return $apenasDigitos === '' ? null : str_pad($apenasDigitos, 7, '0', STR_PAD_LEFT);
     }
 
     private static function mapearSituacao(?string $texto): SituacaoCadastral

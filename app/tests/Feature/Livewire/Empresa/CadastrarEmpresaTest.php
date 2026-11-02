@@ -14,7 +14,9 @@ use Database\Factories\EmpresaAnalisadaFactory;
 use Livewire\Livewire;
 
 /**
- * Feature da STORY-014 cobrindo CA-1..CA-6.
+ * Feature da STORY-014 cobrindo CA-1..CA-6 — desde a STORY-063 (PDR-010) o
+ * formulário manual é exclusivo do autônomo com CPF; o caminho CNPJ está em
+ * CadastroPorCnpjTest.
  */
 beforeEach(function () {
     $this->usuario = Usuario::factory()->create();
@@ -27,40 +29,21 @@ it('exige autenticação para acessar /empresas/nova', function () {
     $this->get('/empresas/nova')->assertRedirect('/login');
 });
 
-it('exibe o formulário de cadastro em /empresas/nova', function () {
+it('abre em modo CNPJ e o link de autônomo leva ao formulário manual de CPF (STORY-063 CA-9)', function () {
     $this->get('/empresas/nova')
         ->assertOk()
         ->assertSee('Cadastrar empresa')
-        ->assertSee('Razão social')
-        ->assertSee('CNAE');
-});
-
-it('cria empresa com CNPJ válido e redireciona para detalhes (CA-1, CA-2)', function () {
-    $cnpj = EmpresaAnalisadaFactory::gerarCnpjValido();
+        ->assertSee('Não tenho CNPJ (sou autônomo)')
+        ->assertDontSee('Razão social');
 
     Livewire::test(Cadastrar::class)
-        ->set('tipo_documento', TipoDocumento::Cnpj->value)
-        ->set('documento', $cnpj)
-        ->set('razao_social', 'Marcenaria Roberto LTDA')
-        ->set('nome_fantasia', 'Marcenaria Roberto')
-        ->set('cnae', '1622699')
-        ->set('municipio', 'São Paulo')
-        ->set('uf', 'SP')
-        ->set('situacao_cadastral', SituacaoCadastral::Ativa->value)
-        ->set('data_fundacao', '2010-03-15')
-        ->call('submit')
-        ->assertRedirect();
-
-    $empresa = EmpresaAnalisada::firstWhere('documento', $cnpj);
-
-    expect($empresa)->not->toBeNull();
-    expect($empresa->usuario_id)->toBe($this->usuario->id);
-    expect($empresa->tipo_documento)->toBe(TipoDocumento::Cnpj);
-    expect($empresa->razao_social)->toBe('Marcenaria Roberto LTDA');
-    expect($empresa->fonte_enriquecimento)->toBe(FonteEnriquecimento::Manual);
-    expect($empresa->enriquecido_at)->toBeNull();
-    expect($empresa->uf)->toBe('SP');
-    expect($empresa->cnae)->toBe('1622699');
+        ->call('usarCpf')
+        ->assertSet('tipo_documento', TipoDocumento::Cpf->value)
+        ->assertSee('Razão social')
+        ->assertSee('CNAE')
+        ->call('usarCnpj')
+        ->assertSet('tipo_documento', TipoDocumento::Cnpj->value)
+        ->assertDontSee('Razão social');
 });
 
 it('cria empresa com CPF válido (autônomo) e fonte manual (CA-2)', function () {
@@ -69,6 +52,7 @@ it('cria empresa com CPF válido (autônomo) e fonte manual (CA-2)', function ()
     Livewire::test(Cadastrar::class)
         ->set('tipo_documento', TipoDocumento::Cpf->value)
         ->set('documento', $cpf)
+        ->set('observacoes', '  Cliente indicada pelo contador.  ')
         ->set('razao_social', 'Joana — Costureira Autônoma')
         ->set('municipio', 'Belo Horizonte')
         ->set('uf', 'MG')
@@ -81,18 +65,20 @@ it('cria empresa com CPF válido (autônomo) e fonte manual (CA-2)', function ()
     expect($empresa)->not->toBeNull();
     expect($empresa->tipo_documento)->toBe(TipoDocumento::Cpf);
     expect($empresa->fonte_enriquecimento)->toBe(FonteEnriquecimento::Manual);
+    expect($empresa->ficha_rfb)->toBeNull();
+    expect($empresa->observacoes)->toBe('Cliente indicada pelo contador.');
 });
 
-it('rejeita CNPJ inválido (DV errado) com mensagem específica (CA-3)', function () {
+it('rejeita observações acima de 2.000 caracteres no cadastro por CPF (STORY-063 CA-5)', function () {
     Livewire::test(Cadastrar::class)
-        ->set('tipo_documento', TipoDocumento::Cnpj->value)
-        ->set('documento', '11.222.333/0001-82')               // DV errado
-        ->set('razao_social', 'Empresa X')
-        ->set('municipio', 'São Paulo')
-        ->set('uf', 'SP')
+        ->set('tipo_documento', TipoDocumento::Cpf->value)
+        ->set('documento', EmpresaAnalisadaFactory::gerarCpfValido())
+        ->set('razao_social', 'Autônomo')
+        ->set('municipio', 'BH')
+        ->set('uf', 'MG')
+        ->set('observacoes', str_repeat('a', 2001))
         ->call('submit')
-        ->assertHasErrors(['documento'])
-        ->assertNoRedirect();
+        ->assertHasErrors(['observacoes']);
 
     expect(EmpresaAnalisada::count())->toBe(0);
 });
@@ -111,8 +97,8 @@ it('rejeita CPF inválido com mensagem específica (CA-3)', function () {
 
 it('exige razão social, município e UF (CA-3)', function () {
     Livewire::test(Cadastrar::class)
-        ->set('tipo_documento', TipoDocumento::Cnpj->value)
-        ->set('documento', EmpresaAnalisadaFactory::gerarCnpjValido())
+        ->set('tipo_documento', TipoDocumento::Cpf->value)
+        ->set('documento', EmpresaAnalisadaFactory::gerarCpfValido())
         ->set('razao_social', '')
         ->set('municipio', '')
         ->set('uf', '')
@@ -122,8 +108,8 @@ it('exige razão social, município e UF (CA-3)', function () {
 
 it('rejeita UF fora da lista (CA-3)', function () {
     Livewire::test(Cadastrar::class)
-        ->set('tipo_documento', TipoDocumento::Cnpj->value)
-        ->set('documento', EmpresaAnalisadaFactory::gerarCnpjValido())
+        ->set('tipo_documento', TipoDocumento::Cpf->value)
+        ->set('documento', EmpresaAnalisadaFactory::gerarCpfValido())
         ->set('razao_social', 'X')
         ->set('municipio', 'Y')
         ->set('uf', 'XX')                                       // UF inexistente
@@ -133,8 +119,8 @@ it('rejeita UF fora da lista (CA-3)', function () {
 
 it('rejeita CNAE com formato inválido (CA-3)', function () {
     Livewire::test(Cadastrar::class)
-        ->set('tipo_documento', TipoDocumento::Cnpj->value)
-        ->set('documento', EmpresaAnalisadaFactory::gerarCnpjValido())
+        ->set('tipo_documento', TipoDocumento::Cpf->value)
+        ->set('documento', EmpresaAnalisadaFactory::gerarCpfValido())
         ->set('razao_social', 'X')
         ->set('cnae', '12345')                                  // 5 dígitos, não 7
         ->set('municipio', 'Y')
@@ -145,8 +131,8 @@ it('rejeita CNAE com formato inválido (CA-3)', function () {
 
 it('rejeita data de fundação no futuro (CA-3)', function () {
     Livewire::test(Cadastrar::class)
-        ->set('tipo_documento', TipoDocumento::Cnpj->value)
-        ->set('documento', EmpresaAnalisadaFactory::gerarCnpjValido())
+        ->set('tipo_documento', TipoDocumento::Cpf->value)
+        ->set('documento', EmpresaAnalisadaFactory::gerarCpfValido())
         ->set('razao_social', 'X')
         ->set('municipio', 'Y')
         ->set('uf', 'SP')
@@ -157,8 +143,8 @@ it('rejeita data de fundação no futuro (CA-3)', function () {
 
 it('aceita CNAE no formato com pontuação e normaliza para 7 dígitos', function () {
     Livewire::test(Cadastrar::class)
-        ->set('tipo_documento', TipoDocumento::Cnpj->value)
-        ->set('documento', EmpresaAnalisadaFactory::gerarCnpjValido())
+        ->set('tipo_documento', TipoDocumento::Cpf->value)
+        ->set('documento', EmpresaAnalisadaFactory::gerarCpfValido())
         ->set('razao_social', 'Empresa Z')
         ->set('cnae', '1622-6/99')
         ->set('municipio', 'Y')
@@ -170,11 +156,11 @@ it('aceita CNAE no formato com pontuação e normaliza para 7 dígitos', functio
 });
 
 it('grava audit_log "empresa.cadastrada" SEM documento (CA-6)', function () {
-    $cnpj = EmpresaAnalisadaFactory::gerarCnpjValido();
+    $cpf = EmpresaAnalisadaFactory::gerarCpfValido();
 
     Livewire::test(Cadastrar::class)
-        ->set('tipo_documento', TipoDocumento::Cnpj->value)
-        ->set('documento', $cnpj)
+        ->set('tipo_documento', TipoDocumento::Cpf->value)
+        ->set('documento', $cpf)
         ->set('razao_social', 'Empresa do Roberto')
         ->set('municipio', 'São Paulo')
         ->set('uf', 'SP')
@@ -188,20 +174,20 @@ it('grava audit_log "empresa.cadastrada" SEM documento (CA-6)', function () {
     $after = (array) $audit->after;
     expect($after)->toHaveKeys(['tipo_documento', 'fonte_enriquecimento', 'uf']);
     expect($after)->not->toHaveKey('documento');                // PII fora do log
-    expect(json_encode($audit->getAttributes()))->not->toContain($cnpj);
+    expect(json_encode($audit->getAttributes()))->not->toContain($cpf);
 });
 
 it('proíbe o mesmo Usuário cadastrar duas empresas com o mesmo documento', function () {
-    $cnpj = EmpresaAnalisadaFactory::gerarCnpjValido();
+    $cpf = EmpresaAnalisadaFactory::gerarCpfValido();
 
     EmpresaAnalisada::factory()->create([
         'usuario_id' => $this->usuario->id,
-        'documento' => $cnpj,
+        'documento' => $cpf,
     ]);
 
     Livewire::test(Cadastrar::class)
-        ->set('tipo_documento', TipoDocumento::Cnpj->value)
-        ->set('documento', $cnpj)
+        ->set('tipo_documento', TipoDocumento::Cpf->value)
+        ->set('documento', $cpf)
         ->set('razao_social', 'Mesma empresa de novo')
         ->set('municipio', 'X')
         ->set('uf', 'SP')
@@ -210,19 +196,19 @@ it('proíbe o mesmo Usuário cadastrar duas empresas com o mesmo documento', fun
 });
 
 it('permite Usuário B cadastrar empresa com mesmo documento de Usuário A (multi-tenancy, CA-4)', function () {
-    $cnpj = EmpresaAnalisadaFactory::gerarCnpjValido();
+    $cpf = EmpresaAnalisadaFactory::gerarCpfValido();
 
     EmpresaAnalisada::factory()->create([
         'usuario_id' => $this->usuario->id,
-        'documento' => $cnpj,
+        'documento' => $cpf,
     ]);
 
     $outro = Usuario::factory()->create();
     $this->actingAs($outro);
 
     Livewire::test(Cadastrar::class)
-        ->set('tipo_documento', TipoDocumento::Cnpj->value)
-        ->set('documento', $cnpj)
+        ->set('tipo_documento', TipoDocumento::Cpf->value)
+        ->set('documento', $cpf)
         ->set('razao_social', 'A mesma empresa, outro consultor')
         ->set('municipio', 'X')
         ->set('uf', 'SP')
@@ -230,26 +216,26 @@ it('permite Usuário B cadastrar empresa com mesmo documento de Usuário A (mult
         ->assertRedirect();
 
     expect(EmpresaAnalisada::withoutGlobalScope(BelongsToUsuarioScope::class)
-        ->where('documento', $cnpj)->count())->toBe(2);
+        ->where('documento', $cpf)->count())->toBe(2);
 });
 
 it('permite recadastrar empresa após soft delete (índice único parcial)', function () {
-    $cnpj = EmpresaAnalisadaFactory::gerarCnpjValido();
+    $cpf = EmpresaAnalisadaFactory::gerarCpfValido();
 
     $original = EmpresaAnalisada::factory()->create([
         'usuario_id' => $this->usuario->id,
-        'documento' => $cnpj,
+        'documento' => $cpf,
     ]);
     $original->delete();                                          // soft delete
 
     Livewire::test(Cadastrar::class)
-        ->set('tipo_documento', TipoDocumento::Cnpj->value)
-        ->set('documento', $cnpj)
+        ->set('tipo_documento', TipoDocumento::Cpf->value)
+        ->set('documento', $cpf)
         ->set('razao_social', 'Recadastrei')
         ->set('municipio', 'X')
         ->set('uf', 'SP')
         ->call('submit')
         ->assertRedirect();
 
-    expect(EmpresaAnalisada::where('documento', $cnpj)->count())->toBe(1);
+    expect(EmpresaAnalisada::where('documento', $cpf)->count())->toBe(1);
 });
