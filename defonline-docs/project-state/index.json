@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-10-30",
+  "generated_at": "2026-11-02",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-02",
@@ -138,7 +138,9 @@
         "STORY-018",
         "STORY-021",
         "STORY-022",
-        "STORY-023"
+        "STORY-023",
+        "STORY-063",
+        "STORY-064"
       ],
       "validation_report": {
         "path": "epics/EPIC-001-cadastro-minimo/validation/report.md",
@@ -169,7 +171,7 @@
       "blocked_by_epics": [],
       "created_at": "2026-05-20",
       "updated_at": "2026-05-24",
-      "note": "Fechado em 2026-05-24 após validação `approved` (PO sobrescreveu o `approved_with_pending` inicial do Validador — detalhes na seção 'Decisão do PO' do `validation/report.md`). 3 estórias de débito criadas no momento do fechamento: STORY-021 (spike Arquiteto: IDR 403 vs 404), STORY-022 (renomear kind↔tipo em business_metrics), STORY-023 (fix bump-rc.yml). Débito não-virado-estória: rotacionar chave cnpja queimada (STORY-018 notas — ação operacional do PO fora do fluxo de sprint)."
+      "note": "Fechado em 2026-05-24 após validação `approved` (PO sobrescreveu o `approved_with_pending` inicial do Validador — detalhes na seção 'Decisão do PO' do `validation/report.md`). 3 estórias de débito criadas no momento do fechamento: STORY-021 (spike Arquiteto: IDR 403 vs 404), STORY-022 (renomear kind↔tipo em business_metrics), STORY-023 (fix bump-rc.yml). Débito não-virado-estória: rotacionar chave cnpja queimada (STORY-018 notas — ação operacional do PO fora do fluxo de sprint). | 2026-11-02: STORY-063/064 acrescentadas como evolução pós-fechamento (PDR-010) — o épico não reabre."
     },
     {
       "id": "EPIC-002",
@@ -1824,6 +1826,49 @@
       "created_at": "2026-08-06",
       "updated_at": "2026-08-06",
       "note": "Achado da STORY-052, aprovado pelo PO para virar estória em 2026-08-06. Os dois mecanismos de inventário (matriz_lacunas_path desde a STORY-032, drm.lacunas_path desde a STORY-052) apontam para defonline-docs/, que fica fora do que o container monta — o guard is_dir() silencia o I/O e nunca registram nada em desenvolvimento. O PDR-009 §2 deu esse arquivo ao PO como instrumento de planejamento, e instrumento que só funciona em produção não planeja. CA-3 pede que o silêncio deixe de ser silencioso."
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-064"
+      ],
+      "epic_id": "EPIC-001",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "created_at": "2026-11-02",
+      "updated_at": "2026-11-02",
+      "id": "STORY-063",
+      "slug": "cadastro-empresa-cnpj-first-ficha-rfb",
+      "title": "Cadastro de empresa pelo CNPJ — ficha completa da Receita, só-leitura, com observações do usuário",
+      "estimated_session_size": "L",
+      "blocked_by": [],
+      "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-063-cadastro-empresa-cnpj-first-ficha-rfb.md",
+      "related_pdr": "PDR-010",
+      "note": "CNPJ primeiro; ficha com CNAEs secundários, endereço, sócios, MEI/Simples; nada editável; observações; falha bloqueia; CPF manual preservado."
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [],
+      "epic_id": "EPIC-001",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "created_at": "2026-11-02",
+      "updated_at": "2026-11-02",
+      "id": "STORY-064",
+      "slug": "atualizar-dados-da-receita",
+      "title": "\"Atualizar dados da Receita\" na tela da empresa — leva as empresas legadas para a ficha completa",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-063"
+      ],
+      "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-064-atualizar-dados-da-receita.md",
+      "related_pdr": "PDR-010"
     }
   ],
   "sprints": [
@@ -2417,6 +2462,33 @@
         "created_at": "2026-08-06",
         "updated_at": "2026-08-06",
         "note": "Desbloqueia a STORY-052 sem esperar a EBC. DEFAULTS (§1): rótulos por setor já nascem validados (Anexo K §K.4); tooltips provisórios, e campo SEM tooltip não renderiza <x-help> (ícone que abre texto genérico é pior que ícone nenhum); TODAS as faixas de farol `nao_calibrada` -> nenhum farol, comportamento correto e não lacuna; textos de leitura AUSENTES por consequência (onde o farol cala, a leitura cala — leitura sobre faixa não calibrada é o farol vestido de prosa, risco do NRF §9.3); alertas e bloqueios presentes desde o dia um, única exceção, porque bloqueio é FUNÇÃO e não explicação. ISOLAMENTO (§2): tudo o que a EBC não validou vive em config/drm/provisorio/, com resolução por sobreposição (validado vence), promover = mover a linha entre arquivos sem tocar em código, teste arquitetural contra a mesma chave nos dois lugares, faixa carrega estado/origem/validado_em com a regra 'não calibrada não produz farol' no MOTOR e não na tela, inventário de lacunas legível pelo PO no padrão do MatrizRecomendacoes (STORY-032), e conteudo_version própria em config/drm.php no padrão de config/quiz/versao.php. Diretório separado em vez de campo `origem` por entrada: o provisório precisa ser desconfortável de ver, senão vira permanente — lição da entrada inerte do ncg_absoluto, que virou a STORY-060 dois meses depois. NOME (§3): [DECIDIR-A] resolvido — 'Raio X do Negócio' nomeia o MÓDULO DRM (o Diagnóstico segue Diagnóstico; a plataforma segue DEFOnline). É nome de INTERFACE; DRM segue como nome técnico em tabelas drm_*, config, motor_drm_version, rotas, classes e docs — nome comercial muda, nome técnico não deve mudar junto, senão revisão de marca vira migração de banco."
+      },
+      {
+        "id": "PDR-010",
+        "slug": "cadastro-empresa-cnpj-first-dados-rfb-imutaveis",
+        "title": "Cadastro de Empresa Analisada começa pelo CNPJ; dados da Receita são imutáveis e completos",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-010-cadastro-empresa-cnpj-first-dados-rfb-imutaveis.md",
+        "decided_at": "2026-11-02",
+        "decided_by": "PO (Alexandro / Claude)",
+        "approved_by": "Alexandro",
+        "approved_at": "2026-11-02",
+        "related_epics": [
+          "EPIC-001",
+          "EPIC-010"
+        ],
+        "related_adrs": [
+          "ADR-002",
+          "ADR-003",
+          "ADR-004"
+        ],
+        "related_idrs": [
+          "IDR-004",
+          "IDR-005"
+        ],
+        "created_at": "2026-11-02",
+        "updated_at": "2026-11-02",
+        "note": "Contraria NRF §3.1 e espec §3.3 Passo 2/§1.5.2 para CNPJ: sem fallback manual, dados RFB não editáveis. CPF segue manual. Legado via 'Atualizar dados da Receita' (sem lote)."
       }
     ],
     "adr": [
