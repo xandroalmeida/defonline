@@ -6,8 +6,12 @@ name: zalk-deploy — build + deploy no ZalkVPS
 #  2. SSH como `defonline-prod`: copia infra/zalk/docker-compose.yml e grava o .env
 #     a partir de APP_ENV_FILE.
 #  3. `zalk-deploy <imagem>` — zalk-check, migrations (predeploy), up --wait.
-#  4. Smoke pós-deploy read-only (curl /health + /ready + Dusk --group=smoke).
+#  4. Smoke HTTP read-only (curl /health + /ready). O Dusk --group=smoke roda na máquina
+#     local, no /release (passo 7), contra a URL pública.
 #  5. Notifica Telegram.
+#
+# Sem testes aqui (economia de minutos do Actions): o /release roda scripts/verificar.sh
+# tudo no SHA da tag antes de criá-la.
 #
 # Gatilhos: push de tag `vX.Y.Z-rc.N` ou `vX.Y.Z`, ou manual com a tag (re-deploy de
 # uma tag já publicada). Rollback rápido sem rebuild: `zalk-deploy --rollback` no
@@ -52,7 +56,9 @@ jobs:
         with:
           ref: ${{ env.TAG }}
       - id: meta
-        run: echo "image=${REGISTRY}/${IMAGE_NAME,,}:${TAG}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "image=${REGISTRY}/${IMAGE_NAME,,}:${TAG}" >> "$GITHUB_OUTPUT"
+          echo "cache=${REGISTRY}/${IMAGE_NAME,,}:buildcache" >> "$GITHUB_OUTPUT"
       - uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
@@ -67,8 +73,9 @@ jobs:
           push: true
           pull: true
           tags: ${{ steps.meta.outputs.image }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Cache no GHCR: o do GHA é por ref, e cada release é uma tag nova (nunca acertaria).
+          cache-from: type=registry,ref=${{ steps.meta.outputs.cache }}
+          cache-to: type=registry,ref=${{ steps.meta.outputs.cache }},mode=max,image-manifest=true,oci-mediatypes=true
           build-args: APP_VERSION=${{ env.TAG }}
 
   deploy:
@@ -105,53 +112,16 @@ jobs:
         run: printf '%s' "$TOKEN" | ssh "$TARGET" docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
       - name: zalk-deploy
         run: ssh "$TARGET" "cd $DIR && zalk-deploy ${{ needs.build-and-push.outputs.image }}"
-
-  smoke:
-    needs: deploy
-    runs-on: ubuntu-24.04
-    permissions: { contents: read }
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: ${{ env.TAG }}
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.5'
-          extensions: pdo_pgsql, zip, bcmath, intl, mbstring
-          coverage: none
-      - uses: actions/cache@v5
-        with:
-          path: app/vendor
-          key: composer-${{ runner.os }}-${{ hashFiles('app/composer.lock') }}
-      # A v2 mudou o default de `chrome-version` de `latest` para `stable`.
-      # Fixado em `latest` para não trocar por tabela a versão do Chrome do Dusk.
-      - uses: browser-actions/setup-chrome@v2
-        with:
-          chrome-version: latest
-
-      - name: HTTP smoke (curl /health + /ready)
+      - name: Smoke HTTP (curl /health + /ready, read-only)
         run: |
           set -e
           for endpoint in health ready; do
               echo "→ GET ${APP_URL}/${endpoint}"
-              curl -fsSL "${APP_URL}/${endpoint}" | grep -E '"status":"ok"'
+              curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors "${APP_URL}/${endpoint}" | grep -E '"status":"ok"'
           done
 
-      - name: Composer install (para Dusk smoke)
-        working-directory: app
-        run: composer install --prefer-dist --no-progress --no-interaction
-
-      - name: Dusk smoke (1 cenário crítico contra URL real, read-only)
-        working-directory: app
-        env:
-          DUSK_DRIVER_URL: http://localhost:9515
-        run: |
-          chromedriver --port=9515 --whitelisted-ips='' >/tmp/chromedriver.log 2>&1 &
-          sleep 3
-          php artisan dusk --group=smoke || (cat /tmp/chromedriver.log && exit 1)
-
   notify:
-    needs: [deploy, smoke]
+    needs: [deploy]
     if: always()
     runs-on: ubuntu-24.04
     permissions: {}
@@ -161,8 +131,8 @@ jobs:
           BOT: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT: ${{ secrets.TELEGRAM_CHAT_ID_HOMOLOG }}
         run: |
-          STATUS="${{ (needs.deploy.result == 'success' && needs.smoke.result == 'success') && '✅' || '❌' }}"
-          MSG="${STATUS} DEFOnline (ZalkVPS): ${TAG} — deploy=${{ needs.deploy.result }} smoke=${{ needs.smoke.result }}"
+          STATUS="${{ needs.deploy.result == 'success' && '✅' || '❌' }}"
+          MSG="${STATUS} DEFOnline (ZalkVPS): ${TAG} — deploy=${{ needs.deploy.result }}"
           echo "$MSG"
           if [ -n "$BOT" ] && [ -n "$CHAT" ]; then
             curl -fsS -X POST "https://api.telegram.org/bot${BOT}/sendMessage" \

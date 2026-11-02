@@ -2,18 +2,14 @@ name: PR — lint + segurança + Unit puros
 
 # ADR-006 §3.1 — Pipeline de PR. Jobs em paralelo; falha em qualquer um = bloqueio.
 #
-# Revisado 2026-08 (agilidade): o CI passou a ser o dono da cobertura E do Dusk.
-# Antes a cobertura + Dusk viviam no pre-push local (caminho crítico, minutos). Agora
-# `test-coverage` (Postgres + pcov) e `test-dusk` (Postgres + Chromium) rodam aqui, em
-# paralelo e fora da máquina do dev. O pre-push ficou enxuto (Pint+Larastan+Pest sem
-# cobertura) e proporcional ao diff. Ver scripts/git-hooks/pre-push.sh.
+# Revisado 2026-11 (minutos do Actions): só roda em PR ou à mão (Actions → Run workflow).
+# Push na main não dispara mais (o main.yml saiu): os mesmos checks rodam na máquina
+# local em scripts/verificar.sh, que o /release exige verde antes de criar a tag.
 
 on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-  # Permite ser chamado como reusable workflow por main.yml e release-*.yml.
-  workflow_call:
 
 concurrency:
   group: pr-${{ github.event.pull_request.number || github.ref }}

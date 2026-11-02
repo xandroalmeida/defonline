@@ -1,6 +1,6 @@
 ---
 name: release
-description: Publica o DEFOnline em produção (defonline.zalk.com.br, ambiente defonline-prod na ZalkVPS) por tag vX.Y.Z — commita o pendente, sincroniza com a origin, exige o CI de main verde, atualiza o secret APP_ENV_FILE, cria e envia a tag, acompanha o workflow zalk-deploy e valida a produção.
+description: Publica o DEFOnline em produção (defonline.zalk.com.br, ambiente defonline-prod na ZalkVPS) por tag vX.Y.Z — commita o pendente, sincroniza com a origin, roda os testes na máquina local (scripts/verificar.sh tudo), atualiza o secret APP_ENV_FILE, cria e envia a tag, acompanha o workflow zalk-deploy e valida a produção.
 argument-hint: "[patch|minor]"
 disable-model-invocation: true
 ---
@@ -58,24 +58,27 @@ BASE=${ULTIMA%%-*}                                           # v0.11.0
    `scripts/segredos.sh push` e commit de `secrets/` (o hook de pre-commit confere).
 4. `git fetch origin --tags`. Atrás da `origin/main` → `git pull --rebase` (conflito: pare e
    pergunte). À frente → `git push origin main` (o pre-push roda Pint, Larastan, Pest e Pennant;
-   precisa do stack local de pé — `./up.sh`). A tag só nasce num commit que já está na `origin/main`.
+   precisa do stack local de pé — `./up.sh`; push na main não dispara mais CI). A tag só nasce num
+   commit que já está na `origin/main`.
 
-## 3. CI de main verde (o portão)
+## 3. Testes locais (o portão)
 
-O `zalk-deploy.yml` não testa: ele confia que o SHA da tag já passou pelo `main.yml` (suíte completa
-do `pr.yml`, com cobertura ≥80/98 e Dusk). Antes da tag:
+Nenhum workflow testa mais o que vai para produção (poupa minutos do Actions): o `zalk-deploy.yml`
+só builda e publica, e push na `main` não roda CI. Este passo é o único portão. Com a árvore limpa
+(o que roda é exatamente o commit da tag) e o stack de pé (`./up.sh`):
 
 ```bash
-SHA=$(git rev-parse HEAD)
-gh run list --workflow main.yml --commit "$SHA" --json databaseId,status,conclusion
+scripts/verificar.sh tudo
 ```
 
-- Em andamento → `gh run watch <id> --exit-status --interval 30` em segundo plano
-  (`run_in_background`). Não consulte o GitHub em laço.
-- Sem execução para o SHA → `gh workflow run main.yml --ref main` e acompanhe.
-- Falhou → `gh run view <id> --log-failed | tail -80`, mostre o trecho relevante e pergunte
-  **"eu corrijo"** ou **"paro para você corrigir"**. Corrigindo: corrija, commite (passo 2), push e
-  espere o novo `main.yml`. Parando: encerre sem tag.
+São os mesmos checks do `pr.yml`: Pint, Larastan, Pest com cobertura ≥80 (≥98 em `app/Domain`),
+Pennant, `composer audit`, Dusk E2E, sem pgAdmin no deploy, Gitleaks e Trivy. Leva minutos: rode em
+segundo plano (`run_in_background`) e espere a notificação.
+
+Falhou → mostre o resumo (`FALHOU: ...` no fim do log e o trecho relevante) e pergunte **"eu
+corrijo"** ou **"paro para você corrigir"**. Corrigindo: corrija, commite (passo 2), push e rode o
+`verificar.sh tudo` de novo. Parando: encerre sem tag. Teste instável (Dusk) que passa ao rodar
+isolado (`scripts/verificar.sh dusk`) pode seguir — diga qual foi.
 
 ## 4. Impacto da troca
 
@@ -98,10 +101,9 @@ destrutiva (drop/rename de coluna em uso): avise em uma linha e pergunte se publ
 1. Ache a execução da tag: `gh run list --workflow zalk-deploy.yml --event push --limit 5 --json databaseId,headBranch,status`
    e pegue a de `headBranch == vX.Y.Z` (pode levar alguns segundos).
 2. `gh run watch <id> --exit-status --interval 30` em segundo plano (limite de 60 min). Os jobs são
-   `build-and-push` → `deploy` → `smoke` (curl `/health` + `/ready` e Dusk `--group=smoke`, read-only)
-   → `notify`.
+   `build-and-push` → `deploy` (inclui curl `/health` + `/ready`) → `notify`.
 3. Falha → `gh run view <id> --log-failed | tail -80`, diga o job e a causa provável e pergunte
-   **"eu corrijo"** ou **"você corrige"**. Corrigindo: commit, CI verde (passo 3), push e **versão
+   **"eu corrijo"** ou **"você corrige"**. Corrigindo: commit, testes locais (passo 3), push e **versão
    nova** (nunca reenvie a mesma tag). Falha só de infraestrutura (SSH, GHCR, `zalk-check`,
    `zalk-deploy`) sem mudança de código: sugira `gh run rerun <id> --failed`. Se o `zalk-deploy`
    falhou no `up`, a versão anterior pode ter caído: o rollback é `zalk-deploy --rollback` como
@@ -115,7 +117,13 @@ Todas precisam passar (repita por até 2 min; o `up --wait` já esperou o health
 - `curl -s https://defonline.zalk.com.br/ready` tem `"status":"ok"` (banco e dependências);
 - `curl -s -o /dev/null -w '%{http_code}' https://defonline.zalk.com.br/` = 200 (landing no ar);
 - `curl -sI https://defonline.zalk.com.br/ | grep -i strict-transport-security` (cabeçalhos da
-  aplicação — o Caddy da ZalkVPS não os injeta).
+  aplicação — o Caddy da ZalkVPS não os injeta);
+- Dusk `--group=smoke` local contra a URL pública (read-only; saiu do workflow):
+
+  ```bash
+  docker compose exec -T web sh -c 'pgrep -x chromedriver >/dev/null || (chromedriver --port=9515 --whitelisted-ips="" >/tmp/chromedriver.log 2>&1 &)'
+  docker compose exec -T web sh -c 'APP_URL=https://defonline.zalk.com.br DUSK_DRIVER_URL=http://localhost:9515 php artisan dusk --group=smoke'
+  ```
 
 Nunca submeta formulário nem escreva no banco de produção para validar (smoke é read-only).
 

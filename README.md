@@ -30,16 +30,16 @@ Plataforma SaaS de Diagnóstico Econômico-Financeiro para Micro e Pequenas Empr
 │   └── zalk/docker-compose.yml         compose do servidor ZalkVPS (ADR-009)
 │
 ├── scripts/
-│   ├── git-hooks/pre-push.sh           gates locais (Pint + Larastan + Pest + Dusk) — ADR-006 §4
+│   ├── verificar.sh                    portão local = checks do pr.yml (o /release roda `tudo`)
+│   ├── git-hooks/pre-push.sh           gate rápido (Pint + Larastan + Pest + Pennant) — ADR-006 §4
 │   ├── install-hooks.sh                instala pre-push (rodado por up.sh)
 │   ├── check-no-pgadmin-in-deploy.sh   STORY-009 CA-10 — pgAdmin nunca no compose do servidor
 │   └── segredos.sh                     segredos cifrados com SOPS em secrets/ (ver "Segredos versionados")
 │
 ├── .github/workflows/              CI/CD GitHub Actions (ADR-006)
-│   ├── pr.yml                          lint + segurança + Unit puros (~2-3 min)
-│   ├── main.yml                        re-valida o SHA mergeado em main
+│   ├── pr.yml                          suíte completa — só em PR ou à mão (push na main não roda CI)
 │   ├── bump-rc.yml                     sugere a próxima tag -rc.N
-│   └── zalk-deploy.yml                 tag v* → build GHCR → zalk-deploy no ZalkVPS → smoke
+│   └── zalk-deploy.yml                 tag v* → build GHCR → zalk-deploy no ZalkVPS → curl /health (sem testes)
 │
 └── defonline-docs/                 documentação do projeto
     ├── project-state/                  estado vivo (épicos, estórias, ADRs, PDRs)
@@ -94,8 +94,12 @@ docker compose exec web php artisan test --testsuite=All        # com Postgres (
 # E2E browser real (Laravel Dusk 8) — exige container web rodando
 docker compose exec web php artisan dusk
 
-# Pre-push hook completo (Pint + Larastan + Pest + Pennant + Dusk)
+# Pre-push hook (Pint + Larastan + Pest + Pennant)
 ./scripts/git-hooks/pre-push.sh
+
+# Portão completo = checks do pr.yml (cobertura, Dusk, Gitleaks, Trivy); o /release exige `tudo` verde
+./scripts/verificar.sh          # só o que o diff contra a origin/main tocou
+./scripts/verificar.sh tudo
 ```
 
 O hook **roda automaticamente** antes de cada `git push` (instalado por `./up.sh`).
@@ -105,7 +109,7 @@ Bypass com `--no-verify` é **proibido por política** (ADR-006).
 
 A imagem `web` traz **PCOV** habilitado (driver leve de cobertura — ~10-20% de overhead). O gate prescrito em `quality-standards.md` §1.1+§2.2 e em ADR-006 §Decisão 4 é aplicado em DOIS pontos (STORY-010):
 
-- **No pre-push hook local** — falha o `git push` se a cobertura geral cair abaixo de 80%, ou se `app/Domain/**` (a nascer no EPIC-001) ficar abaixo de 98%.
+- **No `scripts/verificar.sh` local** (portão do `/release`) — falha se a cobertura geral cair abaixo de 80%, ou se `app/Domain/**` ficar abaixo de 98%.
 - **No PR (job `test-coverage` do `pr.yml`)** — falha o check do PR pelas mesmas regras + publica `coverage-summary.txt` como artefato baixável.
 
 Para medir cobertura local sob demanda:
