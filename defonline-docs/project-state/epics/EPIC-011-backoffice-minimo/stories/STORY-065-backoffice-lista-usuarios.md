@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: false
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador (claude-opus-5-5)
 created_at: 2026-11-03
 updated_at: 2026-11-03
 estimated_session_size: M
@@ -73,8 +73,25 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`.
 ## Notas do agente
 
 ### Decisões tomadas
+- Telas Livewire próprias, sem Filament; allowlist `BACKOFFICE_EMAILS` → `config/backoffice.php`; middleware `backoffice` (404). Detalhes no IDR-015.
+- Busca por envio de formulário, e não por digitação ao vivo: cada busca gera exatamente uma linha de audit (CA-6). O termo também vai na URL (`?q=`).
+- A data de confirmação do e-mail aparece só como data (sem hora) por causa da descoberta abaixo.
+
 ### Descobertas
+- **[BUG pré-existente, fora do escopo] fuso nas colunas `timestamptz` gravadas pelo app.** A sessão do Postgres roda em `America/Sao_Paulo` e o Laravel grava `now()` (UTC) sem offset. Por isso `email_confirmed_at` (e outras `timestamptz` preenchidas pelo PHP) fica 3h no futuro. As colunas com default do banco (`audit_logs.occurred_at`) estão corretas. Já está documentado em `RfbConsultarCnpj` para `business_metrics`. Proposta ao PO: estória para fixar o `timezone` da conexão `pgsql` em UTC e corrigir os dados.
+- Uma relação Eloquent para `EmpresaAnalisada`/`Diagnostico` aplicaria o Global Scope do ator (o membro da equipe), por isso as contagens usam subquery em `DB::table`.
+
 ### Bloqueios encontrados
+- Nenhum.
+
 ### IDRs criados
+- IDR-015.
 ### Cobertura final
+- `scripts/verificar.sh` em 2026-11-03: Pint e Larastan limpos; Pest com 1068 testes verdes; cobertura geral de 97,9% e de 99,7% em `app/Domain`; `SomenteEquipeBackoffice`, `Livewire/Backoffice/Usuarios` e `Models/Usuario` com 100%; Dusk com 37 testes verdes; gitleaks e trivy limpos.
+
+### Pendências do DoD
+- Definir quais e-mails entram em `BACKOFFICE_EMAILS` no `.env.prod` e rodar `scripts/segredos.sh push` (decisão do PO).
+- Deploy em homologação (release) e verificação com uma conta da equipe e uma conta comum.
+
 ### Links de evidência
+- Testes: `app/tests/Feature/Livewire/Backoffice/UsuariosTest.php` (CA-1 a CA-6) e `app/tests/Browser/BackofficeUsuariosBrowserTest.php` (CA-7).

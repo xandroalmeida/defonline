@@ -7,6 +7,7 @@ use App\Http\Controllers\EmailConfirmacaoController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
+use App\Livewire\Backoffice\Usuarios as BackofficeUsuarios;
 use App\Livewire\Cadastro;
 use App\Livewire\Diagnostico\Quiz as QuizDiagnostico;
 use App\Livewire\Diagnostico\SelecionarEmpresa as SelecionarEmpresaDiagnostico;
@@ -59,4 +60,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/diagnosticos/{diagnostico}', [DiagnosticoController::class, 'show'])
         ->whereUuid('diagnostico')
         ->name('diagnosticos.show');
+});
+
+// STORY-065 / PDR-011 — backoffice mínimo, só-leitura, restrito à allowlist da
+// equipe. Fora da allowlist: 404 (IDR-009).
+Route::middleware(['auth', 'backoffice'])->prefix('backoffice')->name('backoffice.')->group(function () {
+    Route::get('/usuarios', BackofficeUsuarios::class)->name('usuarios');
 });

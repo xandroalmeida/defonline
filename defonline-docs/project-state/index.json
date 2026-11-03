@@ -352,7 +352,7 @@
       "slug": "backoffice-minimo",
       "title": "Backoffice mínimo — visão interna de usuários e empresas (só-leitura)",
       "wave": "WAVE-2026-02",
-      "status": "ready",
+      "status": "in_progress",
       "path": "epics/EPIC-011-backoffice-minimo/epic.md",
       "story_ids": [
         "STORY-065"
@@ -1892,11 +1892,11 @@
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "in_review",
       "blocks": [],
       "epic_id": "EPIC-011",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-opus-5-5)",
       "requires_design": false,
       "created_at": "2026-11-03",
       "updated_at": "2026-11-03",
@@ -1906,7 +1906,8 @@
       "estimated_session_size": "M",
       "blocked_by": [],
       "path": "epics/EPIC-011-backoffice-minimo/stories/STORY-065-backoffice-lista-usuarios.md",
-      "related_pdr": "PDR-011"
+      "related_pdr": "PDR-011",
+      "note": "2026-11-03: implementada (1068 Pest + 37 Dusk verdes; cobertura 97,9%). IDR-015. Pendências: e-mails da allowlist em .env.prod e deploy em homologação."
     }
   ],
   "sprints": [
@@ -3146,6 +3147,29 @@
         "created_at": "2026-11-02",
         "updated_at": "2026-11-02",
         "note": "jsonb único em empresas_analisadas.ficha_rfb (sem consumidor para tabelas filhas). Imutabilidade via #[Locked]. receitaws não traz documento/data de entrada do sócio; data de exclusão do Simples no cnpja é derivada de history (formato inferido, verificar na 1ª consulta real de empresa excluída)."
+      },
+      {
+        "id": "IDR-015",
+        "slug": "backoffice-livewire-proprio-allowlist",
+        "title": "Backoffice em telas Livewire próprias (sem Filament), com allowlist em config e middleware `backoffice`",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-015-backoffice-livewire-proprio-allowlist.md",
+        "decided_at": "2026-11-03",
+        "decided_by": "programador (claude-opus-5-5)",
+        "related_story": "STORY-065",
+        "related_pdrs": [
+          "PDR-011"
+        ],
+        "related_idrs": [
+          "IDR-009"
+        ],
+        "related_adrs": [
+          "ADR-001",
+          "ADR-003"
+        ],
+        "created_at": "2026-11-03",
+        "updated_at": "2026-11-03",
+        "note": "Sem Filament enquanto o backoffice for só leitura. BACKOFFICE_EMAILS → config/backoffice.php; middleware alias 'backoffice' + 404. Contagens cross-tenant via subquery DB::table (Global Scope filtraria pelo ator)."
       }
     ],
     "ddr": [

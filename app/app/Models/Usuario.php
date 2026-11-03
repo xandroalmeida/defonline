@@ -31,6 +31,8 @@ use Illuminate\Support\Carbon;
  * @property string $senha_hash
  * @property string $telefone
  * @property Carbon|null $email_confirmed_at
+ * @property Carbon|null $anonimizado_at
+ * @property Carbon|null $deleted_at
  */
 #[Fillable(['cpf', 'nome', 'email', 'senha_hash', 'telefone', 'email_confirmed_at'])]
 #[Hidden(['senha_hash', 'remember_token'])]
@@ -61,6 +63,36 @@ final class Usuario extends Authenticatable
     public function emailConfirmado(): bool
     {
         return $this->email_confirmed_at !== null;
+    }
+
+    /**
+     * STORY-065 CA-1 — membro da equipe com acesso ao backoffice (PDR-011).
+     */
+    public function ehEquipeBackoffice(): bool
+    {
+        /** @var list<string> $equipe */
+        $equipe = config('backoffice.equipe_emails', []);
+
+        return in_array(mb_strtolower((string) $this->email), $equipe, true);
+    }
+
+    /**
+     * STORY-065 CA-2 — CPF com só os 6 dígitos do meio visíveis: `***.456.789-**`.
+     */
+    public function cpfMascarado(): string
+    {
+        $digitos = preg_replace('/\D+/', '', (string) $this->cpf) ?? '';
+
+        if (strlen($digitos) !== 11) {
+            return '—';
+        }
+
+        return '***.'.substr($digitos, 3, 3).'.'.substr($digitos, 6, 3).'-**';
+    }
+
+    public function anonimizado(): bool
+    {
+        return $this->anonimizado_at !== null;
     }
 
     protected static function newFactory(): UsuarioFactory
