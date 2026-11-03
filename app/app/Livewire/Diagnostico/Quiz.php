@@ -35,7 +35,7 @@ use Throwable;
  * `(usuario_id, empresa_analisada_id)` garante 1 ativo por par. Expira em 90 dias.
  *
  * **Anti-duplo-submit (CA-9, IDR-010).** Sem dedup em banco — `wire:loading.attr="disabled"`
- * no botão `Calcular diagnóstico` cobre clique duplo/F5 acidental.
+ * no botão `Fazer diagnóstico` cobre clique duplo/F5 acidental.
  *
  * **Decimais BR → canônico.** Properties guardam string com vírgula
  * ("1.234,56"); a conversão para float canônico ("1234.56") acontece no submit,

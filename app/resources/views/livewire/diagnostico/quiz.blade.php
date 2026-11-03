@@ -367,8 +367,8 @@
                     <x-button type="submit" variant="primary"
                               wire:loading.attr="disabled" wire:target="submeter"
                               dusk="quiz-calcular">
-                        <span wire:loading.remove wire:target="submeter">Calcular diagnóstico</span>
-                        <span wire:loading wire:target="submeter">Calculando…</span>
+                        <span wire:loading.remove wire:target="submeter">Fazer diagnóstico</span>
+                        <span wire:loading wire:target="submeter">Analisando…</span>
                     </x-button>
                 @endif
             </div>
