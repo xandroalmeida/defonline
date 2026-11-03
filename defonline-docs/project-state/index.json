@@ -346,6 +346,25 @@
       ],
       "note": "Criado em 2026-08-04 a partir do feedback do Key User José Marques (2026-08-03) e do parecer favorável da EBC. Parecer do PO em revisao/analise-po-feedback-jose-marques-2026ago03.md. Módulo independente do Diagnóstico, 3 setores, sem paywall. [DECIDIR-B] e [DECIDIR-E] bloqueiam STORY-048. | 2026-08-04: PDR-004 resolveu [DECIDIR-B/C/D/E]. STORY-048 desbloqueada; STORY-058 (spike de provisão) criada; STORY-052 segue blocked só pelas faixas de farol.",
       "activated_at": "2026-08-04"
+    },
+    {
+      "id": "EPIC-011",
+      "slug": "backoffice-minimo",
+      "title": "Backoffice mínimo — visão interna de usuários e empresas (só-leitura)",
+      "wave": "WAVE-2026-02",
+      "status": "ready",
+      "path": "epics/EPIC-011-backoffice-minimo/epic.md",
+      "story_ids": [
+        "STORY-065"
+      ],
+      "validation_report": null,
+      "blocked_by_epics": [],
+      "blocks_epics": [],
+      "related_pdr": [
+        "PDR-011"
+      ],
+      "created_at": "2026-11-03",
+      "updated_at": "2026-11-03"
     }
   ],
   "stories": [
@@ -1869,6 +1888,25 @@
       ],
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-064-atualizar-dados-da-receita.md",
       "related_pdr": "PDR-010"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [],
+      "epic_id": "EPIC-011",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-03",
+      "updated_at": "2026-11-03",
+      "id": "STORY-065",
+      "slug": "backoffice-lista-usuarios",
+      "title": "Backoffice — lista de usuários cadastrados (só-leitura, restrita à equipe)",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "path": "epics/EPIC-011-backoffice-minimo/stories/STORY-065-backoffice-lista-usuarios.md",
+      "related_pdr": "PDR-011"
     }
   ],
   "sprints": [
@@ -2489,6 +2527,28 @@
         "created_at": "2026-11-02",
         "updated_at": "2026-11-02",
         "note": "Contraria NRF §3.1 e espec §3.3 Passo 2/§1.5.2 para CNPJ: sem fallback manual, dados RFB não editáveis. CPF segue manual. Legado via 'Atualizar dados da Receita' (sem lote)."
+      },
+      {
+        "id": "PDR-011",
+        "slug": "backoffice-minimo-somente-leitura",
+        "title": "Antecipar um backoffice mínimo, só-leitura, restrito à equipe interna",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-011-backoffice-minimo-somente-leitura.md",
+        "decided_at": "2026-11-03",
+        "decided_by": "PO (Alexandro / Claude)",
+        "related_epics": [
+          "EPIC-011"
+        ],
+        "related_adrs": [
+          "ADR-001",
+          "ADR-003"
+        ],
+        "related_idrs": [
+          "IDR-009"
+        ],
+        "created_at": "2026-11-03",
+        "updated_at": "2026-11-03",
+        "note": "Antecipa fatia só-leitura do roadmap pós-v1 §6.1 (v1.2). Allowlist de e-mails, 404 para os demais, audit de acesso."
       }
     ],
     "adr": [

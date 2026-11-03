@@ -53,7 +53,7 @@ Se esta onda fechar com sucesso, o DEFOnline alcança "MVP comercializável" —
 
 - Plano Pro com fluxo de contador (Marcos) — onda posterior. Motivo: ainda exige refinamento sobre portfólio multi-cliente e workflow recorrente.
 - Apps móveis, internacionalização, API pública — roadmap §5, §4.3 (v2.0).
-- Backoffice EBP completo — roadmap §6.1 (v1.2).
+- Backoffice EBP completo — roadmap §6.1 (v1.2). A fatia só-leitura (usuários/empresas) foi antecipada no EPIC-011 (PDR-011).
 - Mecanismo de feedback 👍/👎 por recomendação — roadmap §1.4 (cabe aqui só se beta da onda 1 indicar necessidade urgente).
 
 ## Histórico
