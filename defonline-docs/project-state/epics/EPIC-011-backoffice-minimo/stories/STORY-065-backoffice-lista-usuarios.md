@@ -90,7 +90,7 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`.
 - `scripts/verificar.sh` em 2026-11-03: Pint e Larastan limpos; Pest com 1068 testes verdes; cobertura geral de 97,9% e de 99,7% em `app/Domain`; `SomenteEquipeBackoffice`, `Livewire/Backoffice/Usuarios` e `Models/Usuario` com 100%; Dusk com 37 testes verdes; gitleaks e trivy limpos.
 
 ### Pendências do DoD
-- Definir quais e-mails entram em `BACKOFFICE_EMAILS` no `.env.prod` e rodar `scripts/segredos.sh push` (decisão do PO).
+- ~~Allowlist em `.env.prod`~~: feito em 2026-11-03, com `BACKOFFICE_EMAILS=xandroalmeida@gmail.com` (admin definido pelo PO), também no `app/.env` local.
 - Deploy em homologação (release) e verificação com uma conta da equipe e uma conta comum.
 
 ### Links de evidência
