@@ -50,12 +50,34 @@
         ],
     ];
 
+    /*
+     * STORY-065 — área reservada aos admins (allowlist do backoffice, PDR-011).
+     * Quem não é da equipe não vê a seção (a rota já devolve 404 para ele).
+     */
+    $usuarioNav = auth()->user();
+    $itensAdmin = $usuarioNav instanceof \App\Models\Usuario && $usuarioNav->ehEquipeBackoffice()
+        ? [[
+            'label' => 'Usuários',
+            'icon' => 'users',
+            'href' => route('backoffice.usuarios'),
+            'active' => request()->routeIs('backoffice.usuarios'),
+            'disabled' => false,
+            'dusk' => 'app-nav-backoffice-usuarios',
+        ]]
+        : [];
+
+    $grupos = array_filter([
+        ['titulo' => null, 'aria' => 'Navegação principal', 'dusk' => null, 'itens' => $items],
+        ['titulo' => 'Administração', 'aria' => 'Administração', 'dusk' => 'app-nav-admin', 'itens' => $itensAdmin],
+    ], fn ($g) => $g['itens'] !== []);
+
     $icons = [
         'building' => '<path d="M4 22V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v18M4 22h16M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2M9 18h2M13 18h2"/>',
         'plus' => '<path d="M12 5v14M5 12h14"/>',
         'chart' => '<path d="M3 3v18h18M7 14l4-4 4 4 6-6"/>',
         'clock' => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
         'user' => '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>',
+        'users' => '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2.2.6 3.5 2.8 3.5 6"/>',
     ];
 @endphp
 
@@ -102,34 +124,43 @@
         </button>
     </div>
 
-    <nav class="flex flex-col gap-1 p-4" aria-label="Navegação principal">
-        @foreach ($items as $item)
-            @if ($item['disabled'])
-                <span class="nav-item is-disabled"
-                      aria-disabled="true"
-                      tabindex="-1"
-                      title="{{ $item['tooltip'] }}"
-                      data-tooltip="{{ $item['tooltip'] }}"
-                      dusk="{{ $item['dusk'] }}">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        {!! $icons[$item['icon']] !!}
-                    </svg>
-                    <span>{{ $item['label'] }}</span>
-                </span>
-            @else
-                <a href="{{ $item['href'] }}"
-                   class="nav-item @if ($item['active']) is-active @endif"
-                   @if ($item['active']) aria-current="page" @endif
-                   dusk="{{ $item['dusk'] }}"
-                   @click="navOpen = false">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        {!! $icons[$item['icon']] !!}
-                    </svg>
-                    <span>{{ $item['label'] }}</span>
-                </a>
+    @foreach ($grupos as $grupo)
+        <nav class="flex flex-col gap-1 p-4 @if ($grupo['titulo']) border-t border-[color:var(--color-border)] @endif"
+             aria-label="{{ $grupo['aria'] }}"
+             @if ($grupo['dusk']) dusk="{{ $grupo['dusk'] }}" @endif>
+            @if ($grupo['titulo'])
+                <p class="px-3 mb-1 mt-0 text-xs font-medium uppercase tracking-wide text-[color:var(--color-secondary)]">
+                    {{ $grupo['titulo'] }}
+                </p>
             @endif
-        @endforeach
-    </nav>
+            @foreach ($grupo['itens'] as $item)
+                @if ($item['disabled'])
+                    <span class="nav-item is-disabled"
+                          aria-disabled="true"
+                          tabindex="-1"
+                          title="{{ $item['tooltip'] }}"
+                          data-tooltip="{{ $item['tooltip'] }}"
+                          dusk="{{ $item['dusk'] }}">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            {!! $icons[$item['icon']] !!}
+                        </svg>
+                        <span>{{ $item['label'] }}</span>
+                    </span>
+                @else
+                    <a href="{{ $item['href'] }}"
+                       class="nav-item @if ($item['active']) is-active @endif"
+                       @if ($item['active']) aria-current="page" @endif
+                       dusk="{{ $item['dusk'] }}"
+                       @click="navOpen = false">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            {!! $icons[$item['icon']] !!}
+                        </svg>
+                        <span>{{ $item['label'] }}</span>
+                    </a>
+                @endif
+            @endforeach
+        </nav>
+    @endforeach
 </aside>

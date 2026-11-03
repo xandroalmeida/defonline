@@ -44,9 +44,22 @@ describe('CA-1 acesso', function () {
         $this->actingAs($this->equipe)->get('/backoffice/usuarios')->assertNotFound();
     });
 
-    it('não mostra a área no menu de ninguém', function () {
+    it('mostra a seção Administração no menu só para a equipe (CA-8)', function () {
         $this->actingAs($this->equipe)->get('/home')->assertOk()
+            ->assertSee('dusk="app-nav-admin"', escape: false)
+            ->assertSee('Administração')
+            ->assertSee(route('backoffice.usuarios'), escape: false);
+
+        $this->actingAs(Usuario::factory()->create())->get('/home')->assertOk()
+            ->assertDontSee('app-nav-admin', escape: false)
+            ->assertDontSee('Administração')
             ->assertDontSee('/backoffice', escape: false);
+    });
+
+    it('marca o item Usuários como ativo na própria tela (CA-8)', function () {
+        $html = $this->actingAs($this->equipe)->get('/backoffice/usuarios')->getContent();
+
+        expect($html)->toMatch('/<a href="[^"]*\/backoffice\/usuarios"\s+class="nav-item\s+is-active\s*"\s+aria-current="page"/');
     });
 });
 

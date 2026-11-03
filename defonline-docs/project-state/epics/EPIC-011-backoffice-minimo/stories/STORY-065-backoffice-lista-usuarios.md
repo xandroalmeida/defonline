@@ -34,13 +34,14 @@ Permite acompanhar o beta e dar suporte sem abrir o banco de produção.
 
 ## Critérios de aceite
 
-- [ ] **CA-1. Acesso.** Só um usuário logado cujo e-mail está na allowlist da equipe (configuração por ambiente, sem tela de gestão) acessa a área. Anônimo vai para o login. Um usuário logado fora da allowlist recebe **404** (IDR-009), e a área não aparece em nenhum menu para ele. A allowlist vazia ou ausente bloqueia todo mundo.
+- [ ] **CA-1. Acesso.** Só um usuário logado cujo e-mail está na allowlist da equipe (configuração por ambiente, sem tela de gestão) acessa a área. Anônimo vai para o login. Um usuário logado fora da allowlist recebe **404** (IDR-009), e a área não aparece no menu dele. A allowlist vazia ou ausente bloqueia todo mundo.
 - [ ] **CA-2. Colunas.** Nome, e-mail, CPF mascarado (`***.456.789-**`), telefone, e-mail confirmado (sim/não + data), data de cadastro, último login (do audit log `usuario.login_sucesso`; "—" se nunca logou), nº de empresas e nº de diagnósticos.
 - [ ] **CA-3. Situação.** Usuário excluído (`deleted_at`) aparece marcado como "Excluído". Usuário anonimizado (`anonimizado_at`) aparece como "Anonimizado", sem nenhum dado pessoal.
 - [ ] **CA-4. Navegação.** Ordenação padrão: cadastro mais recente primeiro. Busca por nome ou e-mail (parcial, sem diferenciar maiúsculas). Paginação de 50. Total de usuários (e quantos confirmaram o e-mail) no topo.
 - [ ] **CA-5. Só-leitura.** Não há nenhuma ação de escrita. A tela não faz N+1: o número de queries não cresce com o tamanho da página (teste cobre).
 - [ ] **CA-6. Auditoria.** Cada acesso gera audit log `backoffice.usuarios_listados` com o ator e o termo de busca, sem PII de terceiros. Nada de PII em logs de aplicação.
-- [ ] **CA-7. E2E.** Dusk: membro da equipe vê a lista e busca por e-mail; um usuário comum recebe 404 na mesma URL.
+- [ ] **CA-8. Menu (acrescentado pelo PO em 2026-11-03).** Para a equipe, o menu lateral tem uma seção separada, "Administração", com o item "Usuários" apontando para a lista (ativo quando a tela está aberta). Quem não é da equipe não vê a seção.
+- [ ] **CA-7. E2E.** Dusk: membro da equipe entra pelo menu Administração, vê a lista e busca por e-mail; um usuário comum recebe 404 na mesma URL.
 
 ## Fora de escopo
 

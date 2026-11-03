@@ -10,8 +10,8 @@ use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 
 /**
- * STORY-065 CA-7 — membro da equipe vê a lista de usuários e busca por e-mail;
- * um usuário comum recebe 404 na mesma URL.
+ * STORY-065 CA-7/CA-8 — membro da equipe entra pelo menu Administração, vê a
+ * lista e busca por e-mail; um usuário comum não vê o menu e recebe 404 na URL.
  *
  * A allowlist vem de BACKOFFICE_EMAILS no servidor do Dusk; o teste usa um
  * e-mail dela (phpunit.dusk / .env.dusk.local) — ver setUp.
@@ -34,7 +34,10 @@ final class BackofficeUsuariosBrowserTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) use ($equipe, $comum) {
             $browser->loginAs($equipe)
-                ->visit('/backoffice/usuarios')
+                ->visit('/home')
+                ->waitFor('@app-nav-admin')
+                ->click('@app-nav-backoffice-usuarios')
+                ->waitForLocation('/backoffice/usuarios')
                 ->waitFor('@backoffice-usuarios')
                 ->assertSee('4 usuários')
                 ->assertSee('Maria Pereira')
@@ -48,6 +51,9 @@ final class BackofficeUsuariosBrowserTest extends DuskTestCase
 
             $browser->logout()
                 ->loginAs($comum)
+                ->visit('/home')
+                ->waitFor('@app-nav-minhas-empresas')
+                ->assertMissing('@app-nav-admin')
                 ->visit('/backoffice/usuarios')
                 ->assertSee('404')
                 ->assertDontSee('Maria Pereira');
