@@ -91,7 +91,7 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`.
 
 ### Pendências do DoD
 - ~~Allowlist em `.env.prod`~~: feito em 2026-11-03, com `BACKOFFICE_EMAILS=xandroalmeida@gmail.com` (admin definido pelo PO), também no `app/.env` local.
-- Deploy em homologação (release) e verificação com uma conta da equipe e uma conta comum.
+- Publicado em produção em 2026-11-03 na v0.11.3 (health/ready ok, smoke 4/4; anônimo em `/backoffice/usuarios` → 302 /login). Falta verificar logado: a conta da equipe vê a lista e uma conta comum recebe 404.
 
 ### Links de evidência
 - Testes: `app/tests/Feature/Livewire/Backoffice/UsuariosTest.php` (CA-1 a CA-6) e `app/tests/Browser/BackofficeUsuariosBrowserTest.php` (CA-7).

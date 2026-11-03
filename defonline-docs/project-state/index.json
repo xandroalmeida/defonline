@@ -1907,7 +1907,7 @@
       "blocked_by": [],
       "path": "epics/EPIC-011-backoffice-minimo/stories/STORY-065-backoffice-lista-usuarios.md",
       "related_pdr": "PDR-011",
-      "note": "2026-11-03: implementada (1068 Pest + 37 Dusk verdes; cobertura 97,9%). IDR-015. Pendências: e-mails da allowlist em .env.prod e deploy em homologação."
+      "note": "2026-11-03: implementada (1068 Pest + 37 Dusk verdes; cobertura 97,9%). IDR-015. Pendências: e-mails da allowlist em .env.prod e deploy em homologação. | 2026-11-03: publicada na v0.11.3; falta só a verificação logada em produção."
     }
   ],
   "sprints": [
