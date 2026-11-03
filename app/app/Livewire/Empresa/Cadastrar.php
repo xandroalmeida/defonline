@@ -247,7 +247,8 @@ final class Cadastrar extends Component
             'cnae' => self::normalizarCnae($this->cnae),
             'municipio' => trim($this->municipio),
             'uf' => strtoupper(trim($this->uf)),
-            'situacao_cadastral' => $this->situacao_cadastral,
+            // Autônomo não tem situação na Receita (PDR-010 item 6).
+            'situacao_cadastral' => SituacaoCadastral::NaoInformada->value,
             'data_fundacao' => trim($this->data_fundacao) === '' ? null : trim($this->data_fundacao),
             'observacoes' => $this->observacoes,
         ];
@@ -290,13 +291,13 @@ final class Cadastrar extends Component
             'documento.required' => 'Informe o documento.',
             'documento.size' => 'O CPF deve ter 11 dígitos.',
             'documento.unique' => 'Você já cadastrou uma empresa com este documento.',
-            'razao_social.required' => 'Informe a razão social.',
-            'razao_social.min' => 'A razão social deve ter pelo menos 2 caracteres.',
+            'razao_social.required' => 'Informe seu nome completo.',
+            'razao_social.min' => 'O nome deve ter pelo menos 2 caracteres.',
             'cnae.regex' => 'O CNAE deve ter 7 dígitos (somente números).',
             'municipio.required' => 'Informe o município.',
             'uf.required' => 'Informe a UF.',
             'uf.in' => 'Informe uma UF válida.',
-            'data_fundacao.before_or_equal' => 'A data de fundação não pode ser no futuro.',
+            'data_fundacao.before_or_equal' => 'A data de início da atividade não pode ser no futuro.',
             'observacoes.max' => 'As observações podem ter até '.self::OBSERVACOES_MAX.' caracteres.',
         ])->validate();
 

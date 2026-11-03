@@ -35,16 +35,16 @@ it('abre em modo CNPJ/CPF e o caminho de autônomo leva ao formulário manual de
         ->assertSee('Cadastrar empresa')
         ->assertSee('CNPJ ou CPF')
         ->assertSee('Autônomo sem CNPJ? Informe seu CPF')
-        ->assertDontSee('Razão social');
+        ->assertDontSee('Nome completo');
 
     Livewire::test(Cadastrar::class)
         ->call('usarCpf')
         ->assertSet('tipo_documento', TipoDocumento::Cpf->value)
-        ->assertSee('Razão social')
+        ->assertSee('Nome completo')
         ->assertSee('CNAE')
         ->call('usarCnpj')
         ->assertSet('tipo_documento', TipoDocumento::Cnpj->value)
-        ->assertDontSee('Razão social');
+        ->assertDontSee('Nome completo');
 });
 
 it('cria empresa com CPF válido (autônomo) e fonte manual (CA-2)', function () {
@@ -251,4 +251,33 @@ it('permite recadastrar empresa após soft delete (índice único parcial)', fun
         ->assertRedirect();
 
     expect(EmpresaAnalisada::where('documento', $cpf)->count())->toBe(1);
+});
+
+it('autônomo: sem situação cadastral no form, grava "não informada" e a tela usa rótulos de pessoa física', function () {
+    Livewire::test(Cadastrar::class)
+        ->call('usarCpf')
+        ->assertSee('Cadastrar autônomo')
+        ->assertSee('Nome completo')
+        ->assertSee('Início da atividade')
+        ->assertDontSee('Razão social')
+        ->assertDontSee('Situação cadastral')
+        ->set('documento', EmpresaAnalisadaFactory::gerarCpfValido())
+        ->set('razao_social', 'Joana Souza')
+        ->set('situacao_cadastral', SituacaoCadastral::Baixada->value) // forjado pelo cliente
+        ->set('municipio', 'Recife')
+        ->set('uf', 'PE')
+        ->call('submit')
+        ->assertHasNoErrors()
+        ->assertRedirect();
+
+    $empresa = EmpresaAnalisada::first();
+    expect($empresa->situacao_cadastral)->toBe(SituacaoCadastral::NaoInformada);
+
+    $this->get(route('empresas.show', $empresa))
+        ->assertOk()
+        ->assertSee('Nome completo')
+        ->assertSee('Nome comercial')
+        ->assertSee('Atividade principal')
+        ->assertDontSee('Razão social')
+        ->assertDontSee('Situação cadastral');
 });

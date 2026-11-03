@@ -39,7 +39,7 @@ it('antes da consulta mostra só o CNPJ — nenhum dado da empresa (CA-1)', func
     Livewire::test(Cadastrar::class)
         ->assertSet('tipo_documento', TipoDocumento::Cnpj->value)
         ->assertSee('Consultar')
-        ->assertDontSee('Razão social')
+        ->assertDontSee('Nome completo')
         ->assertDontSee('Confirmar e cadastrar');
 });
 
@@ -229,7 +229,7 @@ it('falha da Receita bloqueia o cadastro sem liberar preenchimento manual (CA-7)
         ->assertSet('mensagemErro', $mensagem)
         ->assertSet('resultadoRfb', null)
         ->assertSee($mensagem)
-        ->assertDontSee('Razão social')
+        ->assertDontSee('Nome completo')
         ->assertDontSee('Confirmar e cadastrar')
         ->call('confirmar')
         ->assertNoRedirect();
@@ -288,7 +288,7 @@ it('CPF válido no campo único segue para o cadastro manual com o CPF preenchid
         ->assertSet('tipo_documento', TipoDocumento::Cpf->value)
         ->assertSet('documento', Cpf::formatar($cpf))
         ->assertSet('mensagemErro', null)
-        ->assertSee('Razão social')
+        ->assertSee('Nome completo')
         ->set('razao_social', 'Joana Autônoma')
         ->set('municipio', 'Belo Horizonte')
         ->set('uf', 'MG')

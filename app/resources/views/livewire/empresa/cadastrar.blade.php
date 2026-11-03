@@ -1,5 +1,5 @@
 <div>
-    <x-page-header :title="'Cadastrar empresa'"
+    <x-page-header :title="$tipo_documento === 'cnpj' ? 'Cadastrar empresa' : 'Cadastrar autônomo'"
                    :subtitle="$tipo_documento === 'cnpj'
                        ? 'Informe o CNPJ ou o CPF. Com CNPJ, os dados vêm direto da Receita Federal.'
                        : 'Autônomo sem CNPJ: preencha os dados da sua atividade.'"/>
@@ -149,9 +149,9 @@
                 </div>
 
             <div>
-                <x-label for="razao_social">Razão social</x-label>
+                <x-label for="razao_social">Nome completo</x-label>
                 <x-input type="text" id="razao_social" wire:model="razao_social"
-                         autocomplete="organization" dusk="empresa-razao-social"/>
+                         autocomplete="name" dusk="empresa-razao-social"/>
                 @error('razao_social')
                     <p class="text-[color:var(--color-destructive)] text-sm mt-1 mb-0" dusk="erro-razao-social">{{ $message }}</p>
                 @enderror
@@ -159,7 +159,7 @@
 
             <div>
                 <x-label for="nome_fantasia">
-                    Nome fantasia <span class="normal-case font-normal tracking-normal text-[color:var(--color-secondary)]">(opcional)</span>
+                    Nome comercial <span class="normal-case font-normal tracking-normal text-[color:var(--color-secondary)]">(opcional — como seus clientes te conhecem)</span>
                 </x-label>
                 <x-input type="text" id="nome_fantasia" wire:model="nome_fantasia" dusk="empresa-nome-fantasia"/>
                 @error('nome_fantasia')
@@ -169,7 +169,7 @@
 
             <div>
                 <x-label for="cnae">
-                    CNAE <span class="normal-case font-normal tracking-normal text-[color:var(--color-secondary)]">(opcional — busque pelo código ou pela atividade)</span>
+                    Atividade principal <span class="normal-case font-normal tracking-normal text-[color:var(--color-secondary)]">(opcional — busque pelo código CNAE ou pelo nome)</span>
                 </x-label>
                 <x-cnae-select id="cnae" wire:model="cnae" :valor-inicial="$cnae" dusk="empresa-cnae"/>
                 @error('cnae')
@@ -200,21 +200,8 @@
             </div>
 
             <div>
-                <x-label for="situacao_cadastral">Situação cadastral</x-label>
-                <select id="situacao_cadastral" wire:model="situacao_cadastral" class="input"
-                        dusk="empresa-situacao">
-                    @foreach ($situacoes as $situacao)
-                        <option value="{{ $situacao->value }}">{{ $situacao->rotulo() }}</option>
-                    @endforeach
-                </select>
-                @error('situacao_cadastral')
-                    <p class="text-[color:var(--color-destructive)] text-sm mt-1 mb-0">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <div>
                 <x-label for="data_fundacao">
-                    Data de fundação <span class="normal-case font-normal tracking-normal text-[color:var(--color-secondary)]">(opcional)</span>
+                    Início da atividade <span class="normal-case font-normal tracking-normal text-[color:var(--color-secondary)]">(opcional)</span>
                 </x-label>
                 <x-input type="date" id="data_fundacao" wire:model="data_fundacao" dusk="empresa-data-fundacao"/>
                 @error('data_fundacao')
@@ -224,7 +211,7 @@
 
             <div>
                 <x-label for="observacoes">
-                    Observações <span class="normal-case font-normal tracking-normal text-[color:var(--color-secondary)]">(opcional — suas anotações sobre a empresa)</span>
+                    Observações <span class="normal-case font-normal tracking-normal text-[color:var(--color-secondary)]">(opcional — suas anotações)</span>
                 </x-label>
                 <textarea id="observacoes" wire:model="observacoes" rows="4"
                           maxlength="{{ \App\Livewire\Empresa\Cadastrar::OBSERVACOES_MAX }}"
@@ -245,7 +232,7 @@
                     <x-button type="submit" variant="primary"
                               class="sm:w-auto"
                               dusk="empresa-submit">
-                        Cadastrar empresa
+                        Cadastrar
                     </x-button>
                 </div>
             </form>

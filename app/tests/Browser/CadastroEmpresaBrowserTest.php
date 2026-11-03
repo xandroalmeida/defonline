@@ -43,8 +43,8 @@ final class CadastroEmpresaBrowserTest extends DuskTestCase
                 ->press('@empresa-consultar-receita')
                 ->waitFor('@empresa-razao-social')
                 ->assertInputValue('@empresa-documento', Cpf::formatar($cpf))
-                ->type('@empresa-razao-social', 'Marcenaria Roberto LTDA')
-                ->type('@empresa-nome-fantasia', 'Marcenaria Roberto')
+                ->type('@empresa-razao-social', 'Roberto Almeida da Silva')
+                ->type('@empresa-nome-fantasia', 'Marcenaria do Roberto')
                 ->click('@empresa-cnae')
                 ->type('@empresa-cnae', 'carpintaria constru')
                 ->waitFor('@empresa-cnae-opcao-1622699')
@@ -52,10 +52,10 @@ final class CadastroEmpresaBrowserTest extends DuskTestCase
                 ->assertInputValue('@empresa-cnae', '1622-6/99 — Fabricação de outros artigos de carpintaria para construção')
                 ->type('@empresa-municipio', 'São Paulo')
                 ->select('@empresa-uf', 'SP')
-                ->select('@empresa-situacao', 'nao_informada')
+                ->assertMissing('@empresa-situacao')
                 ->press('@empresa-submit')
-                ->waitForText('Marcenaria Roberto LTDA')
-                ->assertSeeIn('@empresa-show-titulo', 'Marcenaria Roberto LTDA')
+                ->waitForText('Roberto Almeida da Silva')
+                ->assertSeeIn('@empresa-show-titulo', 'Roberto Almeida da Silva')
                 ->assertSeeIn('@empresa-show-fonte', 'Preenchimento manual')
                 ->assertSeeIn('@empresa-show-localizacao', 'São Paulo / SP');
         });
@@ -64,6 +64,6 @@ final class CadastroEmpresaBrowserTest extends DuskTestCase
         $this->assertNotNull($empresa);
         $this->assertSame($cpf, $empresa->documento);
         $this->assertSame('cpf', $empresa->tipo_documento->value);
-        $this->assertSame('Marcenaria Roberto LTDA', $empresa->razao_social);
+        $this->assertSame('Roberto Almeida da Silva', $empresa->razao_social);
     }
 }
