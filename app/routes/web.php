@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\CnaeController;
 use App\Http\Controllers\DiagnosticoController;
 use App\Http\Controllers\EmailConfirmacaoController;
 use App\Http\Controllers\EmpresaController;
@@ -44,6 +45,8 @@ Route::middleware('auth')->group(function () {
 
     // STORY-014 — cadastro manual da primeira Empresa Analisada + visualização.
     Route::get('/empresas/nova', CadastrarEmpresa::class)->name('empresas.nova');
+    // Lista CNAE para o widget de busca (carregada sob demanda).
+    Route::get('/cnaes', [CnaeController::class, 'index'])->name('cnaes.index');
     Route::get('/empresas/{empresa}', [EmpresaController::class, 'show'])
         ->whereUuid('empresa')
         ->name('empresas.show');

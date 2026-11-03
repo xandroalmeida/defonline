@@ -61,7 +61,13 @@
                 <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-nome-fantasia">{{ $empresa->nome_fantasia ?: '—' }}</dd>
 
                 <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">CNAE</dt>
-                <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-cnae">{{ $empresa->cnae ?: '—' }}</dd>
+                <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-cnae">
+                    @if ($empresa->cnae)
+                        {{ \App\Domain\Cnae::formatar($empresa->cnae) }}@if ($cnaeDescricao = \App\Domain\Cnae::descricao($empresa->cnae)) — {{ $cnaeDescricao }}@endif
+                    @else
+                        —
+                    @endif
+                </dd>
 
                 <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">Município / UF</dt>
                 <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-localizacao">{{ $empresa->municipio }} / {{ $empresa->uf }}</dd>

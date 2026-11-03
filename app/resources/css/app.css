@@ -532,3 +532,6 @@
         }
     }
 }
+
+/* Alpine: esconde elementos até o Alpine inicializar. */
+[x-cloak] { display: none !important; }

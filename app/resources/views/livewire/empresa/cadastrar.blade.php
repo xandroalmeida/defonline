@@ -169,11 +169,9 @@
 
             <div>
                 <x-label for="cnae">
-                    CNAE <span class="normal-case font-normal tracking-normal text-[color:var(--color-secondary)]">(opcional — 7 dígitos)</span>
+                    CNAE <span class="normal-case font-normal tracking-normal text-[color:var(--color-secondary)]">(opcional — busque pelo código ou pela atividade)</span>
                 </x-label>
-                <x-input type="text" id="cnae" wire:model="cnae"
-                         inputmode="numeric" maxlength="7" placeholder="0000000"
-                         dusk="empresa-cnae"/>
+                <x-cnae-select id="cnae" wire:model="cnae" :valor-inicial="$cnae" dusk="empresa-cnae"/>
                 @error('cnae')
                     <p class="text-[color:var(--color-destructive)] text-sm mt-1 mb-0" dusk="erro-cnae">{{ $message }}</p>
                 @enderror

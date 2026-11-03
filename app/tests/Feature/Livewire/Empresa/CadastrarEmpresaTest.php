@@ -130,6 +130,18 @@ it('rejeita CNAE com formato inválido (CA-3)', function () {
         ->assertHasErrors(['cnae']);
 });
 
+it('rejeita CNAE de 7 dígitos que não existe na tabela do IBGE', function () {
+    Livewire::test(Cadastrar::class)
+        ->set('tipo_documento', TipoDocumento::Cpf->value)
+        ->set('documento', EmpresaAnalisadaFactory::gerarCpfValido())
+        ->set('razao_social', 'Empresa Z')
+        ->set('cnae', '9999999')
+        ->set('municipio', 'Y')
+        ->set('uf', 'SP')
+        ->call('submit')
+        ->assertHasErrors(['cnae']);
+});
+
 it('rejeita data de fundação no futuro (CA-3)', function () {
     Livewire::test(Cadastrar::class)
         ->set('tipo_documento', TipoDocumento::Cpf->value)

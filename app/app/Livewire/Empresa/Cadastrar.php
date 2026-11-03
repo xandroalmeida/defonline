@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Empresa;
 
+use App\Domain\Cnae;
 use App\Domain\Cnpj;
 use App\Domain\Cpf;
 use App\Domain\FonteEnriquecimento;
@@ -270,7 +271,16 @@ final class Cadastrar extends Component
             ],
             'razao_social' => ['required', 'string', 'min:2', 'max:255'],
             'nome_fantasia' => ['nullable', 'string', 'max:255'],
-            'cnae' => ['nullable', 'string', 'regex:/^\d{7}$/'],
+            'cnae' => [
+                'nullable',
+                'string',
+                'regex:/^\d{7}$/',
+                function (string $attr, mixed $valor, \Closure $fail): void {
+                    if (is_string($valor) && preg_match('/^\d{7}$/', $valor) === 1 && ! Cnae::existe($valor)) {
+                        $fail('Escolha um CNAE da lista.');
+                    }
+                },
+            ],
             'municipio' => ['required', 'string', 'max:120'],
             'uf' => ['required', 'string', Rule::in(Uf::valores())],
             'situacao_cadastral' => ['required', Rule::in(array_map(static fn (SituacaoCadastral $s) => $s->value, SituacaoCadastral::cases()))],
