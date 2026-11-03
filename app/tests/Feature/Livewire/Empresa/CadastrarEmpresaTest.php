@@ -29,11 +29,12 @@ it('exige autenticação para acessar /empresas/nova', function () {
     $this->get('/empresas/nova')->assertRedirect('/login');
 });
 
-it('abre em modo CNPJ e o link de autônomo leva ao formulário manual de CPF (STORY-063 CA-9)', function () {
+it('abre em modo CNPJ/CPF e o caminho de autônomo leva ao formulário manual de CPF (STORY-063 CA-9)', function () {
     $this->get('/empresas/nova')
         ->assertOk()
         ->assertSee('Cadastrar empresa')
-        ->assertSee('Não tenho CNPJ (sou autônomo)')
+        ->assertSee('CNPJ ou CPF')
+        ->assertSee('Autônomo sem CNPJ? Informe seu CPF')
         ->assertDontSee('Razão social');
 
     Livewire::test(Cadastrar::class)

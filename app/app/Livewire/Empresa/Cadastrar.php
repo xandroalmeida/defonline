@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Empresa;
 
 use App\Domain\Cnpj;
+use App\Domain\Cpf;
 use App\Domain\FonteEnriquecimento;
 use App\Domain\Rfb\RfbCnpjStatus;
 use App\Domain\SituacaoCadastral;
@@ -32,7 +33,8 @@ use Livewire\Component;
  *
  * Dois caminhos (PDR-010):
  *
- * - **CNPJ (default, STORY-063).** O usuário informa só o CNPJ; a consulta à
+ * - **CNPJ (default, STORY-063).** O usuário informa só o CNPJ (o campo
+ *   aceita CNPJ ou CPF; CPF válido desvia para o caminho do autônomo); a consulta à
  *   RFB traz a ficha completa, exibida só-leitura. O resultado fica em
  *   propriedades `#[Locked]` — o cliente não consegue forjar nem alterar dado
  *   da Receita. "Confirmar" grava com `fonte_enriquecimento = 'rfb'`. Falha
@@ -70,7 +72,7 @@ final class Cadastrar extends Component
 
     public const MSG_CNPJ_INEXISTENTE = 'Não encontramos este CNPJ na Receita. Confira os números.';
 
-    public const MSG_CNPJ_INVALIDO = 'Informe um CNPJ válido.';
+    public const MSG_CNPJ_INVALIDO = 'Informe um CNPJ ou CPF válido.';
 
     public const MSG_JA_CADASTRADA = 'Você já cadastrou esta empresa.';
 
@@ -112,6 +114,18 @@ final class Cadastrar extends Component
         }
 
         $digitos = Cnpj::normalizar($this->documento);
+
+        // Campo único aceita CNPJ ou CPF: CPF válido segue o fluxo manual do
+        // autônomo (STORY-014), com o documento já preenchido.
+        if (strlen($digitos) === 11 && Cpf::valido($digitos)) {
+            if ($this->bloquearSeJaCadastrada($digitos)) {
+                return;
+            }
+            $this->usarCpf();
+            $this->documento = Cpf::formatar($digitos);
+
+            return;
+        }
 
         if (! Cnpj::valido($digitos)) {
             $this->mensagemErro = self::MSG_CNPJ_INVALIDO;
@@ -352,9 +366,9 @@ final class Cadastrar extends Component
         return $empresa;
     }
 
-    private function bloquearSeJaCadastrada(string $cnpj): bool
+    private function bloquearSeJaCadastrada(string $documento): bool
     {
-        $existente = EmpresaAnalisada::query()->where('documento', $cnpj)->value('id');
+        $existente = EmpresaAnalisada::query()->where('documento', $documento)->value('id');
         if ($existente === null) {
             return false;
         }

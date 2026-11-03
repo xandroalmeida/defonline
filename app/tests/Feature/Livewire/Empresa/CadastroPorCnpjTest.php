@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Cpf;
 use App\Domain\FonteEnriquecimento;
 use App\Domain\Rfb\RfbCnpjResult;
 use App\Domain\SituacaoCadastral;
@@ -276,6 +277,55 @@ it('trocar para CPF descarta a consulta e o tipo inválido volta para CNPJ (CA-9
         ->assertSet('documento', '')
         ->set('tipo_documento', 'passaporte')
         ->assertSet('tipo_documento', TipoDocumento::Cnpj->value);
+});
+
+it('CPF válido no campo único segue para o cadastro manual com o CPF preenchido', function () {
+    $cpf = EmpresaAnalisadaFactory::gerarCpfValido();
+
+    Livewire::test(Cadastrar::class)
+        ->set('documento', $cpf)
+        ->call('consultarReceita')
+        ->assertSet('tipo_documento', TipoDocumento::Cpf->value)
+        ->assertSet('documento', Cpf::formatar($cpf))
+        ->assertSet('mensagemErro', null)
+        ->assertSee('Razão social')
+        ->set('razao_social', 'Joana Autônoma')
+        ->set('municipio', 'Belo Horizonte')
+        ->set('uf', 'MG')
+        ->call('submit')
+        ->assertHasNoErrors()
+        ->assertRedirect();
+
+    expect(EmpresaAnalisada::firstWhere('documento', $cpf)->tipo_documento)->toBe(TipoDocumento::Cpf);
+    expect(consultasRfbRegistradas())->toBe(0);
+});
+
+it('CPF inválido ou documento com tamanho errado no campo único é rejeitado', function (string $doc) {
+    Livewire::test(Cadastrar::class)
+        ->set('documento', $doc)
+        ->call('consultarReceita')
+        ->assertSet('tipo_documento', TipoDocumento::Cnpj->value)
+        ->assertSet('mensagemErro', Cadastrar::MSG_CNPJ_INVALIDO);
+
+    expect(consultasRfbRegistradas())->toBe(0);
+})->with([
+    'CPF com DV errado' => ['123.456.789-00'],
+    'CPF sequência trivial' => ['111.111.111-11'],
+    'tamanho intermediário' => ['1234567890123'],
+]);
+
+it('CPF já cadastrado pelo usuário no campo único mostra link para a empresa', function () {
+    $cpf = EmpresaAnalisadaFactory::gerarCpfValido();
+    $existente = EmpresaAnalisada::factory()->create([
+        'usuario_id' => $this->usuario->id, 'documento' => $cpf, 'tipo_documento' => TipoDocumento::Cpf->value,
+    ]);
+
+    Livewire::test(Cadastrar::class)
+        ->set('documento', $cpf)
+        ->call('consultarReceita')
+        ->assertSet('tipo_documento', TipoDocumento::Cnpj->value)
+        ->assertSet('mensagemErro', Cadastrar::MSG_JA_CADASTRADA)
+        ->assertSet('empresaExistenteId', $existente->id);
 });
 
 it('consulta em modo CPF é no-op', function () {

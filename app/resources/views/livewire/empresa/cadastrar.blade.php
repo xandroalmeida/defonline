@@ -1,7 +1,7 @@
 <div>
     <x-page-header :title="'Cadastrar empresa'"
                    :subtitle="$tipo_documento === 'cnpj'
-                       ? 'Informe o CNPJ. Os dados vêm direto da Receita Federal.'
+                       ? 'Informe o CNPJ ou o CPF. Com CNPJ, os dados vêm direto da Receita Federal.'
                        : 'Autônomo sem CNPJ: preencha os dados da sua atividade.'"/>
 
     @if ($tipo_documento === 'cnpj')
@@ -9,29 +9,23 @@
         <x-card>
             <form wire:submit="consultarReceita" novalidate class="flex flex-col gap-3">
                 <div>
-                    <x-label for="documento">CNPJ</x-label>
+                    <x-label for="documento">CNPJ ou CPF</x-label>
                     <div class="flex flex-col sm:flex-row gap-3">
                         <x-input type="text" id="documento" wire:model.live.debounce.200ms="documento"
                                  inputmode="numeric" autocomplete="off"
-                                 maxlength="{{ $tipo_documento === 'cnpj' ? 18 : 14 }}"
-                                 placeholder="{{ $tipo_documento === 'cnpj' ? '00.000.000/0000-00' : '000.000.000-00' }}"
+                                 maxlength="18"
+                                 placeholder="CNPJ ou CPF"
                                  x-data
                                  x-on:input="
-                                     const tipo = $wire.tipo_documento;
-                                     const limite = tipo === 'cnpj' ? 14 : 11;
-                                     const d = $el.value.replace(/\D/g, '').slice(0, limite);
+                                     {{-- Máscara pelo nº de dígitos: até 11 = CPF, acima = CNPJ. --}}
+                                     const d = $el.value.replace(/\D/g, '').slice(0, 14);
                                      let m = d;
-                                     if (tipo === 'cnpj') {
-                                         if (d.length > 12)      m = d.slice(0,2)+'.'+d.slice(2,5)+'.'+d.slice(5,8)+'/'+d.slice(8,12)+'-'+d.slice(12);
-                                         else if (d.length > 8)  m = d.slice(0,2)+'.'+d.slice(2,5)+'.'+d.slice(5,8)+'/'+d.slice(8);
-                                         else if (d.length > 5)  m = d.slice(0,2)+'.'+d.slice(2,5)+'.'+d.slice(5);
-                                         else if (d.length > 2)  m = d.slice(0,2)+'.'+d.slice(2);
-                                     } else {
-                                         if (d.length > 9)      m = d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6,9)+'-'+d.slice(9);
-                                         else if (d.length > 6) m = d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6);
-                                         else if (d.length > 3) m = d.slice(0,3)+'.'+d.slice(3);
-                                     }
-                                     $el.value = m;
+                                     if (d.length > 11) {
+                                         m = d.slice(0,2)+'.'+d.slice(2,5)+'.'+d.slice(5,8)+'/'+d.slice(8,12)+'-'+d.slice(12);
+                                     } else if (d.length > 9) m = d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6,9)+'-'+d.slice(9);
+                                     else if (d.length > 6) m = d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6);
+                                     else if (d.length > 3) m = d.slice(0,3)+'.'+d.slice(3);
+                                     if ($el.value !== m) { $el.value = m; $el.dispatchEvent(new Event('input')); }
                                  "
                                  dusk="empresa-documento"/>
                         <x-button type="submit" variant="primary"
@@ -56,10 +50,8 @@
                 @endif
 
                 @unless ($resultado)
-                    <p class="m-0 text-sm text-[color:var(--color-secondary)]">
-                        Não tem CNPJ?
-                        <button type="button" wire:click="usarCpf" class="underline font-semibold text-[color:var(--color-tertiary)]"
-                                dusk="empresa-usar-cpf">Não tenho CNPJ (sou autônomo)</button>
+                    <p class="m-0 text-sm text-[color:var(--color-secondary)]" dusk="empresa-dica-cpf">
+                        Autônomo sem CNPJ? Informe seu CPF — em seguida você preenche os dados da sua atividade.
                     </p>
                 @endunless
             </form>
