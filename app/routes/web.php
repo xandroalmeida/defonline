@@ -63,6 +63,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/diagnosticos/{diagnostico}', [DiagnosticoController::class, 'show'])
         ->whereUuid('diagnostico')
         ->name('diagnosticos.show');
+    Route::get('/diagnosticos/{diagnostico}/pdf', [DiagnosticoController::class, 'pdf'])
+        ->whereUuid('diagnostico')
+        ->name('diagnosticos.pdf');
 });
 
 // STORY-065 / PDR-011 — backoffice mínimo, só-leitura, restrito à allowlist da

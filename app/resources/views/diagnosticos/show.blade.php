@@ -1,4 +1,5 @@
 @php
+    use App\Support\Relatorio\Glossario;
     use App\Support\Relatorio\IndicadorFormatter;
     use App\Support\Relatorio\ValoresNominais;
 
@@ -30,10 +31,6 @@
     $resumoEhValido = isset($resumoExecutivo['veredito']);
 
     /*
-     * Glossário inline — textos editoriais derivados do Anexo I (espec V2).
-     * Mudanças no Anexo I propagam por edição manual aqui — Anexo I não tem motor_version.
-     */
-    /*
      * Destino do botão "Voltar" — segue o Referer (de onde Roberto veio):
      * Minhas Empresas, Selecionar Empresa, ou redirect do submit do quiz.
      * Fallback /home quando não há referer (URL bookmarkada ou refresh) ou
@@ -46,28 +43,8 @@
         $voltarUrl = route('home');
     }
 
-    /*
-     * Ordem revisada na devolutiva EBC de 27/05/2026 (STORY-042): o EBITDA sobe
-     * para 2º item — é o conceito que o Roberto mais precisa antes de ler as
-     * margens seguintes. Nenhum item foi removido: o `.docx` pedia "excluir o
-     * item antes do Farol/Semáforo" sem nomear qual, e a pergunta ao Edvan
-     * (pauta-retorno §3) não teve resposta até o prazo de 2026-06-04 — default
-     * documentado é manter, pendência fechada como diferida.
-     */
-    $glossario = [
-        ['Margem Bruta (MB) / Lucro Bruto (LB)', 'Diferença entre o faturamento e o custo (dos produtos/mercadorias/serviços vendidos), antes das despesas.'],
-        ['EBITDA / Margem Operacional', 'Resultado do negócio: faturamento menos custos e despesas operacionais, exceto depreciação (e antes das despesas financeiras e tributos). Mede a eficiência em produzir lucros por meio das vendas.'],
-        ['Margem Operacional Líquida (MOL)', 'A parcela operacional de lucro obtida sobre as vendas, considerando despesas financeiras, depreciação e tributos.'],
-        ['Relação Dívida Líquida / EBITDA', 'Demonstra o número de períodos que uma empresa levaria para pagar sua dívida líquida.'],
-        ['NCG / Vendas', 'Representa a relação entre a necessidade de capital de giro e as vendas realizadas. Expressa, em proporção, quanto da receita precisa ser financiada para sustentar o ciclo operacional.'],
-        ['PMR — Prazo Médio de Recebimento', 'Tempo médio, em dias, que a empresa leva para receber dos clientes após a venda.'],
-        ['PMC — Prazo Médio de pagamento a fornecedores', 'Tempo médio, em dias, que a empresa leva para pagar seus fornecedores após a compra.'],
-        ['Ciclo Financeiro (CF)', 'Indica a necessidade de financiamento complementar do capital de giro, em número de dias, em média (se positivo). Fórmula: PME + PMR − PMC.'],
-        ['Necessidade de Capital de Giro (NCG)', 'Instrumento de aferição da saúde financeira da empresa, apurada pela diferença entre Ativo e Passivo circulante cíclico. Se positiva, indica quanto de financiamento complementar a empresa necessita.'],
-        ['Farol / Semáforo', 'Classificação visual (verde / amarelo / vermelho) atribuída automaticamente a cada indicador a partir das faixas da matriz de recomendações.'],
-        ['Indisponível', 'Rótulo exibido quando o indicador não pode ser calculado (ex.: denominador igual a zero ou dado faltante). Não recebe farol nem texto de recomendação.'],
-        ['Balanço Adaptado / DRE Adaptada', 'Versão simplificada construída a partir dos 23 campos do quiz; suficiente para os indicadores da v1, mas não equivalente a um balanço/DRE contábil formal.'],
-    ];
+    // Glossário — compartilhado com o PDF (App\Support\Relatorio\Glossario).
+    $glossario = Glossario::ITENS;
 @endphp
 
 <x-layouts.app :title="$tituloPagina"
@@ -80,9 +57,20 @@
     <x-page-header :title="$nomeEmpresa"
                    :subtitle="'Diagnóstico de ' . $dataDiagnostico">
         <x-slot:actions>
-            <span class="pill pill--versao" dusk="diagnostico-mvp-badge">
+            <span class="pill pill--versao self-center" dusk="diagnostico-mvp-badge">
                 Versão MVP
             </span>
+            {{-- PDF do mesmo snapshot (capa + resumo + indicadores + glossário). --}}
+            <x-button :href="route('diagnosticos.pdf', $diagnostico)" variant="secondary" size="sm"
+                      dusk="diagnostico-baixar-pdf" data-testid="diagnostico-baixar-pdf">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Baixar PDF
+            </x-button>
         </x-slot:actions>
     </x-page-header>
 

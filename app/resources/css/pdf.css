@@ -1,0 +1,397 @@
+/*
+ * pdf.css — folha do PDF do diagnóstico (renderizado pelo dompdf, não pelo Vite).
+ *
+ * Cores, raios e espaçamentos vêm de tokens.css via `var(--…)`, resolvidos em PHP
+ * por App\Support\Relatorio\TokensDeDesign — nenhum hex aqui (DesignTokensTest).
+ *
+ * Restrições do dompdf (CSS 2.1): sem flex/grid, sem custom properties nativas,
+ * sem color-mix nativo. Layout em tabelas e blocos; colunas por `table-layout: fixed`.
+ *
+ * Quebra de página — a regra que este arquivo existe para garantir:
+ *   - nenhum título fica sozinho no pé da página: título + primeiro item do
+ *     conteúdo moram num `.manter-junto` (page-break-inside: avoid);
+ *   - nenhum item (linha de indicador, card, verbete) parte ao meio;
+ *   - o cabeçalho da tabela de indicadores se repete em cada página (thead).
+ */
+
+@page {
+    margin: 20mm 17mm 22mm 17mm;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    font-size: 9.5pt;
+    line-height: 1.5;
+    color: var(--color-primary);
+    background: var(--color-surface);
+}
+
+h1, h2, h3, p, ul, dl, dd {
+    margin: 0;
+    padding: 0;
+}
+
+.manter-junto,
+.indivisivel {
+    page-break-inside: avoid;
+}
+
+.titulo-da-tabela {
+    page-break-after: avoid;
+}
+
+.nova-pagina {
+    page-break-before: always;
+}
+
+/* ── Capa ─────────────────────────────────────────────────────────────── */
+
+.capa {
+    position: relative;
+    height: 250mm; /* área útil do A4 com as margens do @page (297 − 20 − 22 − folga). */
+    page-break-after: always;
+}
+
+.capa__marca {
+    font-size: 13pt;
+    font-weight: 500;
+    letter-spacing: -0.2pt;
+}
+
+.capa__marca img {
+    vertical-align: middle;
+    margin-right: 2mm;
+}
+
+.capa__corpo {
+    position: absolute;
+    top: 44mm;
+    left: 0;
+    right: 0;
+}
+
+.capa__filete {
+    width: 28mm;
+    height: 3pt;
+    background: var(--color-tertiary);
+    margin-bottom: 7mm;
+}
+
+.capa__sobretitulo {
+    font-size: 8.5pt;
+    font-weight: 600;
+    letter-spacing: 1.2pt;
+    text-transform: uppercase;
+    color: var(--color-tertiary);
+    margin-bottom: 3mm;
+}
+
+.capa__titulo {
+    font-size: 30pt;
+    font-weight: 300;
+    line-height: 1.12;
+    letter-spacing: -0.6pt;
+    margin-bottom: 14mm;
+}
+
+.capa__empresa {
+    font-size: 17pt;
+    font-weight: 500;
+    line-height: 1.25;
+    margin-bottom: 2mm;
+}
+
+.capa__razao {
+    font-size: 10pt;
+    color: var(--color-secondary);
+    margin-bottom: 7mm;
+}
+
+.capa__dados {
+    width: 100%;
+    border-collapse: collapse;
+    border-top: 1px solid var(--color-border);
+}
+
+.capa__dados td {
+    padding: 3.2mm 0;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+}
+
+.capa__dados .rotulo {
+    width: 42mm;
+}
+
+.capa__veredito {
+    margin-top: 12mm;
+    padding: 5mm 6mm;
+    border-left: 3pt solid var(--color-border);
+    background: var(--color-neutral);
+}
+
+.capa__veredito p {
+    font-size: 11pt;
+    font-weight: 500;
+    margin-top: 2.5mm;
+}
+
+.capa__rodape {
+    position: absolute;
+    top: 238mm; /* dompdf não ancora `bottom` no bloco posicionado — topo fixo. */
+    left: 0;
+    right: 0;
+    border-top: 1px solid var(--color-border);
+    padding-top: 4mm;
+    font-size: 8pt;
+    color: var(--color-secondary);
+}
+
+/* ── Tipografia de conteúdo ───────────────────────────────────────────── */
+
+.rotulo {
+    font-size: 7.5pt;
+    font-weight: 600;
+    letter-spacing: 0.8pt;
+    text-transform: uppercase;
+    color: var(--color-secondary);
+}
+
+.secao {
+    margin-bottom: 9mm;
+}
+
+.secao__titulo {
+    font-size: 15pt;
+    font-weight: 500;
+    letter-spacing: -0.2pt;
+    margin-bottom: 1.5mm;
+}
+
+.secao__intro {
+    font-size: 9pt;
+    color: var(--color-secondary);
+    margin-bottom: 4mm;
+}
+
+.secundario {
+    color: var(--color-secondary);
+}
+
+.italico {
+    font-style: italic;
+}
+
+/* ── Farol (pill) — DDR-006: fundo tingido opaco, texto na tinta ──────── */
+
+.farol {
+    display: inline-block;
+    padding: 0.6mm 2.4mm 0.6mm 2mm;
+    border-radius: var(--radius-full);
+    font-size: 7.5pt;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.farol__ponto {
+    display: inline-block;
+    width: 5pt;
+    height: 5pt;
+    border-radius: 2.5pt;
+    margin-right: 1.4mm;
+    vertical-align: 0.2pt;
+}
+
+.farol--verde {
+    background: color-mix(in srgb, var(--color-farol-verde) 10%, var(--color-surface));
+    color: var(--color-farol-verde-texto);
+}
+.farol--verde .farol__ponto { background: var(--color-farol-verde); }
+
+.farol--amarelo {
+    background: color-mix(in srgb, var(--color-farol-amarelo) 12%, var(--color-surface));
+    color: var(--color-farol-amarelo-texto);
+}
+.farol--amarelo .farol__ponto { background: var(--color-farol-amarelo); }
+
+.farol--vermelho {
+    background: color-mix(in srgb, var(--color-farol-vermelho) 10%, var(--color-surface));
+    color: var(--color-farol-vermelho-texto);
+}
+.farol--vermelho .farol__ponto { background: var(--color-farol-vermelho); }
+
+.farol--nenhum {
+    background: color-mix(in srgb, var(--color-farol-cinza) 14%, var(--color-surface));
+    color: var(--color-farol-cinza-texto);
+}
+.farol--nenhum .farol__ponto { background: var(--color-farol-cinza); }
+
+.borda-verde { border-left-color: var(--color-farol-verde) !important; }
+.borda-amarelo { border-left-color: var(--color-farol-amarelo) !important; }
+.borda-vermelho { border-left-color: var(--color-farol-vermelho) !important; }
+
+/* ── Resumo executivo ─────────────────────────────────────────────────── */
+
+.resumo {
+    padding: 5mm 6mm;
+    border-left: 3pt solid var(--color-border);
+    background: var(--color-neutral);
+}
+
+.resumo__veredito {
+    font-size: 11.5pt;
+    font-weight: 500;
+    margin: 3mm 0 2.5mm;
+}
+
+.resumo__lista {
+    list-style: none;
+    margin: 0 0 2.5mm;
+}
+
+.resumo__lista li {
+    padding-left: 4mm;
+    margin-bottom: 1.2mm;
+    text-indent: -4mm;
+}
+
+.resumo__lista li span {
+    color: var(--color-secondary);
+}
+
+/* ── Tabela de indicadores ────────────────────────────────────────────── */
+
+.indicadores {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.indicadores th,
+.indicadores td {
+    padding: 2.6mm 2.4mm;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.indicadores thead th {
+    background: var(--color-neutral);
+    font-size: 7pt;
+    font-weight: 600;
+    letter-spacing: 0.7pt;
+    text-transform: uppercase;
+    color: var(--color-secondary);
+    border-top: 1px solid var(--color-border);
+}
+
+.indicadores tbody tr {
+    page-break-inside: avoid;
+}
+
+.indicadores .col-nome { width: 27%; }
+.indicadores .col-valor { width: 26%; }
+.indicadores .col-farol { width: 15%; }
+.indicadores .col-msg { width: 32%; }
+
+.indicadores .nome {
+    font-weight: 500;
+}
+
+.indicadores .valor {
+    font-size: 10.5pt;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.indicadores .mensagem {
+    font-size: 8.5pt;
+    color: var(--color-secondary);
+}
+
+.indisponivel td {
+    color: var(--color-secondary);
+}
+
+.nominais {
+    margin-top: 1mm;
+    font-size: 7.5pt;
+    line-height: 1.45;
+    color: var(--color-secondary);
+}
+
+/* ── Cards informativos (NCG absoluto + ciclo operacional) ────────────── */
+
+.informativos {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+}
+
+.informativos td {
+    width: 50%;
+    vertical-align: top;
+}
+
+.informativos .espaco {
+    width: 4mm;
+}
+
+.card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-neutral);
+    padding: 4.5mm 5mm;
+}
+
+.card__nome {
+    font-size: 11pt;
+    font-weight: 500;
+    margin: 1mm 0 2mm;
+}
+
+.card__valor {
+    font-size: 18pt;
+    font-weight: 300;
+    line-height: 1.15;
+    margin-bottom: 2mm;
+}
+
+.card__mensagem {
+    font-size: 8.5pt;
+    color: var(--color-secondary);
+}
+
+/* ── Glossário ────────────────────────────────────────────────────────── */
+
+.verbete {
+    padding: 2.6mm 0;
+    border-bottom: 1px solid var(--color-border);
+    page-break-inside: avoid;
+}
+
+.verbete--primeiro {
+    border-top: 1px solid var(--color-border);
+}
+
+.verbete dt {
+    font-weight: 500;
+    margin-bottom: 0.6mm;
+}
+
+.verbete dd {
+    font-size: 8.5pt;
+    color: var(--color-secondary);
+}
+
+/* ── Nota final ───────────────────────────────────────────────────────── */
+
+.nota {
+    margin-top: 6mm;
+    padding-top: 3mm;
+    border-top: 1px solid var(--color-border);
+    font-size: 7.5pt;
+    color: var(--color-secondary);
+}
