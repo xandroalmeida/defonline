@@ -33,6 +33,9 @@ final class ValidaSocios
 
     public const MAXIMO = 10;
 
+    /** Erro de lista vazia — mora em `socios.0.cpf`, mas é da lista inteira. */
+    public const ERRO_MINIMO = 'Informe o CPF de ao menos um sócio.';
+
     /**
      * Forma canônica da lista: linhas 100% vazias descartadas (CA-7), CPF
      * normalizado para 11 dígitos, nome aparado, e a lista ordenada
@@ -111,7 +114,7 @@ final class ValidaSocios
         }
 
         if ($preenchidas === 0) {
-            $erros['socios.0.cpf'] = 'Informe o CPF de ao menos um sócio.';
+            $erros['socios.0.cpf'] = self::ERRO_MINIMO;
         }
 
         if ($preenchidas > self::MAXIMO) {

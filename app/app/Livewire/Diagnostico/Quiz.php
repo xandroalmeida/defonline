@@ -238,6 +238,25 @@ final class Quiz extends Component
     }
 
     /**
+     * Editar um campo apaga o erro dele. O Livewire mantém o error bag entre
+     * requisições, então sem isso a mensagem do último submit continua na tela
+     * depois de o usuário corrigir o campo (ex.: "Informe o CPF de ao menos um
+     * sócio." com o CPF já digitado). A revalidação continua no próximo
+     * avanço/submit; aqui só se limpa o que ficou velho.
+     */
+    public function updated(string $propriedade): void
+    {
+        $this->resetValidation($propriedade);
+
+        // O erro de lista vazia fica em `socios.0.cpf` mas vale para a lista
+        // toda: preencher qualquer campo de qualquer sócio já o torna obsoleto.
+        if (str_starts_with($propriedade, 'socios')
+            && $this->getErrorBag()->first('socios.0.cpf') === ValidaSocios::ERRO_MINIMO) {
+            $this->resetValidation('socios.0.cpf');
+        }
+    }
+
+    /**
      * STORY-038 CA-2: acrescenta uma linha de sócio vazia (até o cap) e pede
      * foco no novo input via evento de browser. Respeita o teto de
      * {@see ValidaSocios::MAXIMO} — acima dele o botão já vem desabilitado, mas

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Quiz\ValidaSocios;
 use App\Livewire\Diagnostico\Quiz;
 use App\Models\Diagnostico;
 use App\Models\EmpresaAnalisada;
@@ -573,6 +574,40 @@ it('exige ao menos 1 sócio preenchido quando Q17="sim" (CA-1 inverso)', functio
         ->assertHasErrors('socios.0.cpf');
 
     expect(Diagnostico::query()->count())->toBe(0);
+});
+
+it('digitar o CPF apaga o erro de lista vazia do submit anterior', function () {
+    $c = quizPreencherAteBloco4($this)
+        ->set('Q17', 'sim')
+        ->set('Q18', '50000')->set('Q19', '20000')->set('Q20', '10000')
+        ->call('submeter')
+        ->assertHasErrors(['socios.0.cpf' => ValidaSocios::ERRO_MINIMO]);
+
+    $c->set('socios.0.cpf', '858.734.467-68')
+        ->assertHasNoErrors('socios.0.cpf');
+});
+
+it('preencher o nome de outro sócio também apaga o erro de lista vazia', function () {
+    quizPreencherAteBloco4($this)
+        ->set('Q17', 'sim')
+        ->set('Q18', '50000')->set('Q19', '20000')->set('Q20', '10000')
+        ->set('socios', [['cpf' => '', 'nome' => ''], ['cpf' => '', 'nome' => '']])
+        ->call('submeter')
+        ->assertHasErrors('socios.0.cpf')
+        ->set('socios.1.nome', 'Ana Lima')
+        ->assertHasNoErrors('socios.0.cpf');
+});
+
+it('editar um campo não apaga o erro de outro', function () {
+    quizPreencherAteBloco4($this)
+        ->set('Q17', 'sim')
+        ->set('Q18', '50000')->set('Q19', '20000')->set('Q20', '10000')
+        ->set('socios', [['cpf' => '111.111.111-11', 'nome' => '']])
+        ->call('submeter')
+        ->assertHasErrors(['socios.0.cpf', 'socios.0.nome'])
+        ->set('socios.0.nome', 'Ana Lima')
+        ->assertHasNoErrors('socios.0.nome')
+        ->assertHasErrors('socios.0.cpf');
 });
 
 it('descarta linhas vazias entre preenchidas no payload (CA-7)', function () {
