@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Models\Scopes\BelongsToUsuarioScope;
 use App\Models\Concerns\RegistraPersonificacao;
+use App\Models\Scopes\BelongsToUsuarioScope;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;

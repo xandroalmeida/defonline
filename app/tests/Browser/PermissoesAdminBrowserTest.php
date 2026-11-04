@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Browser;
 
+use App\Models\GlossarioTermo;
 use App\Models\Usuario;
 use Facebook\WebDriver\WebDriverKeys;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
@@ -42,7 +43,7 @@ final class PermissoesAdminBrowserTest extends DuskTestCase
 
             // Remover usa a cor de alerta e pede confirmação: cancelar mantém o acesso.
             $this->assertSame('rgb(225, 29, 72)', $browser->script(
-                "return getComputedStyle(document.querySelector('[dusk=\"admin-remover-{$colega->id}\"]')).backgroundColor;"
+                "return getComputedStyle(document.querySelector('[dusk=\"admin-remover-{$colega->id}\"]')).backgroundColor;",
             )[0]);
             $browser->press('@admin-remover-'.$colega->id)
                 ->waitFor('@confirmacao')
@@ -69,7 +70,7 @@ final class PermissoesAdminBrowserTest extends DuskTestCase
                 ->waitForTextIn('@glossario-lista', 'Termo E2E');
 
             // O glossário não é truncado entre testes: remove o que criou.
-            $termoId = \App\Models\GlossarioTermo::query()->where('termo', 'Termo E2E')->value('id');
+            $termoId = GlossarioTermo::query()->where('termo', 'Termo E2E')->value('id');
 
             // Editar leva ao topo da tela, com o foco na definição.
             $browser->resize(1280, 700)
@@ -79,13 +80,13 @@ final class PermissoesAdminBrowserTest extends DuskTestCase
                 ->waitUsing(5, 100, fn () => $browser->script(
                     "return document.activeElement.id === 'glossario-definicao'
                         && document.activeElement.value === 'Definição E2E'
-                        && window.scrollY === 0;"
+                        && window.scrollY === 0;",
                 )[0] === true)
                 ->press('@glossario-cancelar');
 
             // Excluir usa a cor de alerta (#E11D48) e pede confirmação: cancelar mantém o termo.
             $this->assertSame('rgb(225, 29, 72)', $browser->script(
-                "return getComputedStyle(document.querySelector('[dusk=\"glossario-excluir-{$termoId}\"]')).backgroundColor;"
+                "return getComputedStyle(document.querySelector('[dusk=\"glossario-excluir-{$termoId}\"]')).backgroundColor;",
             )[0]);
             $browser->press('@glossario-excluir-'.$termoId)
                 ->waitFor('@confirmacao')

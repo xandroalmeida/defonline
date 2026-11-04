@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Concerns\RegistraPersonificacao;
 use App\Models\Scopes\BelongsToUsuarioScope;
 use Database\Factories\DiagnosticoFactory;
-use App\Models\Concerns\RegistraPersonificacao;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\ArrayObject;

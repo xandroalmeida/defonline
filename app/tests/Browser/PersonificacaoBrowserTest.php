@@ -41,7 +41,7 @@ final class PersonificacaoBrowserTest extends DuskTestCase
 
             // A tabela cabe na área útil: sem rolagem, nenhuma coluna fica cortada.
             $sobra = $browser->script(
-                "const c = document.querySelector('[dusk=backoffice-usuarios]').parentElement; return c.scrollWidth - c.clientWidth;"
+                "const c = document.querySelector('[dusk=backoffice-usuarios]').parentElement; return c.scrollWidth - c.clientWidth;",
             )[0];
             $this->assertLessThanOrEqual(0, $sobra, 'tabela não cabe em 1280px');
 
