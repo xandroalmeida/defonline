@@ -17,7 +17,8 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 /**
- * STORY-065 — backoffice: lista de usuários cadastrados (só-leitura, PDR-011).
+ * STORY-065 — backoffice: lista de usuários cadastrados (só-leitura, PDR-011). A
+ * única ação da tela é o "Logar como" (STORY-066, PDR-012), um POST à parte.
  *
  * Acesso garantido pelo middleware `backoffice` (allowlist, 404 para os demais).
  * Contagens e último login vêm de subqueries na própria consulta da página
@@ -60,10 +61,11 @@ final class Usuarios extends Component
             ->first();
 
         return view('livewire.backoffice.usuarios', [
+            'admin' => Auth::user(),
             'usuarios' => $this->paginar($base),
             'total' => (int) ($totais->total ?? 0),
             'confirmados' => (int) ($totais->confirmados ?? 0),
-        ])->layoutData(['title' => 'Usuários cadastrados']);
+        ])->layoutData(['title' => 'Usuários cadastrados', 'largo' => true]);
     }
 
     /**

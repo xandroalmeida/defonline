@@ -355,16 +355,18 @@
       "status": "in_progress",
       "path": "epics/EPIC-011-backoffice-minimo/epic.md",
       "story_ids": [
-        "STORY-065"
+        "STORY-065",
+        "STORY-066"
       ],
       "validation_report": null,
       "blocked_by_epics": [],
       "blocks_epics": [],
       "related_pdr": [
-        "PDR-011"
+        "PDR-011",
+        "PDR-012"
       ],
       "created_at": "2026-11-03",
-      "updated_at": "2026-11-03"
+      "updated_at": "2026-11-04"
     }
   ],
   "stories": [
@@ -1908,6 +1910,26 @@
       "path": "epics/EPIC-011-backoffice-minimo/stories/STORY-065-backoffice-lista-usuarios.md",
       "related_pdr": "PDR-011",
       "note": "2026-11-03: implementada (1068 Pest + 37 Dusk verdes; cobertura 97,9%). IDR-015. Pendências: e-mails da allowlist em .env.prod e deploy em homologação. | 2026-11-03: publicada na v0.11.3; falta só a verificação logada em produção."
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "in_review",
+      "blocks": [],
+      "epic_id": "EPIC-011",
+      "sprint_id": null,
+      "owner_agent": "programador (claude-opus-5-5)",
+      "requires_design": false,
+      "created_at": "2026-11-04",
+      "updated_at": "2026-11-04",
+      "id": "STORY-066",
+      "slug": "backoffice-logar-como",
+      "title": "Backoffice — \"Logar como\" um usuário, com volta ao admin e auditoria da sessão",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "path": "epics/EPIC-011-backoffice-minimo/stories/STORY-066-backoffice-logar-como.md",
+      "related_pdr": "PDR-012",
+      "note": "2026-11-04: implementada; falta publicar e verificar em produção."
     }
   ],
   "sprints": [
@@ -2550,6 +2572,27 @@
         "created_at": "2026-11-03",
         "updated_at": "2026-11-03",
         "note": "Antecipa fatia só-leitura do roadmap pós-v1 §6.1 (v1.2). Allowlist de e-mails, 404 para os demais, audit de acesso."
+      },
+      {
+        "id": "PDR-012",
+        "slug": "logar-como-no-backoffice",
+        "title": "Antecipar o \"Logar como\" no backoffice, com auditoria de toda a sessão",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-012-logar-como-no-backoffice.md",
+        "decided_at": "2026-11-04",
+        "decided_by": "PO (Alexandro / Claude)",
+        "related_epics": [
+          "EPIC-011"
+        ],
+        "related_adrs": [
+          "ADR-003"
+        ],
+        "related_idrs": [
+          "IDR-009"
+        ],
+        "created_at": "2026-11-04",
+        "updated_at": "2026-11-04",
+        "note": "Altera o PDR-011 §3 só para o \"Logar como\"."
       }
     ],
     "adr": [

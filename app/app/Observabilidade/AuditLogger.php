@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Observabilidade;
 
 use App\Models\AuditLog;
+use App\Support\Personificacao;
 use App\Support\RequestId;
 use Illuminate\Support\Str;
 
@@ -32,6 +33,13 @@ final class AuditLogger
         ?array $after = null,
         ?array $context = null,
     ): AuditLog {
+        // STORY-066 — durante o "Logar como" quem age é o admin, não o usuário.
+        $personificacao = Personificacao::ativa();
+        if ($personificacao !== null) {
+            $actorId = $actorType === 'user' ? $personificacao['admin_id'] : $actorId;
+            $context = ['personificacao' => $personificacao, ...($context ?? [])];
+        }
+
         return AuditLog::create([
             'id' => (string) Str::uuid7(),
             'request_id' => RequestId::get(),

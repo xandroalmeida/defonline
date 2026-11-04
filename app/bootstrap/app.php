@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AssignRequestId;
+use App\Http\Middleware\AuditarPersonificacao;
 use App\Http\Middleware\EnrichLogContext;
 use App\Http\Middleware\MeasureRequest;
 use App\Http\Middleware\SecurityHeaders;
@@ -38,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             EnrichLogContext::class,
             MeasureRequest::class,
+            AuditarPersonificacao::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

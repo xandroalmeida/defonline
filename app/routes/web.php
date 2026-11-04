@@ -8,6 +8,7 @@ use App\Http\Controllers\EmailConfirmacaoController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PersonificacaoController;
 use App\Livewire\Backoffice\Usuarios as BackofficeUsuarios;
 use App\Livewire\Cadastro;
 use App\Livewire\Diagnostico\Quiz as QuizDiagnostico;
@@ -42,6 +43,8 @@ Route::middleware('auth')->group(function () {
     // STORY-016 — "Minhas Empresas" substitui a /home mínima da STORY-011.
     Route::get('/home', MinhasEmpresas::class)->name('home');
     Route::post('/logout', [HomeController::class, 'logout'])->name('logout');
+    // STORY-066 — fora do grupo do backoffice: quem chama está logado como o usuário assumido.
+    Route::post('/personificacao/encerrar', [PersonificacaoController::class, 'encerrar'])->name('personificacao.encerrar');
 
     // STORY-014 — cadastro manual da primeira Empresa Analisada + visualização.
     Route::get('/empresas/nova', CadastrarEmpresa::class)->name('empresas.nova');
@@ -68,8 +71,11 @@ Route::middleware('auth')->group(function () {
         ->name('diagnosticos.pdf');
 });
 
-// STORY-065 / PDR-011 — backoffice mínimo, só-leitura, restrito à allowlist da
-// equipe. Fora da allowlist: 404 (IDR-009).
+// STORY-065 / PDR-011 — backoffice mínimo, restrito à allowlist da equipe; a única
+// escrita é o "Logar como" (PDR-012). Fora da allowlist: 404 (IDR-009).
 Route::middleware(['auth', 'backoffice'])->prefix('backoffice')->name('backoffice.')->group(function () {
     Route::get('/usuarios', BackofficeUsuarios::class)->name('usuarios');
+    Route::post('/usuarios/{usuario}/logar-como', [PersonificacaoController::class, 'iniciar'])
+        ->whereUuid('usuario')
+        ->name('usuarios.logar-como');
 });

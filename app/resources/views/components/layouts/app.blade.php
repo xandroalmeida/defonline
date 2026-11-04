@@ -1,6 +1,7 @@
 @props([
     'title' => null,
     'breadcrumb' => [],
+    'largo' => false,
 ])
 
 @php
@@ -68,7 +69,8 @@
 
             <div class="flex-1 flex flex-col min-w-0">
                 <main class="flex-1 px-4 sm:px-6 py-6 sm:py-8" data-testid="app-main">
-                    <div class="max-w-[960px] mx-auto w-full">
+                    {{-- `largo`: telas de tabela (backoffice) usam toda a área; o resto mantém a medida de leitura. --}}
+                    <div @class(['mx-auto w-full', 'max-w-[960px]' => ! $largo])>
                         @if (count($breadcrumb) > 0)
                             <x-breadcrumb :items="$breadcrumb"/>
                         @endif
@@ -80,6 +82,8 @@
             </div>
         </div>
     </div>
+
+    <x-personificacao-aviso/>
 
     @livewireScripts
 </body>

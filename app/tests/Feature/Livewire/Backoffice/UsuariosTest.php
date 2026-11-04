@@ -204,7 +204,7 @@ describe('CA-4 navegação', function () {
 });
 
 describe('CA-5 só-leitura e sem N+1', function () {
-    it('não tem nenhum botão ou ação de escrita além da busca', function () {
+    it('sem outros usuários na lista, não tem botão nem ação além da busca (Logar como: STORY-066)', function () {
         $html = $this->actingAs($this->equipe)->get('/backoffice/usuarios')->getContent();
 
         expect(substr_count($html, 'wire:click'))->toBe(0)

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Support\Personificacao;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,7 @@ final class HomeController
 {
     public function logout(Request $request): RedirectResponse
     {
+        Personificacao::registrarFim('logout');
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

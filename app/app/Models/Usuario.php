@@ -95,6 +95,15 @@ final class Usuario extends Authenticatable
         return $this->anonimizado_at !== null;
     }
 
+    /** STORY-066 — colega da equipe fica de fora: assumir outro admin embaralharia a trilha. */
+    public function podeSerPersonificadoPor(self $admin): bool
+    {
+        return $admin->ehEquipeBackoffice()
+            && ! $this->ehEquipeBackoffice()
+            && ! $this->trashed()
+            && ! $this->anonimizado();
+    }
+
     protected static function newFactory(): UsuarioFactory
     {
         return UsuarioFactory::new();
