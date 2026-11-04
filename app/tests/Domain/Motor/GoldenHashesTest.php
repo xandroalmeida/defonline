@@ -18,8 +18,8 @@ use App\Domain\Motor\Motor;
 |
 | Os 5 cenários cobrem:
 |   - saudavel: todos os indicadores em verde + NCG abs Faixa 1 (NCG ≤ 0).
-|   - atencao: todos amarelo + NCG abs Faixa 2 (moderado).
-|   - alerta: vermelhos, exceto NCG/Vendas amarelo + Div Líq/EBITDA INDISPONÍVEL (ebitda_negativo) + NCG abs Faixa 2.
+|   - atencao: amarelos, exceto NCG/Vendas vermelho + NCG abs Faixa 3 (alto).
+|   - alerta: todos vermelho + Div Líq/EBITDA INDISPONÍVEL (ebitda_negativo) + NCG abs Faixa 3 (alto).
 |   - ncg_negativo: mistura verde/amarelo, NCG abs claramente negativo.
 |   - 70pct_indisponivel: 100% dos indicadores indisponíveis (caminho extremo).
 | ----------------------------------------------------------------------
@@ -27,9 +27,10 @@ use App\Domain\Motor\Motor;
 
 dataset('golden_fixtures', [
     // Hashes re-emitidos no motor 2.0.0 (PDR-014): NCG/Vendas passa à base mensal,
-    // com limite 10,00, e Ciclo Operacional sai da saída. Comparando os 5 fixtures
-    // antes e depois, o Resumo Executivo não muda. No fixture `alerta`, NCG/Vendas
-    // vai de vermelho (0,2333) a amarelo (2,80) e o NCG absoluto, de alto a moderado.
+    // com limite 0,10, e Ciclo Operacional sai da saída. Comparando os 5 fixtures
+    // antes e depois: em `atencao`, NCG/Vendas vai de amarelo (0,05) a vermelho (0,60)
+    // e o NCG absoluto, de moderado a alto. Em `atencao` e `alerta`, ncg_vendas passa
+    // a ser destaque negativo do Resumo Executivo. Os demais não mudam de conteúdo.
     //
     // Hashes anteriores (motor 1.3.3):
     //   saudavel           dd804d9f8be7e6c0d00378bc02008e9f69d6499b18d1f4511bbc04b321589cb8
@@ -94,11 +95,11 @@ dataset('golden_fixtures', [
     ],
     'atencao' => [
         'quiz_industria_atencao.json',
-        '21c16a44741471ffd31eca9d05d7f1bba6ffafb853b9dd42a7eea271a79d0463',
+        'af3f0c4fe8f89e80d43c39e20d11b80065395606ce726e26a2933ac98e17d3f4',
     ],
     'alerta' => [
         'quiz_industria_alerta.json',
-        'abdb8e20ea0ed5dbca4d68b5fa257775de2a30521634faf59b4d27504b882e51',
+        'fe8cea52c777131fd4dab1e379ccd9a075840a11a6844806eeb1f906a0505e0d',
     ],
     'ncg_negativo' => [
         'quiz_industria_ncg_negativo.json',

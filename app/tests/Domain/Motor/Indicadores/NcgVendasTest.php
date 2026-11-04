@@ -24,7 +24,7 @@ function pBaseNv(array $overrides = []): array
 
 it('divide a NCG pela venda mensal: caso da Drogaria apontado pela EB dá 0,76 (PDR-014)', function () {
     $r = calcNcgVendas(['Q03' => '1500', 'Q04' => '120000', 'Q07' => '30000', 'Q09' => '120000']);
-    expect($r['valor'])->toBe(0.7625)->and($r['farol'])->toBe('amarelo');
+    expect($r['valor'])->toBe(0.7625)->and($r['farol'])->toBe('vermelho');
 });
 
 it('verde — NCG negativo', function () {
@@ -42,14 +42,14 @@ it('amarelo — logo acima de zero', function () {
     expect($r['valor'])->toBe(0.01)->and($r['farol'])->toBe('amarelo');
 });
 
-it('amarelo — fronteira superior 10,00 exato', function () {
-    $r = calcNcgVendas(pBaseNv(['Q03' => '1000000', 'Q04' => '0', 'Q07' => '0']));
-    expect($r['valor'])->toBe(10.0)->and($r['farol'])->toBe('amarelo');
+it('amarelo — fronteira superior 0,10 exato', function () {
+    $r = calcNcgVendas(pBaseNv(['Q03' => '10000', 'Q04' => '0', 'Q07' => '0']));
+    expect($r['valor'])->toBe(0.1)->and($r['farol'])->toBe('amarelo');
 });
 
-it('vermelho — logo acima de 10,00', function () {
-    $r = calcNcgVendas(pBaseNv(['Q03' => '1001000', 'Q04' => '0', 'Q07' => '0']));
-    expect($r['valor'])->toBe(10.01)->and($r['farol'])->toBe('vermelho');
+it('vermelho — logo acima de 0,10', function () {
+    $r = calcNcgVendas(pBaseNv(['Q03' => '10010', 'Q04' => '0', 'Q07' => '0']));
+    expect($r['valor'])->toBe(0.1001)->and($r['farol'])->toBe('vermelho');
 });
 
 // ---------- casos extremos ----------

@@ -398,8 +398,8 @@ O motor transforma **16 das 23 respostas** do quiz (as 7 restantes — Q17 flag,
 - **Patrimônio Líquido (PL).** `[VALIDADO]` Na ausência de separação entre Passivo Circulante e Passivo Não Circulante no quiz, o PL é calculado como `Ativo Total − Passivo Circulante`. A EBC **decidiu manter esta simplificação** em 22/04/2026 em face do perfil do público-alvo e da ergonomia do quiz. A crítica técnica do parecer CLAUDE (pg. 3) — distorção em empresas com dívida de longo prazo relevante — é reconhecida, e a mitigação prevista é um **aviso no rodapé do relatório quando Q06 (dívidas financeiras) superar limiar a ser fixado** (ver Seção 6, item 6.7), informando que indicadores derivados do PL (Dívida Líquida/EBITDA, Fontes de Recursos) podem estar subestimados pela metodologia.
 - **NCG absoluto — sem farol, indicador informativo.** `[VALIDADO]` (fechado em 17/05/2026 pelo item 6.3 da Seção 6.) O NCG absoluto (indicador #9, em R$) é **sempre exibido sem farol visual** — o produto mostra o valor numérico e uma mensagem curta da matriz DEZ/2025 (página 33) correspondente à faixa em que o NCG cai. As **três faixas semânticas** são:
   - **NCG ≤ 0** (negativo): texto sobre folga operacional / capital de giro positivo.
-  - **NCG positivo moderado:** `0 < NCG/Vendas ≤ 10,00`, na base mensal do #10 (PDR-014) — texto sobre patamar gerenciável e atenção a prazos médios.
-  - **NCG positivo alto crescente:** `NCG/Vendas > 10,00` — texto sobre pressão sobre o caixa e necessidade de revisão de PMC/PME/PMR ou captação estruturada.
+  - **NCG positivo moderado:** `0 < NCG/Vendas ≤ 0,10`, na base mensal do #10 (PDR-014) — texto sobre patamar gerenciável e atenção a prazos médios.
+  - **NCG positivo alto crescente:** `NCG/Vendas > 0,10` — texto sobre pressão sobre o caixa e necessidade de revisão de PMC/PME/PMR ou captação estruturada.
   - O critério escala automaticamente com o porte da empresa e mantém coerência matemática com o indicador irmão **NCG/Vendas** (#10), que **sim** recebe farol completo (verde / amarelo / vermelho).
   - Os 3 textos correspondentes à matriz DEZ/2025 página 33 ficam pendentes apenas de extração operacional pela EBC para a planilha RECOMENDAÇÕES — **não bloqueia o kickoff de código** (motor pode ser implementado com placeholders, textos finais entram via seed da tabela `Recommendation`).
 
@@ -687,8 +687,8 @@ Sintetizado da matriz de recomendações dez/2025. Cada indicador tem 3 faixas p
 | PMR | Todos | ≤ 30 dias | 30,01–60 | > 60 |
 | Inadimplência | Todos | ≤ 3% | 3,01–5% | > 5% |
 | Ciclo Financeiro | Todos | ≤ 30 dias | 30,01–60 | > 60 |
-| NCG (absoluto) | Todos | **Sempre sem farol — indicador informativo.** 3 faixas semânticas com mensagem curta: (i) NCG ≤ 0 (negativo) → folga operacional; (ii) 0 < NCG/Vendas ≤ 10,00 → positivo moderado; (iii) NCG/Vendas > 10,00 → positivo alto crescente. Detalhe em §4.5. | — | — |
-| NCG / Vendas | Todos | ≤ 0 | 0,01–10,00 | > 10,00 |
+| NCG (absoluto) | Todos | **Sempre sem farol — indicador informativo.** 3 faixas semânticas com mensagem curta: (i) NCG ≤ 0 (negativo) → folga operacional; (ii) 0 < NCG/Vendas ≤ 0,10 → positivo moderado; (iii) NCG/Vendas > 0,10 → positivo alto crescente. Detalhe em §4.5. | — | — |
+| NCG / Vendas | Todos | ≤ 0 | até 0,10 (10%) | > 0,10 (10%) |
 
 ### Anexo F — Matriz de Recomendações (versão resumida dez/2025)
 
@@ -795,9 +795,9 @@ Esta seção consolida **todas as decisões de produto identificadas pelas revis
 
 **Decisão tomada (v2.3, 17/05/2026).** Cinco regras consolidadas em §4.5 e nos Anexos D e E:
 
-1. **Limiar (alterado pelo PDR-014):** `NCG/Vendas > 10,00` classifica como "positivo alto crescente"; `0 < NCG/Vendas ≤ 10,00` é "positivo moderado"; `NCG ≤ 0` é "negativo". O critério escala com o porte da empresa e mantém coerência com o NCG/Vendas.
+1. **Limiar (alterado pelo PDR-014):** `NCG/Vendas > 0,10` classifica como "positivo alto crescente"; `0 < NCG/Vendas ≤ 0,10` é "positivo moderado"; `NCG ≤ 0` é "negativo". O critério escala com o porte da empresa e mantém coerência com o NCG/Vendas.
 2. **NCG absoluto sem farol visual no MVP.** Apresenta apenas valor em R$ + mensagem curta da matriz DEZ/2025 página 33, conforme a faixa (3 textos: negativo, moderado, alto crescente).
-3. **Coerência com NCG/Vendas.** O #10 mantém farol completo (verde ≤ 0; amarelo 0,01–10,00; vermelho > 10,00). O farol agregado do relatório e o Resumo Executivo usam o #10, não o #9.
+3. **Coerência com NCG/Vendas.** O #10 mantém farol completo (verde ≤ 0; amarelo até 0,10; vermelho > 0,10). O farol agregado do relatório e o Resumo Executivo usam o #10, não o #9.
 4. **Textos das 3 mensagens curtas.** A serem extraídos da planilha RECOMENDAÇÕES (página 33) pela EBC — tarefa operacional que **não bloqueia o kickoff**.
 5. **Resumo Executivo.** O algoritmo da §4.7.1 ignora o #9 (tratado como `farol = nenhum`); a interpretação semântica do capital de giro se dá via #10.
 

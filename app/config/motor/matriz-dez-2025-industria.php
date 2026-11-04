@@ -112,8 +112,8 @@ return [
         'vermelho' => 'Vender com prazo menor, ampliar a carteira de clientes, a participação no mercado e aumentar o prazo para pagamento a fornecedores, reduzir o descasamento das contas a pagar e a receber.',
     ],
 
-    // F.14 NCG / Vendas — faixas próprias (Negativa / 0,01–10,00 / Acima de 10,00; PDR-014) mapeadas para verde/amarelo/vermelho.
-    // O motor (NcgVendas.php) classifica via faroes-industria.php — verde=Negativa, amarelo=0,01–10,00, vermelho=>10,00.
+    // F.14 NCG / Vendas — faixas próprias (Negativa / até 0,10 / Acima de 0,10; PDR-014) mapeadas para verde/amarelo/vermelho.
+    // O motor (NcgVendas.php) classifica via faroes-industria.php — verde=Negativa, amarelo=até 0,10, vermelho=>0,10.
     'ncg_vendas' => [
         'verde' => 'Pode indicar que a empresa não necessita de recursos para o giro de seus negócios.',
         'amarelo' => 'Manter-se alerta às vendas a prazo, acompanhar o crescimento da rentabilidade e disponibilidade de capital de giro para financiar as vendas a prazo.',

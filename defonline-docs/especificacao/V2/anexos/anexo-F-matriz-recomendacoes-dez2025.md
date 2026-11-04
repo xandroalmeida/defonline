@@ -133,7 +133,7 @@ Este indicador **não possui farol** no padrão verde/amarelo/vermelho; a matriz
 
 ## F.14 NCG / Vendas
 
-*Faixas em razão direta sobre a venda média mensal: 0,01–10,00 e acima de 10,00 (PDR-014). Limite provisório até a confirmação da EB Parcerias.*
+*Faixas em razão sobre a venda média mensal: até 0,10 (10%) e acima de 0,10 (PDR-014). Limite provisório até a confirmação da EB Parcerias.*
 
 | Faixa | Indústria | Comércio | Serviços |
 |---|---|---|---|

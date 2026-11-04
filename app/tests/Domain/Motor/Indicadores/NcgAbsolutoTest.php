@@ -51,32 +51,32 @@ it('Faixa 1 — NCG = 0 exato (fronteira inclusiva)', function () {
         ->and($r['mensagem'])->toBe(NcgAbsoluto::MSG_FOLGA);
 });
 
-// ---------- Faixa 2: NCG/Vendas de 0,01 a 10,00 ----------
+// ---------- Faixa 2: NCG/Vendas até 0,10 ----------
 
-it('Faixa 2 — caso da Drogaria (NCG/Vendas 0,76) é moderado', function () {
+it('Faixa 2 — fronteira superior: NCG = 10% de um mês de vendas', function () {
+    $r = calcNcgAbs(pBaseNa(['Q03' => '10000', 'Q04' => '0', 'Q07' => '0']));
+    expect($r['valor'])->toBe(10000.0)
+        ->and($r['mensagem'])->toContain('moderado');
+});
+
+// ---------- Faixa 3: NCG/Vendas acima de 0,10 ----------
+
+it('Faixa 3 — logo acima de 10% de um mês de vendas', function () {
+    $r = calcNcgAbs(pBaseNa(['Q03' => '10001', 'Q04' => '0', 'Q07' => '0']));
+    expect($r['valor'])->toBeGreaterThan(10000.0)
+        ->and($r['mensagem'])->toContain('alto');
+});
+
+it('Faixa 3 — caso da Drogaria (NCG/Vendas 0,76) é alto', function () {
     $r = calcNcgAbs(['Q03' => '1500', 'Q04' => '120000', 'Q07' => '30000', 'Q09' => '120000']);
     expect($r['valor'])->toBe(91500.0)
-        ->and($r['mensagem'])->toContain('moderado');
-});
-
-it('Faixa 2 — fronteira superior: NCG = 10 meses de vendas', function () {
-    $r = calcNcgAbs(pBaseNa(['Q03' => '1000000', 'Q04' => '0', 'Q07' => '0']));
-    expect($r['valor'])->toBe(1000000.0)
-        ->and($r['mensagem'])->toContain('moderado');
-});
-
-// ---------- Faixa 3: NCG/Vendas acima de 10,00 ----------
-
-it('Faixa 3 — logo acima de 10 meses de vendas', function () {
-    $r = calcNcgAbs(pBaseNa(['Q03' => '1000001', 'Q04' => '0', 'Q07' => '0']));
-    expect($r['valor'])->toBeGreaterThan(1000000.0)
         ->and($r['mensagem'])->toContain('alto');
 });
 
 it('segue o limite do farol do NCG/Vendas, lido da config', function () {
-    config(['motor.faroes-industria.ncg_vendas.vermelho.valor' => 0.5]);
+    config(['motor.faroes-industria.ncg_vendas.vermelho.valor' => 2.0]);
     $r = calcNcgAbs(pBaseNa());
-    expect($r['mensagem'])->toContain('alto');
+    expect($r['mensagem'])->toContain('moderado');
 });
 
 // ---------- fallback quando Vendas faltante ----------
@@ -181,8 +181,8 @@ it('CA-1 (borda) — a orientação de captação de longo prazo NÃO aparece na
 
 it('CA-1 — as três faixas continuam saindo pelo caminho de cálculo, não só pelas constantes', function () {
     $folga = calcNcgAbs(pBaseNa(['Q03' => '20000', 'Q04' => '10000', 'Q07' => '50000']));
-    $moderado = calcNcgAbs(pBaseNa(['Q03' => '50000', 'Q04' => '40000', 'Q07' => '30000']));
-    $alto = calcNcgAbs(pBaseNa(['Q03' => '1200000', 'Q04' => '50000', 'Q07' => '26000']));
+    $moderado = calcNcgAbs(pBaseNa(['Q03' => '10000', 'Q04' => '5000', 'Q07' => '8000']));
+    $alto = calcNcgAbs(pBaseNa(['Q03' => '120000', 'Q04' => '50000', 'Q07' => '26000']));
 
     expect($folga['mensagem'])->toBe(NcgAbsoluto::MSG_FOLGA)
         ->and($moderado['mensagem'])->toBe(NcgAbsoluto::MSG_MODERADO)
