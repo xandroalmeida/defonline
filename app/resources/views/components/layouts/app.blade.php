@@ -2,6 +2,7 @@
     'title' => null,
     'breadcrumb' => [],
     'largo' => false,
+    'semImpressao' => false,
 ])
 
 @php
@@ -58,7 +59,7 @@
              },
          }"
          @keydown.escape.window="navOpen = false"
-         class="flex-1 flex flex-col">
+         @class(['flex-1 flex flex-col', 'print:hidden' => $semImpressao])>
 
         {{-- Header sticky no topo. --}}
         <x-app-header :usuario="auth()->user()"/>
@@ -82,6 +83,13 @@
             </div>
         </div>
     </div>
+
+    {{-- Tela com PDF próprio: imprimir pelo navegador só traz esta orientação. --}}
+    @if ($semImpressao)
+        <p class="hidden print:block p-8 text-base" dusk="impressao-bloqueada">
+            A impressão não está disponível nesta tela. Para imprimir o relatório, use o botão "Baixar PDF".
+        </p>
+    @endif
 
     <x-personificacao-aviso/>
 

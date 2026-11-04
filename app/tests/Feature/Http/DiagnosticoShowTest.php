@@ -470,14 +470,25 @@ it('o glossário define Despesas Financeiras / EBITDA, Fontes de Recursos, Giro 
     ['PME — Prazo Médio de Estoque', 'permanecem em estoque'],
 ]);
 
-it('o glossário não sai na impressão da tela; o aviso do rodapé continua', function () {
+it('a tela do relatório não imprime: só a orientação de usar o PDF', function () {
     $dono = Usuario::factory()->create();
     $diag = gerarDiagnostico($dono);
 
     $html = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}")->assertOk()->getContent();
 
-    expect($html)->toMatch('/<section[^>]*class="[^"]*print:hidden[^"]*"[^>]*data-testid="glossario"/')
-        ->and($html)->not->toMatch('/<footer[^>]*class="[^"]*print:hidden[^"]*"[^>]*data-testid="relatorio-rodape"/');
+    $doc = new DOMDocument;
+    @$doc->loadHTML('<?xml encoding="utf-8"?>'.$html);
+    $shell = (new DOMXPath($doc))->query('//body/div[@x-data]')->item(0);
+
+    expect($shell->getAttribute('class'))->toContain('print:hidden')
+        ->and($html)->toContain('dusk="impressao-bloqueada"')
+        ->and($html)->toContain('use o botão "Baixar PDF"');
+});
+
+it('as outras telas do app continuam imprimíveis', function () {
+    $dono = Usuario::factory()->create();
+
+    $this->actingAs($dono)->get('/home')->assertOk()->assertDontSee('impressao-bloqueada', escape: false);
 });
 
 it('CA-9 (borda) — o item anterior a "Farol / Semáforo" continua no glossário (pendência diferida)', function () {
@@ -494,34 +505,6 @@ it('CA-9 (borda) — o item anterior a "Farol / Semáforo" continua no glossári
 
     expect($posFarol)->toBeInt()->toBeGreaterThan(0)
         ->and($termos[$posFarol - 1])->toBe('Necessidade de Capital de Giro (NCG)');
-});
-
-it('nenhum box do relatório parte ao meio quando a tela é impressa', function () {
-    // Impressão da tela pelo navegador: resumo, indicador (card e linha), informativo
-    // e verbete do glossário são indivisíveis entre páginas.
-    $dono = Usuario::factory()->create();
-    $diag = gerarDiagnostico($dono);
-
-    $html = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}")->assertOk()->getContent();
-
-    $doc = new DOMDocument;
-    @$doc->loadHTML('<?xml encoding="utf-8"?>'.$html);
-    $xpath = new DOMXPath($doc);
-    $indivisivel = "contains(concat(' ', normalize-space(@class), ' '), ' break-inside-avoid ')";
-
-    $partiveis = fn (string $box): int => $xpath->query("{$box}[not({$indivisivel})]")->length;
-    $total = fn (string $box): int => $xpath->query($box)->length;
-
-    foreach ([
-        '//aside[@data-testid="resumo-executivo"]',
-        '//article[@data-codigo]',
-        '//tr[@data-codigo]',
-        '//section[@data-codigo]',
-        '//section[@data-testid="glossario"]//details',
-    ] as $box) {
-        expect($total($box))->toBeGreaterThan(0, $box)
-            ->and($partiveis($box))->toBe(0, $box);
-    }
 });
 
 it('o cabeçalho e o menu do app não saem na impressão da tela', function () {

@@ -7,7 +7,7 @@ namespace App\Support\Relatorio;
 /**
  * Glossário do relatório de diagnóstico — textos editoriais derivados do
  * Anexo I (espec V2). Só a tela (`diagnosticos.show`) mostra: o conceito abre ao
- * toque, o que não existe no PDF nem no papel. Mudanças no Anexo I propagam por edição manual aqui —
+ * toque, o que não existe no PDF. Mudanças no Anexo I propagam por edição manual aqui —
  * o Anexo I não tem motor_version.
  */
 final class Glossario

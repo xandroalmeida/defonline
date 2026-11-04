@@ -45,7 +45,7 @@
        aria-label="Resumo executivo"
        data-testid="resumo-executivo"
        data-veredito="{{ $veredito }}"
-       class="mb-6 break-inside-avoid rounded-[length:var(--radius-md)] border-l-4 {{ $classes }} p-5 sm:p-6 shadow-[var(--shadow-sm)]">
+       class="mb-6 rounded-[length:var(--radius-md)] border-l-4 {{ $classes }} p-5 sm:p-6 shadow-[var(--shadow-sm)]">
 
     <header class="flex items-center gap-3 mb-3">
         <x-relatorio.farol :cor="$corFarol"/>

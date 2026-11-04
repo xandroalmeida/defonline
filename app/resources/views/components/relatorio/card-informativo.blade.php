@@ -14,7 +14,7 @@
 @endphp
 
 <section aria-labelledby="{{ $tituloId }}"
-         class="break-inside-avoid rounded-[length:var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-neutral)] p-5 sm:p-6 shadow-[var(--shadow-sm)]"
+         class="rounded-[length:var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-neutral)] p-5 sm:p-6 shadow-[var(--shadow-sm)]"
          data-codigo="{{ $codigo }}">
     <div class="flex items-start justify-between gap-3 mb-3">
         <div>
