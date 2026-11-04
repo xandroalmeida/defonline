@@ -7,10 +7,10 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: false
-status: in_review
+status: done
 owner_agent: programador (claude-opus-5-5)
 created_at: 2026-11-03
-updated_at: 2026-11-03
+updated_at: 2026-11-04
 estimated_session_size: M
 ---
 
@@ -96,3 +96,5 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`.
 
 ### Links de evidência
 - Testes: `app/tests/Feature/Livewire/Backoffice/UsuariosTest.php` (CA-1 a CA-6) e `app/tests/Browser/BackofficeUsuariosBrowserTest.php` (CA-7).
+
+2026-11-04: fechada por decisão do PO, publicada na v0.11.5 (health, ready e smoke read-only ok). A verificação logada em produção não foi executada pelo agente.

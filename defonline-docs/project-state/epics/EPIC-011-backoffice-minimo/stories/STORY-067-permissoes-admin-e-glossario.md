@@ -7,7 +7,7 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: false
-status: in_review
+status: done
 owner_agent: programador (claude-opus-5-5)
 created_at: 2026-11-04
 updated_at: 2026-11-04
@@ -29,3 +29,5 @@ Decisão: PDR-013.
 ## Notas do agente
 
 - 2026-11-04: implementada. Falta publicar e verificar em produção.
+
+2026-11-04: fechada por decisão do PO, publicada na v0.11.5 (health, ready e smoke read-only ok). A verificação logada em produção não foi executada pelo agente.
