@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Backoffice;
 
+use App\Livewire\Backoffice\Concerns\ExigePermissao;
 use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
+use App\Support\PermissaoAdmin;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,7 +22,7 @@ use Livewire\WithPagination;
  * STORY-065 — backoffice: lista de usuários cadastrados (só-leitura, PDR-011). A
  * única ação da tela é o "Logar como" (STORY-066, PDR-012), um POST à parte.
  *
- * Acesso garantido pelo middleware `backoffice` (allowlist, 404 para os demais).
+ * Acesso garantido pela permissão `usuarios.ver` (404 para os demais).
  * Contagens e último login vêm de subqueries na própria consulta da página
  * (CA-5: o número de queries não cresce com a página). As subqueries leem as
  * tabelas direto, sem o Global Scope de tenant de EmpresaAnalisada/Diagnostico,
@@ -29,6 +31,7 @@ use Livewire\WithPagination;
 #[Layout('components.layouts.app')]
 final class Usuarios extends Component
 {
+    use ExigePermissao;
     use WithPagination;
 
     public const POR_PAGINA = 50;
@@ -66,6 +69,11 @@ final class Usuarios extends Component
             'total' => (int) ($totais->total ?? 0),
             'confirmados' => (int) ($totais->confirmados ?? 0),
         ])->layoutData(['title' => 'Usuários cadastrados', 'largo' => true]);
+    }
+
+    protected function permissaoExigida(): PermissaoAdmin
+    {
+        return PermissaoAdmin::VerUsuarios;
     }
 
     /**

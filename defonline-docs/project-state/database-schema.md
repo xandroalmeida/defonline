@@ -54,7 +54,11 @@ PK `id uuid`. Persona "Roberto". Soft delete + anonimização LGPD.
 | `email_confirmed_at` | timestamptz | null = email não confirmado (bloqueia login) |
 | `remember_token` | varchar(100) | |
 | `anonimizado_at` | timestamp | LGPD — marca conta anonimizada |
+| `permissoes_admin` | jsonb | nullable — permissões de admin do backoffice (STORY-067); null = não é admin, salvo `BACKOFFICE_EMAILS` |
 | `created_at`/`updated_at`/`deleted_at` | timestamp | soft delete |
+
+### `glossario_termos` — glossário do relatório (STORY-067)
+PK `id uuid`. `termo` varchar(120) **UNIQUE**, `definicao` text, `ordem` integer (índice), timestamps. Mantido na tela de Glossário do backoffice.
 
 ### `empresas_analisadas` — empresas do usuário
 PK `id uuid`. FK `usuario_id → usuarios` (RESTRICT). **UNIQUE parcial** `(usuario_id, documento) WHERE deleted_at IS NULL`.

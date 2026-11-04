@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 /*
- * STORY-065 / PDR-011 — backoffice mínimo, só-leitura.
+ * STORY-065 / STORY-067 — backoffice.
  *
- * `equipe_emails`: allowlist de e-mails da equipe EB Parcerias que acessam
- * `/backoffice/*`. Vem de BACKOFFICE_EMAILS (separados por vírgula). Vazia ou
- * ausente bloqueia todo mundo (CA-1). Comparação sem diferenciar maiúsculas.
+ * `equipe_emails`: admins com todas as permissões, definidos no servidor. Os demais
+ * recebem permissões na tela de Administradores (PDR-013). Vem de BACKOFFICE_EMAILS
+ * (separados por vírgula). Comparação sem diferenciar maiúsculas.
  */
 return [
     'equipe_emails' => array_values(array_filter(array_map(

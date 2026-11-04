@@ -22,7 +22,7 @@ O "Back-office EB Parcerias" (`defonline-docs/especificacao/V2/roadmap-pos-v1.md
 
 1. Antecipar uma fatia mínima do backoffice: **listas só-leitura**, começando pelos **usuários** (STORY-065); empresas vêm depois, em estória própria.
 2. Acesso só para uma **allowlist de e-mails da equipe**, definida em configuração (sem tela de gestão de papéis). Quem não está na lista recebe 404, como no IDR-009.
-3. Sem nenhuma ação de escrita (editar, bloquear, excluir, impersonar). Isso continua no escopo da v1.2. *(Impersonar foi antecipado pelo PDR-012.)*
+3. Sem nenhuma ação de escrita (editar, bloquear, excluir, impersonar). Isso continua no escopo da v1.2. *(Impersonar foi antecipado pelo PDR-012; permissões por admin e glossário, pelo PDR-013.)*
 4. Todo acesso ao backoffice gera audit log. Os dados pessoais exibidos são só os necessários (CPF mascarado).
 
 ## Consequências

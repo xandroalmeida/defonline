@@ -9,6 +9,8 @@ use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PersonificacaoController;
+use App\Livewire\Backoffice\Administradores as BackofficeAdministradores;
+use App\Livewire\Backoffice\Glossario as BackofficeGlossario;
 use App\Livewire\Backoffice\Usuarios as BackofficeUsuarios;
 use App\Livewire\Cadastro;
 use App\Livewire\Diagnostico\Quiz as QuizDiagnostico;
@@ -71,11 +73,14 @@ Route::middleware('auth')->group(function () {
         ->name('diagnosticos.pdf');
 });
 
-// STORY-065 / PDR-011 — backoffice mínimo, restrito à allowlist da equipe; a única
-// escrita é o "Logar como" (PDR-012). Fora da allowlist: 404 (IDR-009).
-Route::middleware(['auth', 'backoffice'])->prefix('backoffice')->name('backoffice.')->group(function () {
-    Route::get('/usuarios', BackofficeUsuarios::class)->name('usuarios');
+// STORY-065, 066 e 067 — backoffice: cada rota exige uma permissão de admin (PDR-013).
+// Sem ela: 404 (IDR-009).
+Route::middleware('auth')->prefix('backoffice')->name('backoffice.')->group(function () {
+    Route::get('/usuarios', BackofficeUsuarios::class)->middleware('backoffice:usuarios.ver')->name('usuarios');
     Route::post('/usuarios/{usuario}/logar-como', [PersonificacaoController::class, 'iniciar'])
+        ->middleware('backoffice:usuarios.logar_como')
         ->whereUuid('usuario')
         ->name('usuarios.logar-como');
+    Route::get('/administradores', BackofficeAdministradores::class)->middleware('backoffice:admins.gerenciar')->name('administradores');
+    Route::get('/glossario', BackofficeGlossario::class)->middleware('backoffice:glossario.editar')->name('glossario');
 });

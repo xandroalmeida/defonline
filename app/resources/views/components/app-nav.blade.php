@@ -51,20 +51,42 @@
     ];
 
     /*
-     * STORY-065 — área reservada aos admins (allowlist do backoffice, PDR-011).
-     * Quem não é da equipe não vê a seção (a rota já devolve 404 para ele).
+     * STORY-065 / STORY-067 — cada item da área de administração só aparece para
+     * quem tem a permissão dele. Sem nenhum, a seção some.
      */
     $usuarioNav = auth()->user();
-    $itensAdmin = $usuarioNav instanceof \App\Models\Usuario && $usuarioNav->ehEquipeBackoffice()
-        ? [[
-            'label' => 'Usuários',
-            'icon' => 'users',
-            'href' => route('backoffice.usuarios'),
-            'active' => request()->routeIs('backoffice.usuarios'),
-            'disabled' => false,
-            'dusk' => 'app-nav-backoffice-usuarios',
-        ]]
-        : [];
+    $itensAdmin = [];
+    if ($usuarioNav instanceof \App\Models\Usuario) {
+        $itensAdmin = array_values(array_filter([
+            [
+                'permissao' => \App\Support\PermissaoAdmin::VerUsuarios,
+                'label' => 'Usuários',
+                'icon' => 'users',
+                'href' => route('backoffice.usuarios'),
+                'active' => request()->routeIs('backoffice.usuarios'),
+                'disabled' => false,
+                'dusk' => 'app-nav-backoffice-usuarios',
+            ],
+            [
+                'permissao' => \App\Support\PermissaoAdmin::GerenciarAdmins,
+                'label' => 'Administradores',
+                'icon' => 'user',
+                'href' => route('backoffice.administradores'),
+                'active' => request()->routeIs('backoffice.administradores'),
+                'disabled' => false,
+                'dusk' => 'app-nav-backoffice-administradores',
+            ],
+            [
+                'permissao' => \App\Support\PermissaoAdmin::EditarGlossario,
+                'label' => 'Glossário',
+                'icon' => 'book',
+                'href' => route('backoffice.glossario'),
+                'active' => request()->routeIs('backoffice.glossario'),
+                'disabled' => false,
+                'dusk' => 'app-nav-backoffice-glossario',
+            ],
+        ], fn (array $item): bool => $usuarioNav->temPermissao($item['permissao'])));
+    }
 
     $grupos = array_filter([
         ['titulo' => null, 'aria' => 'Navegação principal', 'dusk' => null, 'itens' => $items],
@@ -77,6 +99,7 @@
         'chart' => '<path d="M3 3v18h18M7 14l4-4 4 4 6-6"/>',
         'clock' => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
         'user' => '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>',
+        'book' => '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
         'users' => '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2.2.6 3.5 2.8 3.5 6"/>',
     ];
 @endphp

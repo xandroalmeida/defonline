@@ -1,5 +1,5 @@
 @php
-    use App\Support\Relatorio\Glossario;
+    use App\Models\GlossarioTermo;
     use App\Support\Relatorio\IndicadorFormatter;
     use App\Support\Relatorio\ValoresNominais;
 
@@ -43,8 +43,8 @@
         $voltarUrl = route('home');
     }
 
-    // Glossário — só na tela (App\Support\Relatorio\Glossario).
-    $glossario = Glossario::ITENS;
+    // Glossário — só na tela; mantido no backoffice (STORY-067).
+    $glossario = GlossarioTermo::query()->orderBy('ordem')->get();
 @endphp
 
 <x-layouts.app :title="$tituloPagina"
@@ -144,16 +144,17 @@
     @endif
 
     {{-- Glossário inline, só na tela: não vai para o PDF, onde não há como abrir o conceito. --}}
+    @if ($glossario->isNotEmpty())
     <section aria-labelledby="glossario-titulo" class="mb-8" data-testid="glossario">
         <h2 id="glossario-titulo" class="text-[color:var(--color-primary)] text-lg font-medium mb-3">Glossário</h2>
         <p class="text-[color:var(--color-secondary)] text-sm mb-4">
             Definições rápidas dos termos usados neste relatório. Toque para expandir.
         </p>
         <div class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] divide-y divide-[color:var(--color-border)]">
-            @foreach ($glossario as [$termo, $definicao])
+            @foreach ($glossario as $item)
                 <details class="group">
                     <summary class="cursor-pointer px-4 py-3 text-[color:var(--color-primary)] font-medium text-sm flex items-center justify-between gap-3 hover:bg-[color:var(--color-neutral)] focus:bg-[color:var(--color-neutral)] focus:outline-2 focus:outline-offset-[-2px] focus:outline-[color:var(--color-ring)]">
-                        <span>{{ $termo }}</span>
+                        <span>{{ $item->termo }}</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                              class="transition-transform group-open:rotate-180 text-[color:var(--color-secondary)] flex-shrink-0"
@@ -161,11 +162,12 @@
                             <polyline points="6 9 12 15 18 9"/>
                         </svg>
                     </summary>
-                    <div class="px-4 pb-3 text-[color:var(--color-secondary)] text-sm">{{ $definicao }}</div>
+                    <div class="px-4 pb-3 text-[color:var(--color-secondary)] text-sm">{{ $item->definicao }}</div>
                 </details>
             @endforeach
         </div>
     </section>
+    @endif
 
     {{-- Rodapé do relatório — versões do snapshot (NÃO do config atual). ------ --}}
     <footer class="border-t border-[color:var(--color-border)] pt-4 text-[color:var(--color-secondary)] text-xs"

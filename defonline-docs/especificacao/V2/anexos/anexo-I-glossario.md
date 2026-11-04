@@ -5,7 +5,7 @@
 **Data:** 17/05/2026
 **Fonte original:** planilha `DEFweb.net - ESTRUTURA - ebc.2025jul30.xlsx`, aba `DEF`, linhas 177–191
 **Uso na plataforma:** exibido ao final do relatório na tela (não sai no PDF nem na impressão, onde o conceito não pode ser aberto) e disponível em consulta autônoma no painel do assinante. Reutilizável também pelo hotsite, FAQ público e comunicações por e-mail.
-**Mantido por:** EB Parcerias Ltda (responsável técnico-financeiro)
+**Mantido por:** EB Parcerias Ltda (responsável técnico-financeiro). Desde a STORY-067, o texto em uso fica na tela de Glossário do backoffice (tabela `glossario_termos`); este anexo não atualiza o produto.
 
 ---
 

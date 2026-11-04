@@ -85,7 +85,7 @@ final class Personificacao
     }
 
     /**
-     * O admin só vale enquanto existir e continuar na allowlist.
+     * O admin só vale enquanto existir e puder usar o "Logar como".
      *
      * @param  Dados  $ativa
      */
@@ -93,7 +93,7 @@ final class Personificacao
     {
         $admin = Usuario::find($ativa['admin_id']);
 
-        return $admin?->ehEquipeBackoffice() ? $admin : null;
+        return $admin?->temPermissao(PermissaoAdmin::LogarComo) ? $admin : null;
     }
 
     /** Sem efeito fora de uma personificação. */

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Support\Personificacao;
+use App\Support\PermissaoAdmin;
 use Database\Factories\UsuarioFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -32,6 +34,7 @@ use Illuminate\Support\Carbon;
  * @property string $telefone
  * @property Carbon|null $email_confirmed_at
  * @property Carbon|null $anonimizado_at
+ * @property list<string>|null $permissoes_admin
  * @property Carbon|null $deleted_at
  */
 #[Fillable(['cpf', 'nome', 'email', 'senha_hash', 'telefone', 'email_confirmed_at'])]
@@ -46,6 +49,7 @@ final class Usuario extends Authenticatable
     protected $casts = [
         'deleted_at' => 'datetime',
         'anonimizado_at' => 'datetime',
+        'permissoes_admin' => 'array',
         'email_confirmed_at' => 'datetime',
         'senha_hash' => 'hashed',
     ];
@@ -66,14 +70,35 @@ final class Usuario extends Authenticatable
     }
 
     /**
-     * STORY-065 CA-1 — membro da equipe com acesso ao backoffice (PDR-011).
+     * STORY-065 / STORY-067 — tem acesso à área de administração.
      */
     public function ehEquipeBackoffice(): bool
+    {
+        return $this->ehAdminPorConfiguracao() || ! empty($this->permissoes_admin);
+    }
+
+    /**
+     * STORY-067 — quem está em BACKOFFICE_EMAILS tem todas as permissões. Garante que
+     * sempre há quem administre, mesmo sem nenhuma linha no banco.
+     */
+    public function ehAdminPorConfiguracao(): bool
     {
         /** @var list<string> $equipe */
         $equipe = config('backoffice.equipe_emails', []);
 
         return in_array(mb_strtolower((string) $this->email), $equipe, true);
+    }
+
+    public function temPermissao(PermissaoAdmin $permissao): bool
+    {
+        return $this->ehAdminPorConfiguracao()
+            || in_array($permissao->value, $this->permissoes_admin ?? [], true);
+    }
+
+    /** Sessão de "Logar como" nunca usa o backoffice, seja quem for o usuário assumido. */
+    public function podeUsarBackoffice(PermissaoAdmin $permissao): bool
+    {
+        return $this->temPermissao($permissao) && Personificacao::ativa() === null;
     }
 
     /**
@@ -98,7 +123,7 @@ final class Usuario extends Authenticatable
     /** STORY-066 — colega da equipe fica de fora: assumir outro admin embaralharia a trilha. */
     public function podeSerPersonificadoPor(self $admin): bool
     {
-        return $admin->ehEquipeBackoffice()
+        return $admin->temPermissao(PermissaoAdmin::LogarComo)
             && ! $this->ehEquipeBackoffice()
             && ! $this->trashed()
             && ! $this->anonimizado();

@@ -2,27 +2,20 @@
 
 declare(strict_types=1);
 
-namespace App\Support\Relatorio;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 /**
- * Glossário do relatório de diagnóstico — textos editoriais derivados do
- * Anexo I (espec V2). Só a tela (`diagnosticos.show`) mostra: o conceito abre ao
- * toque, o que não existe no PDF. Mudanças no Anexo I propagam por edição manual aqui —
- * o Anexo I não tem motor_version.
+ * STORY-067 / PDR-013 — permissões de admin na conta e glossário no banco, com os
+ * termos que estavam no código. A partir daqui, o texto é mantido no backoffice.
  */
-final class Glossario
+return new class extends Migration
 {
-    /*
-     * Ordem revisada na devolutiva EBC de 27/05/2026 (STORY-042): o EBITDA sobe
-     * para 2º item — é o conceito que o Roberto mais precisa antes de ler as
-     * margens seguintes. Nenhum item foi removido: o `.docx` pedia "excluir o
-     * item antes do Farol/Semáforo" sem nomear qual, e a pergunta ao Edvan
-     * (pauta-retorno §3) não teve resposta até o prazo de 2026-06-04 — default
-     * documentado é manter, pendência fechada como diferida.
-     *
-     * @var list<array{0: string, 1: string}>
-     */
-    public const ITENS = [
+    /** @var list<array{0: string, 1: string}> */
+    private const TERMOS = [
         ['Margem Bruta (MB) / Lucro Bruto (LB)', 'Diferença entre o faturamento e o custo (dos produtos/mercadorias/serviços vendidos), antes das despesas.'],
         ['EBITDA / Margem Operacional', 'Resultado do negócio: faturamento menos custos e despesas operacionais, exceto depreciação (e antes das despesas financeiras e tributos). Mede a eficiência em produzir lucros por meio das vendas.'],
         ['Margem Operacional Líquida (MOL)', 'A parcela operacional de lucro obtida sobre as vendas, considerando despesas financeiras, depreciação e tributos.'],
@@ -41,4 +34,41 @@ final class Glossario
         ['Indisponível', 'Rótulo exibido quando o indicador não pode ser calculado (ex.: denominador igual a zero ou dado faltante). Não recebe farol nem texto de recomendação.'],
         ['Balanço Adaptado / DRE Adaptada', 'Versão simplificada construída a partir dos 23 campos do quiz; suficiente para os indicadores da v1, mas não equivalente a um balanço/DRE contábil formal.'],
     ];
-}
+
+    public function up(): void
+    {
+        Schema::table('usuarios', function (Blueprint $table) {
+            $table->jsonb('permissoes_admin')->nullable();
+        });
+
+        Schema::create('glossario_termos', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('termo', 120)->unique();
+            $table->text('definicao');
+            $table->integer('ordem');
+            $table->timestampsTz();
+
+            $table->index('ordem');
+        });
+
+        foreach (self::TERMOS as $i => [$termo, $definicao]) {
+            DB::table('glossario_termos')->insert([
+                'id' => (string) Str::uuid7(),
+                'termo' => $termo,
+                'definicao' => $definicao,
+                'ordem' => $i + 1,
+                'created_at' => DB::raw('now()'),
+                'updated_at' => DB::raw('now()'),
+            ]);
+        }
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('glossario_termos');
+
+        Schema::table('usuarios', function (Blueprint $table) {
+            $table->dropColumn('permissoes_admin');
+        });
+    }
+};
