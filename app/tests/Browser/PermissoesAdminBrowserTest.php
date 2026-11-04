@@ -69,7 +69,16 @@ final class PermissoesAdminBrowserTest extends DuskTestCase
                 )[0] === true)
                 ->press('@glossario-cancelar');
 
+            // Excluir pede confirmação: cancelar mantém o termo.
             $browser->press('@glossario-excluir-'.$termoId)
+                ->waitForDialog()
+                ->assertDialogOpened('Excluir o termo “Termo E2E” do glossário? Ele sairá de todos os relatórios.')
+                ->dismissDialog()
+                ->pause(300)
+                ->assertSeeIn('@glossario-lista', 'Termo E2E')
+                ->press('@glossario-excluir-'.$termoId)
+                ->waitForDialog()
+                ->acceptDialog()
                 ->waitUntilMissingText('Termo E2E')
                 ->visit('/backoffice/administradores')
                 ->assertSee('404');

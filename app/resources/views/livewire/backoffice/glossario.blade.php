@@ -54,7 +54,7 @@
                                 <x-button type="button" variant="secondary" size="sm" wire:click="mover('{{ $item->id }}', -1)" :disabled="$loop->first" aria-label="Subir {{ $item->termo }}" dusk="glossario-subir-{{ $item->id }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></x-button>
                                 <x-button type="button" variant="secondary" size="sm" wire:click="mover('{{ $item->id }}', 1)" :disabled="$loop->last" aria-label="Descer {{ $item->termo }}" dusk="glossario-descer-{{ $item->id }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg></x-button>
                                 <x-button type="button" variant="secondary" size="sm" wire:click="editar('{{ $item->id }}')" dusk="glossario-editar-{{ $item->id }}">Editar</x-button>
-                                <x-button type="button" variant="secondary" size="sm" wire:click="excluir('{{ $item->id }}')" dusk="glossario-excluir-{{ $item->id }}">Excluir</x-button>
+                                <x-button type="button" variant="secondary" size="sm" wire:click="excluir('{{ $item->id }}')" wire:confirm="Excluir o termo “{{ $item->termo }}” do glossário? Ele sairá de todos os relatórios." dusk="glossario-excluir-{{ $item->id }}">Excluir</x-button>
                             </td>
                         </tr>
                     @endforeach

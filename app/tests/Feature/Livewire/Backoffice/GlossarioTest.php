@@ -81,6 +81,11 @@ it('exclui o termo, que some do relatório', function () {
         ->and(($this->relatorio)())->not->toContain('Percentual médio de atraso');
 });
 
+it('pede confirmação antes de excluir, citando o termo', function () {
+    $this->actingAs($this->admin)->get('/backoffice/glossario')->assertOk()
+        ->assertSee('wire:confirm="Excluir o termo “Inadimplência” do glossário?', escape: false);
+});
+
 it('tira a seção do relatório quando o glossário fica vazio', function () {
     GlossarioTermo::query()->delete();
 
