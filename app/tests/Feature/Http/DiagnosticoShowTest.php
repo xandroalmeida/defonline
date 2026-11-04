@@ -470,3 +470,31 @@ it('CA-9 (borda) — o item anterior a "Farol / Semáforo" continua no glossári
     expect($posFarol)->toBeInt()->toBeGreaterThan(0)
         ->and($termos[$posFarol - 1])->toBe('Necessidade de Capital de Giro (NCG)');
 });
+
+it('nenhum box do relatório parte ao meio quando a tela é impressa', function () {
+    // Impressão da tela pelo navegador: resumo, indicador (card e linha), informativo
+    // e verbete do glossário são indivisíveis entre páginas.
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnostico($dono);
+
+    $html = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}")->assertOk()->getContent();
+
+    $doc = new DOMDocument;
+    @$doc->loadHTML('<?xml encoding="utf-8"?>'.$html);
+    $xpath = new DOMXPath($doc);
+    $indivisivel = "contains(concat(' ', normalize-space(@class), ' '), ' break-inside-avoid ')";
+
+    $partiveis = fn (string $box): int => $xpath->query("{$box}[not({$indivisivel})]")->length;
+    $total = fn (string $box): int => $xpath->query($box)->length;
+
+    foreach ([
+        '//aside[@data-testid="resumo-executivo"]',
+        '//article[@data-codigo]',
+        '//tr[@data-codigo]',
+        '//section[@data-codigo]',
+        '//section[@data-testid="glossario"]//details',
+    ] as $box) {
+        expect($total($box))->toBeGreaterThan(0, $box)
+            ->and($partiveis($box))->toBe(0, $box);
+    }
+});

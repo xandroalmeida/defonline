@@ -16,7 +16,7 @@
 
 {{-- Sem id (a <tr> desktop é a âncora canônica); o JS resolve o alvo visível por
      data-codigo. A classe .indicador-alvo dá scroll-margin + highlight (STORY-040). --}}
-<article class="indicador-alvo rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-sm)]"
+<article class="indicador-alvo break-inside-avoid rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-sm)]"
          data-codigo="{{ $codigo }}"
          @class(['opacity-70' => $indisponivel])>
     <header class="flex items-start justify-between gap-3 mb-2">

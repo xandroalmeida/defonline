@@ -17,7 +17,7 @@
 {{-- id canônico (alvo do scroll/`:target` sem-JS) fica só aqui na tabela desktop;
      o card mobile usa a mesma classe mas SEM id, p/ não duplicar id no DOM (STORY-040). --}}
 <tr id="indicador-{{ $codigo }}"
-    class="indicador-alvo border-b border-[color:var(--color-border)] last:border-b-0 align-top"
+    class="indicador-alvo break-inside-avoid border-b border-[color:var(--color-border)] last:border-b-0 align-top"
     data-codigo="{{ $codigo }}"
     @class(['opacity-70' => $indisponivel])>
     <th scope="row" class="py-3 pr-4 text-left text-[color:var(--color-primary)] font-medium">

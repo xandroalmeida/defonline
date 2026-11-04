@@ -148,7 +148,7 @@
         </p>
         <div class="rounded-[length:var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] divide-y divide-[color:var(--color-border)]">
             @foreach ($glossario as [$termo, $definicao])
-                <details class="group">
+                <details class="group break-inside-avoid">
                     <summary class="cursor-pointer px-4 py-3 text-[color:var(--color-primary)] font-medium text-sm flex items-center justify-between gap-3 hover:bg-[color:var(--color-neutral)] focus:bg-[color:var(--color-neutral)] focus:outline-2 focus:outline-offset-[-2px] focus:outline-[color:var(--color-ring)]">
                         <span>{{ $termo }}</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
