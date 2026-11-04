@@ -10,7 +10,7 @@
  * Quebra de página — a regra que este arquivo existe para garantir:
  *   - nenhum título fica sozinho no pé da página: título + primeiro item do
  *     conteúdo moram num `.manter-junto` (page-break-inside: avoid);
- *   - nenhum item (linha de indicador, card, verbete) parte ao meio;
+ *   - nenhum item (linha de indicador, card) parte ao meio;
  *   - o cabeçalho da tabela de indicadores se repete em cada página (thead).
  */
 
@@ -361,37 +361,5 @@ h1, h2, h3, p, ul, dl, dd {
 
 .card__mensagem {
     font-size: 8.5pt;
-    color: var(--color-secondary);
-}
-
-/* ── Glossário ────────────────────────────────────────────────────────── */
-
-.verbete {
-    padding: 2.6mm 0;
-    border-bottom: 1px solid var(--color-border);
-    page-break-inside: avoid;
-}
-
-.verbete--primeiro {
-    border-top: 1px solid var(--color-border);
-}
-
-.verbete dt {
-    font-weight: 500;
-    margin-bottom: 0.6mm;
-}
-
-.verbete dd {
-    font-size: 8.5pt;
-    color: var(--color-secondary);
-}
-
-/* ── Nota final ───────────────────────────────────────────────────────── */
-
-.nota {
-    margin-top: 6mm;
-    padding-top: 3mm;
-    border-top: 1px solid var(--color-border);
-    font-size: 7.5pt;
     color: var(--color-secondary);
 }

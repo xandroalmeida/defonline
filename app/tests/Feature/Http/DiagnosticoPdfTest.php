@@ -74,7 +74,7 @@ it('a tela do diagnóstico oferece o botão Baixar PDF', function () {
         ->assertSee(route('diagnosticos.pdf', $diag), escape: false);
 });
 
-it('monta capa, resumo, indicadores e glossário a partir do snapshot', function () {
+it('monta capa, resumo e indicadores a partir do snapshot, sem o glossário', function () {
     $dono = Usuario::factory()->create();
     $diag = gerarDiagnosticoParaPdf($dono);
     Auth::login($dono);
@@ -88,9 +88,11 @@ it('monta capa, resumo, indicadores e glossário a partir do snapshot', function
         ->toContain('Resumo executivo')
         ->toContain('Indicadores essenciais')
         ->toContain('Buscar manter a margem atual.')
-        ->toContain('Glossário')
-        ->toContain('Balanço Adaptado / DRE Adaptada')
-        ->toContain('motor v'.$diag->motor_version);
+        ->toContain('motor v'.$diag->motor_version)
+        ->toContain('Este diagnóstico é uma ferramenta de apoio à gestão.')
+        ->not->toContain('Glossário')
+        ->not->toContain('glossario')
+        ->not->toContain('Balanço Adaptado / DRE Adaptada');
 });
 
 it('o CSS do PDF sai com os tokens resolvidos (dompdf não entende var nem color-mix)', function () {
@@ -115,7 +117,7 @@ it('nenhum título de seção fica solto: cada um está preso ao seu primeiro co
     $xpath = new DOMXPath($dom);
 
     $titulos = $xpath->query('//h2[contains(@class, "secao__titulo")]');
-    expect($titulos->length)->toBeGreaterThanOrEqual(4);
+    expect($titulos->length)->toBeGreaterThanOrEqual(3);
 
     foreach ($titulos as $h2) {
         $pai = $h2->parentNode;
@@ -150,6 +152,5 @@ it('a regra de quebra está no pdf.css', function () {
     expect($css)
         ->toMatch('/\.manter-junto,\s*\.indivisivel\s*\{\s*page-break-inside:\s*avoid;/')
         ->toMatch('/\.titulo-da-tabela\s*\{\s*page-break-after:\s*avoid;/')
-        ->toMatch('/\.indicadores tbody tr\s*\{\s*page-break-inside:\s*avoid;/')
-        ->toMatch('/\.verbete\s*\{[^}]*page-break-inside:\s*avoid;/');
+        ->toMatch('/\.indicadores tbody tr\s*\{\s*page-break-inside:\s*avoid;/');
 });

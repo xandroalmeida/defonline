@@ -43,7 +43,7 @@
         $voltarUrl = route('home');
     }
 
-    // Glossário — compartilhado com o PDF (App\Support\Relatorio\Glossario).
+    // Glossário — só na tela (App\Support\Relatorio\Glossario).
     $glossario = Glossario::ITENS;
 @endphp
 
@@ -60,7 +60,7 @@
             <span class="pill pill--versao self-center" dusk="diagnostico-mvp-badge">
                 Versão MVP
             </span>
-            {{-- PDF do mesmo snapshot (capa + resumo + indicadores + glossário). --}}
+            {{-- PDF do mesmo snapshot (capa + resumo + indicadores). --}}
             <x-button :href="route('diagnosticos.pdf', $diagnostico)" variant="secondary" size="sm"
                       dusk="diagnostico-baixar-pdf" data-testid="diagnostico-baixar-pdf">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -142,8 +142,8 @@
         </div>
     @endif
 
-    {{-- Glossário inline. -------------------------------------------------- --}}
-    <section aria-labelledby="glossario-titulo" class="mb-8" data-testid="glossario">
+    {{-- Glossário inline, só na tela: fora dela não há como abrir o conceito. --}}
+    <section aria-labelledby="glossario-titulo" class="mb-8 print:hidden" data-testid="glossario">
         <h2 id="glossario-titulo" class="text-[color:var(--color-primary)] text-lg font-medium mb-3">Glossário</h2>
         <p class="text-[color:var(--color-secondary)] text-sm mb-4">
             Definições rápidas dos termos usados neste relatório. Toque para expandir.

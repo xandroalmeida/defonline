@@ -450,9 +450,34 @@ it('CA-8 (borda) — reordenar não pode ter mexido no 1º item nem no total de 
 
     $termos = termosDoGlossario($html);
 
-    expect($termos)->toHaveCount(12)
+    expect($termos)->toHaveCount(16)
         ->and($termos[0])->toContain('Margem Bruta')
-        ->and(array_unique($termos))->toHaveCount(12);
+        ->and(array_unique($termos))->toHaveCount(16);
+});
+
+it('o glossário define Despesas Financeiras / EBITDA, Fontes de Recursos, Giro do Ativo e PME', function (string $termo, string $definicao) {
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnostico($dono);
+
+    $html = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}")->assertOk()->getContent();
+
+    expect(termosDoGlossario($html))->toContain($termo)
+        ->and(html_entity_decode($html))->toContain($definicao);
+})->with([
+    ['Relação Despesas Financeiras / EBITDA', 'Representa a participação dos bancos no lucro.'],
+    ['Relação entre Fontes de Recursos (RFR)', 'dependência de recursos externos'],
+    ['Giro do Ativo (GA)', 'Vendas ÷ Ativo Total'],
+    ['PME — Prazo Médio de Estoque', 'permanecem em estoque'],
+]);
+
+it('o glossário não sai na impressão da tela; o aviso do rodapé continua', function () {
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnostico($dono);
+
+    $html = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}")->assertOk()->getContent();
+
+    expect($html)->toMatch('/<section[^>]*class="[^"]*print:hidden[^"]*"[^>]*data-testid="glossario"/')
+        ->and($html)->not->toMatch('/<footer[^>]*class="[^"]*print:hidden[^"]*"[^>]*data-testid="relatorio-rodape"/');
 });
 
 it('CA-9 (borda) — o item anterior a "Farol / Semáforo" continua no glossário (pendência diferida)', function () {

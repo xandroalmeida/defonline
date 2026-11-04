@@ -25,7 +25,7 @@ final class DiagnosticoController extends Controller
     }
 
     /**
-     * PDF do mesmo snapshot (capa + resumo + indicadores + glossário), gerado
+     * PDF do mesmo snapshot (capa + resumo + indicadores), gerado
      * na request e devolvido como download — nada fica gravado no servidor.
      * Cross-tenant cai no 404 do Global Scope, igual ao `show`.
      */

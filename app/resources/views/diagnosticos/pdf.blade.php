@@ -1,5 +1,4 @@
 @php
-    use App\Support\Relatorio\Glossario;
     use App\Support\Relatorio\IndicadorFormatter;
     use App\Support\Relatorio\ValoresNominais;
 
@@ -250,41 +249,6 @@
         </table>
     </div>
 @endif
-
-{{-- ═══ Glossário ══════════════════════════════════════════════════════ --}}
-<div class="secao" data-secao="glossario">
-    @php $ultimo = count(Glossario::ITENS) - 1; @endphp
-    @foreach (Glossario::ITENS as $i => [$termo, $definicao])
-        @if ($i === 0)
-            {{-- Título preso ao 1º verbete. --}}
-            <div class="manter-junto">
-                <h2 class="secao__titulo">Glossário</h2>
-                <p class="secao__intro">Definições dos termos usados neste relatório.</p>
-                <dl class="verbete verbete--primeiro">
-                    <dt>{{ $termo }}</dt>
-                    <dd>{{ $definicao }}</dd>
-                </dl>
-            </div>
-        @elseif ($i === $ultimo)
-            {{-- Nota final presa ao último verbete — nunca sozinha numa página. --}}
-            <div class="manter-junto">
-                <dl class="verbete">
-                    <dt>{{ $termo }}</dt>
-                    <dd>{{ $definicao }}</dd>
-                </dl>
-                <p class="nota">
-                    motor v{{ $diagnostico->motor_version }} · matriz {{ $diagnostico->matrix_version }} · gerado em {{ $diagnostico->gerado_em->format('d/m/Y H:i') }}<br>
-                    <span class="italico">Este diagnóstico é uma ferramenta de apoio à gestão. Decisões financeiras devem considerar análise integral do negócio.</span>
-                </p>
-            </div>
-        @else
-            <dl class="verbete">
-                <dt>{{ $termo }}</dt>
-                <dd>{{ $definicao }}</dd>
-            </dl>
-        @endif
-    @endforeach
-</div>
 
 </body>
 </html>

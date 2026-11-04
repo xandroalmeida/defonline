@@ -1,10 +1,10 @@
 # Anexo I — Glossário Financeiro
 
 **Documento pai:** [`../especificacao-funcional.md`](../especificacao-funcional.md), seção 4.7 (Relatório de Diagnóstico)
-**Versão:** 2.1 (alinhado ao modelo de domínio refatorado)
+**Versão:** 2.2 (alinhado ao modelo de domínio refatorado)
 **Data:** 17/05/2026
 **Fonte original:** planilha `DEFweb.net - ESTRUTURA - ebc.2025jul30.xlsx`, aba `DEF`, linhas 177–191
-**Uso na plataforma:** exibido ao final de todo relatório e disponível em consulta autônoma no painel do assinante. Reutilizável também pelo hotsite, FAQ público e comunicações por e-mail.
+**Uso na plataforma:** exibido ao final do relatório na tela (não sai no PDF nem na impressão, onde o conceito não pode ser aberto) e disponível em consulta autônoma no painel do assinante. Reutilizável também pelo hotsite, FAQ público e comunicações por e-mail.
 **Mantido por:** EB Parcerias Ltda (responsável técnico-financeiro)
 
 ---
@@ -55,6 +55,8 @@ Definições curtas, em linguagem acessível, dos termos técnicos usados no rel
 
 - **Farol / Semáforo.** Classificação visual (verde / amarelo / vermelho) atribuída automaticamente a cada indicador a partir das faixas da matriz de recomendações dez/2025.
 
+- **PME (Prazo Médio de Estoque).** Tempo médio, em dias, que os produtos ou mercadorias permanecem em estoque até serem vendidos.
+
 - **Indisponível.** Rótulo textual exibido no lugar do valor numérico quando o indicador não pode ser calculado (ex.: denominador igual a zero). Não recebe farol nem texto de recomendação.
 
 ---
@@ -64,5 +66,6 @@ Definições curtas, em linguagem acessível, dos termos técnicos usados no rel
 | Versão | Data | Autor | Resumo |
 |---|---|---|---|
 | 1.0 | 20/04/2026 | EB Parcerias | Primeira versão extraída da planilha ESTRUTURA jul/2025, com termos complementares incorporados pela equipe de produto. |
+| 2.2 | 04/11/2026 | Produto | PME adicionado em I.3 (texto a validar com a EB Parcerias). Glossário só na tela. |
 
 Alterações neste glossário devem: (1) preservar compatibilidade com relatórios já emitidos; (2) incrementar a versão; (3) comunicar eventuais mudanças semânticas ao time de UX para ajuste no hotsite e FAQ.

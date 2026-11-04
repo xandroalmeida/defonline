@@ -722,7 +722,7 @@ Identificar lacunas no mercado. Focar no cliente e na solução de problemas. Se
 **Versão:** 1.0.
 **Resumo:** definições curtas, em linguagem acessível, dos termos técnicos exibidos no relatório (EBITDA, NCG, Ciclo Financeiro, Giro do Ativo, IOG, etc.) acrescidas de quatro termos complementares introduzidos pela especificação v1 (Balanço Adaptado, DRE Adaptada, Farol/Semáforo, Indisponível).
 **Origem:** `DEFweb.net - ESTRUTURA - ebc.2025jul30.xlsx`, aba DEF, linhas 177–191.
-**Reuso:** o glossário é exibido ao final de todo relatório, disponível em consulta autônoma no painel, e pode ser reaproveitado pelo hotsite, FAQ público e comunicações por e-mail.
+**Reuso:** o glossário é exibido ao final do relatório na tela (não sai no PDF nem na impressão), disponível em consulta autônoma no painel, e pode ser reaproveitado pelo hotsite, FAQ público e comunicações por e-mail.
 
 ### Anexo J — Roadmap Pós-v1 (referência)
 
