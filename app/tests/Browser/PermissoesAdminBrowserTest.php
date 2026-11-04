@@ -118,15 +118,16 @@ final class PermissoesAdminBrowserTest extends DuskTestCase
     }
 
     /**
-     * STORY-068 — o admin com a permissão filtra por segmento e indicador, vê as 3
-     * faixas, é barrado no texto vazio e salva. Os filtros travam durante a edição.
+     * STORY-068 — sem filtros: escolhe o indicador, edita direto nos 9 textos, troca de
+     * indicador sem perder o que digitou e salva tudo de uma vez.
      */
-    public function test_admin_com_permissao_edita_recomendacao(): void
+    public function test_admin_com_permissao_edita_recomendacoes(): void
     {
         $colega = Usuario::factory()->create(['email' => 'colega@exemplo.com.br']);
         $colega->forceFill(['permissoes_admin' => ['recomendacoes.editar']])->save();
-        $registro = Recomendacao::query()->where(['setor' => 'comercio', 'indicador' => 'pmr', 'farol' => 'amarelo'])->firstOrFail();
-        $original = $registro->only('texto', 'editado_em');
+        $industria = Recomendacao::query()->where(['setor' => 'industria', 'indicador' => 'margem_bruta', 'farol' => 'verde'])->firstOrFail();
+        $comercio = Recomendacao::query()->where(['setor' => 'comercio', 'indicador' => 'pmr', 'farol' => 'amarelo'])->firstOrFail();
+        $originais = [[$industria, $industria->only('texto', 'editado_em')], [$comercio, $comercio->only('texto', 'editado_em')]];
 
         try {
             $this->browse(function (Browser $browser) use ($colega) {
@@ -136,42 +137,77 @@ final class PermissoesAdminBrowserTest extends DuskTestCase
                     ->assertMissing('@app-nav-backoffice-glossario')
                     ->click('@app-nav-backoffice-recomendacoes')
                     ->waitForLocation('/backoffice/recomendacoes')
-                    ->waitFor('@recomendacao-verde');
+                    ->waitFor('@recomendacao-industria-verde');
 
-                $this->assertSame(['none', '36px', '12px'], $browser->script(
-                    "const e = getComputedStyle(document.querySelector('[dusk=\"recomendacoes-setor\"]')); return [e.appearance, e.paddingRight, e.paddingLeft];",
-                )[0]);
+                // A área de trabalho é toda usada, e os campos de uma mesma faixa têm a mesma altura.
+                $browser->resize(1600, 1000)->press('@recomendacoes-ir-margem_liquida')->waitForTextIn('@recomendacoes-titulo', 'Margem Líquida');
+                [$livre, $conteudo, $alturas] = $browser->script(<<<'JS'
+                    const main = document.querySelector('[data-testid="app-main"]');
+                    const estilo = getComputedStyle(main);
+                    const campos = document.querySelectorAll('textarea[dusk$="-vermelho"]');
+                    return [
+                        main.clientWidth - parseFloat(estilo.paddingLeft) - parseFloat(estilo.paddingRight),
+                        main.firstElementChild.offsetWidth,
+                        [...new Set([...campos].map((c) => c.offsetHeight))],
+                    ];
+                JS)[0];
+                $this->assertEqualsWithDelta($livre, $conteudo, 1);
+                $this->assertSame([0, 0], $browser->script(<<<'JS'
+                    const abas = document.querySelector('[role="tablist"]');
+                    return [abas.scrollWidth - abas.clientWidth, abas.scrollHeight - abas.clientHeight];
+                JS)[0], 'As 13 abas deveriam caber em uma linha, sem barra de rolagem.');
+                $this->assertCount(1, $alturas, 'Campos da mesma faixa deveriam ter a mesma altura nos três cards.');
+                $browser->press('@recomendacoes-ir-margem_bruta')->waitForTextIn('@recomendacoes-titulo', 'Margem Bruta');
 
-                $browser
-                    ->assertSeeIn('@recomendacao-faixa-verde', '25,01% +')
-                    ->assertSeeIn('@recomendacoes-versao', 'dez-2025')
-                    ->assertMissing('@recomendacoes-aviso-segmento')
-                    ->select('@recomendacoes-setor', 'comercio')
-                    ->waitFor('@recomendacoes-aviso-segmento')
-                    ->select('@recomendacoes-indicador', 'pmr')
-                    ->waitForTextIn('@recomendacao-texto-amarelo', 'Vender a prazos menores.')
-                    ->assertSeeIn('@recomendacao-faixa-amarelo', '30,01–60 dias')
-                    ->press('@recomendacao-editar-amarelo')
-                    ->waitFor('@recomendacao-texto')
-                    ->assertDisabled('@recomendacoes-setor')
-                    ->assertDisabled('@recomendacoes-indicador')
-                    ->type('@recomendacao-texto', ' ')
-                    ->press('@recomendacao-salvar')
-                    ->waitFor('@erro-recomendacao-texto')
-                    ->assertSeeIn('@erro-recomendacao-texto', 'Informe o texto da recomendação.')
-                    ->type('@recomendacao-texto', 'Vender com prazo curto.')
-                    ->assertSeeIn('@recomendacao-amarelo', '23/300')
-                    ->press('@recomendacao-salvar')
-                    ->waitFor('@recomendacao-salva')
-                    ->assertSeeIn('@recomendacao-texto-amarelo', 'Vender com prazo curto.')
-                    ->assertEnabled('@recomendacoes-setor')
-                    ->assertDontSeeIn('@recomendacoes-versao', 'dez-2025');
+                // Abas pelo teclado: a seta move o foco e o Enter ativa.
+                $browser->click('@recomendacoes-ir-margem_bruta')
+                    ->keys('@recomendacoes-ir-margem_bruta', WebDriverKeys::ARROW_RIGHT);
+                $this->assertSame('aba-margem_ebitda', $browser->script('return document.activeElement.id;')[0]);
+                $browser->keys('@recomendacoes-ir-margem_ebitda', WebDriverKeys::ENTER)
+                    ->waitForTextIn('@recomendacoes-titulo', 'Margem EBITDA')
+                    ->press('@recomendacoes-ir-margem_bruta')
+                    ->waitForTextIn('@recomendacoes-titulo', 'Margem Bruta');
+
+                $browser->assertSeeIn('@recomendacao-industria-verde-faixa', '25,01% +')
+                    ->assertSeeIn('@recomendacao-comercio-vermelho-faixa', 'até 18%')
+                    ->assertMissing('@recomendacoes-barra')
+                    // Vazio: bloqueia ao salvar e mostra o erro na própria célula.
+                    ->type('@recomendacao-industria-verde', ' ')
+                    ->keys('@recomendacao-industria-verde', WebDriverKeys::TAB)
+                    ->waitFor('@recomendacoes-salvar')
+                    ->press('@recomendacoes-salvar')
+                    ->waitFor('@recomendacao-industria-verde-erro')
+                    ->assertSeeIn('@recomendacao-industria-verde-erro', 'Informe o texto da recomendação.')
+                    // Texto válido, com contador ao vivo.
+                    ->type('@recomendacao-industria-verde', 'Manter a margem.')
+                    ->keys('@recomendacao-industria-verde', WebDriverKeys::TAB)
+                    ->waitForTextIn('@recomendacoes-pendentes', '1 alteração não salva')
+                    ->assertSee('16/300')
+                    // Troca de indicador sem perder a alteração.
+                    ->press('@recomendacoes-ir-pmr')
+                    ->waitForTextIn('@recomendacoes-titulo', 'PMR')
+                    ->assertPresent('@recomendacoes-ir-margem_bruta .tab__marca')
+                    ->assertInputValue('@recomendacao-comercio-amarelo', 'Vender a prazos menores.')
+                    ->type('@recomendacao-comercio-amarelo', 'Vender com prazo curto.')
+                    ->keys('@recomendacao-comercio-amarelo', WebDriverKeys::TAB)
+                    ->waitForTextIn('@recomendacoes-pendentes', '2 alterações não salvas')
+                    // Atalho de teclado salva o campo em foco.
+                    ->keys('@recomendacao-comercio-amarelo', [WebDriverKeys::CONTROL, 's'])
+                    ->waitFor('@recomendacoes-mensagem')
+                    ->assertSeeIn('@recomendacoes-mensagem', '2 textos salvos.')
+                    ->assertMissing('@recomendacoes-barra')
+                    ->assertMissing('@recomendacoes-ir-margem_bruta .tab__marca')
+                    ->assertSeeIn('@recomendacoes-versao-servicos', 'dez-2025')
+                    ->assertDontSeeIn('@recomendacoes-versao-industria', 'dez-2025');
             });
 
-            $this->assertSame('Vender com prazo curto.', $registro->fresh()?->texto);
+            $this->assertSame('Manter a margem.', $industria->fresh()?->texto);
+            $this->assertSame('Vender com prazo curto.', $comercio->fresh()?->texto);
         } finally {
             // A truncagem deste teste não inclui `recomendacoes`: os textos vêm da migration.
-            Recomendacao::query()->whereKey($registro->id)->update($original);
+            foreach ($originais as [$registro, $valores]) {
+                Recomendacao::query()->whereKey($registro->id)->update($valores);
+            }
         }
     }
 }

@@ -143,6 +143,48 @@
         cursor: not-allowed;
     }
 
+    /* Abas — sempre via <x-tabs> e <x-tabs.item>. */
+    .tabs {
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: thin;
+        border-bottom: 1px solid var(--color-border);
+    }
+    .tab {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        gap: 6px;
+        min-height: var(--touch-target-min);
+        padding: 8px 10px;
+        border-bottom: 2px solid transparent;
+        color: var(--color-secondary);
+        font-size: 0.875rem;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: color 120ms ease, border-color 120ms ease;
+    }
+    .tab:hover {
+        color: var(--color-primary);
+        border-bottom-color: var(--color-border);
+    }
+    .tab:focus-visible {
+        outline: 2px solid var(--color-ring);
+        outline-offset: -2px;
+    }
+    .tab[aria-selected="true"] {
+        color: var(--color-tertiary);
+        border-bottom-color: var(--color-tertiary);
+        font-weight: 500;
+    }
+    .tab__marca {
+        width: 8px;
+        height: 8px;
+        border-radius: 9999px;
+        background: currentColor;
+    }
+
     /*
      * Seta própria: a nativa fica colada na borda direita e o texto ganha um recuo
      * diferente do `.input`. Sempre via <x-select>.

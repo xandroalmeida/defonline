@@ -72,40 +72,51 @@ it('traz Comércio e Serviços do Anexo F, com a faixa própria do segmento', fu
         ->and(($this->registro)('industria', 'ncg_vendas', 'vermelho')->faixa)->toBe('Acima de 10%');
 });
 
-it('filtra por segmento e indicador e mostra as 3 faixas', function () {
+it('abre no primeiro indicador com os 9 textos e navega entre indicadores', function () {
     ($this->tela)()
-        ->assertSee('Buscar manter a margem atual.')
-        ->assertSee('Matriz vigente: dez-2025')
-        ->assertDontSee('ainda não gera diagnóstico')
-        ->set('setor', 'comercio')
-        ->assertSee('com melhoria contínua')
-        ->assertSee('Comércio ainda não gera diagnóstico')
-        ->set('indicador', 'pmr')
-        ->assertSee('Vender a prazos menores.')
-        ->assertDontSee('Buscar manter a margem atual.');
+        ->assertSet('textos.industria.margem_bruta.verde', 'Buscar manter a margem atual.')
+        ->assertSet('textos.comercio.margem_bruta.verde', 'Acompanhar os números para manter a margem atual com melhoria contínua.')
+        ->assertSet('textos.servicos.margem_bruta.verde', 'Manter ou melhorar a margem atual.')
+        ->assertSee('até 18%')
+        ->assertSee('Margem Bruta')
+        ->assertSee('Matriz dez-2025')
+        ->call('irPara', 'pmr')
+        ->assertSet('indicador', 'pmr')
+        ->assertSet('textos.comercio.pmr.amarelo', 'Vender a prazos menores.')
+        ->assertSee('30,01–60 dias')
+        ->assertDontSee('até 18%');
 });
 
-it('valor forjado no filtro volta ao padrão', function () {
-    ($this->tela)()
-        ->set('setor', 'agro')->assertSet('setor', 'industria')
-        ->set('indicador', 'ncg_absoluto')->assertSet('indicador', 'margem_bruta');
+it('toda aba tem rótulo curto, na ordem dos indicadores', function () {
+    expect(array_keys(Recomendacoes::ROTULOS_ABAS))->toEqualCanonicalizing(IndicadorFormatter::ORDEM_ESSENCIAIS);
+
+    ($this->tela)()->assertSeeHtml('aria-selected="true"')->assertSee('Desp. / EBITDA');
 });
 
-it('salva o texto, normaliza espaços, audita e muda a versão só daquele segmento', function () {
+it('indicador forjado é ignorado', function () {
+    ($this->tela)()->call('irPara', 'ncg_absoluto')->assertSet('indicador', 'margem_bruta');
+});
+
+it('o indicador e o texto de origem não podem ser forjados pelo cliente', function () {
+    expect(fn () => ($this->tela)()->set('indicador', 'pmr'))->toThrow(Exception::class);
+    expect(fn () => ($this->tela)()->set('base.industria.margem_bruta.verde', 'x'))->toThrow(Exception::class);
+});
+
+it('salva, normaliza espaços, audita e muda a versão só do segmento alterado', function () {
     Carbon::setTestNow('2026-11-30 22:00:00 America/Sao_Paulo');
     $registro = ($this->registro)('industria', 'margem_bruta', 'verde');
     $antes = $registro->texto;
 
     ($this->tela)()
-        ->call('editar', $registro->id)
-        ->assertSet('texto', $antes)
-        ->set('texto', "  Manter a margem\n  atual.  ")
+        ->set('textos.industria.margem_bruta.verde', "  Manter a margem\n  atual.  ")
+        ->assertSee('1 alteração não salva')
         ->call('salvar')
         ->assertHasNoErrors()
-        ->assertSet('editandoId', null)
-        ->assertSet('salvoId', $registro->id)
-        ->assertSee('Manter a margem atual.')
-        ->assertSee('Matriz vigente: nov-2026');
+        ->assertSee('1 texto salvo.')
+        ->assertDontSee('alteração não salva')
+        ->assertSet('textos.industria.margem_bruta.verde', 'Manter a margem atual.')
+        ->assertSee('Matriz nov-2026')
+        ->assertSee('Matriz dez-2025');
 
     expect($registro->fresh()->texto)->toBe('Manter a margem atual.');
 
@@ -132,49 +143,97 @@ it('a versão usa o mês de Brasília, não o de UTC', function () {
     Carbon::setTestNow();
 });
 
-it('salvar sem mudar nada não audita nem muda a versão', function () {
+it('sem mudança real, nem só de espaços, não há pendência nem gravação', function () {
     $registro = ($this->registro)('industria', 'pmc', 'amarelo');
 
-    ($this->tela)()->call('editar', $registro->id)->call('salvar')->assertHasNoErrors()->assertSet('editandoId', null);
+    ($this->tela)()->call('irPara', 'pmc')
+        ->set('textos.industria.pmc.amarelo', '  '.$registro->texto.' ')
+        ->assertDontSee('alteração não salva')
+        ->call('salvar')
+        ->assertHasNoErrors();
 
     expect($registro->fresh()->editado_em)->toBeNull()
         ->and(AuditLog::query()->where('action', 'recomendacoes.texto_alterado')->exists())->toBeFalse()
         ->and(app(FonteRecomendacoes::class)->versao('industria'))->toBe('dez-2025');
 });
 
-it('recusa texto vazio e acima do limite, sem gravar', function (string $texto, string $mensagem) {
-    $registro = ($this->registro)('industria', 'margem_bruta', 'verde');
-    $antes = $registro->texto;
+it('recusa texto vazio e acima do limite, sem gravar nada', function (string $texto, string $mensagem) {
+    $invalido = ($this->registro)('industria', 'margem_bruta', 'verde');
+    $valido = ($this->registro)('comercio', 'margem_bruta', 'verde');
+    $antes = [$invalido->texto, $valido->texto];
 
-    $tela = ($this->tela)()->call('editar', $registro->id)->set('texto', $texto)->call('salvar')
-        ->assertHasErrors('texto')
-        ->assertSet('editandoId', $registro->id);
+    $tela = ($this->tela)()
+        ->set('textos.comercio.margem_bruta.verde', 'Texto válido.')
+        ->set('textos.industria.margem_bruta.verde', $texto)
+        ->call('salvar')
+        ->assertHasErrors('textos.industria.margem_bruta.verde')
+        ->assertSee($mensagem);
 
-    expect($tela->errors()->first('texto'))->toBe($mensagem)
-        ->and($tela->html())->toContain($mensagem)
-        ->and($registro->fresh()->texto)->toBe($antes);
+    expect([$invalido->fresh()->texto, $valido->fresh()->texto])->toBe($antes)
+        ->and($tela->get('textos.comercio.margem_bruta.verde'))->toBe('Texto válido.');
 })->with([
     'vazio' => ['   ', 'Informe o texto da recomendação.'],
     '301 caracteres' => [str_repeat('á', 301), 'O texto pode ter até 300 caracteres.'],
 ]);
 
 it('aceita exatamente 300 caracteres', function () {
-    $registro = ($this->registro)('industria', 'pme', 'verde');
+    $registro = ($this->registro)('industria', 'margem_bruta', 'verde');
 
-    ($this->tela)()->call('editar', $registro->id)->set('texto', str_repeat('á', 300))->call('salvar')->assertHasNoErrors();
+    ($this->tela)()->set('textos.industria.margem_bruta.verde', str_repeat('á', 300))->call('salvar')->assertHasNoErrors();
 
     expect($registro->fresh()->texto)->toBe(str_repeat('á', 300));
 });
 
-it('trocar o filtro cancela a edição em aberto', function () {
-    $registro = ($this->registro)('industria', 'margem_bruta', 'verde');
-    $antes = $registro->texto;
+it('alteração continua pendente ao trocar de indicador e é salva junto com as outras', function () {
+    $tela = ($this->tela)()
+        ->set('textos.industria.margem_bruta.verde', 'Primeiro.')
+        ->call('irPara', 'pmr')
+        ->assertSet('textos.industria.margem_bruta.verde', 'Primeiro.')
+        ->assertSeeHtml('tab__marca')
+        ->set('textos.servicos.pmr.vermelho', 'Segundo.')
+        ->assertSee('2 alterações não salvas')
+        ->call('salvar')
+        ->assertSee('2 textos salvos.');
 
-    ($this->tela)()->call('editar', $registro->id)->set('texto', 'Rascunho')->set('indicador', 'pmr')
-        ->assertSet('editandoId', null)
-        ->assertSet('texto', '');
+    expect(($this->registro)('industria', 'margem_bruta', 'verde')->texto)->toBe('Primeiro.')
+        ->and(($this->registro)('servicos', 'pmr', 'vermelho')->texto)->toBe('Segundo.')
+        ->and(AuditLog::query()->where('action', 'recomendacoes.texto_alterado')->count())->toBe(2);
 
-    expect($registro->fresh()->texto)->toBe($antes);
+    $tela->assertDontSeeHtml('tab__marca');
+});
+
+it('erro em outro indicador leva o usuário até ele', function () {
+    ($this->tela)()
+        ->set('textos.industria.margem_bruta.verde', '')
+        ->call('irPara', 'pmr')
+        ->call('salvar')
+        ->assertHasErrors('textos.industria.margem_bruta.verde')
+        ->assertSet('indicador', 'margem_bruta')
+        ->assertSee('Informe o texto da recomendação.');
+});
+
+it('desfazer restaura um texto e descartar restaura todos', function () {
+    $original = ($this->registro)('industria', 'margem_bruta', 'verde')->texto;
+    $outro = ($this->registro)('comercio', 'margem_bruta', 'verde')->texto;
+
+    ($this->tela)()
+        ->set('textos.industria.margem_bruta.verde', 'A')
+        ->set('textos.comercio.margem_bruta.verde', 'B')
+        ->assertSee('2 alterações não salvas')
+        ->call('desfazer', 'industria', 'margem_bruta', 'verde')
+        ->assertSet('textos.industria.margem_bruta.verde', $original)
+        ->assertSee('1 alteração não salva')
+        ->call('desfazer', 'industria', 'pmr', 'inexistente')
+        ->call('descartar')
+        ->assertSet('textos.comercio.margem_bruta.verde', $outro)
+        ->assertSee('Alterações descartadas.');
+
+    expect(Recomendacao::query()->whereNotNull('editado_em')->exists())->toBeFalse();
+});
+
+it('texto em formato inválido enviado pelo cliente é recusado', function () {
+    ($this->tela)()->set('textos.industria.margem_bruta.verde', ['x'])->call('salvar')
+        ->assertHasErrors('textos.industria.margem_bruta.verde');
 });
 
 it('o texto editado vale para o próximo diagnóstico; o já emitido mantém o da época', function () {
@@ -189,7 +248,7 @@ it('o texto editado vale para o próximo diagnóstico; o já emitido mantém o d
     expect($antigo->matrix_version)->toBe('dez-2025');
 
     $registro = ($this->registro)('industria', 'margem_bruta', $farol);
-    ($this->tela)()->call('editar', $registro->id)->set('texto', 'Texto editado pela equipe.')->call('salvar');
+    ($this->tela)()->set("textos.industria.margem_bruta.{$farol}", 'Texto editado pela equipe.')->call('salvar');
 
     $novo = $calcular->execute($empresa, ($this->payload)());
 
