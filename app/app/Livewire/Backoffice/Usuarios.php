@@ -68,7 +68,7 @@ final class Usuarios extends Component
             'usuarios' => $this->paginar($base),
             'total' => (int) ($totais->total ?? 0),
             'confirmados' => (int) ($totais->confirmados ?? 0),
-        ])->layoutData(['title' => 'Usuários cadastrados', 'largo' => true]);
+        ])->layoutData(['title' => 'Usuários cadastrados']);
     }
 
     protected function permissaoExigida(): PermissaoAdmin

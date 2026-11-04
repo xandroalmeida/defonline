@@ -407,11 +407,11 @@ describe('CA-6 ações e métricas indicam o admin', function () {
     });
 });
 
-it('a lista do backoffice ocupa a largura toda; as demais telas mantêm os 960px', function () {
+it('todas as telas ocupam a área de trabalho inteira', function () {
     $this->actingAs($this->admin);
 
     $conteudo = fn (string $url) => str($this->get($url)->getContent())->between('data-testid="app-main"', '</main>')->toString();
 
     expect($conteudo('/backoffice/usuarios'))->not->toContain('max-w-[960px]')
-        ->and($conteudo('/home'))->toContain('max-w-[960px]');
+        ->and($conteudo('/home'))->not->toContain('max-w-[960px]');
 });
