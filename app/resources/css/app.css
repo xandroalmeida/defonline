@@ -83,6 +83,14 @@
         background: var(--color-neutral);
     }
 
+    .btn--destructive {
+        background: var(--color-destructive);
+        color: var(--color-on-primary);
+    }
+    .btn--destructive:hover:not(:disabled) {
+        background: var(--color-destructive-hover);
+    }
+
     .btn--ghost {
         background: transparent;
         color: var(--color-primary);

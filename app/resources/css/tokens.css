@@ -68,6 +68,7 @@
 
     /* Semânticas. */
     --color-destructive: #E11D48;
+    --color-destructive-hover: #BE123C;
 
     /*
      * `border` e `input` foram idênticos do DS v1 até a STORY-059, e a

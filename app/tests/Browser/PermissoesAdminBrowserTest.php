@@ -69,7 +69,10 @@ final class PermissoesAdminBrowserTest extends DuskTestCase
                 )[0] === true)
                 ->press('@glossario-cancelar');
 
-            // Excluir pede confirmação: cancelar mantém o termo.
+            // Excluir usa a cor de alerta (#E11D48) e pede confirmação: cancelar mantém o termo.
+            $this->assertSame('rgb(225, 29, 72)', $browser->script(
+                "return getComputedStyle(document.querySelector('[dusk=\"glossario-excluir-{$termoId}\"]')).backgroundColor;"
+            )[0]);
             $browser->press('@glossario-excluir-'.$termoId)
                 ->waitForDialog()
                 ->assertDialogOpened('Excluir o termo “Termo E2E” do glossário? Ele sairá de todos os relatórios.')
