@@ -20,7 +20,7 @@ Decisão: PDR-012. A tela `/backoffice/usuarios` também deixa de ficar limitada
 
 ## Critérios de aceite
 
-- **CA-1 quem pode:** só a equipe da allowlist, por POST; comum e não encontrado recebem 404. Outro membro da equipe, conta excluída ou anonimizada não podem ser assumidos e não têm o botão.
+- **CA-1 quem pode:** só a equipe da allowlist, por POST; comum e não encontrado recebem 404. Admin que também pode "Logar como", conta excluída ou anonimizada não podem ser assumidos e não têm o botão (regra revista em 2026-11-04, ver PDR-012 §3).
 - **CA-2 acesso:** a sessão passa a ser a do usuário: vê só os dados dele e não acessa o backoffice. Não conta como login dele em "Último login".
 - **CA-3 volta:** aviso fixo em toda tela do app, com o nome do usuário e "Voltar ao admin", que devolve à lista.
 - **CA-4 sessão:** "Sair" encerra tudo. Admin fora da allowlist derruba a sessão na próxima requisição. Chave de personificação velha nunca devolve o acesso de admin.

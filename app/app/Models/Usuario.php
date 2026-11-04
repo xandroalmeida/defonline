@@ -120,11 +120,11 @@ final class Usuario extends Authenticatable
         return $this->anonimizado_at !== null;
     }
 
-    /** STORY-066 — colega da equipe fica de fora: assumir outro admin embaralharia a trilha. */
+    /** PDR-012 §3 — quem também pode "Logar como" fica de fora, e o admin não assume a si mesmo. */
     public function podeSerPersonificadoPor(self $admin): bool
     {
         return $admin->temPermissao(PermissaoAdmin::LogarComo)
-            && ! $this->ehEquipeBackoffice()
+            && ! $this->temPermissao(PermissaoAdmin::LogarComo)
             && ! $this->trashed()
             && ! $this->anonimizado();
     }

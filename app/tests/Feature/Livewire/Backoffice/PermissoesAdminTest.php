@@ -227,10 +227,24 @@ describe('CA-4 Logar como', function () {
         $this->actingAs($pode)->post('/backoffice/usuarios/'.$alvo->id.'/logar-como')->assertRedirect('/home');
     });
 
-    it('não assume outro admin, mesmo sem ser de BACKOFFICE_EMAILS', function () {
+    it('não assume admin que também pode Logar como', function () {
+        $outroAdmin = ($this->comPermissoes)(['usuarios.logar_como']);
+
+        $this->actingAs($this->raiz)->get('/backoffice/usuarios')
+            ->assertDontSee('/usuarios/'.$outroAdmin->id.'/logar-como', escape: false);
+        $this->actingAs($this->raiz)->post('/backoffice/usuarios/'.$outroAdmin->id.'/logar-como')->assertNotFound();
+    });
+
+    it('assume admin sem essa permissão, e a sessão não usa o backoffice dele', function () {
         $outroAdmin = ($this->comPermissoes)(['glossario.editar']);
 
-        $this->actingAs($this->raiz)->post('/backoffice/usuarios/'.$outroAdmin->id.'/logar-como')->assertNotFound();
+        $this->actingAs($this->raiz)->get('/backoffice/usuarios')
+            ->assertSee('/usuarios/'.$outroAdmin->id.'/logar-como', escape: false);
+        $this->actingAs($this->raiz)->post('/backoffice/usuarios/'.$outroAdmin->id.'/logar-como')->assertRedirect('/home');
+
+        expect(auth()->id())->toBe($outroAdmin->id);
+        $this->get('/backoffice/glossario')->assertNotFound();
+        $this->get('/home')->assertOk()->assertDontSee('app-nav-backoffice-glossario', escape: false);
     });
 
     it('sessão de Logar como não usa o backoffice se o usuário assumido virar admin', function () {

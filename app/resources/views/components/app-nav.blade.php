@@ -85,7 +85,7 @@
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-glossario',
             ],
-        ], fn (array $item): bool => $usuarioNav->temPermissao($item['permissao'])));
+        ], fn (array $item): bool => $usuarioNav->podeUsarBackoffice($item['permissao'])));
     }
 
     $grupos = array_filter([

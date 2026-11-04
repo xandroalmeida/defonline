@@ -22,7 +22,7 @@ O PDR-011 §3 deixou impersonar para a v1.2. O PO pediu a antecipação: a equip
 
 1. Altera o PDR-011 §3 só neste ponto: a equipe da allowlist pode assumir o acesso de um usuário a partir de `/backoffice/usuarios`. O resto do backoffice continua só-leitura.
 2. Pode agir como o usuário, sem restrição de escrita, e volta ao admin quando quiser.
-3. Não pode ser assumido: outro membro da equipe, conta excluída ou anonimizada.
+3. Não pode ser assumido: admin que também tem a permissão de "Logar como" (inclui quem está em `BACKOFFICE_EMAILS` e o próprio admin), conta excluída ou anonimizada. Admin sem essa permissão pode ser assumido, e a sessão não dá acesso ao backoffice dele. (Revisto pelo PO em 2026-11-04; antes, nenhum membro da equipe podia ser assumido.)
 4. Toda requisição da sessão vai para `audit_logs`, com o admin como ator e o usuário como alvo, incluindo os campos enviados. Só credenciais são mascaradas.
 5. Ações e métricas da sessão indicam o admin que as fez: no próprio registro, nos eventos de produto, nas métricas e nas telas.
 
