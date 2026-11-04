@@ -450,12 +450,12 @@ it('CA-8 (borda) — reordenar não pode ter mexido no 1º item nem no total de 
 
     $termos = termosDoGlossario($html);
 
-    expect($termos)->toHaveCount(16)
+    expect($termos)->toHaveCount(17)
         ->and($termos[0])->toContain('Margem Bruta')
-        ->and(array_unique($termos))->toHaveCount(16);
+        ->and(array_unique($termos))->toHaveCount(17);
 });
 
-it('o glossário define Despesas Financeiras / EBITDA, Fontes de Recursos, Giro do Ativo e PME', function (string $termo, string $definicao) {
+it('o glossário define Despesas Financeiras / EBITDA, Fontes de Recursos, Giro do Ativo, PME e Inadimplência', function (string $termo, string $definicao) {
     $dono = Usuario::factory()->create();
     $diag = gerarDiagnostico($dono);
 
@@ -467,7 +467,8 @@ it('o glossário define Despesas Financeiras / EBITDA, Fontes de Recursos, Giro 
     ['Relação Despesas Financeiras / EBITDA', 'Representa a participação dos bancos no lucro.'],
     ['Relação entre Fontes de Recursos (RFR)', 'dependência de recursos externos'],
     ['Giro do Ativo (GA)', 'Vendas ÷ Ativo Total'],
-    ['PME — Prazo Médio de Estoque', 'permanecem em estoque'],
+    ['PME — Prazo Médio de Permanência dos Estoques', 'Prazo médio de permanência em estoque, em dias.'],
+    ['Inadimplência', 'Percentual médio de atraso de clientes de vendas a prazo.'],
 ]);
 
 it('a tela do relatório não imprime: só a orientação de usar o PDF', function () {

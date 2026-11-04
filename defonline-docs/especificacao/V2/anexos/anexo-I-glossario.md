@@ -55,7 +55,9 @@ Definições curtas, em linguagem acessível, dos termos técnicos usados no rel
 
 - **Farol / Semáforo.** Classificação visual (verde / amarelo / vermelho) atribuída automaticamente a cada indicador a partir das faixas da matriz de recomendações dez/2025.
 
-- **PME (Prazo Médio de Estoque).** Tempo médio, em dias, que os produtos ou mercadorias permanecem em estoque até serem vendidos.
+- **PME (Prazo Médio de Permanência dos Estoques).** Prazo médio de permanência em estoque, em dias. Nome da planilha ESTRUTURA (A86); texto do Anexo A (Q11).
+
+- **Inadimplência.** Percentual médio de atraso de clientes de vendas a prazo. Texto da planilha QUIZ (C14).
 
 - **Indisponível.** Rótulo textual exibido no lugar do valor numérico quando o indicador não pode ser calculado (ex.: denominador igual a zero). Não recebe farol nem texto de recomendação.
 
@@ -66,6 +68,6 @@ Definições curtas, em linguagem acessível, dos termos técnicos usados no rel
 | Versão | Data | Autor | Resumo |
 |---|---|---|---|
 | 1.0 | 20/04/2026 | EB Parcerias | Primeira versão extraída da planilha ESTRUTURA jul/2025, com termos complementares incorporados pela equipe de produto. |
-| 2.2 | 04/11/2026 | Produto | PME adicionado em I.3 (texto a validar com a EB Parcerias). Glossário só na tela. |
+| 2.2 | 04/11/2026 | Produto | PME e Inadimplência adicionados em I.3, a partir dos originais. Glossário só na tela. |
 
 Alterações neste glossário devem: (1) preservar compatibilidade com relatórios já emitidos; (2) incrementar a versão; (3) comunicar eventuais mudanças semânticas ao time de UX para ajuste no hotsite e FAQ.
