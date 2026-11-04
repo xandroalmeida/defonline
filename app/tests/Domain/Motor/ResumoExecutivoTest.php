@@ -37,7 +37,7 @@ function indicador(float|int|null $valor, string $farol, string $mensagem = 'Men
 }
 
 /**
- * Helper para criar snapshot completo (14 do Anexo D + Ciclo Operacional).
+ * Helper para criar snapshot completo (14 do Anexo D).
  * Por padrão, todos verdes; passa um override no segundo argumento para
  * substituir indicadores específicos.
  *
@@ -64,8 +64,6 @@ function snapshot(array $overrides = []): array
         'pme' => indicador(20.0, Farol::VERDE),
         'pmr' => indicador(20.0, Farol::VERDE),
         'inadimplencia' => indicador(2.0, Farol::VERDE),
-        // Ciclo Operacional — informativo, fora do Anexo D.
-        'ciclo_operacional' => indicador(40.0, Farol::NENHUM, 'PME + PMR.'),
     ];
 
     return array_merge($verde, $overrides);
@@ -170,7 +168,7 @@ it('CA-2 + Passo 6 — todos vermelho → em_alerta + 2 destaques negativos sem 
         'fontes_recursos' => 2.0,
         'giro_ativo' => 0.2,
         'ciclo_financeiro' => 120.0,
-        'ncg_vendas' => 0.5,
+        'ncg_vendas' => 15.0,
         'pmc' => 10.0,
         'pme' => 120.0,
         'pmr' => 120.0,
@@ -267,42 +265,19 @@ it('CA-4 — truncamento em ~80 chars com "…" e sem cortar palavra', function 
     expect($blocoTotal)->toBeLessThanOrEqual(420); // pequena tolerância
 });
 
-it('CA-5 — NCG abs e Ciclo Operacional ignorados na contagem V/A/Vd e em destaques', function () {
-    // Cenário: TODOS os 13 indicadores com farol em verde, mas NCG abs e Ciclo Op com farol=nenhum.
+it('CA-5 — NCG abs ignorado na contagem V/A/Vd e em destaques', function () {
+    // Cenário: TODOS os 13 indicadores com farol em verde, mas NCG abs com farol=nenhum.
     // Veredito deve ser saudavel + Passo 6 (todos verde) — confirma que NCG abs não atrapalha N=13.
     $out = $this->resumo->gerar(snapshot([
         'ncg_absoluto' => indicador(50000.0, Farol::NENHUM, 'NCG positivo moderado.'),
-        'ciclo_operacional' => indicador(50.0, Farol::NENHUM, 'PME+PMR mensagem informativa.'),
     ]), '1.2.0');
 
     expect($out['veredito'])->toBe('saudavel');
     expect($out['mensagem_extra'] ?? null)->toBe('Todos os indicadores avaliados estão em patamar saudável. Continue acompanhando.');
-    // NCG abs e Ciclo Operacional nunca aparecem como destaque.
+    // NCG abs nunca aparece como destaque.
     foreach (array_merge($out['destaques_negativos'], $out['destaque_positivo'] === null ? [] : [$out['destaque_positivo']]) as $d) {
         expect($d['codigo'])->not->toBe('ncg_absoluto');
-        expect($d['codigo'])->not->toBe('ciclo_operacional');
     }
-});
-
-it('CA-5 — Ciclo Operacional indisponível NÃO conta no denominador 14 do fallback', function () {
-    // 9 indisponíveis dos 14 do Anexo D = 9/14 ≈ 64% < 70% (não fallback).
-    // Ciclo Operacional indisponível adicional não conta — deve permanecer não-fallback.
-    $indispo = indicador(null, Farol::NENHUM, '', 'indisponivel:teste');
-    $overrides = [
-        'margem_bruta' => $indispo,
-        'margem_ebitda' => $indispo,
-        'margem_liquida' => $indispo,
-        'divida_liquida_ebitda' => $indispo,
-        'despesas_fin_ebitda' => $indispo,
-        'fontes_recursos' => $indispo,
-        'giro_ativo' => $indispo,
-        'ciclo_financeiro' => $indispo,
-        'ncg_vendas' => $indispo,
-        'ciclo_operacional' => $indispo,
-    ];
-    $out = $this->resumo->gerar(snapshot($overrides), '1.2.0');
-
-    expect($out['fallback_acionado'])->toBeFalse();
 });
 
 it('determinismo — 100 execuções produzem saída bit-exata', function () {

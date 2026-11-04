@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Support\Relatorio\IndicadorFormatter;
 
-it('devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo Operacional)', function (string $codigo, string $nomeEsperado) {
+it('devolve nome humanizado dos 14 indicadores do Anexo D', function (string $codigo, string $nomeEsperado) {
     expect(IndicadorFormatter::nome($codigo))->toBe($nomeEsperado);
 })->with([
     ['margem_bruta', 'Margem Bruta'],
@@ -21,7 +21,6 @@ it('devolve nome humanizado dos 15 indicadores conhecidos (14 do Anexo D + Ciclo
     ['pme', 'PME — Prazo médio de estoque'],
     ['pmr', 'PMR — Prazo médio de recebimento'],
     ['inadimplencia', 'Inadimplência'],
-    ['ciclo_operacional', 'Ciclo Operacional'],
 ]);
 
 it('devolve o próprio código quando o indicador não está no catálogo', function () {
@@ -52,8 +51,11 @@ it('formata Dívida Líq./EBITDA, Fontes Recursos e Giro como múltiplo com 2 ca
 });
 
 it('formata NCG/Vendas multiplicando razão por 100 (snapshot grava decimal)', function () {
-    expect(IndicadorFormatter::valor('ncg_vendas', 0.085))->toBe('8,5%');
-    expect(IndicadorFormatter::valor('ncg_vendas', -0.0416))->toBe('-4,2%');
+    expect(IndicadorFormatter::valor('ncg_vendas', 0.7625))->toBe('0,76');
+    expect(IndicadorFormatter::valor('ncg_vendas', -0.5, '2.0.0'))->toBe('-0,50');
+    // Snapshot anterior ao motor 2.0.0 foi calculado sobre vendas anuais.
+    expect(IndicadorFormatter::valor('ncg_vendas', 0.085, '1.3.3'))->toBe('8,5%');
+    expect(IndicadorFormatter::valor('ncg_vendas', -0.0416, '1.3.3'))->toBe('-4,2%');
 });
 
 it('formata prazos médios, ciclo financeiro e ciclo operacional em dias inteiros', function () {
@@ -61,7 +63,6 @@ it('formata prazos médios, ciclo financeiro e ciclo operacional em dias inteiro
     expect(IndicadorFormatter::valor('pmc', 30))->toBe('30 dias');
     expect(IndicadorFormatter::valor('pme', 25.0))->toBe('25 dias');
     expect(IndicadorFormatter::valor('ciclo_financeiro', -60.0))->toBe('-60 dias');
-    expect(IndicadorFormatter::valor('ciclo_operacional', 75.0))->toBe('75 dias');
 });
 
 it('formata NCG absoluto em moeda BR com sinal preservado', function () {

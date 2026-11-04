@@ -53,7 +53,7 @@ it('persiste um Diagnostico com snapshot completo', function () {
     expect($diag->usuario_id)->toBe($u->id);
     expect($diag->empresa_analisada_id)->toBe($empresa->id);
     expect($diag->payload_hash)->toMatch('/^[0-9a-f]{64}$/');
-    expect(count($diag->indicadores_calculados))->toBe(15);
+    expect(count($diag->indicadores_calculados))->toBe(14);
 });
 
 it('calcula payload_hash como SHA-256 do canonical JSON', function () {

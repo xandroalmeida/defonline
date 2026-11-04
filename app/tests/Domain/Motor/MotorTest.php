@@ -38,7 +38,7 @@ it('retorna estrutura canônica com motor_version, matrix_version, setor, indica
     expect($r['setor'])->toBe('industria');
 });
 
-it('produz exatamente 15 indicadores na V2 (14 do Anexo D + Ciclo Operacional informativo)', function () {
+it('produz exatamente os 14 indicadores do Anexo D', function () {
     $r = (new Motor)->calcular(payloadIndustriaSaudavel(), 'industria');
     expect(array_keys($r['indicadores_calculados']))->toBe([
         // ordem do Anexo D §4.5
@@ -56,7 +56,6 @@ it('produz exatamente 15 indicadores na V2 (14 do Anexo D + Ciclo Operacional in
         'pme',                    // #12
         'pmr',                    // #13
         'inadimplencia',          // #14
-        'ciclo_operacional',      // (+) informativo
     ]);
 });
 

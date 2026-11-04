@@ -6,7 +6,6 @@ namespace App\Domain\Motor;
 
 use App\Domain\Motor\Calculos\DreAdaptada;
 use App\Domain\Motor\Indicadores\CicloFinanceiro;
-use App\Domain\Motor\Indicadores\CicloOperacional;
 use App\Domain\Motor\Indicadores\DespesasFinEbitda;
 use App\Domain\Motor\Indicadores\DividaLiquidaEbitda;
 use App\Domain\Motor\Indicadores\FontesRecursos;
@@ -38,8 +37,7 @@ use App\Domain\Motor\Indicadores\Pmr;
  * — fontes de não-determinismo proibidas). O `gerado_em` é definido pelo Action
  * `CalcularDiagnostico`, não aqui.
  *
- * **Ordem dos indicadores** = ordem do Anexo D §4.5 (#1..#14) + Ciclo Operacional
- * informativo no final. Esta ordem entra no hash de saída — mudança requer bump.
+ * **Ordem dos indicadores** = ordem do Anexo D §4.5 (#1..#14). Esta ordem entra no hash de saída — mudança requer bump.
  */
 final class Motor
 {
@@ -90,8 +88,7 @@ final class Motor
     }
 
     /**
-     * Lista canônica dos indicadores, na ordem do Anexo D §4.5 (#1..#14)
-     * com Ciclo Operacional informativo ao final.
+     * Lista canônica dos indicadores, na ordem do Anexo D §4.5 (#1..#14).
      *
      * @return list<Indicador>
      */
@@ -112,7 +109,6 @@ final class Motor
             new Pme,                   // #12 (STORY-030)
             new Pmr,                   // #13
             new Inadimplencia,         // #14 (STORY-030)
-            new CicloOperacional,      // (+) informativo, sem farol (STORY-030)
         ];
     }
 }

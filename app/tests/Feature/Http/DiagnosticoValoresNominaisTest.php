@@ -131,7 +131,7 @@ it('não exibe bloco nominal para prazos e inadimplência, nem placeholder vazio
     $dono = Usuario::factory()->create();
     $html = htmlRelatorioNominal($dono, diagnosticoNominal($dono));
 
-    foreach (['pmc', 'pme', 'pmr', 'ciclo_financeiro', 'ciclo_operacional', 'inadimplencia'] as $codigo) {
+    foreach (['pmc', 'pme', 'pmr', 'ciclo_financeiro', 'inadimplencia'] as $codigo) {
         expect($html)->not->toContain('data-testid="nominais-'.$codigo.'"');
     }
 

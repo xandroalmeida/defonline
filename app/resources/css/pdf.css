@@ -321,7 +321,7 @@ h1, h2, h3, p, ul, dl, dd {
     color: var(--color-secondary);
 }
 
-/* ── Cards informativos (NCG absoluto + ciclo operacional) ────────────── */
+/* ── Cards informativos (NCG absoluto) ────────────── */
 
 .informativos {
     width: 100%;

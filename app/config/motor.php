@@ -34,7 +34,10 @@ return [
     //         ciclo devolve. O texto passou a nomear o financiamento do fornecedor e a
     //         dependência que ele cria. Só a mensagem da faixa 1 muda; nenhum valor,
     //         farol ou veredito é afetado.
-    'version' => '1.3.3',
+    // 2.0.0 — PDR-014 (MAJOR: NCG/Vendas passa a dividir pela venda média mensal, e não pela
+    //         anualizada, com limite amarelo/vermelho em 10,00; a faixa do NCG absoluto
+    //         acompanha. Ciclo Operacional sai do motor, por pedido da EB Parcerias.)
+    'version' => '2.0.0',
     'matrix_version' => 'dez-2025',
 
     // Path do arquivo de lacunas auto-append por MatrizRecomendacoes (CA-5/STORY-032).

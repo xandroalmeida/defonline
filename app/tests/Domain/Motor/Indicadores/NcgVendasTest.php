@@ -13,8 +13,7 @@ function calcNcgVendas(array $payload): array
 function pBaseNv(array $overrides = []): array
 {
     // NCG = Q03 + Q04 − Q07 = 80k + 60k − 30k = 110k.
-    // Vendas anuais = Q09 × 12 = 1_200_000.
-    // NCG/Vendas = 110000 / 1200000 ≈ 0.0917 (9.17%).
+    // Venda média mensal = Q09 = 100k. NCG/Vendas = 1,10.
     return array_merge([
         'Q03' => '80000',
         'Q04' => '60000',
@@ -23,49 +22,34 @@ function pBaseNv(array $overrides = []): array
     ], $overrides);
 }
 
-it('verde — NCG negativo (folga operacional, fornecedores > clientes+estoques)', function () {
-    $r = calcNcgVendas(pBaseNv(['Q03' => '20000', 'Q04' => '10000', 'Q07' => '50000']));
-    expect($r['valor'])->toBeLessThan(0.0);
-    expect($r['farol'])->toBe('verde');
+it('divide a NCG pela venda mensal: caso da Drogaria apontado pela EB dá 0,76 (PDR-014)', function () {
+    $r = calcNcgVendas(['Q03' => '1500', 'Q04' => '120000', 'Q07' => '30000', 'Q09' => '120000']);
+    expect($r['valor'])->toBe(0.7625)->and($r['farol'])->toBe('amarelo');
 });
 
-it('verde — fronteira 0.0 exato (≤ 0 → verde)', function () {
-    // NCG = 0 → ACC = PCC. Q03 + Q04 = Q07. 20+10=30.
+it('verde — NCG negativo', function () {
+    $r = calcNcgVendas(pBaseNv(['Q03' => '20000', 'Q04' => '10000', 'Q07' => '50000']));
+    expect($r['valor'])->toBe(-0.2)->and($r['farol'])->toBe('verde');
+});
+
+it('verde — fronteira 0 exato (≤ 0 → verde)', function () {
     $r = calcNcgVendas(pBaseNv(['Q03' => '20000', 'Q04' => '10000', 'Q07' => '30000']));
     expect($r['valor'])->toBe(0.0)->and($r['farol'])->toBe('verde');
 });
 
-it('amarelo — fronteira 0.01 (NCG positivo pequeno)', function () {
-    // NCG = 12001 → 1.0001% das vendas 1.2M. Quero ratio > 0. Q03+Q04−Q07 = 12001.
-    // 20+10−Q07/1000 = 12.001 → Q07 = 17999.
-    $r = calcNcgVendas(pBaseNv(['Q03' => '20000', 'Q04' => '10000', 'Q07' => '17999']));
-    expect($r['valor'])->toBeGreaterThan(0.0);
-    expect($r['farol'])->toBe('amarelo');
+it('amarelo — logo acima de zero', function () {
+    $r = calcNcgVendas(pBaseNv(['Q03' => '20000', 'Q04' => '10000', 'Q07' => '29000']));
+    expect($r['valor'])->toBe(0.01)->and($r['farol'])->toBe('amarelo');
 });
 
-it('amarelo — típico 5% das vendas', function () {
-    // NCG = 60000 → 5% das 1.2M. Q03+Q04−Q07 = 60000. 80+60−Q07 = 60 → Q07=80k.
-    $r = calcNcgVendas(pBaseNv(['Q07' => '80000']));
-    expect($r['valor'])->toBe(0.05)->and($r['farol'])->toBe('amarelo');
+it('amarelo — fronteira superior 10,00 exato', function () {
+    $r = calcNcgVendas(pBaseNv(['Q03' => '1000000', 'Q04' => '0', 'Q07' => '0']));
+    expect($r['valor'])->toBe(10.0)->and($r['farol'])->toBe('amarelo');
 });
 
-it('amarelo — fronteira superior 10% exato', function () {
-    // NCG = 120000 → 10%. Q03+Q04−Q07 = 120000. 80+60−Q07 = 120 → Q07=20k.
-    $r = calcNcgVendas(pBaseNv(['Q07' => '20000']));
-    expect($r['valor'])->toBe(0.10)->and($r['farol'])->toBe('amarelo');
-});
-
-it('vermelho — fronteira 10.01% (> 0.10)', function () {
-    // NCG = 120120 → 10.01%. Q03+Q04−Q07 = 120120. 80+60−Q07 = 120.12 → Q07=19880.
-    $r = calcNcgVendas(pBaseNv(['Q07' => '19880']));
-    expect($r['valor'])->toBeGreaterThan(0.10);
-    expect($r['farol'])->toBe('vermelho');
-});
-
-it('vermelho — 20% das vendas (NCG alto)', function () {
-    // NCG = 240000. Q07 = (80+60) − 240 = −100k? Não. Aumentar clientes: Q03 = 250k, Q04=20k, Q07=30k → NCG = 240k.
-    $r = calcNcgVendas(pBaseNv(['Q03' => '250000', 'Q04' => '20000', 'Q07' => '30000']));
-    expect($r['valor'])->toBe(0.20)->and($r['farol'])->toBe('vermelho');
+it('vermelho — logo acima de 10,00', function () {
+    $r = calcNcgVendas(pBaseNv(['Q03' => '1001000', 'Q04' => '0', 'Q07' => '0']));
+    expect($r['valor'])->toBe(10.01)->and($r['farol'])->toBe('vermelho');
 });
 
 // ---------- casos extremos ----------

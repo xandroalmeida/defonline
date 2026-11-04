@@ -19,13 +19,25 @@ use App\Domain\Motor\Motor;
 | Os 5 cenários cobrem:
 |   - saudavel: todos os indicadores em verde + NCG abs Faixa 1 (NCG ≤ 0).
 |   - atencao: todos amarelo + NCG abs Faixa 2 (moderado).
-|   - alerta: todos vermelho + Div Líq/EBITDA INDISPONÍVEL (ebitda_negativo) + NCG abs Faixa 3 (alto).
+|   - alerta: vermelhos, exceto NCG/Vendas amarelo + Div Líq/EBITDA INDISPONÍVEL (ebitda_negativo) + NCG abs Faixa 2.
 |   - ncg_negativo: mistura verde/amarelo, NCG abs claramente negativo.
 |   - 70pct_indisponivel: 100% dos indicadores indisponíveis (caminho extremo).
 | ----------------------------------------------------------------------
 */
 
 dataset('golden_fixtures', [
+    // Hashes re-emitidos no motor 2.0.0 (PDR-014): NCG/Vendas passa à base mensal,
+    // com limite 10,00, e Ciclo Operacional sai da saída. Comparando os 5 fixtures
+    // antes e depois, o Resumo Executivo não muda. No fixture `alerta`, NCG/Vendas
+    // vai de vermelho (0,2333) a amarelo (2,80) e o NCG absoluto, de alto a moderado.
+    //
+    // Hashes anteriores (motor 1.3.3):
+    //   saudavel           dd804d9f8be7e6c0d00378bc02008e9f69d6499b18d1f4511bbc04b321589cb8
+    //   atencao            0ef6bbc5152207a4c51914d0be7c821b1ed465abbee031b0604498255fc8bd18
+    //   alerta             fe61411e23655a220eb3a925f3e3bbd33d8e19d8308be3319441d488649ce437
+    //   ncg_negativo       761e5bae6b1634c254ce370bfcf391e61c3ef1d4fb22775ed65dab6e98049e0d
+    //   70pct_indisponivel fe2c664e8e8b9585d82c0b1c350d72c4c9103ed681c896568346bf1254caf333
+    //
     // Hashes re-emitidos na revisão de redação do PO (motor 1.3.2 → 1.3.3),
     // 06/08/2026: a faixa 1 do NCG absoluto deixou de dizer "folga operacional".
     // Mesma conferência por reconstrução — com a versão fixada de volta em 1.3.2
@@ -78,23 +90,23 @@ dataset('golden_fixtures', [
     // matriz dez-2025 (Anexo F, coluna Indústria).
     'saudavel' => [
         'quiz_industria_saudavel.json',
-        'dd804d9f8be7e6c0d00378bc02008e9f69d6499b18d1f4511bbc04b321589cb8',
+        '428202edefce35afb973e06cba73a335a465093d0387eed5672f3227402b9d05',
     ],
     'atencao' => [
         'quiz_industria_atencao.json',
-        '0ef6bbc5152207a4c51914d0be7c821b1ed465abbee031b0604498255fc8bd18',
+        '21c16a44741471ffd31eca9d05d7f1bba6ffafb853b9dd42a7eea271a79d0463',
     ],
     'alerta' => [
         'quiz_industria_alerta.json',
-        'fe61411e23655a220eb3a925f3e3bbd33d8e19d8308be3319441d488649ce437',
+        'abdb8e20ea0ed5dbca4d68b5fa257775de2a30521634faf59b4d27504b882e51',
     ],
     'ncg_negativo' => [
         'quiz_industria_ncg_negativo.json',
-        '761e5bae6b1634c254ce370bfcf391e61c3ef1d4fb22775ed65dab6e98049e0d',
+        '9b491fa247ed4a92613ae17acab6706537d255d5dcc35abf24b8994a1a4fb672',
     ],
     '70pct_indisponivel' => [
         'quiz_industria_70pct_indisponivel.json',
-        'fe2c664e8e8b9585d82c0b1c350d72c4c9103ed681c896568346bf1254caf333',
+        '660e4b1b36394c39ebd6eefc34ff09cfb106c34b9f8cfff2170f282208ff5330',
     ],
 ]);
 

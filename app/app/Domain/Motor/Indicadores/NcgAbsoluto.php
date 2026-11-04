@@ -18,8 +18,11 @@ use App\Domain\Motor\MotivosIndisponibilidade;
  * A interpretação semântica entra via 3 faixas de mensagem:
  *
  *   - Faixa 1 (`NCG ≤ 0`): ciclo financiado pelo fornecedor.
- *   - Faixa 2 (`0 < NCG ≤ 10% Vendas anualizadas`): patamar moderado, atenção a prazos.
- *   - Faixa 3 (`NCG > 10% Vendas anualizadas`): pressão sobre o caixa.
+ *   - Faixa 2 (NCG/Vendas de 0,01 a 10,00): patamar moderado, atenção a prazos.
+ *   - Faixa 3 (NCG/Vendas acima de 10,00): pressão sobre o caixa.
+ *
+ * O limite é o mesmo do farol do NCG/Vendas (#10), lido da config, para os dois
+ * indicadores não se contradizerem no relatório (PDR-014).
  *
  * **Por que a faixa 1 não fala em "folga" (revisão do PO, 06/08/2026).** A
  * redação original da STORY-060 dizia "folga operacional", e a palavra foi lida
@@ -39,8 +42,8 @@ use App\Domain\Motor\MotivosIndisponibilidade;
  * palavra "folga" e diz a dependência que ele cria. Vale para `NCG ≤ 0`
  * inclusive no zero exato — daí "não supera", e não "é menor que".
  *
- * **Quando Vendas anuais é null ou zero** mas o NCG é calculável e positivo,
- * a referência "10% das Vendas" não existe — usamos a Faixa 2 como fallback
+ * **Quando Vendas é null ou zero** mas o NCG é calculável e positivo,
+ * a referência de vendas não existe — usamos a Faixa 2 como fallback
  * conservador (mensagem moderada, não alarmista).
  *
  * **Não consome a matriz `dez-2025`.** A STORY-032 (motor 1.3.0) migrou os 13
@@ -95,7 +98,7 @@ final class NcgAbsoluto implements Indicador
         $ncg = bcsub(bcadd($clientes, $estoques, DreAdaptada::ESCALA), $fornecedores, DreAdaptada::ESCALA);
         $valor = (float) $ncg;
 
-        $mensagem = $this->mensagemPorFaixa($ncg, $dre->vendasAnuais());
+        $mensagem = $this->mensagemPorFaixa($ncg, $dre->vendasMensais());
 
         return new IndicadorResultado(
             valor: $valor,
@@ -105,7 +108,7 @@ final class NcgAbsoluto implements Indicador
         );
     }
 
-    private function mensagemPorFaixa(string $ncg, ?string $vendasAnuais): string
+    private function mensagemPorFaixa(string $ncg, ?string $vendasMensais): string
     {
         // Faixa 1: NCG ≤ 0.
         if (bccomp($ncg, '0', DreAdaptada::ESCALA) <= 0) {
@@ -113,17 +116,18 @@ final class NcgAbsoluto implements Indicador
         }
 
         // Sem referência de vendas → fallback moderado.
-        if ($vendasAnuais === null || bccomp($vendasAnuais, '0', DreAdaptada::ESCALA) <= 0) {
+        if ($vendasMensais === null || bccomp($vendasMensais, '0', DreAdaptada::ESCALA) <= 0) {
             return self::MSG_MODERADO;
         }
 
-        // Faixa 3: NCG > 10% Vendas.
-        $dezPctVendas = bcmul($vendasAnuais, '0.10', DreAdaptada::ESCALA);
-        if (bccomp($ncg, $dezPctVendas, DreAdaptada::ESCALA) > 0) {
+        // Faixa 3: NCG/Vendas acima do limite do farol do #10.
+        $razaoLimite = (string) config('motor.faroes-industria.ncg_vendas.vermelho.valor');
+        $limite = bcmul($vendasMensais, $razaoLimite, DreAdaptada::ESCALA);
+        if (bccomp($ncg, $limite, DreAdaptada::ESCALA) > 0) {
             return self::MSG_ALTO;
         }
 
-        // Faixa 2: 0 < NCG ≤ 10% Vendas.
+        // Faixa 2: NCG positivo até o limite.
         return self::MSG_MODERADO;
     }
 }

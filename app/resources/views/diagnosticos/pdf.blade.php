@@ -14,7 +14,7 @@
     $empresa = $diagnostico->empresa;
     $nomeEmpresa = $empresa->nome_fantasia ?: $empresa->razao_social;
     $snapshot = (array) $diagnostico->indicadores_calculados;
-    $nominais = ValoresNominais::doSnapshot((array) $diagnostico->quiz_payload);
+    $nominais = ValoresNominais::doSnapshot((array) $diagnostico->quiz_payload, $diagnostico->motor_version);
 
     $resumo = (array) ($diagnostico->resumo_executivo ?? []);
     $resumoEhValido = isset($resumo['veredito']);
@@ -42,10 +42,8 @@
         fn (string $c): bool => isset($snapshot[$c]),
     ));
     $ncgAbsoluto = $snapshot['ncg_absoluto'] ?? null;
-    $cicloOperacional = $snapshot['ciclo_operacional'] ?? null;
     $informativos = array_filter([
         'ncg_absoluto' => $ncgAbsoluto,
-        'ciclo_operacional' => $cicloOperacional,
     ]);
 
     $setor = ['industria' => 'Indústria', 'comercio' => 'Comércio', 'servicos' => 'Serviços'][$diagnostico->setor]
@@ -186,7 +184,7 @@
                             @if ($valor === null)
                                 <span class="italico">Indisponível</span>
                             @else
-                                <span class="valor">{{ IndicadorFormatter::valor($codigo, $valor) }}</span>
+                                <span class="valor">{{ IndicadorFormatter::valor($codigo, $valor, $diagnostico->motor_version) }}</span>
                                 @if (! empty($nom))
                                     <div class="nominais">
                                         @foreach ($nom as $t)

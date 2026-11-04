@@ -2,6 +2,7 @@
     'codigo',
     'indicador', // array{valor: ?float|int, farol: string, motivo: ?string, mensagem: string}
     'nominais' => [], // STORY-044 — list<array{rotulo, valor}> derivada do quiz_payload do snapshot
+    'motorVersion' => null, // versão do snapshot: o NCG/Vendas muda de escala no motor 2.0.0
 ])
 
 @php
@@ -29,7 +30,7 @@
         @if ($indisponivel)
             <span class="text-[color:var(--color-secondary)] italic">Indisponível</span>
         @else
-            <span class="whitespace-nowrap">{{ IndicadorFormatter::valor($codigo, $valor) }}</span>
+            <span class="whitespace-nowrap">{{ IndicadorFormatter::valor($codigo, $valor, $motorVersion) }}</span>
             <x-relatorio.valores-nominais :codigo="$codigo" :nominais="$nominais"/>
         @endif
     </td>

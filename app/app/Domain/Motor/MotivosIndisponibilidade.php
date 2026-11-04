@@ -56,8 +56,6 @@ final class MotivosIndisponibilidade
 
     public const INADIMPLENCIA_FALTANTE = 'indisponivel:inadimplencia_faltante';
 
-    public const CICLO_OPERACIONAL_PRAZO_FALTANTE = 'indisponivel:ciclo_operacional_prazo_faltante';
-
     private const MENSAGENS = [
         self::VENDAS_ZERO => 'Indicador indisponível: vendas anuais são zero.',
         self::VENDAS_FALTANTE => 'Indicador indisponível: vendas mensais não informadas.',
@@ -76,7 +74,6 @@ final class MotivosIndisponibilidade
         self::ATIVO_ZERO => 'Indicador indisponível: ativo total declarado é zero.',
         self::ATIVO_COMPONENTE_FALTANTE => 'Indicador indisponível: componentes do ativo não informados.',
         self::INADIMPLENCIA_FALTANTE => 'Indicador indisponível: índice de inadimplência não informado.',
-        self::CICLO_OPERACIONAL_PRAZO_FALTANTE => 'Indicador informativo indisponível: prazos médios de estoque (PME) ou recebimento (PMR) não informados.',
     ];
 
     public static function mensagem(string $motivo): string

@@ -11,12 +11,13 @@ use App\Domain\Motor\MatrizRecomendacoes;
 use App\Domain\Motor\MotivosIndisponibilidade;
 
 /**
- * Indicador #10 — NCG / Vendas = `(ACC − PCC) / Vendas` (Anexo D).
+ * Indicador #10 — NCG / Vendas = `(ACC − PCC) / Venda média mensal` (Anexo D; PDR-014).
  *   - ACC = Q03 (Clientes) + Q04 (Estoques).
  *   - PCC = Q07 (Fornecedores).
  *
- * Valor em **fração** (ex.: 0.05 = 5% das vendas). O Anexo E expressa as faixas
- * em "≤ 0", "0,01–10%", "> 10%" — já configuradas como fração (0, 0.10).
+ * Valor em **razão direta**: 0,76 = a NCG equivale a 0,76 de um mês de vendas. A
+ * base é mensal, e não Q09 × 12, porque foi assim que a EB Parcerias definiu o
+ * indicador. As faixas ("≤ 0", "0,01–10,00", "> 10,00") estão na mesma escala.
  *
  * Casos extremos (catálogo §10):
  *   - Vendas zero → `indisponivel:vendas_zero`.
@@ -48,7 +49,7 @@ final class NcgVendas implements Indicador
             );
         }
 
-        $vendas = $dre->vendasAnuais();
+        $vendas = $dre->vendasMensais();
         if ($vendas === null) {
             return IndicadorResultado::indisponivel(
                 MotivosIndisponibilidade::VENDAS_FALTANTE,
@@ -65,7 +66,7 @@ final class NcgVendas implements Indicador
 
         $acc = bcadd($clientes, $estoques, DreAdaptada::ESCALA);
         $ncg = bcsub($acc, $fornecedores, DreAdaptada::ESCALA);
-        $ratio = bcdiv($ncg, $vendas, 6);   // fração
+        $ratio = bcdiv($ncg, $vendas, 6);
         // Arredonda a 4 casas decimais explicitamente — bcdiv truncou.
         $valor = (float) bcadd($ratio, '0', 4);
 

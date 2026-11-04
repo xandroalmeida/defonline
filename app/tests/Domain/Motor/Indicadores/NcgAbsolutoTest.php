@@ -51,34 +51,31 @@ it('Faixa 1 — NCG = 0 exato (fronteira inclusiva)', function () {
         ->and($r['mensagem'])->toBe(NcgAbsoluto::MSG_FOLGA);
 });
 
-// ---------- Faixa 2: 0 < NCG ≤ 10% Vendas ----------
+// ---------- Faixa 2: NCG/Vendas de 0,01 a 10,00 ----------
 
-it('Faixa 2 — NCG positivo moderado (NCG 5% das vendas)', function () {
-    // Vendas anuais = 1.2M. 5% = 60000. NCG = 60000 → Q03+Q04−Q07 = 60k. 50+40-30=60.
-    $r = calcNcgAbs(pBaseNa(['Q03' => '50000', 'Q04' => '40000', 'Q07' => '30000']));
-    expect($r['valor'])->toBe(60000.0)
+it('Faixa 2 — caso da Drogaria (NCG/Vendas 0,76) é moderado', function () {
+    $r = calcNcgAbs(['Q03' => '1500', 'Q04' => '120000', 'Q07' => '30000', 'Q09' => '120000']);
+    expect($r['valor'])->toBe(91500.0)
         ->and($r['mensagem'])->toContain('moderado');
 });
 
-it('Faixa 2 — fronteira superior NCG = 10% Vendas exato', function () {
-    // 10% × 1.2M = 120000.
-    $r = calcNcgAbs(pBaseNa(['Q03' => '100000', 'Q04' => '40000', 'Q07' => '20000']));
-    expect($r['valor'])->toBe(120000.0)
+it('Faixa 2 — fronteira superior: NCG = 10 meses de vendas', function () {
+    $r = calcNcgAbs(pBaseNa(['Q03' => '1000000', 'Q04' => '0', 'Q07' => '0']));
+    expect($r['valor'])->toBe(1000000.0)
         ->and($r['mensagem'])->toContain('moderado');
 });
 
-// ---------- Faixa 3: NCG > 10% Vendas ----------
+// ---------- Faixa 3: NCG/Vendas acima de 10,00 ----------
 
-it('Faixa 3 — NCG positivo alto (12% das vendas)', function () {
-    // 12% × 1.2M = 144000.
-    $r = calcNcgAbs(pBaseNa(['Q03' => '120000', 'Q04' => '50000', 'Q07' => '26000']));
-    expect($r['valor'])->toBe(144000.0)
+it('Faixa 3 — logo acima de 10 meses de vendas', function () {
+    $r = calcNcgAbs(pBaseNa(['Q03' => '1000001', 'Q04' => '0', 'Q07' => '0']));
+    expect($r['valor'])->toBeGreaterThan(1000000.0)
         ->and($r['mensagem'])->toContain('alto');
 });
 
-it('Faixa 3 — fronteira logo acima de 10% (120001)', function () {
-    $r = calcNcgAbs(pBaseNa(['Q03' => '100001', 'Q04' => '40000', 'Q07' => '20000']));
-    expect($r['valor'])->toBeGreaterThan(120000.0);
+it('segue o limite do farol do NCG/Vendas, lido da config', function () {
+    config(['motor.faroes-industria.ncg_vendas.vermelho.valor' => 0.5]);
+    $r = calcNcgAbs(pBaseNa());
     expect($r['mensagem'])->toContain('alto');
 });
 
@@ -185,7 +182,7 @@ it('CA-1 (borda) — a orientação de captação de longo prazo NÃO aparece na
 it('CA-1 — as três faixas continuam saindo pelo caminho de cálculo, não só pelas constantes', function () {
     $folga = calcNcgAbs(pBaseNa(['Q03' => '20000', 'Q04' => '10000', 'Q07' => '50000']));
     $moderado = calcNcgAbs(pBaseNa(['Q03' => '50000', 'Q04' => '40000', 'Q07' => '30000']));
-    $alto = calcNcgAbs(pBaseNa(['Q03' => '120000', 'Q04' => '50000', 'Q07' => '26000']));
+    $alto = calcNcgAbs(pBaseNa(['Q03' => '1200000', 'Q04' => '50000', 'Q07' => '26000']));
 
     expect($folga['mensagem'])->toBe(NcgAbsoluto::MSG_FOLGA)
         ->and($moderado['mensagem'])->toBe(NcgAbsoluto::MSG_MODERADO)

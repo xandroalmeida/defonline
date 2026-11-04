@@ -10,7 +10,7 @@ use App\Support\Relatorio\IndicadorFormatter;
  * Geração determinística do Resumo Executivo (spec V2 §4.7.1).
  *
  * **Entrada.** O array `indicadores_calculados` produzido pelo {@see Motor},
- * com 15 entradas (14 do Anexo D + Ciclo Operacional informativo). Cada entrada
+ * com as 14 entradas do Anexo D. Cada entrada
  * tem `{valor, farol, motivo, mensagem}` (ver {@see IndicadorResultado}).
  *
  * **Saída.** Estrutura JSON-friendly com veredito + destaques + linha de
@@ -40,8 +40,6 @@ final class ResumoExecutivo
      *
      * **NCG absoluto (#9)** entra na lista (faz parte do Anexo D) embora tenha
      * `farol = 'nenhum'` sempre — fica fora de V/A/Vd, mas conta no denominador 14.
-     * **Ciclo Operacional** NÃO entra (não está no Anexo D — adicionado pela
-     * STORY-030 como complementar).
      *
      * @var list<string>
      */
@@ -406,8 +404,8 @@ final class ResumoExecutivo
     /**
      * Lê a faixa do indicador da config (sem validação — o whitelist
      * {@see self::CODIGOS_ANEXO_D} garante que só códigos cobertos chegam aqui,
-     * e ncg_absoluto/ciclo_operacional nunca entram em severidade/favorabilidade
-     * porque sempre têm farol=nenhum).
+     * e ncg_absoluto nunca entra em severidade/favorabilidade
+     * porque sempre tem farol=nenhum).
      *
      * @return array{tipo: string, verde: array{op: string, valor: float}, amarelo: array{min: float, max: float}, vermelho: array{op: string, valor: float}}
      */

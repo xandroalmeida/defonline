@@ -37,10 +37,9 @@ use App\Domain\Motor\IndicadorResultado;
  * granularidade é por indicador, então snapshot antigo incompleto perde só os
  * indicadores afetados.
  *
- * **Seis indicadores não têm valor nominal derivável** e devolvem `[]` por
+ * **Cinco indicadores não têm valor nominal derivável** e devolvem `[]` por
  * decisão, não por lacuna de implementação: `pmc`/`pme`/`pmr` são declarados em
- * dias (Q10/Q11/Q12), `ciclo_financeiro`/`ciclo_operacional` são somas desses
- * dias, e `inadimplencia` é um percentual declarado (Q13) cuja base — vendas a
+ * dias (Q10/Q11/Q12), `ciclo_financeiro` é a soma desses dias, e `inadimplencia` é um percentual declarado (Q13) cuja base — vendas a
  * prazo — o quiz não captura em reais. Nenhum deles ganharia nominal com
  * mudança de motor; exigiria pergunta nova no quiz. Ver "Notas do agente" da
  * STORY-044.
@@ -66,15 +65,19 @@ final class ValoresNominais
         'ncg_absoluto',
     ];
 
-    private function __construct(private readonly DreAdaptada $dre) {}
+    private function __construct(
+        private readonly DreAdaptada $dre,
+        private readonly ?string $motorVersion,
+    ) {}
 
     /**
      * @param  array<string, mixed>  $quizPayload  `diagnosticos.quiz_payload` como persistido
      *                                             (já canonicalizado — nada é recanonicalizado aqui).
+     * @param  ?string  $motorVersion  `diagnosticos.motor_version`, para exibir a base que o snapshot usou.
      */
-    public static function doSnapshot(array $quizPayload): self
+    public static function doSnapshot(array $quizPayload, ?string $motorVersion = null): self
     {
-        return new self(new DreAdaptada($quizPayload));
+        return new self(new DreAdaptada($quizPayload), $motorVersion);
     }
 
     /**
@@ -117,10 +120,9 @@ final class ValoresNominais
                 'Vendas (12 meses)' => $this->dre->vendasAnuais(),
                 'Ativo total' => $this->dre->ativoTotal(),
             ],
-            'ncg_vendas' => [
-                'NCG' => $this->ncg(),
-                'Vendas (12 meses)' => $this->dre->vendasAnuais(),
-            ],
+            'ncg_vendas' => MotorLegado::ncgSobreVendasAnuais($this->motorVersion)
+                ? ['NCG' => $this->ncg(), 'Vendas (12 meses)' => $this->dre->vendasAnuais()]
+                : ['NCG' => $this->ncg(), 'Vendas (média mensal)' => $this->dre->vendasMensais()],
             'ncg_absoluto' => [
                 'Contas a receber' => $this->dre->clientes(),
                 'Estoque' => $this->dre->estoques(),

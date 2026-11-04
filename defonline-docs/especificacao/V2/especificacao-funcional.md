@@ -393,14 +393,14 @@ Cada **Quiz** é uma instância vinculada a **uma Empresa Analisada específica*
 O motor transforma **16 das 23 respostas** do quiz (as 7 restantes — Q17 flag, Q18–Q20 de captação e Q21–Q23 de CPFs dos sócios — alimentam a seção de captação e não entram no cálculo dos indicadores) em um balanço adaptado, uma DRE adaptada e **14 indicadores**. Todas as fórmulas estão descritas em detalhe nos Anexos B, C e D.
 
 **Premissas de cálculo.**
-- **Anualização.** `[VALIDADO]` As respostas Q08 (compras médias mensais), Q09 (vendas médias mensais), Q14 (custos e despesas fixas), Q15 (custos e despesas variáveis) e Q16 (despesas financeiras) são coletadas como **média mensal dos últimos 12 meses** e **multiplicadas por 12** para obtenção dos valores anualizados usados na DRE adaptada e nos indicadores de margem, giro e prazos médios. A regra é explícita, fixa e visível ao usuário no cabeçalho do relatório (rodapé metodológico: "Vendas e compras foram anualizadas a partir da média mensal declarada").
+- **Anualização.** `[VALIDADO]` As respostas Q08 (compras médias mensais), Q09 (vendas médias mensais), Q14 (custos e despesas fixas), Q15 (custos e despesas variáveis) e Q16 (despesas financeiras) são coletadas como **média mensal dos últimos 12 meses** e **multiplicadas por 12** para obtenção dos valores anualizados usados na DRE adaptada e nos indicadores de margem, giro e prazos médios. A regra é explícita, fixa e visível ao usuário no cabeçalho do relatório (rodapé metodológico: "Vendas e compras foram anualizadas a partir da média mensal declarada"). **Exceção:** o NCG/Vendas (#10) usa a venda média mensal, sem anualizar (PDR-014).
 - **Tratamento de divisão por zero.** `[VALIDADO]` Qualquer indicador cujo denominador resulte em zero ou em valor inválido é apresentado com o rótulo textual **"Indisponível"** no lugar do valor numérico, **sem farol** (nem verde, nem amarelo, nem vermelho). Nenhum texto de recomendação é exibido para o indicador nessa condição; em vez disso, é mostrada uma nota curta: *"Não foi possível calcular este indicador com as informações fornecidas."*
 - **Patrimônio Líquido (PL).** `[VALIDADO]` Na ausência de separação entre Passivo Circulante e Passivo Não Circulante no quiz, o PL é calculado como `Ativo Total − Passivo Circulante`. A EBC **decidiu manter esta simplificação** em 22/04/2026 em face do perfil do público-alvo e da ergonomia do quiz. A crítica técnica do parecer CLAUDE (pg. 3) — distorção em empresas com dívida de longo prazo relevante — é reconhecida, e a mitigação prevista é um **aviso no rodapé do relatório quando Q06 (dívidas financeiras) superar limiar a ser fixado** (ver Seção 6, item 6.7), informando que indicadores derivados do PL (Dívida Líquida/EBITDA, Fontes de Recursos) podem estar subestimados pela metodologia.
 - **NCG absoluto — sem farol, indicador informativo.** `[VALIDADO]` (fechado em 17/05/2026 pelo item 6.3 da Seção 6.) O NCG absoluto (indicador #9, em R$) é **sempre exibido sem farol visual** — o produto mostra o valor numérico e uma mensagem curta da matriz DEZ/2025 (página 33) correspondente à faixa em que o NCG cai. As **três faixas semânticas** são:
   - **NCG ≤ 0** (negativo): texto sobre folga operacional / capital de giro positivo.
-  - **NCG positivo moderado:** `0 < NCG ≤ 10% das Vendas anualizadas` (Q09 × 12) — texto sobre patamar gerenciável e atenção a prazos médios.
-  - **NCG positivo alto crescente:** `NCG > 10% das Vendas anualizadas` — texto sobre pressão sobre o caixa e necessidade de revisão de PMC/PME/PMR ou captação estruturada.
-  - O critério "% de Vendas anualizadas" escala automaticamente com o porte da empresa e mantém coerência matemática com o indicador irmão **NCG/Vendas** (#10), que **sim** recebe farol completo (verde / amarelo / vermelho).
+  - **NCG positivo moderado:** `0 < NCG/Vendas ≤ 10,00`, na base mensal do #10 (PDR-014) — texto sobre patamar gerenciável e atenção a prazos médios.
+  - **NCG positivo alto crescente:** `NCG/Vendas > 10,00` — texto sobre pressão sobre o caixa e necessidade de revisão de PMC/PME/PMR ou captação estruturada.
+  - O critério escala automaticamente com o porte da empresa e mantém coerência matemática com o indicador irmão **NCG/Vendas** (#10), que **sim** recebe farol completo (verde / amarelo / vermelho).
   - Os 3 textos correspondentes à matriz DEZ/2025 página 33 ficam pendentes apenas de extração operacional pela EBC para a planilha RECOMENDAÇÕES — **não bloqueia o kickoff de código** (motor pode ser implementado com placeholders, textos finais entram via seed da tabela `Recommendation`).
 
 **Princípios operacionais.**
@@ -646,13 +646,13 @@ Baseado na aba **DEF** (linhas 41–50) e consolidação com a matriz de recomen
 | 7 | Giro do Ativo | Vendas / Ativo Total | × | Maior = melhor |
 | 8 | Ciclo Financeiro | PME + PMR − PMC | dias | Menor = melhor |
 | 9 | Necessidade de Capital de Giro (NCG) — absoluto | Estoques + Clientes − Fornecedores | R$ | Indicador **informativo** (sem farol — ver §4.5). Interpretação por farol via #10 NCG/Vendas. |
-| 10 | NCG / Vendas | (ACC − PCC) / Vendas | — | Menor = melhor |
+| 10 | NCG / Vendas | (ACC − PCC) / Venda média mensal (Q09) | razão | Menor = melhor |
 | 11 | PMC — prazo de fornecedores | Declarado no quiz (Q10) | dias | Contextual — maior = melhor (dentro de limites) |
 | 12 | PME — prazo de estoque | Declarado no quiz (Q11) | dias | Menor = melhor — *não se aplica a Serviços (Q01=3)* |
 | 13 | PMR — prazo a clientes | Declarado no quiz (Q12) | dias | Menor = melhor |
 | 14 | Inadimplência | Declarada no quiz (Q13) | % | Menor = melhor |
 
-*Nota:* conforme a premissa de cálculo definida na seção 4.5, qualquer indicador com denominador igual a zero (ou inválido) é apresentado como **"Indisponível"**, sem farol e sem texto de recomendação associado. Os valores mensais declarados no quiz (Q08, Q09, Q14, Q15, Q16) são **anualizados por multiplicação × 12** antes de alimentar as fórmulas acima. O indicador **#12 PME** tem coleta obrigatória dispensada quando Q01=3 (Serviços) e não exibe farol nem recomendação para esse setor.
+*Nota:* conforme a premissa de cálculo definida na seção 4.5, qualquer indicador com denominador igual a zero (ou inválido) é apresentado como **"Indisponível"**, sem farol e sem texto de recomendação associado. Os valores mensais declarados no quiz (Q08, Q09, Q14, Q15, Q16) são **anualizados por multiplicação × 12** antes de alimentar as fórmulas acima, exceto no #10 NCG/Vendas, que usa a média mensal (PDR-014). O indicador **#12 PME** tem coleta obrigatória dispensada quando Q01=3 (Serviços) e não exibe farol nem recomendação para esse setor.
 
 ### Anexo E — Faixas de Classificação e Semáforo (por setor)
 
@@ -687,8 +687,8 @@ Sintetizado da matriz de recomendações dez/2025. Cada indicador tem 3 faixas p
 | PMR | Todos | ≤ 30 dias | 30,01–60 | > 60 |
 | Inadimplência | Todos | ≤ 3% | 3,01–5% | > 5% |
 | Ciclo Financeiro | Todos | ≤ 30 dias | 30,01–60 | > 60 |
-| NCG (absoluto) | Todos | **Sempre sem farol — indicador informativo.** 3 faixas semânticas com mensagem curta: (i) NCG ≤ 0 (negativo) → folga operacional; (ii) 0 < NCG ≤ 10% das Vendas anualizadas → positivo moderado; (iii) NCG > 10% das Vendas anualizadas → positivo alto crescente. Detalhe em §4.5. | — | — |
-| NCG / Vendas | Todos | ≤ 0 | 0,01–10% | > 10% |
+| NCG (absoluto) | Todos | **Sempre sem farol — indicador informativo.** 3 faixas semânticas com mensagem curta: (i) NCG ≤ 0 (negativo) → folga operacional; (ii) 0 < NCG/Vendas ≤ 10,00 → positivo moderado; (iii) NCG/Vendas > 10,00 → positivo alto crescente. Detalhe em §4.5. | — | — |
+| NCG / Vendas | Todos | ≤ 0 | 0,01–10,00 | > 10,00 |
 
 ### Anexo F — Matriz de Recomendações (versão resumida dez/2025)
 
@@ -795,9 +795,9 @@ Esta seção consolida **todas as decisões de produto identificadas pelas revis
 
 **Decisão tomada (v2.3, 17/05/2026).** Cinco regras consolidadas em §4.5 e nos Anexos D e E:
 
-1. **Limiar:** `NCG > 10% das Vendas anualizadas (Q09 × 12)` classifica como "positivo alto crescente"; `0 < NCG ≤ 10%` é "positivo moderado"; `NCG ≤ 0` é "negativo". O critério "% de Vendas" escala com o porte da empresa e mantém coerência com o NCG/Vendas.
+1. **Limiar (alterado pelo PDR-014):** `NCG/Vendas > 10,00` classifica como "positivo alto crescente"; `0 < NCG/Vendas ≤ 10,00` é "positivo moderado"; `NCG ≤ 0` é "negativo". O critério escala com o porte da empresa e mantém coerência com o NCG/Vendas.
 2. **NCG absoluto sem farol visual no MVP.** Apresenta apenas valor em R$ + mensagem curta da matriz DEZ/2025 página 33, conforme a faixa (3 textos: negativo, moderado, alto crescente).
-3. **Coerência com NCG/Vendas.** O #10 mantém farol completo (verde ≤ 0; amarelo 0,01–10%; vermelho > 10%). O farol agregado do relatório e o Resumo Executivo usam o #10, não o #9.
+3. **Coerência com NCG/Vendas.** O #10 mantém farol completo (verde ≤ 0; amarelo 0,01–10,00; vermelho > 10,00). O farol agregado do relatório e o Resumo Executivo usam o #10, não o #9.
 4. **Textos das 3 mensagens curtas.** A serem extraídos da planilha RECOMENDAÇÕES (página 33) pela EBC — tarefa operacional que **não bloqueia o kickoff**.
 5. **Resumo Executivo.** O algoritmo da §4.7.1 ignora o #9 (tratado como `farol = nenhum`); a interpretação semântica do capital de giro se dá via #10.
 

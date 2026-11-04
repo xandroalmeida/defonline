@@ -13,7 +13,6 @@
     $snapshot = (array) $diagnostico->indicadores_calculados;
 
     $ncgAbsoluto = $snapshot['ncg_absoluto'] ?? null;
-    $cicloOperacional = $snapshot['ciclo_operacional'] ?? null;
 
     /*
      * Valores nominais (STORY-044) — derivados da OUTRA coluna do mesmo snapshot,
@@ -21,7 +20,7 @@
      * invocado, nada é gravado, `payload_hash` e `motor_version` não mudam
      * (CA-2 + IDR-013). Instanciado uma vez e consultado por indicador.
      */
-    $nominais = ValoresNominais::doSnapshot((array) $diagnostico->quiz_payload);
+    $nominais = ValoresNominais::doSnapshot((array) $diagnostico->quiz_payload, $diagnostico->motor_version);
 
     // Resumo Executivo §4.7.1 — coluna NOT NULL desde STORY-028 (placeholder até a 030,
     // populada de verdade pela 031). Snapshots em motor_version < 1.2.0 (placeholder
@@ -110,7 +109,8 @@
                         @if (isset($snapshot[$codigo]))
                             <x-relatorio.linha-indicador :codigo="$codigo"
                                                          :indicador="$snapshot[$codigo]"
-                                                         :nominais="$nominais->paraIndicador($codigo)"/>
+                                                         :nominais="$nominais->paraIndicador($codigo)"
+                                                         :motor-version="$diagnostico->motor_version"/>
                         @endif
                     @endforeach
                 </tbody>
@@ -123,23 +123,19 @@
                 @if (isset($snapshot[$codigo]))
                     <x-relatorio.card-indicador :codigo="$codigo"
                                                 :indicador="$snapshot[$codigo]"
-                                                :nominais="$nominais->paraIndicador($codigo)"/>
+                                                :nominais="$nominais->paraIndicador($codigo)"
+                                                         :motor-version="$diagnostico->motor_version"/>
                 @endif
             @endforeach
         </div>
     </section>
 
-    {{-- Indicadores informativos (sem farol) — NCG absoluto + Ciclo Operacional. --}}
-    @if ($ncgAbsoluto !== null || $cicloOperacional !== null)
-        <div class="mb-8 grid gap-4 md:grid-cols-2">
-            @if ($ncgAbsoluto !== null)
-                <x-relatorio.card-informativo codigo="ncg_absoluto"
-                                             :indicador="$ncgAbsoluto"
-                                             :nominais="$nominais->paraIndicador('ncg_absoluto')"/>
-            @endif
-            @if ($cicloOperacional !== null)
-                <x-relatorio.card-informativo codigo="ciclo_operacional" :indicador="$cicloOperacional"/>
-            @endif
+    {{-- Indicador informativo (sem farol) — NCG absoluto. --}}
+    @if ($ncgAbsoluto !== null)
+        <div class="mb-8">
+            <x-relatorio.card-informativo codigo="ncg_absoluto"
+                                         :indicador="$ncgAbsoluto"
+                                         :nominais="$nominais->paraIndicador('ncg_absoluto')"/>
         </div>
     @endif
 

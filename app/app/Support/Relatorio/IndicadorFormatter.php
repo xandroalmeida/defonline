@@ -12,9 +12,10 @@ use App\Domain\Motor\Motor;
  *
  * Catálogo de unidades (alinhado com IDR-010 e Anexo D):
  *   - Percentuais já em base 100 (margens, desp.fin/EBITDA, inadimplência).
- *   - Razão decimal (NCG/Vendas grava `0.085` = 8,5% — multiplicado por 100 aqui).
+ *   - NCG/Vendas: razão direta (`0,76`). Motor anterior ao 2.0.0 gravou fração das
+ *     vendas anuais, que continua exibida como percentual (`6,4%`) — IDR-010.
  *   - Múltiplos (Dívida Líq./EBITDA: `1.5×`; Fontes Recursos: `0.50×`; Giro: `2.5×`).
- *   - Dias (PMR/PMC/PME/CicloFin/CicloOperacional: `45 dias`).
+ *   - Dias (PMR/PMC/PME/CicloFin: `45 dias`).
  *   - Moeda BR (NCG abs: `R$ 50.000,00`).
  *
  * Quando `valor === null` o chamador exibe a mensagem do snapshot em texto
@@ -37,12 +38,11 @@ final class IndicadorFormatter
         'pme' => 'PME — Prazo médio de estoque',
         'pmr' => 'PMR — Prazo médio de recebimento',
         'inadimplencia' => 'Inadimplência',
-        'ciclo_operacional' => 'Ciclo Operacional',
     ];
 
     /**
      * Ordem canônica de exibição dos 13 indicadores **com farol** (Anexo D §4.5).
-     * NCG absoluto e Ciclo Operacional são informativos e tratados à parte
+     * NCG absoluto é informativo e tratado à parte
      * (cards ou linhas separadas).
      *
      * Igual à ordem do {@see Motor::indicadores()} filtrada pelos que têm farol.
@@ -70,7 +70,7 @@ final class IndicadorFormatter
         return self::NOMES[$codigo] ?? $codigo;
     }
 
-    public static function valor(string $codigo, float|int|null $valor): string
+    public static function valor(string $codigo, float|int|null $valor, ?string $motorVersion = null): string
     {
         if ($valor === null) {
             return '—';
@@ -85,12 +85,13 @@ final class IndicadorFormatter
             'divida_liquida_ebitda',
             'fontes_recursos',
             'giro_ativo' => self::multiplo((float) $valor),
-            'ncg_vendas' => self::percentual((float) $valor * 100.0, 1),
+            'ncg_vendas' => MotorLegado::ncgSobreVendasAnuais($motorVersion)
+                ? self::percentual((float) $valor * 100.0, 1)
+                : self::numeroBr((float) $valor, 2),
             'pmr',
             'pmc',
             'pme',
-            'ciclo_financeiro',
-            'ciclo_operacional' => self::dias((float) $valor),
+            'ciclo_financeiro' => self::dias((float) $valor),
             'ncg_absoluto' => self::moeda((float) $valor),
             default => self::numeroBr((float) $valor, 2),
         };

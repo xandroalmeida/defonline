@@ -133,6 +133,8 @@ Este indicador **não possui farol** no padrão verde/amarelo/vermelho; a matriz
 
 ## F.14 NCG / Vendas
 
+*Faixas em razão direta sobre a venda média mensal: 0,01–10,00 e acima de 10,00 (PDR-014). Limite provisório até a confirmação da EB Parcerias.*
+
 | Faixa | Indústria | Comércio | Serviços |
 |---|---|---|---|
 | Negativa | Pode indicar que a empresa não necessita de recursos para o giro de seus negócios. | É provável que a empresa não necessite de recursos para o giro de seus negócios. | Indica que o negócio não necessita de recursos para o giro. |

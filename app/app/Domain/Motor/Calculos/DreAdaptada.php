@@ -103,6 +103,12 @@ final class DreAdaptada
     // DRE (Anexo C) — todos os valores em R$/ano, escala 4 bcmath
     // ============================================================
 
+    /** Venda média mensal = Q09, sem anualizar (base do NCG/Vendas — PDR-014). */
+    public function vendasMensais(): ?string
+    {
+        return self::asBc($this->payload['Q09'] ?? null);
+    }
+
     /** Vendas anualizadas = Q09 × 12. */
     public function vendasAnuais(): ?string
     {

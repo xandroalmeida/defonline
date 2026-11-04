@@ -87,7 +87,7 @@ it('devolve os termos nominais de cada indicador composto (CA-1)', function (str
     ]],
     'NCG / Vendas' => ['ncg_vendas', [
         ['rotulo' => 'NCG', 'valor' => 'R$ 110.000,00'],
-        ['rotulo' => 'Vendas (12 meses)', 'valor' => 'R$ 1.200.000,00'],
+        ['rotulo' => 'Vendas (média mensal)', 'valor' => 'R$ 100.000,00'],
     ]],
     'NCG absoluto = Clientes + Estoque − Fornecedores' => ['ncg_absoluto', [
         ['rotulo' => 'Contas a receber', 'valor' => 'R$ 80.000,00'],
@@ -106,7 +106,14 @@ it('devolve os termos nominais de cada indicador composto (CA-1)', function (str
 it('não inventa valor nominal para indicadores sem origem monetária (CA-3)', function (string $codigo) {
     expect(ValoresNominais::doSnapshot(payloadNominalCompleto())->paraIndicador($codigo))
         ->toBe([]);
-})->with(['pmc', 'pme', 'pmr', 'ciclo_financeiro', 'ciclo_operacional', 'inadimplencia']);
+})->with(['pmc', 'pme', 'pmr', 'ciclo_financeiro', 'inadimplencia']);
+
+it('snapshot anterior ao motor 2.0.0 mantém as vendas de 12 meses no NCG/Vendas', function () {
+    expect(ValoresNominais::doSnapshot(payloadNominalCompleto(), '1.3.3')->paraIndicador('ncg_vendas'))->toBe([
+        ['rotulo' => 'NCG', 'valor' => 'R$ 110.000,00'],
+        ['rotulo' => 'Vendas (12 meses)', 'valor' => 'R$ 1.200.000,00'],
+    ]);
+});
 
 it('devolve lista vazia para código de indicador desconhecido', function () {
     expect(ValoresNominais::doSnapshot(payloadNominalCompleto())->paraIndicador('indicador_futuro_xyz'))
