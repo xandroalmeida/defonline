@@ -123,7 +123,7 @@ final class ValoresNominaisBrowserTest extends DuskTestCase
                 ->waitFor('[data-testid="indicadores-tabela"]');
 
             $tamanhos = $browser->script(
-                'const linha = document.querySelector(\'#indicador-margem_bruta\');'
+                'const linha = document.querySelector(\'tr[data-codigo="margem_bruta"]\');'
                 .'const nominal = linha.querySelector(\'[data-testid="nominais-margem_bruta"]\');'
                 .'const valor = linha.querySelector(\'td span.whitespace-nowrap\');'
                 .'return [parseFloat(getComputedStyle(valor).fontSize), parseFloat(getComputedStyle(nominal).fontSize)];',

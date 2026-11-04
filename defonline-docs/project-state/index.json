@@ -239,7 +239,8 @@
       "note": "Validação interna e externa aprovadas (PDR-005); as 3 escalações que travavam o fechamento foram decididas no PDR-006 e as estórias 039–044 estão todas em done. O épico fica em `in_review` até a STORY-060 fechar — coerente com o PDR-005 §1, que recusou o padrão do EPIC-001 de marcar épico como done com débito aberto. A STORY-060 está na SPRINT-2026-W32, não solta.",
       "promote_to_done_when": "STORY-060 em done",
       "related_pdr": [
-        "PDR-014"
+        "PDR-014",
+        "PDR-015"
       ]
     },
     {
@@ -2654,6 +2655,22 @@
         "path": "decisions/pdr/PDR-014-ncg-vendas-base-mensal-e-fim-do-ciclo-operacional.md",
         "decided_at": "2026-11-04",
         "decided_by": "PO (Alexandro / Claude)",
+        "related_epics": [
+          "EPIC-002"
+        ],
+        "related_adrs": [],
+        "related_idrs": [
+          "IDR-010"
+        ]
+      },
+      {
+        "id": "PDR-015",
+        "slug": "remocao-do-resumo-executivo-do-relatorio",
+        "title": "Retirada do Resumo Executivo do relatório, na tela e no PDF",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-015-remocao-do-resumo-executivo-do-relatorio.md",
+        "decided_at": "2026-11-04",
+        "decided_by": "PO (Alexandro / Claude), a pedido da EB Parcerias",
         "related_epics": [
           "EPIC-002"
         ],

@@ -16,26 +16,12 @@
     $snapshot = (array) $diagnostico->indicadores_calculados;
     $nominais = ValoresNominais::doSnapshot((array) $diagnostico->quiz_payload, $diagnostico->motor_version);
 
-    $resumo = (array) ($diagnostico->resumo_executivo ?? []);
-    $resumoEhValido = isset($resumo['veredito']);
-    $veredito = $resumo['veredito'] ?? 'fallback';
-    $corVeredito = match ($veredito) {
-        'saudavel' => 'verde',
-        'precisa_atencao' => 'amarelo',
-        'em_alerta' => 'vermelho',
-        default => 'nenhum',
-    };
     $rotuloFarol = [
         'verde' => 'Verde',
         'amarelo' => 'Amarelo',
         'vermelho' => 'Vermelho',
         'nenhum' => 'Sem classificação',
     ];
-    $rotuloVeredito = [
-        'saudavel' => 'Saudável',
-        'precisa_atencao' => 'Precisa de atenção',
-        'em_alerta' => 'Em alerta',
-    ][$veredito] ?? null;
 
     $essenciais = array_values(array_filter(
         IndicadorFormatter::ORDEM_ESSENCIAIS,
@@ -100,13 +86,6 @@
                 </tr>
             @endif
         </table>
-
-        @if ($resumoEhValido && empty($resumo['fallback_acionado']) && $rotuloVeredito)
-            <div class="capa__veredito borda-{{ $corVeredito }}">
-                <span class="farol farol--{{ $corVeredito }}"><span class="farol__ponto"></span>{{ $rotuloVeredito }}</span>
-                <p>{{ $resumo['veredito_texto'] ?? '' }}</p>
-            </div>
-        @endif
     </div>
 
     <div class="capa__rodape">
@@ -115,42 +94,6 @@
         Este diagnóstico é uma ferramenta de apoio à gestão. Decisões financeiras devem considerar análise integral do negócio.
     </div>
 </div>
-
-{{-- ═══ Resumo executivo ═══════════════════════════════════════════════ --}}
-@if ($resumoEhValido)
-    <div class="secao manter-junto">
-        <h2 class="secao__titulo">Resumo executivo</h2>
-        <p class="secao__intro">Leitura geral dos indicadores e os pontos que mais pesaram no resultado.</p>
-
-        <div class="resumo borda-{{ $corVeredito }}">
-            @if (! empty($resumo['fallback_acionado']))
-                <p>{{ $resumo['mensagem_fallback'] ?? '' }}</p>
-            @else
-                <span class="farol farol--{{ $corVeredito }}"><span class="farol__ponto"></span>{{ $rotuloVeredito ?? $rotuloFarol[$corVeredito] }}</span>
-                <p class="resumo__veredito">{{ $resumo['veredito_texto'] ?? '' }}</p>
-
-                @if (! empty($resumo['mensagem_extra']))
-                    <p style="margin-bottom: 2.5mm">{{ $resumo['mensagem_extra'] }}</p>
-                @endif
-
-                @if (! empty($resumo['destaques_negativos']) || ! empty($resumo['destaque_positivo']))
-                    <ul class="resumo__lista">
-                        @foreach ($resumo['destaques_negativos'] ?? [] as $d)
-                            <li>–&nbsp;&nbsp;&nbsp;{{ $d['texto'] }}</li>
-                        @endforeach
-                        @if (! empty($resumo['destaque_positivo']))
-                            <li>+&nbsp;&nbsp;&nbsp;{{ $resumo['destaque_positivo']['texto'] }}</li>
-                        @endif
-                    </ul>
-                @endif
-
-                @if (! empty($resumo['linha_fixa']))
-                    <p class="secundario italico" style="font-size: 8.5pt">Os detalhes e recomendações de cada indicador estão nas páginas seguintes.</p>
-                @endif
-            @endif
-        </div>
-    </div>
-@endif
 
 {{-- ═══ Indicadores essenciais ═════════════════════════════════════════ --}}
 @if (count($essenciais) > 0)

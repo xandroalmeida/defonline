@@ -73,7 +73,7 @@ final class EvidenciaFarolBrowserTest extends DuskTestCase
 
             $browser->resize(360, 900)
                 ->visit("/diagnosticos/{$diag->id}")
-                ->waitFor('[data-farol]')
+                ->waitFor('[data-testid="indicadores-cards"] [data-farol]')
                 ->screenshot('story-059-farol-mobile');
         });
 

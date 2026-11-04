@@ -118,10 +118,6 @@
     --color-farol-vermelho-texto: #CA2121; /* 4,79:1 / 4,55:1 */
     --color-farol-cinza-texto: #596B86;    /* 4,79:1 / 4,57:1 */
 
-    /* Highlight temporário (~1s) da linha-alvo quando o usuário clica num destaque do
-       Resumo Executivo (STORY-040). Tonalidade suave do tertiary (#635BFF). */
-    --color-highlight-pulse: rgba(99, 91, 255, 0.16);
-
     /* Espaçamento — escala compacta do design-system. */
     --spacing-xs: 4px;
     --spacing-sm: 8px;

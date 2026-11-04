@@ -74,7 +74,7 @@ it('a tela do diagnóstico oferece o botão Baixar PDF', function () {
         ->assertSee(route('diagnosticos.pdf', $diag), escape: false);
 });
 
-it('monta capa, resumo e indicadores a partir do snapshot, sem o glossário', function () {
+it('monta capa e indicadores a partir do snapshot, sem o resumo executivo e sem o glossário', function () {
     $dono = Usuario::factory()->create();
     $diag = gerarDiagnosticoParaPdf($dono);
     Auth::login($dono);
@@ -85,11 +85,13 @@ it('monta capa, resumo e indicadores a partir do snapshot, sem o glossário', fu
         ->toContain('class="capa"')
         ->toContain('Diagnóstico<br>Econômico-Financeiro')
         ->toContain('Indústria Teste')
-        ->toContain('Resumo executivo')
         ->toContain('Indicadores essenciais')
         ->toContain('Buscar manter a margem atual.')
         ->toContain('motor v'.$diag->motor_version)
         ->toContain('Este diagnóstico é uma ferramenta de apoio à gestão.')
+        ->not->toContain('Resumo executivo')
+        ->not->toContain('capa__veredito')
+        ->not->toContain((string) $diag->resumo_executivo['veredito_texto'])
         ->not->toContain('Glossário')
         ->not->toContain('glossario')
         ->not->toContain('Balanço Adaptado / DRE Adaptada');
@@ -117,7 +119,7 @@ it('nenhum título de seção fica solto: cada um está preso ao seu primeiro co
     $xpath = new DOMXPath($dom);
 
     $titulos = $xpath->query('//h2[contains(@class, "secao__titulo")]');
-    expect($titulos->length)->toBeGreaterThanOrEqual(3);
+    expect($titulos->length)->toBeGreaterThanOrEqual(2);
 
     foreach ($titulos as $h2) {
         $pai = $h2->parentNode;

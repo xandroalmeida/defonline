@@ -177,7 +177,7 @@ it('renderiza o nominal dentro da mesma linha do indicador, após o valor (CA-5,
 
     // A linha da tabela é a unidade de associação para leitor de tela: o
     // <th scope="row"> nomeia o indicador e o nominal vive na mesma <tr>.
-    $inicioLinha = mb_strpos($html, 'id="indicador-margem_bruta"');
+    $inicioLinha = mb_strpos($html, 'data-codigo="margem_bruta"');
     $fimLinha = mb_strpos($html, '</tr>', $inicioLinha);
     $linha = mb_substr($html, $inicioLinha, $fimLinha - $inicioLinha);
 

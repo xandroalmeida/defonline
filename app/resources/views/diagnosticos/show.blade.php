@@ -22,13 +22,6 @@
      */
     $nominais = ValoresNominais::doSnapshot((array) $diagnostico->quiz_payload, $diagnostico->motor_version);
 
-    // Resumo Executivo §4.7.1 — coluna NOT NULL desde STORY-028 (placeholder até a 030,
-    // populada de verdade pela 031). Snapshots em motor_version < 1.2.0 (placeholder
-    // `{pendente_story, fallback_acionado}`) NÃO contêm `veredito` — o componente trata
-    // qualquer payload inválido como fallback visual.
-    $resumoExecutivo = (array) ($diagnostico->resumo_executivo ?? []);
-    $resumoEhValido = isset($resumoExecutivo['veredito']);
-
     /*
      * Destino do botão "Voltar" — segue o Referer (de onde Roberto veio):
      * Minhas Empresas, Selecionar Empresa, ou redirect do submit do quiz.
@@ -75,12 +68,6 @@
     </x-page-header>
 
     <x-personificacao-marca :registro="$diagnostico" class="mb-4"/>
-
-    {{-- Resumo executivo §4.7.1 (STORY-031). Diagnósticos antigos em motor < 1.2.0
-         carregam placeholder e não renderizam o bloco (mantém compatibilidade). --}}
-    @if ($resumoEhValido)
-        <x-relatorio.resumo-executivo :resumo="$resumoExecutivo"/>
-    @endif
 
     {{-- 13 indicadores essenciais com farol (motor V2 = 1.1.0, Anexo D §4.5).
          Renderiza dois layouts: tabela densa em ≥ md, stack de cards em < md.

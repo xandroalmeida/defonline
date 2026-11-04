@@ -123,19 +123,6 @@ h1, h2, h3, p, ul, dl, dd {
     width: 42mm;
 }
 
-.capa__veredito {
-    margin-top: 12mm;
-    padding: 5mm 6mm;
-    border-left: 3pt solid var(--color-border);
-    background: var(--color-neutral);
-}
-
-.capa__veredito p {
-    font-size: 11pt;
-    font-weight: 500;
-    margin-top: 2.5mm;
-}
-
 .capa__rodape {
     position: absolute;
     top: 238mm; /* dompdf não ancora `bottom` no bloco posicionado — topo fixo. */
@@ -226,39 +213,6 @@ h1, h2, h3, p, ul, dl, dd {
     color: var(--color-farol-cinza-texto);
 }
 .farol--nenhum .farol__ponto { background: var(--color-farol-cinza); }
-
-.borda-verde { border-left-color: var(--color-farol-verde) !important; }
-.borda-amarelo { border-left-color: var(--color-farol-amarelo) !important; }
-.borda-vermelho { border-left-color: var(--color-farol-vermelho) !important; }
-
-/* ── Resumo executivo ─────────────────────────────────────────────────── */
-
-.resumo {
-    padding: 5mm 6mm;
-    border-left: 3pt solid var(--color-border);
-    background: var(--color-neutral);
-}
-
-.resumo__veredito {
-    font-size: 11.5pt;
-    font-weight: 500;
-    margin: 3mm 0 2.5mm;
-}
-
-.resumo__lista {
-    list-style: none;
-    margin: 0 0 2.5mm;
-}
-
-.resumo__lista li {
-    padding-left: 4mm;
-    margin-bottom: 1.2mm;
-    text-indent: -4mm;
-}
-
-.resumo__lista li span {
-    color: var(--color-secondary);
-}
 
 /* ── Tabela de indicadores ────────────────────────────────────────────── */
 

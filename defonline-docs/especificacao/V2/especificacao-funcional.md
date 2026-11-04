@@ -422,7 +422,7 @@ Além das recomendações específicas por indicador, o relatório inclui uma se
 
 1. **Cabeçalho**: logo **DEF on line**, título "Relatório de Diagnóstico Econômico-Financeiro".
 2. **Metadados**: identificam **a Empresa Analisada** (Razão Social ou Nome, Nome Fantasia, CNPJ/CPF, Setor, UF/Município) e **o contexto da execução** (Data do Diagnóstico — envio do quiz, Data de Geração — do PDF, ID do Quiz, identificação do Usuário que executou).
-3. **Resumo executivo**: bloco de 4 a 5 linhas em linguagem amigável e construtiva, com **algoritmo determinístico** descrito em §4.7.1. Sinaliza o estado geral do negócio com um veredito ("saudável", "precisa de atenção" ou "em alerta") e destaca os indicadores mais relevantes do diagnóstico.
+3. **Resumo executivo** — **retirado do relatório, na tela e no PDF (PDR-015).** O motor continua calculando e gravando o resumo, sem exibi-lo. Definição original: bloco de 4 a 5 linhas em linguagem amigável e construtiva, com **algoritmo determinístico** descrito em §4.7.1. Sinaliza o estado geral do negócio com um veredito ("saudável", "precisa de atenção" ou "em alerta") e destaca os indicadores mais relevantes do diagnóstico.
 4. **Tabela de indicadores**: colunas Indicador, Valor, Farol, Mensagem curta (texto resumido da matriz dez/2025). Cada linha é expansível para "Ver recomendação detalhada" (texto completo da matriz jul/2025).
 5. **Informações de captação** (se o usuário indicou Q17=1): apresenta os 4 parâmetros calculados (metade do endividamento, 3× vendas com cartão, 1/3 do patrimônio livre, valor declarado) e o menor deles como referência, com o botão "Solicitar análise primária" (seção 4.9).
 6. **Sugestões gerais**: lista das 50+ sugestões genéricas (anexo H).
@@ -434,6 +434,8 @@ Além das recomendações específicas por indicador, o relatório inclui uma se
 **Regras do semáforo (por indicador).** Ver anexo E — cada indicador tem 3 faixas por setor, e a cor é atribuída automaticamente conforme o valor calculado caia em cada faixa.
 
 #### 4.7.1 Algoritmo de geração do Resumo Executivo
+
+> **Fora do relatório desde o PDR-015.** O algoritmo segue valendo só para o `resumo_executivo` gravado no snapshot.
 
 Algoritmo determinístico — mesma entrada produz sempre a mesma saída. Fechado em 17/05/2026 (ver §6.2 RESOLVIDO).
 

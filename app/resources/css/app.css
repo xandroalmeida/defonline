@@ -505,40 +505,6 @@
             box-shadow: var(--shadow-md);
         }
     }
-
-    /*
-     * STORY-040 — alvo de scroll dos destaques do Resumo Executivo (linha da tabela
-     * em ≥ md, card em < md). `scroll-margin-top` compensa o header sticky (h-16 =
-     * 64px) + folga, para o alvo não parar escondido atrás dele (CA-2).
-     */
-    .indicador-alvo {
-        scroll-margin-top: 84px;
-    }
-
-    @keyframes indicador-highlight {
-        from {
-            background-color: var(--color-highlight-pulse);
-        }
-        to {
-            background-color: transparent;
-        }
-    }
-
-    /* `:target` cobre o fallback sem-JS (apenas a <tr> desktop tem id); `.is-highlight`
-       é aplicada pelo JS ao alvo VISÍVEL no breakpoint atual (tabela ou card). */
-    .indicador-alvo:target,
-    .indicador-alvo.is-highlight {
-        animation: indicador-highlight 1s ease-out;
-    }
-
-    /* Quem pede menos movimento recebe um realce estático breve (sem pulsar). */
-    @media (prefers-reduced-motion: reduce) {
-        .indicador-alvo:target,
-        .indicador-alvo.is-highlight {
-            animation: none;
-            background-color: var(--color-highlight-pulse);
-        }
-    }
 }
 
 /* Alpine: esconde elementos até o Alpine inicializar. */
