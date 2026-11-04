@@ -6,19 +6,19 @@
         <div class="flex flex-col md:flex-row md:items-end gap-4">
             <div class="md:w-48">
                 <x-label for="recomendacoes-setor">Segmento</x-label>
-                <select id="recomendacoes-setor" wire:model.live="setor" class="input w-full" dusk="recomendacoes-setor" @disabled($editandoId)>
+                <x-select id="recomendacoes-setor" wire:model.live="setor" dusk="recomendacoes-setor" :disabled="$editandoId !== null">
                     @foreach ($setores as $codigo => $nome)
                         <option value="{{ $codigo }}">{{ $nome }}</option>
                     @endforeach
-                </select>
+                </x-select>
             </div>
             <div class="md:w-80">
                 <x-label for="recomendacoes-indicador">Indicador</x-label>
-                <select id="recomendacoes-indicador" wire:model.live="indicador" class="input w-full" dusk="recomendacoes-indicador" @disabled($editandoId)>
+                <x-select id="recomendacoes-indicador" wire:model.live="indicador" dusk="recomendacoes-indicador" :disabled="$editandoId !== null">
                     @foreach ($indicadores as $codigo => $nome)
                         <option value="{{ $codigo }}">{{ $nome }}</option>
                     @endforeach
-                </select>
+                </x-select>
             </div>
             <p class="text-sm text-[color:var(--color-secondary)] m-0 md:ml-auto" dusk="recomendacoes-versao">Matriz vigente: {{ $versao }}</p>
         </div>

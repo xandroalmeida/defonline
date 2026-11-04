@@ -136,7 +136,13 @@ final class PermissoesAdminBrowserTest extends DuskTestCase
                     ->assertMissing('@app-nav-backoffice-glossario')
                     ->click('@app-nav-backoffice-recomendacoes')
                     ->waitForLocation('/backoffice/recomendacoes')
-                    ->waitFor('@recomendacao-verde')
+                    ->waitFor('@recomendacao-verde');
+
+                $this->assertSame(['none', '36px', '12px'], $browser->script(
+                    "const e = getComputedStyle(document.querySelector('[dusk=\"recomendacoes-setor\"]')); return [e.appearance, e.paddingRight, e.paddingLeft];",
+                )[0]);
+
+                $browser
                     ->assertSeeIn('@recomendacao-faixa-verde', '25,01% +')
                     ->assertSeeIn('@recomendacoes-versao', 'dez-2025')
                     ->assertMissing('@recomendacoes-aviso-segmento')

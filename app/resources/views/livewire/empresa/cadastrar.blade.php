@@ -187,12 +187,12 @@
                 </div>
                 <div class="sm:w-32">
                     <x-label for="uf">UF</x-label>
-                    <select id="uf" wire:model="uf" class="input" dusk="empresa-uf">
+                    <x-select id="uf" wire:model="uf" dusk="empresa-uf">
                         <option value="">—</option>
                         @foreach ($ufs as $ufCase)
                             <option value="{{ $ufCase->value }}">{{ $ufCase->value }}</option>
                         @endforeach
-                    </select>
+                    </x-select>
                     @error('uf')
                         <p class="text-[color:var(--color-destructive)] text-sm mt-1 mb-0" dusk="erro-uf">{{ $message }}</p>
                     @enderror
