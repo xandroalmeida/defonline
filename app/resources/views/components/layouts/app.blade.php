@@ -92,6 +92,7 @@
     @endif
 
     <x-personificacao-aviso/>
+    <x-confirmacao/>
 
     @livewireScripts
 </body>

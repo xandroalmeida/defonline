@@ -39,6 +39,19 @@ final class PermissoesAdminBrowserTest extends DuskTestCase
                 ->waitFor('@admin-linha-'.$colega->id)
                 ->assertSeeIn('@admin-linha-'.$colega->id, 'Manter glossário');
 
+            // Remover usa a cor de alerta e pede confirmação: cancelar mantém o acesso.
+            $this->assertSame('rgb(225, 29, 72)', $browser->script(
+                "return getComputedStyle(document.querySelector('[dusk=\"admin-remover-{$colega->id}\"]')).backgroundColor;"
+            )[0]);
+            $browser->press('@admin-remover-'.$colega->id)
+                ->waitFor('@confirmacao')
+                ->assertSeeIn('@confirmacao', 'Remover acesso')
+                ->press('@confirmacao-cancelar')
+                ->waitUntilMissing('@confirmacao')
+                ->pause(300)
+                ->assertPresent('@admin-linha-'.$colega->id);
+            $this->assertSame(['glossario.editar'], $colega->fresh()?->permissoes_admin);
+
             $browser->logout()
                 ->loginAs($colega)
                 ->visit('/home')
@@ -74,17 +87,30 @@ final class PermissoesAdminBrowserTest extends DuskTestCase
                 "return getComputedStyle(document.querySelector('[dusk=\"glossario-excluir-{$termoId}\"]')).backgroundColor;"
             )[0]);
             $browser->press('@glossario-excluir-'.$termoId)
-                ->waitForDialog()
-                ->assertDialogOpened('Excluir o termo “Termo E2E” do glossário? Ele sairá de todos os relatórios.')
-                ->dismissDialog()
+                ->waitFor('@confirmacao')
+                ->assertSeeIn('@confirmacao-mensagem', 'Excluir “Termo E2E” do glossário?')
+                ->keys('@confirmacao-cancelar', ['{escape}'])
+                ->waitUntilMissing('@confirmacao')
                 ->pause(300)
                 ->assertSeeIn('@glossario-lista', 'Termo E2E')
                 ->press('@glossario-excluir-'.$termoId)
-                ->waitForDialog()
-                ->acceptDialog()
+                ->waitFor('@confirmacao')
+                ->press('@confirmacao-confirmar')
                 ->waitUntilMissingText('Termo E2E')
                 ->visit('/backoffice/administradores')
                 ->assertSee('404');
+
+            // Confirmar o Remover tira o acesso.
+            $browser->logout()
+                ->loginAs($raiz)
+                ->visit('/backoffice/administradores')
+                ->waitFor('@admin-linha-'.$colega->id)
+                ->press('@admin-remover-'.$colega->id)
+                ->waitFor('@confirmacao')
+                ->press('@confirmacao-confirmar')
+                ->waitUntilMissing('@admin-linha-'.$colega->id);
         });
+
+        $this->assertNull($colega->fresh()?->permissoes_admin);
     }
 }

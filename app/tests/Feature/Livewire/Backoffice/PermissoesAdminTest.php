@@ -7,6 +7,7 @@ use App\Livewire\Backoffice\Glossario;
 use App\Livewire\Backoffice\Usuarios;
 use App\Models\AuditLog;
 use App\Models\Usuario;
+use Illuminate\Support\Js;
 use Livewire\Livewire;
 
 /**
@@ -178,6 +179,18 @@ describe('CA-3 cadastro de admin', function () {
         $tela->call('remover', $alvo->id);
         expect($alvo->fresh()->permissoes_admin)->toBeNull()
             ->and($alvo->fresh()->ehEquipeBackoffice())->toBeFalse();
+    });
+
+    it('o Remover pede confirmação no alerta do app, citando o nome, em botão de alerta', function () {
+        $alvo = ($this->comPermissoes)(['usuarios.ver']);
+        $alvo->forceFill(['nome' => 'Maria Pereira'])->save();
+
+        $html = $this->actingAs($this->raiz)->get('/backoffice/administradores')->assertOk()->getContent();
+
+        expect($html)->toContain('btn btn--destructive btn--sm')
+            ->toContain('pedir-confirmacao')
+            ->toContain(Js::from('Remover o acesso de administração de “Maria Pereira”?')->toHtml())
+            ->not->toContain('wire:confirm');
     });
 
     it('não permite definir permissões no cadastro em massa', function () {

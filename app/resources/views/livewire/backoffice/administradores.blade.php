@@ -61,7 +61,10 @@
                         <td class="px-3 py-2 text-right whitespace-nowrap">
                             @unless ($admin->ehAdminPorConfiguracao() || $admin->id === $eu)
                                 <x-button type="button" variant="secondary" size="sm" wire:click="editar('{{ $admin->id }}')" dusk="admin-editar-{{ $admin->id }}">Editar</x-button>
-                                <x-button type="button" variant="secondary" size="sm" wire:click="remover('{{ $admin->id }}')" dusk="admin-remover-{{ $admin->id }}">Remover</x-button>
+                                <x-botao-confirmar titulo="Remover acesso"
+                                                   :mensagem="'Remover o acesso de administração de “'.$admin->nome.'”?'"
+                                                   acao="remover('{{ $admin->id }}')"
+                                                   dusk="admin-remover-{{ $admin->id }}">Remover</x-botao-confirmar>
                             @endunless
                         </td>
                     </tr>

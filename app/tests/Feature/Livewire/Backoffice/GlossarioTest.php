@@ -8,6 +8,7 @@ use App\Models\Diagnostico;
 use App\Models\EmpresaAnalisada;
 use App\Models\GlossarioTermo;
 use App\Models\Usuario;
+use Illuminate\Support\Js;
 use Livewire\Livewire;
 
 /**
@@ -81,10 +82,22 @@ it('exclui o termo, que some do relatório', function () {
         ->and(($this->relatorio)())->not->toContain('Percentual médio de atraso');
 });
 
-it('pede confirmação antes de excluir, citando o termo, em botão de alerta', function () {
-    $this->actingAs($this->admin)->get('/backoffice/glossario')->assertOk()
-        ->assertSee('btn btn--destructive btn--sm', escape: false)
-        ->assertSee('wire:confirm="Excluir o termo “Inadimplência” do glossário?', escape: false);
+it('o Excluir pede confirmação no alerta do app, citando o termo, em botão de alerta', function () {
+    $html = $this->actingAs($this->admin)->get('/backoffice/glossario')->assertOk()->getContent();
+
+    expect($html)->toContain('btn btn--destructive btn--sm')
+        ->toContain('dusk="confirmacao"')
+        ->toContain('pedir-confirmacao')
+        ->toContain(Js::from('Excluir “Inadimplência” do glossário? Ele sairá de todos os relatórios.')->toHtml())
+        ->not->toContain('wire:confirm')
+        ->not->toContain('wire:click="excluir');
+});
+
+it('escapa termo com aspas e HTML na tela de manutenção e no alerta', function () {
+    ($this->tela)()->set('termo', "O'Brien\"><script>alert(1)</script>")->set('definicao', 'Definição')->call('salvar')->assertHasNoErrors();
+
+    expect($this->actingAs($this->admin)->get('/backoffice/glossario')->assertOk()->getContent())
+        ->not->toContain('<script>alert(1)</script>');
 });
 
 it('tira a seção do relatório quando o glossário fica vazio', function () {
