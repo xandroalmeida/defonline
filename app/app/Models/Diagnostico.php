@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Models\Scopes\BelongsToUsuarioScope;
 use Database\Factories\DiagnosticoFactory;
+use App\Models\Concerns\RegistraPersonificacao;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\ArrayObject;
@@ -60,7 +61,7 @@ use Illuminate\Support\Carbon;
 final class Diagnostico extends Model
 {
     /** @use HasFactory<DiagnosticoFactory> */
-    use HasFactory, HasUuids, SoftDeletes;
+    use HasFactory, HasUuids, RegistraPersonificacao, SoftDeletes;
 
     protected $table = 'diagnosticos';
 

@@ -41,6 +41,20 @@ final class Personificacao
         return $dados;
     }
 
+    /**
+     * Marca para métricas e eventos de produto: só ids, sem PII (ADR-004).
+     *
+     * @return array{personificacao: array{admin_id: string, sessao_id: string}}|array{}
+     */
+    public static function marca(): array
+    {
+        $ativa = self::ativa();
+
+        return $ativa === null
+            ? []
+            : ['personificacao' => ['admin_id' => $ativa['admin_id'], 'sessao_id' => $ativa['sessao_id']]];
+    }
+
     public static function iniciar(Usuario $admin, Usuario $alvo): void
     {
         Auth::login($alvo);

@@ -20,6 +20,8 @@
         </x-slot:actions>
     </x-page-header>
 
+    <x-personificacao-marca :registro="$empresa" class="mb-4"/>
+
     {{-- H1 oficial mostra nome fantasia/razao social. Mantemos um marcador adicional
          para Dusk compatível com testes anteriores (dusk="empresa-show-titulo"). --}}
     <p class="sr-only" dusk="empresa-show-titulo">{{ $empresa->razao_social }}</p>

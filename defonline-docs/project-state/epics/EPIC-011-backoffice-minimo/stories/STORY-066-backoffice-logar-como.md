@@ -25,6 +25,10 @@ Decisão: PDR-012. A tela `/backoffice/usuarios` também deixa de ficar limitada
 - **CA-3 volta:** aviso fixo em toda tela do app, com o nome do usuário e "Voltar ao admin", que devolve à lista.
 - **CA-4 sessão:** "Sair" encerra tudo. Admin fora da allowlist derruba a sessão na próxima requisição. Chave de personificação velha nunca devolve o acesso de admin.
 - **CA-5 auditoria:** `audit_logs` guarda `personificacao.iniciada`, `personificacao.encerrada` (com motivo) e uma `personificacao.requisicao` por requisição (método, caminho, rota, query, status, campos e chamadas Livewire), todas com `context.personificacao.sessao_id`. Credenciais são mascaradas. Eventos de domínio da sessão ficam com o admin em `actor_id`.
+- **CA-6 indicação do admin:**
+  - `empresas_analisadas`, `diagnosticos` e `quiz_rascunhos`: `personificado_por_id` guarda o admin da última gravação e volta a null quando o próprio usuário grava depois.
+  - `request_metrics`: `personificado_por_id`. `evento_produto.propriedades` e `business_metrics.meta` (consulta à Receita): `personificacao.admin_id` e `personificacao.sessao_id`.
+  - Telas: empresa e diagnóstico mostram o nome do admin, e a capa do PDF mostra quem fez o diagnóstico. A lista do backoffice separa o que foi feito "via admin" nas contagens.
 
 ## Consultar uma sessão
 

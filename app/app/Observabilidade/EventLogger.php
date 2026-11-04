@@ -6,6 +6,7 @@ namespace App\Observabilidade;
 
 use App\Models\EventoProduto;
 use App\Observabilidade\Excecoes\PiiEmEventoException;
+use App\Support\Personificacao;
 use App\Support\RequestId;
 use Illuminate\Support\Str;
 
@@ -51,7 +52,7 @@ final class EventLogger
             'nome_evento' => $nomeEvento,
             'usuario_id' => $usuarioId,
             'empresa_id' => $empresaId,
-            'propriedades' => $propriedades,
+            'propriedades' => [...$propriedades, ...Personificacao::marca()],
             'request_id' => RequestId::get(),
         ]);
     }

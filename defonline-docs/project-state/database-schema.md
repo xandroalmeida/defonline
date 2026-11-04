@@ -72,6 +72,7 @@ PK `id uuid`. FK `usuario_id → usuarios` (RESTRICT). **UNIQUE parcial** `(usua
 | `data_fundacao` | date / `enriquecido_at` timestamptz | |
 | `ficha_rfb` | jsonb | nullable — ficha RFB completa (natureza, porte, capital, CNAEs secundários, endereço, sócios, `simples`/`simei`). Só escrita por consulta à Receita (PDR-010, STORY-063); null em CPF e em empresas anteriores à STORY-063 |
 | `observacoes` | text | nullable — única informação livre do usuário (até 2.000 caracteres, validado na app) |
+| `personificado_por_id` | uuid | nullable, FK `usuarios` (RESTRICT) — admin da última gravação pelo "Logar como" (STORY-066); null se o próprio usuário gravou por último |
 
 ### `quiz_rascunhos` — rascunhos do quiz (23 campos, Anexo A)
 PK `id uuid`. FKs `usuario_id`, `empresa_analisada_id` (RESTRICT). **UNIQUE parcial** `(usuario_id, empresa_analisada_id) WHERE deleted_at IS NULL`.
@@ -81,6 +82,7 @@ PK `id uuid`. FKs `usuario_id`, `empresa_analisada_id` (RESTRICT). **UNIQUE parc
 | `quiz_payload` | jsonb | NOT NULL — respostas parciais |
 | `ultimo_bloco_preenchido` | smallint | CHECK `1..4` |
 | `expires_at` | timestamptz | NOT NULL — TTL do rascunho (índice `(usuario_id, expires_at)`) |
+| `personificado_por_id` | uuid | nullable, FK `usuarios` — como em `empresas_analisadas` |
 
 ### `diagnosticos` — diagnóstico gerado (imutável)
 PK `id uuid`. FKs `usuario_id`, `empresa_analisada_id` (RESTRICT). Índice `(empresa_analisada_id, gerado_em)`.
@@ -95,6 +97,7 @@ PK `id uuid`. FKs `usuario_id`, `empresa_analisada_id` (RESTRICT). Índice `(emp
 | `indicadores_calculados` | jsonb | saída do motor |
 | `resumo_executivo` | jsonb | destaques (STORY-040) |
 | `gerado_em` | timestamptz | NOT NULL |
+| `personificado_por_id` | uuid | nullable, FK `usuarios` — admin que gerou pelo "Logar como" |
 
 ### `term_acceptances` — aceites LGPD (append-only)
 PK `id uuid`. FK `usuario_id → usuarios` **CASCADE**. Índice `(usuario_id, termo_tipo, aceito_at)`.
@@ -116,11 +119,12 @@ PK `id bigint`. `evento_id uuid` **UNIQUE** (idempotência). Emitido **só** via
 - `nome_evento`, `ocorrido_em` (default now), `usuario_id`, `empresa_id`, `propriedades jsonb` (default `{}`), `request_id`.
 - Índices: `(nome_evento, ocorrido_em)`, `nome_evento`, `usuario_id`, `empresa_id`, `request_id`, **GIN** `propriedades jsonb_path_ops`.
 - Canônicos entregues: `quiz_iniciado`, `diagnostico_concluido` (STORY-035).
+- Evento gerado no "Logar como" traz `propriedades.personificacao` com `admin_id` e `sessao_id` (STORY-066). Para excluir da métrica de produto: `NOT propriedades ? 'personificacao'`.
 
 ### `business_metrics` / `request_metrics` / `job_metrics` — séries temporais
 Append-only, PK `bigint`, `request_id` de correlação, **índice BRIN** em `inserido_em` (barato p/ dados ordenados no tempo).
-- `business_metrics`: `tipo`, `sucesso bool`, `duracao_ms`, `meta jsonb`.
-- `request_metrics`: `path`, `method`, `status`, `duration_ms`, `usuario_id`, `empresa_id`.
+- `business_metrics`: `tipo`, `sucesso bool`, `duracao_ms`, `meta jsonb` (`meta.personificacao` na consulta à Receita feita pelo "Logar como").
+- `request_metrics`: `path`, `method`, `status`, `duration_ms`, `usuario_id`, `empresa_id`, `personificado_por_id` (admin no "Logar como").
 - `job_metrics`: `job_class`, `queue`, `status`, `duration_ms`, `tentativas`.
 
 ### `audit_logs` — trilha de auditoria

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Browser;
 
 use App\Models\AuditLog;
+use App\Models\EmpresaAnalisada;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
@@ -20,7 +21,7 @@ final class PersonificacaoBrowserTest extends DuskTestCase
     use DatabaseTruncation;
 
     /** @var list<string> */
-    protected array $tablesToTruncate = ['usuarios', 'audit_logs', 'sessions', 'cache'];
+    protected array $tablesToTruncate = ['empresas_analisadas', 'usuarios', 'audit_logs', 'sessions', 'cache'];
 
     public function test_equipe_assume_o_usuario_e_volta_com_tudo_auditado(): void
     {
@@ -30,7 +31,9 @@ final class PersonificacaoBrowserTest extends DuskTestCase
             'email' => 'maria.pereira.albuquerque@exemplo.com.br',
         ]);
 
-        $this->browse(function (Browser $browser) use ($equipe, $alvo) {
+        $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $alvo->id]);
+
+        $this->browse(function (Browser $browser) use ($equipe, $alvo, $empresa) {
             $browser->resize(1280, 800)
                 ->loginAs($equipe)
                 ->visit('/backoffice/usuarios')
@@ -49,13 +52,23 @@ final class PersonificacaoBrowserTest extends DuskTestCase
                 ->assertSeeIn('@personificacao-aviso', 'Maria Pereira')
                 ->visit('/backoffice/usuarios')
                 ->assertSee('404')
-                ->visit('/diagnosticos/novo')
+                ->visit('/empresas/'.$empresa->id)
                 ->waitFor('@personificacao-aviso')
+                ->assertMissing('@personificacao-marca')
+                ->type('@empresa-show-observacoes', 'Ajuste feito pela equipe')
+                ->press('@empresa-show-salvar-observacoes')
+                ->waitFor('@empresa-show-observacoes-salvas')
+                ->refresh()
+                ->waitFor('@personificacao-marca')
+                ->assertSeeIn('@personificacao-marca', 'Equipe EBP')
                 ->press('@personificacao-voltar')
                 ->waitForLocation('/backoffice/usuarios')
                 ->waitFor('@backoffice-usuarios')
-                ->assertMissing('@personificacao-aviso');
+                ->assertMissing('@personificacao-aviso')
+                ->assertSeeIn('@backoffice-usuario-'.$alvo->id, '1 via admin');
         });
+
+        $this->assertSame($equipe->id, $empresa->fresh()?->personificado_por_id);
 
         $this->assertSame(1, AuditLog::where('action', 'personificacao.iniciada')->where('actor_id', $equipe->id)->count());
         $this->assertSame(1, AuditLog::where('action', 'personificacao.encerrada')->where('actor_id', $equipe->id)->count());

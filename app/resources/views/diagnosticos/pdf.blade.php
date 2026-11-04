@@ -95,6 +95,13 @@
                 <td class="rotulo">Data do diagnóstico</td>
                 <td>{{ $diagnostico->gerado_em->format('d/m/Y') }}</td>
             </tr>
+            @if ($diagnostico->personificadoPor)
+                {{-- STORY-066 CA-6 --}}
+                <tr>
+                    <td class="rotulo">Feito por</td>
+                    <td>{{ $diagnostico->personificadoPor->nome }}, da equipe DEFOnline</td>
+                </tr>
+            @endif
         </table>
 
         @if ($resumoEhValido && empty($resumo['fallback_acionado']) && $rotuloVeredito)

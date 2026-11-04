@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Support\Personificacao;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -53,6 +54,7 @@ final class MeasureRequest
                 'status' => $response->getStatusCode(),
                 'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
                 'usuario_id' => Auth::id(),
+                'personificado_por_id' => Personificacao::ativa()['admin_id'] ?? null,
                 'empresa_id' => null,
                 'inserido_em' => now(),
             ]);

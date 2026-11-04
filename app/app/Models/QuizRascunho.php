@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Scopes\BelongsToUsuarioScope;
+use App\Models\Concerns\RegistraPersonificacao;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -43,7 +44,7 @@ use Illuminate\Support\Carbon;
 #[ScopedBy([BelongsToUsuarioScope::class])]
 final class QuizRascunho extends Model
 {
-    use HasUuids, SoftDeletes;
+    use HasUuids, RegistraPersonificacao, SoftDeletes;
 
     protected $table = 'quiz_rascunhos';
 

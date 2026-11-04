@@ -74,6 +74,8 @@
         </x-slot:actions>
     </x-page-header>
 
+    <x-personificacao-marca :registro="$diagnostico" class="mb-4"/>
+
     {{-- Resumo executivo §4.7.1 (STORY-031). Diagnósticos antigos em motor < 1.2.0
          carregam placeholder e não renderizam o bloco (mantém compatibilidade). --}}
     @if ($resumoEhValido)

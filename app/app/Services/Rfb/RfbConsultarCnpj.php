@@ -8,6 +8,7 @@ use App\Domain\Cnpj;
 use App\Domain\Rfb\RfbCnpjResult;
 use App\Domain\Rfb\RfbCnpjStatus;
 use App\Observabilidade\AuditLogger;
+use App\Support\Personificacao;
 use App\Support\RequestId;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Cache;
@@ -107,6 +108,7 @@ final class RfbConsultarCnpj
         $meta = [
             'provider' => $provedor,
             'status' => $status->value,
+            ...Personificacao::marca(),
         ];
 
         try {

@@ -105,6 +105,21 @@ final class Usuarios extends Component
                     ->whereNull('diagnosticos.deleted_at'),
                 'diagnosticos_count',
             )
+            // STORY-066 CA-6 — quanto das contagens veio do "Logar como".
+            ->selectSub(
+                DB::table('empresas_analisadas')->selectRaw('count(*)')
+                    ->whereColumn('empresas_analisadas.usuario_id', 'usuarios.id')
+                    ->whereNull('empresas_analisadas.deleted_at')
+                    ->whereNotNull('empresas_analisadas.personificado_por_id'),
+                'empresas_via_admin_count',
+            )
+            ->selectSub(
+                DB::table('diagnosticos')->selectRaw('count(*)')
+                    ->whereColumn('diagnosticos.usuario_id', 'usuarios.id')
+                    ->whereNull('diagnosticos.deleted_at')
+                    ->whereNotNull('diagnosticos.personificado_por_id'),
+                'diagnosticos_via_admin_count',
+            )
             ->selectSub(
                 DB::table('audit_logs')->selectRaw('max(occurred_at)')
                     ->whereColumn('audit_logs.usuario_id', 'usuarios.id')

@@ -60,8 +60,16 @@
                             </td>
                             <td class="px-2 py-2">{{ $data($u->created_at) }}</td>
                             <td class="px-2 py-2">{{ $data($u->ultimo_login_at) }}</td>
-                            <td class="px-2 py-2 text-right">{{ (int) $u->empresas_count }}</td>
-                            <td class="px-2 py-2 text-right">{{ (int) $u->diagnosticos_count }}</td>
+                            <td class="px-2 py-2 text-right">{{ (int) $u->empresas_count }}
+                                @if ((int) $u->empresas_via_admin_count > 0)
+                                    <div class="text-xs text-[color:var(--color-secondary)] whitespace-nowrap">{{ (int) $u->empresas_via_admin_count }} via admin</div>
+                                @endif
+                            </td>
+                            <td class="px-2 py-2 text-right">{{ (int) $u->diagnosticos_count }}
+                                @if ((int) $u->diagnosticos_via_admin_count > 0)
+                                    <div class="text-xs text-[color:var(--color-secondary)] whitespace-nowrap">{{ (int) $u->diagnosticos_via_admin_count }} via admin</div>
+                                @endif
+                            </td>
                             <td class="sticky right-0 bg-[color:var(--color-surface)] px-2 py-2 text-right">
                                 @if ($u->podeSerPersonificadoPor($admin))
                                     <form method="POST" action="{{ route('backoffice.usuarios.logar-como', $u) }}" class="m-0">

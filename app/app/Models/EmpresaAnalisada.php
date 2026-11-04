@@ -13,6 +13,7 @@ use App\Domain\TipoDocumento;
 use App\Domain\Uf;
 use App\Models\Scopes\BelongsToUsuarioScope;
 use Database\Factories\EmpresaAnalisadaFactory;
+use App\Models\Concerns\RegistraPersonificacao;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -70,7 +71,7 @@ use Illuminate\Support\Carbon;
 final class EmpresaAnalisada extends Model
 {
     /** @use HasFactory<EmpresaAnalisadaFactory> */
-    use HasFactory, HasUuids, SoftDeletes;
+    use HasFactory, HasUuids, RegistraPersonificacao, SoftDeletes;
 
     protected $table = 'empresas_analisadas';
 
