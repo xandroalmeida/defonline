@@ -11,6 +11,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PersonificacaoController;
 use App\Livewire\Backoffice\Administradores as BackofficeAdministradores;
 use App\Livewire\Backoffice\Glossario as BackofficeGlossario;
+use App\Livewire\Backoffice\Recomendacoes as BackofficeRecomendacoes;
 use App\Livewire\Backoffice\Usuarios as BackofficeUsuarios;
 use App\Livewire\Cadastro;
 use App\Livewire\Diagnostico\Quiz as QuizDiagnostico;
@@ -83,4 +84,5 @@ Route::middleware('auth')->prefix('backoffice')->name('backoffice.')->group(func
         ->name('usuarios.logar-como');
     Route::get('/administradores', BackofficeAdministradores::class)->middleware('backoffice:admins.gerenciar')->name('administradores');
     Route::get('/glossario', BackofficeGlossario::class)->middleware('backoffice:glossario.editar')->name('glossario');
+    Route::get('/recomendacoes', BackofficeRecomendacoes::class)->middleware('backoffice:recomendacoes.editar')->name('recomendacoes');
 });

@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 /**
- * Matriz de Recomendações — versão dez/2025, setor Indústria.
+ * Matriz de Recomendações — versão dez/2025, setor Indústria, congelada para os
+ * testes de domínio e os golden hashes. **O produto não lê este arquivo**: o texto
+ * vigente está na tabela `recomendacoes`, mantida no backoffice (PDR-016). Editar
+ * aqui não muda nada em produção.
  *
  * Fonte: `defonline-docs/especificacao/V2/anexos/anexo-F-matriz-recomendacoes-dez2025.md`,
  * coluna **Indústria** (autoria EB Parcerias / EBC). Os textos são transcritos
@@ -22,10 +25,8 @@ declare(strict_types=1);
  *   auditoria editorial, não por configuração. Ver o bloco de comentário da
  *   própria seção e o CA-5 da STORY-060.
  *
- * **Imutabilidade.** Esta versão da matriz é `matrix_version = "dez-2025"`. Para
- * editar textos: criar `matriz-<nova-versao>-industria.php`, incrementar
- * `matrix_version` em `config/motor.php`. Diagnósticos persistidos com a versão
- * antiga continuam exibindo o texto da época (snapshot — IDR-010 §sub-decisão 2).
+ * **Imutabilidade.** Diagnósticos persistidos continuam exibindo o texto da época
+ * (snapshot — IDR-010 §sub-decisão 2).
  */
 return [
     // F.1 Margem Bruta

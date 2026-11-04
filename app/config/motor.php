@@ -7,8 +7,9 @@ declare(strict_types=1);
  *
  *   - version: semver inteiro `MAJOR.MINOR.PATCH`. Sobe quando muda comportamento
  *     do motor (fórmula, novo indicador, bug fix que altera output).
- *   - matrix_version: formato datado `mes-aaaa`. Sobe quando a EBC valida nova
- *     matriz de recomendações (Anexo F/G).
+ *   - matrix_version: versão de origem da matriz (Anexo F). Depois da primeira
+ *     edição de um segmento no backoffice, a versão dele é o mês da última edição
+ *     (`mes-aaaa` — PDR-016, `App\Support\RecomendacoesNoBanco`).
  *
  * Estes valores são gravados em cada `diagnosticos.motor_version|matrix_version`
  * no momento da emissão, como snapshot — diagnósticos antigos não são

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\Motor\Farol;
 use App\Domain\Motor\MatrizRecomendacoes;
 use App\Domain\Motor\ResumoExecutivo;
+use Tests\Support\RecomendacoesCongeladas;
 
 /*
 |-------------------------------------------------------------------------
@@ -31,7 +32,7 @@ const CHAVES_NAO_CONSUMIDAS = ['_referencia_editorial'];
 
 it('config matriz dez-2025 industria tem entrada para os 13 indicadores com farol × 3 cores', function () {
     /** @var array<string, array<string, string>> $matriz */
-    $matriz = config('motor.matriz-dez-2025-industria');
+    $matriz = RecomendacoesCongeladas::matriz();
 
     expect($matriz)->toBeArray();
 
@@ -57,7 +58,7 @@ it('config matriz dez-2025 industria tem entrada para os 13 indicadores com faro
 
 it('STORY-060 CA-5 — toda chave de primeiro nível é indicador consumido, salvo a exceção declarada', function () {
     /** @var array<string, mixed> $matriz */
-    $matriz = config('motor.matriz-dez-2025-industria');
+    $matriz = RecomendacoesCongeladas::matriz();
 
     $indicadoresComFarol = array_values(array_diff(ResumoExecutivo::CODIGOS_ANEXO_D, ['ncg_absoluto']));
     $inesperadas = array_diff(array_keys($matriz), $indicadoresComFarol, CHAVES_NAO_CONSUMIDAS);
@@ -71,7 +72,7 @@ it('STORY-060 CA-5 — toda chave de primeiro nível é indicador consumido, sal
 
 it('STORY-060 CA-5 — a referência editorial preserva o texto do Anexo F §F.13 fora do runtime', function () {
     /** @var array<string, mixed> $matriz */
-    $matriz = config('motor.matriz-dez-2025-industria');
+    $matriz = RecomendacoesCongeladas::matriz();
 
     expect($matriz['_referencia_editorial']['ncg_absoluto'])
         ->toHaveKey('positiva')

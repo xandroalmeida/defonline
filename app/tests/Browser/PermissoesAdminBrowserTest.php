@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Browser;
 
 use App\Models\GlossarioTermo;
+use App\Models\Recomendacao;
 use App\Models\Usuario;
 use Facebook\WebDriver\WebDriverKeys;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
@@ -114,5 +115,57 @@ final class PermissoesAdminBrowserTest extends DuskTestCase
         });
 
         $this->assertNull($colega->fresh()?->permissoes_admin);
+    }
+
+    /**
+     * STORY-068 — o admin com a permissão filtra por segmento e indicador, vê as 3
+     * faixas, é barrado no texto vazio e salva. Os filtros travam durante a edição.
+     */
+    public function test_admin_com_permissao_edita_recomendacao(): void
+    {
+        $colega = Usuario::factory()->create(['email' => 'colega@exemplo.com.br']);
+        $colega->forceFill(['permissoes_admin' => ['recomendacoes.editar']])->save();
+        $registro = Recomendacao::query()->where(['setor' => 'comercio', 'indicador' => 'pmr', 'farol' => 'amarelo'])->firstOrFail();
+        $original = $registro->only('texto', 'editado_em');
+
+        try {
+            $this->browse(function (Browser $browser) use ($colega) {
+                $browser->loginAs($colega)
+                    ->visit('/home')
+                    ->waitFor('@app-nav-admin')
+                    ->assertMissing('@app-nav-backoffice-glossario')
+                    ->click('@app-nav-backoffice-recomendacoes')
+                    ->waitForLocation('/backoffice/recomendacoes')
+                    ->waitFor('@recomendacao-verde')
+                    ->assertSeeIn('@recomendacao-faixa-verde', '25,01% +')
+                    ->assertSeeIn('@recomendacoes-versao', 'dez-2025')
+                    ->assertMissing('@recomendacoes-aviso-segmento')
+                    ->select('@recomendacoes-setor', 'comercio')
+                    ->waitFor('@recomendacoes-aviso-segmento')
+                    ->select('@recomendacoes-indicador', 'pmr')
+                    ->waitForTextIn('@recomendacao-texto-amarelo', 'Vender a prazos menores.')
+                    ->assertSeeIn('@recomendacao-faixa-amarelo', '30,01–60 dias')
+                    ->press('@recomendacao-editar-amarelo')
+                    ->waitFor('@recomendacao-texto')
+                    ->assertDisabled('@recomendacoes-setor')
+                    ->assertDisabled('@recomendacoes-indicador')
+                    ->type('@recomendacao-texto', ' ')
+                    ->press('@recomendacao-salvar')
+                    ->waitFor('@erro-recomendacao-texto')
+                    ->assertSeeIn('@erro-recomendacao-texto', 'Informe o texto da recomendação.')
+                    ->type('@recomendacao-texto', 'Vender com prazo curto.')
+                    ->assertSeeIn('@recomendacao-amarelo', '23/300')
+                    ->press('@recomendacao-salvar')
+                    ->waitFor('@recomendacao-salva')
+                    ->assertSeeIn('@recomendacao-texto-amarelo', 'Vender com prazo curto.')
+                    ->assertEnabled('@recomendacoes-setor')
+                    ->assertDontSeeIn('@recomendacoes-versao', 'dez-2025');
+            });
+
+            $this->assertSame('Vender com prazo curto.', $registro->fresh()?->texto);
+        } finally {
+            // A truncagem deste teste não inclui `recomendacoes`: os textos vêm da migration.
+            Recomendacao::query()->whereKey($registro->id)->update($original);
+        }
     }
 }

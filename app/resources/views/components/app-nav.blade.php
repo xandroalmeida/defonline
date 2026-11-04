@@ -85,6 +85,15 @@
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-glossario',
             ],
+            [
+                'permissao' => \App\Support\PermissaoAdmin::EditarRecomendacoes,
+                'label' => 'Recomendações',
+                'icon' => 'message',
+                'href' => route('backoffice.recomendacoes'),
+                'active' => request()->routeIs('backoffice.recomendacoes'),
+                'disabled' => false,
+                'dusk' => 'app-nav-backoffice-recomendacoes',
+            ],
         ], fn (array $item): bool => $usuarioNav->podeUsarBackoffice($item['permissao'])));
     }
 
@@ -100,6 +109,7 @@
         'clock' => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
         'user' => '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>',
         'book' => '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
+        'message' => '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
         'users' => '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2.2.6 3.5 2.8 3.5 6"/>',
     ];
 @endphp

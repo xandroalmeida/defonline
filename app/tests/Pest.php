@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Domain\Motor\FonteRecomendacoes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\RecomendacoesCongeladas;
 use Tests\TestCase;
 
 /*
@@ -17,6 +19,9 @@ use Tests\TestCase;
 pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Feature');
 
 // Domain: testes do núcleo de regras de negócio (app/Domain). Boot do Laravel
-// é necessário para `config(...)` e service container, mas NÃO usa banco.
+// é necessário para `config(...)` e service container, mas NÃO usa banco: a matriz
+// de recomendações vem de um arquivo congelado (PDR-016).
 // Gate de cobertura ≥ 98% via phpunit-domain.xml (STORY-010 + STORY-028).
-pest()->extend(TestCase::class)->in('Domain');
+pest()->extend(TestCase::class)->beforeEach(function () {
+    app()->bind(FonteRecomendacoes::class, RecomendacoesCongeladas::class);
+})->in('Domain');

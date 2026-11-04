@@ -80,7 +80,7 @@ final class Motor
 
         return [
             'motor_version' => $motorVersion,
-            'matrix_version' => (string) config('motor.matrix_version'),
+            'matrix_version' => app(FonteRecomendacoes::class)->versao($setor),
             'setor' => $setor,
             'indicadores_calculados' => $indicadoresCalculados,
             'resumo_executivo' => $resumoExecutivo,

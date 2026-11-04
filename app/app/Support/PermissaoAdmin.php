@@ -14,6 +14,7 @@ enum PermissaoAdmin: string
     case LogarComo = 'usuarios.logar_como';
     case GerenciarAdmins = 'admins.gerenciar';
     case EditarGlossario = 'glossario.editar';
+    case EditarRecomendacoes = 'recomendacoes.editar';
 
     public function rotulo(): string
     {
@@ -22,6 +23,7 @@ enum PermissaoAdmin: string
             self::LogarComo => 'Logar como usuário',
             self::GerenciarAdmins => 'Gerenciar admins',
             self::EditarGlossario => 'Manter glossário',
+            self::EditarRecomendacoes => 'Manter recomendações',
         };
     }
 }

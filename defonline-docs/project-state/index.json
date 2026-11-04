@@ -361,7 +361,8 @@
       "story_ids": [
         "STORY-065",
         "STORY-066",
-        "STORY-067"
+        "STORY-067",
+        "STORY-068"
       ],
       "validation_report": null,
       "blocked_by_epics": [],
@@ -369,7 +370,8 @@
       "related_pdr": [
         "PDR-011",
         "PDR-012",
-        "PDR-013"
+        "PDR-013",
+        "PDR-016"
       ],
       "created_at": "2026-11-03",
       "updated_at": "2026-11-04"
@@ -1962,6 +1964,26 @@
       "note": "2026-11-04: implementada; falta publicar e verificar em produção. | 2026-11-04: fechada por decisão do PO, publicada na v0.11.5 (health, ready e smoke read-only ok). A verificação logada em produção não foi executada pelo agente.",
       "closed_at": "2026-11-04",
       "approved_by": "Alexandro"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "in_review",
+      "blocks": [],
+      "epic_id": "EPIC-011",
+      "sprint_id": null,
+      "owner_agent": "programador (claude-opus-5-5)",
+      "requires_design": false,
+      "created_at": "2026-11-04",
+      "updated_at": "2026-11-04",
+      "id": "STORY-068",
+      "slug": "recomendacoes-no-backoffice",
+      "title": "Backoffice — manutenção da matriz de recomendações",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "path": "epics/EPIC-011-backoffice-minimo/stories/STORY-068-recomendacoes-no-backoffice.md",
+      "related_pdr": "PDR-016",
+      "note": "2026-11-04: implementada, commit local; falta publicar e verificar em produção."
     }
   ],
   "sprints": [
@@ -2678,6 +2700,23 @@
         "related_idrs": [
           "IDR-010"
         ]
+      },
+      {
+        "id": "PDR-016",
+        "slug": "recomendacoes-editaveis-no-backoffice",
+        "title": "Matriz de recomendações mantida pela equipe no backoffice",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-016-recomendacoes-editaveis-no-backoffice.md",
+        "decided_at": "2026-11-04",
+        "decided_by": "PO (Alexandro / Claude)",
+        "related_epics": [
+          "EPIC-011"
+        ],
+        "related_adrs": [],
+        "related_idrs": [
+          "IDR-010"
+        ],
+        "note": "Altera a IDR-010 e o Anexo F §F.99."
       }
     ],
     "adr": [

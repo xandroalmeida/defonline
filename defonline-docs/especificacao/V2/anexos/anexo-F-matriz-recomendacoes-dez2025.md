@@ -149,4 +149,8 @@ Este indicador **não possui farol** no padrão verde/amarelo/vermelho; a matriz
 |---|---|---|---|
 | dez/2025 | 10/12/2025 | EB Parcerias | Primeira versão resumida, consolidada a partir da matriz detalhada jul/2025 em textos mais enxutos para exibição primária no relatório. |
 
+**A partir do PDR-016, este anexo é o registro da versão dez/2025, não a origem do texto em produção.** Os textos vigentes ficam na tabela `recomendacoes`, editados na tela de Recomendações do backoffice. Cada edição fica no audit log, a versão do segmento passa a ser o mês da última edição, e os diagnósticos já emitidos guardam o próprio texto. O processo abaixo não se aplica mais a edições feitas na tela.
+
 Atualizações desta matriz devem seguir o processo: (1) editar o conteúdo versionado no banco; (2) incrementar a versão e a data; (3) manter a versão anterior acessível para reprodução histórica dos diagnósticos já emitidos; (4) refletir a mudança neste arquivo `.md` mantendo a tabela de controle atualizada.
+
+**Divergência conhecida em §F.13 (STORY-042, devolutiva da EBC de 27/05/2026):** o autor retirou do cenário positivo de Indústria a frase "O crescimento das vendas e o aumento do prazo concedido a clientes gera maior NCG.". Este anexo ainda a mostra. O NCG absoluto não usa estes textos: o produto exibe as mensagens de faixa de `NcgAbsoluto` (STORY-060).

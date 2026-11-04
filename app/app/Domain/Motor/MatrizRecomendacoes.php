@@ -9,19 +9,18 @@ use Illuminate\Support\Facades\Log;
 /**
  * Leitura da matriz de recomendações por indicador × farol (snapshot — STORY-032).
  *
- * **Fonte.** Config PHP versionado em `config/motor/matriz-<matrix_version>-<setor>.php`.
- * Para a V1 (motor 1.3.0), só `matrix_version = "dez-2025"` × `setor = "industria"`
- * existe. Comércio/Serviços entram na Onda 2.
+ * **Fonte.** {@see FonteRecomendacoes}: em produção, a tabela `recomendacoes`, mantida
+ * no backoffice (PDR-016). Os 117 textos existem, mas o motor só calcula Indústria;
+ * Comércio/Serviços entram no EPIC-006.
  *
  * **Contrato.** {@see self::texto()} retorna o texto literal do par
  * `(codigo, farol)`; quando o par não existe (lacuna editorial), devolve
  * `"Recomendação em revisão."` + `Log::warning` + auto-append idempotente em
  * `design/matriz-lacunas.md` — **não quebra** cálculo nem relatório (CA-5).
  *
- * **Determinismo.** O método é puro: lê só do config (carregado uma vez por
- * request). Sem `now()`, sem leitura de banco. A escrita em `matriz-lacunas.md`
- * é I/O lateral idempotente — o conteúdo retornado **não muda** entre execuções,
- * então o `payload_hash` segue determinístico (IDR-010 §sub-decisão 3).
+ * **Determinismo.** Mesma matriz vigente → mesmo texto. Sem `now()`. A escrita em
+ * `matriz-lacunas.md` é I/O lateral idempotente (IDR-010 §sub-decisão 3). O
+ * `payload_hash` vem só do quiz, então não muda quando um texto é editado.
  *
  * **Snapshot.** O texto retornado é gravado em `diagnosticos.indicadores_calculados[*].mensagem`
  * no momento do cálculo (Motor::calcular). Diagnósticos antigos não recalculam
@@ -40,17 +39,14 @@ final class MatrizRecomendacoes
      */
     public function texto(string $codigo, string $farol, string $setor = 'industria'): string
     {
-        $matrixVersion = (string) config('motor.matrix_version');
+        $fonte = app(FonteRecomendacoes::class);
 
-        /** @var array<string, array<string, string>>|null $matriz */
-        $matriz = config("motor.matriz-{$matrixVersion}-{$setor}");
-
-        $texto = $matriz[$codigo][$farol] ?? null;
-        if (is_string($texto) && $texto !== '') {
+        $texto = $fonte->texto($setor, $codigo, $farol);
+        if ($texto !== null && $texto !== '') {
             return $texto;
         }
 
-        $this->reportarLacuna($codigo, $farol, $setor, $matrixVersion);
+        $this->reportarLacuna($codigo, $farol, $setor, $fonte->versao($setor));
 
         return self::FALLBACK;
     }

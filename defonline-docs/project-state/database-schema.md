@@ -60,6 +60,9 @@ PK `id uuid`. Persona "Roberto". Soft delete + anonimização LGPD.
 ### `glossario_termos` — glossário do relatório (STORY-067)
 PK `id uuid`. `termo` varchar(120) **UNIQUE**, `definicao` text, `ordem` integer (índice), timestamps. Mantido na tela de Glossário do backoffice.
 
+### `recomendacoes` — matriz de recomendações (STORY-068, PDR-016)
+PK `id uuid`. **UNIQUE** `(setor, indicador, farol)`. `setor` varchar(16), `indicador` varchar(40), `farol` varchar(10), `faixa` varchar(40) (só rótulo da tela), `texto` varchar(300), `editado_em` timestamptz (null = texto de origem; o maior valor do segmento define a versão da matriz), timestamps. 117 linhas, mantidas na tela de Recomendações do backoffice.
+
 ### `empresas_analisadas` — empresas do usuário
 PK `id uuid`. FK `usuario_id → usuarios` (RESTRICT). **UNIQUE parcial** `(usuario_id, documento) WHERE deleted_at IS NULL`.
 

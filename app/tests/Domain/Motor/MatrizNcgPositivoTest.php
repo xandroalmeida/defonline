@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Motor\Indicadores\NcgAbsoluto;
 use App\Domain\Motor\Motor;
+use Tests\Support\RecomendacoesCongeladas;
 
 /*
 |-------------------------------------------------------------------------
@@ -36,7 +37,7 @@ $textoNovo = 'A elevação deve ser acompanhada, na mesma proporção, pelo aume
 
 it('CA-7 — `ncg_absoluto.positiva` da referência editorial é exatamente o texto revisado', function () use ($textoNovo) {
     /** @var array<string, array<string, array<string, string>>> $matriz */
-    $matriz = config('motor.matriz-dez-2025-industria');
+    $matriz = RecomendacoesCongeladas::matriz();
 
     // Igualdade estrita: `toContain` passaria com o texto antigo, do qual o
     // texto novo é literalmente a segunda frase.
@@ -45,7 +46,7 @@ it('CA-7 — `ncg_absoluto.positiva` da referência editorial é exatamente o te
 
 it('CA-7 (borda) — o cenário `negativa` não foi tocado', function () {
     /** @var array<string, array<string, array<string, string>>> $matriz */
-    $matriz = config('motor.matriz-dez-2025-industria');
+    $matriz = RecomendacoesCongeladas::matriz();
 
     expect($matriz['_referencia_editorial']['ncg_absoluto']['negativa'])->toBe(
         'Teoricamente, a empresa não necessita de recursos para o giro. NCG negativa significa Investimento Operacional em Giro (IOG).',
@@ -57,7 +58,7 @@ it('CA-7 (borda) — a edição não vazou para o `ncg_vendas`, que tem faixas p
     // existe (ncg_vendas é verde/amarelo/vermelho) e o texto pedido é de §F.13.
     // Trocar o alvo errado é o modo de falha real desta tarefa.
     /** @var array<string, array<string, string>> $matriz */
-    $matriz = config('motor.matriz-dez-2025-industria');
+    $matriz = RecomendacoesCongeladas::matriz();
 
     foreach (['verde', 'amarelo', 'vermelho'] as $farol) {
         expect($matriz['ncg_vendas'][$farol])->not->toBe($textoNovo);

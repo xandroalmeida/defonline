@@ -61,9 +61,8 @@ use App\Domain\Motor\MotivosIndisponibilidade;
  * **fontes de financiamento de longo prazo, preferencialmente de fornecedores**
  * — para as constantes MODERADO e ALTO abaixo, que são o que o produto de fato
  * exibe. A faixa FOLGA foi revisitada contra o cenário "NCG negativa" do mesmo
- * §F.13. A entrada correspondente da matriz permanece em
- * `config/motor/matriz-dez-2025-industria.php`, agora sob a chave
- * `_referencia_editorial`, explicitamente fora do que o runtime consome.
+ * §F.13. Estas constantes ficam fora da tabela `recomendacoes` e da tela de edição:
+ * o NCG absoluto não tem farol (PDR-016).
  *
  * Casos extremos (catálogo §9):
  *   - Q03 ∨ Q04 ∨ Q07 ausente → `indisponivel:ncg_componente_faltante`.

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Domain\Motor\FonteRecomendacoes;
 use App\Observabilidade\Listeners\CollectJobMetrics;
 use App\Services\Rfb\CnpjaRfbCnpjClient;
 use App\Services\Rfb\MockRfbCnpjClient;
 use App\Services\Rfb\ReceitawsRfbCnpjClient;
 use App\Services\Rfb\RfbCnpjClient;
+use App\Support\RecomendacoesNoBanco;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Queue\Events\JobFailed;
@@ -23,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(CollectJobMetrics::class);
+        $this->app->bind(FonteRecomendacoes::class, RecomendacoesNoBanco::class);
 
         // STORY-018 CA-4 — bind do provedor RFB conforme `config('services.rfb.provider')`.
         // IDR-004 fixa os três valores aceitos; o `default` é exception explícita para
