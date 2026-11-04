@@ -51,6 +51,7 @@ it('edita o termo sem acusar duplicidade com ele mesmo', function () {
 
     ($this->tela)()->call('editar', $termo->id)
         ->assertSet('termo', 'Inadimplência')
+        ->assertDispatched('glossario-editando')
         ->set('definicao', 'Texto novo.')
         ->call('salvar')
         ->assertHasNoErrors()

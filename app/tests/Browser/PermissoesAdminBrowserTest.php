@@ -56,6 +56,19 @@ final class PermissoesAdminBrowserTest extends DuskTestCase
 
             // O glossário não é truncado entre testes: remove o que criou.
             $termoId = \App\Models\GlossarioTermo::query()->where('termo', 'Termo E2E')->value('id');
+
+            // Editar leva ao topo da tela, com o foco na definição.
+            $browser->resize(1280, 700)
+                ->scrollIntoView('@glossario-editar-'.$termoId);
+            $this->assertGreaterThan(0, $browser->script('return window.scrollY;')[0]);
+            $browser->press('@glossario-editar-'.$termoId)
+                ->waitUsing(5, 100, fn () => $browser->script(
+                    "return document.activeElement.id === 'glossario-definicao'
+                        && document.activeElement.value === 'Definição E2E'
+                        && window.scrollY === 0;"
+                )[0] === true)
+                ->press('@glossario-cancelar');
+
             $browser->press('@glossario-excluir-'.$termoId)
                 ->waitUntilMissingText('Termo E2E')
                 ->visit('/backoffice/administradores')

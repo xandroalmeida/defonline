@@ -77,6 +77,7 @@ final class Glossario extends Component
         $this->editandoId = $registro->id;
         $this->termo = $registro->termo;
         $this->definicao = $registro->definicao;
+        $this->dispatch('glossario-editando');
     }
 
     public function excluir(string $id): void

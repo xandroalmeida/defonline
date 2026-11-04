@@ -1,4 +1,9 @@
-<div>
+<div x-on:glossario-editando.window="$nextTick(() => {
+         const campo = $refs.definicao;
+         campo.focus({ preventScroll: true });
+         campo.setSelectionRange(campo.value.length, campo.value.length);
+         window.scrollTo({ top: 0 });
+     })">
     <x-page-header :title="'Glossário'"
                    :subtitle="'Termos exibidos ao final do relatório, na tela. A ordem aqui é a ordem do relatório.'" />
 
@@ -13,7 +18,7 @@
             </div>
             <div>
                 <x-label for="glossario-definicao">Definição</x-label>
-                <textarea id="glossario-definicao" wire:model="definicao" rows="3" maxlength="{{ \App\Livewire\Backoffice\Glossario::DEFINICAO_MAX }}"
+                <textarea id="glossario-definicao" x-ref="definicao" wire:model="definicao" rows="3" maxlength="{{ \App\Livewire\Backoffice\Glossario::DEFINICAO_MAX }}"
                           class="input min-h-24 w-full" dusk="glossario-definicao"></textarea>
                 @error('definicao')
                     <p class="text-[color:var(--color-destructive)] text-sm mt-1 mb-0" dusk="erro-glossario-definicao">{{ $message }}</p>
