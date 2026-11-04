@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Browser;
 
 use App\Models\Usuario;
+use Facebook\WebDriver\WebDriverKeys;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
@@ -88,9 +89,9 @@ final class PermissoesAdminBrowserTest extends DuskTestCase
             )[0]);
             $browser->press('@glossario-excluir-'.$termoId)
                 ->waitFor('@confirmacao')
-                ->assertSeeIn('@confirmacao-mensagem', 'Excluir “Termo E2E” do glossário?')
-                ->keys('@confirmacao-cancelar', ['{escape}'])
-                ->waitUntilMissing('@confirmacao')
+                ->assertSeeIn('@confirmacao-mensagem', 'Excluir “Termo E2E” do glossário?');
+            $browser->driver->getKeyboard()->sendKeys(WebDriverKeys::ESCAPE);
+            $browser->waitUntilMissing('@confirmacao')
                 ->pause(300)
                 ->assertSeeIn('@glossario-lista', 'Termo E2E')
                 ->press('@glossario-excluir-'.$termoId)
