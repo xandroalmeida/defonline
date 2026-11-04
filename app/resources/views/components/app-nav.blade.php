@@ -85,7 +85,7 @@
 <div x-show="navOpen"
      x-cloak
      x-transition.opacity.duration.200ms
-     class="fixed inset-0 z-40 bg-[color:var(--color-primary)]/40 lg:hidden"
+     class="print:hidden fixed inset-0 z-40 bg-[color:var(--color-primary)]/40 lg:hidden"
      @click="navOpen = false"
      aria-hidden="true">
 </div>
@@ -93,7 +93,7 @@
 {{-- Sidebar fixa em ≥ 1024px; drawer off-canvas em < 1024px. Mesmo markup, mesmo conteúdo. --}}
 <aside id="app-nav-drawer"
        data-testid="app-nav"
-       class="fixed top-0 left-0 z-50 h-full w-[280px] max-w-[80vw] bg-[color:var(--color-surface)] border-r border-[color:var(--color-border)] transform transition-transform duration-200 ease-out lg:translate-x-0 lg:sticky lg:top-0 lg:z-auto lg:w-60 lg:h-screen lg:max-w-none lg:transform-none"
+       class="print:hidden fixed top-0 left-0 z-50 h-full w-[280px] max-w-[80vw] bg-[color:var(--color-surface)] border-r border-[color:var(--color-border)] transform transition-transform duration-200 ease-out lg:translate-x-0 lg:sticky lg:top-0 lg:z-auto lg:w-60 lg:h-screen lg:max-w-none lg:transform-none"
        :class="navOpen ? 'translate-x-0' : '-translate-x-full'"
        {{--
            STORY-059 CA-2 — drawer fechado sai da tabulação E da árvore de

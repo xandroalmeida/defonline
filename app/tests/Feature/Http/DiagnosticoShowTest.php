@@ -498,3 +498,20 @@ it('nenhum box do relatório parte ao meio quando a tela é impressa', function 
             ->and($partiveis($box))->toBe(0, $box);
     }
 });
+
+it('o cabeçalho e o menu do app não saem na impressão da tela', function () {
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnostico($dono);
+
+    $html = $this->actingAs($dono)->get("/diagnosticos/{$diag->id}")->assertOk()->getContent();
+
+    $doc = new DOMDocument;
+    @$doc->loadHTML('<?xml encoding="utf-8"?>'.$html);
+    $xpath = new DOMXPath($doc);
+
+    foreach (['app-header', 'app-nav'] as $testid) {
+        $classes = $xpath->query("//*[@data-testid='{$testid}']")->item(0)?->getAttribute('class');
+
+        expect($classes)->toContain('print:hidden');
+    }
+});

@@ -15,7 +15,7 @@
 @endphp
 
 <header data-testid="app-header"
-        class="sticky top-0 z-30 flex items-center justify-between gap-3 h-16 px-4 sm:px-6 bg-[color:var(--color-surface)] border-b border-[color:var(--color-border)]">
+        class="print:hidden sticky top-0 z-30 flex items-center justify-between gap-3 h-16 px-4 sm:px-6 bg-[color:var(--color-surface)] border-b border-[color:var(--color-border)]">
 
     <div class="flex items-center gap-3 min-w-0">
         {{-- Hamburger só aparece em < 1024px (controlado pelo Alpine root do shell). --}}
