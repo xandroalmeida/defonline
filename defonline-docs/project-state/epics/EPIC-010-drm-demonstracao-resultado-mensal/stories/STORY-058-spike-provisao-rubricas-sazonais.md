@@ -6,10 +6,10 @@ epic_id: EPIC-010
 type: spike
 target_role: arquiteto
 requires_design: false
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: arquiteto (claude-sonnet-5.5)
 created_at: 2026-08-04
-updated_at: 2026-08-04
+updated_at: 2026-11-05
 estimated_session_size: M
 decisoes: [PDR-004]
 checkpoint: CP3
@@ -99,6 +99,20 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`.
 ## Notas do agente
 
 ### Decisões tomadas
+- Recomendação: **saída C** (manter caixa + `STORY-051` e medir após o primeiro dezembro real), com a **lente de provisão derivada** (saldo calculado na leitura, nunca gravado) pré-desenhada como degrau seguinte condicionado a gatilho. Saída B (razão de provisão persistido) não recomendada dentro do DRM. Detalhe e as 8 respostas no `ADR-011`.
+- ADR gravado como `proposed` (não `accepted`): CA-1 e a Definição de Pronto exigem revisão do PO antes do aceite.
+
 ### Descobertas
+- A provisão colide com **duas** premissas, não uma: o caixa puro do `PDR-003` e a **independência dos snapshots** do `ADR-007`/`IDR-010` (saldo é cumulativo; persisti-lo cria dependência entre competências ou obriga recálculo em cascata).
+- `D16` é folha **líquida**; a base correta é bruta. Provisão derivada é estimativa, não valor contábil.
+- `D16`/`D20`/`D21` só existem no modo detalhado; quem usa `D15` agregado não tem como ser provisionado.
+- Não há dado de uso: todas as estórias de implementação do épico estão `ready`.
+- Fragilidade do `A4` (sem alterar a `STORY-051`): só dispara a partir do 4º lançamento, então quem começa em outubro não tem alerta no primeiro dezembro.
+- O payload imutável já guarda `D16`/`D17`/`D20`/`D21`; a lente derivada fica viável sem nenhuma mudança agora.
+- Como a saída recomendada é C, **não** foi esboçado EPIC no `roadmap/next-wave.md` (CA-8 só o exige para B). Numeração: `EPIC-011` já é o backoffice; um eventual épico novo seria `EPIC-012` ou posterior.
+
 ### Bloqueios encontrados
+- Nenhum. Pendente: decisões do PO (ver relatório) e `index.json` (a cargo do orquestrador).
+
 ### ADRs criados
+- `ADR-011` — `decisions/adr/ADR-011-provisao-rubricas-sazonais-drm.md` (status `proposed`, type `persistencia`).
