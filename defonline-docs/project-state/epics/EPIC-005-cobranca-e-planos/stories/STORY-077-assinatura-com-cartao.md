@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: true
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: claude-sonnet-5-5 (STORY-077)
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: L
@@ -100,13 +100,32 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 ## Notas do agente
 
 ### Decisões tomadas
+- Leitura: estória (com "Ajustes do ADR-010", que prevalecem), ADR-010, IDR-018, notas da STORY-076, spec `STORY-070-checkout-assinatura.md` e skill do programador. Pelo ADR-010 a seção de campos de cartão da spec não se aplica: o cartão é digitado no Checkout hospedado `RECURRENT`; o botão leva ao provedor depois do aceite do Termo.
+- Entrada `GET /assinar/{plano}/{ciclo}` (`checkout.assinatura`, `RotasCobranca::ASSINAR`) e retorno `GET /assinar/retorno/{invoice}` (`assinatura.retorno`, polling de 3 s). Cobrança desligada = 404 nas duas.
+- Fluxo: `IniciarAssinatura` (aceite -> Invoice `tipo=assinatura` com retrato de preço e cota -> `startCheckout` recorrente). A assinatura só nasce em `ConfirmarAssinatura`, chamado por `ProcessarEvento` em `cobranca.paga` depois de `getCharge`. Nada de ativar pelo retorno do navegador.
+- Renovação (CA-6/CA-8): uma cobrança paga que não é a da Invoice do checkout mas pertence a uma assinatura nossa (`provedor` + id da assinatura) vira uma Invoice `renovacao` (`UNIQUE (provedor, id_externo)`), estende o período e devolve a cota cheia. Mensal: renova com o pagamento. Anual: ano inteiro de acesso pago, e `assinaturas:renovar-cota` (horário, idempotente) devolve a cota todo mês no aniversário; num mês sem o dia vale o último dia, e o dia 31 volta nos meses que o têm (`CotaMensal`, aniversário = `data_inicio + n meses`, sem deriva). `periodos_pagos` ancora o vencimento em `data_inicio`.
+- Preço no CA-5: a assinatura guarda `preco_snapshot_centavos` e `cota_snapshot`. Na renovação o preço é o que o provedor cobrou (ele manda; o valor da assinatura no provedor é fixo), com `warning` se mudou; a cota passa a ser a do catálogo de hoje (é o "até a renovação" do CA-5). Se o PO preferir manter a cota antiga até a troca de plano, é mudar uma linha em `ConfirmarAssinatura::renovar`.
+- Recusa (CA-3): o Asaas trata no checkout hospedado; a volta sem pagamento (`cobranca.falhou`, prazo vencido ou cancelamento) mantém o usuário sem assinatura e oferece "Tentar de novo". Motivo específico (limite, CVV) não é mostrado porque o evento canônico não o carrega; texto genérico "O banco não autorizou o pagamento. Tente outro cartão." Se o usuário acertar o cartão na própria página do provedor, o pagamento chega e ativa (a Invoice `falhou` ainda aceita `paga`).
+- Segurança (CA-4): `CobrancaNoProvedor` só tem `cartaoBandeira` e `cartaoUltimos4` (lidos de `creditCardBrand`/`creditCardNumber`, normalizados para os 4 últimos dígitos; o token é ignorado e removido do payload). Colunas `cartao_bandeira(20)`/`cartao_ultimos4(4)` em `invoices` e `assinaturas`. Testes arquiteturais novos em `PagamentoArchTest` e `SchemaSemDadosDeCartaoTest` (ADR-010 §2).
+- Pagamento duplicado (duas abas, dois checkouts pagos): a Invoice fica `paga`, a segunda assinatura não nasce, `Log::error cobranca.assinatura_duplicada` e a tela explica; devolução é manual (fora de escopo, estorno é 087).
+- Plano anual: só cartão (PedidoCheckout recusa Pix recorrente); o ramo Pix é da STORY-080.
+- `Assinatura` passou a usar `$dateFormat` com offset (IDR-018 avisava), senão `proxima_cota_em` deslocava 3 h no banco local.
+- Refatoração pequena: o registro do aceite saiu de `IniciarCompraDeCreditos` para `RegistrarAceiteDoCheckout` (segundo uso).
+- Teste alterado: em `PaginaTest`, "esconde Assinar enquanto o checkout de assinatura não existe" virou "mostra Assinar em cada plano ativo, apontando ao checkout existente com plano e ciclo" (mais um teste de plano inativo sem botão); removi `rotaFalsa(ASSINAR)` dos dois testes que a usavam, porque a rota é real agora.
 
 ### Descobertas
+- Sandbox real: `POST /checkouts` com `RECURRENT`, `CREDIT_CARD` e `subscription{cycle MONTHLY|YEARLY, nextDueDate hoje 00:00:00}` é aceito (mensal e anual), e o cancelamento funciona (`tests/Sandbox`, rodado com a chave do `app/.env` sem imprimi-la).
+- Doc do Asaas: `nextDueDate` é a data da primeira cobrança, criada só quando o pagador conclui o checkout; a cobrança tem o campo `subscription`. A doc NÃO diz se a cobrança herda `externalReference`/`checkoutSession`; o código tolera os dois casos (acha a Invoice por referência, checkout ou id da cobrança; renovação por id da assinatura).
+- `ReceberWebhook` engole exceção do processamento síncrono (grava `erro`, o reprocessador retoma): testes de falha conferem o estado, não a exceção.
 
 ### Bloqueios encontrados
+- Nenhum. Não verifiquei com pagamento real na página hospedada do Asaas (ADR-010 pendências 1, 5 e 6): sem isso não sei (a) se `creditCard.creditCardNumber/Brand` aparece na cobrança de um checkout, então "cartão final 4242" pode não aparecer em produção (a tela omite quando não há), (b) se a 1ª cobrança nasce `CONFIRMED` na hora com `nextDueDate` = hoje e (c) como a 2ª cobrança herda campos. Dúvidas ao PO/Arquiteto: ver relatório (retentativa e atraso são da 079).
 
 ### IDRs criados
+- IDR-019 (assinatura: Invoice por cobrança, `periodos_pagos` e cota mensal do anual).
 
 ### Cobertura final
+- Suíte All: 2349 testes verdes; cobertura total 98,6%; `app/Domain` 99,7% (gate 98). Dusk inteiro: 73 verdes. Pint e PHPStan limpos.
 
 ### Evidências
+- `tests/Feature/Cobranca/{AssinaturaComCartaoTest,AsaasAssinaturaTest,SchemaSemDadosDeCartaoTest}.php`, `tests/Feature/Livewire/AssinarPlanoTest.php`, `tests/Domain/Cobranca/CicloECotaMensalTest.php`, `tests/Unit/Arch/PagamentoArchTest.php`, `tests/Browser/AssinaturaCartaoBrowserTest.php`, `tests/Sandbox/AsaasSandboxTest.php`.
