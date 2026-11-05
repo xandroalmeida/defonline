@@ -2382,13 +2382,13 @@
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-087"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2400,18 +2400,19 @@
         "STORY-081"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-082-troca-de-plano.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "901597e; IDR-026. Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-087"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2427,7 +2428,8 @@
         "STORY-081"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-083-cupom-no-checkout-e-beneficio-beta.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "ca0e6ff..c887f31; merge 0bb1ff1; IDR-029. Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
@@ -2458,13 +2460,13 @@
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-087"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2477,18 +2479,19 @@
         "STORY-077"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-085-operacao-financeira-no-backoffice.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "01df463..; merge ee065c5; IDR-027. Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-087"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2503,7 +2506,8 @@
         "STORY-079"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-086-eventos-e-alertas-de-cobranca.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "e28c5a7..08e7664; integração 82b5476; IDR-028. Revisado pelo orquestrador na main."
     },
     {
       "type": "validation",
@@ -4020,6 +4024,41 @@
         "title": "IDR-021 — Cancelar a renovação e trocar o cartão",
         "status": "accepted",
         "path": "decisions/idr/IDR-021-meu-plano-cancelar-renovacao-e-troca-de-cartao.md",
+        "decided_at": "2026-11-05"
+      },
+      {
+        "id": "IDR-025",
+        "title": "IDR-025 — Fuso de exibição e sessão do banco em UTC",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-025-fuso-de-exibicao-e-sessao-do-banco-em-utc.md",
+        "decided_at": "2026-11-05"
+      },
+      {
+        "id": "IDR-026",
+        "title": "IDR-026 — Troca de plano",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-026-troca-de-plano-upgrade-imediato-e-downgrade-agendado.md",
+        "decided_at": "2026-11-05"
+      },
+      {
+        "id": "IDR-027",
+        "title": "IDR-027 — Reembolso no backoffice",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-027-reembolso-no-backoffice-e-pagamento-sem-destino.md",
+        "decided_at": "2026-11-05"
+      },
+      {
+        "id": "IDR-028",
+        "title": "IDR-028 — Eventos e alertas de cobrança",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-028-eventos-e-alertas-de-cobranca.md",
+        "decided_at": "2026-11-05"
+      },
+      {
+        "id": "IDR-029",
+        "title": "IDR-029 — Cupom no checkout",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-029-cupom-no-checkout-reserva-de-vaga-e-ciclos-sem-cobranca.md",
         "decided_at": "2026-11-05"
       }
     ],
