@@ -41,13 +41,19 @@ final class IniciarAssinatura
         return $ciclo->precoDe($plano->preco_mensal_centavos, $plano->preco_anual_centavos);
     }
 
-    /** Assinatura paga vigente do Usuário (o trial não conta: assinar o encerra). */
+    /**
+     * Assinatura paga vigente do Usuário (o trial não conta: assinar o encerra). Inclui a renovação
+     * cancelada enquanto o ciclo pago não acabou (STORY-081): o acesso ainda é dela, e assinar de novo
+     * seria pagar duas vezes pelo mesmo período. Para voltar a cobrar, o caminho é reativar.
+     */
     public static function assinaturaVigente(string $usuarioId): ?Assinatura
     {
         return Assinatura::query()
             ->where('usuario_id', $usuarioId)
             ->where('trial', false)
-            ->whereIn('status', [StatusAssinatura::Ativa->value, StatusAssinatura::EmAtraso->value])
+            ->where(fn ($q) => $q
+                ->whereIn('status', [StatusAssinatura::Ativa->value, StatusAssinatura::EmAtraso->value])
+                ->orWhere(fn ($c) => $c->where('status', StatusAssinatura::Cancelada->value)->where('proximo_vencimento', '>', DB::raw('now()'))))
             ->first();
     }
 

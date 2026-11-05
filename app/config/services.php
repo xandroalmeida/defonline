@@ -107,6 +107,8 @@ return [
         // Validade do link do checkout de assinatura com cartão (o provedor aceita 10 a 1440).
         'cartao_expiracao_minutos' => (int) env('CARTAO_EXPIRACAO_MINUTOS', 60),
         'webhook_token' => env('PAYMENTS_WEBHOOK_TOKEN'),
+        // STORY-081 CA-1 — a partir de quantos dias do vencimento o lote de créditos ganha o alerta.
+        'lote_perto_de_vencer_dias' => (int) env('LOTE_PERTO_DE_VENCER_DIAS', 30),
     ],
 
     'asaas' => [

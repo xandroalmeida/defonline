@@ -54,6 +54,13 @@ final class FalhaDeRenovacao
             return ['ignorado', null];
         }
 
+        // Cartão novo de uma assinatura em atraso (STORY-081): a troca parou a régua da cobrança antiga e a 1ª
+        // cobrança do cartão novo foi recusada. A régua recomeça sobre ela, senão a assinatura ficaria em
+        // atraso para sempre, sem retentativa nem encerramento.
+        if ($assinatura->status === StatusAssinatura::EmAtraso && $assinatura->atraso_cobranca_id === null) {
+            return $this->retomarRegua($assinatura, $cobrancaId);
+        }
+
         if (! $this->entraEmAtraso($assinatura, $cobranca)) {
             return ['ignorado', null];
         }
@@ -96,6 +103,38 @@ final class FalhaDeRenovacao
         }
 
         return ['processado', null];
+    }
+
+    /** @return array{0: 'processado'|'ignorado', 1: string|null} */
+    private function retomarRegua(Assinatura $assinatura, string $cobrancaId): array
+    {
+        $retomada = DB::transaction(function () use ($assinatura, $cobrancaId): bool {
+            $a = Assinatura::query()->lockForUpdate()->findOrFail($assinatura->id);
+
+            if ($a->status !== StatusAssinatura::EmAtraso || $a->atraso_cobranca_id !== null) {
+                return false;
+            }
+
+            $a->forceFill([
+                'atraso_cobranca_id' => $cobrancaId,
+                'tentativas_cobranca' => 0,
+                'proxima_tentativa_em' => ReguaDeCobranca::proximaTentativa(now()),
+                'atraso_aviso_em' => null,
+            ])->save();
+
+            AuditLogger::log(
+                action: 'cobranca.regua_retomada_apos_troca_de_cartao',
+                subjectType: 'Assinatura',
+                subjectId: $a->id,
+                actorType: 'system',
+                usuarioId: $a->usuario_id,
+                after: ['cobranca' => $cobrancaId],
+            );
+
+            return true;
+        });
+
+        return $retomada ? ['processado', null] : ['ignorado', null];
     }
 
     /** Só a cobrança do ciclo em aberto de uma assinatura em dia coloca em atraso. */

@@ -23,6 +23,7 @@ use App\Livewire\Cobranca\AcompanharAssinatura;
 use App\Livewire\Cobranca\AcompanharPagamento;
 use App\Livewire\Cobranca\AssinarPlano;
 use App\Livewire\Cobranca\ComprarCreditos;
+use App\Livewire\Cobranca\MeuPlano;
 use App\Livewire\Diagnostico\Quiz as QuizDiagnostico;
 use App\Livewire\Diagnostico\SelecionarEmpresa as SelecionarEmpresaDiagnostico;
 use App\Livewire\Drm\Demonstracao as DemonstracaoDrm;
@@ -118,9 +119,13 @@ Route::middleware('auth')->group(function () {
     // STORY-077 — assinatura com cartão (checkout hospedado). Cobrança desligada = 404.
     Route::get('/assinar/retorno/{invoice}', AcompanharAssinatura::class)->whereUuid('invoice')->name('assinatura.retorno');
     Route::get('/assinar/{plano}/{ciclo}', AssinarPlano::class)->whereUuid('plano')->whereIn('ciclo', ['mensal', 'anual'])->name('checkout.assinatura');
+    // STORY-081 — Meu plano: plano, cota, créditos, cobranças, troca de cartão e cancelamento. Desligada = 404.
+    Route::get('/meu-plano', MeuPlano::class)->name('meu-plano');
     // "Página do provedor" do adaptador fake (dev/E2E): 404 fora do provedor fake.
     Route::get('/pagamentos/fake/{invoice}', [PagamentoFakeController::class, 'mostrar'])->whereUuid('invoice')->name('pagamentos.fake');
     Route::post('/pagamentos/fake/{invoice}', [PagamentoFakeController::class, 'simular'])->whereUuid('invoice')->name('pagamentos.fake.simular');
+    Route::get('/pagamentos/fake/troca/{troca}', [PagamentoFakeController::class, 'mostrarTroca'])->whereUuid('troca')->name('pagamentos.fake.troca');
+    Route::post('/pagamentos/fake/troca/{troca}', [PagamentoFakeController::class, 'simularTroca'])->whereUuid('troca')->name('pagamentos.fake.troca.simular');
 
     // STORY-047 — Raio X do Negócio (DRM): lançamento mensal. Empresa de outro usuário → 404 (IDR-009).
     Route::get('/empresas/{empresa}/drm/lancar', LancamentoDrm::class)

@@ -241,7 +241,7 @@ final class Carteira
         return $renovadas;
     }
 
-    /** Atraso, cancelamento e encerramento. Cancelar registra a data e mantém o acesso até o vencimento. */
+    /** Atraso, cancelamento, reativação e encerramento. Cancelar registra a data e mantém o acesso até o vencimento. */
     public function mudarStatus(string $assinaturaId, StatusAssinatura $status): Assinatura
     {
         $assinatura = Assinatura::query()->findOrFail($assinaturaId);
@@ -249,6 +249,11 @@ final class Carteira
 
         if ($status === StatusAssinatura::Cancelada) {
             $assinatura->data_cancelamento = now();
+        }
+
+        // Reativar a renovação (STORY-081 CA-5) apaga a marca do cancelamento.
+        if ($status === StatusAssinatura::Ativa) {
+            $assinatura->data_cancelamento = null;
         }
 
         $assinatura->save();

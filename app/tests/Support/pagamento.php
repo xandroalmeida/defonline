@@ -281,6 +281,18 @@ function _provedorQueFalha(array $falhas): PaymentProvider
             $this->real->cancelSubscription($assinatura);
         }
 
+        public function suspendSubscription(ReferenciaProvedor $assinatura): void
+        {
+            $this->checar(__FUNCTION__, $assinatura);
+            $this->real->suspendSubscription($assinatura);
+        }
+
+        public function resumeSubscription(ReferenciaProvedor $assinatura): void
+        {
+            $this->checar(__FUNCTION__, $assinatura);
+            $this->real->resumeSubscription($assinatura);
+        }
+
         public function listSubscriptionCharges(ReferenciaProvedor $assinatura, DateTimeImmutable $desde): array
         {
             $this->checar(__FUNCTION__, $assinatura);

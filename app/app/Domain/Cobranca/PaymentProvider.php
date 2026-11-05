@@ -12,7 +12,8 @@ use DateTimeImmutable;
  * é escrever outra implementação e registrá-la; regra de plano, carteira e crédito não muda.
  *
  * Entram conforme as estórias precisam: checkout avulso (076), assinatura (077), retentativa,
- * cancelamento da recorrência e conciliação (079). `ensureCustomer` e estorno ficam para 087.
+ * cancelamento da recorrência e conciliação (079), suspender/religar a renovação (081).
+ * `ensureCustomer` e estorno ficam para 087.
  */
 interface PaymentProvider
 {
@@ -49,7 +50,8 @@ interface PaymentProvider
     public function retryCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor;
 
     /**
-     * STORY-079 — encerra a recorrência no provedor (ele para de gerar cobranças).
+     * STORY-079/081 — encerra a recorrência de vez no provedor (régua esgotada, ou a assinatura antiga
+     * depois de uma troca de cartão). Idempotente: cancelar o que já não existe não é erro.
      *
      * @throws ProvedorIndisponivel
      */
@@ -72,6 +74,21 @@ interface PaymentProvider
      * @throws ProvedorIndisponivel
      */
     public function listCheckoutCharges(ReferenciaProvedor $sessao): array;
+
+    /**
+     * STORY-081 CA-4 — para de cobrar as próximas renovações sem apagar a assinatura, para que
+     * {@see resumeSubscription()} possa religá-la (CA-5).
+     *
+     * @throws ProvedorIndisponivel
+     */
+    public function suspendSubscription(ReferenciaProvedor $assinatura): void;
+
+    /**
+     * STORY-081 CA-5 — volta a cobrar a renovação da assinatura suspensa.
+     *
+     * @throws ProvedorIndisponivel
+     */
+    public function resumeSubscription(ReferenciaProvedor $assinatura): void;
 
     /**
      * Autentica e traduz um webhook bruto para o evento canônico.

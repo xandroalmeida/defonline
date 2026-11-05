@@ -56,3 +56,9 @@ Schedule::command('cobranca:conciliar --modo=diaria')
     ->dailyAt('06:30')
     ->onOneServer()
     ->withoutOverlapping(120);
+
+// STORY-081 — termina o cancelamento da assinatura antiga das trocas de cartão (o provedor pode ter falhado na hora).
+Schedule::command('assinaturas:cancelar-antigas')
+    ->hourly()
+    ->onOneServer()
+    ->withoutOverlapping(30);

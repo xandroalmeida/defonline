@@ -145,7 +145,13 @@ final class ConfirmarAssinatura
         return ['processado', $invoice->id];
     }
 
-    /** @return array{0: 'processado'|'ignorado', 1: string|null} */
+    /**
+     * Em atraso, QUALQUER cobrança paga da assinatura a restabelece e para a régua (STORY-079 CA-4): a
+     * retentativa da régua e a 1ª cobrança do cartão novo (STORY-081 CA-3) chegam aqui pelo mesmo caminho,
+     * e cada cobrança vira uma só Invoice (`UNIQUE (provedor, id_externo)`), então não há renovação em dobro.
+     *
+     * @return array{0: 'processado'|'ignorado', 1: string|null}
+     */
     private function renovar(CobrancaNoProvedor $cobranca, string $provedor, ?Invoice $referencia): array
     {
         $assinatura = $cobranca->assinaturaId === null ? null : Assinatura::query()
@@ -155,6 +161,20 @@ final class ConfirmarAssinatura
             ->first();
 
         if ($assinatura === null) {
+            // Pagamento da cobrança da assinatura ANTIGA de uma troca de cartão já concluída (a retentativa
+            // da régua estava em voo quando o cartão novo foi confirmado): o ciclo vai ser cobrado de novo
+            // pelo cartão novo, então pede devolução manual (STORY-087).
+            if ($cobranca->assinaturaId !== null && DB::table('trocas_de_cartao')->where('antiga_id_externo', $cobranca->assinaturaId)->where('status', 'concluida')->exists()) {
+                Log::error('cobranca.pagamento_da_assinatura_antiga', [
+                    'module' => 'cobranca',
+                    'action' => 'processar_evento',
+                    'cobranca' => $cobranca->referencia->id,
+                    'assinatura_antiga' => $cobranca->assinaturaId,
+                ]);
+
+                return ['ignorado', $referencia?->id];
+            }
+
             Log::error('cobranca.evento_sem_invoice', [
                 'module' => 'cobranca',
                 'action' => 'processar_evento',
