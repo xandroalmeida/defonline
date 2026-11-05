@@ -32,3 +32,10 @@ A STORY-047 deixou duas decisões de baixo nível para o Programador: (1) como g
 
 - Reedições do ADR-007 devem ler "UPDATE do ponteiro → INSERT da nova versão".
 - `demonstracao` nasce `[]` na STORY-047 (o motor é a STORY-048) e, sendo imutável, não pode ser preenchida depois por UPDATE: antes de o módulo ter lançamentos reais, a STORY-048 precisa passar a gravar o snapshot no fechamento (ou fazer um backfill por migration, exceção deliberada à imutabilidade).
+
+## Aditivo — STORY-050 (2026-11-05): quem perde a corrida do `FOR UPDATE` volta vazio
+
+O `SELECT … FOR UPDATE` da vigente (`WHERE substituido_por_id IS NULL`) tem uma pegadinha de `READ COMMITTED`: a sessão que esperava o lock reavalia o `WHERE` sobre a linha que o concorrente acabou de substituir; como o ponteiro agora está preenchido, a linha deixa de casar e a consulta devolve **zero linhas**. Lido como "competência nunca lançada", o perdedor da corrida receberia 404/erro genérico em vez do conflito de concorrência otimista. Achado por `RetificacaoConcorrenciaTest` (dois processos, COMMIT real).
+
+- **Decisão:** `RetificarLancamento` trata "vigente ausente" assim: se ainda existe alguma versão não apagada da competência, é `RetificacaoConflitante`; só quando não existe nenhuma é `CompetenciaNaoLancada`.
+- **Efeito sobre o ADR-007:** nenhum. A sequência (lock → conferir `base_versao` → conferir hash → UPDATE do ponteiro → INSERT) é a mesma; apenas o ramo "vazio" ganha significado.
