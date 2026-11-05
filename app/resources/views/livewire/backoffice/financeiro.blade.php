@@ -206,7 +206,7 @@
                                 <strong class="block text-[color:var(--color-destructive)]" dusk="cobranca-devolver-{{ $i->id }}">Devolver: {{ $motivosDevolucao[$i->devolucao_motivo] ?? $i->devolucao_motivo }}</strong>
                             @endif
                             @if ($i->reembolso_estado === 'aguardando_autorizacao')
-                                <span class="block text-xs" dusk="cobranca-aguardando-{{ $i->id }}">Estorno do Pix pedido: autorize no painel do Asaas (ações críticas). O estado muda sozinho quando o Asaas avisar.</span>
+                                <span class="block text-xs" dusk="cobranca-aguardando-{{ $i->id }}">Estorno do Pix pedido: autorize no painel do provedor de pagamento (ações críticas). O estado muda sozinho quando o provedor avisar.</span>
                             @elseif ($i->reembolso_estado === 'em_andamento')
                                 <span class="block text-xs" dusk="cobranca-andamento-{{ $i->id }}">Estorno em andamento no provedor.</span>
                             @endif

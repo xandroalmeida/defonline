@@ -155,7 +155,7 @@ final class Financeiro extends Component
 
         $this->mensagem = match ($resultado) {
             ResultadoReembolso::Concluido => 'Reembolso confirmado pelo provedor. A cobrança está estornada e o que ela concedeu foi retirado.',
-            ResultadoReembolso::AguardandoAutorizacao => 'Reembolso pedido. Para concluir, autorize o estorno no painel do Asaas (ações críticas): a cobrança vira "Estornada" sozinha quando o Asaas avisar.',
+            ResultadoReembolso::AguardandoAutorizacao => 'Reembolso pedido. Para concluir, autorize o estorno no painel do provedor de pagamento (ações críticas): a cobrança vira "Estornada" sozinha quando o provedor avisar.',
             default => 'Reembolso aceito pelo provedor e em andamento: a cobrança vira "Estornada" quando ele confirmar.',
         };
         $this->cancelarReembolso();

@@ -174,10 +174,10 @@ describe('CA-4, CA-5, CA-7 reembolso pela tela', function () {
         expect(FakePaymentProvider::reembolsosDe((string) $i->id_externo))->toBe(1);
     });
 
-    it('Pix: orienta a autorizar no painel do Asaas e o estado muda com o evento', function () {
+    it('Pix: orienta a autorizar no painel do provedor de pagamento e o estado muda com o evento', function () {
         $i = ($this->paga)(null, MeioPagamento::Pix);
         $tela = ($this->tela)()->call('abrirReembolso', $i->id)->set('motivo', 'Arrependimento')->call('confirmarReembolso')
-            ->assertSee('autorize o estorno no painel do Asaas')
+            ->assertSee('autorize o estorno no painel do provedor de pagamento')
             ->assertSeeHtml('dusk="cobranca-aguardando-'.$i->id.'"')
             ->assertDontSeeHtml('dusk="cobranca-reembolsar-'.$i->id.'"');
 
