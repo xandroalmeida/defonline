@@ -42,6 +42,12 @@ final class Carteira
         return RegrasConsumo::decidir($this->snapshot($usuarioId, $this->agora(), $empresaId));
     }
 
+    /** STORY-084 — o Usuário pode usar o Raio X do Negócio agora? `null` = sim; senão, o motivo. */
+    public function bloqueioDoDrm(string $usuarioId): ?Bloqueio
+    {
+        return RegrasConsumo::bloqueioDoDrm($this->snapshot($usuarioId, $this->agora()));
+    }
+
     /**
      * STORY-074 — o aviso do trial para a Home, ou nulo se o último vínculo do Usuário não é um trial.
      *
