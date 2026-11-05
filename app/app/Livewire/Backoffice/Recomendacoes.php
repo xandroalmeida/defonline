@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Backoffice;
 
 use App\Domain\Motor\FonteRecomendacoes;
+use App\Domain\Motor\Indicadores\NcgAbsoluto;
 use App\Livewire\Backoffice\Concerns\ExigePermissao;
 use App\Models\Recomendacao;
 use App\Observabilidade\AuditLogger;
@@ -19,9 +20,10 @@ use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
- * STORY-068 / PDR-016 — manutenção dos 117 textos da matriz de recomendações.
+ * STORY-068 / PDR-016 / PDR-018 — manutenção dos 123 textos da matriz de recomendações.
  *
- * Um indicador por vez, com os 9 textos à vista (faixa × segmento) e sempre editáveis.
+ * Um indicador por vez, com os textos à vista (faixa × segmento) e sempre editáveis: 9
+ * nos indicadores com farol, 6 no NCG absoluto (positivo ou negativo).
  * As alterações ficam pendentes, inclusive ao trocar de indicador, até "Salvar". Só o
  * texto muda: a faixa numérica é informativa, porque alterá-la mudaria o farol. Um
  * texto salvo vale para os diagnósticos seguintes; os emitidos guardam o da época.
@@ -37,13 +39,20 @@ final class Recomendacoes extends Component
 
     public const FAROIS = ['verde', 'amarelo', 'vermelho'];
 
-    /** Nome curto na aba, para os 13 caberem em uma linha. O nome completo vem logo abaixo. */
+    /** O NCG absoluto é informativo: em vez de farol, tem positivo ou negativo. */
+    public const NCG_ABSOLUTO = 'ncg_absoluto';
+
+    public const SITUACOES_NCG = [NcgAbsoluto::POSITIVA => 'Positivo', NcgAbsoluto::NEGATIVA => 'Negativo'];
+
+    public const INDICADORES = [...IndicadorFormatter::ORDEM_ESSENCIAIS, self::NCG_ABSOLUTO];
+
+    /** Nome curto na aba, para os 14 caberem em uma linha. O nome completo vem logo abaixo. */
     public const ROTULOS_ABAS = [
         'margem_bruta' => 'Margem Bruta',
         'margem_ebitda' => 'Margem EBITDA',
         'margem_liquida' => 'Margem Líquida',
         'divida_liquida_ebitda' => 'Dívida / EBITDA',
-        'despesas_fin_ebitda' => 'Desp. / EBITDA',
+        'despesas_fin_ebitda' => 'Desp.Fin./Ebitda',
         'fontes_recursos' => 'Fontes',
         'giro_ativo' => 'Giro',
         'ncg_vendas' => 'NCG / Vendas',
@@ -52,6 +61,7 @@ final class Recomendacoes extends Component
         'pmr' => 'PMR',
         'ciclo_financeiro' => 'Ciclo',
         'inadimplencia' => 'Inadimplência',
+        self::NCG_ABSOLUTO => 'NCG',
     ];
 
     #[Locked]
@@ -74,7 +84,7 @@ final class Recomendacoes extends Component
 
     public function irPara(string $indicador): void
     {
-        if (in_array($indicador, IndicadorFormatter::ORDEM_ESSENCIAIS, true)) {
+        if (in_array($indicador, self::INDICADORES, true)) {
             $this->indicador = $indicador;
             $this->mensagem = null;
             $this->carregar();
@@ -146,9 +156,10 @@ final class Recomendacoes extends Component
         return view('livewire.backoffice.recomendacoes', [
             'setores' => self::SETORES,
             'rotulosAbas' => self::ROTULOS_ABAS,
+            'situacoes' => $this->indicador === self::NCG_ABSOLUTO ? array_keys(self::SITUACOES_NCG) : self::FAROIS,
             'indicadores' => array_map(
                 fn (string $codigo): string => IndicadorFormatter::NOMES[$codigo],
-                array_combine(IndicadorFormatter::ORDEM_ESSENCIAIS, IndicadorFormatter::ORDEM_ESSENCIAIS),
+                array_combine(self::INDICADORES, self::INDICADORES),
             ),
             'versoes' => array_map(fn (string $setor): string => $fonte->versao($setor), array_combine(array_keys(self::SETORES), array_keys(self::SETORES))),
             'faixas' => Recomendacao::query()->where('indicador', $this->indicador)->get()

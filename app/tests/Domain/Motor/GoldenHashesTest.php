@@ -17,15 +17,27 @@ use App\Domain\Motor\Motor;
 | que muda o comportamento. NÃO atualizar o hash silenciosamente.
 |
 | Os 5 cenários cobrem:
-|   - saudavel: todos os indicadores em verde + NCG abs Faixa 1 (NCG ≤ 0).
-|   - atencao: todos amarelo + NCG abs Faixa 2 (moderado).
-|   - alerta: vermelhos, exceto NCG/Vendas amarelo + Div Líq/EBITDA INDISPONÍVEL (ebitda_negativo) + NCG abs Faixa 2.
+|   - saudavel: todos os indicadores em verde + NCG abs negativo (NCG ≤ 0).
+|   - atencao: todos amarelo + NCG abs positivo.
+|   - alerta: vermelhos, exceto NCG/Vendas amarelo + Div Líq/EBITDA INDISPONÍVEL (ebitda_negativo) + NCG abs positivo.
 |   - ncg_negativo: mistura verde/amarelo, NCG abs claramente negativo.
 |   - 70pct_indisponivel: 100% dos indicadores indisponíveis (caminho extremo).
 | ----------------------------------------------------------------------
 */
 
 dataset('golden_fixtures', [
+    // Hashes re-emitidos no motor 2.0.2 (PDR-018): o NCG absoluto passa a ler a matriz,
+    // com positivo ou negativo. Conferência por reconstrução: com a versão em 2.0.1 e a
+    // mensagem de NCG da época no JSON, os 5 hashes voltam bit a bit aos anteriores. Quatro
+    // fixtures trocam a mensagem; `70pct_indisponivel` muda só pelo `motor_version`.
+    //
+    // Hashes anteriores (motor 2.0.1):
+    //   saudavel           50d34125986853846a7175dc37303974ac8979d69da8fa1aff88f93c2a1ae6a7
+    //   atencao            e255184fc20afc095787f42a2b5a3ea3cf09e519878fabb37366ad35091eb99d
+    //   alerta             d684588026c4a63a5249712a256c53c4857baf8f06f8eaf04a387c7917975c36
+    //   ncg_negativo       abda35da5436cb00d0ce9fd61f7c71f50bfff7328c22f1b3416ff9ab6eb9c500
+    //   70pct_indisponivel e60a0fe5459bcf92e8cd3fb78c10750e27395db49c0f5b012bd96d4c25ee6788
+    //
     // Hashes re-emitidos no motor 2.0.1 (PDR-014): o limite do NCG/Vendas volta de
     // 0,10 para 10,00. Em `atencao` e `alerta`, NCG/Vendas volta a amarelo e o NCG
     // absoluto, a moderado. Os 5 hashes mudam também pelo `motor_version` no payload.
@@ -94,23 +106,23 @@ dataset('golden_fixtures', [
     // matriz dez-2025 (Anexo F, coluna Indústria).
     'saudavel' => [
         'quiz_industria_saudavel.json',
-        '50d34125986853846a7175dc37303974ac8979d69da8fa1aff88f93c2a1ae6a7',
+        'fbb53dbc56077cb39f03715110cba66d533aa0c63aaf0095cf50f2a1c6dd562b',
     ],
     'atencao' => [
         'quiz_industria_atencao.json',
-        'e255184fc20afc095787f42a2b5a3ea3cf09e519878fabb37366ad35091eb99d',
+        '00624ce4e5cc97131c38509256bae00a172c95b20c49d9eededb7a8e8d6f4b5f',
     ],
     'alerta' => [
         'quiz_industria_alerta.json',
-        'd684588026c4a63a5249712a256c53c4857baf8f06f8eaf04a387c7917975c36',
+        '652a12a99fbbafa3f99ad2035a7c640e18e76d5b249d584b0bf39dae202126e9',
     ],
     'ncg_negativo' => [
         'quiz_industria_ncg_negativo.json',
-        'abda35da5436cb00d0ce9fd61f7c71f50bfff7328c22f1b3416ff9ab6eb9c500',
+        '84539cb99ed9e6d85d96af966e6f396ba5e786eec50a055ca3056310e8d470c6',
     ],
     '70pct_indisponivel' => [
         'quiz_industria_70pct_indisponivel.json',
-        'e60a0fe5459bcf92e8cd3fb78c10750e27395db49c0f5b012bd96d4c25ee6788',
+        '91dad772e9e040437272e372d503bfcd4215ea40bcdb51a9ea39a665b3b428c4',
     ],
 ]);
 

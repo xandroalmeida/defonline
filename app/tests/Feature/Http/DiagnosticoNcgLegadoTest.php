@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Domain\Motor\Indicadores\NcgAbsoluto;
 use App\Models\Diagnostico;
 use App\Models\EmpresaAnalisada;
+use App\Models\Recomendacao;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +22,7 @@ uses(RefreshDatabase::class);
 | retroativo.
 |
 | O modo de falha que este arquivo existe para pegar: alguém "melhorar" a view
-| para resolver o texto a partir das constantes atuais em vez de ler o
+| para resolver o texto a partir da matriz atual em vez de ler o
 | snapshot. O relatório passaria a mentir sobre o que foi dito ao usuário.
 |-------------------------------------------------------------------------
 */
@@ -35,6 +35,14 @@ const MSG_ALTO_1_3_1 = 'NCG positivo alto: pressão sobre o caixa. Considere rev
 
 /** Mensagem exata que o motor 1.3.1 gravava na faixa FOLGA, antes da STORY-060. */
 const MSG_FOLGA_1_3_1 = 'Folga operacional: seu ciclo de pagamento a fornecedores cobre o ciclo de recebimento e estoques. Capital de giro positivo.';
+
+/** Textos atuais do NCG absoluto, na tabela `recomendacoes` (PDR-018). */
+function textoAtualNcg(string $situacao): string
+{
+    return Recomendacao::query()
+        ->where(['setor' => 'industria', 'indicador' => 'ncg_absoluto', 'farol' => $situacao])
+        ->value('texto');
+}
 
 function diagnosticoLegadoComNcg(Usuario $dono, string $mensagemDaEpoca, float $valor): Diagnostico
 {
@@ -66,7 +74,7 @@ it('CA-4 — relatório de diagnóstico emitido em 1.3.1 exibe a mensagem MODERA
         ->get("/diagnosticos/{$diag->id}")
         ->assertOk()
         ->assertSee(MSG_MODERADO_1_3_1)
-        ->assertDontSee(NcgAbsoluto::MSG_MODERADO);
+        ->assertDontSee(textoAtualNcg('positiva'));
 });
 
 it('CA-4 — o mesmo vale para a faixa ALTO', function () {
@@ -77,7 +85,7 @@ it('CA-4 — o mesmo vale para a faixa ALTO', function () {
         ->get("/diagnosticos/{$diag->id}")
         ->assertOk()
         ->assertSee(MSG_ALTO_1_3_1)
-        ->assertDontSee(NcgAbsoluto::MSG_ALTO);
+        ->assertDontSee(textoAtualNcg('positiva'));
 });
 
 it('CA-4 — e para a faixa FOLGA, com NCG negativo', function () {
@@ -88,7 +96,7 @@ it('CA-4 — e para a faixa FOLGA, com NCG negativo', function () {
         ->get("/diagnosticos/{$diag->id}")
         ->assertOk()
         ->assertSee(MSG_FOLGA_1_3_1)
-        ->assertDontSee(NcgAbsoluto::MSG_FOLGA);
+        ->assertDontSee(textoAtualNcg('negativa'));
 });
 
 it('CA-4 (persistência) — reler o registro devolve a mensagem da época, não a atual', function () {
@@ -105,7 +113,7 @@ it('CA-4 (persistência) — reler o registro devolve a mensagem da época, não
 });
 
 it('CA-4 (borda) — as três mensagens de 1.3.1 são diferentes das atuais, senão o teste não prova nada', function () {
-    expect(MSG_FOLGA_1_3_1)->not->toBe(NcgAbsoluto::MSG_FOLGA)
-        ->and(MSG_MODERADO_1_3_1)->not->toBe(NcgAbsoluto::MSG_MODERADO)
-        ->and(MSG_ALTO_1_3_1)->not->toBe(NcgAbsoluto::MSG_ALTO);
+    expect(MSG_FOLGA_1_3_1)->not->toBe(textoAtualNcg('negativa'))
+        ->and(MSG_MODERADO_1_3_1)->not->toBe(textoAtualNcg('positiva'))
+        ->and(MSG_ALTO_1_3_1)->not->toBe(textoAtualNcg('positiva'));
 });

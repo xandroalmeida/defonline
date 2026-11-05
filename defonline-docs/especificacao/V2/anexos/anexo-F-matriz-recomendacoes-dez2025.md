@@ -153,4 +153,4 @@ Este indicador **não possui farol** no padrão verde/amarelo/vermelho; a matriz
 
 Atualizações desta matriz devem seguir o processo: (1) editar o conteúdo versionado no banco; (2) incrementar a versão e a data; (3) manter a versão anterior acessível para reprodução histórica dos diagnósticos já emitidos; (4) refletir a mudança neste arquivo `.md` mantendo a tabela de controle atualizada.
 
-**Divergência conhecida em §F.13 (STORY-042, devolutiva da EBC de 27/05/2026):** o autor retirou do cenário positivo de Indústria a frase "O crescimento das vendas e o aumento do prazo concedido a clientes gera maior NCG.". Este anexo ainda a mostra. O NCG absoluto não usa estes textos: o produto exibe as mensagens de faixa de `NcgAbsoluto` (STORY-060).
+**Divergência conhecida em §F.13 (STORY-042, devolutiva da EBC de 27/05/2026):** o autor retirou do cenário positivo de Indústria a frase "O crescimento das vendas e o aumento do prazo concedido a clientes gera maior NCG.". Este anexo ainda a mostra. Desde o PDR-018, estes textos são a origem das recomendações do NCG absoluto na tabela `recomendacoes`.

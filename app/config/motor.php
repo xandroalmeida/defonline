@@ -41,7 +41,10 @@ return [
     // 2.0.1 — PDR-014, correção do PO (PATCH: o limite amarelo/vermelho do NCG/Vendas volta
     //         de 0,10 para 10,00, que estava em produção por engano sob a 2.0.0. Muda farol e
     //         mensagem, não a fórmula. O NCG absoluto acompanha.)
-    'version' => '2.0.1',
+    // 2.0.2 — PDR-018 (PATCH: o NCG absoluto passa a ler a matriz editável, com um texto para
+    //         positivo e outro para negativo, no lugar das três faixas fixas. Muda a mensagem,
+    //         não o valor, o farol ou o veredito.)
+    'version' => '2.0.2',
     'matrix_version' => 'dez-2025',
 
     // Path do arquivo de lacunas auto-append por MatrizRecomendacoes (CA-5/STORY-032).

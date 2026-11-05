@@ -2732,6 +2732,23 @@
         "related_adrs": [],
         "related_idrs": [],
         "note": "Complementa a PDR-010."
+      },
+      {
+        "id": "PDR-018",
+        "slug": "ncg-absoluto-na-matriz-editavel",
+        "title": "Recomendações do NCG absoluto editáveis, por sinal e segmento",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-018-ncg-absoluto-na-matriz-editavel.md",
+        "decided_at": "2026-11-05",
+        "decided_by": "PO (Alexandro / Claude)",
+        "related_epics": [
+          "EPIC-011"
+        ],
+        "related_adrs": [],
+        "related_idrs": [
+          "IDR-010"
+        ],
+        "note": "Revê o PDR-016 §1 e §7, o PDR-006 §2 e a espec §4.5."
       }
     ],
     "adr": [

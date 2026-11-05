@@ -14,21 +14,9 @@ use Tests\Support\RecomendacoesCongeladas;
 | Garantem que:
 |   - O config tem cobertura completa (13 com farol × 3 cores).
 |   - Nenhum indicador continua usando MensagensFarol::paraFarol (CA-3).
-|   - A seção `_referencia_editorial` (STORY-060 CA-5) é a única exceção
-|     conhecida ao "toda chave de primeiro nível é indicador consumido" — e é
-|     tratada como exceção declarada, não como acusação.
+|   - O NCG absoluto, sem farol, tem positiva e negativa (PDR-018).
 |-------------------------------------------------------------------------
 */
-
-/**
- * Chaves de primeiro nível da matriz que **não** são indicadores consumidos em
- * runtime. Exceção declarada da STORY-060 CA-5: a lista existe para que o teste
- * saiba da seção editorial em vez de acusá-la, e para que qualquer chave nova
- * fora dessa lista continue sendo acusada.
- *
- * @var list<string>
- */
-const CHAVES_NAO_CONSUMIDAS = ['_referencia_editorial'];
 
 it('config matriz dez-2025 industria tem entrada para os 13 indicadores com farol × 3 cores', function () {
     /** @var array<string, array<string, string>> $matriz */
@@ -52,41 +40,15 @@ it('config matriz dez-2025 industria tem entrada para os 13 indicadores com faro
         }
     }
 
-    // NCG absoluto NÃO é chave de primeiro nível: não é consumido (STORY-060 CA-5).
-    expect($matriz)->not->toHaveKey('ncg_absoluto');
 });
 
-it('STORY-060 CA-5 — toda chave de primeiro nível é indicador consumido, salvo a exceção declarada', function () {
-    /** @var array<string, mixed> $matriz */
+it('PDR-018 — o NCG absoluto tem texto para positiva e negativa, e a matriz não guarda mais nada', function () {
+    /** @var array<string, array<string, string>> $matriz */
     $matriz = RecomendacoesCongeladas::matriz();
 
-    $indicadoresComFarol = array_values(array_diff(ResumoExecutivo::CODIGOS_ANEXO_D, ['ncg_absoluto']));
-    $inesperadas = array_diff(array_keys($matriz), $indicadoresComFarol, CHAVES_NAO_CONSUMIDAS);
-
-    expect($inesperadas)->toBe(
-        [],
-        'Chave de primeiro nível que não é indicador com farol nem exceção declarada: '.
-        implode(', ', $inesperadas).'. Ou ela é consumida em runtime, ou desce para `_referencia_editorial`.',
-    );
-});
-
-it('STORY-060 CA-5 — a referência editorial preserva o texto do Anexo F §F.13 fora do runtime', function () {
-    /** @var array<string, mixed> $matriz */
-    $matriz = RecomendacoesCongeladas::matriz();
-
-    expect($matriz['_referencia_editorial']['ncg_absoluto'])
-        ->toHaveKey('positiva')
-        ->toHaveKey('negativa');
-});
-
-it('STORY-060 CA-5 — pedir `ncg_absoluto` à matriz vira lacuna registrada, não texto silencioso', function () {
-    // O modo de falha que a estória chama de "armadilha": receber texto de uma
-    // entrada que o produto nunca exibe. Depois do CA-5 isso não acontece mais —
-    // o par cai no fallback e é reportado como lacuna.
-    config()->set('motor.matriz_lacunas_path', '');
-
-    expect((new MatrizRecomendacoes)->texto('ncg_absoluto', 'positiva'))
-        ->toBe(MatrizRecomendacoes::FALLBACK);
+    expect(array_keys($matriz['ncg_absoluto']))->toEqualCanonicalizing(['positiva', 'negativa'])
+        ->and(array_keys($matriz))->toEqualCanonicalizing(ResumoExecutivo::CODIGOS_ANEXO_D)
+        ->and((new MatrizRecomendacoes)->texto('ncg_absoluto', 'positiva'))->toBe($matriz['ncg_absoluto']['positiva']);
 });
 
 it('nenhum indicador continua usando MensagensFarol::paraFarol para mensagem', function () {

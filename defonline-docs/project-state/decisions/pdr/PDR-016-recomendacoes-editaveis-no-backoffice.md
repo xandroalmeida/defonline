@@ -20,13 +20,13 @@ O PO pediu para editar, na Administração, as recomendações por indicador, se
 
 ## Decisão
 
-1. Os 117 textos (13 indicadores × 3 segmentos × 3 faixas) vão para a tabela `recomendacoes`: Indústria com o texto que o motor usava, Comércio e Serviços com o Anexo F dez/2025. Todos são editáveis, inclusive os avisos de "não se aplica" do PME em Serviços.
+1. Os 117 textos (13 indicadores × 3 segmentos × 3 faixas; 123 com o NCG absoluto, PDR-018) vão para a tabela `recomendacoes`: Indústria com o texto que o motor usava, Comércio e Serviços com o Anexo F dez/2025. Todos são editáveis, inclusive os avisos de "não se aplica" do PME em Serviços.
 2. A tela de Recomendações exige a permissão própria "Manter recomendações". Mostra um indicador por vez, escolhido em abas, com os 9 textos sempre editáveis: um card por segmento, com as 3 faixas alinhadas entre os cards. As alterações ficam pendentes ao trocar de indicador e são salvas juntas, ou nenhuma, se alguma for inválida.
 3. Só o texto muda, com até 300 caracteres (limite do Anexo F) e sem texto vazio. A faixa numérica aparece só como informação: alterá-la mudaria o farol, que é cálculo.
 4. A edição vale na hora para os próximos diagnósticos. Os já emitidos mantêm o texto e a versão da época, no snapshot (IDR-010).
 5. A versão da matriz é por segmento e passa a ser o mês da última edição (`mes-aaaa`). Sem edição, segue `dez-2025`. Toda alteração gera audit log com antes, depois e a versão.
 6. O motor continua sem banco em `app/Domain`: lê por uma interface, implementada com a tabela fora do domínio. Os testes de domínio e os golden hashes usam a matriz dez-2025 congelada em `tests/Fixtures`, e um teste garante que ela é igual à migration.
-7. O NCG absoluto fica de fora: não tem farol, e seus textos seguem no código.
+7. O NCG absoluto fica de fora: não tem farol, e seus textos seguem no código. **Revisto pelo PDR-018:** o NCG absoluto entrou na tabela, que passou a ter 123 textos.
 
 ## Consequências
 

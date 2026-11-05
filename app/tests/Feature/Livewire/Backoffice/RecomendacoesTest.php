@@ -10,7 +10,6 @@ use App\Models\AuditLog;
 use App\Models\EmpresaAnalisada;
 use App\Models\Recomendacao;
 use App\Models\Usuario;
-use App\Support\Relatorio\IndicadorFormatter;
 use Illuminate\Support\Carbon;
 use Livewire\Livewire;
 use Tests\Support\RecomendacoesCongeladas;
@@ -31,14 +30,16 @@ beforeEach(function () {
     );
 });
 
-it('a migration traz 117 textos, um por trio, todos preenchidos e dentro do limite', function () {
+it('a migration traz 123 textos, um por trio, todos preenchidos e dentro do limite', function () {
     $linhas = Recomendacao::query()->get();
 
-    expect($linhas)->toHaveCount(117);
+    expect($linhas)->toHaveCount(123);
 
     foreach (array_keys(Recomendacoes::SETORES) as $setor) {
-        foreach (IndicadorFormatter::ORDEM_ESSENCIAIS as $indicador) {
-            foreach (Recomendacoes::FAROIS as $farol) {
+        foreach (Recomendacoes::INDICADORES as $indicador) {
+            $situacoes = $indicador === Recomendacoes::NCG_ABSOLUTO ? array_keys(Recomendacoes::SITUACOES_NCG) : Recomendacoes::FAROIS;
+
+            foreach ($situacoes as $farol) {
                 $linha = $linhas->first(fn (Recomendacao $r) => $r->setor === $setor && $r->indicador === $indicador && $r->farol === $farol);
 
                 expect($linha)->not->toBeNull("Faltando {$setor}/{$indicador}/{$farol}")
@@ -48,8 +49,6 @@ it('a migration traz 117 textos, um por trio, todos preenchidos e dentro do limi
             }
         }
     }
-
-    expect($linhas->where('indicador', 'ncg_absoluto'))->toBeEmpty();
 });
 
 it('os textos de Indústria na migration são os mesmos dos testes de domínio e golden hashes', function () {
@@ -88,13 +87,13 @@ it('abre no primeiro indicador com os 9 textos e navega entre indicadores', func
 });
 
 it('toda aba tem rótulo curto, na ordem dos indicadores', function () {
-    expect(array_keys(Recomendacoes::ROTULOS_ABAS))->toEqualCanonicalizing(IndicadorFormatter::ORDEM_ESSENCIAIS);
+    expect(array_keys(Recomendacoes::ROTULOS_ABAS))->toEqualCanonicalizing(Recomendacoes::INDICADORES);
 
-    ($this->tela)()->assertSeeHtml('aria-selected="true"')->assertSee('Desp. / EBITDA');
+    ($this->tela)()->assertSeeHtml('aria-selected="true"')->assertSee('Desp.Fin./Ebitda')->assertDontSee('Desp. / EBITDA');
 });
 
 it('indicador forjado é ignorado', function () {
-    ($this->tela)()->call('irPara', 'ncg_absoluto')->assertSet('indicador', 'margem_bruta');
+    ($this->tela)()->call('irPara', 'inexistente')->assertSet('indicador', 'margem_bruta');
 });
 
 it('o indicador e o texto de origem não podem ser forjados pelo cliente', function () {
@@ -288,6 +287,54 @@ it('sem a linha no banco, o relatório cai no aviso de revisão em vez de quebra
     Recomendacao::query()->where(['setor' => 'industria', 'indicador' => 'pmr', 'farol' => 'verde'])->delete();
 
     expect((new MatrizRecomendacoes)->texto('pmr', 'verde'))->toBe(MatrizRecomendacoes::FALLBACK);
+});
+
+it('traz os textos do NCG por segmento, do Anexo F §F.13', function () {
+    expect(Recomendacao::query()->where('indicador', 'ncg_absoluto')->count())->toBe(6)
+        ->and(($this->registro)('comercio', 'ncg_absoluto', 'negativa')->texto)->toStartWith('Em tese, a empresa')
+        ->and(($this->registro)('servicos', 'ncg_absoluto', 'positiva')->texto)->toStartWith('A elevação da NCG')
+        ->and(($this->registro)('servicos', 'ncg_absoluto', 'negativa')->faixa)->toBe('Zero ou abaixo');
+});
+
+it('a aba do NCG mostra positivo e negativo nos 3 segmentos, sem farol', function () {
+    ($this->tela)()->call('irPara', 'ncg_absoluto')
+        ->assertSet('indicador', 'ncg_absoluto')
+        ->assertSee('NCG — Necessidade de Capital de Giro')
+        ->assertSee('Positivo')->assertSee('Negativo')
+        ->assertSee('Acima de zero')->assertSee('Zero ou abaixo')
+        ->assertSeeHtml('dusk="recomendacao-industria-positiva"')
+        ->assertSeeHtml('dusk="recomendacao-comercio-negativa"')
+        ->assertSeeHtml('dusk="recomendacao-servicos-positiva"')
+        ->assertDontSeeHtml('data-farol');
+});
+
+it('o texto editado do NCG vale para o próximo diagnóstico; o já emitido mantém o da época', function () {
+    Carbon::setTestNow('2026-11-10 12:00:00 America/Sao_Paulo');
+    $dono = Usuario::factory()->create();
+    $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $dono->id]);
+    $calcular = app(CalcularDiagnostico::class);
+    $negativa = ($this->registro)('industria', 'ncg_absoluto', 'negativa')->texto;
+
+    $antigo = $calcular->execute($empresa, ($this->payload)());
+    $textoAntigo = $antigo->indicadores_calculados['ncg_absoluto']['mensagem'];
+    expect($antigo->indicadores_calculados['ncg_absoluto']['valor'])->toBeGreaterThan(0)
+        ->and($textoAntigo)->toBe(($this->registro)('industria', 'ncg_absoluto', 'positiva')->texto);
+
+    ($this->tela)()->call('irPara', 'ncg_absoluto')
+        ->set('textos.industria.ncg_absoluto.positiva', 'NCG positivo revisado.')
+        ->call('salvar')
+        ->assertHasNoErrors();
+
+    $novo = $calcular->execute($empresa, ($this->payload)());
+
+    expect($novo->indicadores_calculados['ncg_absoluto']['mensagem'])->toBe('NCG positivo revisado.')
+        ->and($novo->matrix_version)->toBe('nov-2026')
+        ->and($antigo->fresh()->indicadores_calculados['ncg_absoluto']['mensagem'])->toBe($textoAntigo)
+        ->and(($this->registro)('industria', 'ncg_absoluto', 'negativa')->texto)->toBe($negativa);
+
+    $this->actingAs($dono)->get('/diagnosticos/'.$novo->id)->assertOk()->assertSee('NCG positivo revisado.');
+
+    Carbon::setTestNow();
 });
 
 it('sem a permissão: 404 na tela e nas ações, e sem item no menu', function () {

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
  * Leitura da matriz de recomendações por indicador × farol (snapshot — STORY-032).
  *
  * **Fonte.** {@see FonteRecomendacoes}: em produção, a tabela `recomendacoes`, mantida
- * no backoffice (PDR-016). Os 117 textos existem, mas o motor só calcula Indústria;
+ * no backoffice (PDR-016). Os 123 textos existem, mas o motor só calcula Indústria;
  * Comércio/Serviços entram no EPIC-006.
  *
  * **Contrato.** {@see self::texto()} retorna o texto literal do par
@@ -34,7 +34,7 @@ final class MatrizRecomendacoes
      * Devolve o texto da matriz para o par `(codigo, farol)` no setor pedido.
      *
      * @param  string  $codigo  Chave do indicador (snake_case Anexo D — ex.: `margem_bruta`).
-     * @param  string  $farol  Cor do farol — `verde`, `amarelo`, `vermelho`.
+     * @param  string  $farol  Cor do farol — `verde`, `amarelo`, `vermelho` — ou, no NCG absoluto, `positiva`, `negativa`.
      * @param  string  $setor  `industria` na V1.
      */
     public function texto(string $codigo, string $farol, string $setor = 'industria'): string

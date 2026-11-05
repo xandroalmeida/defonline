@@ -5,6 +5,7 @@
     $proximo = $codigos[$posicao + 1] ?? null;
     $max = \App\Livewire\Backoffice\Recomendacoes::TEXTO_MAX;
     $avisoSaida = 'Há alterações não salvas. Sair e perdê-las?';
+    $ncg = $indicador === \App\Livewire\Backoffice\Recomendacoes::NCG_ABSOLUTO;
 @endphp
 
 <div x-data
@@ -36,7 +37,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-5">
         @foreach ($setores as $setor => $nomeSetor)
             <x-card as="section" aria-label="{{ $nomeSetor }}" wire:key="setor-{{ $setor }}"
-                    class="grid gap-y-5 md:[grid-row:span_4] md:[grid-template-rows:subgrid]"
+                    class="grid gap-y-5 md:[grid-template-rows:subgrid] {{ $ncg ? 'md:[grid-row:span_3]' : 'md:[grid-row:span_4]' }}"
                     dusk="recomendacoes-setor-{{ $setor }}">
                 <header class="border-b border-[color:var(--color-border)] pb-3">
                     <div class="flex items-baseline justify-between gap-2">
@@ -45,7 +46,7 @@
                     </div>
                 </header>
 
-                @foreach (\App\Livewire\Backoffice\Recomendacoes::FAROIS as $farol)
+                @foreach ($situacoes as $farol)
                     @php
                         $chave = "{$setor}.{$indicador}.{$farol}";
                         $alterado = in_array($chave, $alterados, true);
@@ -53,11 +54,15 @@
                     @endphp
                     <div wire:key="celula-{{ $chave }}" class="flex flex-col">
                         <div class="flex items-center justify-between gap-2 mb-2">
-                            <x-relatorio.farol :cor="$farol" />
+                            @if ($ncg)
+                                <span class="text-sm font-medium" dusk="{{ $campo }}-situacao">{{ \App\Livewire\Backoffice\Recomendacoes::SITUACOES_NCG[$farol] }}</span>
+                            @else
+                                <x-relatorio.farol :cor="$farol" />
+                            @endif
                             <span class="text-sm text-[color:var(--color-secondary)]" dusk="{{ $campo }}-faixa">{{ $faixas["{$setor}.{$farol}"] ?? '' }}</span>
                         </div>
                         <textarea id="{{ $campo }}" wire:model.live.blur="textos.{{ $chave }}" rows="4" maxlength="{{ $max }}"
-                                  aria-label="{{ $nomeSetor }}, farol {{ $farol }}, faixa {{ $faixas["{$setor}.{$farol}"] ?? '' }}"
+                                  aria-label="{{ $nomeSetor }}, {{ $ncg ? 'NCG '.\App\Livewire\Backoffice\Recomendacoes::SITUACOES_NCG[$farol] : "farol {$farol}" }}, faixa {{ $faixas["{$setor}.{$farol}"] ?? '' }}"
                                   @class(['input w-full grow text-sm [field-sizing:content]', '!border-[color:var(--color-tertiary)] !border-2' => $alterado])
                                   dusk="{{ $campo }}"></textarea>
                         <div class="flex items-center justify-between gap-2 mt-1 text-xs text-[color:var(--color-secondary)]">
