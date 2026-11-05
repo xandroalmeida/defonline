@@ -14,7 +14,7 @@ final class RegrasConsumo
     {
         $assinatura = $carteira->assinatura;
 
-        if ($assinatura !== null && self::daAcesso($assinatura, $carteira) && $assinatura->cotaRestante > 0) {
+        if ($assinatura !== null && self::daAcesso($assinatura, $carteira) && $assinatura->cotaRestante > 0 && ! self::testeBarradoPelaEmpresa($assinatura, $carteira)) {
             return Decisao::cota($assinatura->id);
         }
 
@@ -25,6 +25,12 @@ final class RegrasConsumo
         }
 
         return Decisao::bloquear(self::motivo($carteira));
+    }
+
+    /** O trial não vale para uma empresa que já gastou análise de trial em outra conta (STORY-074 CA-2); crédito comprado vale. */
+    private static function testeBarradoPelaEmpresa(AssinaturaVista $assinatura, SnapshotCarteira $carteira): bool
+    {
+        return $assinatura->trial && $carteira->empresaJaEmTesteDeOutraConta;
     }
 
     /** Ativa e cancelada dão acesso até o fim do ciclo pago; atraso e encerrada, não. */
@@ -80,6 +86,10 @@ final class RegrasConsumo
                 $assinatura->trial ? MotivoBloqueio::TesteEncerrado : MotivoBloqueio::PlanoEncerrado,
                 $assinatura->vencimento,
             );
+        }
+
+        if (self::testeBarradoPelaEmpresa($assinatura, $carteira)) {
+            return new Bloqueio(MotivoBloqueio::TesteEmpresaJaAnalisada, $assinatura->vencimento);
         }
 
         if ($assinatura->trial) {

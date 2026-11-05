@@ -15,3 +15,9 @@ Schedule::command('rfb:monitorar-error-rate')
     ->everyFiveMinutes()
     ->onOneServer()
     ->withoutOverlapping(10);
+
+// STORY-074 CA-6 — convite para assinar em D-2 e D-0 do trial (cada aviso sai uma vez por trial).
+Schedule::command('trial:avisar-fim')
+    ->hourly()
+    ->onOneServer()
+    ->withoutOverlapping(30);

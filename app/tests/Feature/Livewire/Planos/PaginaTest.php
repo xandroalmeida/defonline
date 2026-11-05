@@ -133,13 +133,11 @@ describe('CA-3 teste', function () {
         $this->actingAs($usuario)->get('/planos')->assertOk()->assertDontSee('screen-planos-teste', false);
     });
 
-    it('mostra a oferta ao logado elegível, com o botão só quando a rota do teste existe', function () {
+    it('mostra a oferta ao logado elegível, levando à ativação do teste', function () {
         $usuario = Usuario::factory()->create();
 
-        $this->actingAs($usuario)->get('/planos')->assertSee('screen-planos-teste', false)->assertDontSee('Começar teste grátis');
-
-        rotaFalsa(RotasCobranca::TESTE);
-        $this->actingAs($usuario)->get('/planos')->assertSee('Começar teste grátis')->assertSee(route(RotasCobranca::TESTE), false);
+        $this->actingAs($usuario)->get('/planos')->assertSee('screen-planos-teste', false)
+            ->assertSee('Começar teste grátis')->assertSee(route(RotasCobranca::TESTE), false);
     });
 
     it('leva o visitante a criar a conta para começar o teste', function () {

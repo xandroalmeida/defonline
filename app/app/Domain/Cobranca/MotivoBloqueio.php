@@ -13,6 +13,8 @@ enum MotivoBloqueio: string
     case SemNada = 'sem_nada';
     case TesteUsado = 'teste_usado';
     case TesteEncerrado = 'teste_encerrado';
+    /** STORY-074 CA-2: o CNPJ desta empresa já gastou uma análise de trial em outra conta. */
+    case TesteEmpresaJaAnalisada = 'teste_empresa_ja_analisada';
     case CotaEsgotada = 'cota_esgotada';
     case CreditosVencidos = 'creditos_vencidos';
     case EmAtraso = 'em_atraso';

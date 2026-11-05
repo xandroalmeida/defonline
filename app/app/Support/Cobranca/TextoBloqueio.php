@@ -51,6 +51,7 @@ final class TextoBloqueio
                 : ['Você ainda não tem análises', 'Escolha um plano ou compre créditos para fazer uma análise.', ['planos', 'creditos']],
             MotivoBloqueio::TesteUsado => ['Você usou a análise do teste', "O teste termina em {$data}. Assine ou compre créditos para fazer outra análise.", ['planos', 'creditos']],
             MotivoBloqueio::TesteEncerrado => ['Seu teste terminou', "Seu teste terminou em {$data}. Seus diagnósticos continuam disponíveis.", ['planos', 'creditos']],
+            MotivoBloqueio::TesteEmpresaJaAnalisada => ['Esta empresa já foi analisada em um teste', 'Esta empresa já foi analisada em um teste gratuito, então não conseguimos incluir outro teste para ela.', ['planos', 'creditos']],
             MotivoBloqueio::CotaEsgotada => [
                 'Você usou as análises deste ciclo',
                 $b->renova

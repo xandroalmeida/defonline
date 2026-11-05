@@ -26,8 +26,10 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $data_cancelamento
  * @property int $cota_snapshot
  * @property int $cota_restante_ciclo
+ * @property Carbon|null $aviso_d2_em
+ * @property Carbon|null $aviso_d0_em
  */
-#[Fillable(['usuario_id', 'plano_id', 'trial', 'status', 'ciclo', 'data_inicio', 'proximo_vencimento', 'data_cancelamento', 'cota_snapshot', 'cota_restante_ciclo'])]
+#[Fillable(['usuario_id', 'plano_id', 'trial', 'status', 'ciclo', 'data_inicio', 'proximo_vencimento', 'data_cancelamento', 'cota_snapshot', 'cota_restante_ciclo', 'aviso_d2_em', 'aviso_d0_em'])]
 final class Assinatura extends Model
 {
     use HasUuids;
@@ -42,6 +44,8 @@ final class Assinatura extends Model
             'data_inicio' => 'datetime',
             'proximo_vencimento' => 'datetime',
             'data_cancelamento' => 'datetime',
+            'aviso_d2_em' => 'datetime',
+            'aviso_d0_em' => 'datetime',
         ];
     }
 }

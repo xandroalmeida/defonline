@@ -207,6 +207,11 @@
                 <x-input type="text" inputmode="numeric" id="trial-analises" wire:model="trial.analises" dusk="trial-analises" class="w-full"/>
                 {!! $erro('trial.analises', 'erro-trial-analises') !!}
             </div>
+            <div>
+                <x-label for="trial-limite-ip">Alertar acima de (trials por IP em 30 dias)</x-label>
+                <x-input type="text" inputmode="numeric" id="trial-limite-ip" wire:model="trial.limite_ip_30d" dusk="trial-limite-ip" class="w-full"/>
+                {!! $erro('trial.limite_ip_30d', 'erro-trial-limite-ip') !!}
+            </div>
             <div class="md:col-span-3 flex items-center gap-3">
                 <x-button type="submit" variant="primary" dusk="trial-salvar">Salvar trial</x-button>
                 @if ($mensagemTrial)

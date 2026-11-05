@@ -178,6 +178,25 @@ describe('CA-5 trial', function () {
     });
 });
 
+describe('STORY-074 CA-7 limite de trials por IP', function () {
+    it('traz o limite padrão e deixa o PO alterá-lo', function () {
+        ($this->tela)()->assertSet('trial.limite_ip_30d', '3')->set('trial.limite_ip_30d', '5')->call('salvarTrial')->assertHasNoErrors();
+
+        expect(TrialConfig::atual()->limite_ip_30d)->toBe(5);
+    });
+
+    it('recusa limite vazio, zero ou não inteiro', function (string $valor, string $mensagem) {
+        $tela = ($this->tela)()->set('trial.limite_ip_30d', $valor)->call('salvarTrial');
+
+        expect($tela->errors()->first('trial.limite_ip_30d'))->toBe($mensagem)->and(TrialConfig::atual()->limite_ip_30d)->toBe(3);
+    })->with([
+        'vazio' => ['', 'Informe o limite de trials por IP.'],
+        'zero' => ['0', 'O limite deve ser de pelo menos 1 trial.'],
+        'texto' => ['muitos', 'O limite deve ser um número inteiro.'],
+        'enorme' => ['999999999', 'O limite é grande demais.'],
+    ]);
+});
+
 describe('CA-6 valores inválidos', function () {
     it('recusa plano inválido com mensagem por campo', function (array $campos, array $erros) {
         $tela = ($this->tela)();

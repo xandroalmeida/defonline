@@ -179,3 +179,35 @@ it('só a assinatura vigente ocupa o lugar único do Usuário', function () {
         ->and(StatusAssinatura::Cancelada->vigente())->toBeFalse()
         ->and(StatusAssinatura::Expirada->vigente())->toBeFalse();
 });
+
+describe('STORY-074 CA-2 — empresa que já gastou análise de trial em outra conta', function () {
+    function _snapComEmpresaDeOutraConta(?AssinaturaVista $assinatura, array $lotes = []): SnapshotCarteira
+    {
+        return new SnapshotCarteira(_snapAgora(), $assinatura, $lotes, false, empresaJaEmTesteDeOutraConta: true);
+    }
+
+    it('não usa a cota do trial para essa empresa e explica o motivo', function () {
+        $d = RegrasConsumo::decidir(_snapComEmpresaDeOutraConta(_snapAssinatura(trial: true, restante: 1, snapshot: 1)));
+
+        expect($d->permitido())->toBeFalse()
+            ->and($d->bloqueio->motivo)->toBe(MotivoBloqueio::TesteEmpresaJaAnalisada);
+    });
+
+    it('cai no crédito comprado, que vale para qualquer empresa', function () {
+        $d = RegrasConsumo::decidir(_snapComEmpresaDeOutraConta(_snapAssinatura(trial: true, restante: 1, snapshot: 1), [_snapLote('l1', 2, '2027-01-01')]));
+
+        expect($d->origem)->toBe(Origem::Credito)->and($d->loteId)->toBe('l1');
+    });
+
+    it('não mexe na cota de plano pago', function () {
+        $d = RegrasConsumo::decidir(_snapComEmpresaDeOutraConta(_snapAssinatura()));
+
+        expect($d->origem)->toBe(Origem::Cota);
+    });
+
+    it('trial já encerrado continua dizendo que o teste terminou', function () {
+        $d = RegrasConsumo::decidir(_snapComEmpresaDeOutraConta(_snapAssinatura(trial: true, restante: 1, snapshot: 1, vence: '2026-11-01 00:00:00')));
+
+        expect($d->bloqueio->motivo)->toBe(MotivoBloqueio::TesteEncerrado);
+    });
+});

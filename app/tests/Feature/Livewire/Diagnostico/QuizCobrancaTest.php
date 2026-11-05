@@ -311,8 +311,9 @@ describe('CA-11 texto de cada causa', function () {
             ->and(strpos($html, 'Ver planos'))->toBeLessThan(strpos($html, 'Comprar créditos'));
     });
 
-    it('só com a rota de planos, o bloqueio mostra uma única ação (a primária)', function () {
+    it('só com a rota de planos (teste desativado), o bloqueio mostra uma única ação (a primária)', function () {
         _ligarCobrancaQuiz();
+        DB::table('trial_config')->update(['ativo' => false]);
 
         $html = Livewire::test(Quiz::class, ['empresa' => $this->empresa])->html();
 

@@ -16,11 +16,12 @@ use Illuminate\Support\Carbon;
  * @property bool $ativo
  * @property int $dias
  * @property int $analises
+ * @property int $limite_ip_30d
  * @property string|null $alterado_por_usuario_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['ativo', 'dias', 'analises', 'alterado_por_usuario_id'])]
+#[Fillable(['ativo', 'dias', 'analises', 'limite_ip_30d', 'alterado_por_usuario_id'])]
 final class TrialConfig extends Model
 {
     use HasUuids;

@@ -24,6 +24,7 @@ use App\Livewire\Empresa\Cadastrar as CadastrarEmpresa;
 use App\Livewire\Home\MinhasEmpresas;
 use App\Livewire\Login;
 use App\Livewire\Planos\Pagina as PaginaPlanos;
+use App\Livewire\Trial\Ativar as AtivarTrial;
 use Illuminate\Support\Facades\Route;
 
 // STORY-024 — landing pública simples (substitui a página de debug welcome + hello-world).
@@ -54,6 +55,8 @@ Route::middleware('auth')->group(function () {
     // STORY-016 — "Minhas Empresas" substitui a /home mínima da STORY-011.
     Route::get('/home', MinhasEmpresas::class)->name('home');
     Route::post('/logout', [HomeController::class, 'logout'])->name('logout');
+    // STORY-074 — oferta e ativação do teste grátis. 404 com a cobrança desligada.
+    Route::get('/teste-gratis', AtivarTrial::class)->name('trial.iniciar');
     // STORY-066 — fora do grupo do backoffice: quem chama está logado como o usuário assumido.
     Route::post('/personificacao/encerrar', [PersonificacaoController::class, 'encerrar'])->name('personificacao.encerrar');
 

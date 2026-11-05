@@ -15,5 +15,7 @@ final readonly class SnapshotCarteira
         public ?AssinaturaVista $assinatura,
         public array $lotes,
         public bool $trialElegivel,
+        /** STORY-074 CA-2: a empresa em análise já recebeu análise de trial de outra conta (por CNPJ). */
+        public bool $empresaJaEmTesteDeOutraConta = false,
     ) {}
 }
