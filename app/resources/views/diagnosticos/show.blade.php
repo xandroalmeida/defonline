@@ -5,7 +5,7 @@
 
     /** @var \App\Models\Diagnostico $diagnostico */
     $empresa = $diagnostico->empresa;
-    $nomeEmpresa = $empresa->nomeExibicao();
+    $nomeEmpresa = $diagnostico->nomeExibicao();
     $dataDiagnostico = $diagnostico->gerado_em->format('d/m/Y');
     $tituloPagina = 'Diagnóstico de '.$dataDiagnostico;
 
@@ -48,7 +48,7 @@
                ]">
 
     <x-page-header :title="$nomeEmpresa"
-                   :detalhe="$empresa->razaoSocialComplementar()"
+                   :detalhe="$diagnostico->razaoSocialComplementar()"
                    :subtitle="'Diagnóstico de ' . $dataDiagnostico">
         <x-slot:actions>
             <span class="pill pill--versao self-center" dusk="diagnostico-mvp-badge">

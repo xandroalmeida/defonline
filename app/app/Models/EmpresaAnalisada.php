@@ -161,6 +161,25 @@ final class EmpresaAnalisada extends Model
     }
 
     /**
+     * Dados que o diagnóstico congela na emissão (STORY-064 CA-8): os que a ação
+     * "Atualizar dados da Receita" pode mudar. O nome informado pelo usuário fica
+     * de fora de propósito (PDR-017), e o nome comercial de CPF também.
+     *
+     * @return array{tipo_documento: string, documento: string, razao_social: string, nome_fantasia: string|null, municipio: string, uf: string}
+     */
+    public function snapshotParaDiagnostico(): array
+    {
+        return [
+            'tipo_documento' => $this->tipo_documento->value,
+            'documento' => $this->documento,
+            'razao_social' => $this->razao_social,
+            'nome_fantasia' => $this->tipo_documento === TipoDocumento::Cnpj ? $this->nome_fantasia : null,
+            'municipio' => $this->municipio,
+            'uf' => $this->uf,
+        ];
+    }
+
+    /**
      * Ficha completa da RFB (STORY-063). Null para CPF e para empresas
      * cadastradas antes da ficha existir.
      */

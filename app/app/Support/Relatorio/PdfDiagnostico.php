@@ -64,8 +64,7 @@ final class PdfDiagnostico
 
     public function nomeArquivo(Diagnostico $diagnostico): string
     {
-        $empresa = $diagnostico->empresa;
-        $nome = Str::slug($empresa->nomeExibicao()) ?: 'empresa';
+        $nome = Str::slug($diagnostico->nomeExibicao()) ?: 'empresa';
 
         return sprintf('diagnostico-%s-%s.pdf', $nome, $diagnostico->gerado_em->format('Y-m-d'));
     }
@@ -134,8 +133,7 @@ final class PdfDiagnostico
     /** Rodapé corrido nas páginas de conteúdo — a capa (página 1) fica limpa. */
     private function numerarPaginas(Dompdf $dompdf, Diagnostico $diagnostico): void
     {
-        $empresa = $diagnostico->empresa;
-        $nomeEmpresa = $empresa->nomeExibicao();
+        $nomeEmpresa = $diagnostico->nomeExibicao();
         $data = $diagnostico->gerado_em->format('d/m/Y');
         [$r, $g, $b] = sscanf(ltrim($this->tokens->valor('color-secondary'), '#'), '%2x%2x%2x');
         $cor = [$r / 255, $g / 255, $b / 255];

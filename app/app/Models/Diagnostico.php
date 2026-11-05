@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Domain\Cnpj;
+use App\Domain\Cpf;
+use App\Domain\TipoDocumento;
 use App\Models\Concerns\RegistraPersonificacao;
 use App\Models\Scopes\BelongsToUsuarioScope;
 use Database\Factories\DiagnosticoFactory;
@@ -40,6 +43,7 @@ use Illuminate\Support\Carbon;
  * @property string $payload_hash
  * @property ArrayObject<string, array{valor: float|int|null, farol: string, motivo: ?string, mensagem: string}> $indicadores_calculados
  * @property ArrayObject<string, mixed> $resumo_executivo
+ * @property array{tipo_documento: string, documento: string, razao_social: string, nome_fantasia: string|null, municipio: string, uf: string} $empresa_snapshot
  * @property Carbon $gerado_em
  * @property Carbon|null $deleted_at
  *
@@ -55,6 +59,7 @@ use Illuminate\Support\Carbon;
     'payload_hash',
     'indicadores_calculados',
     'resumo_executivo',
+    'empresa_snapshot',
     'gerado_em',
 ])]
 #[ScopedBy([BelongsToUsuarioScope::class])]
@@ -69,9 +74,59 @@ final class Diagnostico extends Model
         'quiz_payload' => AsArrayObject::class,
         'indicadores_calculados' => AsArrayObject::class,
         'resumo_executivo' => AsArrayObject::class,
+        'empresa_snapshot' => 'array',
         'gerado_em' => 'datetime',
         'deleted_at' => 'datetime',
     ];
+
+    /**
+     * Nome da empresa no relatório. A ordem é a da PDR-017: o nome informado pelo
+     * usuário (lido ao vivo — os já emitidos mostram o nome novo), o fantasia da
+     * Receita e a razão social, estes dois congelados na emissão. Em CPF o nome
+     * comercial é do próprio usuário e também é lido ao vivo.
+     */
+    public function nomeExibicao(): string
+    {
+        $empresa = $this->empresa;
+        $snapshot = $this->empresa_snapshot;
+        $fantasia = $snapshot['tipo_documento'] === TipoDocumento::Cpf->value
+            ? $empresa?->nome_fantasia
+            : $snapshot['nome_fantasia'];
+
+        return ($empresa?->nome_fantasia_informado ?: $fantasia) ?: $snapshot['razao_social'];
+    }
+
+    /** Razão social (congelada) para a capa; null quando ela já é o próprio nome. */
+    public function razaoSocialComplementar(): ?string
+    {
+        $razao = $this->empresa_snapshot['razao_social'];
+
+        return $this->nomeExibicao() !== $razao ? $razao : null;
+    }
+
+    public function rotuloDocumento(): string
+    {
+        return $this->empresa_snapshot['tipo_documento'] === TipoDocumento::Cpf->value ? 'CPF' : 'CNPJ';
+    }
+
+    public function documentoFormatado(): string
+    {
+        $documento = $this->empresa_snapshot['documento'];
+
+        return match (true) {
+            $documento === '' => '—',
+            $this->empresa_snapshot['tipo_documento'] === TipoDocumento::Cpf->value => Cpf::formatar($documento),
+            default => Cnpj::formatar($documento),
+        };
+    }
+
+    /** "Município / UF" como estavam na emissão. */
+    public function localizacao(): string
+    {
+        $municipio = $this->empresa_snapshot['municipio'];
+
+        return $municipio === '' ? '—' : $municipio.' / '.$this->empresa_snapshot['uf'];
+    }
 
     /**
      * @return BelongsTo<Usuario, $this>
