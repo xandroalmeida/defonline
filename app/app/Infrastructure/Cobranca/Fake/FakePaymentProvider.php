@@ -7,6 +7,7 @@ namespace App\Infrastructure\Cobranca\Fake;
 use App\Domain\Cobranca\CobrancaNoProvedor;
 use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\EventoDoProvedor;
+use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PaymentProvider;
 use App\Domain\Cobranca\PedidoCheckout;
 use App\Domain\Cobranca\ProvedorIndisponivel;
@@ -66,6 +67,7 @@ final class FakePaymentProvider implements PaymentProvider
             'estado' => EstadoCobranca::Pendente->value,
             'pago_em' => null,
             'assinatura' => $pedido->recorrencia === null ? null : 'fakesub_'.Str::after($id, 'fakechk_'),
+            'cartao' => in_array(MeioPagamento::Cartao, $pedido->meios, true),
         ], now()->addDays(2));
 
         return new SessaoCheckout(
@@ -82,12 +84,14 @@ final class FakePaymentProvider implements PaymentProvider
 
     public function getCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
     {
-        /** @var array{checkout: string, referencia: string|null, valor: int, estado: string, pago_em: string|null, assinatura?: string|null}|null $c */
+        /** @var array{checkout: string, referencia: string|null, valor: int, estado: string, pago_em: string|null, assinatura?: string|null, cartao?: bool}|null $c */
         $c = Cache::get(self::PREFIXO."pay:{$cobranca->id}");
 
         if ($c === null) {
             throw new ProvedorIndisponivel('Cobrança desconhecida no provedor fake.');
         }
+
+        $comCartao = ($c['assinatura'] ?? null) !== null || ($c['cartao'] ?? false) === true;
 
         return new CobrancaNoProvedor(
             $cobranca,
@@ -97,8 +101,8 @@ final class FakePaymentProvider implements PaymentProvider
             $c['referencia'],
             $c['pago_em'] === null ? null : new DateTimeImmutable($c['pago_em']),
             $c['assinatura'] ?? null,
-            ($c['assinatura'] ?? null) !== null && $c['estado'] === EstadoCobranca::Paga->value ? 'VISA' : null,
-            ($c['assinatura'] ?? null) !== null && $c['estado'] === EstadoCobranca::Paga->value ? '4242' : null,
+            $comCartao && $c['estado'] === EstadoCobranca::Paga->value ? 'VISA' : null,
+            $comCartao && $c['estado'] === EstadoCobranca::Paga->value ? '4242' : null,
         );
     }
 

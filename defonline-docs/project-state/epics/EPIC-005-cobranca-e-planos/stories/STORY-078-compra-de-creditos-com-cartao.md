@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: true
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: claude-sonnet-5-5 (STORY-078)
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: S
@@ -87,13 +87,26 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 ## Notas do agente
 
 ### Decisões tomadas
+- Leitura: estória (com "Ajustes do ADR-010", que prevalecem), ADR-010, IDR-018, IDR-019, notas das STORY-076 e 077, spec `STORY-070-checkout-creditos-cartao.md` e a skill do programador. Pelo ADR-010 a seção de campos de cartão da spec não se aplica: o cartão é digitado no Checkout hospedado `DETACHED`/`CREDIT_CARD`; o botão leva ao provedor depois do aceite do Termo.
+- Mesma rota e mesmo componente da 076 (`creditos.comprar`, `ComprarCreditos`), com `meio` (`pix` padrão, `?meio=cartao`) e o seletor `x-cobranca.seletor-meio` (radiogroup nativo, DDR-010; será reutilizado pela 080). `IniciarCompraDeCreditos::executar` ganhou o parâmetro `MeioPagamento $meio = Pix`; o meio vai para `invoices.meio`, para o `PedidoCheckout` e para o prazo (`cartao_expiracao_minutos` no cartão, `pix_expiracao_minutos` no Pix). A reutilização de checkout pendente agora filtra por meio.
+- Crédito: nenhum código novo. O cartão passa pelo mesmo `ProcessarEvento` da 076 (crédito só em `cobranca.paga` depois de `getCharge`, lock da linha, índice único em `lotes_credito.invoice_id`). Passei a gravar `cartao_bandeira` e `cartao_ultimos4` na Invoice paga (só o que o provedor informa). Nada cria `Assinatura` (CA-2).
+- Recusa (CA-3): `cobranca.falhou` já virava `Falhou`/`recusado`. A tela de retorno agora distingue recusa de cartão (`Cartão recusado`, "O banco não autorizou o pagamento", "Você pode tentar outro cartão ou pagar com Pix", ações `Tentar de novo` e `Pagar com Pix`) de falha do provedor. Para isso a falha ao abrir o checkout passou a gravar `motivo_encerramento = provedor` também nos créditos (como já fazia a assinatura). Motivo específico do banco (limite, CVV) não é mostrado porque o evento canônico não o carrega (mesma limitação da 077).
+- Aviso de "QR Code Pix em aberto" (spec §4): aparece ao escolher cartão se há Invoice Pix pendente e não expirada do mesmo pacote.
+- Fake: `getCharge` devolve VISA/4242 quando o checkout foi pedido com cartão (antes só na assinatura); a página fake mostra aprovar/recusar/desistir para qualquer Invoice de cartão. E-mail do link de pagamento fala em cartão quando é o caso.
+- CA-6: a rota continua 404 com a cobrança desligada; nada novo aparece para o usuário comum.
 
 ### Descobertas
+- A spec diz que "o back-end rejeita o segundo" pagamento (Pix em aberto e cartão pagos). Isso NÃO existe e não foi pedido nos CAs: dois checkouts pagos do mesmo pacote viram dois lotes (dois pagamentos reais, duas Invoices). A tela só previne. Se o PO quiser rejeitar/estornar o segundo, é decisão nova (sugestão: tratar na 087, junto ao estorno).
+- Sandbox/produção do Asaas: ainda não confirmei com pagamento real se `creditCard.creditCardNumber/Brand` aparece na cobrança de um checkout avulso (ADR-010 pendências 1 e 5); se não aparecer, "Pago com cartão final 4242" some da confirmação (a tela omite o final quando não há).
 
 ### Bloqueios encontrados
+- Nenhum.
 
 ### IDRs criados
+- Nenhum (decisões locais, sem impacto novo além do IDR-018/019).
 
 ### Cobertura final
+- Ver relatório da execução: suíte All verde, Pint e PHPStan limpos, Dusk inteiro verde.
 
 ### Evidências
+- `tests/Feature/Cobranca/CreditosComCartaoTest.php`, `tests/Feature/Livewire/{ComprarCreditos,AcompanharPagamento}Test.php`, `tests/Browser/CompraCreditosCartaoBrowserTest.php`.

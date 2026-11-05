@@ -3,12 +3,14 @@
 declare(strict_types=1);
 
 use App\Domain\Cobranca\EstadoCobranca;
+use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PaymentProvider;
 use App\Domain\Cobranca\ProvedorIndisponivel;
 use App\Livewire\Cobranca\AcompanharPagamento;
 use App\Models\EmpresaAnalisada;
 use App\Models\LoteCredito;
 use App\Models\QuizRascunho;
+use App\Services\Cobranca\IniciarCompraDeCreditos;
 use App\Services\Cobranca\ReceberWebhook;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
@@ -153,4 +155,76 @@ it('a página fake só existe com o provedor fake, para o dono, e simula pagamen
 
     _asaasSimulado();
     $this->actingAs($this->usuario)->get(route('pagamentos.fake', $this->invoice))->assertNotFound();
+});
+
+// STORY-078 — a mesma tela de retorno para o pacote pago com cartão.
+describe('pacote pago com cartão (STORY-078)', function () {
+    beforeEach(function () {
+        $this->cartao = app(IniciarCompraDeCreditos::class)->executar($this->usuario, _pacote(), null, null, MeioPagamento::Cartao);
+    });
+
+    it('aguarda a confirmação sem falar em QR Code e sem creditar (CA-2)', function () {
+        Livewire::actingAs($this->usuario)->test(AcompanharPagamento::class, ['invoice' => $this->cartao->id])
+            ->assertSee('Pague com cartão')
+            ->assertSee('Abrir o pagamento com cartão')
+            ->assertSee('Aguardando a confirmação do pagamento…')
+            ->assertSee('não renova')
+            ->assertDontSee('QR Code Pix');
+
+        expect(LoteCredito::query()->count())->toBe(0);
+    });
+
+    it('confirmada: mostra o cartão final, os créditos e nenhuma recorrência (CA-2)', function () {
+        $c = Livewire::actingAs($this->usuario)->test(AcompanharPagamento::class, ['invoice' => $this->cartao->id]);
+        app(ReceberWebhook::class)->tratar($this->fake->simularPagamento($this->cartao->checkout_id_externo));
+
+        $lote = LoteCredito::query()->sole();
+        $c->call('$refresh')
+            ->assertSee('Pagamento confirmado')
+            ->assertSee('Pago com cartão Visa final 4242')
+            ->assertSee("Você tem {$lote->quantidade_comprada} créditos")
+            ->assertDontSee('Recebemos o Pix');
+    });
+
+    it('recusado: explica o motivo, diz que nada foi creditado e oferece tentar de novo ou pagar com Pix (CA-3)', function () {
+        app(ReceberWebhook::class)->tratar($this->fake->simularRecusa($this->cartao->checkout_id_externo));
+
+        $c = Livewire::actingAs($this->usuario)->test(AcompanharPagamento::class, ['invoice' => $this->cartao->id])
+            ->assertSee('Cartão recusado')
+            ->assertSee('O banco não autorizou o pagamento.')
+            ->assertSee('Você pode tentar outro cartão ou pagar com Pix.')
+            ->assertSee('Pagar com Pix');
+
+        $c->call('pagarComPix')->assertRedirect(route('creditos.comprar', ['pacote' => $this->cartao->pacote_credito_id, 'meio' => 'pix']));
+        $c->call('novoCodigo')->assertRedirect(route('creditos.comprar', ['pacote' => $this->cartao->pacote_credito_id, 'meio' => 'cartao']));
+        expect(LoteCredito::query()->count())->toBe(0);
+    });
+
+    it('prazo vencido: nada cobrado e tentar de novo, sem falar em QR Code', function () {
+        $this->cartao->forceFill(['checkout_expira_em' => now()->subMinute()])->save();
+
+        Livewire::actingAs($this->usuario)->test(AcompanharPagamento::class, ['invoice' => $this->cartao->id])
+            ->assertSee('O pagamento não foi concluído e nada foi cobrado.')
+            ->assertDontSee('QR Code')
+            ->call('novoCodigo')->assertRedirect(route('creditos.comprar', ['pacote' => $this->cartao->pacote_credito_id, 'meio' => 'cartao']));
+    });
+
+    it('falha do provedor no cartão usa o texto do cartão', function () {
+        $this->cartao->forceFill(['status' => EstadoCobranca::Falhou, 'motivo_encerramento' => 'provedor'])->save();
+
+        Livewire::actingAs($this->usuario)->test(AcompanharPagamento::class, ['invoice' => $this->cartao->id])
+            ->assertSee('Não conseguimos abrir o pagamento agora. Nada foi cobrado.')
+            ->assertDontSee('Cartão recusado');
+    });
+
+    it('a página fake oferece cartão aprovado, recusado e desistência, e o Pix continua com o Pix', function () {
+        $this->actingAs($this->usuario)->get($this->cartao->checkout_url)
+            ->assertOk()->assertSee('Simular cartão aprovado')->assertSee('Simular cartão recusado')->assertDontSee('Simular pagamento do Pix');
+        $this->actingAs($this->usuario)->get($this->invoice->checkout_url)
+            ->assertOk()->assertSee('Simular pagamento do Pix')->assertDontSee('Simular cartão recusado');
+
+        $this->actingAs($this->usuario)->post(route('pagamentos.fake.simular', $this->cartao), ['acao' => 'recusar'])->assertRedirect(route('creditos.retorno', $this->cartao));
+        expect($this->cartao->fresh()->motivo_encerramento)->toBe('recusado');
+        $this->actingAs($this->usuario)->post(route('pagamentos.fake.simular', $this->invoice), ['acao' => 'recusar'])->assertStatus(422);
+    });
 });

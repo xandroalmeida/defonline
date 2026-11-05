@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Cobranca;
 
+use App\Domain\Cobranca\EstadoCobranca;
+use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\ProvedorIndisponivel;
 use App\Jobs\EnviarEmailConfirmacao;
 use App\Models\CobrancaConfig;
+use App\Models\Invoice;
 use App\Models\PacoteCredito;
 use App\Models\Usuario;
 use App\Services\Cobranca\CompraNaoPermitida;
@@ -17,6 +20,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
@@ -32,6 +36,10 @@ final class ComprarCreditos extends Component
 
     public bool $aceito = false;
 
+    /** `pix` ou `cartao` (STORY-078; spec: Pix vem selecionado). Aceita `?meio=` para voltar já no cartão. */
+    #[Url(as: 'meio')]
+    public string $meio = 'pix';
+
     /** O provedor não atendeu: a tela mostra o aviso com "Tentar de novo". */
     public bool $falhaDoProvedor = false;
 
@@ -44,6 +52,17 @@ final class ComprarCreditos extends Component
         $this->pacoteId = $pacote;
         // Vindo de "Gerar novo QR Code": o aceite já dado continua marcado (spec §4.4).
         $this->aceito = (bool) session('aceite_previo', false);
+        $this->updatedMeio();
+    }
+
+    /** Trocar o meio não zera aceite nem cupom: só muda o bloco de pagamento e o botão. */
+    public function updatedMeio(): void
+    {
+        if (MeioPagamento::tryFrom($this->meio) === null) {
+            $this->meio = MeioPagamento::Pix->value;
+        }
+
+        $this->falhaDoProvedor = false;
     }
 
     public function gerar(IniciarCompraDeCreditos $iniciar): mixed
@@ -65,7 +84,7 @@ final class ComprarCreditos extends Component
         }
 
         try {
-            $invoice = $iniciar->executar($usuario, $pacote, request()->ip(), substr((string) request()->userAgent(), 0, 255));
+            $invoice = $iniciar->executar($usuario, $pacote, request()->ip(), substr((string) request()->userAgent(), 0, 255), MeioPagamento::from($this->meio));
         } catch (CompraNaoPermitida) {
             // A própria tela já mostra o motivo (e-mail, admin, pacote): só reavalia o estado.
             return null;
@@ -107,9 +126,26 @@ final class ComprarCreditos extends Component
             'emailConfirmado' => $usuario instanceof Usuario && $usuario->emailConfirmado(),
             'email' => $usuario instanceof Usuario ? $usuario->email : '',
             'personificando' => Personificacao::ativa() !== null,
+            'meioAtual' => MeioPagamento::from($this->meio),
+            'pixEmAberto' => $pacote === null || ! $usuario instanceof Usuario ? null : $this->pixEmAberto($usuario, $pacote),
             'minutosPix' => (int) config('services.payments.pix_expiracao_minutos', 30),
             'validade' => $pacote === null ? null : now()->addMonthsNoOverflow($pacote->validade_meses),
         ])->layoutData(['title' => 'Comprar créditos']);
+    }
+
+    /** QR Code Pix ainda válido deste pacote: a tela avisa para evitar pagar duas vezes (spec §4). */
+    private function pixEmAberto(Usuario $usuario, PacoteCredito $pacote): ?Invoice
+    {
+        $aberto = Invoice::query()
+            ->where('usuario_id', $usuario->id)
+            ->where('pacote_credito_id', $pacote->id)
+            ->where('meio', MeioPagamento::Pix->value)
+            ->where('status', EstadoCobranca::Pendente->value)
+            ->whereNotNull('checkout_url')
+            ->latest('created_at')
+            ->first();
+
+        return $aberto === null || $aberto->expirada() ? null : $aberto;
     }
 
     private function pacote(): ?PacoteCredito

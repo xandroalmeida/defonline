@@ -133,6 +133,8 @@ final class ProcessarEvento
                 'id_externo' => $cobranca->referencia->id,
                 'checkout_id_externo' => $invoice->checkout_id_externo ?? $cobranca->checkoutId,
                 'pago_em' => $pagoEm,
+                'cartao_bandeira' => $cobranca->cartaoBandeira,
+                'cartao_ultimos4' => $cobranca->cartaoUltimos4,
             ])->save();
 
             $this->carteira->concederCreditos(

@@ -19,7 +19,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * STORY-076 CA-1, CA-2, CA-6, CA-7 — da revisão do pedido até o checkout hospedado.
+ * STORY-076 CA-1, CA-2, CA-6, CA-7 — da revisão do pedido até o checkout hospedado. STORY-078: o meio é
+ * Pix ou cartão (checkout avulso `DETACHED`, sem recorrência nos dois).
  *
  * Ordem: valida quem pode comprar, registra o aceite (data, IP, hash), grava a Invoice ANTES de
  * falar com o provedor (o id dela é a chave de idempotência) e só então abre o checkout. Falha do
@@ -36,7 +37,7 @@ final class IniciarCompraDeCreditos
      * @throws CompraNaoPermitida
      * @throws ProvedorIndisponivel
      */
-    public function executar(Usuario $usuario, PacoteCredito $pacote, ?string $ip, ?string $userAgent): Invoice
+    public function executar(Usuario $usuario, PacoteCredito $pacote, ?string $ip, ?string $userAgent, MeioPagamento $meio = MeioPagamento::Pix): Invoice
     {
         if (Personificacao::ativa() !== null) {
             throw CompraNaoPermitida::adminPersonificando();
@@ -53,7 +54,7 @@ final class IniciarCompraDeCreditos
         $aceiteId = $this->aceite->executar($usuario, $ip, $userAgent);
 
         // Clique repetido ou volta ao checkout: reaproveita o que ainda vale em vez de abrir outro.
-        $existente = $this->checkoutAindaValido($usuario, $pacote);
+        $existente = $this->checkoutAindaValido($usuario, $pacote, $meio);
 
         if ($existente !== null) {
             return $existente;
@@ -68,7 +69,7 @@ final class IniciarCompraDeCreditos
             'validade_meses' => $pacote->validade_meses,
             'valor_centavos' => $pacote->preco_centavos,
             'status' => EstadoCobranca::Pendente,
-            'meio' => MeioPagamento::Pix->value,
+            'meio' => $meio->value,
             'provedor' => $this->provedor->nome(),
             'aceite_termo_id' => $aceiteId,
         ]);
@@ -78,8 +79,10 @@ final class IniciarCompraDeCreditos
                 referenciaInterna: $invoice->id,
                 descricao: $invoice->descricao,
                 valorCentavos: $invoice->valor_centavos,
-                meios: [MeioPagamento::Pix],
-                expiraEmMinutos: (int) config('services.payments.pix_expiracao_minutos', 30),
+                meios: [$meio],
+                expiraEmMinutos: $meio === MeioPagamento::Pix
+                    ? (int) config('services.payments.pix_expiracao_minutos', 30)
+                    : (int) config('services.payments.cartao_expiracao_minutos', 60),
                 urlSucesso: route('creditos.retorno', $invoice),
                 urlCancelamento: route('creditos.comprar'),
                 urlExpirado: route('creditos.retorno', $invoice),
@@ -87,6 +90,7 @@ final class IniciarCompraDeCreditos
         } catch (ProvedorIndisponivel $e) {
             $invoice->forceFill([
                 'status' => EstadoCobranca::Falhou,
+                'motivo_encerramento' => 'provedor',
                 'falha_motivo' => mb_substr($e->getMessage(), 0, 200),
             ])->save();
 
@@ -115,7 +119,7 @@ final class IniciarCompraDeCreditos
             actorType: 'user',
             actorId: $usuario->id,
             usuarioId: $usuario->id,
-            after: ['valor_centavos' => $invoice->valor_centavos, 'provedor' => $invoice->provedor, 'pacote_credito_id' => $pacote->id],
+            after: ['valor_centavos' => $invoice->valor_centavos, 'provedor' => $invoice->provedor, 'pacote_credito_id' => $pacote->id, 'meio' => $meio->value],
         );
 
         EnviarEmailPagamento::dispatch($invoice->id);
@@ -123,12 +127,13 @@ final class IniciarCompraDeCreditos
         return $invoice;
     }
 
-    private function checkoutAindaValido(Usuario $usuario, PacoteCredito $pacote): ?Invoice
+    private function checkoutAindaValido(Usuario $usuario, PacoteCredito $pacote, MeioPagamento $meio): ?Invoice
     {
         return Invoice::query()
             ->where('usuario_id', $usuario->id)
             ->where('pacote_credito_id', $pacote->id)
             ->where('valor_centavos', $pacote->preco_centavos)
+            ->where('meio', $meio->value)
             ->where('provedor', $this->provedor->nome())
             ->where('status', EstadoCobranca::Pendente->value)
             ->whereNotNull('checkout_url')
