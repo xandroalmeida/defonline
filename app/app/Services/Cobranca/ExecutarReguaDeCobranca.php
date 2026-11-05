@@ -15,6 +15,7 @@ use App\Domain\Cobranca\TentativaNaoRealizada;
 use App\Models\Assinatura;
 use App\Models\CobrancaConfig;
 use App\Observabilidade\AuditLogger;
+use App\Observabilidade\EventosCobranca;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -232,6 +233,8 @@ final class ExecutarReguaDeCobranca
                     usuarioId: $a->usuario_id,
                     after: ['tentativas' => $a->tentativas_cobranca, 'atraso_desde' => $a->atraso_desde?->toIso8601String(), 'cobranca_perdida' => $cobrancaPerdida],
                 );
+
+                EventosCobranca::cancelamento($a, EventosCobranca::ORIGEM_INADIMPLENCIA);
             }
 
             return ['acao' => $acao, 'tentativas' => $a->tentativas_cobranca, 'anterior' => $anterior];

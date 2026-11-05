@@ -14,6 +14,7 @@ use App\Models\Invoice;
 use App\Models\LoteCredito;
 use App\Models\QuizRascunho;
 use App\Models\Usuario;
+use App\Observabilidade\EventosCobranca;
 use App\Support\Personificacao;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -68,6 +69,7 @@ final class AcompanharPagamento extends Component
 
                 if ($atual->status === EstadoCobranca::Pendente) {
                     $atual->forceFill(['status' => EstadoCobranca::Cancelada, 'motivo_encerramento' => 'cancelado'])->save();
+                    EventosCobranca::contratacaoAbandonada($atual, 'cancelado');
                 }
             });
         }

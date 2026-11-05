@@ -16,6 +16,7 @@ use App\Models\CobrancaConfig;
 use App\Models\EmpresaAnalisada;
 use App\Models\QuizRascunho;
 use App\Observabilidade\EventLogger;
+use App\Observabilidade\EventosCobranca;
 use App\Support\Cobranca\TextoBloqueio;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -196,6 +197,8 @@ final class Quiz extends Component
 
     private function bloquear(Bloqueio $bloqueio): void
     {
+        EventosCobranca::bloqueioSemSaldo((string) $this->empresa->usuario_id, $bloqueio->motivo, EventosCobranca::BLOQUEIO_ANALISE);
+
         $this->bloqueio_saldo = [
             'motivo' => $bloqueio->motivo->value,
             ...TextoBloqueio::para($bloqueio),

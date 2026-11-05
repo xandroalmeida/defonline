@@ -8,7 +8,8 @@ use App\Models\Assinatura;
 use App\Models\TrialAtivacao;
 use App\Models\TrialConfig;
 use App\Models\Usuario;
-use App\Services\Rfb\RfbAlerter;
+use App\Observabilidade\AlertaDaEquipe;
+use App\Observabilidade\EventosCobranca;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +28,7 @@ class Trial
     public function __construct(
         private readonly Carteira $carteira,
         private readonly ElegibilidadeTrial $elegibilidade,
-        private readonly RfbAlerter $alerter,
+        private readonly AlertaDaEquipe $alerter,
     ) {}
 
     /** @throws TrialIndisponivel */
@@ -57,7 +58,10 @@ class Trial
                     ]);
                 }
 
-                return $this->carteira->concederCota($usuario->id, $config->analises, $agora, $agora->copy()->addDays($config->dias), trial: true);
+                $trial = $this->carteira->concederCota($usuario->id, $config->analises, $agora, $agora->copy()->addDays($config->dias), trial: true);
+                EventosCobranca::trialAtivado($trial);
+
+                return $trial;
             });
         } catch (UniqueConstraintViolationException|AssinaturaVigenteJaExiste) {
             // Corrida: outra ativação do mesmo CPF (ou da mesma conta) chegou primeiro.
@@ -78,10 +82,13 @@ class Trial
         $total = TrialAtivacao::query()->where('ip', $ip)->where('ativado_em', '>=', now()->subDays(30))->count();
 
         if ($total > $limite) {
+            // O alerta vai para um canal de mensagens: IP é dado pessoal, então só sai com o último trecho oculto.
+            $mascarado = AlertaDaEquipe::mascararIp($ip);
+
             $this->alerter->enviar(
-                'Trials em excesso para um mesmo IP',
-                "O IP {$ip} ativou {$total} trials em 30 dias (limite configurado: {$limite}). Nada foi bloqueado; confira se é abuso ou um escritório compartilhando IP.",
-                ['ip' => $ip, 'total_30d' => $total, 'limite' => $limite],
+                '[P2] Trials em excesso para um mesmo IP',
+                "Um IP ({$mascarado}) ativou {$total} trials em 30 dias (limite configurado: {$limite}). Nada foi bloqueado; confira em trial_ativacoes se é abuso ou um escritório compartilhando IP.",
+                ['ip_mascarado' => $mascarado, 'total_30d' => $total, 'limite' => $limite],
             );
         }
     }

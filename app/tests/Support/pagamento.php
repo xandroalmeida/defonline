@@ -8,6 +8,7 @@ use App\Domain\Cobranca\EventoDoProvedor;
 use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PaymentProvider;
 use App\Domain\Cobranca\PedidoCheckout;
+use App\Domain\Cobranca\ReembolsoNoProvedor;
 use App\Domain\Cobranca\ReferenciaProvedor;
 use App\Domain\Cobranca\SessaoCheckout;
 use App\Domain\Cobranca\WebhookBruto;
@@ -312,6 +313,13 @@ function _provedorQueFalha(array $falhas): PaymentProvider
             $this->checar(__FUNCTION__, $sessao);
 
             return $this->real->listCheckoutCharges($sessao);
+        }
+
+        public function refund(ReferenciaProvedor $cobranca, ?int $valorCentavos = null, string $motivo = ''): ReembolsoNoProvedor
+        {
+            $this->checar(__FUNCTION__, $cobranca);
+
+            return $this->real->refund($cobranca, $valorCentavos, $motivo);
         }
 
         public function parseWebhook(WebhookBruto $requisicao): EventoDoProvedor

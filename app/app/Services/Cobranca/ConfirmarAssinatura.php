@@ -17,6 +17,7 @@ use App\Models\Assinatura;
 use App\Models\Invoice;
 use App\Models\Plano;
 use App\Observabilidade\AuditLogger;
+use App\Observabilidade\EventosCobranca;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -131,7 +132,10 @@ final class ConfirmarAssinatura
             }
 
             // O dinheiro entrou, mas o Usuário já tinha assinatura (duas abas, dois checkouts). Não dá
-            // para desfazer sozinho: fica registrado como pago e vira alerta para estorno manual.
+            // para desfazer sozinho: fica registrado como pago e vira alerta para estorno manual. A tela do
+            // backoffice (STORY-085) o destaca para o admin devolver.
+            $invoice->forceFill(['devolucao_motivo' => 'assinatura_duplicada'])->save();
+
             Log::error('cobranca.assinatura_duplicada', [
                 'module' => 'cobranca',
                 'action' => 'processar_evento',
@@ -157,6 +161,8 @@ final class ConfirmarAssinatura
 
         $invoice->forceFill(['assinatura_id' => $assinatura->id])->save();
         $this->cupons->registrarUso($invoice);
+
+        EventosCobranca::contratacaoConcluida($invoice, $assinatura, renovacao: false);
 
         AuditLogger::log(
             action: 'cobranca.assinatura_ativada',
@@ -244,6 +250,8 @@ final class ConfirmarAssinatura
             after: ['periodos_pagos' => $periodos, 'proximo_vencimento' => $vencimento->toIso8601String(), 'cota' => $invoice->cota_snapshot, 'valor_centavos' => $invoice->valor_centavos, 'desconto_centavos' => $invoice->desconto_centavos, 'meio' => $invoice->meio],
         );
 
+        EventosCobranca::contratacaoConcluida($invoice, $assinatura, renovacao: true);
+
         return ['processado', $invoice->id];
     }
 
@@ -282,8 +290,12 @@ final class ConfirmarAssinatura
         if ($assinatura === null) {
             // Pagamento da cobrança da assinatura ANTIGA de uma troca de cartão já concluída (a retentativa
             // da régua estava em voo quando o cartão novo foi confirmado): o ciclo vai ser cobrado de novo
-            // pelo cartão novo, então pede devolução manual (STORY-087).
-            if ($cobranca->assinaturaId !== null && DB::table('trocas_de_cartao')->where('antiga_id_externo', $cobranca->assinaturaId)->where('status', 'concluida')->exists()) {
+            // pelo cartão novo, então pede devolução manual: vira Invoice marcada, e a tela do backoffice (STORY-085) a destaca.
+            $troca = $cobranca->assinaturaId === null ? null : DB::table('trocas_de_cartao')->where('antiga_id_externo', $cobranca->assinaturaId)->where('status', 'concluida')->first();
+
+            if ($troca !== null) {
+                $orfa = $this->registrarPagamentoSemDestino($cobranca, $provedor, (string) $troca->usuario_id, (string) $troca->assinatura_id, 'assinatura_antiga');
+
                 Log::error('cobranca.pagamento_da_assinatura_antiga', [
                     'module' => 'cobranca',
                     'action' => 'processar_evento',
@@ -291,7 +303,7 @@ final class ConfirmarAssinatura
                     'assinatura_antiga' => $cobranca->assinaturaId,
                 ]);
 
-                return ['ignorado', $referencia?->id];
+                return ['ignorado', $orfa->id];
             }
 
             Log::error('cobranca.evento_sem_invoice', [
@@ -310,8 +322,10 @@ final class ConfirmarAssinatura
         $emAtraso = $assinatura->status === StatusAssinatura::EmAtraso;
 
         // Cancelada ou encerrada não renova sozinha: o dinheiro entrou, mas não há ciclo a estender.
-        // Fica o alerta para a equipe (devolução é manual, STORY-087).
+        // Fica o alerta para a equipe e a Invoice marcada: a tela do backoffice (STORY-085) a destaca para devolver.
         if ($assinatura->status !== StatusAssinatura::Ativa && ! $emAtraso) {
+            $orfa = $this->registrarPagamentoSemDestino($cobranca, $provedor, $assinatura->usuario_id, $assinatura->id, 'assinatura_cancelada');
+
             Log::error('cobranca.renovacao_de_assinatura_inativa', [
                 'module' => 'cobranca',
                 'action' => 'processar_evento',
@@ -319,7 +333,7 @@ final class ConfirmarAssinatura
                 'status' => $assinatura->status->value,
             ]);
 
-            return ['ignorado', $referencia?->id];
+            return ['ignorado', $orfa->id];
         }
 
         // STORY-082: o downgrade agendado vale nesta renovação (plano, ciclo e preço novos).
@@ -413,5 +427,38 @@ final class ConfirmarAssinatura
         );
 
         return ['processado', $invoice->id];
+    }
+
+    /**
+     * STORY-085 — o dinheiro entrou, mas não há ciclo a estender (assinatura cancelada ou encerrada, ou a antiga
+     * de uma troca de cartão). Registra a cobrança como paga e marcada para devolução, sem conceder nada; o
+     * `UNIQUE (provedor, id_externo)` faz o mesmo aviso repetido registrar uma vez só.
+     */
+    private function registrarPagamentoSemDestino(CobrancaNoProvedor $cobranca, string $provedor, string $usuarioId, string $assinaturaId, string $motivo): Invoice
+    {
+        $existente = Invoice::query()->where('provedor', $provedor)->where('id_externo', $cobranca->referencia->id)->first();
+
+        if ($existente !== null) {
+            return $existente;
+        }
+
+        $pagoEm = $cobranca->pagoEm !== null ? CarbonImmutable::instance($cobranca->pagoEm) : CarbonImmutable::now();
+
+        return Invoice::query()->create([
+            'usuario_id' => $usuarioId,
+            'tipo' => 'assinatura',
+            'descricao' => 'Pagamento sem destino: devolver',
+            'valor_centavos' => max(1, $cobranca->valorCentavos),
+            'status' => EstadoCobranca::Paga,
+            'meio' => MeioPagamento::Cartao->value,
+            'provedor' => $provedor,
+            'id_externo' => $cobranca->referencia->id,
+            'pago_em' => $pagoEm,
+            'assinatura_id' => $assinaturaId,
+            'renovacao' => false, // não renovou nada: renovação é só o que estende o ciclo
+            'devolucao_motivo' => $motivo,
+            'cartao_bandeira' => $cobranca->cartaoBandeira,
+            'cartao_ultimos4' => $cobranca->cartaoUltimos4,
+        ]);
     }
 }

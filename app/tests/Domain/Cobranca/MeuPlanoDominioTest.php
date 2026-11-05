@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Cobranca\Arrependimento;
+use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\LoteVisto;
 use App\Domain\Cobranca\SituacaoDoPlano as S;
 use App\Domain\Cobranca\StatusAssinatura as St;
@@ -74,5 +75,24 @@ describe('LoteVisto::pertoDeVencer (CA-1)', function () use ($agora) {
             ->and($lote($agora->addDays(31))->pertoDeVencer($agora, 30))->toBeFalse()
             ->and($lote($agora)->pertoDeVencer($agora, 30))->toBeFalse()
             ->and($lote($agora->subDay())->pertoDeVencer($agora, 30))->toBeFalse();
+    });
+});
+
+describe('STORY-085: Arrependimento::noPrazo, rótulos e resultado do reembolso', function () use ($agora) {
+    it('noPrazo olha só a janela de 7 dias corridos, sem considerar análise', function () use ($agora) {
+        expect(Arrependimento::noPrazo($agora->subDays(7), $agora))->toBeTrue()
+            ->and(Arrependimento::noPrazo($agora->subDays(7)->subSecond(), $agora))->toBeFalse()
+            ->and(Arrependimento::noPrazo($agora->addMinute(), $agora))->toBeFalse();
+    });
+
+    it('todo estado de cobrança e de assinatura tem rótulo legível', function () {
+        foreach (EstadoCobranca::cases() as $e) {
+            expect($e->rotulo())->not->toBe('');
+        }
+        foreach (St::cases() as $s) {
+            expect($s->rotulo())->not->toBe('');
+        }
+        expect(EstadoCobranca::EstornadaParcial->rotulo())->toBe('Estornada parcialmente')
+            ->and(St::Expirada->rotulo())->toBe('Encerrada');
     });
 });

@@ -7,6 +7,7 @@ namespace App\Http\Middleware;
 use App\Models\DrmLancamento;
 use App\Models\DrmRascunho;
 use App\Models\EmpresaAnalisada;
+use App\Observabilidade\EventosCobranca;
 use App\Support\Cobranca\AcessoDrm;
 use App\Support\Cobranca\TextoBloqueio;
 use Closure;
@@ -29,6 +30,8 @@ final class ExigirAcessoDrm
         if ($bloqueio === null) {
             return $next($request);
         }
+
+        EventosCobranca::bloqueioSemSaldo((string) $usuario->getAuthIdentifier(), $bloqueio->motivo, EventosCobranca::BLOQUEIO_DRM);
 
         $empresa = $request->route('empresa');
         $empresa = $empresa instanceof EmpresaAnalisada ? $empresa : null;

@@ -8,10 +8,12 @@ use App\Domain\Cobranca\PaymentProvider;
 use App\Domain\Cobranca\PedidoCheckout;
 use App\Domain\Cobranca\ProvedorIndisponivel;
 use App\Domain\Cobranca\ReferenciaProvedor;
+use App\Domain\Cobranca\ResultadoReembolso;
 use App\Domain\Cobranca\TipoEvento;
 use App\Domain\Cobranca\WebhookBruto;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 /**
  * STORY-081 — o adaptador do Asaas na gestão da assinatura: pausar, religar e cancelar a recorrência,
@@ -84,4 +86,56 @@ it('CHECKOUT_PAID sem assinatura no corpo não inventa uma', function () {
     $e = app(PaymentProvider::class)->parseWebhook(_webhookDoCheckout(['id' => 'evt_c2', 'event' => 'CHECKOUT_PAID', 'checkout' => ['id' => 'chk-1']]));
 
     expect($e->assinaturaId)->toBeNull();
+});
+
+/**
+ * STORY-085 / ADR-010 §4.6 — estorno pelo adaptador do Asaas (respostas do sandbox, rede simulada).
+ */
+describe('refund', function () {
+    $ref = fn () => new ReferenciaProvedor('asaas', 'pay_1');
+
+    it('cartão: estorno total concluído, enviado sem valor e com o motivo', function () use ($ref) {
+        Http::fake(fn () => Http::response(['id' => 'pay_1', 'status' => 'REFUNDED', 'refunds' => [['status' => 'DONE', 'value' => 49.9]]], 200));
+
+        $r = app(PaymentProvider::class)->refund($ref(), null, 'Arrependimento');
+
+        expect($r->resultado)->toBe(ResultadoReembolso::Concluido);
+        Http::assertSent(fn (Request $q) => $q->method() === 'POST' && str_ends_with($q->url(), '/payments/pay_1/refund') && $q->data() === ['description' => 'Arrependimento']);
+    });
+
+    it('Pix: fica aguardando a autorização da ação crítica', function () use ($ref) {
+        Http::fake(fn () => Http::response(['status' => 'RECEIVED', 'refunds' => [['status' => 'AWAITING_CRITICAL_ACTION_AUTHORIZATION']]], 200));
+
+        expect(app(PaymentProvider::class)->refund($ref())->resultado)->toBe(ResultadoReembolso::AguardandoAutorizacao);
+    });
+
+    it('aceito mas ainda não concluído é "em andamento"; valor parcial vai em reais', function () use ($ref) {
+        Http::fake(fn () => Http::response(['status' => 'REFUND_IN_PROGRESS', 'refunds' => [['status' => 'PENDING']]], 200));
+
+        expect(app(PaymentProvider::class)->refund($ref(), 1500)->resultado)->toBe(ResultadoReembolso::EmAndamento);
+        Http::assertSent(fn (Request $q) => $q->data() === ['value' => 15.0]);
+    });
+
+    it('4xx é recusa com a descrição do Asaas; 5xx e rede são indisponibilidade', function () use ($ref) {
+        Http::fake(['*' => Http::sequence()
+            ->push(['errors' => [['code' => 'invalid_action', 'description' => 'só pode ser estornada parcialmente no próximo dia']]], 400)
+            ->push('', 503)
+            ->pushFailedConnection()]);
+
+        $r = app(PaymentProvider::class)->refund($ref());
+        expect($r->resultado)->toBe(ResultadoReembolso::Recusado)->and($r->detalhe)->toContain('próximo dia');
+        expect(fn () => app(PaymentProvider::class)->refund($ref()))->toThrow(ProvedorIndisponivel::class);
+        expect(fn () => app(PaymentProvider::class)->refund($ref()))->toThrow(ProvedorIndisponivel::class);
+    });
+
+    it('o Fake recusa estorno de cobrança não paga ou já em curso', function () {
+        _usarProvedor('fake');
+        $sessao = _fake()->startCheckout(new PedidoCheckout('22222222-2222-4222-8222-222222222222', 'P', 5000, [MeioPagamento::Pix], 30, 'https://a/ok', 'https://a/c', 'https://a/e'));
+        $cobranca = new ReferenciaProvedor('fake', 'fakepay_'.Str::after($sessao->referencia->id, 'fakechk_'));
+
+        expect(_fake()->refund($cobranca)->resultado)->toBe(ResultadoReembolso::Recusado);
+        _fake()->simularPagamento($sessao->referencia->id);
+        expect(_fake()->refund($cobranca)->resultado)->toBe(ResultadoReembolso::AguardandoAutorizacao)
+            ->and(_fake()->refund($cobranca)->resultado)->toBe(ResultadoReembolso::Recusado);
+    });
 });

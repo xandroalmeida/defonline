@@ -16,6 +16,7 @@ use App\Models\Invoice;
 use App\Models\ProviderEvent;
 use App\Models\TrocaDeCartao;
 use App\Observabilidade\AuditLogger;
+use App\Observabilidade\EventosCobranca;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -37,6 +38,8 @@ use Throwable;
  * - recusa ou vencimento da cobrança de uma assinatura nossa é de {@see FalhaDeRenovacao} (STORY-079);
  * - provedor fora do ar NÃO é recusa do cliente: o evento fica em `erro`, a equipe é alertada e o
  *   reprocessador tenta de novo (STORY-079 CA-7);
+ * - estorno e contestação (STORY-085): conferidos no provedor; o estorno retira o que a cobrança concedeu
+ *   ({@see ReembolsarCobranca::concluir()}, que serve também ao estorno feito direto no painel do provedor);
  * - checkout de troca de cartão (STORY-081) não tem Invoice: é uma {@see TrocaDeCartao}, e o cartão novo
  *   só vale quando o provedor confirma (checkout concluído ou 1ª cobrança paga).
  */
@@ -50,6 +53,7 @@ final class ProcessarEvento
         private readonly TrocarCartao $trocas,
         private readonly CupomDoCheckout $cupons,
         private readonly AjustarValorDaAssinatura $ajustes,
+        private readonly ReembolsarCobranca $reembolsos,
     ) {}
 
     public function executar(string $providerEventId): void
@@ -91,6 +95,9 @@ final class ProcessarEvento
             'erro' => null,
             'processado_em' => now(),
         ])->save();
+
+        // STORY-086 CA-4: cada cobrança paga ou recusada entra na conta da taxa de falha de pagamento.
+        EventosCobranca::pagamentoDoEvento($registro, $status, $invoiceId);
     }
 
     /** @return array{0: 'processado'|'ignorado', 1: string|null} */
@@ -102,6 +109,8 @@ final class ProcessarEvento
             TipoEvento::CheckoutExpirado => $this->encerrarCheckout($evento, EstadoCobranca::Vencida, 'expirado'),
             TipoEvento::CheckoutCancelado => $this->encerrarCheckout($evento, EstadoCobranca::Cancelada, 'cancelado'),
             TipoEvento::CobrancaFalhou, TipoEvento::CobrancaVencida => $this->aplicarFalha($evento),
+            TipoEvento::CobrancaEstornada => $this->aplicarEstorno($evento),
+            TipoEvento::CobrancaContestada => $this->aplicarContestacao($evento),
             default => ['ignorado', null],
         };
     }
@@ -199,6 +208,8 @@ final class ProcessarEvento
                 after: ['valor_centavos' => $invoice->valor_centavos, 'creditos' => $invoice->quantidade_creditos, 'provedor' => $invoice->provedor],
             );
 
+            EventosCobranca::contratacaoConcluida($invoice, null, renovacao: false);
+
             return ['processado', $invoice->id];
         });
     }
@@ -225,6 +236,78 @@ final class ProcessarEvento
         }
 
         return ['ignorado', null];
+    }
+
+    /** @return array{0: 'processado'|'ignorado', 1: string|null} */
+    private function aplicarEstorno(ProviderEvent $evento): array
+    {
+        if ($evento->cobranca_id_externo === null) {
+            return $this->semInvoice($evento, 'estorno sem id de cobrança');
+        }
+
+        $cobranca = $this->provedor->getCharge(new ReferenciaProvedor($evento->provedor, $evento->cobranca_id_externo));
+        $invoice = $this->localizar($evento, $cobranca);
+
+        if ($invoice === null) {
+            return $this->semInvoice($evento, 'estorno sem invoice correspondente');
+        }
+
+        if ($cobranca->estado !== EstadoCobranca::Estornada) {
+            return ['ignorado', $invoice->id];
+        }
+
+        return [$this->reembolsos->concluir($invoice->id) ? 'processado' : 'ignorado', $invoice->id];
+    }
+
+    /**
+     * Contestação (chargeback): a cobrança passa a "Contestada" e a equipe é alertada. O acesso não é
+     * retirado sozinho: a contestação pode ser revertida, e quem decide é o admin (a tela destaca).
+     *
+     * @return array{0: 'processado'|'ignorado', 1: string|null}
+     */
+    private function aplicarContestacao(ProviderEvent $evento): array
+    {
+        if ($evento->cobranca_id_externo === null) {
+            return $this->semInvoice($evento, 'contestação sem id de cobrança');
+        }
+
+        $cobranca = $this->provedor->getCharge(new ReferenciaProvedor($evento->provedor, $evento->cobranca_id_externo));
+        $invoice = $this->localizar($evento, $cobranca);
+
+        if ($invoice === null) {
+            return $this->semInvoice($evento, 'contestação sem invoice correspondente');
+        }
+
+        if ($cobranca->estado !== EstadoCobranca::Contestada) {
+            return ['ignorado', $invoice->id];
+        }
+
+        return DB::transaction(function () use ($invoice): array {
+            $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
+
+            if (! $invoice->status->podeIrPara(EstadoCobranca::Contestada)) {
+                return ['ignorado', $invoice->id];
+            }
+
+            $invoice->forceFill(['status' => EstadoCobranca::Contestada])->save();
+
+            Log::error('cobranca.contestada', [
+                'module' => 'cobranca',
+                'action' => 'processar_evento',
+                'invoice_id' => $invoice->id,
+            ]);
+
+            AuditLogger::log(
+                action: 'cobranca.contestada',
+                subjectType: 'Invoice',
+                subjectId: $invoice->id,
+                actorType: 'system',
+                usuarioId: $invoice->usuario_id,
+                after: ['valor_centavos' => $invoice->valor_centavos, 'provedor' => $invoice->provedor],
+            );
+
+            return ['processado', $invoice->id];
+        });
     }
 
     /** @return array{0: 'processado'|'ignorado', 1: string|null} */
@@ -282,6 +365,7 @@ final class ProcessarEvento
             }
 
             $invoice->forceFill(['status' => $novo, 'motivo_encerramento' => $motivo])->save();
+            EventosCobranca::contratacaoAbandonada($invoice, $motivo);
 
             return ['processado', $invoice->id];
         });

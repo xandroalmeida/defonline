@@ -19,6 +19,20 @@ enum EstadoCobranca: string
     case Contestada = 'contestada';
     case Cancelada = 'cancelada';
 
+    public function rotulo(): string
+    {
+        return match ($this) {
+            self::Pendente => 'Pendente',
+            self::Paga => 'Paga',
+            self::Vencida => 'Vencida',
+            self::Falhou => 'Falhou',
+            self::Estornada => 'Estornada',
+            self::EstornadaParcial => 'Estornada parcialmente',
+            self::Contestada => 'Contestada',
+            self::Cancelada => 'Cancelada',
+        };
+    }
+
     /** Estados dos quais não se volta: nenhum evento tardio os reabre nem os transforma em `paga`. */
     public function final(): bool
     {

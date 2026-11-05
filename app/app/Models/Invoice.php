@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Domain\Cobranca\EstadoCobranca;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
@@ -45,6 +46,15 @@ use Illuminate\Support\Carbon;
  * @property int|null $cupom_ciclos
  * @property int|null $preco_cheio_centavos
  * @property int $desconto_centavos
+ * @property string|null $reembolso_estado
+ * @property string|null $reembolso_motivo
+ * @property string|null $reembolso_por_id
+ * @property Carbon|null $reembolso_solicitado_em
+ * @property Carbon|null $reembolsado_em
+ * @property string|null $devolucao_motivo
+ * @property Carbon|null $nf_emitida_em
+ * @property string|null $nf_emitida_por_id
+ * @property string|null $nf_numero
  * @property Carbon|null $created_at
  */
 final class Invoice extends Model
@@ -65,7 +75,17 @@ final class Invoice extends Model
             'checkout_expira_em' => 'datetime',
             'pago_em' => 'datetime',
             'renovacao' => 'boolean',
+            'reembolso_solicitado_em' => 'datetime',
+            'reembolsado_em' => 'datetime',
+            'nf_emitida_em' => 'datetime',
         ];
+    }
+
+    /** Inclui conta excluída: a cobrança continua existindo para a equipe financeira (STORY-085). */
+    /** @return BelongsTo<Usuario, $this> */
+    public function usuario(): BelongsTo
+    {
+        return $this->belongsTo(Usuario::class)->withTrashed();
     }
 
     /** O prazo do checkout passou sem pagamento (o banco ainda pode confirmar depois). */

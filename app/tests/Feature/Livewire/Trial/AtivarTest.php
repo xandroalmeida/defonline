@@ -13,14 +13,14 @@ use App\Models\Plano;
 use App\Models\TrialAtivacao;
 use App\Models\TrialConfig;
 use App\Models\Usuario;
-use App\Services\Rfb\RfbAlerter;
+use App\Observabilidade\AlertaDaEquipe;
 use Livewire\Livewire;
 
 /**
  * STORY-074 / spec STORY-070-trial — oferta, ativação em um clique, confirmação, andamento e recusas.
  */
 beforeEach(function () {
-    app()->instance(RfbAlerter::class, Mockery::mock(RfbAlerter::class)->shouldIgnoreMissing());
+    app()->instance(AlertaDaEquipe::class, Mockery::mock(AlertaDaEquipe::class)->shouldIgnoreMissing());
     CobrancaConfig::atual()->update(['ativa' => true]);
     $this->usuario = Usuario::factory()->create();
     $this->tela = fn () => Livewire::actingAs($this->usuario)->test(Ativar::class);

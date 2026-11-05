@@ -12,7 +12,9 @@ use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PaymentProvider;
 use App\Domain\Cobranca\PedidoCheckout;
 use App\Domain\Cobranca\ProvedorIndisponivel;
+use App\Domain\Cobranca\ReembolsoNoProvedor;
 use App\Domain\Cobranca\ReferenciaProvedor;
+use App\Domain\Cobranca\ResultadoReembolso;
 use App\Domain\Cobranca\SessaoCheckout;
 use App\Domain\Cobranca\TipoEvento;
 use App\Domain\Cobranca\WebhookBruto;
@@ -28,7 +30,9 @@ use Illuminate\Support\Str;
  *
  * Gatilhos: {@see falharProximoCheckout()}, {@see simularPagamento()}, {@see simularExpiracao()},
  * {@see simularCancelamento()} e, para a STORY-079, {@see ficarIndisponivel()},
- * {@see aprovarProximaTentativa()}, {@see criarCobrancaDeRenovacao()} e {@see simularRecusaDeRenovacao()}. Os webhooks gerados passam por {@see parseWebhook()}, como os reais.
+ * {@see aprovarProximaTentativa()}, {@see criarCobrancaDeRenovacao()} e {@see simularRecusaDeRenovacao()}; e, para a STORY-085,
+ * {@see recusarProximoReembolso()}, {@see perderRespostaDoProximoReembolso()}, {@see autorizarReembolso()} e {@see simularContestacao()}.
+ * Os webhooks gerados passam por {@see parseWebhook()}, como os reais.
  */
 final class FakePaymentProvider implements PaymentProvider
 {
@@ -60,6 +64,24 @@ final class FakePaymentProvider implements PaymentProvider
         $v = Cache::get(self::PREFIXO."sub:{$assinaturaId}");
 
         return is_string($v) ? $v : null;
+    }
+
+    /** O provedor responde que não aceita o próximo estorno (cobrança fora do prazo, sem saldo...). */
+    public static function recusarProximoReembolso(): void
+    {
+        Cache::put(self::PREFIXO.'recusar-reembolso', true, now()->addMinutes(10));
+    }
+
+    /** O próximo estorno é feito lá, mas a resposta se perde (timeout): quem pediu fica sem saber o resultado. */
+    public static function perderRespostaDoProximoReembolso(): void
+    {
+        Cache::put(self::PREFIXO.'perder-reembolso', true, now()->addMinutes(10));
+    }
+
+    /** Quantos estornos o provedor executou para a cobrança (prova de que não houve duplicidade). */
+    public static function reembolsosDe(string $cobrancaId): int
+    {
+        return (int) Cache::get(self::PREFIXO."reembolsos:{$cobrancaId}", 0);
     }
 
     public function nome(): string
@@ -222,6 +244,57 @@ final class FakePaymentProvider implements PaymentProvider
         }
 
         return $this->retrato($cobranca->id);
+    }
+
+    /**
+     * Estorno total. Cartão volta na hora; Pix fica aguardando a autorização de quem opera o painel do
+     * provedor ({@see autorizarReembolso()}), como o Asaas faz com ações críticas.
+     */
+    public function refund(ReferenciaProvedor $cobranca, ?int $valorCentavos = null, string $motivo = ''): ReembolsoNoProvedor
+    {
+        $this->exigirDisponivel();
+        $c = $this->cobrancaGravada($cobranca->id);
+
+        if (Cache::pull(self::PREFIXO.'recusar-reembolso') === true) {
+            return new ReembolsoNoProvedor(ResultadoReembolso::Recusado, 'Estorno recusado pelo provedor fake.');
+        }
+
+        if ($c['estado'] !== EstadoCobranca::Paga->value || Cache::get(self::PREFIXO."reembolso-pendente:{$cobranca->id}") === true) {
+            return new ReembolsoNoProvedor(ResultadoReembolso::Recusado, 'A cobrança não está paga ou já tem estorno em curso.');
+        }
+
+        $comCartao = ($c['assinatura'] ?? null) !== null || ($c['cartao'] ?? false) === true;
+
+        if ($comCartao) {
+            $this->gravarEstado($cobranca->id, EstadoCobranca::Estornada);
+            Cache::put(self::PREFIXO."reembolsos:{$cobranca->id}", self::reembolsosDe($cobranca->id) + 1, now()->addDays(self::TTL_DIAS));
+        } else {
+            Cache::put(self::PREFIXO."reembolso-pendente:{$cobranca->id}", true, now()->addDays(self::TTL_DIAS));
+        }
+
+        if (Cache::pull(self::PREFIXO.'perder-reembolso') === true) {
+            throw new ProvedorIndisponivel('Resposta do estorno perdida (simulado).');
+        }
+
+        return new ReembolsoNoProvedor($comCartao ? ResultadoReembolso::Concluido : ResultadoReembolso::AguardandoAutorizacao);
+    }
+
+    /** Quem opera o painel autoriza o estorno do Pix: a cobrança vira estornada e o provedor avisa. */
+    public function autorizarReembolso(string $cobrancaId, ?string $eventoId = null): WebhookBruto
+    {
+        $this->gravarEstado($cobrancaId, EstadoCobranca::Estornada);
+        Cache::forget(self::PREFIXO."reembolso-pendente:{$cobrancaId}");
+        Cache::put(self::PREFIXO."reembolsos:{$cobrancaId}", self::reembolsosDe($cobrancaId) + 1, now()->addDays(self::TTL_DIAS));
+
+        return $this->webhookDaCobranca(TipoEvento::CobrancaEstornada, $cobrancaId, $eventoId);
+    }
+
+    /** O portador contesta a compra (chargeback): a cobrança vira contestada e o provedor avisa. */
+    public function simularContestacao(string $cobrancaId, ?string $eventoId = null): WebhookBruto
+    {
+        $this->gravarEstado($cobrancaId, EstadoCobranca::Contestada);
+
+        return $this->webhookDaCobranca(TipoEvento::CobrancaContestada, $cobrancaId, $eventoId);
     }
 
     public function cancelSubscription(ReferenciaProvedor $assinatura): void

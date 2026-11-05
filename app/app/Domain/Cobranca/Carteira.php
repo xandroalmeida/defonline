@@ -8,6 +8,7 @@ use App\Models\Assinatura;
 use App\Models\ConsumoAnalise;
 use App\Models\LoteCredito;
 use App\Models\TrialEmpresa;
+use App\Observabilidade\EventosCobranca;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Closure;
@@ -157,6 +158,7 @@ final class Carteira
                     }
 
                     $vigente->forceFill(['status' => StatusAssinatura::Expirada])->save();
+                    EventosCobranca::trialEncerrado($vigente, EventosCobranca::FIM_POR_CONTRATACAO);
                 }
 
                 return Assinatura::query()->create([

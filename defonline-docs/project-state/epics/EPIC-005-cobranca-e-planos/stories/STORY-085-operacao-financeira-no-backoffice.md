@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: false
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador-pista-c
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: M
@@ -93,12 +93,29 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 
 ### Decisões tomadas
 
+- Ver IDR-027. Resumo: trava `reembolso_estado` antes da chamada de rede; "Estornada" só com o provedor confirmando (cartão na hora; Pix e em andamento pelo webhook); retira o saldo restante do lote (estado novo `estornado`) ou encerra a assinatura (cancelamento da recorrência pelo job da régua); acesso de cobrança antiga com cobrança paga mais recente é mantido.
+- Pagamento capturado depois do cancelamento/encerramento ou na assinatura antiga (casos da 079/081) e assinatura duplicada (077) viram Invoice `paga` com `devolucao_motivo`, destacada na tela.
+- Contestação marca `contestada`, alerta e destaca; não retira acesso sozinha.
+- Tela `/backoffice/financeiro` no padrão de Planos/Cupons; filtros usuário, status (assinatura e cobrança) e período; seção "Pagas sem nota fiscal" com painel para marcar (número opcional).
+
 ### Descobertas
+
+- Sandbox Asaas: cobrança recém-criada recusa o estorno ("tente novamente em alguns instantes") por alguns segundos; cartão estorna `REFUNDED`; Pix fica `AWAITING_CRITICAL_ACTION_AUTHORIZATION`.
+- Pagamento "sem destino" não podia ser `renovacao=true`: testes da 079/081 contam renovações por esse campo.
+- `x-botao-confirmar` espera expressão de chamada (`acao="metodo()"`), não nome.
 
 ### Bloqueios encontrados
 
+Nenhum.
+
 ### IDRs criados
+
+IDR-027.
 
 ### Cobertura final
 
+Ver relatório final do agente (suíte, Pint, PHPStan e Dusk rodados ao fim).
+
 ### Evidências
+
+Testes: `tests/Feature/Cobranca/ReembolsoTest.php`, `tests/Feature/Livewire/Backoffice/FinanceiroTest.php`, `tests/Feature/Cobranca/AsaasGestaoDeAssinaturaTest.php` (refund), `tests/Domain/Cobranca/MeuPlanoDominioTest.php`, `tests/Sandbox/AsaasSandboxTest.php` (estorno real no sandbox), Dusk `tests/Browser/FinanceiroBackofficeBrowserTest.php`.

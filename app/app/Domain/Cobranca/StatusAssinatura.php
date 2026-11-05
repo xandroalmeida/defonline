@@ -15,6 +15,16 @@ enum StatusAssinatura: string
     case Cancelada = 'cancelada';
     case Expirada = 'expirada';
 
+    public function rotulo(): string
+    {
+        return match ($this) {
+            self::Ativa => 'Ativa',
+            self::EmAtraso => 'Em atraso',
+            self::Cancelada => 'Cancelada',
+            self::Expirada => 'Encerrada',
+        };
+    }
+
     /** Estados em que a assinatura ainda ocupa o lugar único do Usuário (índice parcial da tabela). */
     public function vigente(): bool
     {

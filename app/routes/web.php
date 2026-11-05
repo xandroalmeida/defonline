@@ -15,6 +15,7 @@ use App\Http\Controllers\WebhookPagamentoController;
 use App\Http\Middleware\AuditarPersonificacao;
 use App\Livewire\Backoffice\Administradores as BackofficeAdministradores;
 use App\Livewire\Backoffice\Cupons as BackofficeCupons;
+use App\Livewire\Backoffice\Financeiro as BackofficeFinanceiro;
 use App\Livewire\Backoffice\Glossario as BackofficeGlossario;
 use App\Livewire\Backoffice\Planos as BackofficePlanos;
 use App\Livewire\Backoffice\Recomendacoes as BackofficeRecomendacoes;
@@ -175,4 +176,6 @@ Route::middleware('auth')->prefix('backoffice')->name('backoffice.')->group(func
     Route::get('/recomendacoes', BackofficeRecomendacoes::class)->middleware('backoffice:recomendacoes.editar')->name('recomendacoes');
     Route::get('/planos', BackofficePlanos::class)->middleware('backoffice:planos.gerenciar')->name('planos');
     Route::get('/cupons', BackofficeCupons::class)->middleware('backoffice:cupons.gerenciar')->name('cupons');
+    // STORY-085 — assinaturas, cobranças, reembolso e nota fiscal.
+    Route::get('/financeiro', BackofficeFinanceiro::class)->middleware('backoffice:financeiro.gerenciar')->name('financeiro');
 });
