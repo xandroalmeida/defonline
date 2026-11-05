@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: designer
 requires_design: true
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: "designer (claude-sonnet-5-5)"
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: M
@@ -79,13 +79,24 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 ## Notas do agente
 
 ### Decisões tomadas
+- 10 specs `draft` em `design/screens/` (9 telas pedidas mais o bloqueio da STORY-073). A spec de `checkout-pix-creditos` é a base estrutural dos demais checkouts.
+- 3 DDRs `proposed`: DDR-008 (resumo do pedido, seis linhas fixas), DDR-009 (seis situações do plano e avisos sem urgência; cancelar na primeira dobra) e DDR-010 (`seletor-modo` generalizado para meio de pagamento e ciclo).
+- Componente novo: `resumo-pedido`. Zero token novo.
+- CA-1: as specs estão `draft`; ficam `ready` só com aprovação do PO.
 
 ### Descobertas
+- `confirmacao` (diálogo) existe em código mas não consta em `components.md`; registrar na aceitação do DDR-009.
+- ADR-010 ainda não existe: campos de cartão, dados do titular e valor mínimo por cobrança ficaram como premissas declaradas nas specs.
+- A STORY-073 precisa devolver o **motivo** do bloqueio, não só "sem saldo".
 
 ### Bloqueios encontrados
+Nenhum.
 
 ### IDRs criados
+Nenhum (DDR-008, 009 e 010, `proposed`).
 
 ### Cobertura final
+CA-1 pendente de aprovação do PO; CA-2 a CA-5 atendidos nas specs; CA-6 depende do orquestrador (entradas em `design.screens[]` e `decisions.ddr[]` listadas no relatório).
 
 ### Evidências
+`defonline-docs/project-state/design/screens/STORY-070-*.md` e `decisions/ddr/DDR-008..010`.
