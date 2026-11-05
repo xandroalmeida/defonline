@@ -14,7 +14,7 @@
         {{-- Sem pagamento até o fim: encerrado, sem "em atraso", porque nada falhou (CA-5). --}}
         <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-4">Plano encerrado</h1>
         <x-drm.aviso-inline variant="info" dusk="screen-meuplano-encerrado">
-            <p class="m-0 mb-2">Seu plano terminou em {{ $fim->format('d/m/Y') }}. Seus diagnósticos continuam disponíveis.</p>
+            <p class="m-0 mb-2">Seu plano terminou em {{ \App\Support\DataExibicao::data($fim) }}. Seus diagnósticos continuam disponíveis.</p>
             <div class="flex flex-wrap gap-3">
                 @if ($plano)
                     <x-button :href="route('checkout.assinatura', ['plano' => $plano->id, 'ciclo' => 'anual', 'meio' => 'pix'])" variant="primary" dusk="screen-meuplano-renovar-pix">Renovar com Pix</x-button>
@@ -38,7 +38,7 @@
     @elseif (! $janelaAberta)
         <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-4">Renovar plano {{ $plano?->nome }}</h1>
         <x-drm.aviso-inline variant="info" dusk="screen-meuplano-renovacao-fechada">
-            <p class="m-0">Este plano não renova sozinho. Termina em {{ $fim->format('d/m/Y') }}. Você poderá pagar a renovação a partir de {{ $abreEm->format('d/m/Y') }}, e avisaremos por e-mail.</p>
+            <p class="m-0">Este plano não renova sozinho. Termina em {{ \App\Support\DataExibicao::data($fim) }}. Você poderá pagar a renovação a partir de {{ \App\Support\DataExibicao::data($abreEm) }}, e avisaremos por e-mail.</p>
         </x-drm.aviso-inline>
     @else
         <h1 x-ref="titulo" tabindex="-1" dusk="screen-checkout-titulo"
@@ -47,7 +47,7 @@
         </h1>
 
         <x-drm.aviso-inline variant="info" dusk="screen-meuplano-aviso-renovacao">
-            <p class="m-0">Seu plano anual termina em {{ $fim->format('d/m/Y') }}. Ele não renova sozinho.</p>
+            <p class="m-0">Seu plano anual termina em {{ \App\Support\DataExibicao::data($fim) }}. Ele não renova sozinho.</p>
         </x-drm.aviso-inline>
 
         <div class="mt-4 flex flex-col gap-6 lg:grid lg:grid-cols-[3fr_2fr] lg:items-start lg:gap-8">
@@ -64,7 +64,7 @@
                         <dt class="text-[color:var(--color-secondary)]">Ciclo</dt>
                         <dd class="m-0 text-right" dusk="screen-checkout-resumo-ciclo">Anual, não renova sozinho — avisamos 7 dias antes</dd>
                         <dt class="text-[color:var(--color-secondary)]">Novo ciclo</dt>
-                        <dd class="m-0 text-right" dusk="screen-checkout-resumo-novo-ciclo">O novo ciclo vai até {{ $novoFim->format('d/m/Y') }}.</dd>
+                        <dd class="m-0 text-right" dusk="screen-checkout-resumo-novo-ciclo">O novo ciclo vai até {{ \App\Support\DataExibicao::data($novoFim) }}.</dd>
                     </dl>
                 </x-card>
             </section>

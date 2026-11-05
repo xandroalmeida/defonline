@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Cobranca;
 
+use App\Support\DataExibicao;
 use Carbon\CarbonImmutable;
 
 /**
@@ -16,8 +17,6 @@ use Carbon\CarbonImmutable;
  */
 final class AvisoTrial
 {
-    private const FUSO = 'America/Sao_Paulo';
-
     /**
      * @param  bool  $temOutroSaldo  Há lote de crédito válido: o fim do teste não bloqueia nada.
      * @return Aviso|null
@@ -28,8 +27,8 @@ final class AvisoTrial
             return null;
         }
 
-        $fim = $trial->vencimento->setTimezone(self::FUSO);
-        $data = $fim->format('d/m/Y');
+        $fim = DataExibicao::converter($trial->vencimento);
+        $data = DataExibicao::data($trial->vencimento);
 
         if ($trial->vencimento->lessThanOrEqualTo($agora)) {
             return $temOutroSaldo ? null : [
@@ -40,7 +39,7 @@ final class AvisoTrial
             ];
         }
 
-        $dias = (int) $agora->setTimezone(self::FUSO)->startOfDay()->diffInDays($fim->startOfDay());
+        $dias = (int) DataExibicao::converter($agora)->startOfDay()->diffInDays($fim->startOfDay());
 
         if ($dias === 0) {
             return ['severidade' => 'info', 'texto' => 'Seu teste termina hoje.', 'acao' => 'planos', 'rotulo' => 'Assinar um plano'];

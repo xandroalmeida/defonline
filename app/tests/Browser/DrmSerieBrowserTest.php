@@ -13,7 +13,7 @@ use App\Models\DrmLancamento;
 use App\Models\DrmRascunho;
 use App\Models\EmpresaAnalisada;
 use App\Models\Usuario;
-use Carbon\CarbonImmutable;
+use App\Support\DataExibicao;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
@@ -105,7 +105,7 @@ final class DrmSerieBrowserTest extends DuskTestCase
     {
         $usuario = Usuario::factory()->create(['nome' => 'Joana Souza']);
         $empresa = $this->empresa($usuario);
-        $m1 = Competencia::padrao(CarbonImmutable::now());
+        $m1 = Competencia::padrao(DataExibicao::agora());
         $m2 = Competencia::deData($m1->data->subMonthNoOverflow());
 
         $this->browse(function (Browser $browser) use ($usuario, $empresa, $m1, $m2) {
@@ -144,7 +144,7 @@ final class DrmSerieBrowserTest extends DuskTestCase
     {
         $usuario = Usuario::factory()->create();
         $empresa = $this->empresa($usuario);
-        $m1 = Competencia::padrao(CarbonImmutable::now());
+        $m1 = Competencia::padrao(DataExibicao::agora());
         $m2 = Competencia::deData($m1->data->subMonthNoOverflow());
         $this->mes($empresa, $m2->texto(), '3.900,00');   // lucro 1.000,00
         $this->mes($empresa, $m1->texto(), '3.400,00');   // lucro 1.500,00  → +50,0%
@@ -182,7 +182,7 @@ final class DrmSerieBrowserTest extends DuskTestCase
     {
         $usuario = Usuario::factory()->create();
         $empresa = $this->empresa($usuario);
-        $hoje = CarbonImmutable::now();
+        $hoje = DataExibicao::agora();
         $c = fn (int $atras): string => Competencia::deData($hoje->startOfMonth()->subMonthsNoOverflow($atras))->texto();
 
         // Do mais antigo ao mais recente: 5 meses de 13º zerado, depois o quarto com 13º (atípico), uma lacuna e um rascunho.
@@ -233,7 +233,7 @@ final class DrmSerieBrowserTest extends DuskTestCase
     {
         $usuario = Usuario::factory()->create();
         $empresa = $this->empresa($usuario);
-        $m1 = Competencia::padrao(CarbonImmutable::now());
+        $m1 = Competencia::padrao(DataExibicao::agora());
         $m2 = Competencia::deData($m1->data->subMonthNoOverflow());
         $m3 = Competencia::deData($m2->data->subMonthNoOverflow());
         $this->mes($empresa, $m3->texto());

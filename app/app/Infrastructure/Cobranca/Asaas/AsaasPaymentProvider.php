@@ -18,8 +18,8 @@ use App\Domain\Cobranca\TentativaNaoRealizada;
 use App\Domain\Cobranca\TipoEvento;
 use App\Domain\Cobranca\WebhookBruto;
 use App\Domain\Cobranca\WebhookInvalido;
+use App\Support\DataExibicao;
 use DateTimeImmutable;
-use DateTimeZone;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -99,8 +99,7 @@ final class AsaasPaymentProvider implements PaymentProvider
                 'cycle' => $pedido->recorrencia === CicloCobranca::Mensal ? 'MONTHLY' : 'YEARLY',
                 // Por padrão a primeira cobrança é a do próprio checkout: hoje, no fuso do negócio. Na troca
                 // de cartão no meio do ciclo (STORY-081) é o vencimento já pago, para não cobrar em dobro.
-                'nextDueDate' => ($pedido->primeiraCobrancaEm ?? new DateTimeImmutable('now', new DateTimeZone('America/Sao_Paulo')))
-                    ->setTimezone(new DateTimeZone('America/Sao_Paulo'))->format('Y-m-d').' 00:00:00',
+                'nextDueDate' => DataExibicao::converter($pedido->primeiraCobrancaEm ?? DataExibicao::agora())->format('Y-m-d').' 00:00:00',
             ]]),
             'minutesToExpire' => $pedido->expiraEmMinutos,
             'externalReference' => $pedido->referenciaInterna,
@@ -167,7 +166,7 @@ final class AsaasPaymentProvider implements PaymentProvider
      */
     public function retryCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
     {
-        $hoje = (new DateTimeImmutable('now', new DateTimeZone('America/Sao_Paulo')))->format('Y-m-d');
+        $hoje = DataExibicao::agora()->format('Y-m-d');
         $r = $this->requisitar('put', '/payments/'.rawurlencode($cobranca->id), ['dueDate' => $hoje]);
 
         if ($r->failed() && $r->serverError()) {

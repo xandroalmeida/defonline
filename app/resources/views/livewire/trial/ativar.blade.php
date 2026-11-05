@@ -9,7 +9,7 @@
                  x-data x-init="$nextTick(() => $refs.titulo.focus())">
             <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Seu teste começou</h1>
             <p class="m-0 text-[color:var(--color-primary)]">
-                Você tem até {{ $trial->proximo_vencimento->setTimezone('America/Sao_Paulo')->format('d/m/Y') }} para fazer {{ TextoTrial::analises($trial->cota_snapshot) }} e lançar no Raio X do Negócio.
+                Você tem até {{ \App\Support\DataExibicao::data($trial->proximo_vencimento) }} para fazer {{ TextoTrial::analises($trial->cota_snapshot) }} e lançar no Raio X do Negócio.
             </p>
             <div class="flex flex-wrap gap-3">
                 @if ($temEmpresa)

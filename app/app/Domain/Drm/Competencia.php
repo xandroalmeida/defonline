@@ -32,7 +32,8 @@ final readonly class Competencia
     /** Sugestão de D00: o mês anterior ao corrente. */
     public static function padrao(CarbonImmutable $hoje): self
     {
-        return new self($hoje->startOfMonth()->subMonthNoOverflow()->startOfDay());
+        // Mês civil de `$hoje` (o chamador passa o dia de Brasília), reancorado em UTC como as demais.
+        return new self(CarbonImmutable::create($hoje->year, $hoje->month, 1, 0, 0, 0, 'UTC')->subMonthNoOverflow());
     }
 
     public function texto(): string
@@ -49,7 +50,8 @@ final readonly class Competencia
     /** Regra B2: o mês só pode ser lançado depois de terminar. */
     public function ehFutura(CarbonImmutable $hoje): bool
     {
-        return $this->data->greaterThanOrEqualTo($hoje->startOfMonth()->startOfDay());
+        // Compara o mês civil de `$hoje` (qualquer fuso), não instantes: a competência é um dia sem hora.
+        return $this->texto() >= $hoje->format('Y-m');
     }
 
     /** `agosto/2026`. */

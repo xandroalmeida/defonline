@@ -6,7 +6,7 @@
     /** @var \App\Models\Diagnostico $diagnostico */
     $empresa = $diagnostico->empresa;
     $nomeEmpresa = $diagnostico->nomeExibicao();
-    $dataDiagnostico = $diagnostico->gerado_em->format('d/m/Y');
+    $dataDiagnostico = \App\Support\DataExibicao::data($diagnostico->gerado_em);
     $tituloPagina = 'Diagnóstico de '.$dataDiagnostico;
 
     // Snapshot da execução do motor — fonte da verdade (IDR-010 §sub-decisão 4).
@@ -158,7 +158,7 @@
             data-testid="relatorio-rodape">
         <p class="m-0 mb-1">
             <span dusk="relatorio-versoes">
-                motor v{{ $diagnostico->motor_version }} · matriz {{ $diagnostico->matrix_version }} · gerado em {{ $diagnostico->gerado_em->format('d/m/Y H:i') }}
+                motor v{{ $diagnostico->motor_version }} · matriz {{ $diagnostico->matrix_version }} · gerado em {{ \App\Support\DataExibicao::dataHora($diagnostico->gerado_em) }}
             </span>
         </p>
         <p class="m-0 italic">

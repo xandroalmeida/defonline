@@ -25,6 +25,7 @@ use App\Services\Cobranca\GestaoNegada;
 use App\Services\Cobranca\TrocarCartao;
 use App\Support\Cobranca\HistoricoDeCobrancas;
 use App\Support\Cobranca\RotasCobranca;
+use App\Support\DataExibicao;
 use App\Support\Personificacao;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
@@ -288,6 +289,6 @@ final class MeuPlano extends Component
 
     private static function data(\DateTimeInterface $d): string
     {
-        return CarbonImmutable::instance($d)->setTimezone('America/Sao_Paulo')->format('d/m/Y');
+        return DataExibicao::data($d);
     }
 }

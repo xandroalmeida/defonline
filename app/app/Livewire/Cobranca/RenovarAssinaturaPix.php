@@ -95,16 +95,15 @@ final class RenovarAssinaturaPix extends Component
         $assinatura = $usuario instanceof Usuario ? IniciarRenovacaoPix::assinaturaDoUsuario($usuario->id) : null;
         $vigente = $assinatura !== null && $assinatura->status === StatusAssinatura::Ativa;
         $plano = $assinatura?->plano_id === null ? null : Plano::query()->find($assinatura->plano_id);
-        $fuso = 'America/Sao_Paulo';
 
         return view('livewire.cobranca.renovar-assinatura-pix', [
             'assinatura' => $assinatura,
             'vigente' => $vigente,
             'plano' => $plano,
             'janelaAberta' => $vigente && RenovacaoPix::janelaAberta($assinatura->proximo_vencimento, now()),
-            'abreEm' => $vigente ? RenovacaoPix::abreEm($assinatura->proximo_vencimento)->setTimezone($fuso) : null,
-            'fim' => $assinatura?->proximo_vencimento->copy()->setTimezone($fuso),
-            'novoFim' => $assinatura === null ? null : RenovacaoPix::novoVencimento($assinatura->data_inicio, $assinatura->periodos_pagos)->setTimezone($fuso),
+            'abreEm' => $vigente ? RenovacaoPix::abreEm($assinatura->proximo_vencimento) : null,
+            'fim' => $assinatura?->proximo_vencimento,
+            'novoFim' => $assinatura === null ? null : RenovacaoPix::novoVencimento($assinatura->data_inicio, $assinatura->periodos_pagos),
             'valor' => (int) $assinatura?->preco_snapshot_centavos,
             'emailConfirmado' => $usuario instanceof Usuario && $usuario->emailConfirmado(),
             'email' => $usuario instanceof Usuario ? $usuario->email : '',

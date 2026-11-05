@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Support\DataExibicao;
+
 /**
  * STORY-024 CA-2..CA-11 — Landing pública `/`.
  *
@@ -53,7 +55,7 @@ it('CA-4 — landing contém os dois CTAs com a copy exata e os hrefs corretos',
 it('CA-4/CA-5 — landing tem o copyright literal no footer', function () {
     $response = $this->get('/');
 
-    $response->assertSee('© DEFOnline '.now()->year);
+    $response->assertSee('© DEFOnline '.DataExibicao::ano());
 });
 
 it('CA-5 — header da landing tem logo + dois CTAs (Entrar + Criar conta)', function () {

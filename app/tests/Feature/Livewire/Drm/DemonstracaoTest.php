@@ -8,6 +8,7 @@ use App\Models\DrmLancamento;
 use App\Models\DrmPreferencia;
 use App\Models\EmpresaAnalisada;
 use App\Models\Usuario;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
@@ -45,6 +46,15 @@ function abrirMes(EmpresaAnalisada $empresa, string $competencia = '2026-09')
 {
     return Livewire::test(Demonstracao::class, ['empresa' => $empresa, 'competencia' => $competencia]);
 }
+
+describe('IDR-025 — data no fuso de Brasília', function () {
+    it('às 22:30 em Brasília o rodapé mostra o dia de Brasília, não o dia seguinte do UTC', function () {
+        Carbon::setTestNow('2026-11-06 01:30:00');
+        mesDoGolden($this->empresa, 'saudavel_comercio', ['gerado_em' => now()]);
+
+        abrirMes($this->empresa)->assertSee('gerado em 05/11/2026 22:30')->assertDontSee('06/11/2026');
+    });
+});
 
 describe('CA-1 — rota e escopo', function () {
     it('abre a competência de uma empresa do usuário', function () {
@@ -391,7 +401,7 @@ describe('CA-8 — snapshot, não recálculo', function () {
         mesDoGolden($this->empresa, 'saudavel_comercio', ['demonstracao' => $snapshot, 'motor_drm_version' => '0.9.0']);
         config(['drm.motor_drm_version' => '9.9.9']);
 
-        abrirMes($this->empresa)->assertSee('motor v0.9.0 · gerado em 04/09/2026 14:22')->assertDontSee('9.9.9');
+        abrirMes($this->empresa)->assertSee('motor v0.9.0 · gerado em 04/09/2026 11:22')->assertDontSee('9.9.9');
     });
 
     it('mostra o valor gravado mesmo que o cálculo de hoje desse outro', function () {

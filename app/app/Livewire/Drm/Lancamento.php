@@ -27,6 +27,7 @@ use App\Models\DrmRascunho;
 use App\Models\EmpresaAnalisada;
 use App\Observabilidade\EventosDrm;
 use App\Support\Cobranca\AcessoDrm;
+use App\Support\DataExibicao;
 use App\Support\Drm\HistoricoDrm;
 use App\Support\Drm\MensagensDrm;
 use Carbon\CarbonImmutable;
@@ -845,7 +846,7 @@ final class Lancamento extends Component
 
     private function hoje(): CarbonImmutable
     {
-        return CarbonImmutable::now();
+        return DataExibicao::agora();
     }
 
     private function competenciaValida(): ?Competencia

@@ -24,9 +24,8 @@ use Illuminate\Support\Facades\DB;
 final class AtualizarFichaRfb
 {
     /**
-     * Compara pelo relógio (UTC) gravado, não pelo instante: com a sessão do Postgres
-     * em America/Sao_Paulo (compose de dev), o instante relido de `enriquecido_at`
-     * desloca 3h, mas o relógio gravado volta igual.
+     * Compara pelo relógio (UTC) gravado, não pelo instante: `enriquecido_at` é `timestamp`
+     * sem fuso, então o relógio gravado volta igual em qualquer sessão (IDR-025).
      */
     private const RELOGIO = 'Y-m-d H:i:s';
 

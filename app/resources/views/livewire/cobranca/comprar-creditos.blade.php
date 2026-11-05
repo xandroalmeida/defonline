@@ -68,7 +68,7 @@
                             <dt class="text-[color:var(--color-secondary)]">Depois</dt>
                             <dd class="m-0 text-right" dusk="screen-checkout-resumo-depois">Não há</dd>
                             <dt class="text-[color:var(--color-secondary)]">Validade dos créditos</dt>
-                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-validade">até {{ $validade->setTimezone('America/Sao_Paulo')->format('d/m/Y') }}</dd>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-validade">até {{ \App\Support\DataExibicao::data($validade) }}</dd>
                         </dl>
                     </x-card>
                 </section>
@@ -90,7 +90,7 @@
                             </p>
                             @if ($pixEmAberto)
                                 <x-drm.aviso-inline variant="info" dusk="screen-checkout-pix-em-aberto">
-                                    Você tem um QR Code Pix em aberto, válido até {{ $pixEmAberto->checkout_expira_em->setTimezone('America/Sao_Paulo')->format('H:i') }}. Se pagar com cartão, ignore-o.
+                                    Você tem um QR Code Pix em aberto, válido até {{ \App\Support\DataExibicao::hora($pixEmAberto->checkout_expira_em) }}. Se pagar com cartão, ignore-o.
                                 </x-drm.aviso-inline>
                             @endif
                         @else

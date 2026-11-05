@@ -30,7 +30,7 @@ final class TrocaDeCartao extends Model
 {
     use HasUuids;
 
-    /** Com offset (IDR-018): o banco local roda em America/Sao_Paulo e a aplicação em UTC. */
+    /** Com offset (IDR-018/025): a sessão do banco já é UTC; o offset explícito é só defesa contra outra sessão. */
     protected $dateFormat = 'Y-m-d H:i:sP';
 
     protected $table = 'trocas_de_cartao';

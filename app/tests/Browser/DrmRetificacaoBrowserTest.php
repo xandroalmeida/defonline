@@ -9,7 +9,7 @@ use App\Models\DrmLancamento;
 use App\Models\DrmRascunho;
 use App\Models\EmpresaAnalisada;
 use App\Models\Usuario;
-use Carbon\CarbonImmutable;
+use App\Support\DataExibicao;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
@@ -83,7 +83,7 @@ final class DrmRetificacaoBrowserTest extends DuskTestCase
     {
         $usuario = Usuario::factory()->create(['nome' => 'Joana Souza']);
         $empresa = $this->empresa($usuario);
-        $mes = Competencia::padrao(CarbonImmutable::now())->texto();
+        $mes = Competencia::padrao(DataExibicao::agora())->texto();
 
         $this->browse(function (Browser $browser) use ($usuario, $empresa, $mes) {
             $browser->resize(360, 800)->loginAs($usuario);
@@ -124,7 +124,7 @@ final class DrmRetificacaoBrowserTest extends DuskTestCase
             // A sinalização, na tela vigente.
             $browser->assertPresent('@drm-demonstracao-retificado')
                 ->assertSeeIn('@drm-demonstracao-retificado', 'Retificado')
-                ->assertSeeIn('@drm-rodape', 'corrigido 1× — última correção em '.now()->format('d/m/Y'))
+                ->assertSeeIn('@drm-rodape', 'corrigido 1× — última correção em '.DataExibicao::data(now()))
                 ->assertSee('R$ 2.298,00');   // lucro depois da retirada: 3.240,00 − 942,00 de impostos a mais
             $this->semScrollHorizontal($browser);
 
@@ -150,7 +150,7 @@ final class DrmRetificacaoBrowserTest extends DuskTestCase
     {
         $usuario = Usuario::factory()->create();
         $empresa = $this->empresa($usuario);
-        $mes = Competencia::padrao(CarbonImmutable::now())->texto();
+        $mes = Competencia::padrao(DataExibicao::agora())->texto();
         DrmLancamento::factory()->create([
             'empresa_analisada_id' => $empresa->id, 'competencia' => $mes.'-01', 'versao' => 1,
         ]);

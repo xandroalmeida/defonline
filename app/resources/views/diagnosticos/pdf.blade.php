@@ -39,7 +39,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Diagnóstico — {{ $nomeEmpresa }} — {{ $diagnostico->gerado_em->format('d/m/Y') }}</title>
+    <title>Diagnóstico — {{ $nomeEmpresa }} — {{ \App\Support\DataExibicao::data($diagnostico->gerado_em) }}</title>
     <style>{!! $css !!}</style>
 </head>
 <body>
@@ -71,7 +71,7 @@
             </tr>
             <tr>
                 <td class="rotulo">Data do diagnóstico</td>
-                <td>{{ $diagnostico->gerado_em->format('d/m/Y') }}</td>
+                <td>{{ \App\Support\DataExibicao::data($diagnostico->gerado_em) }}</td>
             </tr>
             @if ($diagnostico->personificadoPor)
                 {{-- STORY-066 CA-6 --}}
@@ -85,7 +85,7 @@
 
     <div class="capa__rodape">
         Versão MVP · motor v{{ $diagnostico->motor_version }} · matriz {{ $diagnostico->matrix_version }}
-        · gerado em {{ $diagnostico->gerado_em->format('d/m/Y H:i') }}<br>
+        · gerado em {{ \App\Support\DataExibicao::dataHora($diagnostico->gerado_em) }}<br>
         Este diagnóstico é uma ferramenta de apoio à gestão. Decisões financeiras devem considerar análise integral do negócio.
     </div>
 </div>

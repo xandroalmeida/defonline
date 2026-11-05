@@ -7,6 +7,7 @@ namespace Tests\Browser;
 use App\Domain\FonteEnriquecimento;
 use App\Models\EmpresaAnalisada;
 use App\Models\Usuario;
+use App\Support\DataExibicao;
 use Database\Factories\EmpresaAnalisadaFactory;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
@@ -47,7 +48,7 @@ final class AtualizarReceitaBrowserTest extends DuskTestCase
                 ->assertMissing('@empresa-aviso-legada')
                 ->assertSeeIn('@empresa-show-fonte', 'Receita Federal')
                 ->assertSeeIn('@ficha-simples', 'Optante')
-                ->assertSeeIn('@empresa-show-consultado-em', 'Dados da Receita de '.now()->format('d/m/Y'))
+                ->assertSeeIn('@empresa-show-consultado-em', 'Dados da Receita de '.DataExibicao::data(now()))
                 ->assertInputValue('@empresa-show-observacoes', 'Cliente indicado pelo contador.');
 
             $this->assertCount(3, $browser->elements('@ficha-cnae-secundario'));

@@ -19,7 +19,7 @@
                     Recebemos o Pix de {{ $reais }}.
                 @endif
                 @if ($lote)
-                    Você tem {{ $lote->quantidade_comprada }} créditos, válidos até {{ $lote->data_expiracao->setTimezone('America/Sao_Paulo')->format('d/m/Y') }}.
+                    Você tem {{ $lote->quantidade_comprada }} créditos, válidos até {{ \App\Support\DataExibicao::data($lote->data_expiracao) }}.
                 @endif
                 Enviaremos a nota fiscal por e-mail.
             </p>
@@ -87,7 +87,7 @@
                     <x-button :href="$invoice->checkout_url" variant="primary" dusk="screen-checkout-abrir-pagamento">Abrir o pagamento com cartão</x-button>
                 </div>
                 <p class="m-0 text-sm text-[color:var(--color-secondary)]" role="timer" dusk="screen-checkout-pix-expira">
-                    Este link vale até as {{ $invoice->checkout_expira_em?->setTimezone('America/Sao_Paulo')->format('H:i') }} ·
+                    Este link vale até as {{ \App\Support\DataExibicao::hora($invoice->checkout_expira_em) }} ·
                     <span aria-live="polite" aria-atomic="true">restam {{ $minutosRestantes }} min</span>
                 </p>
             @else
@@ -99,7 +99,7 @@
                 </div>
                 <p class="m-0 text-sm text-[color:var(--color-secondary)]" role="timer" dusk="screen-checkout-pix-expira">
                     Este código vale por {{ (int) config('services.payments.pix_expiracao_minutos', 30) }} minutos.
-                    Expira às {{ $invoice->checkout_expira_em?->setTimezone('America/Sao_Paulo')->format('H:i') }} ·
+                    Expira às {{ \App\Support\DataExibicao::hora($invoice->checkout_expira_em) }} ·
                     <span aria-live="polite" aria-atomic="true">restam {{ $minutosRestantes }} min</span>
                 </p>
             @endif

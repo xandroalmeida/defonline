@@ -90,6 +90,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Fuso de exibição (IDR-025)
+    |--------------------------------------------------------------------------
+    |
+    | Armazenamento, cálculo e `app.timezone` ficam em UTC. Toda data ou hora
+    | mostrada a pessoas (telas, PDF, planilha, e-mail, backoffice) passa por
+    | `App\Support\DataExibicao`, que converte para este fuso.
+    |
+    */
+
+    'display_timezone' => env('APP_DISPLAY_TIMEZONE', 'America/Sao_Paulo'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Locale Configuration
     |--------------------------------------------------------------------------
     |

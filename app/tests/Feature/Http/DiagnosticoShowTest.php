@@ -6,6 +6,7 @@ use App\Actions\CalcularDiagnostico;
 use App\Models\Diagnostico;
 use App\Models\EmpresaAnalisada;
 use App\Models\Usuario;
+use App\Support\DataExibicao;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -148,7 +149,7 @@ it('exibe rodapé com motor_version, matrix_version e data (CA-9)', function () 
     $response->assertOk()
         ->assertSee('motor v'.$diag->motor_version)
         ->assertSee('matriz '.$diag->matrix_version)
-        ->assertSee('gerado em '.$diag->gerado_em->format('d/m/Y H:i'));
+        ->assertSee('gerado em '.DataExibicao::dataHora($diag->gerado_em));
 });
 
 it('rodapé reflete a versão do snapshot, não a do config atual', function () {

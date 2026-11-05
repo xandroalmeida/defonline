@@ -12,6 +12,7 @@ use App\Models\Assinatura;
 use App\Models\Plano;
 use App\Models\Usuario;
 use App\Support\Cobranca\RotasCobranca;
+use App\Support\DataExibicao;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Support\Facades\Log;
@@ -25,8 +26,6 @@ use Throwable;
  */
 final class AvisosDeCobranca
 {
-    private const FUSO = 'America/Sao_Paulo';
-
     public function renovacaoProxima(Assinatura $a): bool
     {
         return $this->enviar($a, 'renovacao_proxima', fn (Usuario $u, string $plano): Mailable => new RenovacaoProximaMessage(
@@ -96,6 +95,6 @@ final class AvisosDeCobranca
 
     private function data(?CarbonInterface $quando): string
     {
-        return $quando === null ? '' : $quando->copy()->setTimezone(self::FUSO)->format('d/m/Y');
+        return DataExibicao::data($quando);
     }
 }

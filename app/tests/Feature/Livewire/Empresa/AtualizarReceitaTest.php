@@ -12,6 +12,7 @@ use App\Models\Usuario;
 use App\Services\Rfb\MockRfbCnpjClient;
 use App\Services\Rfb\RfbCnpjClient;
 use App\Services\Rfb\RfbConsultarCnpj;
+use App\Support\DataExibicao;
 use Database\Factories\EmpresaAnalisadaFactory;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -91,7 +92,7 @@ it('não mostra aviso na empresa com ficha completa, mas mostra a data (CA-1)', 
 
     $this->get("/empresas/{$empresa->id}")
         ->assertSee('Atualizar dados da Receita')
-        ->assertSee('Dados da Receita de '.now()->format('d/m/Y'))
+        ->assertSee('Dados da Receita de '.DataExibicao::data(now()))
         ->assertDontSee('Estes dados não foram confirmados');
 });
 

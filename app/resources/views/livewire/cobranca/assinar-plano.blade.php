@@ -20,9 +20,9 @@
         <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-4">Assinar plano {{ $plano->nome }}</h1>
         <x-drm.aviso-inline variant="info" dusk="screen-checkout-ja-assinante">
             @if ($vigente->pagoComPix())
-                <p class="m-0 mb-2">Você já tem o plano {{ $planoVigente?->nome }}, que termina em {{ $vigente->proximo_vencimento->setTimezone('America/Sao_Paulo')->format('d/m/Y') }} e não renova sozinho.</p>
+                <p class="m-0 mb-2">Você já tem o plano {{ $planoVigente?->nome }}, que termina em {{ \App\Support\DataExibicao::data($vigente->proximo_vencimento) }} e não renova sozinho.</p>
             @else
-                <p class="m-0 mb-2">Você já tem o plano {{ $planoVigente?->nome }}, {{ $vigente->status === \App\Domain\Cobranca\StatusAssinatura::Cancelada ? 'com a renovação cancelada e acesso até' : 'que renova em' }} {{ $vigente->proximo_vencimento->setTimezone('America/Sao_Paulo')->format('d/m/Y') }}.</p>
+                <p class="m-0 mb-2">Você já tem o plano {{ $planoVigente?->nome }}, {{ $vigente->status === \App\Domain\Cobranca\StatusAssinatura::Cancelada ? 'com a renovação cancelada e acesso até' : 'que renova em' }} {{ \App\Support\DataExibicao::data($vigente->proximo_vencimento) }}.</p>
             @endif
             <div class="flex flex-wrap gap-3">
                 @if ($urlRenovar)<x-button :href="$urlRenovar" variant="primary" dusk="screen-meuplano-renovar-pix">Pagar renovação</x-button>@endif
@@ -92,7 +92,7 @@
                             <dt class="text-[color:var(--color-secondary)]">Ciclo</dt>
                             <dd class="m-0 text-right" dusk="screen-checkout-resumo-ciclo">{{ $pix ? 'Anual, não renova sozinho — avisamos '.$avisoDias.' dias antes' : $cicloAtual->rotulo().', renova sozinho no cartão' }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Próxima cobrança</dt>
-                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-proxima">{{ $pix ? 'Não há cobrança automática. Renovação em '.$proximaCobranca->format('d/m/Y') : $proximaCobranca->format('d/m/Y').' · '.$reais($preco) }}</dd>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-proxima">{{ $pix ? 'Não há cobrança automática. Renovação em '.\App\Support\DataExibicao::data($proximaCobranca) : \App\Support\DataExibicao::data($proximaCobranca).' · '.$reais($preco) }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Depois</dt>
                             <dd class="m-0 text-right" dusk="screen-checkout-resumo-depois">{{ $pix ? 'Você paga '.$reais($preco).' por um novo QR Code, se quiser continuar' : $reais($preco).' '.$cicloAtual->porExtenso() }}</dd>
                         </dl>

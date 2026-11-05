@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Relatorio;
 
 use App\Models\Diagnostico;
+use App\Support\DataExibicao;
 use Dompdf\Canvas;
 use Dompdf\Dompdf;
 use Dompdf\FontMetrics;
@@ -66,7 +67,7 @@ final class PdfDiagnostico
     {
         $nome = Str::slug($diagnostico->nomeExibicao()) ?: 'empresa';
 
-        return sprintf('diagnostico-%s-%s.pdf', $nome, $diagnostico->gerado_em->format('Y-m-d'));
+        return sprintf('diagnostico-%s-%s.pdf', $nome, DataExibicao::converter($diagnostico->gerado_em)->format('Y-m-d'));
     }
 
     private function opcoes(): Options
@@ -134,7 +135,7 @@ final class PdfDiagnostico
     private function numerarPaginas(Dompdf $dompdf, Diagnostico $diagnostico): void
     {
         $nomeEmpresa = $diagnostico->nomeExibicao();
-        $data = $diagnostico->gerado_em->format('d/m/Y');
+        $data = DataExibicao::data($diagnostico->gerado_em);
         [$r, $g, $b] = sscanf(ltrim($this->tokens->valor('color-secondary'), '#'), '%2x%2x%2x');
         $cor = [$r / 255, $g / 255, $b / 255];
         [$lr, $lg, $lb] = sscanf(ltrim($this->tokens->valor('color-border'), '#'), '%2x%2x%2x');

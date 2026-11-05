@@ -5,7 +5,7 @@
     $estado = $invoice->status;
     $paga = $estado === EstadoCobranca::Paga;
     $aguardando = $estado === EstadoCobranca::Pendente && ! $invoice->expirada();
-    $fim = $assinatura?->proximo_vencimento->setTimezone('America/Sao_Paulo')->format('d/m/Y');
+    $fim = \App\Support\DataExibicao::data($assinatura?->proximo_vencimento);
     $cartao = $assinatura?->cartao_ultimos4 ? ($assinatura->cartao_bandeira ? ucfirst(strtolower($assinatura->cartao_bandeira)).' ' : '').'final '.$assinatura->cartao_ultimos4 : null;
 @endphp
 {{-- O polling só roda enquanto há o que esperar; confirmado, recusado ou vencido, para. --}}
@@ -85,7 +85,7 @@
             </p>
             <div><x-button :href="$invoice->checkout_url" variant="primary" dusk="screen-checkout-abrir-pagamento">Abrir o QR Code Pix</x-button></div>
             <p class="m-0 text-sm text-[color:var(--color-secondary)]" role="timer" dusk="screen-checkout-pix-expira">
-                Este código vale até as {{ $invoice->checkout_expira_em?->setTimezone('America/Sao_Paulo')->format('H:i') }}.
+                Este código vale até as {{ \App\Support\DataExibicao::hora($invoice->checkout_expira_em) }}.
             </p>
             <div class="rounded-md border border-[color:var(--color-tertiary)]/30 bg-[color:var(--color-tertiary)]/5 p-4" role="status" dusk="screen-checkout-aguardando-aviso">
                 <p class="m-0 font-medium text-[color:var(--color-primary)]">Aguardando o pagamento…</p>

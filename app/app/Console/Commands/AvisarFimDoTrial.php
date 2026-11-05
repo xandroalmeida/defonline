@@ -9,6 +9,7 @@ use App\Mail\FimDoTrialMessage;
 use App\Models\Assinatura;
 use App\Models\CobrancaConfig;
 use App\Models\Usuario;
+use App\Support\DataExibicao;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -30,8 +31,6 @@ final class AvisarFimDoTrial extends Command
     /** @var string */
     protected $description = 'Envia o convite para assinar a quem está a 2 dias (D-2) ou no último dia (D-0) do teste grátis (STORY-074 CA-6)';
 
-    private const FUSO = 'America/Sao_Paulo';
-
     public function handle(): int
     {
         if (! CobrancaConfig::ligada()) {
@@ -41,7 +40,7 @@ final class AvisarFimDoTrial extends Command
         }
 
         $agora = now();
-        $hoje = $agora->copy()->setTimezone(self::FUSO)->startOfDay();
+        $hoje = DataExibicao::converter($agora)->startOfDay();
 
         $trials = Assinatura::query()
             ->where('trial', true)
@@ -56,9 +55,9 @@ final class AvisarFimDoTrial extends Command
         $falhas = 0;
 
         foreach ($trials as $i => $trial) {
-            $fim = $trial->proximo_vencimento->copy()->setTimezone(self::FUSO);
+            $fim = DataExibicao::converter($trial->proximo_vencimento);
             $dias = (int) $hoje->diffInDays($fim->copy()->startOfDay());
-            $iniciouAntesDeHoje = $trial->data_inicio->copy()->setTimezone(self::FUSO)->startOfDay()->lessThan($hoje);
+            $iniciouAntesDeHoje = DataExibicao::converter($trial->data_inicio)->startOfDay()->lessThan($hoje);
 
             $coluna = match (true) {
                 ! $iniciouAntesDeHoje => null,
@@ -78,7 +77,7 @@ final class AvisarFimDoTrial extends Command
             }
 
             try {
-                Mail::to($usuario->email)->send(new FimDoTrialMessage($usuario->primeiroNome(), $fim->format('d/m/Y'), $dias, route('planos')));
+                Mail::to($usuario->email)->send(new FimDoTrialMessage($usuario->primeiroNome(), DataExibicao::data($fim), $dias, route('planos')));
                 $trial->forceFill([$coluna => $agora])->save();
                 $enviados++;
             } catch (Throwable $e) {

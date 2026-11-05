@@ -97,6 +97,8 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // IDR-025: a sessão é sempre UTC, qualquer que seja o fuso do servidor Postgres.
+            'timezone' => 'UTC',
         ],
 
         'sqlsrv' => [

@@ -6,7 +6,9 @@ use App\Actions\CalcularDiagnostico;
 use App\Models\Diagnostico;
 use App\Models\EmpresaAnalisada;
 use App\Models\Usuario;
+use App\Support\DataExibicao;
 use App\Support\Relatorio\PdfDiagnostico;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -59,7 +61,7 @@ it('baixa o PDF do próprio diagnóstico como anexo', function () {
         ->assertHeader('Content-Type', 'application/pdf')
         ->assertHeader(
             'Content-Disposition',
-            'attachment; filename="diagnostico-industria-teste-'.$diag->gerado_em->format('Y-m-d').'.pdf"',
+            'attachment; filename="diagnostico-industria-teste-'.DataExibicao::converter($diag->gerado_em)->format('Y-m-d').'.pdf"',
         );
     expect($resposta->getContent())->toStartWith('%PDF-');
 });
@@ -173,4 +175,15 @@ it('o card do NCG vai sem título de seção: é o único informativo e já traz
         ->toContain('Indicador informativo')
         ->not->toContain('Indicadores informativos')
         ->not->toContain('Sem farol');
+});
+
+it('às 22:30 em Brasília o PDF e o nome do arquivo usam o dia de Brasília (IDR-025)', function () {
+    Carbon::setTestNow('2026-11-06 01:30:00');
+    $diag = gerarDiagnosticoParaPdf(Usuario::factory()->create());
+    $pdf = PdfDiagnostico::padrao();
+
+    $html = $pdf->html($diag);
+
+    expect($html)->toContain('05/11/2026')->toContain('gerado em 05/11/2026 22:30')->not->toContain('06/11/2026')
+        ->and($pdf->nomeArquivo($diag))->toEndWith('-2026-11-05.pdf');
 });

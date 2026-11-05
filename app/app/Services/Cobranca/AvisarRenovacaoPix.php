@@ -11,6 +11,7 @@ use App\Mail\RenovacaoPixMessage;
 use App\Models\Assinatura;
 use App\Models\Plano;
 use App\Models\Usuario;
+use App\Support\DataExibicao;
 use Closure;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -66,14 +67,12 @@ final class AvisarRenovacaoPix
             return false;
         }
 
-        $fuso = 'America/Sao_Paulo';
-
         try {
             Mail::to($usuario->email)->send(new RenovacaoPixMessage(
                 $usuario->primeiroNome(),
                 $plano->nome,
-                $assinatura->proximo_vencimento->copy()->setTimezone($fuso)->format('d/m/Y'),
-                RenovacaoPix::novoVencimento($assinatura->data_inicio, $assinatura->periodos_pagos)->setTimezone($fuso)->format('d/m/Y'),
+                DataExibicao::data($assinatura->proximo_vencimento),
+                DataExibicao::data(RenovacaoPix::novoVencimento($assinatura->data_inicio, $assinatura->periodos_pagos)),
                 'R$ '.number_format(((int) $assinatura->preco_snapshot_centavos) / 100, 2, ',', '.'),
                 route('assinatura.renovar'),
             ));

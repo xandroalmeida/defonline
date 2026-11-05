@@ -140,7 +140,7 @@ final class AssinarPlano extends Component
             'cicloAtual' => $ciclo,
             'preco' => $plano === null ? 0 : IniciarAssinatura::precoDe($plano, $ciclo),
             'economia' => $plano === null ? 0 : VitrinePrecos::economiaPercentual($plano->preco_mensal_centavos, $plano->preco_anual_centavos),
-            'proximaCobranca' => $ciclo->vencimento(now())->setTimezone('America/Sao_Paulo'),
+            'proximaCobranca' => $ciclo->vencimento(now()),
             'meioAtual' => MeioPagamento::from($this->meio),
             'minutosPix' => (int) config('services.payments.pix_expiracao_minutos', 30),
             'avisoDias' => RenovacaoPix::AVISO_DIAS,

@@ -11,10 +11,10 @@
                    dusk="app-footer-termo">Termo de Adesão</a>
                 <a href="{{ route('termos.politica-privacidade') }}" class="link"
                    dusk="app-footer-privacidade">Política de Privacidade</a>
-                <span>© DEFOnline {{ now()->year }}</span>
+                <span>© DEFOnline {{ \App\Support\DataExibicao::ano() }}</span>
             </div>
         @else
-            <span>© DEFOnline {{ now()->year }}</span>
+            <span>© DEFOnline {{ \App\Support\DataExibicao::ano() }}</span>
         @endif
 
         <x-footer-version/>

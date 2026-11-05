@@ -84,7 +84,7 @@
                 @endunless
 
                 <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">{{ $pf ? 'Início da atividade' : 'Data de fundação' }}</dt>
-                <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-data-fundacao">{{ $empresa->data_fundacao?->format('d/m/Y') ?: '—' }}</dd>
+                <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-data-fundacao">{{ \App\Support\DataExibicao::dia($empresa->data_fundacao, '—') }}</dd>
             </dl>
         @endif
     </x-card>

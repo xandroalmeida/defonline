@@ -3,7 +3,7 @@
     use App\Domain\Cobranca\SituacaoDoPlano as S;
 
     $reais = fn (int $centavos): string => 'R$ '.number_format($centavos / 100, 2, ',', '.');
-    $dia = fn ($d): string => \Carbon\CarbonImmutable::instance($d)->setTimezone('America/Sao_Paulo')->format('d/m/Y');
+    $dia = fn ($d): string => \App\Support\DataExibicao::data($d);
     $analises = fn (int $n): string => $n.' '.($n === 1 ? 'análise' : 'análises');
     $ciclo = $assinatura?->ciclo !== null ? CicloCobranca::tryFrom($assinatura->ciclo) : null;
     $acaoBloqueada = $personificando;

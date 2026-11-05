@@ -6,6 +6,7 @@ namespace App\Support\Cobranca;
 
 use App\Domain\Cobranca\Bloqueio;
 use App\Domain\Cobranca\MotivoBloqueio;
+use App\Support\DataExibicao;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -43,7 +44,7 @@ final class TextoBloqueio
      */
     public static function para(Bloqueio $b): array
     {
-        $data = $b->data?->setTimezone('America/Sao_Paulo')->format('d/m/Y') ?? '';
+        $data = DataExibicao::data($b->data);
 
         [$titulo, $causa, $acoes] = match ($b->motivo) {
             MotivoBloqueio::SemNada => $b->trialElegivel
@@ -80,7 +81,7 @@ final class TextoBloqueio
      */
     public static function paraDrm(Bloqueio $b): array
     {
-        $data = $b->data?->setTimezone('America/Sao_Paulo')->format('d/m/Y') ?? '';
+        $data = DataExibicao::data($b->data);
         $fim = 'Os meses já lançados continuam visíveis.';
 
         [$titulo, $causa, $acoes] = match ($b->motivo) {

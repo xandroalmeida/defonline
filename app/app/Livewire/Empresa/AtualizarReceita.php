@@ -10,6 +10,7 @@ use App\Domain\TipoDocumento;
 use App\Models\EmpresaAnalisada;
 use App\Services\Rfb\AtualizarFichaRfb;
 use App\Services\Rfb\RfbCnpjFalhouException;
+use App\Support\DataExibicao;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -49,7 +50,7 @@ final class AtualizarReceita extends Component
         $this->cnpj = $empresa->tipo_documento === TipoDocumento::Cnpj;
         $this->legada = $this->cnpj
             && ($empresa->fonte_enriquecimento === FonteEnriquecimento::Manual || $empresa->ficha_rfb === null);
-        $this->consultadoEm = $this->cnpj ? $empresa->enriquecido_at?->format('d/m/Y') : null;
+        $this->consultadoEm = $this->cnpj ? DataExibicao::data($empresa->enriquecido_at) ?: null : null;
         $this->resultado = session()->get(self::FLASH);
     }
 

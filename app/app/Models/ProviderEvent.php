@@ -33,7 +33,7 @@ final class ProviderEvent extends Model
 
     public $timestamps = false;
 
-    /** Com offset: o banco local roda em America/Sao_Paulo e a aplicação em UTC (mesmo ajuste de Recomendacao). */
+    /** Com offset (IDR-025): a sessão do banco já é UTC; o offset explícito é só defesa contra outra sessão. */
     protected $dateFormat = 'Y-m-d H:i:sP';
 
     protected $table = 'provider_events';

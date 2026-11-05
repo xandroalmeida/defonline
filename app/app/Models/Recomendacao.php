@@ -30,8 +30,8 @@ final class Recomendacao extends Model
     protected $table = 'recomendacoes';
 
     /**
-     * Grava com o fuso: sem ele, `now()` em UTC é lido como hora local pela sessão do
-     * Postgres e a versão da matriz (mês da edição) poderia cair no mês errado.
+     * Grava com o fuso (IDR-025): a sessão do banco já é UTC; o offset explícito é só defesa
+     * contra outra sessão, que poderia deslocar a versão da matriz (mês da edição).
      */
     protected $dateFormat = 'Y-m-d H:i:sP';
 

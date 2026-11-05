@@ -2,7 +2,7 @@
     $erro = fn (string $campo, string $dusk) => $errors->has($campo)
         ? '<p class="text-[color:var(--color-destructive)] text-sm mt-1 mb-0" dusk="'.$dusk.'">'.e($errors->first($campo)).'</p>'
         : '';
-    $data = fn ($d) => $d->format('d/m/Y');
+    $data = fn ($d) => \App\Support\DataExibicao::dia($d);
 @endphp
 
 <div>
@@ -183,7 +183,7 @@
             <h3 class="text-base font-medium mt-0 mb-2">Concessões ({{ $concessoesDetalhe->count() }}{{ $concessoesDetalhe->count() === \App\Livewire\Backoffice\Cupons::DETALHE_LIMITE ? '+' : '' }})</h3>
             <ul class="list-none p-0 m-0 mb-4 text-sm" dusk="cupom-detalhe-concessoes">
                 @forelse ($concessoesDetalhe as $c)
-                    <li class="py-1">{{ $c->usuario->nome }} ({{ $c->usuario->email }}), em {{ $c->concedida_em->format('d/m/Y') }}</li>
+                    <li class="py-1">{{ $c->usuario->nome }} ({{ $c->usuario->email }}), em {{ \App\Support\DataExibicao::data($c->concedida_em) }}</li>
                 @empty
                     <li class="py-1 text-[color:var(--color-secondary)]">Nenhuma concessão.</li>
                 @endforelse
@@ -192,7 +192,7 @@
             <h3 class="text-base font-medium mt-0 mb-2">Usos ({{ $usosDetalhe->count() }}{{ $usosDetalhe->count() === \App\Livewire\Backoffice\Cupons::DETALHE_LIMITE ? '+' : '' }})</h3>
             <ul class="list-none p-0 m-0 text-sm" dusk="cupom-detalhe-usos">
                 @forelse ($usosDetalhe as $u)
-                    <li class="py-1">{{ $u->usuario->nome }} ({{ $u->usuario->email }}), em {{ $u->usado_em->format('d/m/Y') }}, desconto de R$ {{ number_format($u->desconto_centavos / 100, 2, ',', '.') }}</li>
+                    <li class="py-1">{{ $u->usuario->nome }} ({{ $u->usuario->email }}), em {{ \App\Support\DataExibicao::data($u->usado_em) }}, desconto de R$ {{ number_format($u->desconto_centavos / 100, 2, ',', '.') }}</li>
                 @empty
                     <li class="py-1 text-[color:var(--color-secondary)]">Nenhum uso.</li>
                 @endforelse

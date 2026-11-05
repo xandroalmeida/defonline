@@ -49,6 +49,16 @@ it('envia o convite de D-2 uma vez só, com a data do fim e o link dos planos', 
     expect($trial->refresh()->aviso_d2_em)->not->toBeNull()->and($trial->aviso_d0_em)->toBeNull();
 });
 
+it('às 22:30 em Brasília do último dia o e-mail diz o dia de Brasília (IDR-025)', function () {
+    // 2026-11-13 01:30 UTC = 12/11 22:30 em Brasília.
+    _trialQueTermina($this->usuario, '2026-11-13 01:30:00');
+    _agora('2026-11-10 12:00:00');
+
+    $this->artisan('trial:avisar-fim')->assertSuccessful();
+
+    Mail::assertSent(FimDoTrialMessage::class, fn (FimDoTrialMessage $m) => $m->dias === 2 && $m->dataFim === '12/11/2026');
+});
+
 it('envia o convite de D-0 no último dia, antes do fim', function () {
     $trial = _trialQueTermina($this->usuario, '2026-11-12 22:00:00');
     _agora('2026-11-12 12:00:00');

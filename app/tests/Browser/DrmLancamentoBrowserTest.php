@@ -12,7 +12,7 @@ use App\Models\DrmPreferencia;
 use App\Models\DrmRascunho;
 use App\Models\EmpresaAnalisada;
 use App\Models\Usuario;
-use Carbon\CarbonImmutable;
+use App\Support\DataExibicao;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
@@ -109,7 +109,7 @@ final class DrmLancamentoBrowserTest extends DuskTestCase
             $this->assertGreaterThanOrEqual(44.0, $this->menorAlvoDeToque($browser)[0]);
 
             $browser->press('Fechar o mês')
-                ->waitForRoute('drm.mes', [$empresa, Competencia::padrao(CarbonImmutable::now())->texto()])
+                ->waitForRoute('drm.mes', [$empresa, Competencia::padrao(DataExibicao::agora())->texto()])
                 // STORY-049 CA-12: o fechamento termina na Demonstração do Mês, lida do snapshot gravado.
                 ->waitFor('@drm-demonstracao')
                 ->assertSee('QUANTO VENDEU')
@@ -161,7 +161,7 @@ final class DrmLancamentoBrowserTest extends DuskTestCase
     {
         $usuario = Usuario::factory()->create();
         $empresa = $this->empresa($usuario);
-        $anterior = Competencia::padrao(CarbonImmutable::now()->subMonthNoOverflow());
+        $anterior = Competencia::padrao(DataExibicao::agora()->subMonthNoOverflow());
         DrmLancamento::factory()->create([
             'empresa_analisada_id' => $empresa->id, 'competencia' => $anterior->dia01(),
         ]);
@@ -185,7 +185,7 @@ final class DrmLancamentoBrowserTest extends DuskTestCase
             $this->assertSame(1, DrmLancamento::query()->count());
             $browser->assertSee('Conferir e fechar')
                 ->press('Fechar o mês')
-                ->waitForRoute('drm.mes', [$empresa, Competencia::padrao(CarbonImmutable::now())->texto()]);
+                ->waitForRoute('drm.mes', [$empresa, Competencia::padrao(DataExibicao::agora())->texto()]);
         });
 
         $this->assertSame(2, DrmLancamento::query()->count());

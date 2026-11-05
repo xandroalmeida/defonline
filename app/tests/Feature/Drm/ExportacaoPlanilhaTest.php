@@ -18,6 +18,7 @@ use App\Models\TrialConfig;
 use App\Models\Usuario;
 use App\Support\Cobranca\AcessoDrm;
 use App\Support\Drm\PlanilhaDrm;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -177,6 +178,20 @@ describe('CA-1, CA-2, CA-10 — conteúdo, célula a célula', function () {
 });
 
 describe('CA-5 — fonte é o snapshot, retificação sinalizada', function () {
+    it('às 22:30 em Brasília a situação e o rodapé trazem o dia de Brasília (IDR-025)', function () {
+        mesDoSetor($this->empresa, '2026-09', Setor::Comercio);
+        Carbon::setTestNow('2026-11-06 01:30:00');
+        app(RetificarLancamento::class)->execute(
+            $this->empresa, Competencia::deTexto('2026-09'),
+            lancamentoDoSetor(Setor::Comercio, ['D02' => '6.000,00']), [], 1,
+        );
+
+        $aba = xlsxBaixado($this->empresa, '2026-09')->getSheetByName('Mês');
+        $textos = collect(range(1, 40))->map(fn ($r) => (string) $aba->getCell("A{$r}")->getValue().'|'.(string) $aba->getCell("B{$r}")->getValue())->implode("\n");
+
+        expect($textos)->toContain('última correção em 05/11/2026')->toContain('gerado em 05/11/2026 22:30')->not->toContain('06/11/2026');
+    });
+
     it('exportar o mês retificado traz os valores retificados e diz que foi retificado', function () {
         $v1 = mesDoSetor($this->empresa, '2026-09', Setor::Comercio);
         app(RetificarLancamento::class)->execute(

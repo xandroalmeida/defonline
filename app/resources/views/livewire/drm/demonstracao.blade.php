@@ -214,15 +214,15 @@
     @php
         $rodape = implode(' · ', array_filter([
             $visao->motorVersion === null ? null : 'motor v'.$visao->motorVersion,
-            $visao->geradoEm === null ? null : 'gerado em '.$visao->geradoEm->setTimezone(config('app.timezone'))->format('d/m/Y H:i'),
-            $retificado ? 'corrigido '.$vezesRetificado.'× — última correção em '.$retificadoEm->setTimezone(config('app.timezone'))->format('d/m/Y') : null,
+            $visao->geradoEm === null ? null : 'gerado em '.\App\Support\DataExibicao::dataHora($visao->geradoEm),
+            $retificado ? 'corrigido '.$vezesRetificado.'× — última correção em '.\App\Support\DataExibicao::data($retificadoEm) : null,
         ]));
     @endphp
     @php
         $rodapeImpressao = strtr((string) config('drm.exportacao.impressao_rodape'), [
             ':motor' => $visao->motorVersion ?? '—',
             ':conteudo' => (string) config('drm.conteudo_version'),
-            ':data' => $visao->geradoEm?->setTimezone(config('app.timezone'))->format('d/m/Y H:i') ?? '—',
+            ':data' => \App\Support\DataExibicao::dataHora($visao->geradoEm, '—'),
         ]);
     @endphp
     @if ($rodape !== '')

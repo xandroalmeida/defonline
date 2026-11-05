@@ -1,5 +1,5 @@
 @php
-    $data = fn ($valor) => $valor ? \Illuminate\Support\Carbon::parse($valor)->timezone('America/Sao_Paulo')->format('d/m/Y H:i') : '—';
+    $data = fn ($valor) => $valor ? \App\Support\DataExibicao::dataHora($valor) : '—';
     $telefone = function (?string $t): string {
         $d = preg_replace('/\D+/', '', (string) $t) ?? '';
         return match (strlen($d)) {
@@ -56,7 +56,7 @@
                                 <td class="px-2 py-2 whitespace-nowrap">{{ $telefone($u->telefone) }}</td>
                             @endif
                             <td class="px-2 py-2">
-                                {{ $u->email_confirmed_at ? 'Sim · ' . $u->email_confirmed_at->format('d/m/Y') : 'Não' }}
+                                {{ $u->email_confirmed_at ? 'Sim · ' . \App\Support\DataExibicao::data($u->email_confirmed_at) : 'Não' }}
                             </td>
                             <td class="px-2 py-2">{{ $data($u->created_at) }}</td>
                             <td class="px-2 py-2">{{ $data($u->ultimo_login_at) }}</td>

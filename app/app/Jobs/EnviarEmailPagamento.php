@@ -8,6 +8,7 @@ use App\Domain\Cobranca\EstadoCobranca;
 use App\Mail\LinkDePagamentoMessage;
 use App\Models\Invoice;
 use App\Models\Usuario;
+use App\Support\DataExibicao;
 use Illuminate\Support\Facades\Mail;
 
 /** STORY-076 CA-2 — manda o link do checkout por e-mail, para quem fechou a tela. */
@@ -35,7 +36,7 @@ final class EnviarEmailPagamento extends BaseJob
             descricao: $invoice->descricao,
             valor: 'R$ '.number_format($invoice->valor_centavos / 100, 2, ',', '.'),
             link: $invoice->checkout_url,
-            expiraEm: $invoice->checkout_expira_em?->setTimezone('America/Sao_Paulo')->format('H:i') ?? '',
+            expiraEm: DataExibicao::hora($invoice->checkout_expira_em),
             cartao: $invoice->meio === 'cartao',
         ));
     }

@@ -8,6 +8,7 @@ use App\Domain\Drm\Competencia;
 use App\Domain\Drm\Setor;
 use App\Models\DrmLancamento;
 use App\Models\EmpresaAnalisada;
+use App\Support\DataExibicao;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -342,7 +343,7 @@ final class PlanilhaDrm
         return strtr((string) config('drm.exportacao.situacao.retificado'), [
             ':versao' => (string) $l->versao,
             ':vezes' => (string) $l->vezesRetificado(),
-            ':data' => $l->gerado_em->setTimezone(config('app.timezone'))->format('d/m/Y'),
+            ':data' => DataExibicao::data($l->gerado_em),
         ]);
     }
 
@@ -350,7 +351,7 @@ final class PlanilhaDrm
     {
         return strtr((string) config('drm.exportacao.rodape'), [
             ':motor' => $visao->motorVersion ?? '—',
-            ':data' => $visao->geradoEm?->setTimezone(config('app.timezone'))->format('d/m/Y H:i') ?? '—',
+            ':data' => DataExibicao::dataHora($visao->geradoEm, '—'),
         ]);
     }
 

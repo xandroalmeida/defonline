@@ -113,10 +113,8 @@ final class RfbConsultarCnpj
 
         try {
             // `inserido_em` cai no default `useCurrent` da migration. Deixamos o
-            // banco carimbar para não cair na armadilha de timezone:
-            // `now()` em PHP é UTC, mas DB::table()->insert() passa o valor sem
-            // offset, e a sessão do Postgres ('America/Sao_Paulo' no compose)
-            // o interpreta como local — jogando o instante 3h no futuro.
+            // banco carimbar: DB::table()->insert() passa o valor sem offset
+            // e o default do banco dispensa a conversão (sessão UTC, IDR-025).
             DB::table('business_metrics')->insert([
                 'request_id' => RequestId::get(),
                 'tipo' => 'rfb_consulta',

@@ -6,7 +6,6 @@ namespace App\Support;
 
 use App\Domain\Motor\FonteRecomendacoes;
 use App\Models\Recomendacao;
-use Illuminate\Support\Carbon;
 
 /**
  * STORY-068 / PDR-016 — matriz vigente na tabela `recomendacoes`.
@@ -33,7 +32,7 @@ final class RecomendacoesNoBanco implements FonteRecomendacoes
             return (string) config('motor.matrix_version');
         }
 
-        $data = Carbon::parse($ultimaEdicao)->setTimezone('America/Sao_Paulo');
+        $data = DataExibicao::converter($ultimaEdicao);
 
         return self::MESES[$data->month - 1].'-'.$data->year;
     }

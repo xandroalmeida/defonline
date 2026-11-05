@@ -11,9 +11,9 @@ use App\Domain\Drm\Setor;
 use App\Models\DrmPreferencia;
 use App\Models\DrmRascunho;
 use App\Models\EmpresaAnalisada;
+use App\Support\DataExibicao;
 use App\Support\Drm\HistoricoDrm;
 use App\Support\Drm\SerieVisao;
-use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -55,7 +55,7 @@ final class Serie extends Component
             HistoricoDrm::serie($this->empresa, $posicao),
             $rascunhos,
             $conteudo->nomesDosBlocos($setor->value),
-            CarbonImmutable::now(),
+            DataExibicao::agora(),
             $conteudo,
         );
 

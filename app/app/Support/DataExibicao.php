@@ -1,0 +1,76 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Support;
+
+use Carbon\CarbonImmutable;
+use DateTimeInterface;
+
+/**
+ * Ponto único de formatação de data e hora para pessoas (IDR-025).
+ *
+ * O armazenamento e `app.timezone` são UTC; tudo que aparece em tela, PDF, planilha, e-mail ou
+ * backoffice passa por aqui e sai no fuso `app.display_timezone` (America/Sao_Paulo). Depois das
+ * 21h em Brasília o UTC já é o dia seguinte: formatar direto do atributo mostra a data errada.
+ *
+ * Para um dia sem hora (data de fundação, competência) use {@see self::dia()}: não há instante
+ * para converter e mudar o fuso mudaria o dia.
+ */
+final class DataExibicao
+{
+    public static function fuso(): string
+    {
+        return (string) config('app.display_timezone');
+    }
+
+    /** Instante no fuso de exibição; aceita string de data/hora (interpretada em UTC). */
+    public static function converter(DateTimeInterface|string $instante): CarbonImmutable
+    {
+        $d = $instante instanceof DateTimeInterface
+            ? CarbonImmutable::instance($instante)
+            : CarbonImmutable::parse($instante, 'UTC');
+
+        return $d->setTimezone(self::fuso());
+    }
+
+    public static function agora(): CarbonImmutable
+    {
+        return CarbonImmutable::now(self::fuso());
+    }
+
+    /** O dia corrente em Brasília (meia-noite local). */
+    public static function hoje(): CarbonImmutable
+    {
+        return self::agora()->startOfDay();
+    }
+
+    public static function ano(): int
+    {
+        return self::agora()->year;
+    }
+
+    /** `dd/mm/aaaa` */
+    public static function data(DateTimeInterface|string|null $instante, string $vazio = ''): string
+    {
+        return $instante === null ? $vazio : self::converter($instante)->format('d/m/Y');
+    }
+
+    /** `dd/mm/aaaa HH:mm` */
+    public static function dataHora(DateTimeInterface|string|null $instante, string $vazio = ''): string
+    {
+        return $instante === null ? $vazio : self::converter($instante)->format('d/m/Y H:i');
+    }
+
+    /** `HH:mm` */
+    public static function hora(DateTimeInterface|string|null $instante, string $vazio = ''): string
+    {
+        return $instante === null ? $vazio : self::converter($instante)->format('H:i');
+    }
+
+    /** `dd/mm/aaaa` de uma data sem hora: sem conversão de fuso. */
+    public static function dia(?DateTimeInterface $dia, string $vazio = ''): string
+    {
+        return $dia === null ? $vazio : $dia->format('d/m/Y');
+    }
+}
