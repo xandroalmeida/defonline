@@ -73,6 +73,41 @@ final class TextoBloqueio
     }
 
     /**
+     * STORY-084 — a variante do Raio X do Negócio (spec STORY-070 §4). Só há duas famílias: nunca teve
+     * plano nem teste (créditos avulsos incluídos) e lançamento pausado. Nunca usa vocabulário de saldo.
+     *
+     * @return array{titulo: string, causa: string, acoes: list<array{chave: string, rotulo: string}>}
+     */
+    public static function paraDrm(Bloqueio $b): array
+    {
+        $data = $b->data?->setTimezone('America/Sao_Paulo')->format('d/m/Y') ?? '';
+        $fim = 'Os meses já lançados continuam visíveis.';
+
+        [$titulo, $causa, $acoes] = match ($b->motivo) {
+            MotivoBloqueio::EmAtraso => [
+                'O lançamento do Raio X está pausado',
+                "Não conseguimos cobrar a renovação da sua assinatura. {$fim}",
+                ['cartao', 'meu-plano'],
+            ],
+            MotivoBloqueio::TesteEncerrado => ['O lançamento do Raio X está pausado', "Seu teste terminou em {$data}. {$fim}", ['planos']],
+            MotivoBloqueio::PlanoEncerrado => ['O lançamento do Raio X está pausado', "Seu plano terminou em {$data}. {$fim}", ['planos']],
+            default => [
+                'O Raio X do Negócio faz parte dos planos',
+                'Os créditos avulsos não incluem o Raio X do Negócio. Assine um plano'
+                    .($b->trialElegivel ? ' ou comece o teste' : '')
+                    .' para lançar novos meses. Os que você já lançou continuam visíveis.',
+                $b->trialElegivel ? ['planos', 'trial'] : ['planos'],
+            ],
+        };
+
+        return [
+            'titulo' => $titulo,
+            'causa' => $causa,
+            'acoes' => array_map(fn (string $chave): array => ['chave' => $chave, 'rotulo' => self::ROTULOS[$chave]], $acoes),
+        ];
+    }
+
+    /**
      * As ações cuja tela já existe, com o endereço. Ordem preservada: a primeira é a primária.
      *
      * @param  list<array{chave: string, rotulo: string}>  $acoes

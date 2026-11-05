@@ -4,6 +4,7 @@
     'rascunho' => false,
     'acoes' => [],
     'prefixo' => 'screen-bloqueio',
+    'rodape' => true,
 ])
 
 {{-- STORY-073 / spec STORY-070-bloqueio-sem-saldo: bloco no lugar do fluxo (nem modal nem toast).
@@ -44,8 +45,10 @@
         </div>
     @endif
 
-    <p class="m-0 text-sm text-[color:var(--color-secondary)]">
-        Seus diagnósticos anteriores continuam disponíveis.
-        <x-link :href="route('home')" dusk="{{ $prefixo }}-ver-diagnosticos">Ver diagnósticos</x-link>
-    </p>
+    @if ($rodape)
+        <p class="m-0 text-sm text-[color:var(--color-secondary)]">
+            Seus diagnósticos anteriores continuam disponíveis.
+            <x-link :href="route('home')" dusk="{{ $prefixo }}-ver-diagnosticos">Ver diagnósticos</x-link>
+        </p>
+    @endif
 </section>

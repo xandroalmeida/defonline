@@ -125,6 +125,7 @@ Route::middleware('auth')->group(function () {
     // STORY-047 — Raio X do Negócio (DRM): lançamento mensal. Empresa de outro usuário → 404 (IDR-009).
     Route::get('/empresas/{empresa}/drm/lancar', LancamentoDrm::class)
         ->whereUuid('empresa')
+        ->middleware('drm.acesso') // STORY-084
         ->name('drm.lancar');
     Route::get('/empresas/{empresa}/drm/{competencia}', DemonstracaoDrm::class)
         ->whereUuid('empresa')
@@ -134,6 +135,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/empresas/{empresa}/drm/{competencia}/corrigir', LancamentoDrm::class)
         ->whereUuid('empresa')
         ->where('competencia', '\d{4}-(0[1-9]|1[0-2])')
+        ->middleware('drm.acesso') // STORY-084
         ->name('drm.corrigir');
 });
 

@@ -3,6 +3,7 @@
 use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\AuditarPersonificacao;
 use App\Http\Middleware\EnrichLogContext;
+use App\Http\Middleware\ExigirAcessoDrm;
 use App\Http\Middleware\MeasureRequest;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SomenteEquipeBackoffice;
@@ -34,7 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Ordem importa: request_id PRIMEIRO, depois enriquece log, depois mede.
         $middleware->prepend(AssignRequestId::class);
         $middleware->append(SecurityHeaders::class);
-        $middleware->alias(['backoffice' => SomenteEquipeBackoffice::class]);
+        $middleware->alias(['backoffice' => SomenteEquipeBackoffice::class, 'drm.acesso' => ExigirAcessoDrm::class]);
 
         $middleware->web(append: [
             EnrichLogContext::class,
