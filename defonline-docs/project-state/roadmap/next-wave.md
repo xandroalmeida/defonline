@@ -27,7 +27,7 @@ Se a hipótese **não** se confirmar, esta onda muda inteiramente. Cenários pos
 
 > Nota: a numeração foi deslocada em 2026-05-24 — o `EPIC-004` deixou de ser placeholder de "Cobrança e Plano Básico" e foi atribuído ao **App shell + materialização do design system v1** dentro da WAVE-2026-01 (ver `roadmap/current-wave.md`). Todos os placeholders abaixo subiram um número.
 
-- **EPIC-005 — Cobrança e planos.** Roberto ativa o trial de 7 dias com 1 análise, assina um plano e compra créditos avulsos, com Pix e cartão recorrente via Asaas (provedor substituível). A equipe gere planos, pacotes e cupons em tela no backoffice, sem nada fixo em código, e os usuários do beta recebem cupom. O DRM entra em todos os planos pagos e no trial. Decisões em `PDR-020`. Outcome: produto comercializável.
+- **EPIC-005 — Cobrança e planos.** Roberto ativa o trial de 7 dias com 1 análise, assina um plano e compra créditos avulsos, com Pix e cartão recorrente via Asaas (provedor substituível). A equipe gere planos, pacotes e cupons em tela no backoffice, sem nada fixo em código, e os usuários do beta recebem cupom. O DRM entra em todos os planos pagos e no trial. Decisões em `PDR-020`; detalhado em 19 estórias em `epics/EPIC-005-cobranca-e-planos/epic.md`. Outcome: produto comercializável.
 
 - **EPIC-006 — Cobertura de Comércio e Serviços.** Quiz, motor de cálculo e matriz de recomendações estendidos para os setores Comércio e Serviços. Joana e autônomos passam a ter relatório com semáforo e recomendações específicas. Outcome: produto serve a maioria das MPEs brasileiras, não só Indústria.
 

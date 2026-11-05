@@ -376,6 +376,44 @@
       ],
       "created_at": "2026-11-03",
       "updated_at": "2026-11-04"
+    },
+    {
+      "id": "EPIC-005",
+      "slug": "cobranca-e-planos",
+      "title": "Cobrança e planos — trial, assinatura, créditos e cupons com catálogo configurável",
+      "wave": "WAVE-2026-02",
+      "status": "ready",
+      "path": "epics/EPIC-005-cobranca-e-planos/epic.md",
+      "story_ids": [
+        "STORY-069",
+        "STORY-070",
+        "STORY-071",
+        "STORY-072",
+        "STORY-073",
+        "STORY-074",
+        "STORY-075",
+        "STORY-076",
+        "STORY-077",
+        "STORY-078",
+        "STORY-079",
+        "STORY-080",
+        "STORY-081",
+        "STORY-082",
+        "STORY-083",
+        "STORY-084",
+        "STORY-085",
+        "STORY-086",
+        "STORY-087"
+      ],
+      "validation_report": null,
+      "blocked_by_epics": [],
+      "blocks_epics": [],
+      "related_pdr": [
+        "PDR-020",
+        "PDR-003"
+      ],
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05"
     }
   ],
   "stories": [
@@ -1450,7 +1488,8 @@
         "STORY-050",
         "STORY-051",
         "STORY-056",
-        "STORY-057"
+        "STORY-057",
+        "STORY-084"
       ],
       "note": "Maior risco do épico — é aqui que o usuário decide se volta no mês seguinte. Campos no Anexo K. Alertas A4/A6 ficam para STORY-051 (dependem de histórico). | 2026-08-06: spec SCREEN-STORY-046-lancamento-mensal em `ready` e DDRs `accepted` (PDR-007) — invariante 12 satisfeita, sem decisão de design pendente à frente.",
       "epic_id": "EPIC-010",
@@ -1985,6 +2024,506 @@
       "path": "epics/EPIC-011-backoffice-minimo/stories/STORY-068-recomendacoes-no-backoffice.md",
       "related_pdr": "PDR-016",
       "note": "2026-11-04: implementada, commit local; falta publicar e verificar em produção."
+    },
+    {
+      "type": "spike",
+      "target_role": "arquiteto",
+      "status": "ready",
+      "blocks": [
+        "STORY-076",
+        "STORY-077",
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-069",
+      "slug": "spike-provedor-pagamento-asaas",
+      "title": "Spike — abstração do provedor de pagamento e integração Asaas",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-069-spike-provedor-pagamento-asaas.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "designer",
+      "status": "ready",
+      "blocks": [
+        "STORY-074",
+        "STORY-075",
+        "STORY-076",
+        "STORY-077",
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-070",
+      "slug": "design-telas-cobranca",
+      "title": "Design das telas de cobrança do usuário",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-070-design-telas-cobranca.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-072",
+        "STORY-073",
+        "STORY-075",
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-071",
+      "slug": "catalogo-planos-e-pacotes-backoffice",
+      "title": "Backoffice — gestão de planos, pacotes de créditos e trial",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-071-catalogo-planos-e-pacotes-backoffice.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-083",
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-072",
+      "slug": "cupons-no-backoffice",
+      "title": "Backoffice — criação e concessão de cupons",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-071"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-072-cupons-no-backoffice.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-074",
+        "STORY-076",
+        "STORY-077",
+        "STORY-084",
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-073",
+      "slug": "carteira-consumo-e-bloqueio-de-analise",
+      "title": "Carteira, interruptor de cobrança e bloqueio de análise",
+      "estimated_session_size": "L",
+      "blocked_by": [
+        "STORY-071"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-073-carteira-consumo-e-bloqueio-de-analise.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-084",
+        "STORY-086",
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-074",
+      "slug": "trial-gratuito",
+      "title": "Trial gratuito",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-070",
+        "STORY-073"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-074-trial-gratuito.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-076",
+        "STORY-077",
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-075",
+      "slug": "pagina-de-planos",
+      "title": "Página de planos e preços",
+      "estimated_session_size": "S",
+      "blocked_by": [
+        "STORY-070",
+        "STORY-071"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-075-pagina-de-planos.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-078",
+        "STORY-080",
+        "STORY-083",
+        "STORY-085",
+        "STORY-086",
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-076",
+      "slug": "compra-de-creditos-com-pix",
+      "title": "Compra de créditos com Pix — primeira cobrança real",
+      "estimated_session_size": "L",
+      "blocked_by": [
+        "STORY-069",
+        "STORY-070",
+        "STORY-073",
+        "STORY-075"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-076-compra-de-creditos-com-pix.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-078",
+        "STORY-079",
+        "STORY-080",
+        "STORY-081",
+        "STORY-083",
+        "STORY-085",
+        "STORY-086",
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-077",
+      "slug": "assinatura-com-cartao",
+      "title": "Assinatura de plano com cartão recorrente",
+      "estimated_session_size": "L",
+      "blocked_by": [
+        "STORY-069",
+        "STORY-070",
+        "STORY-073",
+        "STORY-075"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-077-assinatura-com-cartao.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-078",
+      "slug": "compra-de-creditos-com-cartao",
+      "title": "Compra de créditos com cartão",
+      "estimated_session_size": "S",
+      "blocked_by": [
+        "STORY-076",
+        "STORY-077"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-078-compra-de-creditos-com-cartao.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-083",
+        "STORY-086",
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-079",
+      "slug": "renovacao-e-falha-de-cobranca",
+      "title": "Renovação e falha de cobrança",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-077"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-079-renovacao-e-falha-de-cobranca.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-080",
+      "slug": "pix-no-plano-anual",
+      "title": "Pix no plano anual",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-076",
+        "STORY-077"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-080-pix-no-plano-anual.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-082",
+        "STORY-083",
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-081",
+      "slug": "meu-plano-e-cancelamento",
+      "title": "Meu plano, troca de cartão e cancelamento",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-077"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-081-meu-plano-e-cancelamento.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-082",
+      "slug": "troca-de-plano",
+      "title": "Upgrade e downgrade de plano",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-081"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-082-troca-de-plano.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-083",
+      "slug": "cupom-no-checkout-e-beneficio-beta",
+      "title": "Cupom no checkout e benefício do beta",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-072",
+        "STORY-076",
+        "STORY-077",
+        "STORY-079",
+        "STORY-081"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-083-cupom-no-checkout-e-beneficio-beta.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-084",
+      "slug": "acesso-ao-drm-por-plano",
+      "title": "Acesso ao DRM por plano ou trial",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-073",
+        "STORY-074",
+        "STORY-047"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-084-acesso-ao-drm-por-plano.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-085",
+      "slug": "operacao-financeira-no-backoffice",
+      "title": "Backoffice — assinaturas, reembolso e nota fiscal",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-076",
+        "STORY-077"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-085-operacao-financeira-no-backoffice.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "implementation",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-086",
+      "slug": "eventos-e-alertas-de-cobranca",
+      "title": "Eventos e alertas de cobrança",
+      "estimated_session_size": "S",
+      "blocked_by": [
+        "STORY-074",
+        "STORY-076",
+        "STORY-077",
+        "STORY-079"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-086-eventos-e-alertas-de-cobranca.md",
+      "related_pdr": "PDR-020"
+    },
+    {
+      "type": "validation",
+      "target_role": "validador",
+      "status": "ready",
+      "blocks": [],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-087",
+      "slug": "validacao-final-cobranca",
+      "title": "Validação final do EPIC-005",
+      "estimated_session_size": "M",
+      "blocked_by": [
+        "STORY-069",
+        "STORY-070",
+        "STORY-071",
+        "STORY-072",
+        "STORY-073",
+        "STORY-074",
+        "STORY-075",
+        "STORY-076",
+        "STORY-077",
+        "STORY-078",
+        "STORY-079",
+        "STORY-080",
+        "STORY-081",
+        "STORY-082",
+        "STORY-083",
+        "STORY-084",
+        "STORY-085",
+        "STORY-086"
+      ],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-087-validacao-final-cobranca.md",
+      "related_pdr": "PDR-020"
     }
   ],
   "sprints": [

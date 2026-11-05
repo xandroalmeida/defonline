@@ -1,0 +1,100 @@
+---
+story_id: STORY-076
+slug: compra-de-creditos-com-pix
+title: "Compra de créditos com Pix — primeira cobrança real"
+epic_id: EPIC-005
+sprint_id: null
+type: implementation
+target_role: programador
+requires_design: true
+status: ready
+owner_agent: null
+created_at: 2026-11-05
+updated_at: 2026-11-05
+estimated_session_size: L
+---
+
+# STORY-076 — Compra de créditos com Pix — primeira cobrança real
+
+> **Para o agente que vai executar:** leia esta estória por inteiro antes de começar. Se algo estiver ambíguo, registre a dúvida em "Notas do agente" e pause em vez de adivinhar.
+
+## Contexto
+
+É a menor fatia que atravessa todo o caminho do dinheiro: checkout, provedor, webhook e carteira. Por não ter recorrência, valida a integração com menor risco.
+
+- Épico: `epics/EPIC-005-cobranca-e-planos/epic.md`
+- Ler antes:
+  - `decisions/pdr/PDR-020-modelo-de-cobranca-planos-configuraveis-asaas.md`
+  - `defonline-docs/especificacao/V2/especificacao-funcional.md` §2.2 e §3.4
+  - `defonline-docs/especificacao/V2/requisitos-nao-funcionais-e-juridicos.md` §3.2
+  - ADR-010
+  - Spec de tela da STORY-070
+
+## O quê
+
+Permitir que o usuário compre um pacote com Pix e receba os créditos após a confirmação do provedor.
+
+## Por quê
+
+Primeiro momento em que o produto recebe dinheiro, e a comprovação da abstração do ADR-010.
+
+## Critérios de aceite
+
+- [ ] **CA-1:** O checkout exige e-mail confirmado e o aceite da versão vigente do Termo de Adesão, registrado com data, IP e hash em `term_acceptances`.
+- [ ] **CA-2:** Dado o aceite, o sistema gera um QR Code Pix com a expiração configurada (padrão de 30 minutos) e envia por e-mail, caso o usuário feche a tela.
+- [ ] **CA-3:** Quando o provedor confirma o pagamento, a tela é atualizada e os créditos entram na carteira com a validade do pacote no momento da compra.
+- [ ] **CA-4:** O mesmo webhook recebido duas vezes credita uma única vez. Webhook sem autenticação válida é recusado.
+- [ ] **CA-5:** Pix expirado não credita, e a tela permite gerar outro.
+- [ ] **CA-6:** Falha do provedor exibe mensagem clara, não gera crédito e é registrada para alerta. Toda cobrança fica registrada com status e identificador externo.
+- [ ] **CA-7:** Durante o "Logar como", o admin não consegue contratar nem pagar.
+- [ ] **CA-8:** A suíte roda com o adaptador de teste, e existe um teste contra o sandbox do Asaas que pode ser executado sob demanda.
+- [ ] **CA-9:** Teste arquitetural impede referência ao Asaas fora do adaptador.
+- [ ] **CA-10:** Respeite o interruptor de cobrança (STORY-073): enquanto estiver desligado, o usuário comum não vê nem sofre nenhum efeito desta estória.
+
+## Fora de escopo
+
+- Cartão (STORY-077 e STORY-078).
+- Cupom (STORY-083).
+
+## Padrões de qualidade exigidos
+
+Siga `defonline-docs/skills/po/references/quality-standards.md`: TDD; cobertura de 80% no código novo e 98% em regras de negócio; teste E2E em browser quando houver fluxo de usuário; nada de setup manual.
+
+## Dependências
+
+- **Bloqueada por:** STORY-069, STORY-070, STORY-073, STORY-075
+- **Bloqueia:** STORY-078, STORY-080, STORY-083, STORY-085, STORY-086, STORY-087
+
+## Decisões já tomadas (não as reabra)
+
+- PDR-020: catálogo em tela, trial, Asaas substituível, Termos `v2`, DRM em planos pagos e no trial, e cupons.
+
+## Liberdade técnica
+
+Você decide estrutura de código, tabelas, bibliotecas dentro dos ADRs e desenho dos testes. Não decide critérios de aceite nem padrões de qualidade. Se faltar uma decisão arquitetural, pare e registre em "Notas do agente".
+
+## Definição de Pronto
+
+- [ ] Todos os critérios de aceite têm teste e passam.
+- [ ] `scripts/verificar.sh` verde.
+- [ ] Commits em `main` local; push, PR e tag só com pedido do PO.
+- [ ] IDR registrado se houve decisão técnica com impacto futuro.
+- [ ] `index.json` e "Notas do agente" atualizados; status `in_review`.
+
+## Protocolo do agente
+
+Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atualize status e `owner_agent` aqui e no `index.json`. Se travar, use `status: blocked` e descreva o bloqueio.
+
+## Notas do agente
+
+### Decisões tomadas
+
+### Descobertas
+
+### Bloqueios encontrados
+
+### IDRs criados
+
+### Cobertura final
+
+### Evidências
