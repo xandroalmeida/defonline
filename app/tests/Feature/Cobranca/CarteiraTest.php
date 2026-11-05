@@ -386,3 +386,37 @@ it('sem a linha de configuração, a cobrança conta como desligada e a linha re
         ->and(CobrancaConfig::atual()->ativa)->toBeFalse()
         ->and(DB::table('cobranca_config')->count())->toBe(1);
 });
+
+it('a corrida entre duas concessões é barrada pelo índice e vira AssinaturaVigenteJaExiste', function () {
+    $outroUsuario = $this->usuario->id;
+    $concorrente = fn () => DB::table('assinaturas')->insert([
+        'id' => (string) Str::uuid7(), 'usuario_id' => $outroUsuario, 'trial' => false, 'status' => 'ativa',
+        'data_inicio' => now(), 'proximo_vencimento' => now()->addMonth(), 'cota_snapshot' => 1,
+        'cota_restante_ciclo' => 1, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+
+    // A outra concessão entra entre a conferência e o INSERT.
+    Assinatura::creating(function () use ($concorrente): void {
+        Assinatura::flushEventListeners();
+        $concorrente();
+    });
+
+    expect(fn () => _carteira()->concederCota($this->usuario->id, 1, now(), now()->addMonth()))
+        ->toThrow(AssinaturaVigenteJaExiste::class);
+});
+
+it('se o saldo decidido sumiu antes do débito, falha em vez de debitar errado', function () {
+    _ligarCobranca();
+    $assinatura = _carteira()->concederCota($this->usuario->id, 1, now()->subDay(), now()->addMonth());
+
+    $mexendo = false;
+    DB::beforeExecuting(function (string $sql) use (&$mexendo, $assinatura): void {
+        if (! $mexendo && str_starts_with($sql, 'update assinaturas set cota_restante_ciclo = cota_restante_ciclo - 1')) {
+            $mexendo = true;
+            DB::table('assinaturas')->where('id', $assinatura->id)->update(['cota_restante_ciclo' => 0]);
+        }
+    });
+
+    expect(fn () => _analisar($this->empresa))->toThrow(LogicException::class);
+    expect(ConsumoAnalise::query()->count())->toBe(0);
+});
