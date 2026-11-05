@@ -95,7 +95,7 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 - Testes: Domain puro (decisão), Feature (carteira, quiz, interruptor, CA-9), `tests/Concorrencia` com processos reais no Postgres, Dusk do bloqueio.
 
 ### Decisões tomadas
-- Regra pura em `app/Domain/Cobranca/RegrasConsumo` (cota, depois lote por vencimento, senão `Bloqueio` com `MotivoBloqueio`); serviço `Carteira` (consumo sob lock por Usuário, concessão, consulta) no mesmo namespace. Detalhe e alternativas em `IDR-016`.
+- Regra pura em `app/Domain/Cobranca/RegrasConsumo` (cota, depois lote por vencimento, senão `Bloqueio` com `MotivoBloqueio`); serviço `Carteira` (consumo sob lock por Usuário, concessão, consulta) no mesmo namespace. Detalhe e alternativas em `IDR-017`.
 - O trial é uma assinatura com `trial = true` e `plano_id` nulo. Desvio consciente da lista de status da arquitetura §4.1 (`Trial` como status): o status fica `ativa|em_atraso|cancelada|expirada` e a flag preserva "já teve trial" depois que ele vence. Elegibilidade por CPF fica com a STORY-074; aqui vale "este Usuário nunca teve trial".
 - Cancelada dá acesso até o vencimento (espec §2.4). Para cota esgotada com plano cancelado, a frase diz "Seu plano termina em {data}" em vez de "Novas análises em {data}" (variação de microcopy fora da spec, que é provisória; confirmar com o PO/Designer).
 - A causa `DescontoAcabouSemCartao` existe no enum e na tela, mas quem a produz é o cupom (STORY-083).
@@ -114,7 +114,7 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 Nenhum.
 
 ### IDRs criados
-- `IDR-016-carteira-consumo-e-lock-por-usuario`.
+- `IDR-017-carteira-consumo-e-lock-por-usuario`.
 
 ### Cobertura final
 Suíte All: 1398 testes, cobertura total 98,3% (mínimo 80). Gate de `app/Domain`: 99,7% (mínimo 98); `Carteira` 100%.

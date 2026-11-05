@@ -24,7 +24,7 @@ return new class extends Migration
         Schema::create('cobranca_config', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->boolean('ativa')->default(false);
-            $table->foreignUuid('alterado_por_usuario_id')->nullable()->constrained('usuarios')->nullOnDelete();
+            $table->uuid('alterado_por_usuario_id')->nullable();
             $table->timestampsTz();
         });
 

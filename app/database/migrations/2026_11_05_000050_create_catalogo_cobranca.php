@@ -38,7 +38,7 @@ return new class extends Migration
             $table->unsignedInteger('preco_anual_centavos');
             $table->boolean('ativo')->default(true);
             $table->unsignedInteger('ordem');
-            $table->foreignUuid('alterado_por_usuario_id')->nullable()->constrained('usuarios')->nullOnDelete();
+            $table->uuid('alterado_por_usuario_id')->nullable();
             $table->timestampsTz();
 
             $table->index(['ativo', 'ordem']);
@@ -53,7 +53,7 @@ return new class extends Migration
             $table->unsignedInteger('validade_meses');
             $table->boolean('ativo')->default(true);
             $table->unsignedInteger('ordem');
-            $table->foreignUuid('alterado_por_usuario_id')->nullable()->constrained('usuarios')->nullOnDelete();
+            $table->uuid('alterado_por_usuario_id')->nullable();
             $table->timestampsTz();
 
             $table->index(['ativo', 'ordem']);
@@ -65,7 +65,7 @@ return new class extends Migration
             $table->boolean('ativo')->default(true);
             $table->unsignedInteger('dias');
             $table->unsignedInteger('analises');
-            $table->foreignUuid('alterado_por_usuario_id')->nullable()->constrained('usuarios')->nullOnDelete();
+            $table->uuid('alterado_por_usuario_id')->nullable();
             $table->timestampsTz();
         });
 

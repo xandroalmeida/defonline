@@ -1,5 +1,5 @@
 ---
-idr_id: IDR-016
+idr_id: IDR-017
 slug: carteira-consumo-e-lock-por-usuario
 title: Carteira do Usuário — tabelas, consumo transacional com lock por Usuário e interface de concessão
 status: accepted
@@ -15,7 +15,7 @@ created_at: 2026-11-05
 updated_at: 2026-11-05
 ---
 
-# IDR-016 — Carteira do Usuário: consumo transacional com lock por Usuário
+# IDR-017 — Carteira do Usuário: consumo transacional com lock por Usuário
 
 ## Contexto
 
