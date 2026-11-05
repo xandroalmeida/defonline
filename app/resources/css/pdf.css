@@ -156,12 +156,6 @@ h1, h2, h3, p, ul, dl, dd {
     margin-bottom: 1.5mm;
 }
 
-.secao__intro {
-    font-size: 9pt;
-    color: var(--color-secondary);
-    margin-bottom: 4mm;
-}
-
 .secundario {
     color: var(--color-secondary);
 }

@@ -119,7 +119,7 @@ it('nenhum título de seção fica solto: cada um está preso ao seu primeiro co
     $xpath = new DOMXPath($dom);
 
     $titulos = $xpath->query('//h2[contains(@class, "secao__titulo")]');
-    expect($titulos->length)->toBeGreaterThanOrEqual(2);
+    expect($titulos->length)->toBeGreaterThanOrEqual(1);
 
     foreach ($titulos as $h2) {
         $pai = $h2->parentNode;
@@ -160,4 +160,17 @@ it('a regra de quebra está no pdf.css', function () {
         ->toMatch('/\.manter-junto,\s*\.indivisivel\s*\{\s*page-break-inside:\s*avoid;/')
         ->toMatch('/\.titulo-da-tabela\s*\{\s*page-break-after:\s*avoid;/')
         ->toMatch('/\.indicadores tbody tr\s*\{\s*page-break-inside:\s*avoid;/');
+});
+
+it('o card do NCG vai sem título de seção: é o único informativo e já traz o próprio rótulo', function () {
+    $dono = Usuario::factory()->create();
+    $diag = gerarDiagnosticoParaPdf($dono);
+    Auth::login($dono);
+
+    $html = PdfDiagnostico::padrao()->html($diag->fresh());
+
+    expect($html)
+        ->toContain('Indicador informativo')
+        ->not->toContain('Indicadores informativos')
+        ->not->toContain('Sem farol');
 });

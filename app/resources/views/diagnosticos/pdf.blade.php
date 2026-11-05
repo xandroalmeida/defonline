@@ -147,11 +147,9 @@
     </div>
 @endif
 
-{{-- ═══ Indicadores informativos ═══════════════════════════════════════ --}}
+{{-- ═══ Indicador informativo (NCG): o card já traz o próprio rótulo ═══ --}}
 @if (count($informativos) > 0)
     <div class="secao manter-junto">
-        <h2 class="secao__titulo">Indicadores informativos</h2>
-        <p class="secao__intro">Sem farol — ajudam a dimensionar a necessidade de capital de giro.</p>
         <table class="informativos">
             <tr>
                 @foreach ($informativos as $codigo => $ind)
