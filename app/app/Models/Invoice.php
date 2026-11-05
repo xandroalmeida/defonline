@@ -33,6 +33,13 @@ use Illuminate\Support\Carbon;
  * @property string|null $motivo_encerramento
  * @property string|null $falha_motivo
  * @property string|null $aceite_termo_id
+ * @property string|null $plano_id
+ * @property string|null $ciclo
+ * @property int|null $cota_snapshot
+ * @property string|null $assinatura_id
+ * @property bool $renovacao
+ * @property string|null $cartao_bandeira
+ * @property string|null $cartao_ultimos4
  * @property Carbon|null $created_at
  */
 final class Invoice extends Model
@@ -52,6 +59,7 @@ final class Invoice extends Model
             'status' => EstadoCobranca::class,
             'checkout_expira_em' => 'datetime',
             'pago_em' => 'datetime',
+            'renovacao' => 'boolean',
         ];
     }
 

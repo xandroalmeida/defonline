@@ -18,6 +18,7 @@ final readonly class EventoDoProvedor
         public ?string $cobrancaId = null,
         public ?string $checkoutId = null,
         public ?string $referenciaInterna = null,
+        public ?string $assinaturaId = null,
         public array $payload = [],
     ) {}
 }
