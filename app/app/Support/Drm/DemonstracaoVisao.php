@@ -164,6 +164,8 @@ final class DemonstracaoVisao
             negativo: $nominal !== null && $nominal < 0,
             final: $final,
             prejuizo: $final && $nominal !== null && $nominal < 0,
+            centavos: $nominal,
+            percentualBruto: $percentual === null ? null : (string) $bruta['percentual'],
         );
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\CnaeController;
 use App\Http\Controllers\DiagnosticoController;
+use App\Http\Controllers\DrmExportacaoController;
 use App\Http\Controllers\EmailConfirmacaoController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\HealthController;
@@ -136,6 +137,11 @@ Route::middleware('auth')->group(function () {
         ->whereUuid('empresa')
         ->where('competencia', '\d{4}-(0[1-9]|1[0-2])')
         ->name('drm.mes');
+    // STORY-055 — planilha XLSX da competência (e da série): leitura do histórico, fora de `drm.acesso`.
+    Route::get('/empresas/{empresa}/drm/{competencia}/exportar', DrmExportacaoController::class)
+        ->whereUuid('empresa')
+        ->where('competencia', '\d{4}-(0[1-9]|1[0-2])')
+        ->name('drm.exportar');
     // STORY-050 — retificação: o mesmo formulário, semeado com a versão vigente. Sem vigente (ou empresa alheia) → 404.
     Route::get('/empresas/{empresa}/drm/{competencia}/corrigir', LancamentoDrm::class)
         ->whereUuid('empresa')
