@@ -95,6 +95,7 @@ final class FakePaymentProvider implements PaymentProvider
 
         if ($pedido->recorrencia !== null) {
             Cache::put(self::PREFIXO.'sub:fakesub_'.Str::after($id, 'fakechk_'), 'ativa', now()->addDays(self::TTL_DIAS));
+            Cache::put(self::PREFIXO.'sub-valor:fakesub_'.Str::after($id, 'fakechk_'), $pedido->valorCentavos, now()->addDays(self::TTL_DIAS));
         }
 
         // A referência é o id da Invoice, ou o da troca de cartão (STORY-081): cada uma tem a sua "página do provedor".
@@ -122,6 +123,25 @@ final class FakePaymentProvider implements PaymentProvider
     public function resumeSubscription(ReferenciaProvedor $assinatura): void
     {
         $this->mudarAssinatura($assinatura, 'ativa');
+    }
+
+    public function changeSubscriptionValue(ReferenciaProvedor $assinatura, int $valorCentavos): void
+    {
+        $this->exigirDisponivel();
+
+        if (Cache::pull(self::PREFIXO.'falhar-assinatura') === true) {
+            throw new ProvedorIndisponivel('Falha simulada do provedor fake.');
+        }
+
+        Cache::put(self::PREFIXO."sub-valor:{$assinatura->id}", $valorCentavos, now()->addDays(self::TTL_DIAS));
+    }
+
+    /** O valor (centavos) que o provedor cobra nas próximas renovações; `null` se nunca viu a assinatura. */
+    public static function valorDaAssinatura(string $assinaturaId): ?int
+    {
+        $v = Cache::get(self::PREFIXO."sub-valor:{$assinaturaId}");
+
+        return is_int($v) ? $v : null;
     }
 
     public function getCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
@@ -333,11 +353,13 @@ final class FakePaymentProvider implements PaymentProvider
         $origem = Cache::get(self::PREFIXO."pay:{$this->cobrancaDe($checkoutId)}");
         $nova = 'fakepay_'.Str::lower((string) Str::ulid());
         $assinatura = is_array($origem) ? $origem['assinatura'] : null;
+        // A renovação cobra o valor ATUAL da recorrência (STORY-083: muda quando o desconto acaba).
+        $valorAtual = is_string($assinatura) ? self::valorDaAssinatura($assinatura) : null;
 
         Cache::put(self::PREFIXO."pay:{$nova}", [
             'checkout' => null,
             'referencia' => null,
-            'valor' => is_array($origem) ? $origem['valor'] : 0,
+            'valor' => $valorAtual ?? (is_array($origem) ? $origem['valor'] : 0),
             'estado' => $estado->value,
             'pago_em' => $estado === EstadoCobranca::Paga ? now()->toIso8601String() : null,
             'assinatura' => $assinatura,

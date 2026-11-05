@@ -150,6 +150,19 @@ final class AsaasPaymentProvider implements PaymentProvider
         $this->enviar('put', '/subscriptions/'.rawurlencode($assinatura->id), ['status' => 'ACTIVE']);
     }
 
+    /**
+     * `PUT /subscriptions/{id}` com `value`: vale para as cobranças futuras; `updatePendingPayments` leva o novo
+     * valor também à cobrança do próximo ciclo se o Asaas já a gerou (ADR-010 4.7). PENDENTE DE CONFIRMAÇÃO NO
+     * SANDBOX COM CARTÃO: valor de cartão alterado exige tokenização habilitada na conta (ADR-010, Q5).
+     */
+    public function changeSubscriptionValue(ReferenciaProvedor $assinatura, int $valorCentavos): void
+    {
+        $this->enviar('put', '/subscriptions/'.rawurlencode($assinatura->id), [
+            'value' => round($valorCentavos / 100, 2),
+            'updatePendingPayments' => true,
+        ]);
+    }
+
     public function getCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
     {
         $r = $this->enviar('get', '/payments/'.rawurlencode($cobranca->id));

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Domain\Cobranca\Carteira;
+use App\Domain\Cobranca\DescontoDaAssinatura;
 use App\Domain\Cobranca\StatusAssinatura;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -45,8 +46,14 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $encerrada_em
  * @property string $meio_pagamento
  * @property Carbon|null $aviso_renovacao_pix_para
+ * @property string|null $cupom_id
+ * @property int|null $preco_cheio_centavos
+ * @property int $desconto_centavos
+ * @property int|null $desconto_periodos
+ * @property Carbon|null $desconto_aviso_em
+ * @property bool $valor_pendente_no_provedor
  */
-#[Fillable(['usuario_id', 'plano_id', 'trial', 'status', 'ciclo', 'data_inicio', 'proximo_vencimento', 'data_cancelamento', 'cota_snapshot', 'cota_restante_ciclo', 'aviso_d2_em', 'aviso_d0_em', 'provedor', 'id_externo', 'preco_snapshot_centavos', 'periodos_pagos', 'proxima_cota_em', 'cartao_bandeira', 'cartao_ultimos4', 'aviso_renovacao_periodo', 'atraso_desde', 'atraso_cobranca_id', 'tentativas_cobranca', 'proxima_tentativa_em', 'atraso_aviso_em', 'encerramento_pendente_no_provedor', 'encerrada_em', 'meio_pagamento', 'aviso_renovacao_pix_para'])]
+#[Fillable(['usuario_id', 'plano_id', 'trial', 'status', 'ciclo', 'data_inicio', 'proximo_vencimento', 'data_cancelamento', 'cota_snapshot', 'cota_restante_ciclo', 'aviso_d2_em', 'aviso_d0_em', 'provedor', 'id_externo', 'preco_snapshot_centavos', 'periodos_pagos', 'proxima_cota_em', 'cartao_bandeira', 'cartao_ultimos4', 'aviso_renovacao_periodo', 'atraso_desde', 'atraso_cobranca_id', 'tentativas_cobranca', 'proxima_tentativa_em', 'atraso_aviso_em', 'encerramento_pendente_no_provedor', 'encerrada_em', 'meio_pagamento', 'aviso_renovacao_pix_para', 'cupom_id', 'preco_cheio_centavos', 'desconto_centavos', 'desconto_periodos', 'desconto_aviso_em', 'valor_pendente_no_provedor'])]
 final class Assinatura extends Model
 {
     use HasUuids;
@@ -60,6 +67,22 @@ final class Assinatura extends Model
     public function pagoComPix(): bool
     {
         return $this->meio_pagamento === 'pix';
+    }
+
+    /** Ativada sem cobrança (cupom de desconto total): não há cartão nem Pix cadastrado (STORY-083). */
+    public function semMeioDePagamento(): bool
+    {
+        return $this->meio_pagamento === 'nenhum';
+    }
+
+    /** O desconto contratado, como valor (STORY-083). `null` se a assinatura nunca teve desconto. */
+    public function desconto(): ?DescontoDaAssinatura
+    {
+        if ($this->desconto_centavos <= 0 || $this->preco_cheio_centavos === null) {
+            return null;
+        }
+
+        return new DescontoDaAssinatura($this->preco_cheio_centavos, $this->desconto_centavos, $this->desconto_periodos);
     }
 
     protected function casts(): array
@@ -79,6 +102,8 @@ final class Assinatura extends Model
             'encerrada_em' => 'datetime',
             'encerramento_pendente_no_provedor' => 'boolean',
             'aviso_renovacao_pix_para' => 'datetime',
+            'desconto_aviso_em' => 'datetime',
+            'valor_pendente_no_provedor' => 'boolean',
         ];
     }
 }

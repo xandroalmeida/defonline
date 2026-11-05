@@ -91,6 +91,15 @@ interface PaymentProvider
     public function resumeSubscription(ReferenciaProvedor $assinatura): void;
 
     /**
+     * STORY-083 CA-7 / ADR-010 4.7 — muda o valor das PRÓXIMAS cobranças da recorrência (o desconto de
+     * cupom acabou e o preço volta ao vigente). Cobranças já pagas não mudam. Idempotente: repetir com o
+     * mesmo valor não tem efeito.
+     *
+     * @throws ProvedorIndisponivel
+     */
+    public function changeSubscriptionValue(ReferenciaProvedor $assinatura, int $valorCentavos): void;
+
+    /**
      * Autentica e traduz um webhook bruto para o evento canônico.
      *
      * @throws WebhookInvalido se a autenticação falhar ou o corpo não for legível

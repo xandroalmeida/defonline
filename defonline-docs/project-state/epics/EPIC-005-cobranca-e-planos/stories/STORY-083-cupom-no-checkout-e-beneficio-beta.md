@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: true
-status: ready
-owner_agent: null
+status: in_progress
+owner_agent: claude-sonnet-5-5 (pista B)
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: M
@@ -92,6 +92,11 @@ Você decide estrutura de código, tabelas, bibliotecas dentro dos ADRs e desenh
 Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atualize status e `owner_agent` aqui e no `index.json`. Se travar, use `status: blocked` e descreva o bloqueio.
 
 ## Notas do agente
+
+### Plano (entrada inicial)
+Lidos: estória, ADR-010 (4.5, 4.7, Q4, `changeSubscriptionValue`), spec STORY-070-cupom-no-checkout, notas da STORY-072, IDR-019/020/021, `Cupom::recusaPara`, `CupomRegras`, `TipoDesconto`, os quatro checkouts e `ConfirmarAssinatura`.
+Entendimento: o cupom (digitado ou concedido) vira desconto em centavos sobre o preço; ao provedor vai sempre o valor final. Valor final zero ou abaixo do mínimo = ativação sem cobrança (Invoice paga de valor 0 + uso + carteira, tudo numa transação, sem chamar o provedor). O uso só é gravado quando a contratação conclui (pagamento confirmado ou ativação sem cobrança); a Invoice pendente reserva a vaga do limite (CA-4). O desconto da assinatura é um retrato na própria assinatura (CA-9), vale pelos N ciclos, e ao fim o valor no provedor volta ao cheio.
+Plano: (1) domínio puro `PrecoComCupom` + `DescontoDaAssinatura`; (2) migration (invoices, assinaturas, cupom_usos); (3) `CupomDoCheckout` (resolução, reserva, uso) + os quatro `Iniciar*` + Livewire/telas; (4) confirmação (créditos, ativação, renovação), `changeSubscriptionValue`, ciclos gratuitos, aviso D-7; (5) Meu plano; (6) testes (domínio, feature, concorrência real, Dusk).
 
 ### Decisões tomadas
 
