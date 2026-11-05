@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\Drm;
 
 use App\Actions\Drm\CompetenciaJaLancada;
+use App\Actions\Drm\CompetenciaNaoLancada;
 use App\Actions\Drm\FecharLancamento;
+use App\Actions\Drm\RetificacaoConflitante;
+use App\Actions\Drm\RetificacaoSemMudanca;
+use App\Actions\Drm\RetificarLancamento;
 use App\Domain\Drm\Alertas\AvaliadorDeAlertas;
 use App\Domain\Drm\Competencia;
 use App\Domain\Drm\ConteudoDrm;
@@ -29,6 +33,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Throwable;
 
@@ -39,6 +44,13 @@ use Throwable;
  * (`drm_rascunhos`, ADR-007) e o fechamento grava `versao = 1` em `drm_lancamentos`.
  * Multi-tenant: a empresa resolvida pelo route binding já passa pelo Global Scope,
  * então outra conta recebe 404 (IDR-009).
+ *
+ * **Retificação (STORY-050, spec §4.9).** Com `{competencia}` na rota (`drm.corrigir`) o mesmo
+ * formulário corrige um mês já fechado: nasce semeado com a versão vigente (sem marca de herança),
+ * guarda `origem = 'retificacao'` e `base_versao = N` no rascunho e, no fechamento, entrega a
+ * {@see RetificarLancamento}. B1 não se aplica; as demais regras valem. A competência, o setor e
+ * a versão-base são `#[Locked]`: o cliente não os troca. A retificação NÃO altera as preferências
+ * de modo da empresa (um mês antigo não deve mudar o que o próximo mês abre).
  *
  * **Valores ficam como texto BRL** (o que a máscara mostra); a interpretação em
  * centavos e todas as regras vivem em `App\Domain\Drm`. Este componente só orquestra
@@ -110,9 +122,37 @@ final class Lancamento extends Component
 
     public ?string $erro_geral = null;
 
-    public function mount(EmpresaAnalisada $empresa): void
+    /** Retificação: a tela corrige a vigente de `competencia_fixa` em vez de lançar um mês novo. */
+    #[Locked]
+    public bool $retificando = false;
+
+    /** Versão vigente em que o rascunho de retificação foi aberto (concorrência otimista, ADR-007). */
+    #[Locked]
+    public int $base_versao = 0;
+
+    #[Locked]
+    public string $competencia_fixa = '';
+
+    /** Setor gravado na versão vigente: a estrutura de campos da retificação é a do lançamento original. */
+    #[Locked]
+    public string $setor_fixo = '';
+
+    /** A vigente já não é a versão-base: outra sessão corrigiu o mês enquanto este rascunho estava aberto. */
+    public bool $conflito = false;
+
+    /** Retificação no-op: nenhum valor mudou em relação à vigente. */
+    public bool $sem_mudanca = false;
+
+    public function mount(EmpresaAnalisada $empresa, ?string $competencia = null): void
     {
         $this->empresa = $empresa;
+
+        if ($competencia !== null) {
+            $this->abrirRetificacao(Competencia::deTexto($competencia));
+
+            return;
+        }
+
         $this->modos = $this->modosEmTexto(DrmPreferencia::daEmpresa($empresa)->modos());
 
         $this->competencia = $this->competenciaInicial()->texto();
@@ -183,6 +223,12 @@ final class Lancamento extends Component
 
     public function updatedCompetencia(): void
     {
+        if ($this->retificando) {
+            $this->competencia = $this->competencia_fixa; // a competência retificada não se troca.
+
+            return;
+        }
+
         $this->limparFeedback();
         $this->erro_geral = null;
 
@@ -301,7 +347,16 @@ final class Lancamento extends Component
         $this->salvarRascunho($this->bloco_atual);
     }
 
-    public function fechar(FecharLancamento $fechar): mixed
+    /** Conflito de versão: descarta o rascunho velho e leva à versão atual, de onde se reabre a correção. */
+    public function abrirVersaoAtual(): mixed
+    {
+        abort_unless($this->retificando, 404);
+        DrmRascunho::paraCompetencia($this->empresa, $this->competenciaObjeto()->dia01())?->delete();
+
+        return $this->redirect(route('drm.mes', [$this->empresa, $this->competencia_fixa]), navigate: false);
+    }
+
+    public function fechar(FecharLancamento $fechar, RetificarLancamento $retificar): mixed
     {
         $this->limparFeedback();
         $this->erro_geral = null;
@@ -322,14 +377,24 @@ final class Lancamento extends Component
 
         $competencia = $this->competenciaObjeto();
 
+        $rascunho = DrmRascunho::paraCompetencia($this->empresa, $competencia->dia01());
+
         try {
-            $fechar->execute(
-                $this->empresa,
-                $competencia,
-                $this->lancamento(),
-                $alertas,
-                DrmRascunho::paraCompetencia($this->empresa, $competencia->dia01()),
-            );
+            if ($this->retificando) {
+                $retificar->execute($this->empresa, $competencia, $this->lancamento(), $alertas, $this->base_versao, $rascunho);
+            } else {
+                $fechar->execute($this->empresa, $competencia, $this->lancamento(), $alertas, $rascunho);
+            }
+        } catch (RetificacaoConflitante) {
+            $this->conflito = true;
+
+            return null;
+        } catch (RetificacaoSemMudanca) {
+            $this->sem_mudanca = true;
+
+            return null;
+        } catch (CompetenciaNaoLancada) {
+            abort(404);
         } catch (CompetenciaJaLancada) {
             // B1: alguém (outra aba, duplo clique) lançou antes. O banco decidiu; só oferecemos as saídas.
             $this->competencia_ja_lancada = true;
@@ -382,11 +447,11 @@ final class Lancamento extends Component
             'grupos' => Grupo::cases(),
             'existente' => $this->competencia_ja_lancada && $competencia !== null ? $competencia : null,
         ])->layoutData([
-            'title' => 'Lançar '.($competencia?->rotulo() ?? ''),
+            'title' => ($this->retificando ? 'Corrigir ' : 'Lançar ').($competencia?->rotulo() ?? ''),
             'breadcrumb' => [
                 ['label' => 'Minhas Empresas', 'url' => route('home')],
                 ['label' => $this->empresa->nomeExibicao(), 'url' => route('empresas.show', $this->empresa)],
-                ['label' => 'Lançar o mês', 'url' => '#'],
+                ['label' => $this->retificando ? 'Corrigir o mês' : 'Lançar o mês', 'url' => '#'],
             ],
         ]);
     }
@@ -499,6 +564,51 @@ final class Lancamento extends Component
         $this->bloco_atual = 1;
     }
 
+    /**
+     * Reabrir um mês fechado (spec §4.9): 404 se não há vigente; senão retoma o rascunho de retificação ou
+     * cria um semeado com a vigente. Abrir e abandonar nunca toca a versão vigente (ADR-007).
+     */
+    private function abrirRetificacao(Competencia $competencia): void
+    {
+        $vigente = DrmLancamento::vigenteDaCompetencia($this->empresa, $competencia->dia01());
+        abort_if($vigente === null, 404);
+
+        $this->retificando = true;
+        $this->competencia = $this->competencia_fixa = $competencia->texto();
+        $this->setor_fixo = $vigente->setor;
+
+        $payload = $vigente->lancamento_payload->getArrayCopy();
+        $this->modos = $this->modosEmTexto($this->modosDoPayload($payload));
+
+        $rascunho = DrmRascunho::paraCompetencia($this->empresa, $competencia->dia01());
+        if ($rascunho !== null && $rascunho->origem === 'retificacao') {
+            $this->hidratarDoRascunho($rascunho);
+            $this->base_versao = (int) $rascunho->base_versao;
+
+            return;
+        }
+
+        $this->valores = PreenchimentoInicial::de($this->setor(), $this->modosObjeto(), $payload)->valores;
+        $this->repetidos = []; // são os valores DAQUELE mês, não herdados de outro (spec §4.9 item 3).
+        $this->base_versao = $vigente->versao;
+        $this->salvarRascunho(1);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, Modo>
+     */
+    private function modosDoPayload(array $payload): array
+    {
+        $doPayload = (array) ($payload['modos'] ?? []);
+        $modos = [];
+        foreach (Grupo::cases() as $grupo) {
+            $modos[$grupo->value] = Modo::tryFrom((string) ($doPayload[$grupo->value] ?? '')) ?? Modo::Detalhado;
+        }
+
+        return $modos;
+    }
+
     private function salvarRascunho(int $bloco): void
     {
         $competencia = $this->competenciaObjeto();
@@ -508,8 +618,8 @@ final class Lancamento extends Component
                 ['empresa_analisada_id' => $this->empresa->id, 'competencia' => $competencia->dia01()],
                 [
                     'usuario_id' => Auth::id(),
-                    'origem' => 'inicial',
-                    'base_versao' => null,
+                    'origem' => $this->retificando ? 'retificacao' : 'inicial',
+                    'base_versao' => $this->retificando ? $this->base_versao : null,
                     'rascunho_payload' => [
                         'valores' => $this->valores,
                         'modos' => $this->modos,
@@ -525,8 +635,10 @@ final class Lancamento extends Component
                 ],
             );
 
-            // O modo escolhido vale para os próximos meses (Anexo K §K.5).
-            DrmPreferencia::gravarModos($this->empresa, $this->modosObjeto());
+            // O modo escolhido vale para os próximos meses (Anexo K §K.5) — exceto ao corrigir um mês antigo.
+            if (! $this->retificando) {
+                DrmPreferencia::gravarModos($this->empresa, $this->modosObjeto());
+            }
         });
     }
 
@@ -638,6 +750,7 @@ final class Lancamento extends Component
     {
         $this->confirmando_detalhar = null;
         $this->tentou = false;
+        $this->sem_mudanca = false;
     }
 
     // ------------------------------------------------------------------ derivados
@@ -649,7 +762,7 @@ final class Lancamento extends Component
 
     private function setor(): Setor
     {
-        return Setor::doCnae($this->empresa->cnae);
+        return Setor::tryFrom($this->setor_fixo) ?? Setor::doCnae($this->empresa->cnae);
     }
 
     private function hoje(): CarbonImmutable

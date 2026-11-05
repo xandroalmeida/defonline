@@ -153,7 +153,8 @@ describe('CA-2 — competência', function () {
             ->assertSee('Você já lançou outubro/2026 para esta empresa.')
             ->assertSee('Abrir outubro/2026')
             ->assertSee('Corrigir outubro/2026')
-            ->assertSeeHtml(route('drm.mes', [$this->empresa, '2026-10']));
+            ->assertSeeHtml(route('drm.mes', [$this->empresa, '2026-10']))
+            ->assertSeeHtml('href="'.route('drm.corrigir', [$this->empresa, '2026-10']).'"');
     });
 
     it('trocar a competência para uma já lançada mostra B1 na hora', function () {

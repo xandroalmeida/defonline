@@ -217,7 +217,7 @@ describe('GET /empresas/{empresa}/drm/{competencia}', function () {
 
         $this->get(route('drm.mes', [$this->empresa, '2026-09']))
             ->assertOk()
-            ->assertSee('Setembro/2026');
+            ->assertSee('Setembro de 2026'); // a página mínima da STORY-047 virou a Demonstração (STORY-049)
     });
 
     it('404 silente: competência sem lançamento', function () {

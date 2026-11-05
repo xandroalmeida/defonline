@@ -9,6 +9,9 @@
         @if ($title)
             <h1 class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)]">
                 {{ $title }}
+                @isset($badge)
+                    <span class="align-middle text-[length:var(--text-body)] font-normal ml-2">{{ $badge }}</span>
+                @endisset
             </h1>
         @endif
         @if ($detalhe)

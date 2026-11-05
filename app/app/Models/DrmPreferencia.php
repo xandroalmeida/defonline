@@ -94,4 +94,16 @@ final class DrmPreferencia extends Model
             ['usuario_id' => $empresa->usuario_id, ...$dados],
         );
     }
+
+    /**
+     * Grava a leitura do pró-labore (`fora` | `dentro`) — só preferência de exibição (PDR-004 decisão B).
+     * Cria a linha na primeira vez; os modos dos grupos ficam nos defaults da tabela.
+     */
+    public static function gravarPosicao(EmpresaAnalisada $empresa, string $posicao): self
+    {
+        return self::query()->updateOrCreate(
+            ['empresa_analisada_id' => $empresa->id],
+            ['usuario_id' => $empresa->usuario_id, 'posicao_prolabore' => $posicao],
+        );
+    }
 }
