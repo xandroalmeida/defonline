@@ -50,6 +50,12 @@ it('não compara nem filtra por código de plano ou pacote específico', functio
 
     foreach (_fontesDaAplicacao() as $caminho => $codigo) {
         foreach (_regrasCatalogo() as $regex => $motivo) {
+            // No DRM, `->codigo` é a rubrica da demonstração, não o catálogo. Os literais de
+            // plano e pacote continuam vetados lá pelas demais regras.
+            if ($motivo === 'comparação de ->codigo' && preg_match('#/(Drm|drm)/#', $caminho) === 1) {
+                continue;
+            }
+
             if (preg_match($regex, $codigo, $m) === 1) {
                 $achados[] = basename($caminho).": {$motivo} ({$m[0]})";
             }

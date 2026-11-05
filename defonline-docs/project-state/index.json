@@ -340,7 +340,7 @@
         "PDR-004"
       ],
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-04",
+      "updated_at": "2026-11-05",
       "design_notes": [
         "epics/EPIC-010-drm-demonstracao-resultado-mensal/design/estrutura-drm.md"
       ],
@@ -1476,7 +1476,7 @@
       "title": "Lançamento mensal — formulário adaptativo por setor, modos agregado/detalhado, rascunho e pré-preenchimento",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "estimated_session_size": "L",
       "blocked_by": [
         "STORY-045",
@@ -1491,14 +1491,14 @@
         "STORY-057",
         "STORY-084"
       ],
-      "note": "Maior risco do épico — é aqui que o usuário decide se volta no mês seguinte. Campos no Anexo K. Alertas A4/A6 ficam para STORY-051 (dependem de histórico). | 2026-08-06: spec SCREEN-STORY-046-lancamento-mensal em `ready` e DDRs `accepted` (PDR-007) — invariante 12 satisfeita, sem decisão de design pendente à frente.",
+      "note": "5db7d5d..5292774; IDR-016; setor por CNAE é provisório Revisado pelo orquestrador na main.",
       "epic_id": "EPIC-010",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-047-lancamento-mensal.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-06",
+      "updated_at": "2026-11-05",
       "design_screen_id": "SCREEN-STORY-046-lancamento-mensal"
     },
     {
@@ -1507,7 +1507,7 @@
       "title": "Motor do DRM — estrutura canônica em três setores, valores nominais e percentuais",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "estimated_session_size": "L",
       "blocked_by": [
         "STORY-045",
@@ -1522,14 +1522,14 @@
         "STORY-055",
         "STORY-057"
       ],
-      "note": "DESBLOQUEADA em 2026-08-04 pelo PDR-004. Contrato aritmético: design/estrutura-drm.md v1.1 §1. Entrega os DOIS modos de pró-labore (apresentação, não cálculo) + linhas não operacionais. CA-1c é invariante obrigatório: Lucro Líquido idêntico nos 2 modos. Cobertura ≥98%. | 2026-08-06 (PDR-008 §1): ganha o CA-1e — cada linha da demonstracao carrega `tipo` (total|deducao|subtotal|item) e `destaque` (bool), persistidos no snapshot. Tira da configuração as 2 regras da Tela 2 (quais linhas são destaque; onde fecha o card de trecho). Janela fechando: depois desta estória o snapshot é imutável.",
+      "note": "f1ad2d4, a849066 Revisado pelo orquestrador na main.",
       "epic_id": "EPIC-010",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-048-motor-drm.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-06"
+      "updated_at": "2026-11-05"
     },
     {
       "id": "STORY-049",
@@ -1864,18 +1864,18 @@
       "title": "Gate de tokens — fechar o furo que deixa `rgba()` e `hsl()` passarem por baixo do IDR-008",
       "type": "bugfix",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "estimated_session_size": "S",
       "blocked_by": [],
       "blocks": [],
       "epic_id": "EPIC-004",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "path": "epics/EPIC-004-app-shell-navegacao/stories/STORY-061-gate-de-tokens-cego-a-cor-nao-hex.md",
       "created_at": "2026-08-06",
-      "updated_at": "2026-08-06",
-      "note": "Achado da STORY-059, aprovado pelo PO para virar estória em 2026-08-06. O DesignTokensTest procura só #RRGGBB: o badge 'Versão MVP' carregava rgba(99,91,255,…) inline em produção e passava pelo gate. O badge foi corrigido na 059; o furo do gate, não. Gate que pega uma notação e ignora as outras dá falsa segurança, que é pior que gate nenhum. Atenção ao CA-2: color-mix com token é padrão aprovado pelo DDR-006 e não pode virar falso positivo."
+      "updated_at": "2026-11-05",
+      "note": "f33fe79 Revisado pelo orquestrador na main."
     },
     {
       "id": "STORY-062",
@@ -1883,18 +1883,18 @@
       "title": "Inventário de lacunas — o mecanismo silencia em desenvolvimento e ninguém percebe",
       "type": "bugfix",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "estimated_session_size": "S",
       "blocked_by": [],
       "blocks": [],
       "epic_id": "EPIC-002",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "path": "epics/EPIC-002-diagnostico-industria/stories/STORY-062-inventario-de-lacunas-nao-escreve-em-dev.md",
       "created_at": "2026-08-06",
-      "updated_at": "2026-08-06",
-      "note": "Achado da STORY-052, aprovado pelo PO para virar estória em 2026-08-06. Os dois mecanismos de inventário (matriz_lacunas_path desde a STORY-032, drm.lacunas_path desde a STORY-052) apontam para defonline-docs/, que fica fora do que o container monta — o guard is_dir() silencia o I/O e nunca registram nada em desenvolvimento. O PDR-009 §2 deu esse arquivo ao PO como instrumento de planejamento, e instrumento que só funciona em produção não planeja. CA-3 pede que o silêncio deixe de ser silencioso."
+      "updated_at": "2026-11-05",
+      "note": "599bdea Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
@@ -1921,14 +1921,14 @@
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [],
       "epic_id": "EPIC-001",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "created_at": "2026-11-02",
-      "updated_at": "2026-11-02",
+      "updated_at": "2026-11-05",
       "id": "STORY-064",
       "slug": "atualizar-dados-da-receita",
       "title": "\"Atualizar dados da Receita\" na tela da empresa — leva as empresas legadas para a ficha completa",
@@ -1937,7 +1937,8 @@
         "STORY-063"
       ],
       "path": "epics/EPIC-001-cadastro-minimo/stories/STORY-064-atualizar-dados-da-receita.md",
-      "related_pdr": "PDR-010"
+      "related_pdr": "PDR-010",
+      "note": "935946f, d65cf69; snapshot aprovado pelo PO Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
@@ -2104,14 +2105,14 @@
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-083",
         "STORY-087"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2123,12 +2124,13 @@
         "STORY-071"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-072-cupons-no-backoffice.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "76d170e Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-074",
         "STORY-076",
@@ -2138,7 +2140,7 @@
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2152,7 +2154,8 @@
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-073-carteira-consumo-e-bloqueio-de-analise.md",
       "related_pdr": "PDR-020",
-      "design_screen_id": "SCREEN-STORY-070-bloqueio-sem-saldo"
+      "design_screen_id": "SCREEN-STORY-070-bloqueio-sem-saldo",
+      "note": "72c9324..1a9bdd5; IDR-017 Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
@@ -3967,6 +3970,20 @@
         "created_at": "2026-11-03",
         "updated_at": "2026-11-03",
         "note": "Sem Filament enquanto o backoffice for só leitura. BACKOFFICE_EMAILS → config/backoffice.php; middleware alias 'backoffice' + 404. Contagens cross-tenant via subquery DB::table (Global Scope filtraria pelo ator)."
+      },
+      {
+        "id": "IDR-016",
+        "title": "DRM: canonicalizador próprio e FK de vigência adiável",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-016-drm-canonicalizador-proprio-e-fk-de-vigencia-adiavel.md",
+        "decided_at": "2026-11-05"
+      },
+      {
+        "id": "IDR-017",
+        "title": "Carteira, regra de consumo e lock por usuário",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-017-carteira-consumo-e-lock-por-usuario.md",
+        "decided_at": "2026-11-05"
       }
     ],
     "ddr": [
