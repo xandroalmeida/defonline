@@ -13,6 +13,7 @@ use App\Models\PacoteCredito;
 use App\Models\Plano;
 use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
+use App\Support\DataExibicao;
 use App\Support\PermissaoAdmin;
 use Carbon\CarbonImmutable;
 use Closure;
@@ -333,7 +334,9 @@ final class Cupons extends Component
             return $contas->whereIn(DB::raw('lower(usuarios.email)'), self::emailsInformados($this->concessao['emails']));
         }
 
-        return $contas->where('usuarios.created_at', '<', CarbonImmutable::parse($this->concessao['ate'])->addDay()->startOfDay());
+        // A data é um dia do calendário de Brasília (o admin escolhe uma data local): "até o fim do dia" é até
+        // 23:59:59 de Brasília, que em UTC é 02:59:59 do dia seguinte (IDR-025).
+        return $contas->where('usuarios.created_at', '<', DataExibicao::inicioDoDiaSeguinte($this->concessao['ate'])->format('Y-m-d H:i:sP'));
     }
 
     /** @return list<string> */

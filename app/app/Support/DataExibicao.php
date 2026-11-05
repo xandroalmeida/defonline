@@ -45,6 +45,16 @@ final class DataExibicao
         return self::agora()->startOfDay();
     }
 
+    /**
+     * O início do dia SEGUINTE a `$dia` (`Y-m-d`, um dia do calendário de Brasília), como instante em UTC: o limite
+     * exclusivo de "até o fim do dia `$dia`" para quem escolhe uma data local (ex.: contas cadastradas até 31/10
+     * entram até 31/10 23:59:59 em Brasília, e não até 21:00 do dia 31 nem até 03:00 do dia 1 em UTC).
+     */
+    public static function inicioDoDiaSeguinte(string $dia): CarbonImmutable
+    {
+        return CarbonImmutable::createFromFormat('!Y-m-d', $dia, self::fuso())->addDay()->startOfDay()->utc();
+    }
+
     public static function ano(): int
     {
         return self::agora()->year;

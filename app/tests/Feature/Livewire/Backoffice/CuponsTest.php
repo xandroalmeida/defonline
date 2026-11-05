@@ -392,14 +392,17 @@ describe('CA-4 concessão', function () {
             ->assertHasErrors(['concessao.emails']);
     })->with(['', '   ', ' , ;']);
 
-    it('concede a todas as contas cadastradas até a data, inclusive no próprio dia', function () {
+    it('concede a todas as contas cadastradas até o fim do dia da data em Brasília, inclusive no próprio dia', function () {
         Usuario::query()->delete();
         $antiga = Usuario::factory()->create();
         $antiga->forceFill(['created_at' => '2026-10-01 08:00:00'])->save();
-        $nodia = Usuario::factory()->create();
-        $nodia->forceFill(['created_at' => '2026-10-31 23:59:59'])->save();
-        $depois = Usuario::factory()->create();
-        $depois->forceFill(['created_at' => '2026-11-01 00:00:00'])->save();
+        // Virada do dia: 02:59:59 UTC de 01/11 ainda é 23:59:59 de 31/10 em Brasília; 03:00:00 UTC já é 01/11.
+        $ultimoSegundo = Usuario::factory()->create();
+        $ultimoSegundo->forceFill(['created_at' => '2026-11-01 02:59:59'])->save();
+        $nodiaUtc = Usuario::factory()->create();
+        $nodiaUtc->forceFill(['created_at' => '2026-10-31 23:59:59'])->save();
+        $primeiroSegundoDoDiaSeguinte = Usuario::factory()->create();
+        $primeiroSegundoDoDiaSeguinte->forceFill(['created_at' => '2026-11-01 03:00:00'])->save();
         $anonima = Usuario::factory()->create();
         $anonima->forceFill(['created_at' => '2026-10-02 00:00:00', 'anonimizado_at' => now()])->save();
         $excluida = Usuario::factory()->create();
@@ -408,10 +411,11 @@ describe('CA-4 concessão', function () {
 
         ($this->tela)()->call('abrirConcessao', $this->cupom->id)
             ->set('concessao.modo', 'todas')->set('concessao.ate', '2026-10-31')->call('calcularConcessao')
-            ->assertSet('previa', ['total' => 2, 'novas' => 2, 'ja_tinham' => 0])
+            ->assertSet('previa', ['total' => 3, 'novas' => 3, 'ja_tinham' => 0])
             ->call('confirmarConcessao');
 
-        expect(CupomConcessao::pluck('usuario_id')->sort()->values()->all())->toBe(collect([$antiga->id, $nodia->id])->sort()->values()->all());
+        expect(CupomConcessao::pluck('usuario_id')->sort()->values()->all())
+            ->toBe(collect([$antiga->id, $ultimoSegundo->id, $nodiaUtc->id])->sort()->values()->all());
     });
 
     it('concede a mais de um lote de contas', function () {

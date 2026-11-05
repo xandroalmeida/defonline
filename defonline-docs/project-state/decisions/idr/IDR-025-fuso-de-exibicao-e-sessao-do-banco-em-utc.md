@@ -34,7 +34,7 @@ updated_at: 2026-11-05
 - `timestamptz`: o instante armazenado é absoluto e a leitura devolve o mesmo instante (com offset) em qualquer sessão; reinterpretar a sessão não altera dados já gravados. Muda só a gravação de string **sem offset**, que passa a ser lida como UTC (era o bug local de 3 h; models com offset já gravavam certo).
 - Consequência prática: no banco local, linhas antigas gravadas sem offset em `timestamptz` por models sem cast ficam 3 h deslocadas (só dev; recriar com `migrate:fresh`). Nenhuma query do código usa `date_trunc`, `::date` ou `CURRENT_DATE` sobre instantes (verificado por busca), então não há agrupamento por dia dependente da sessão.
 - **Produção:** o Postgres é o do host ZalkVPS e seu `timezone` não é legível pelo repositório. Como o instante em `timestamptz` não muda e a sessão agora é fixa, o resultado independe dele. Se o host não estiver em UTC, `timestamp` com default de banco criados antes saíram no relógio do host: conferir com `SHOW timezone;` e, se divergir, tratar à parte (pedido ao admin, sem migração automática aqui).
-- Fica de fora (decisão de produto, não tocada): `Cupons::contasAlvo` ("cadastradas até a data") compara o dia informado contra `created_at` em UTC.
+- `Cupons::contasAlvo` ("cadastradas até a data"): a data do admin é um dia local; vale até 23:59:59 de Brasília (`DataExibicao::inicioDoDiaSeguinte`, limite exclusivo em UTC). Antes comparava o dia contra `created_at` em UTC e errava a borda por 3 h.
 
 ## Alternativas
 

@@ -57,6 +57,13 @@ describe('DataExibicao', function () {
             ->and(DataExibicao::hoje()->format('d/m/Y H:i'))->toBe('05/11/2026 00:00');
     });
 
+    it('"até o fim do dia" de uma data local termina às 23:59:59 de Brasília, ou seja, 03:00 UTC do dia seguinte', function () {
+        $limite = DataExibicao::inicioDoDiaSeguinte('2026-10-31');
+
+        expect($limite->utc()->format('Y-m-d H:i:s'))->toBe('2026-11-01 03:00:00')
+            ->and(DataExibicao::inicioDoDiaSeguinte('2026-12-31')->format('Y-m-d H:i:s'))->toBe('2027-01-01 03:00:00');
+    });
+
     it('o ano do rodapé vira junto com Brasília, não com o UTC', function () {
         Carbon::setTestNow('2027-01-01 01:30:00');
         expect(DataExibicao::ano())->toBe(2026);
