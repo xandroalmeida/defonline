@@ -8,6 +8,7 @@ use App\Domain\Drm\Competencia;
 use App\Models\DrmLancamento;
 use App\Models\DrmPreferencia;
 use App\Models\EmpresaAnalisada;
+use App\Observabilidade\EventosDrm;
 use App\Support\Drm\PlanilhaDrm;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -27,6 +28,8 @@ final class DrmExportacaoController extends Controller
         $alvo = Competencia::deTexto($competencia);
         $lancamento = DrmLancamento::vigenteDaCompetencia($empresa, $alvo->dia01());
         abort_if($lancamento === null, 404);
+
+        EventosDrm::exportado($lancamento, $empresa, EventosDrm::FORMATO_XLSX); // STORY-056 CA-6.
 
         $planilha = PlanilhaDrm::gerar($empresa, $lancamento, DrmPreferencia::daEmpresa($empresa)->posicao_prolabore);
 

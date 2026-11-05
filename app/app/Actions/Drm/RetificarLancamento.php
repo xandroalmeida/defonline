@@ -14,6 +14,7 @@ use App\Models\DrmLancamento;
 use App\Models\DrmRascunho;
 use App\Models\EmpresaAnalisada;
 use App\Observabilidade\AuditLogger;
+use App\Observabilidade\EventosDrm;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -133,6 +134,9 @@ final class RetificarLancamento
                     'competencia' => $competencia->texto(),
                 ],
             );
+
+            // STORY-056: o numerador da taxa de retificação, na mesma transação da versão nova.
+            EventosDrm::lancamentoRetificado($nova, $vigente, $empresa);
 
             return $nova;
         });

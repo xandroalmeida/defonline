@@ -239,6 +239,6 @@
         <x-button :href="route('drm.corrigir', [$empresa, $competencia])" variant="secondary" dusk="drm-corrigir">Corrigir este mês</x-button>
         {{-- STORY-055: planilha gerada na hora (CA-9); a impressão é interina e não promete PDF nosso (CA-13). --}}
         <x-button :href="route('drm.exportar', [$empresa, $competencia])" variant="secondary" dusk="drm-exportar-xlsx">{{ config('drm.exportacao.botao_planilha') }}</x-button>
-        <x-button type="button" variant="secondary" x-data x-on:click="window.print()" dusk="drm-imprimir">{{ config('drm.exportacao.botao_imprimir') }}</x-button>
+        <x-button type="button" variant="secondary" x-data x-on:click="window.print()" wire:click="registrarImpressao" dusk="drm-imprimir">{{ config('drm.exportacao.botao_imprimir') }}</x-button>
     </div>
 </div>

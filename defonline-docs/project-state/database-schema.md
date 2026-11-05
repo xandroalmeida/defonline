@@ -128,7 +128,8 @@ PK `id uuid`. FK `usuario_id → usuarios` **CASCADE**. Índice `(usuario_id, te
 PK `id bigint`. `evento_id uuid` **UNIQUE** (idempotência). Emitido **só** via `EventLogger::emit()` (PII proibida → `PiiEmEventoException`).
 - `nome_evento`, `ocorrido_em` (default now), `usuario_id`, `empresa_id`, `propriedades jsonb` (default `{}`), `request_id`.
 - Índices: `(nome_evento, ocorrido_em)`, `nome_evento`, `usuario_id`, `empresa_id`, `request_id`, **GIN** `propriedades jsonb_path_ops`.
-- Canônicos entregues: `quiz_iniciado`, `diagnostico_concluido` (STORY-035).
+- `chave_idempotencia varchar(160) NULL` + índice único parcial `(nome_evento, chave_idempotencia) WHERE chave_idempotencia IS NOT NULL` (STORY-056): `EventLogger::emitOnce()` grava o fato no máximo uma vez. Eventos sem chave (`emit()`) não são afetados.
+- Canônicos entregues: `quiz_iniciado`, `diagnostico_concluido` (STORY-035); do DRM (STORY-056, `App\Observabilidade\EventosDrm`): `drm_lancamento_iniciado`, `drm_bloco_concluido`, `drm_rascunho_retomado`, `drm_regra_bloqueante_acionada`, `drm_lancamento_concluido`, `drm_lancamento_retificado`, `drm_alerta_aceito`, `drm_demonstracao_visualizada`, `drm_exportado`.
 - Evento gerado no "Logar como" traz `propriedades.personificacao` com `admin_id` e `sessao_id` (STORY-066). Para excluir da métrica de produto: `NOT propriedades ? 'personificacao'`.
 
 ### `business_metrics` / `request_metrics` / `job_metrics` — séries temporais
