@@ -40,11 +40,11 @@ return [
      * `provisorio/` é registrada aqui, para que o PO responda "o que ainda não
      * passou pela EBC?" abrindo um arquivo, sem ler código.
      *
-     * Mesmo padrão de `motor.matriz_lacunas_path` (STORY-032). String vazia
-     * desliga o I/O — é o que os testes usam.
+     * Vive em `storage/` (gravável em dev e em produção; `defonline-docs/` fica
+     * fora do container — STORY-062). `scripts/sincronizar-lacunas.sh` traz o
+     * conteúdo para a cópia versionada em `defonline-docs/`. Mesmo padrão de
+     * `motor.matriz_lacunas_path`. String vazia desliga o I/O — é o que os
+     * testes usam (`.env.testing`).
      */
-    'lacunas_path' => env(
-        'DRM_LACUNAS_PATH',
-        base_path('../defonline-docs/project-state/epics/EPIC-010-drm-demonstracao-resultado-mensal/design/conteudo-lacunas.md'),
-    ),
+    'lacunas_path' => env('DRM_LACUNAS_PATH', storage_path('app/private/lacunas/drm-conteudo-lacunas.md')),
 ];

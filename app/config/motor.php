@@ -47,11 +47,9 @@ return [
     'version' => '2.0.2',
     'matrix_version' => 'dez-2025',
 
-    // Path do arquivo de lacunas auto-append por MatrizRecomendacoes (CA-5/STORY-032).
-    // Default: doc path do épico (visível ao PO). Pode ser sobrescrito via
-    // env MOTOR_MATRIZ_LACUNAS_PATH para tmp em testes. String vazia = desliga I/O.
-    'matriz_lacunas_path' => env(
-        'MOTOR_MATRIZ_LACUNAS_PATH',
-        base_path('../defonline-docs/project-state/epics/EPIC-002-diagnostico-industria/design/matriz-lacunas.md'),
-    ),
+    // Inventário de lacunas auto-append por MatrizRecomendacoes (CA-5/STORY-032).
+    // Vive em `storage/` (STORY-062): `defonline-docs/` fica fora do container.
+    // `scripts/sincronizar-lacunas.sh` copia para a versão versionada. Pode ser
+    // sobrescrito via MOTOR_MATRIZ_LACUNAS_PATH. String vazia = desliga I/O (testes).
+    'matriz_lacunas_path' => env('MOTOR_MATRIZ_LACUNAS_PATH', storage_path('app/private/lacunas/matriz-lacunas.md')),
 ];
