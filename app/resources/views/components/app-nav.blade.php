@@ -137,6 +137,15 @@
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-cupons',
             ],
+            [
+                'permissao' => \App\Support\PermissaoAdmin::GerenciarFinanceiro,
+                'label' => 'Financeiro',
+                'icon' => 'tag',
+                'href' => route('backoffice.financeiro'),
+                'active' => request()->routeIs('backoffice.financeiro'),
+                'disabled' => false,
+                'dusk' => 'app-nav-backoffice-financeiro',
+            ],
         ], fn (array $item): bool => $usuarioNav->podeUsarBackoffice($item['permissao'])));
     }
 

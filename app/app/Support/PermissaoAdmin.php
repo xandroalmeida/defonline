@@ -17,6 +17,7 @@ enum PermissaoAdmin: string
     case EditarRecomendacoes = 'recomendacoes.editar';
     case GerenciarPlanos = 'planos.gerenciar';
     case GerenciarCupons = 'cupons.gerenciar';
+    case GerenciarFinanceiro = 'financeiro.gerenciar';
 
     public function rotulo(): string
     {
@@ -28,6 +29,7 @@ enum PermissaoAdmin: string
             self::EditarRecomendacoes => 'Manter recomendações',
             self::GerenciarPlanos => 'Gerenciar planos e pacotes',
             self::GerenciarCupons => 'Gerenciar cupons',
+            self::GerenciarFinanceiro => 'Gerenciar assinaturas, reembolsos e notas fiscais',
         };
     }
 }

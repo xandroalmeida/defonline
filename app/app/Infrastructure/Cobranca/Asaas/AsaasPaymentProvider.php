@@ -12,7 +12,9 @@ use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PaymentProvider;
 use App\Domain\Cobranca\PedidoCheckout;
 use App\Domain\Cobranca\ProvedorIndisponivel;
+use App\Domain\Cobranca\ReembolsoNoProvedor;
 use App\Domain\Cobranca\ReferenciaProvedor;
+use App\Domain\Cobranca\ResultadoReembolso;
 use App\Domain\Cobranca\SessaoCheckout;
 use App\Domain\Cobranca\TentativaNaoRealizada;
 use App\Domain\Cobranca\TipoEvento;
@@ -179,6 +181,51 @@ final class AsaasPaymentProvider implements PaymentProvider
         }
 
         return $this->getCharge($cobranca);
+    }
+
+    /**
+     * `POST /payments/{id}/refund` (ADR-010 §4.6, confirmado no sandbox): cartão estorna por inteiro na hora
+     * (`REFUNDED`, estorno `DONE`); parcial só a partir do dia seguinte; Pix fica em
+     * `AWAITING_CRITICAL_ACTION_AUTHORIZATION` até alguém autorizar no painel do Asaas. 4xx = o Asaas
+     * respondeu e recusou (`Recusado`, com a descrição dele); rede e 5xx = `ProvedorIndisponivel`.
+     */
+    public function refund(ReferenciaProvedor $cobranca, ?int $valorCentavos = null, string $motivo = ''): ReembolsoNoProvedor
+    {
+        $corpo = array_filter([
+            'value' => $valorCentavos === null ? null : round($valorCentavos / 100, 2),
+            'description' => $motivo === '' ? null : mb_substr($motivo, 0, 200),
+        ], fn (mixed $v): bool => $v !== null);
+
+        $r = $this->requisitar('post', '/payments/'.rawurlencode($cobranca->id).'/refund', $corpo);
+
+        if ($r->serverError()) {
+            throw $this->indisponibilidade($r);
+        }
+
+        if ($r->failed()) {
+            return new ReembolsoNoProvedor(ResultadoReembolso::Recusado, $this->descricaoDoErro($r));
+        }
+
+        $estornos = array_values(array_filter((array) $r->json('refunds'), is_array(...)));
+        $situacoes = array_map(fn (array $e): string => (string) ($e['status'] ?? ''), $estornos);
+
+        if (in_array('AWAITING_CRITICAL_ACTION_AUTHORIZATION', $situacoes, true)) {
+            return new ReembolsoNoProvedor(ResultadoReembolso::AguardandoAutorizacao);
+        }
+
+        if ($r->json('status') === 'REFUNDED' || ($situacoes !== [] && array_unique($situacoes) === ['DONE'])) {
+            return new ReembolsoNoProvedor(ResultadoReembolso::Concluido);
+        }
+
+        return new ReembolsoNoProvedor(ResultadoReembolso::EmAndamento);
+    }
+
+    private function descricaoDoErro(Response $r): string
+    {
+        $erro = ((array) $r->json('errors'))[0] ?? null;
+        $descricao = is_array($erro) && is_string($erro['description'] ?? null) ? $erro['description'] : '';
+
+        return mb_substr("O Asaas recusou o estorno (HTTP {$r->status()}). {$descricao}", 0, 300);
     }
 
     public function cancelSubscription(ReferenciaProvedor $assinatura): void

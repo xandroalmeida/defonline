@@ -13,7 +13,7 @@ use DateTimeImmutable;
  *
  * Entram conforme as estórias precisam: checkout avulso (076), assinatura (077), retentativa,
  * cancelamento da recorrência e conciliação (079), suspender/religar a renovação (081).
- * `ensureCustomer` e estorno ficam para 087.
+ * `ensureCustomer` fica para a 087; o estorno entrou na 085.
  */
 interface PaymentProvider
 {
@@ -89,6 +89,15 @@ interface PaymentProvider
      * @throws ProvedorIndisponivel
      */
     public function resumeSubscription(ReferenciaProvedor $assinatura): void;
+
+    /**
+     * STORY-085 / ADR-010 §1 — pede o estorno de uma cobrança paga. Sem `$valorCentavos` é total (o que o
+     * backoffice usa: o parcial do cartão só vale a partir do dia seguinte). Quem chama confere antes, por
+     * {@see getCharge()}, que a cobrança ainda está paga: repetir o pedido não pode estornar duas vezes.
+     *
+     * @throws ProvedorIndisponivel se o provedor não respondeu (o resultado é inconclusivo: conferir antes de repetir)
+     */
+    public function refund(ReferenciaProvedor $cobranca, ?int $valorCentavos = null, string $motivo = ''): ReembolsoNoProvedor;
 
     /**
      * Autentica e traduz um webhook bruto para o evento canônico.

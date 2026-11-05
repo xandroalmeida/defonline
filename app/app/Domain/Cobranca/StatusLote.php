@@ -10,4 +10,6 @@ enum StatusLote: string
     case Ativo = 'ativo';
     case Esgotado = 'esgotado';
     case Expirado = 'expirado';
+    /** STORY-085 — a compra foi devolvida: o saldo restante foi retirado. */
+    case Estornado = 'estornado';
 }

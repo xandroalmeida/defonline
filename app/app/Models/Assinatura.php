@@ -9,6 +9,7 @@ use App\Domain\Cobranca\StatusAssinatura;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
@@ -55,6 +56,18 @@ final class Assinatura extends Model
     protected $dateFormat = 'Y-m-d H:i:sP';
 
     protected $table = 'assinaturas';
+
+    /** @return BelongsTo<Usuario, $this> */
+    public function usuario(): BelongsTo
+    {
+        return $this->belongsTo(Usuario::class)->withTrashed();
+    }
+
+    /** @return BelongsTo<Plano, $this> */
+    public function plano(): BelongsTo
+    {
+        return $this->belongsTo(Plano::class);
+    }
 
     /** Plano anual pago com Pix: não renova sozinho (STORY-080). */
     public function pagoComPix(): bool

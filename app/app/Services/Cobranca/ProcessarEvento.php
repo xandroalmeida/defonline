@@ -37,6 +37,8 @@ use Throwable;
  * - recusa ou vencimento da cobrança de uma assinatura nossa é de {@see FalhaDeRenovacao} (STORY-079);
  * - provedor fora do ar NÃO é recusa do cliente: o evento fica em `erro`, a equipe é alertada e o
  *   reprocessador tenta de novo (STORY-079 CA-7);
+ * - estorno e contestação (STORY-085): conferidos no provedor; o estorno retira o que a cobrança concedeu
+ *   ({@see ReembolsarCobranca::concluir()}, que serve também ao estorno feito direto no painel do provedor);
  * - checkout de troca de cartão (STORY-081) não tem Invoice: é uma {@see TrocaDeCartao}, e o cartão novo
  *   só vale quando o provedor confirma (checkout concluído ou 1ª cobrança paga).
  */
@@ -48,6 +50,7 @@ final class ProcessarEvento
         private readonly ConfirmarAssinatura $assinaturas,
         private readonly FalhaDeRenovacao $falhas,
         private readonly TrocarCartao $trocas,
+        private readonly ReembolsarCobranca $reembolsos,
     ) {}
 
     public function executar(string $providerEventId): void
@@ -100,6 +103,8 @@ final class ProcessarEvento
             TipoEvento::CheckoutExpirado => $this->encerrarCheckout($evento, EstadoCobranca::Vencida, 'expirado'),
             TipoEvento::CheckoutCancelado => $this->encerrarCheckout($evento, EstadoCobranca::Cancelada, 'cancelado'),
             TipoEvento::CobrancaFalhou, TipoEvento::CobrancaVencida => $this->aplicarFalha($evento),
+            TipoEvento::CobrancaEstornada => $this->aplicarEstorno($evento),
+            TipoEvento::CobrancaContestada => $this->aplicarContestacao($evento),
             default => ['ignorado', null],
         };
     }
@@ -216,6 +221,78 @@ final class ProcessarEvento
         }
 
         return ['ignorado', null];
+    }
+
+    /** @return array{0: 'processado'|'ignorado', 1: string|null} */
+    private function aplicarEstorno(ProviderEvent $evento): array
+    {
+        if ($evento->cobranca_id_externo === null) {
+            return $this->semInvoice($evento, 'estorno sem id de cobrança');
+        }
+
+        $cobranca = $this->provedor->getCharge(new ReferenciaProvedor($evento->provedor, $evento->cobranca_id_externo));
+        $invoice = $this->localizar($evento, $cobranca);
+
+        if ($invoice === null) {
+            return $this->semInvoice($evento, 'estorno sem invoice correspondente');
+        }
+
+        if ($cobranca->estado !== EstadoCobranca::Estornada) {
+            return ['ignorado', $invoice->id];
+        }
+
+        return [$this->reembolsos->concluir($invoice->id) ? 'processado' : 'ignorado', $invoice->id];
+    }
+
+    /**
+     * Contestação (chargeback): a cobrança passa a "Contestada" e a equipe é alertada. O acesso não é
+     * retirado sozinho: a contestação pode ser revertida, e quem decide é o admin (a tela destaca).
+     *
+     * @return array{0: 'processado'|'ignorado', 1: string|null}
+     */
+    private function aplicarContestacao(ProviderEvent $evento): array
+    {
+        if ($evento->cobranca_id_externo === null) {
+            return $this->semInvoice($evento, 'contestação sem id de cobrança');
+        }
+
+        $cobranca = $this->provedor->getCharge(new ReferenciaProvedor($evento->provedor, $evento->cobranca_id_externo));
+        $invoice = $this->localizar($evento, $cobranca);
+
+        if ($invoice === null) {
+            return $this->semInvoice($evento, 'contestação sem invoice correspondente');
+        }
+
+        if ($cobranca->estado !== EstadoCobranca::Contestada) {
+            return ['ignorado', $invoice->id];
+        }
+
+        return DB::transaction(function () use ($invoice): array {
+            $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
+
+            if (! $invoice->status->podeIrPara(EstadoCobranca::Contestada)) {
+                return ['ignorado', $invoice->id];
+            }
+
+            $invoice->forceFill(['status' => EstadoCobranca::Contestada])->save();
+
+            Log::error('cobranca.contestada', [
+                'module' => 'cobranca',
+                'action' => 'processar_evento',
+                'invoice_id' => $invoice->id,
+            ]);
+
+            AuditLogger::log(
+                action: 'cobranca.contestada',
+                subjectType: 'Invoice',
+                subjectId: $invoice->id,
+                actorType: 'system',
+                usuarioId: $invoice->usuario_id,
+                after: ['valor_centavos' => $invoice->valor_centavos, 'provedor' => $invoice->provedor],
+            );
+
+            return ['processado', $invoice->id];
+        });
     }
 
     /** @return array{0: 'processado'|'ignorado', 1: string|null} */

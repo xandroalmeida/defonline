@@ -7,6 +7,7 @@ use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PedidoCheckout;
 use App\Domain\Cobranca\ReferenciaProvedor;
+use App\Domain\Cobranca\ResultadoReembolso;
 use App\Infrastructure\Cobranca\Asaas\AsaasPaymentProvider;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -114,6 +115,78 @@ it('lista, retenta e cancela uma assinatura no sandbox', function () {
     } finally {
         if ($assinaturaId !== null) {
             $api()->delete("/subscriptions/{$assinaturaId}");
+        }
+
+        $api()->delete("/customers/{$cliente}");
+    }
+})->group('asaas-sandbox');
+
+/**
+ * STORY-085 — estorno no sandbox de verdade: cartão estorna por inteiro na hora (REFUNDED), o segundo
+ * pedido é recusado, e o Pix confirmado fica aguardando a autorização da ação crítica. Cobranças criadas
+ * direto na API com o cartão de TESTE público do Asaas, só neste teste e só no sandbox; limpeza no fim.
+ */
+it('estorna cartão por inteiro, recusa o segundo estorno e deixa o Pix aguardando autorização no sandbox', function () {
+    $chave = env('ASAAS_SANDBOX_API_KEY');
+
+    if (! is_string($chave) || $chave === '') {
+        $this->markTestSkipped('ASAAS_SANDBOX_API_KEY não definida.');
+    }
+
+    $api = fn () => Http::baseUrl('https://api-sandbox.asaas.com/v3')->withHeaders(['access_token' => $chave, 'User-Agent' => 'DEFOnline-story085'])->acceptJson()->asJson();
+    $cliente = $api()->post('/customers', ['name' => 'Teste STORY-085', 'cpfCnpj' => '24971563792', 'email' => 'sandbox@example.com'])->json('id');
+    $cobrancas = [];
+
+    try {
+        $provedor = _asaasSandbox();
+        $vence = now('America/Sao_Paulo')->format('Y-m-d');
+
+        $cartao = $api()->post('/payments', [
+            'customer' => $cliente, 'billingType' => 'CREDIT_CARD', 'value' => 49.9, 'dueDate' => $vence, 'description' => 'Teste STORY-085 cartão',
+            'creditCard' => ['holderName' => 'Teste Sandbox', 'number' => '4539656048392220', 'expiryMonth' => '12', 'expiryYear' => '2030', 'ccv' => '123'],
+            'creditCardHolderInfo' => ['name' => 'Teste Sandbox', 'email' => 'sandbox@example.com', 'cpfCnpj' => '24971563792', 'postalCode' => '89223005', 'addressNumber' => '277', 'phone' => '4738010919'],
+            'remoteIp' => '203.0.113.10',
+        ])->json('id');
+        $cobrancas[] = $cartao;
+        expect($cartao)->toBeString();
+        $ref = new ReferenciaProvedor('asaas', $cartao);
+        expect($provedor->getCharge($ref)->estado)->toBe(EstadoCobranca::Paga);
+
+        // Cobrança recém-criada: o Asaas responde "tente novamente em alguns instantes" (400) até assentar.
+        for ($t = 0; $t < 12; $t++) {
+            $primeiro = $provedor->refund($ref, null, 'Teste STORY-085');
+
+            if ($primeiro->resultado !== ResultadoReembolso::Recusado) {
+                break;
+            }
+
+            sleep(5);
+        }
+        expect($primeiro->detalhe)->toBeNull()
+            ->and($primeiro->resultado)->toBe(ResultadoReembolso::Concluido)
+            ->and($provedor->getCharge($ref)->estado)->toBe(EstadoCobranca::Estornada)
+            ->and($provedor->refund($ref)->resultado)->toBe(ResultadoReembolso::Recusado);
+
+        $pix = $api()->post('/payments', ['customer' => $cliente, 'billingType' => 'PIX', 'value' => 10, 'dueDate' => $vence, 'description' => 'Teste STORY-085 pix'])->json('id');
+        $cobrancas[] = $pix;
+        $api()->post("/sandbox/payment/{$pix}/confirm");
+        $refPix = new ReferenciaProvedor('asaas', $pix);
+        expect($provedor->getCharge($refPix)->estado)->toBe(EstadoCobranca::Paga);
+
+        for ($t = 0; $t < 12; $t++) {
+            $porPix = $provedor->refund($refPix, null, 'Teste STORY-085');
+
+            if ($porPix->resultado !== ResultadoReembolso::Recusado) {
+                break;
+            }
+
+            sleep(5);
+        }
+
+        expect($porPix->detalhe)->toBeNull()->and($porPix->resultado)->toBe(ResultadoReembolso::AguardandoAutorizacao);
+    } finally {
+        foreach ($cobrancas as $c) {
+            $api()->delete("/payments/{$c}");
         }
 
         $api()->delete("/customers/{$cliente}");
