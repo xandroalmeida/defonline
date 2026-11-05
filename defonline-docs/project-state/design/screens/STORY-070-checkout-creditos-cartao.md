@@ -3,7 +3,7 @@ id: SCREEN-STORY-070-checkout-creditos-cartao
 story: STORY-070-design-telas-cobranca
 implemented_by: STORY-078
 epic: EPIC-005-cobranca-e-planos
-status: draft
+status: ready
 created_at: 2026-11-05
 updated_at: 2026-11-05
 owner_designer: designer (claude-sonnet-5-5)
