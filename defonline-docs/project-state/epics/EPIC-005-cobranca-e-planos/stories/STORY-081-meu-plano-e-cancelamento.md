@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: true
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: claude-sonnet-5-5
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: M
@@ -38,16 +38,16 @@ Transparência reduz chargeback e reclamação, e permite recuperar uma assinatu
 
 ## Critérios de aceite
 
-- [ ] **CA-1:** A tela mostra plano, ciclo, próxima renovação e valor, cota restante e, por lote, créditos e vencimento, com alerta para lote perto de vencer.
-- [ ] **CA-2:** A tela lista as cobranças com data, valor, desconto, status e meio de pagamento.
-- [ ] **CA-3:** O usuário troca o cartão, e uma assinatura em atraso é cobrada novamente com o cartão novo.
-- [ ] **CA-4:** O usuário cancela a renovação, a tela informa até quando o acesso vai, e não há nova cobrança. O acesso continua até o fim do ciclo pago.
-- [ ] **CA-5:** O usuário reativa a renovação antes do fim do ciclo.
-- [ ] **CA-6:** A tela informa como pedir arrependimento nos 7 dias corridos, quando aplicável.
-- [ ] **CA-7:** Usuários sem plano e sem créditos veem a oferta de planos.
-- [ ] **CA-8:** Durante o "Logar como", o admin vê a tela, mas não executa ações.
-- [ ] **CA-9:** Teste E2E cobre cancelamento e troca de cartão.
-- [ ] **CA-10:** Respeite o interruptor de cobrança (STORY-073): enquanto estiver desligado, o usuário comum não vê nem sofre nenhum efeito desta estória.
+- [x] **CA-1:** A tela mostra plano, ciclo, próxima renovação e valor, cota restante e, por lote, créditos e vencimento, com alerta para lote perto de vencer.
+- [x] **CA-2:** A tela lista as cobranças com data, valor, desconto, status e meio de pagamento.
+- [x] **CA-3:** O usuário troca o cartão, e uma assinatura em atraso é cobrada novamente com o cartão novo.
+- [x] **CA-4:** O usuário cancela a renovação, a tela informa até quando o acesso vai, e não há nova cobrança. O acesso continua até o fim do ciclo pago.
+- [x] **CA-5:** O usuário reativa a renovação antes do fim do ciclo.
+- [x] **CA-6:** A tela informa como pedir arrependimento nos 7 dias corridos, quando aplicável.
+- [x] **CA-7:** Usuários sem plano e sem créditos veem a oferta de planos.
+- [x] **CA-8:** Durante o "Logar como", o admin vê a tela, mas não executa ações.
+- [x] **CA-9:** Teste E2E cobre cancelamento e troca de cartão.
+- [x] **CA-10:** Respeite o interruptor de cobrança (STORY-073): enquanto estiver desligado, o usuário comum não vê nem sofre nenhum efeito desta estória.
 
 ## Ajustes do ADR-010 (prevalecem sobre os CAs acima onde houver conflito)
 
@@ -93,13 +93,32 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 ## Notas do agente
 
 ### Decisões tomadas
+- Leitura: estória (com "Ajustes do ADR-010"), spec `STORY-070-meu-plano`, DDR-009, IDR-019, notas da 077, ADR-010 e skill do programador. Rota nomeada `meu-plano` (`/meu-plano`, já esperada por `TextoBloqueio::ROTAS`); com a cobrança desligada é 404 e o item de menu some (CA-10).
+- **Cancelar renovação** = suspender a recorrência no provedor + `Cancelada` na carteira; **reativar** = religar + `Ativa`. Acesso e cota intactos até `proximo_vencimento`. Provedor primeiro: se falhar, nada muda e a tela diz "sua renovação continua ativa". Só `Ativa` cancela (em atraso é caminho da 079/troca de cartão). Ver IDR-021.
+- **Trocar cartão** (ajuste do ADR-010): novo Checkout recorrente (`trocas_de_cartao`, não `Invoice`); em dia a 1ª cobrança é no vencimento já pago (`PedidoCheckout::primeiraCobrancaEm`), em atraso é hoje. O ponteiro `assinaturas.id_externo` só muda na confirmação (`checkout.concluido` ou 1ª `cobranca.paga`); só então a antiga é cancelada, com repetição horária (`assinaturas:cancelar-antigas`) e `Log::error` se o provedor falhar.
+- **Em atraso (CA-3)**: o pagamento da 1ª cobrança do cartão novo volta a assinatura a `Ativa` e renova o ciclo (`ConfirmarAssinatura::renovar(recuperaAtraso: true)`). Nenhuma máquina de estados nova; o resto do atraso (retentativas, régua, encerramento) continua da 079 e o teste antigo "renovação em atraso fica para a 079" segue valendo.
+- **Pix anual (ajuste do ADR-010)**: plano pago sem `id_externo` (sem recorrência no provedor) mostra "Este plano não renova sozinho. Termina em {data}." e não tem cancelar nem trocar cartão. "Pagar renovação" (spec §4.9) é da 080.
+- **Arrependimento (CA-6)**: canal `eb@ebparcerias.com` (e-mail, sem botão). Texto fixo no rodapé e, no diálogo de cancelamento, a frase personalizada quando o plano tem até 7 dias corridos e nenhuma análise da cota dele.
+- `IniciarAssinatura::assinaturaVigente` passou a contar a assinatura `Cancelada` com ciclo por correr (assinar de novo seria pagar duas vezes o mesmo período). A tela de checkout diz "com a renovação cancelada e acesso até".
+- `Carteira::mudarStatus(Ativa)` apaga `data_cancelamento`. `x-confirmacao` ganhou o rótulo opcional `voltar` (spec: "Voltar"); o padrão continua "Cancelar".
+- Cobranças: lista tudo que virou cobrança (pago, pendente não expirado, recusado, reembolsado, contestado) e esconde checkout abandonado/expirado e falha nossa com o provedor. Desconto é "—" até a STORY-083 (não há coluna).
+- Limiar de lote perto de vencer: `services.payments.lote_perto_de_vencer_dias` (env `LOTE_PERTO_DE_VENCER_DIAS`, padrão 30).
+- "Trocar plano" só aparece quando a rota `plano.trocar` (082) existir; "Atualizar cartão" do bloqueio (`cartao.atualizar`) continua para a 079: a ação some até lá. A troca de cartão vive em Meu plano.
+- Teste alterado: `QuizCobrancaTest` "esconde as ações enquanto as telas não existem" usava a ausência da rota `meu-plano` como exemplo. Com a rota real, o teste agora espera a ação "Ver meu plano" desde o início e usa `cartao.atualizar` (079) como a rota que ainda nasce. Mesma garantia (ação some sem rota, aparece com ela).
 
 ### Descobertas
+- O Livewire de teste não leva a sessão para `request()`, então `Personificacao::ativa()` não dispara dentro de `Livewire::test()`. O somente-leitura é coberto por GET (HTML com botões `disabled`), pelos testes de serviço (negam durante "Logar como") e pelo Dusk com "Logar como" real.
+- O fake agora conhece a página da troca de cartão (`/pagamentos/fake/troca/{troca}`), decidida pela existência da troca na referência do checkout.
 
 ### Bloqueios encontrados
+- Nenhum. Não verificado contra o Asaas real (ver IDR-021, "Pendências"): (1) `PUT /subscriptions/{id}` com `status` INACTIVE/ACTIVE; (2) `nextDueDate` futuro no Checkout recorrente não cobrar no ato (senão a troca em dia cobra em dobro: validar no sandbox ANTES de ligar a cobrança); (3) `CHECKOUT_PAID` trazer `checkout.subscription`.
+- Dúvidas ao PO/Arquiteto: (a) cancelar em atraso: hoje não há; devo permitir? (b) em atraso o cartão novo cobra o valor da assinatura na hora; se o provedor recusar, a troca falha e a assinatura segue em atraso com o cartão antigo (conforme a spec §4.3).
 
 ### IDRs criados
+- IDR-021 (cancelar = suspender a recorrência; troca de cartão por novo checkout, antiga cancelada após confirmação).
 
 ### Cobertura final
+- Suíte All: 2457 testes verdes; cobertura total 98,6%; `app/Domain` com todas as classes novas em 100%. Dusk inteiro: 80 verdes (6 novos). Pint e PHPStan limpos.
 
 ### Evidências
+- `tests/Domain/Cobranca/MeuPlanoDominioTest.php` (situações, arrependimento, lote perto), `tests/Feature/Cobranca/GerirRenovacaoETrocaDeCartaoTest.php` (CA-3/4/5/8 nos serviços e webhooks), `tests/Feature/Cobranca/AsaasGestaoDeAssinaturaTest.php`, `tests/Feature/Cobranca/PagamentoFakeTrocaDeCartaoTest.php`, `tests/Feature/Livewire/MeuPlanoTest.php` (CA-1/2/4/5/6/7/8/10 na tela), `tests/Browser/MeuPlanoBrowserTest.php` (CA-9: cancelar/reativar em 360px, trocar cartão em dia e em atraso, recusa, oferta, "Logar como").
