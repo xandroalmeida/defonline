@@ -28,11 +28,12 @@ final class AvisosDeCobranca
 {
     public function renovacaoProxima(Assinatura $a): bool
     {
+        // STORY-082: com downgrade agendado, o aviso fala do plano, do ciclo e do valor que serão cobrados.
         return $this->enviar($a, 'renovacao_proxima', fn (Usuario $u, string $plano): Mailable => new RenovacaoProximaMessage(
             $u->primeiroNome(),
             $plano,
-            $a->ciclo === 'anual' ? 'anual' : 'mensal',
-            $this->reais((int) $a->preco_snapshot_centavos),
+            ($a->troca_ciclo ?? $a->ciclo) === 'anual' ? 'anual' : 'mensal',
+            $this->reais((int) ($a->troca_preco_centavos ?? $a->preco_snapshot_centavos)),
             $this->data($a->proximo_vencimento),
             $this->linkDoPlano(),
         ));
@@ -70,7 +71,7 @@ final class AvisosDeCobranca
     {
         try {
             $usuario = Usuario::query()->findOrFail($a->usuario_id);
-            $plano = $a->plano_id === null ? 'DEFOnline' : Plano::query()->findOrFail($a->plano_id)->nome;
+            $plano = $a->plano_id === null ? 'DEFOnline' : Plano::query()->findOrFail($aviso === 'renovacao_proxima' ? ($a->troca_plano_id ?? $a->plano_id) : $a->plano_id)->nome;
 
             Mail::to($usuario->email)->send($montar($usuario, $plano));
 

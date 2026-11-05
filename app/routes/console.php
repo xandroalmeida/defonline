@@ -68,3 +68,9 @@ Schedule::command('assinaturas:pix-anual')
     ->hourly()
     ->onOneServer()
     ->withoutOverlapping(30);
+
+// STORY-082 — o provedor pode ter recusado o ajuste de valor na hora da troca de plano; repete até conseguir.
+Schedule::command('assinaturas:ajustar-no-provedor')
+    ->hourly()
+    ->onOneServer()
+    ->withoutOverlapping(30);

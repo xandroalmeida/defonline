@@ -42,7 +42,11 @@ final class PagamentoFakeController extends Controller
 
         $receber->tratar($webhook);
 
-        return redirect()->route($invoice->tipo === 'assinatura' ? 'assinatura.retorno' : 'creditos.retorno', $invoice);
+        return redirect()->route(match ($invoice->tipo) {
+            'assinatura' => 'assinatura.retorno',
+            'troca_de_plano' => 'plano.trocar.retorno',
+            default => 'creditos.retorno',
+        }, $invoice);
     }
 
     /** STORY-081 — a página do cartão novo (troca de cartão): mesma ideia, outro registro. */

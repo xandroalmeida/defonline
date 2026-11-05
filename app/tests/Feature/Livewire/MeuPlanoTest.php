@@ -432,14 +432,17 @@ describe('situações do plano (DDR-009)', function () {
             ->call('trocarCartao')->assertSee('Este plano não renova sozinho');
     });
 
-    it('troca de plano só aparece quando a tela de troca existir (STORY-082)', function () {
+    it('"Trocar plano" leva à lista de planos (STORY-082: a tela de troca existe)', function () {
         _mpAssinar($this->usuario);
+
+        _meuPlano($this->usuario)->assertSeeHtml('screen-meuplano-trocar-plano')->assertSeeHtml('href="'.route('planos').'"');
+    });
+
+    it('"Trocar plano" não existe sem plano pago renovável nem com a renovação cancelada', function () {
+        $a = _mpAssinar($this->usuario);
+        $a->forceFill(['status' => StatusAssinatura::Cancelada])->save();
+
         _meuPlano($this->usuario)->assertDontSeeHtml('screen-meuplano-trocar-plano');
-
-        Route::get('/planos/trocar/{plano}/{ciclo}', fn () => 'ok')->name('plano.trocar');
-        app('router')->getRoutes()->refreshNameLookups();
-
-        _meuPlano($this->usuario)->assertSeeHtml('screen-meuplano-trocar-plano');
     });
 });
 

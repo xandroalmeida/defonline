@@ -40,6 +40,7 @@ use Illuminate\Support\Carbon;
  * @property bool $renovacao
  * @property string|null $cartao_bandeira
  * @property string|null $cartao_ultimos4
+ * @property int|null $periodo_base
  * @property Carbon|null $created_at
  */
 final class Invoice extends Model

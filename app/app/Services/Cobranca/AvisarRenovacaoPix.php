@@ -61,7 +61,7 @@ final class AvisarRenovacaoPix
     private function avisar(Assinatura $assinatura): bool
     {
         $usuario = Usuario::query()->find($assinatura->usuario_id);
-        $plano = $assinatura->plano_id === null ? null : Plano::query()->find($assinatura->plano_id);
+        $plano = $assinatura->plano_id === null ? null : Plano::query()->find($assinatura->troca_plano_id ?? $assinatura->plano_id);
 
         if ($usuario === null || $plano === null) {
             return false;
@@ -73,7 +73,7 @@ final class AvisarRenovacaoPix
                 $plano->nome,
                 DataExibicao::data($assinatura->proximo_vencimento),
                 DataExibicao::data(RenovacaoPix::novoVencimento($assinatura->data_inicio, $assinatura->periodos_pagos)),
-                'R$ '.number_format(((int) $assinatura->preco_snapshot_centavos) / 100, 2, ',', '.'),
+                'R$ '.number_format(((int) ($assinatura->troca_preco_centavos ?? $assinatura->preco_snapshot_centavos)) / 100, 2, ',', '.'),
                 route('assinatura.renovar'),
             ));
             $assinatura->forceFill(['aviso_renovacao_pix_para' => $assinatura->proximo_vencimento])->save();

@@ -48,7 +48,10 @@ final class ConfirmarAssinatura
         'atraso_aviso_em' => null,
     ];
 
-    public function __construct(private readonly Carteira $carteira) {}
+    /** A troca agendada (STORY-082) deixa de estar agendada quando a renovação a aplica. */
+    private const LIMPA_TROCA = ['troca_plano_id' => null, 'troca_ciclo' => null, 'troca_preco_centavos' => null, 'troca_agendada_em' => null];
+
+    public function __construct(private readonly Carteira $carteira, private readonly TrocarDePlano $trocas) {}
 
     /** @return array{0: 'processado'|'ignorado', 1: string|null} */
     public function aplicar(?Invoice $invoice, CobrancaNoProvedor $cobranca, string $provedor): array
@@ -56,6 +59,13 @@ final class ConfirmarAssinatura
         return DB::transaction(function () use ($invoice, $cobranca, $provedor): array {
             if ($invoice !== null) {
                 $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
+
+                // STORY-082: a diferença de um upgrade, paga por checkout avulso, aplica a troca; não ativa nem renova.
+                if ($invoice->tipo === 'troca_de_plano') {
+                    return in_array($invoice->status, [EstadoCobranca::Pendente, EstadoCobranca::Vencida, EstadoCobranca::Falhou], true)
+                        ? $this->trocas->aplicarPaga($invoice, $cobranca)
+                        : ['ignorado', $invoice->id];
+                }
 
                 if (in_array($invoice->status, [EstadoCobranca::Pendente, EstadoCobranca::Vencida, EstadoCobranca::Falhou], true)) {
                     return $invoice->renovacao ? $this->renovarPorPix($invoice, $cobranca) : $this->ativar($invoice, $cobranca);
@@ -170,9 +180,12 @@ final class ConfirmarAssinatura
         $assinatura->forceFill([
             'proximo_vencimento' => $vencimento,
             'periodos_pagos' => $periodos,
+            'plano_id' => $invoice->plano_id ?? $assinatura->plano_id,
             'cota_snapshot' => (int) $invoice->cota_snapshot,
             'preco_snapshot_centavos' => $invoice->valor_centavos,
             'proxima_cota_em' => CotaMensal::proxima($assinatura->data_inicio, $pagoEm, $vencimento),
+            // STORY-082: o downgrade agendado vale a partir desta renovação (a Invoice já nasceu com o plano novo).
+            ...self::LIMPA_TROCA,
         ])->save();
 
         AuditLogger::log(
@@ -262,20 +275,24 @@ final class ConfirmarAssinatura
             return ['ignorado', $referencia?->id];
         }
 
-        $plano = Plano::query()->findOrFail($assinatura->plano_id);
-        $ciclo = CicloCobranca::from((string) $assinatura->ciclo);
+        // STORY-082: o downgrade agendado vale nesta renovação (plano, ciclo e preço novos).
+        $plano = Plano::query()->findOrFail($assinatura->troca_plano_id ?? $assinatura->plano_id);
+        $ciclo = CicloCobranca::from((string) ($assinatura->troca_ciclo ?? $assinatura->ciclo));
+        $cicloMudou = $ciclo->value !== $assinatura->ciclo;
         $pagoEm = $cobranca->pagoEm !== null ? CarbonImmutable::instance($cobranca->pagoEm) : CarbonImmutable::now();
-        $periodos = $assinatura->periodos_pagos + 1;
-        $vencimento = $ciclo->vencimento($assinatura->data_inicio, $periodos);
+        // Mudou o ciclo: o período novo nasce no fim do atual (a data de início é a âncora do vencimento).
+        $inicio = $cicloMudou ? CarbonImmutable::instance($assinatura->proximo_vencimento) : CarbonImmutable::instance($assinatura->data_inicio);
+        $periodos = $cicloMudou ? 1 : $assinatura->periodos_pagos + 1;
+        $vencimento = $ciclo->vencimento($inicio, $periodos);
         // Na renovação vale o catálogo de hoje para a cota (CA-5: o snapshot protege até aqui).
         $cota = $plano->cota_mensal;
 
-        if ($cobranca->valorCentavos !== $assinatura->preco_snapshot_centavos) {
+        if ($cobranca->valorCentavos !== ($assinatura->troca_preco_centavos ?? $assinatura->preco_snapshot_centavos)) {
             Log::warning('cobranca.valor_da_renovacao_mudou', [
                 'module' => 'cobranca',
                 'action' => 'processar_evento',
                 'assinatura_id' => $assinatura->id,
-                'anterior_centavos' => $assinatura->preco_snapshot_centavos,
+                'anterior_centavos' => $assinatura->troca_preco_centavos ?? $assinatura->preco_snapshot_centavos,
                 'cobrado_centavos' => $cobranca->valorCentavos,
             ]);
         }
@@ -302,9 +319,13 @@ final class ConfirmarAssinatura
         $this->carteira->renovarCota($assinatura->id, $cota, $vencimento);
 
         $assinatura->refresh()->forceFill([
+            'plano_id' => $plano->id,
+            'ciclo' => $ciclo->value,
+            'data_inicio' => $inicio,
             'periodos_pagos' => $periodos,
             'preco_snapshot_centavos' => $cobranca->valorCentavos,
-            'proxima_cota_em' => $ciclo === CicloCobranca::Anual ? CotaMensal::proxima($assinatura->data_inicio, $pagoEm, $vencimento) : null,
+            'proxima_cota_em' => $ciclo === CicloCobranca::Anual ? CotaMensal::proxima($inicio, $pagoEm, $vencimento) : null,
+            ...self::LIMPA_TROCA,
             'cartao_bandeira' => $cobranca->cartaoBandeira ?? $assinatura->cartao_bandeira,
             'cartao_ultimos4' => $cobranca->cartaoUltimos4 ?? $assinatura->cartao_ultimos4,
             ...($emAtraso ? self::FIM_DO_ATRASO : []),

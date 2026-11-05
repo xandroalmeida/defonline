@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: true
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: claude-sonnet-5-5
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: M
@@ -87,12 +87,26 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 
 ### Decisões tomadas
 
+Ver IDR-026. Em resumo: "superior" = preço por mês (empate só sobe se a cota for maior); a diferença do upgrade é uma Invoice avulsa (`troca_de_plano`), o plano só muda com o pagamento conferido; abaixo de R$ 5,00 aplica sem cobrança; downgrade e anual para mensal ficam agendados em `assinaturas.troca_*` e valem na renovação; o valor no provedor muda por `changeSubscriptionValue` (repetível por rotina horária); Pix anual: upgrade por novo QR Code da diferença, destino só anual; em atraso ou cancelada não troca; rota `plano.trocar` (`RotasCobranca::TROCAR`).
+
 ### Descobertas
+
+- A `/planos` (STORY-075) já mostrava "Trocar" quando a rota existia e `MeuPlano` já apontava para ela: a revisão é `/planos/trocar/{plano}/{ciclo}`.
+- Teste antigo de `MeuPlanoTest` ("só aparece quando a tela de troca existir") registrava a rota falsa `plano.trocar`; com a rota real a premissa acabou e ele foi trocado por dois testes (leva a `/planos`; não existe com a renovação cancelada).
+- A troca de ciclo imediata reancora `data_inicio`, o que reabre a contagem do arrependimento de 7 dias (ver IDR-026, para a 087).
 
 ### Bloqueios encontrados
 
+Nenhum. Perguntas ao PO (respostas adotadas, a confirmar): (1) upgrade em Pix anual gera QR Code da diferença; (2) ciclo segue a regra de preço por mês, e anual para mensal só no fim do ciclo.
+
 ### IDRs criados
+
+IDR-026.
 
 ### Cobertura final
 
+Testes: `tests/Domain/Cobranca/CalculoDeTrocaTest.php` (13), `tests/Feature/Cobranca/TrocaDePlanoTest.php` (28), `tests/Feature/Livewire/TrocarPlanoTest.php` (25), `tests/Browser/TrocaDePlanoBrowserTest.php` (4). CA-1: revisão com valor proporcional (domínio e tela). CA-2: pagamento aprova e vale na hora; recusa, expiração e cancelamento mantêm o plano. CA-3: primeiro e último dia, fora do ciclo, varredura de preços, nunca negativo. CA-4: agendado, visível em Meu plano, "Desfazer troca". CA-5: destino só ativo, plano atual desativado segue valendo. CA-6: 404 com o interruptor desligado.
+
 ### Evidências
+
+Suíte, Pint, PHPStan e Dusk inteiro verdes (ver relatório do agente). Pendente de produção: o Asaas aceitar `value`/`cycle` no `PUT /subscriptions/{id}` de cartão (ADR-010 Q5).

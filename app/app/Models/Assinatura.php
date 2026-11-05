@@ -45,8 +45,13 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $encerrada_em
  * @property string $meio_pagamento
  * @property Carbon|null $aviso_renovacao_pix_para
+ * @property string|null $troca_plano_id
+ * @property string|null $troca_ciclo
+ * @property int|null $troca_preco_centavos
+ * @property Carbon|null $troca_agendada_em
+ * @property bool $ajuste_provedor_pendente
  */
-#[Fillable(['usuario_id', 'plano_id', 'trial', 'status', 'ciclo', 'data_inicio', 'proximo_vencimento', 'data_cancelamento', 'cota_snapshot', 'cota_restante_ciclo', 'aviso_d2_em', 'aviso_d0_em', 'provedor', 'id_externo', 'preco_snapshot_centavos', 'periodos_pagos', 'proxima_cota_em', 'cartao_bandeira', 'cartao_ultimos4', 'aviso_renovacao_periodo', 'atraso_desde', 'atraso_cobranca_id', 'tentativas_cobranca', 'proxima_tentativa_em', 'atraso_aviso_em', 'encerramento_pendente_no_provedor', 'encerrada_em', 'meio_pagamento', 'aviso_renovacao_pix_para'])]
+#[Fillable(['usuario_id', 'plano_id', 'trial', 'status', 'ciclo', 'data_inicio', 'proximo_vencimento', 'data_cancelamento', 'cota_snapshot', 'cota_restante_ciclo', 'aviso_d2_em', 'aviso_d0_em', 'provedor', 'id_externo', 'preco_snapshot_centavos', 'periodos_pagos', 'proxima_cota_em', 'cartao_bandeira', 'cartao_ultimos4', 'aviso_renovacao_periodo', 'atraso_desde', 'atraso_cobranca_id', 'tentativas_cobranca', 'proxima_tentativa_em', 'atraso_aviso_em', 'encerramento_pendente_no_provedor', 'encerrada_em', 'meio_pagamento', 'aviso_renovacao_pix_para', 'troca_plano_id', 'troca_ciclo', 'troca_preco_centavos', 'troca_agendada_em', 'ajuste_provedor_pendente'])]
 final class Assinatura extends Model
 {
     use HasUuids;
@@ -79,6 +84,8 @@ final class Assinatura extends Model
             'encerrada_em' => 'datetime',
             'encerramento_pendente_no_provedor' => 'boolean',
             'aviso_renovacao_pix_para' => 'datetime',
+            'troca_agendada_em' => 'datetime',
+            'ajuste_provedor_pendente' => 'boolean',
         ];
     }
 }

@@ -74,9 +74,10 @@ final class TrocarCartao
         }
 
         $atraso = $assinatura->status === StatusAssinatura::EmAtraso;
-        $ciclo = CicloCobranca::from((string) $assinatura->ciclo);
-        $plano = Plano::query()->findOrFail($assinatura->plano_id);
-        $valor = $assinatura->preco_snapshot_centavos ?? IniciarAssinatura::precoDe($plano, $ciclo);
+        // STORY-082: com downgrade agendado o provedor já cobra o plano novo; o cartão novo nasce igual.
+        $ciclo = CicloCobranca::from((string) ($assinatura->troca_ciclo ?? $assinatura->ciclo));
+        $plano = Plano::query()->findOrFail($assinatura->troca_plano_id ?? $assinatura->plano_id);
+        $valor = $assinatura->troca_preco_centavos ?? $assinatura->preco_snapshot_centavos ?? IniciarAssinatura::precoDe($plano, $ciclo);
 
         $troca = TrocaDeCartao::query()->create([
             'usuario_id' => $usuario->id,

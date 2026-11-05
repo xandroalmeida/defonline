@@ -130,6 +130,13 @@
                                 @endif
                         @endswitch
 
+                        @if ($trocaAgendada !== null && $situacao === S::Ativo)
+                            <div class="mb-3 text-sm text-[color:var(--color-primary)]" aria-live="polite" dusk="screen-troca-agendado">
+                                <p class="m-0">Troca para o plano {{ $trocaAgendada->nome }}{{ $assinatura->troca_ciclo ? ' · '.$assinatura->troca_ciclo : '' }} agendada para {{ $dia($vencimento) }}. Dá para desfazer até lá.</p>
+                                <button type="button" class="btn btn--ghost mt-1" wire:click="desfazerTroca" @disabled($acaoBloqueada) dusk="screen-troca-desfazer">Desfazer troca</button>
+                            </div>
+                        @endif
+
                         @if ($paga && $renovaSozinha && $cartao && ! in_array($situacao, [S::Encerrado], true))
                             <p class="m-0 mb-3 text-sm text-[color:var(--color-secondary)]" dusk="screen-meuplano-cartao">Cartão {{ $cartao }}</p>
                         @endif

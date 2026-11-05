@@ -22,7 +22,9 @@ use App\Models\TrocaDeCartao;
 use App\Models\Usuario;
 use App\Services\Cobranca\GerirRenovacao;
 use App\Services\Cobranca\GestaoNegada;
+use App\Services\Cobranca\TrocaNegada;
 use App\Services\Cobranca\TrocarCartao;
+use App\Services\Cobranca\TrocarDePlano;
 use App\Support\Cobranca\HistoricoDeCobrancas;
 use App\Support\Cobranca\RotasCobranca;
 use App\Support\DataExibicao;
@@ -98,6 +100,28 @@ final class MeuPlano extends Component
             fn (Assinatura $a): string => 'Renovação reativada. Próxima cobrança em '.self::data($a->proximo_vencimento).'.',
             'Não conseguimos reativar agora. Sua renovação continua cancelada. Tente de novo.',
         );
+    }
+
+    /** STORY-082 CA-4 — desfaz o downgrade agendado, enquanto não valeu. */
+    public function desfazerTroca(TrocarDePlano $trocas): void
+    {
+        $usuario = Auth::user();
+        $this->mensagem = null;
+
+        if (! $usuario instanceof Usuario) {
+            return;
+        }
+
+        try {
+            $trocas->desfazer($usuario);
+            $this->avisar('Troca desfeita. Você continua no plano atual.', 'ok');
+        } catch (TrocaNegada $e) {
+            $this->avisar($e->motivo === TrocaNegada::ADMIN_PERSONIFICANDO
+                ? 'Você está acessando como administrador. Aqui é só leitura.'
+                : 'Não foi possível desfazer a troca agora. Atualize a página.', 'erro');
+        } catch (ProvedorIndisponivel) {
+            $this->avisar('Não conseguimos desfazer a troca agora. A troca continua agendada. Tente de novo.', 'erro');
+        }
     }
 
     public function trocarCartao(TrocarCartao $trocar): mixed
@@ -180,6 +204,7 @@ final class MeuPlano extends Component
             'urlTeste' => RotasCobranca::url(RotasCobranca::TESTE),
             'urlPlanos' => Route::has('planos') ? route('planos') : null,
             'urlComprar' => RotasCobranca::url(RotasCobranca::COMPRAR),
+            'trocaAgendada' => $assinatura === null ? null : TrocarDePlano::agendada($assinatura),
             'urlTrocarPlano' => Route::has(RotasCobranca::TROCAR) ? route('planos') : null,
         ])->layoutData(['title' => 'Meu plano']);
     }

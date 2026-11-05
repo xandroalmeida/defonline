@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Cobranca\Fake;
 
+use App\Domain\Cobranca\CicloCobranca;
 use App\Domain\Cobranca\CobrancaNoProvedor;
 use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\EventoDoProvedor;
@@ -122,6 +123,33 @@ final class FakePaymentProvider implements PaymentProvider
     public function resumeSubscription(ReferenciaProvedor $assinatura): void
     {
         $this->mudarAssinatura($assinatura, 'ativa');
+    }
+
+    public function changeSubscriptionValue(ReferenciaProvedor $assinatura, int $valorCentavos, CicloCobranca $ciclo, DateTimeImmutable $proximaCobrancaEm): void
+    {
+        $this->exigirDisponivel();
+
+        if (Cache::pull(self::PREFIXO.'falhar-assinatura') === true) {
+            throw new ProvedorIndisponivel('Falha simulada do provedor fake.');
+        }
+
+        Cache::put(self::PREFIXO."sub-valor:{$assinatura->id}", [
+            'valor' => $valorCentavos,
+            'ciclo' => $ciclo->value,
+            'proxima' => $proximaCobrancaEm->format('Y-m-d H:i:s'),
+        ], now()->addDays(self::TTL_DIAS));
+    }
+
+    /**
+     * O que o provedor fake cobra da assinatura agora (STORY-082); `null` se o valor nunca foi mudado.
+     *
+     * @return array{valor: int, ciclo: string, proxima: string}|null
+     */
+    public static function valorDaAssinatura(string $assinaturaId): ?array
+    {
+        $v = Cache::get(self::PREFIXO."sub-valor:{$assinaturaId}");
+
+        return is_array($v) ? $v : null;
     }
 
     public function getCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
@@ -337,7 +365,8 @@ final class FakePaymentProvider implements PaymentProvider
         Cache::put(self::PREFIXO."pay:{$nova}", [
             'checkout' => null,
             'referencia' => null,
-            'valor' => is_array($origem) ? $origem['valor'] : 0,
+            // Depois de `changeSubscriptionValue` (STORY-082) o provedor cobra o valor novo.
+            'valor' => (is_string($assinatura) ? self::valorDaAssinatura($assinatura)['valor'] ?? null : null) ?? (is_array($origem) ? $origem['valor'] : 0),
             'estado' => $estado->value,
             'pago_em' => $estado === EstadoCobranca::Paga ? now()->toIso8601String() : null,
             'assinatura' => $assinatura,

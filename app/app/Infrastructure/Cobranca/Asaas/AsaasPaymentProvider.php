@@ -149,6 +149,21 @@ final class AsaasPaymentProvider implements PaymentProvider
         $this->enviar('put', '/subscriptions/'.rawurlencode($assinatura->id), ['status' => 'ACTIVE']);
     }
 
+    /**
+     * STORY-082 — `PUT /subscriptions/{id}` com `value`, `cycle`, `nextDueDate` e `updatePendingPayments`
+     * (ADR-010 4.7). PENDENTE DE CONFIRMAÇÃO COM PAGAMENTO REAL: que o valor de uma assinatura de cartão possa
+     * mudar exige a tokenização habilitada na conta (ADR-010 Q5), que o sandbox não deixa provar sem pagar.
+     */
+    public function changeSubscriptionValue(ReferenciaProvedor $assinatura, int $valorCentavos, CicloCobranca $ciclo, DateTimeImmutable $proximaCobrancaEm): void
+    {
+        $this->enviar('put', '/subscriptions/'.rawurlencode($assinatura->id), [
+            'value' => round($valorCentavos / 100, 2),
+            'cycle' => $ciclo === CicloCobranca::Mensal ? 'MONTHLY' : 'YEARLY',
+            'nextDueDate' => DataExibicao::converter($proximaCobrancaEm)->format('Y-m-d'),
+            'updatePendingPayments' => true,
+        ]);
+    }
+
     public function getCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
     {
         $r = $this->enviar('get', '/payments/'.rawurlencode($cobranca->id));

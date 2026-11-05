@@ -133,7 +133,7 @@ final class ProcessarEvento
         }
 
         // Daqui em diante, sem assinatura na cobrança, a Invoice existe (a guarda acima já devolveu o resto).
-        if ($cobranca->assinaturaId !== null || $invoice->tipo === 'assinatura') {
+        if ($cobranca->assinaturaId !== null || in_array($invoice->tipo, ['assinatura', 'troca_de_plano'], true)) {
             $resultado = $this->assinaturas->aplicar($invoice, $cobranca, $evento->provedor);
 
             // A cobrança "de hoje" do cartão novo foi paga: a partir daqui o atraso não é mais dela.

@@ -91,6 +91,15 @@ interface PaymentProvider
     public function resumeSubscription(ReferenciaProvedor $assinatura): void;
 
     /**
+     * STORY-082 — muda o que a assinatura cobra daqui em diante: valor, ciclo e a data da próxima cobrança
+     * (cobranças já geradas e ainda não pagas também passam ao valor novo). Repetir o mesmo pedido não
+     * tem efeito a mais: é seguro tentar de novo.
+     *
+     * @throws ProvedorIndisponivel
+     */
+    public function changeSubscriptionValue(ReferenciaProvedor $assinatura, int $valorCentavos, CicloCobranca $ciclo, DateTimeImmutable $proximaCobrancaEm): void;
+
+    /**
      * Autentica e traduz um webhook bruto para o evento canônico.
      *
      * @throws WebhookInvalido se a autenticação falhar ou o corpo não for legível

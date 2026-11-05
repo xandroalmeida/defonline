@@ -71,13 +71,14 @@ final class IniciarRenovacaoPix
             throw CompraNaoPermitida::foraDaJanelaDeRenovacao();
         }
 
-        $plano = Plano::query()->find($assinatura->plano_id);
+        // STORY-082: o downgrade agendado vale nesta renovação: paga-se o plano novo, pelo preço escolhido.
+        $plano = Plano::query()->find($assinatura->troca_plano_id ?? $assinatura->plano_id);
 
-        if ($plano === null || ! $plano->ativo) {
+        if ($plano === null || ($assinatura->troca_plano_id === null && ! $plano->ativo)) {
             throw CompraNaoPermitida::planoIndisponivel();
         }
 
-        $valor = (int) $assinatura->preco_snapshot_centavos;
+        $valor = (int) ($assinatura->troca_preco_centavos ?? $assinatura->preco_snapshot_centavos);
         $aceiteId = $this->aceite->executar($usuario, $ip, $userAgent);
 
         // Clique repetido ou volta à tela: reaproveita o QR Code que ainda vale.
