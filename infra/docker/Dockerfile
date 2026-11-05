@@ -11,6 +11,7 @@
 # Targets explícitos: CI builda `--target runtime`; compose constrói `target: dev`.
 
 # ─── Stage 1: composer + vendor ─────────────────────────────────────────────
+# `composer:2` não tem ext-gd; o runtime tem (phpoffice/phpspreadsheet, ADR-008), por isso a checagem é ignorada só aqui.
 FROM composer:2 AS composer-deps
 WORKDIR /build
 COPY app/composer.json app/composer.lock ./
@@ -20,7 +21,8 @@ RUN composer install \
         --no-scripts \
         --no-progress \
         --no-autoloader \
-        --prefer-dist
+        --prefer-dist \
+        --ignore-platform-req=ext-gd
 
 # ─── Stage 2: Vite assets (STORY-019/024) ───────────────────────────────────
 # Tailwind v4 + Inter (Bunny) compilam para public/build/{manifest.json,assets/*}.
@@ -46,7 +48,7 @@ RUN apk add --no-cache \
         libzip-dev oniguruma-dev libpng-dev libxml2-dev icu-dev \
         postgresql-dev postgresql-client \
         nodejs npm \
-        && docker-php-ext-install pdo_pgsql zip bcmath \
+        && docker-php-ext-install pdo_pgsql zip bcmath gd \
         # PCOV — driver de cobertura leve (ADR-006 §3.1 + quality-standards §1.1/§2.2 +
         # STORY-010 CA-1 / IDR-003). Preferido a Xdebug por overhead (~10-20% vs 4-5×).
         # Habilitado por padrão na imagem, mas só ATIVA quando Pest é chamado com
