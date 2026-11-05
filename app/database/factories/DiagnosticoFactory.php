@@ -60,6 +60,8 @@ final class DiagnosticoFactory extends Factory
                 'destaque_positivo' => null,
                 'fallback_acionado' => false,
             ],
+            'empresa_snapshot' => fn (array $attrs) => EmpresaAnalisada::withoutGlobalScopes()->withTrashed()
+                ->findOrFail($attrs['empresa_analisada_id'])->snapshotParaDiagnostico(),
             'gerado_em' => now(),
         ];
     }

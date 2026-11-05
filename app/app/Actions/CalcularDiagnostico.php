@@ -84,6 +84,8 @@ final class CalcularDiagnostico
                 'payload_hash' => $payloadHash,
                 'indicadores_calculados' => $saida['indicadores_calculados'],
                 'resumo_executivo' => $saida['resumo_executivo'],
+                // STORY-064 CA-8: os dados da Receita ficam como estavam na emissão.
+                'empresa_snapshot' => $empresa->snapshotParaDiagnostico(),
                 'gerado_em' => now(),
             ]);
 

@@ -33,12 +33,11 @@
             <span class="pill" dusk="empresa-show-fonte">
                 Fonte: {{ $empresa->fonte_enriquecimento->rotulo() }}
             </span>
-            @if ($ficha && $empresa->enriquecido_at)
-                <span class="text-sm text-[color:var(--color-secondary)]" dusk="empresa-show-consultado-em">
-                    Dados da Receita de {{ $empresa->enriquecido_at->format('d/m/Y') }}
-                </span>
-            @endif
         </div>
+
+        @if ($empresa->tipo_documento === \App\Domain\TipoDocumento::Cnpj)
+            <div class="mb-4"><livewire:empresa.atualizar-receita :empresa="$empresa"/></div>
+        @endif
 
         @if ($ficha)
             {{-- STORY-063: ficha RFB completa, só-leitura (PDR-010). --}}

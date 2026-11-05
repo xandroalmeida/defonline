@@ -11,8 +11,7 @@
      * @var string $css      pdf.css com os tokens já resolvidos + @font-face da Inter
      * @var string $logoSvg  data URI do logo nas cores dos tokens
      */
-    $empresa = $diagnostico->empresa;
-    $nomeEmpresa = $empresa->nomeExibicao();
+    $nomeEmpresa = $diagnostico->nomeExibicao();
     $snapshot = (array) $diagnostico->indicadores_calculados;
     $nominais = ValoresNominais::doSnapshot((array) $diagnostico->quiz_payload, $diagnostico->motor_version);
 
@@ -34,7 +33,7 @@
 
     $setor = ['industria' => 'Indústria', 'comercio' => 'Comércio', 'servicos' => 'Serviços'][$diagnostico->setor]
         ?? ucfirst((string) $diagnostico->setor);
-    $rotuloDocumento = $empresa->tipo_documento->value === 'cpf' ? 'CPF' : 'CNPJ';
+    $rotuloDocumento = $diagnostico->rotuloDocumento();
 @endphp
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -55,16 +54,16 @@
         <h1 class="capa__titulo">Diagnóstico<br>Econômico-Financeiro</h1>
 
         <p class="capa__empresa">{{ $nomeEmpresa }}</p>
-        <p class="capa__razao">{{ $empresa->razaoSocialComplementar() ?? "\u{00A0}" }}</p>
+        <p class="capa__razao">{{ $diagnostico->razaoSocialComplementar() ?? "\u{00A0}" }}</p>
 
         <table class="capa__dados">
             <tr>
                 <td class="rotulo">{{ $rotuloDocumento }}</td>
-                <td>{{ $empresa->documentoFormatado() }}</td>
+                <td>{{ $diagnostico->documentoFormatado() }}</td>
             </tr>
             <tr>
                 <td class="rotulo">Localização</td>
-                <td>{{ $empresa->municipio }} / {{ $empresa->uf }}</td>
+                <td>{{ $diagnostico->localizacao() }}</td>
             </tr>
             <tr>
                 <td class="rotulo">Setor</td>

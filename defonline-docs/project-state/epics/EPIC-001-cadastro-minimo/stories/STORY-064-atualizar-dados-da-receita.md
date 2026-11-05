@@ -7,7 +7,7 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: true
-status: blocked
+status: in_review
 owner_agent: programador (claude-sonnet-5-5)
 created_at: 2026-11-02
 updated_at: 2026-11-05
@@ -41,6 +41,7 @@ Essa ação leva a base legada para a regra nova sem job em lote e sem estourar 
 - [ ] **CA-5.** Atualizações repetidas da mesma empresa em menos de 5 minutos usam o cache da consulta (IDR-004) e não geram nova chamada ao provedor. A tela informa que os dados já estão atualizados.
 - [ ] **CA-6.** Diagnósticos já emitidos não mudam: o relatório antigo continua mostrando os dados da empresa de quando foi gerado (verifique se isso já vale hoje e registre em "Notas do agente"; se não valer, pare e escale ao PO).
 - [ ] **CA-7.** Teste E2E: empresa legada manual → aviso → atualizar → ficha completa com as observações preservadas.
+- [ ] **CA-8.** (acrescentado em 2026-11-05, decisão aprovada pelo PO) O diagnóstico congela na emissão os dados da Receita que a ação pode mudar: razão social, nome fantasia da Receita, documento e município/UF. Tela e PDF leem desse snapshot. O nome informado pelo usuário (`nome_fantasia_informado`) continua lido ao vivo (PDR-017), na ordem: informado, fantasia do snapshot, razão social do snapshot. Atualizar a Receita não muda relatório nem PDF já emitidos; um diagnóstico novo usa os dados novos; editar o nome informado continua mudando os emitidos.
 
 ## Fora de escopo
 
@@ -71,13 +72,24 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`.
 ## Notas do agente
 
 ### Decisões tomadas
-Nenhuma ainda; nada foi implementado.
+- 2026-11-05 — **Decisão aprovada pelo PO em 2026-11-05** (proposta do orquestrador para destravar o CA-6, depois aprovada): Opção A. O diagnóstico ganha `empresa_snapshot` (jsonb, NOT NULL) com tipo e número do documento, razão social, fantasia da Receita e município/UF, gravado em `CalcularDiagnostico` (e na `DiagnosticoFactory`). Tela, PDF e nome do arquivo leem de `Diagnostico::nomeExibicao()`, `razaoSocialComplementar()`, `rotuloDocumento()`, `documentoFormatado()` e `localizacao()`. CA-8 acrescentado à estória.
+- Em CPF o nome comercial (`nome_fantasia`) é do usuário e editável (PDR-017 item 6), então fica de fora do snapshot e é lido ao vivo, como o nome informado.
+- Migration `2026_11_05_200020`: preenche os emitidos com os dados atuais da empresa, inclusive empresas excluídas (soft delete). Se o dono foi anonimizado (`usuarios.anonimizado_at`) ou a empresa não existe, grava marcador neutro ("Empresa removida", documento e local vazios, exibidos como "—"), sem copiar dado que a anonimização removeria. Depois torna a coluna NOT NULL.
+- `AtualizarFichaRfb` (service) + `Livewire\Empresa\AtualizarReceita`. Passa por `RfbConsultarCnpj`, então o cache de 5 min (IDR-004) vale. "Já atualizada" (CA-5) = a consulta devolvida não é mais nova que a gravada em `enriquecido_at`: não escreve, não audita e a tela diz "Os dados da Receita já estão atualizados." Vale também para a consulta feita no cadastro minutos antes.
+- Audit `empresa.rfb_atualizada` com `campos_alterados` (só nomes: colunas e chaves da ficha, e `fonte_enriquecimento` quando era manual). Nome informado, contato e observações não são tocados.
+- Falha: a ficha anterior fica intacta e a tela mostra as mesmas mensagens do CA-7 da STORY-063. O sucesso volta por redirect, porque título, breadcrumb e ficha mudam.
+- Design: não há spec dedicada. Segui a ficha da empresa e o DS: botão `secondary` pequeno, aviso de legada no mesmo estilo do aviso de situação não ativa (borda amarela do farol), só tokens existentes.
 
 ### Descobertas
-- 2026-11-05 — **CA-6 NÃO vale hoje.** A tabela `diagnosticos` guarda só `quiz_payload`, `indicadores_calculados` e `resumo_executivo`; não há cópia dos dados da empresa. A tela (`resources/views/diagnosticos/show.blade.php`, linhas 7-8, 46 e 51) e o PDF (`resources/views/diagnosticos/pdf.blade.php`, linhas 14-15 e 57-67; `app/Support/Relatorio/PdfDiagnostico.php`, linhas 67 e 137) leem `$diagnostico->empresa` ao vivo: nome de exibição, razão social, documento, município/UF. Se "Atualizar dados da Receita" trocar razão social, fantasia da Receita ou município/UF, os relatórios antigos mudam retroativamente. Isso contraria o CA-6 e o "snapshot imutável" do model `Diagnostico`.
-- 2026-11-05 — O restante é viável sobre a STORY-063: `EmpresaAnalisada::fichaRfb()`, `RfbConsultarCnpj` (cache de 300s, ignorado no mock) e `Livewire/Empresa/Observacoes` como modelo de componente. Para o CA-5, o `consultado_at` vem preservado do cache; se for igual a `enriquecido_at`, a consulta já está aplicada e dá para avisar "dados já atualizados".
+- 2026-11-05 — O CA-6 não valia: tela e PDF liam `$diagnostico->empresa` ao vivo (razão social, documento, município/UF). Resolvido pelo CA-8.
+- 2026-11-05 — Com a sessão do Postgres em America/Sao_Paulo (compose de dev) e a app em UTC, `enriquecido_at` (timestamptz) relido desloca o instante em 3h, embora o relógio gravado volte igual. Por isso a comparação do CA-5 usa o relógio (`Y-m-d H:i:s`) e não o timestamp.
+- 2026-11-05 — A primeira versão do snapshot usava um hook `creating` do model. Não funcionou nos testes do Quiz (eventos de model desligados por `Event::fake`), então a gravação é explícita na action e na factory.
+- 2026-11-05 — O mock da Receita ignora o cache. Os testes do CA-5 trocam o provedor para `cnpja` e injetam um cliente falso que conta chamadas; nenhum serviço real é chamado.
+- 2026-11-05 — Dusk completo: 42 verdes e 2 falhas em `PlanosBackofficeBrowserTest` (estória da cobrança, fora desta pista). Ver o relatório.
+
 ### Bloqueios encontrados
-- [ESCALONAMENTO-PO] CA-6 falha na verificação (ver Descobertas). A estória manda parar e escalar. Decisão necessária. Opção A: congelar no diagnóstico um snapshot dos dados da empresa (nome, razão social, documento, município/UF) na emissão, e fazer tela e PDF lerem dele; exige migração e decisão sobre os diagnósticos já emitidos (backfill com os dados atuais). Opção B: aceitar que o relatório reflita a empresa atual e reescrever o CA-6. Sugiro a A, por causa do "snapshot imutável" (IDR-010). Pode virar estória própria, pré-requisito desta.
+- CA-6 falhou na verificação e foi escalado; resolvido pela decisão aprovada pelo PO em 2026-11-05 (CA-8). Sem bloqueios abertos.
+
 ### IDRs criados
 ### Cobertura final
 ### Links de evidência
