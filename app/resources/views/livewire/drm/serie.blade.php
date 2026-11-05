@@ -66,10 +66,11 @@
                                 <p class="m-0 mt-2 text-[length:var(--text-body-sm)] {{ $textoSecundario }}" dusk="drm-serie-vs-anterior-{{ $l->competencia }}">{{ $l->vsAnterior }}</p>
                                 <p class="m-0 text-[length:var(--text-body-sm)] {{ $textoSecundario }}" dusk="drm-serie-vs-media-{{ $l->competencia }}">{{ $l->vsMedia }}</p>
                                 @if ($l->atipico)
-                                    <p class="m-0 mt-2 flex items-start gap-2 text-[length:var(--text-body-sm)] text-[color:var(--color-primary)]" dusk="drm-serie-atipico-explicacao-{{ $l->competencia }}">
-                                        <span>{{ $l->explicacao }}</span>
+                                    {{-- <div>, não <p>: o <x-help> tem <div> e o parser fecharia o <p> no meio do componente Alpine. --}}
+                                    <div class="m-0 mt-2 flex items-start gap-2 text-[length:var(--text-body-sm)] text-[color:var(--color-primary)]">
+                                        <span dusk="drm-serie-atipico-explicacao-{{ $l->competencia }}">{{ $l->explicacao }}</span>
                                         <x-help id="drm-serie-atipico-{{ $l->competencia }}" :text="config('drm.serie.atipico_ajuda')" label="Por que este mês é atípico"/>
-                                    </p>
+                                    </div>
                                 @endif
                             @else
                                 <p class="m-0 mt-2 {{ $textoSecundario }}" dusk="drm-serie-ausencia-{{ $l->competencia }}">{{ $l->rascunhoTexto }}</p>
