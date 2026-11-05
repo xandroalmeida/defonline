@@ -31,11 +31,13 @@ A STORY-081 dá ao usuário "Cancelar renovação", "Reativar renovação" e "Tr
 - **Plano sem recorrência no provedor** (`id_externo` nulo — o Pix anual da 080): sem cancelar nem trocar cartão; a tela diz até quando vai o acesso (ajuste do ADR-010).
 - Porta `PaymentProvider` ganha `cancelSubscription`, `suspendSubscription`, `resumeSubscription` (o ADR-010 previa só `cancelSubscription`).
 
-## Pendências (não verificadas contra o Asaas real)
+## Verificação no sandbox do Asaas (2026-11-05, sem pagamento real; dados de teste removidos)
 
-1. `PUT /subscriptions/{id}` aceitar `status` (`INACTIVE`/`ACTIVE`) e religar não gerar cobrança retroativa.
-2. Checkout `RECURRENT` com `nextDueDate` futuro: se NÃO cobra no ato (senão a troca em dia cobra em dobro).
-3. `CHECKOUT_PAID` trazer `checkout.subscription`; sem isso a troca fica `pendente` com alerta `cobranca.troca_de_cartao_sem_assinatura`.
+- **Confirmado:** `PUT /subscriptions/{id}` com `{"status":"INACTIVE"}` e depois `{"status":"ACTIVE"}` responde 200 e o `GET` seguinte reflete cada estado (testado numa assinatura BOLETO, que tem a mesma máquina de status da de cartão). `DELETE` responde 200 com `deleted=true`. Suspender/religar está, portanto, correto no adaptador.
+- **Confirmado:** `POST /checkouts` RECURRENT/CREDIT_CARD aceita `nextDueDate` hoje e daqui a 3 dias (200, mesmas chaves de resposta), e o `POST /checkouts/{id}/cancel` funciona. Antes de alguém pagar, nenhuma cobrança é criada (0 cobranças por `externalReference`), seja a data hoje ou futura.
+- **NÃO foi possível confirmar sem pagar:** se, ao concluir o checkout com `nextDueDate` futuro, o cartão é cobrado na hora (risco de cobrança em dobro na troca em dia) ou só na data. O `GET /checkouts/{id}` responde 404 no sandbox, então nem o estado do checkout é consultável. O sandbox, portanto, não mostrou risco, mas também não o descartou. Passo para fechar: pagar um checkout com `nextDueDate` futuro com o cartão de teste (`4539 6560 4839 2220`) e listar `/payments?subscription=...` (exige URL pública de webhook, ADR-010 pendência 1). **Até lá, não ligar a cobrança em produção sem esse teste.** O fluxo não foi alterado: não há evidência para escolher outro desenho.
+- **Não confirmado:** religar (`ACTIVE`) uma assinatura que passou do vencimento enquanto suspensa gera cobrança retroativa? O fluxo só reativa dentro do ciclo pago, então a data ainda não passou; o caso fica de fora.
+- **Não confirmado:** `CHECKOUT_PAID` trazer `checkout.subscription` (precisa de pagamento). Sem ele a troca fica `pendente` com alerta `cobranca.troca_de_cartao_sem_assinatura`.
 
 ## Consequências
 

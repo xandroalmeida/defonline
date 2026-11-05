@@ -111,8 +111,8 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 - O fake agora conhece a página da troca de cartão (`/pagamentos/fake/troca/{troca}`), decidida pela existência da troca na referência do checkout.
 
 ### Bloqueios encontrados
-- Nenhum. Não verificado contra o Asaas real (ver IDR-021, "Pendências"): (1) `PUT /subscriptions/{id}` com `status` INACTIVE/ACTIVE; (2) `nextDueDate` futuro no Checkout recorrente não cobrar no ato (senão a troca em dia cobra em dobro: validar no sandbox ANTES de ligar a cobrança); (3) `CHECKOUT_PAID` trazer `checkout.subscription`.
-- Dúvidas ao PO/Arquiteto: (a) cancelar em atraso: hoje não há; devo permitir? (b) em atraso o cartão novo cobra o valor da assinatura na hora; se o provedor recusar, a troca falha e a assinatura segue em atraso com o cartão antigo (conforme a spec §4.3).
+- Nenhum. Sandbox do Asaas verificado depois (IDR-021): `PUT status` INACTIVE/ACTIVE funciona e o checkout aceita data futura sem gerar cobrança antes do pagamento. Seguem não verificáveis sem pagar: (2) `nextDueDate` futuro no Checkout recorrente não cobrar no ato (senão a troca em dia cobra em dobro: validar no sandbox ANTES de ligar a cobrança); (3) `CHECKOUT_PAID` trazer `checkout.subscription`.
+- Dúvidas ao PO/Arquiteto: (a) RESPONDIDA pelo orquestrador: cancelar em atraso precisa existir (Termo v2: "a qualquer momento"). NÃO implementado nesta estória: a régua de falha é da STORY-079 em outra pista, e o orquestrador trata depois da junção. Hoje, em atraso, a tela só oferece "Trocar cartão" e `GerirRenovacao::cancelar` só aceita `Ativa`; (b) em atraso o cartão novo cobra o valor da assinatura na hora; se o provedor recusar, a troca falha e a assinatura segue em atraso com o cartão antigo (conforme a spec §4.3).
 
 ### IDRs criados
 - IDR-021 (cancelar = suspender a recorrência; troca de cartão por novo checkout, antiga cancelada após confirmação).
