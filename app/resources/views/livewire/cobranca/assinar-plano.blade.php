@@ -18,7 +18,7 @@
     @elseif ($vigente)
         <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-4">Assinar plano {{ $plano->nome }}</h1>
         <x-drm.aviso-inline variant="info" dusk="screen-checkout-ja-assinante">
-            <p class="m-0 mb-2">Você já tem o plano {{ $planoVigente?->nome }}, que renova em {{ $vigente->proximo_vencimento->setTimezone('America/Sao_Paulo')->format('d/m/Y') }}.</p>
+            <p class="m-0 mb-2">Você já tem o plano {{ $planoVigente?->nome }}, {{ $vigente->status === \App\Domain\Cobranca\StatusAssinatura::Cancelada ? 'com a renovação cancelada e acesso até' : 'que renova em' }} {{ $vigente->proximo_vencimento->setTimezone('America/Sao_Paulo')->format('d/m/Y') }}.</p>
             <div class="flex flex-wrap gap-3">
                 @if ($urlMeuPlano)<x-button :href="$urlMeuPlano" variant="secondary">Ver meu plano</x-button>@endif
                 @if ($urlTrocar)<x-button :href="$urlTrocar" variant="secondary">Trocar de plano</x-button>@endif

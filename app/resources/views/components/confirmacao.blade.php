@@ -7,9 +7,10 @@
             titulo: '',
             mensagem: '',
             rotulo: '',
+            voltar: 'Cancelar',
             acao: null,
             abrir(pedido) {
-                Object.assign(this, pedido);
+                Object.assign(this, { voltar: 'Cancelar' }, pedido);
                 this.$root.showModal();
             },
             confirmar() {
@@ -27,7 +28,7 @@
         <h2 id="confirmacao-titulo" class="text-lg font-medium m-0 mb-2" x-text="titulo"></h2>
         <p id="confirmacao-mensagem" class="text-sm text-[color:var(--color-secondary)] m-0 mb-6" x-text="mensagem" dusk="confirmacao-mensagem"></p>
         <div class="flex justify-end gap-2">
-            <x-button type="button" variant="secondary" autofocus x-on:click="$root.close()" dusk="confirmacao-cancelar">Cancelar</x-button>
+            <x-button type="button" variant="secondary" autofocus x-on:click="$root.close()" dusk="confirmacao-cancelar"><span x-text="voltar"></span></x-button>
             <x-button type="button" variant="destructive" x-on:click="confirmar()" dusk="confirmacao-confirmar"><span x-text="rotulo"></span></x-button>
         </div>
     </div>

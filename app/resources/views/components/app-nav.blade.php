@@ -62,6 +62,19 @@
         ]]);
     }
 
+    // STORY-081 — "Meu plano", logo depois de "Planos", também só com a cobrança ligada.
+    if (\Illuminate\Support\Facades\Route::has('meu-plano') && \App\Models\CobrancaConfig::ligada()) {
+        $posicao = collect($items)->search(fn (array $i): bool => $i['dusk'] === 'app-nav-planos');
+        array_splice($items, $posicao === false ? 3 : $posicao + 1, 0, [[
+            'label' => 'Meu plano',
+            'icon' => 'user',
+            'href' => route('meu-plano'),
+            'active' => request()->routeIs('meu-plano'),
+            'disabled' => false,
+            'dusk' => 'app-nav-meu-plano',
+        ]]);
+    }
+
     /*
      * STORY-065 / STORY-067 — cada item da área de administração só aparece para
      * quem tem a permissão dele. Sem nenhum, a seção some.

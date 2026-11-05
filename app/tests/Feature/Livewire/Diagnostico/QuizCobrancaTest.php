@@ -284,16 +284,18 @@ describe('CA-11 texto de cada causa', function () {
     });
 
     it('esconde as ações enquanto as telas não existem e as mostra quando a rota nasce', function () {
-        // Causa cujas ações (cartão e meu plano) pertencem a estórias ainda sem tela. A rota de
-        // créditos nasceu na STORY-076, por isso a causa `SemNada` já não serve a este cenário.
+        // Causa cujas ações são `cartao` (STORY-079, ainda sem tela) e `meu-plano` (STORY-081, que já existe).
         $acoes = TextoBloqueio::para(new Bloqueio(MotivoBloqueio::EmAtraso))['acoes'];
 
-        expect(TextoBloqueio::disponiveis($acoes))->toBe([]);
+        expect(TextoBloqueio::disponiveis($acoes))->toBe([['chave' => 'meu-plano', 'rotulo' => 'Ver meu plano', 'href' => route('meu-plano')]]);
 
-        Route::get('/meu-plano-teste', fn () => 'meu plano')->name('meu-plano');
+        Route::get('/cartao-teste', fn () => 'cartao')->name('cartao.atualizar');
         Route::getRoutes()->refreshNameLookups();
 
-        expect(TextoBloqueio::disponiveis($acoes))->toBe([['chave' => 'meu-plano', 'rotulo' => 'Ver meu plano', 'href' => url('/meu-plano-teste')]]);
+        expect(TextoBloqueio::disponiveis($acoes))->toBe([
+            ['chave' => 'cartao', 'rotulo' => 'Atualizar cartão', 'href' => url('/cartao-teste')],
+            ['chave' => 'meu-plano', 'rotulo' => 'Ver meu plano', 'href' => route('meu-plano')],
+        ]);
     });
 
     it('com a rota existente a ação aparece no bloqueio, primária primeiro', function () {
