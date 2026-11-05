@@ -1599,7 +1599,7 @@
       "title": "Série histórica e comparativos — o que mudou em relação ao mês passado e à média",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "estimated_session_size": "L",
       "blocked_by": [
         "STORY-045",
@@ -1616,14 +1616,14 @@
         "STORY-056",
         "STORY-057"
       ],
-      "note": "Fecha o Checkpoint 2. É o que transforma o DRM de planilha em produto e justifica assinatura anual. [DECIDIR-D] resolvida pelo PDR-004: entrega o tratamento interino de rubricas sazonais (alerta A4 + marcação de atípico), sem conta patrimonial. A provisão completa está sob spike na STORY-058 e não altera esta estória. | 2026-08-06: spec SCREEN-STORY-046-serie-historica em `ready` e DDRs `accepted` (PDR-007) — invariante 12 satisfeita, sem decisão de design pendente à frente.",
+      "note": "c6fe227, a162824. Revisado pelo orquestrador na main.",
       "epic_id": "EPIC-010",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-051-serie-historica-comparativos.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-06",
+      "updated_at": "2026-11-05",
       "checkpoint": "CP2",
       "design_screen_id": "SCREEN-STORY-046-serie-historica"
     },
@@ -1683,7 +1683,7 @@
       "title": "Faróis e leitura em linguagem simples — o que este mês está dizendo",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "estimated_session_size": "M",
       "blocked_by": [
         "STORY-048",
@@ -1694,14 +1694,14 @@
       "blocks": [
         "STORY-057"
       ],
-      "note": "Reaproveita a mecânica de farol e resumo executivo do Diagnóstico, com faixas e textos próprios (STORY-052). Leitura determinística, nunca generativa. Ganhou CA-1b (grau zero: todas as faixas não calibradas, tela funciona) e CA-1c (calibrar não exige deploy de código). Cobertura ≥98%. | [CONFLITO-PO] aberto em 2026-08-04 pelo Arquiteto: o CA-8 (versão do pacote de conteúdo gravada no snapshot do lançamento) colide com o ADR-007 e com a ratificação do PO (faróis fora do snapshot), e não é implementável como está — o snapshot nasce no CP1 e os faróis são do CP3, então carimbá-lo depois exigiria escrever em coluna imutável (mesmo beco do IDR-013). RESOLVIDO em 2026-08-04 pela saída (a), por delegação do PO ao Arquiteto: CA-8 reescrito — a interpretação é derivada na exibição, nunca gravada no snapshot, e a tela nomeia a diferença entre medição (valores, imutáveis) e leitura (farol, recalibrável). Fundamento decisivo: congelar deixaria permanentemente sem farol todo mês lançado antes da calibração da EBC. | 2026-08-06 (PDR-009 §1): nasce sabendo que pode entregar ZERO farol e ZERO leitura em homologação — com todas as faixas `nao_calibrada`, isso é aprovação e não reprovação. A regra 'faixa não calibrada não produz farol' é do motor, não da tela.",
+      "note": "36612e3..8193d5d; frases próprias aguardam o PO. Revisado pelo orquestrador na main.",
       "epic_id": "EPIC-010",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-054-farois-leitura-simples.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-06",
+      "updated_at": "2026-11-05",
       "checkpoint": "CP3"
     },
     {
@@ -1710,7 +1710,7 @@
       "title": "Exportação da Demonstração — planilha XLSX e camada de impressão",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "estimated_session_size": "M",
       "blocked_by": [
         "STORY-048",
@@ -1720,14 +1720,14 @@
       "blocks": [
         "STORY-057"
       ],
-      "note": "CA-3 (PDF) pode ser n/a se o ADR da STORY-053 recomendar adiar. Fonte é o snapshot, nunca recálculo. A planilha original do Key User é a referência de layout já validada. | 2026-08-06 (PDR-008 §2): escopo alinhado à ADR-008. XLSX síncrono sem retenção; CA-3 (PDF) resolvido como n/a — PDF devolvido ao EPIC-007; CA-4 = 1 arquivo, 2 abas, com fórmulas; CA-10 relê o XLSX e avalia as fórmulas; novos CA-12 (camada @media print sobre o mesmo markup) e CA-13 (o botão não se chama 'Exportar PDF'). A camada de impressão mora aqui, não na STORY-049. STORY-053 saiu de blocked_by (fechada). Slug do arquivo é histórico.",
+      "note": "40ff6f0..afc2b1f; CA-3 n/a pelo ADR-008. Revisado pelo orquestrador na main.",
       "epic_id": "EPIC-010",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-055-exportacao-planilha-pdf.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-06",
+      "updated_at": "2026-11-05",
       "checkpoint": "CP3"
     },
     {
@@ -1736,7 +1736,7 @@
       "title": "Eventos analíticos do DRM — instrumentar recorrência, atrito e alcance",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "estimated_session_size": "S",
       "blocked_by": [
         "STORY-047",
@@ -1747,14 +1747,14 @@
       "blocks": [
         "STORY-057"
       ],
-      "note": "Cumpre a condição do PDR-003 de medir adesão antes de construir cobrança. Sem esta estória o épico fecha sem poder responder se a hipótese se confirmou. Zero PII, zero valor financeiro absoluto.",
+      "note": "fb06937..3bba7a9. Revisado pelo orquestrador na main.",
       "epic_id": "EPIC-010",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-056-eventos-analiticos-drm.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-04",
+      "updated_at": "2026-11-05",
       "checkpoint": "CP3"
     },
     {
@@ -2280,13 +2280,13 @@
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-087"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2299,12 +2299,13 @@
         "STORY-077"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-078-compra-de-creditos-com-cartao.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "5939666. Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-083",
         "STORY-086",
@@ -2312,7 +2313,7 @@
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2324,18 +2325,19 @@
         "STORY-077"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-079-renovacao-e-falha-de-cobranca.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "ae2bba5..535f7fa; IDR-020. Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-087"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2348,12 +2350,13 @@
         "STORY-077"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-080-pix-no-plano-anual.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "55dab18; integração f6b4f7c. Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-082",
         "STORY-083",
@@ -2361,7 +2364,7 @@
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2373,7 +2376,8 @@
         "STORY-077"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-081-meu-plano-e-cancelamento.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "9e7a29e..6157921, 17348e5; IDR-021. Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
@@ -4002,6 +4006,20 @@
         "title": "Assinatura com cartão no checkout hospedado",
         "status": "accepted",
         "path": "decisions/idr/IDR-019-assinatura-invoice-por-cobranca-e-cota-mensal-do-anual.md",
+        "decided_at": "2026-11-05"
+      },
+      {
+        "id": "IDR-020",
+        "title": "IDR-020 — Régua de cobrança e conciliação",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-020-regua-de-cobranca-e-conciliacao.md",
+        "decided_at": "2026-11-05"
+      },
+      {
+        "id": "IDR-021",
+        "title": "IDR-021 — Cancelar a renovação e trocar o cartão",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-021-meu-plano-cancelar-renovacao-e-troca-de-cartao.md",
         "decided_at": "2026-11-05"
       }
     ],
