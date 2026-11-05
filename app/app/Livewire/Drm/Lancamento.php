@@ -25,6 +25,7 @@ use App\Models\DrmLancamento;
 use App\Models\DrmPreferencia;
 use App\Models\DrmRascunho;
 use App\Models\EmpresaAnalisada;
+use App\Observabilidade\EventosDrm;
 use App\Support\Cobranca\AcessoDrm;
 use App\Support\Drm\HistoricoDrm;
 use App\Support\Drm\MensagensDrm;
@@ -178,7 +179,9 @@ final class Lancamento extends Component
             return;
         }
 
-        $this->irPara($this->bloco_atual + 1);
+        $concluido = $this->bloco_atual;
+        $rascunho = $this->irPara($this->bloco_atual + 1);
+        $this->evento(fn () => EventosDrm::blocoConcluido($rascunho, $this->empresa, $this->setor(), $concluido));
     }
 
     public function voltar(): void
@@ -214,7 +217,8 @@ final class Lancamento extends Component
         }
 
         $this->repetidos = [];
-        $this->irPara(self::BLOCOS);
+        $rascunho = $this->irPara(self::BLOCOS);
+        $this->evento(fn () => EventosDrm::blocoConcluido($rascunho, $this->empresa, $this->setor(), 1)); // só o bloco 1 foi validado.
     }
 
     public function dispensarOferta(): void
@@ -413,6 +417,7 @@ final class Lancamento extends Component
             // B1: alguém (outra aba, duplo clique) lançou antes. O banco decidiu; só oferecemos as saídas.
             $this->competencia_ja_lancada = true;
             $this->bloco_atual = 1;
+            $this->eventoBloqueio(new Ocorrencia('B1', 'D00'), 1);
 
             return null;
         } catch (Throwable $e) {
@@ -472,13 +477,15 @@ final class Lancamento extends Component
 
     // ------------------------------------------------------------------ rascunho e carga
 
-    private function irPara(int $bloco): void
+    private function irPara(int $bloco): DrmRascunho
     {
-        $this->salvarRascunho(min(self::BLOCOS, $bloco));
+        $rascunho = $this->salvarRascunho(min(self::BLOCOS, $bloco));
         $this->bloco_atual = min(self::BLOCOS, $bloco);
         $this->retomando_rascunho = false;
         $this->rascunho_expirou = false;
         $this->dispatch('focar-bloco');
+
+        return $rascunho;
     }
 
     /**
@@ -518,6 +525,7 @@ final class Lancamento extends Component
         $rascunho = DrmRascunho::paraCompetencia($this->empresa, $competencia->dia01());
         if ($rascunho !== null) {
             $this->hidratarDoRascunho($rascunho);
+            $this->eventoRetomada($rascunho);
 
             return;
         }
@@ -598,6 +606,7 @@ final class Lancamento extends Component
         if ($rascunho !== null && $rascunho->origem === 'retificacao') {
             $this->hidratarDoRascunho($rascunho);
             $this->base_versao = (int) $rascunho->base_versao;
+            $this->eventoRetomada($rascunho);
 
             return;
         }
@@ -623,12 +632,12 @@ final class Lancamento extends Component
         return $modos;
     }
 
-    private function salvarRascunho(int $bloco): void
+    private function salvarRascunho(int $bloco): DrmRascunho
     {
         $competencia = $this->competenciaObjeto();
 
-        DB::transaction(function () use ($competencia, $bloco): void {
-            DrmRascunho::query()->updateOrCreate(
+        return DB::transaction(function () use ($competencia, $bloco): DrmRascunho {
+            $rascunho = DrmRascunho::query()->updateOrCreate(
                 ['empresa_analisada_id' => $this->empresa->id, 'competencia' => $competencia->dia01()],
                 [
                     'usuario_id' => Auth::id(),
@@ -653,7 +662,53 @@ final class Lancamento extends Component
             if (! $this->retificando) {
                 DrmPreferencia::gravarModos($this->empresa, $this->modosObjeto());
             }
+
+            // STORY-056 CA-2: a primeira gravação é o lançamento "iniciado" (mesmo critério do `quiz_iniciado`).
+            if ($rascunho->wasRecentlyCreated) {
+                $this->evento(fn () => EventosDrm::lancamentoIniciado($rascunho, $this->empresa, $this->setor(), $this->mes_origem !== ''));
+            }
+
+            return $rascunho;
         });
+    }
+
+    // ------------------------------------------------------------------ eventos analíticos (STORY-056)
+
+    /**
+     * Só uma ação liberada por {@see AcessoDrm} gera evento de lançamento (STORY-084 CA-7): com o acesso
+     * perdido no meio da sessão, a tela pode até continuar aberta, mas nada dela vira dado de adesão.
+     */
+    private function evento(callable $emitir): void
+    {
+        if (AcessoDrm::permitido((string) Auth::id())) {
+            $emitir();
+        }
+    }
+
+    /** Voltar a um rascunho depois de uma pausa: o mecanismo que o PDR-003 quer medir (CA-4). */
+    private function eventoRetomada(DrmRascunho $rascunho): void
+    {
+        $pausa = (int) config('drm.eventos.retomada_apos_minutos');
+        if ($rascunho->updated_at->diffInMinutes(now(), true) < $pausa) {
+            return;
+        }
+
+        $this->evento(fn () => EventosDrm::rascunhoRetomado($rascunho, $this->empresa, $this->setor(), (int) (((array) $rascunho->rascunho_payload)['bloco'] ?? 1)));
+    }
+
+    /** Regra bloqueante B1–B4 que impediu de avançar (CA-5): o insumo da taxa de atrito por regra. */
+    private function eventoBloqueio(Ocorrencia $bloqueio, int $bloco): void
+    {
+        $this->evento(fn () => EventosDrm::regraBloqueanteAcionada(
+            $this->getId(),
+            $this->empresa,
+            $this->setor(),
+            $this->competenciaObjeto()->texto(),
+            $this->retificando ? 'retificacao' : 'inicial',
+            $bloco,
+            $bloqueio->codigo,
+            $bloqueio->campo,
+        ));
     }
 
     // ------------------------------------------------------------------ validação
@@ -674,12 +729,14 @@ final class Lancamento extends Component
             foreach (ValidaLancamento::bloqueios($lancamento, $competencia, $this->hoje()) as $bloqueio) {
                 if ($bloqueio->campo === 'D00' || in_array($bloqueio->campo, $campos, true)) {
                     $ok = false;
+                    $this->eventoBloqueio($bloqueio, $bloco);
                 }
             }
         }
 
         if ($bloco === 1 && $this->competencia_ja_lancada) {
             $ok = false;
+            $this->eventoBloqueio(new Ocorrencia('B1', 'D00'), 1);
         }
 
         $this->tentou = ! $ok;
@@ -697,9 +754,12 @@ final class Lancamento extends Component
         $lancamento = $this->lancamento();
         $competencia = $this->competenciaValida();
 
-        $ok = $this->errosDeCampo($lancamento, array_keys($lancamento->erros))
-            && $competencia !== null
-            && ValidaLancamento::bloqueios($lancamento, $competencia, $this->hoje()) === [];
+        $ok = $this->errosDeCampo($lancamento, array_keys($lancamento->erros));
+        $bloqueios = $competencia === null ? [] : ValidaLancamento::bloqueios($lancamento, $competencia, $this->hoje());
+        foreach ($bloqueios as $bloqueio) {
+            $this->eventoBloqueio($bloqueio, $this->blocoDoCampo((string) $bloqueio->campo));
+        }
+        $ok = $ok && $competencia !== null && $bloqueios === [];
 
         $this->tentou = ! $ok;
 

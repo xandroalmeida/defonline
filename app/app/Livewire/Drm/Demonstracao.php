@@ -10,6 +10,7 @@ use App\Domain\Drm\Setor;
 use App\Models\DrmLancamento;
 use App\Models\DrmPreferencia;
 use App\Models\EmpresaAnalisada;
+use App\Observabilidade\EventosDrm;
 use App\Support\Drm\ComparativosVisao;
 use App\Support\Drm\DemonstracaoVisao;
 use App\Support\Drm\HistoricoDrm;
@@ -46,9 +47,19 @@ final class Demonstracao extends Component
     {
         $this->empresa = $empresa;
         $this->competencia = Competencia::deTexto($competencia)->texto();
-        abort_if($this->lancamento() === null, 404);
+        $lancamento = $this->lancamento();
+        abort_if($lancamento === null, 404);
 
         $this->posicao = DrmPreferencia::daEmpresa($empresa)->posicao_prolabore;
+
+        // STORY-056 CA-6: leitura do resultado. Leitura do histórico nunca passa por AcessoDrm (STORY-084).
+        EventosDrm::demonstracaoVisualizada($lancamento, $empresa, $this->posicao);
+    }
+
+    /** O clique em "Imprimir / Salvar em PDF": a janela de impressão é do navegador, o evento é nosso (CA-6). */
+    public function registrarImpressao(): void
+    {
+        EventosDrm::exportado($this->lancamento() ?? abort(404), $this->empresa, EventosDrm::FORMATO_IMPRESSAO);
     }
 
     /** Alterna entre "retirada fora" e "retirada dentro". Só preferência: não toca o lançamento. */
