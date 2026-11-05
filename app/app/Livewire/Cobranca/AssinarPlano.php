@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Livewire\Cobranca;
 
 use App\Domain\Cobranca\CicloCobranca;
+use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\ProvedorIndisponivel;
+use App\Domain\Cobranca\RenovacaoPix;
 use App\Domain\Cobranca\VitrinePrecos;
 use App\Jobs\EnviarEmailConfirmacao;
 use App\Models\Assinatura;
@@ -21,6 +23,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
@@ -37,6 +40,10 @@ final class AssinarPlano extends Component
 
     public bool $aceito = false;
 
+    /** `cartao` ou `pix`; o Pix só existe no ciclo anual (STORY-080). */
+    #[Url(as: 'meio')]
+    public string $meio = 'cartao';
+
     public bool $falhaDoProvedor = false;
 
     public bool $confirmacaoReenviada = false;
@@ -47,6 +54,19 @@ final class AssinarPlano extends Component
 
         $this->planoId = $plano;
         $this->ciclo = (CicloCobranca::tryFrom($ciclo) ?? CicloCobranca::Mensal)->value;
+        $this->updatedMeio();
+    }
+
+    /** Meio inválido, ou Pix fora do anual, volta ao cartão. Trocar o meio não zera o aceite. */
+    public function updatedMeio(): void
+    {
+        $meio = MeioPagamento::tryFrom($this->meio);
+
+        if ($meio === null || ($meio === MeioPagamento::Pix && $this->ciclo !== CicloCobranca::Anual->value)) {
+            $this->meio = MeioPagamento::Cartao->value;
+        }
+
+        $this->falhaDoProvedor = false;
     }
 
     public function updatedCiclo(): void
@@ -55,7 +75,7 @@ final class AssinarPlano extends Component
             $this->ciclo = CicloCobranca::Mensal->value;
         }
 
-        $this->falhaDoProvedor = false;
+        $this->updatedMeio();
     }
 
     public function assinar(IniciarAssinatura $iniciar): mixed
@@ -77,7 +97,7 @@ final class AssinarPlano extends Component
         }
 
         try {
-            $invoice = $iniciar->executar($usuario, $plano, CicloCobranca::from($this->ciclo), request()->ip(), substr((string) request()->userAgent(), 0, 255));
+            $invoice = $iniciar->executar($usuario, $plano, CicloCobranca::from($this->ciclo), request()->ip(), substr((string) request()->userAgent(), 0, 255), MeioPagamento::from($this->meio));
         } catch (CompraNaoPermitida) {
             // A própria tela já mostra o motivo (e-mail, admin, plano, já assinante): só reavalia o estado.
             return null;
@@ -121,6 +141,10 @@ final class AssinarPlano extends Component
             'preco' => $plano === null ? 0 : IniciarAssinatura::precoDe($plano, $ciclo),
             'economia' => $plano === null ? 0 : VitrinePrecos::economiaPercentual($plano->preco_mensal_centavos, $plano->preco_anual_centavos),
             'proximaCobranca' => $ciclo->vencimento(now())->setTimezone('America/Sao_Paulo'),
+            'meioAtual' => MeioPagamento::from($this->meio),
+            'minutosPix' => (int) config('services.payments.pix_expiracao_minutos', 30),
+            'avisoDias' => RenovacaoPix::AVISO_DIAS,
+            'urlRenovar' => $vigente?->pagoComPix() === true && RenovacaoPix::janelaAberta($vigente->proximo_vencimento, now()) ? RotasCobranca::url(RotasCobranca::RENOVAR) : null,
             'vigente' => $vigente,
             'planoVigente' => $vigente === null ? null : Plano::query()->find($vigente->plano_id),
             'emTeste' => $usuario instanceof Usuario && $this->emTeste($usuario),

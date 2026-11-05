@@ -73,7 +73,9 @@ describe('CA-1 resumo', function () {
             ->assertSee('Anual, renova sozinho no cartão')
             ->assertSee(now()->addYear()->setTimezone('America/Sao_Paulo')->format('d/m/Y'))
             ->assertSee('por ano')
-            ->assertDontSee('Pix');
+            // O Pix é uma opção do anual (STORY-080), mas o cartão continua sendo o padrão.
+            ->assertSee('Assinar e pagar')
+            ->assertDontSee('Gerar QR Code Pix');
     });
 
     it('trocar o ciclo na tela atualiza o resumo', function () {

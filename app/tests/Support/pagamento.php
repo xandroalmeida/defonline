@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use App\Domain\Cobranca\CicloCobranca;
+use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PaymentProvider;
 use App\Domain\Cobranca\WebhookBruto;
 use App\Infrastructure\Cobranca\Fake\FakePaymentProvider;
+use App\Models\Assinatura;
 use App\Models\CobrancaConfig;
 use App\Models\Invoice;
 use App\Models\PacoteCredito;
@@ -152,9 +154,9 @@ function _plano(string $nome = 'Básico'): Plano
     return Plano::query()->where('nome', $nome)->firstOrFail();
 }
 
-function _assinaturaPendente(Usuario $usuario, ?Plano $plano = null, CicloCobranca $ciclo = CicloCobranca::Mensal): Invoice
+function _assinaturaPendente(Usuario $usuario, ?Plano $plano = null, CicloCobranca $ciclo = CicloCobranca::Mensal, MeioPagamento $meio = MeioPagamento::Cartao): Invoice
 {
-    return app(IniciarAssinatura::class)->executar($usuario, $plano ?? _plano(), $ciclo, '203.0.113.7', 'PestAgent');
+    return app(IniciarAssinatura::class)->executar($usuario, $plano ?? _plano(), $ciclo, '203.0.113.7', 'PestAgent', $meio);
 }
 
 function _fake(): FakePaymentProvider
@@ -177,4 +179,12 @@ function _pagarAssinatura(Invoice $invoice): Invoice
     _entregar(_fake()->simularPagamento((string) $invoice->checkout_id_externo));
 
     return $invoice->fresh();
+}
+
+/** STORY-080 — plano anual pago com Pix já ativo (checkout fake pago). */
+function _assinaturaPixAtiva(Usuario $usuario, ?Plano $plano = null): Assinatura
+{
+    $invoice = _pagarAssinatura(_assinaturaPendente($usuario, $plano, CicloCobranca::Anual, MeioPagamento::Pix));
+
+    return Assinatura::query()->findOrFail($invoice->assinatura_id);
 }

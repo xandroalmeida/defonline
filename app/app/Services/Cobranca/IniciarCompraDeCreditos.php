@@ -16,7 +16,6 @@ use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
 use App\Support\Personificacao;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 /**
  * STORY-076 CA-1, CA-2, CA-6, CA-7 — da revisão do pedido até o checkout hospedado. STORY-078: o meio é
@@ -31,6 +30,7 @@ final class IniciarCompraDeCreditos
     public function __construct(
         private readonly PaymentProvider $provedor,
         private readonly RegistrarAceiteDoCheckout $aceite,
+        private readonly AbrirCheckoutDaInvoice $checkout,
     ) {}
 
     /**
@@ -74,43 +74,18 @@ final class IniciarCompraDeCreditos
             'aceite_termo_id' => $aceiteId,
         ]);
 
-        try {
-            $sessao = $this->provedor->startCheckout(new PedidoCheckout(
-                referenciaInterna: $invoice->id,
-                descricao: $invoice->descricao,
-                valorCentavos: $invoice->valor_centavos,
-                meios: [$meio],
-                expiraEmMinutos: $meio === MeioPagamento::Pix
-                    ? (int) config('services.payments.pix_expiracao_minutos', 30)
-                    : (int) config('services.payments.cartao_expiracao_minutos', 60),
-                urlSucesso: route('creditos.retorno', $invoice),
-                urlCancelamento: route('creditos.comprar'),
-                urlExpirado: route('creditos.retorno', $invoice),
-            ));
-        } catch (ProvedorIndisponivel $e) {
-            $invoice->forceFill([
-                'status' => EstadoCobranca::Falhou,
-                'motivo_encerramento' => 'provedor',
-                'falha_motivo' => mb_substr($e->getMessage(), 0, 200),
-            ])->save();
-
-            // Alvo do alerta operacional: nível error, módulo e ação estáveis. Sem corpo nem chave.
-            Log::error('cobranca.provedor_falhou', [
-                'module' => 'cobranca',
-                'action' => 'iniciar_checkout',
-                'invoice_id' => $invoice->id,
-                'provedor' => $this->provedor->nome(),
-                'motivo' => $e->getMessage(),
-            ]);
-
-            throw $e;
-        }
-
-        $invoice->forceFill([
-            'checkout_id_externo' => $sessao->referencia->id,
-            'checkout_url' => $sessao->url,
-            'checkout_expira_em' => $sessao->expiraEm,
-        ])->save();
+        $this->checkout->executar($invoice, new PedidoCheckout(
+            referenciaInterna: $invoice->id,
+            descricao: $invoice->descricao,
+            valorCentavos: $invoice->valor_centavos,
+            meios: [$meio],
+            expiraEmMinutos: $meio === MeioPagamento::Pix
+                ? (int) config('services.payments.pix_expiracao_minutos', 30)
+                : (int) config('services.payments.cartao_expiracao_minutos', 60),
+            urlSucesso: route('creditos.retorno', $invoice),
+            urlCancelamento: route('creditos.comprar'),
+            urlExpirado: route('creditos.retorno', $invoice),
+        ), 'iniciar_checkout');
 
         AuditLogger::log(
             action: 'cobranca.checkout_criado',

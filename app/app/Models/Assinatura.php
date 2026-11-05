@@ -35,8 +35,10 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $proxima_cota_em
  * @property string|null $cartao_bandeira
  * @property string|null $cartao_ultimos4
+ * @property string $meio_pagamento
+ * @property Carbon|null $aviso_renovacao_pix_para
  */
-#[Fillable(['usuario_id', 'plano_id', 'trial', 'status', 'ciclo', 'data_inicio', 'proximo_vencimento', 'data_cancelamento', 'cota_snapshot', 'cota_restante_ciclo', 'aviso_d2_em', 'aviso_d0_em', 'provedor', 'id_externo', 'preco_snapshot_centavos', 'periodos_pagos', 'proxima_cota_em', 'cartao_bandeira', 'cartao_ultimos4'])]
+#[Fillable(['usuario_id', 'plano_id', 'trial', 'status', 'ciclo', 'data_inicio', 'proximo_vencimento', 'data_cancelamento', 'cota_snapshot', 'cota_restante_ciclo', 'aviso_d2_em', 'aviso_d0_em', 'provedor', 'id_externo', 'preco_snapshot_centavos', 'periodos_pagos', 'proxima_cota_em', 'cartao_bandeira', 'cartao_ultimos4', 'meio_pagamento', 'aviso_renovacao_pix_para'])]
 final class Assinatura extends Model
 {
     use HasUuids;
@@ -45,6 +47,12 @@ final class Assinatura extends Model
     protected $dateFormat = 'Y-m-d H:i:sP';
 
     protected $table = 'assinaturas';
+
+    /** Plano anual pago com Pix: não renova sozinho (STORY-080). */
+    public function pagoComPix(): bool
+    {
+        return $this->meio_pagamento === 'pix';
+    }
 
     protected function casts(): array
     {
@@ -57,6 +65,7 @@ final class Assinatura extends Model
             'aviso_d2_em' => 'datetime',
             'aviso_d0_em' => 'datetime',
             'proxima_cota_em' => 'datetime',
+            'aviso_renovacao_pix_para' => 'datetime',
         ];
     }
 }

@@ -23,6 +23,7 @@ use App\Livewire\Cobranca\AcompanharAssinatura;
 use App\Livewire\Cobranca\AcompanharPagamento;
 use App\Livewire\Cobranca\AssinarPlano;
 use App\Livewire\Cobranca\ComprarCreditos;
+use App\Livewire\Cobranca\RenovarAssinaturaPix;
 use App\Livewire\Diagnostico\Quiz as QuizDiagnostico;
 use App\Livewire\Diagnostico\SelecionarEmpresa as SelecionarEmpresaDiagnostico;
 use App\Livewire\Drm\Demonstracao as DemonstracaoDrm;
@@ -116,6 +117,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/creditos/comprar/{pacote?}', ComprarCreditos::class)->whereUuid('pacote')->name('creditos.comprar');
     Route::get('/creditos/pagamentos/{invoice}', AcompanharPagamento::class)->whereUuid('invoice')->name('creditos.retorno');
     // STORY-077 — assinatura com cartão (checkout hospedado). Cobrança desligada = 404.
+    Route::get('/assinar/renovar', RenovarAssinaturaPix::class)->name('assinatura.renovar');
     Route::get('/assinar/retorno/{invoice}', AcompanharAssinatura::class)->whereUuid('invoice')->name('assinatura.retorno');
     Route::get('/assinar/{plano}/{ciclo}', AssinarPlano::class)->whereUuid('plano')->whereIn('ciclo', ['mensal', 'anual'])->name('checkout.assinatura');
     // "Página do provedor" do adaptador fake (dev/E2E): 404 fora do provedor fake.

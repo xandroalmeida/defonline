@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: true
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: claude-sonnet-5-5 (STORY-080)
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: M
@@ -88,13 +88,29 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 ## Notas do agente
 
 ### Decisões tomadas
+- Leitura: estória (com "Ajustes do ADR-010", que prevalecem), ADR-010, IDR-018, IDR-019, notas das STORY-076/077/078, spec `STORY-070-checkout-pix-anual.md` e a skill do programador.
+- Contratação: `IniciarAssinatura` ganhou `MeioPagamento` (cartão padrão). Pix só no anual (`CompraNaoPermitida::pixSoNoAnual`). É um Checkout Pix avulso (`DETACHED`, sem `subscription` no Asaas); a assinatura nasce em `ConfirmarAssinatura::ativar` só com `cobranca.paga`, com `meio_pagamento = pix` e `id_externo` nulo. Pix vencido ainda ativa se o banco confirmar depois (mesma regra dos créditos).
+- Renovação: `IniciarRenovacaoPix` cria uma Invoice `renovacao = true` (Pix, ligada à assinatura) só nos últimos 7 dias (`RenovacaoPix`, domínio puro). O pagamento (`ConfirmarAssinatura::renovarPorPix`) estende o ciclo a partir do fim atual (`data_inicio + 12*n meses`, sem perder dias), grava `periodos_pagos`, preço e cota do catálogo de hoje, e NÃO zera a cota do mês em curso: `proxima_cota_em` passa a ser o fim do ciclo antigo, quando a cota volta cheia. Se o plano já tinha acabado quando o Pix foi pago, vira assinatura nova.
+- Preço da renovação: o da última contratação (`preco_snapshot_centavos`), não o do catálogo. A regra de mudança de preço com aviso de 30 dias é da STORY-079; até lá o preço do Pix não muda sem o usuário ver o valor na tela.
+- Aviso (CA-4): `assinaturas:pix-anual` (horária, `routes/console.php`) envia `RenovacaoPixMessage` (data do fim, novo fim, valor, link `assinatura.renovar`) uma vez por ciclo (`assinaturas.aviso_renovacao_pix_para` guarda o vencimento avisado, gravado depois do envio). Falha de envio não marca e a rotina sai com erro.
+- Fim sem pagamento (CA-5): a carteira já não dá acesso a ciclo vencido (`PlanoEncerrado`); a mesma rotina passa a assinatura a `expirada` (libera a vaga para contratar de novo, com auditoria). Sem retentativa e sem chamada ao provedor. Histórico e diagnósticos intocados.
+- Tela `/assinar/renovar` (`assinatura.renovar`, `RotasCobranca::RENOVAR`, componente `RenovarAssinaturaPix`): fora da janela diz quando abre; na janela mostra o aviso, o resumo e "Pagar renovação"; depois do fim mostra "Plano encerrado" com "Renovar com Pix" e "Assinar com cartão". O retorno (`assinatura.retorno`) cobre aguardando, expirado, ativo e renovado do Pix. Retorno de renovação por cartão (já nasce paga) continua 404.
+- Refatoração (terceira ocorrência): `AbrirCheckoutDaInvoice` concentra abrir o checkout, gravar link/prazo e tratar falha do provedor; usado por créditos, assinatura e renovação. Efeito colateral: créditos também gravam `motivo_encerramento = provedor`.
+- Teste antigo alterado: em `AssinarPlanoTest`, "no anual ... assertDontSee('Pix')" virou `assertSee('Assinar e pagar')` + `assertDontSee('Gerar QR Code Pix')`, porque o seletor do anual agora cita Pix por exigência do CA-1.
 
 ### Descobertas
+- O aviso e o estado "Encerrado" da spec moram em Meu plano, que é a STORY-081 e ainda não existe. Implementei o e-mail e a tela `/assinar/renovar` (com os ids `screen-meuplano-*`); a 081 deve exibir o aviso `info` dos últimos 7 dias e o "Encerrado" apontando para `RotasCobranca::RENOVAR`, e esconder "Cancelar" para `Assinatura::pagoComPix()`.
+- `FakePaymentProvider` usa o relógio real no prazo do checkout; em testes com `travelTo` é preciso ajustar `checkout_expira_em`.
+- Flake preexistente: `TrialTest` "CA-8 assinar durante o trial" (empate de `data_inicio` na ordenação de `Carteira::snapshot`) e a ordenação por `occurred_at` em `CobrancaInterruptorTest` falham de vez em quando em suíte cheia e passam isoladas. Não mexi.
 
 ### Bloqueios encontrados
+- Nenhum. Perguntas ao PO: (1) a spec §9 propõe não ter "Cancelar renovação" no Pix; implementei assim (a 081 decide a tela). (2) Confirmar o preço da renovação Pix = último preço contratado. (3) Reembolso/estorno de Pix de renovação é da 087.
 
 ### IDRs criados
+- Nenhum novo: decisões locais, ligadas ao IDR-019 (`periodos_pagos`, vencimento ancorado no início).
 
 ### Cobertura final
+- Ver relatório da execução.
 
 ### Evidências
+- `tests/Feature/Cobranca/PixNoPlanoAnualTest.php`, `tests/Feature/Livewire/RenovarAssinaturaPixTest.php`, `tests/Domain/Cobranca/RenovacaoPixTest.php`, `tests/Browser/PixAnualBrowserTest.php`.
