@@ -19,4 +19,7 @@
 
         <x-footer-version/>
     </div>
+    <p class="m-0 mt-3 text-xs text-[color:var(--color-secondary)]" data-testid="app-footer-empresa">
+        EB Parcerias Ltda · CNPJ 28.261.669/0001-56 · Av. Oliveira Paiva, 1194, Cidade dos Funcionários, Fortaleza/CE, CEP 60822-130
+    </p>
 </footer>

@@ -80,8 +80,11 @@ it('cria Usuário e três registros em term_acceptances quando marketing é acei
     expect($porTipo->get('lgpd')->aceito)->toBeTrue();
     expect($porTipo->get('marketing')->aceito)->toBeTrue();
 
+    expect($porTipo->get('termo_adesao')->versao)->toBe('v2');
+    expect($porTipo->get('lgpd')->versao)->toBe('v2');
+    expect($porTipo->get('marketing')->versao)->toBe('v1-placeholder');
+
     foreach ($porTipo as $aceite) {
-        expect($aceite->versao)->toBe('v1-placeholder');
         expect($aceite->conteudo_hash)->toMatch('/^[a-f0-9]{64}$/');
         expect($aceite->ip)->not->toBeNull();
         expect($aceite->user_agent)->not->toBeNull();
@@ -106,7 +109,7 @@ it('registra marketing recusado mesmo quando o opt-in fica desmarcado (CA-2, CA-
     expect($marketing->versao)->toBe('v1-placeholder');
 });
 
-it('hash registrado bate com o conteúdo da view placeholder vigente (CA-3, CA-4)', function () {
+it('hash registrado bate com o conteúdo da view vigente (CA-3, CA-4)', function () {
     preencherCadastroBase(Livewire::test(Cadastro::class))
         ->set('aceite_termo_adesao', true)
         ->set('aceite_lgpd', true)

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-11-02",
+  "generated_at": "2026-11-05",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-02",
@@ -67,7 +67,8 @@
       "related_pdr": [
         "PDR-003",
         "PDR-004",
-        "PDR-005"
+        "PDR-005",
+        "PDR-020"
       ],
       "note": "Aberta em 2026-08-04 (PDR-005). EPIC-010 (DRM) é o épico âncora. EPIC-003 realocado da onda 1.",
       "start_date": "2026-08-04",
@@ -2764,6 +2765,23 @@
         "related_adrs": [],
         "related_idrs": [],
         "note": "Complementa a PDR-010."
+      },
+      {
+        "id": "PDR-020",
+        "slug": "modelo-de-cobranca-planos-configuraveis-asaas",
+        "title": "Cobrança com planos geridos em tela, trial de 7 dias, cupons e Asaas como provedor substituível",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-020-modelo-de-cobranca-planos-configuraveis-asaas.md",
+        "decided_at": "2026-11-05",
+        "decided_by": "PO (Alexandro / Claude)",
+        "related_epics": [
+          "EPIC-005",
+          "EPIC-010",
+          "EPIC-011"
+        ],
+        "related_adrs": [],
+        "related_idrs": [],
+        "note": "Altera a condição de medição do PDR-003. DRM em todos os planos pagos e no trial; cupons para o beta; Termos v2. Adiados pelo PO: revisão por advogado e novo aceite das contas existentes."
       }
     ],
     "adr": [

@@ -226,8 +226,8 @@ Banco relacional **PostgreSQL** é o modelo natural para o domínio (usuários, 
 
 **Plan** *(catálogo parametrizado de planos de assinatura)*
 - id
-- codigo (`basico` | `pro` | `trial`) — string única, usada pelo código
-- nome_exibicao (`Básico` | `Pro` | `Trial`)
+- codigo — string única e livre (seed: `basico`, `pro`, `trial`); o código não ramifica por plano específico (PDR-020)
+- nome_exibicao (seed: `Básico`, `Pro`, `Trial`)
 - cota_mensal (integer — análises incluídas no ciclo)
 - preco_mensal_centavos (integer)
 - preco_anual_centavos (integer)
@@ -242,8 +242,8 @@ Banco relacional **PostgreSQL** é o modelo natural para o domínio (usuários, 
 
 **CreditPackage** *(catálogo parametrizado de pacotes de créditos avulsos)*
 - id
-- codigo (`mini` | `plus` | `max`) — string única
-- nome_exibicao (`Mini` | `Plus` | `Max`)
+- codigo — string única e livre (seed: `mini`, `plus`, `max`)
+- nome_exibicao (seed: `Mini`, `Plus`, `Max`)
 - quantidade_creditos (integer)
 - preco_centavos (integer)
 - validade_meses (integer — default 12)
@@ -251,6 +251,20 @@ Banco relacional **PostgreSQL** é o modelo natural para o domínio (usuários, 
 - ordem_exibicao (integer)
 - data_criacao, data_alteracao
 - alterado_por_usuario_id (auditoria)
+
+**Coupon** *(cupom de desconto criado pelo admin — spec funcional §2.5)*
+- id, codigo (string única)
+- tipo (Percentual | Valor fixo), valor
+- vigencia_inicio, vigencia_fim, limite_usos (nullable)
+- ciclos_duracao (nullable — nulo = toda a assinatura)
+- itens cobertos (planos, ciclos e pacotes)
+- ativo (bool)
+- data_criacao, data_alteracao, alterado_por_usuario_id (auditoria)
+
+**CouponGrant / CouponRedemption** *(concessão direta a um Usuário e uso efetivo do cupom)*
+- id, coupon_id, usuario_id
+- subscription_id ou invoice_id (no uso), ciclos_restantes
+- datas de concessão e de uso
 
 **Setting** *(configurações parametrizadas chave-valor)*
 - key (string única — ex.: `pix_expiracao_minutos`, `analise_cota_acumula`, `rascunho_expira_dias`)

@@ -27,7 +27,7 @@ Se a hipótese **não** se confirmar, esta onda muda inteiramente. Cenários pos
 
 > Nota: a numeração foi deslocada em 2026-05-24 — o `EPIC-004` deixou de ser placeholder de "Cobrança e Plano Básico" e foi atribuído ao **App shell + materialização do design system v1** dentro da WAVE-2026-01 (ver `roadmap/current-wave.md`). Todos os placeholders abaixo subiram um número.
 
-- **EPIC-005 — Cobrança e Plano Básico.** Roberto consegue assinar o Plano Básico (R$ 49,90/mês) e comprar créditos avulsos. Pix e cartão recorrente. Trial gratuito (`[DECIDIR]` 2.3 da spec) ainda pendente — decisão até abertura efetiva desta onda. Outcome: produto comercializável para o setor Indústria.
+- **EPIC-005 — Cobrança e planos.** Roberto ativa o trial de 7 dias com 1 análise, assina um plano e compra créditos avulsos, com Pix e cartão recorrente via Asaas (provedor substituível). A equipe gere planos, pacotes e cupons em tela no backoffice, sem nada fixo em código, e os usuários do beta recebem cupom. O DRM entra em todos os planos pagos e no trial. Decisões em `PDR-020`. Outcome: produto comercializável.
 
 - **EPIC-006 — Cobertura de Comércio e Serviços.** Quiz, motor de cálculo e matriz de recomendações estendidos para os setores Comércio e Serviços. Joana e autônomos passam a ter relatório com semáforo e recomendações específicas. Outcome: produto serve a maioria das MPEs brasileiras, não só Indústria.
 
@@ -43,8 +43,8 @@ Se esta onda fechar com sucesso, o DEFOnline alcança "MVP comercializável" —
 
 ## Riscos antecipados
 
-- **LGPD e jurídico:** Termo de Adesão revisado por advogado (NRF §8) é gatilho que destrava EPIC-005; sem ele, não se pode cobrar.
-- **Gateway de pagamento:** ADR específica de gateway sai como spike antecipado, talvez no fim da WAVE-2026-01.
+- **LGPD e jurídico:** a revisão do Termo de Adesão por advogado (NRF §8) segue pendente, mas deixou de bloquear o EPIC-005 (PDR-020). Risco aceito pelo PO. A versão `v2` dos Termos já traz as cláusulas comerciais, ainda sem revisão jurídica.
+- **Gateway de pagamento:** Asaas (PDR-020). Falta a ADR da abstração do provedor.
 - **Matriz multi-setor:** validação externa das faixas para Comércio e Serviços (NRF §9.3) precisa estar pronta antes do EPIC-006. **O EPIC-010 não depende dela** — é justamente por isso que vem antes.
 - **Atrito do lançamento mensal (EPIC-010):** até 36 campos monetários, doze vezes por ano. É o risco nº 1 da onda e é de retenção, não de construção. Mitigado por três mecanismos obrigatórios no MVP (PDR-003, decisão 6) e detectado pela métrica primária do épico — 2º lançamento em 45 dias.
 - **Pendências editoriais da EBC (EPIC-010):** `[DECIDIR-B]` e `[DECIDIR-E]` bloqueiam o motor do DRM. Consulta única recomendada antes da abertura do sprint; defaults registrados em cada estória.
@@ -59,5 +59,6 @@ Se esta onda fechar com sucesso, o DEFOnline alcança "MVP comercializável" —
 ## Histórico
 
 - 2026-05-20 — Rascunho inicial criado junto com a abertura da WAVE-2026-01.
+- 2026-11-05 — Decisões de cobrança registradas no `PDR-020`: catálogo em tela, trial ativado, Asaas substituível, Termos `v2` sem revisão jurídica, medição do DRM sem bloqueio, DRM nos planos e cupons, inclusive para o beta.
 - 2026-08-04 — **EPIC-010 (DRM) inserido como épico âncora**, à frente do EPIC-006, com 13 estórias detalhadas. Origem: feedback do Key User José Marques (03/08/2026) + parecer favorável da EBC. Decisão em PDR-003, parecer do PO em `../../revisao/analise-po-feedback-jose-marques-2026ago03.md`. Sequência da onda revisada e dois riscos novos registrados. Exceção deliberada à regra de "só épicos e outcomes" neste arquivo: o EPIC-010 foi detalhado antes da retro da onda 1 porque o feedback do Key User e o parecer da EBC já dão base suficiente, e porque as decisões pendentes da EBC têm prazo longo — adiar a especificação atrasaria a consulta, não o contrário.
 - 2026-05-24 — Numeração dos placeholders deslocada (+1) porque o `EPIC-004` foi reatribuído ao "App shell + materialização do design system v1" dentro da WAVE-2026-01 (ver `roadmap/current-wave.md`). Cobrança virou EPIC-005, Cobertura virou EPIC-006, PDF virou EPIC-007, Captação virou EPIC-008, Hotsite virou EPIC-009. Riscos atualizados para refletir nova numeração.

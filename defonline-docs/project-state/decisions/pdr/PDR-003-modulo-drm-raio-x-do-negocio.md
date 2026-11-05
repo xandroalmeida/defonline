@@ -15,6 +15,8 @@ origem: "revisao/analise-po-feedback-jose-marques-2026ago03.md"
 
 # PDR-003 — Módulo DRM (Demonstração de Resultado Mensal)
 
+> **Alterada pela PDR-020 (2026-11-05):** a medição de adesão continua, mas deixa de condicionar a construção da cobrança (EPIC-005).
+
 ## Contexto
 
 Em 03/08/2026 o Key User José Marques enviou feedback sobre o MVP do DEF Online com três pedidos: (A) registrar o valor nominal junto a cada indicador do relatório, (B) nomear o produto "Raio X do Negócio" e (C) criar um módulo mensal que responda à pergunta *"meu negócio dá lucro?"*, acompanhado de uma planilha modelo com a estrutura completa da demonstração. A EBC analisou e emitiu parecer favorável à criação do módulo.

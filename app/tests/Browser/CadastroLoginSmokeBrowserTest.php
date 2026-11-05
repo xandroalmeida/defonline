@@ -37,18 +37,18 @@ final class CadastroLoginSmokeBrowserTest extends DuskTestCase
     }
 
     #[Group('smoke')]
-    public function test_termos_renderizam_com_banner_placeholder(): void
+    public function test_termos_renderizam_na_versao_vigente(): void
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/termos/termo-adesao')
                 ->assertSee('Termo de Adesão')
-                ->assertSee('TEXTO PLACEHOLDER')
-                ->assertSeeIn('@legal-versao', 'v1-placeholder');
+                ->assertDontSee('TEXTO PLACEHOLDER')
+                ->assertSeeIn('@legal-versao', 'v2');
 
             $browser->visit('/termos/politica-privacidade')
                 ->assertSee('Política de Privacidade')
-                ->assertSee('TEXTO PLACEHOLDER')
-                ->assertSeeIn('@legal-versao', 'v1-placeholder');
+                ->assertDontSee('TEXTO PLACEHOLDER')
+                ->assertSeeIn('@legal-versao', 'v2');
         });
     }
 

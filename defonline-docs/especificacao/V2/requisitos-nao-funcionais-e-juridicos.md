@@ -112,7 +112,7 @@
 ### 3.2 Gateway de Pagamento
 
 - **Requisitos funcionais:** cartão de crédito com recorrência tokenizada; geração de QR Code Pix com expiração de 30 minutos; webhook de confirmação; retentativas automáticas em falha de cobrança recorrente (até 3 em intervalos de 48h); emissão de recibo/nota fiscal (pela EB Parcerias — parte de back-office, fora do código do MVP).
-- **Provedor:** `[A DEFINIR]`. Critérios: custo por transação, suporte a recorrência + Pix, webhooks confiáveis, conformidade PCI. Não bloqueia o kickoff — desenvolvimento pode iniciar com sandbox.
+- **Provedor:** **Asaas** (PDR-020). A integração fica atrás de uma abstração, de modo que trocar de provedor não altere as regras de negócio.
 - **PCI-DSS:** plataforma DEFOnline **não armazena dados de cartão** — todos ficam no vault do gateway (tokenização).
 
 ### 3.3 Provedor de E-mail Transacional `[A DEFINIR]`
@@ -382,7 +382,7 @@ A spec técnica de construção precisa fechar, **antes do início de implementa
 - [ ] Storage de backup off-site (provedor).
 - [ ] Provedor de e-mail transacional.
 - [x] ~~Provedor da API CNPJ~~ — decidido via **IDR-004**: abstração `RfbCnpjClient` com dois provedores reais (`cnpja`, `receitaws`) selecionáveis via config + rate-limit por provedor. Ativação real entregue pela STORY-018.
-- [ ] Gateway de pagamento.
+- [x] ~~Gateway de pagamento~~ — Asaas, substituível (PDR-020).
 - [ ] Ferramentas de teste E2E e de teste unitário/integração compatíveis com a stack escolhida.
 
 ### 10.3 Critérios pendentes (pré-go-live — podem rodar em paralelo)

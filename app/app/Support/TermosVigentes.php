@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\View;
  * CA-3, CA-4). O `conteudo_hash` é calculado renderizando a view sem layout,
  * com SHA-256 sobre o HTML — assim qualquer mudança no texto invalida o hash
  * registrado nos aceites antigos, permitindo identificar quem precisa re-aceitar
- * quando o jurídico voltar com a redação definitiva.
+ * quando o jurídico voltar com a redação definitiva. As views de versões antigas
+ * ficam no repositório como registro do texto aceito (PDR-020).
  *
  * Marketing não tem texto próprio: o aceite é só o opt-in. Mantemos uma "versão"
  * estável para que `term_acceptances.versao` siga consistente.
@@ -23,13 +24,13 @@ final class TermosVigentes
     /** @var array<string, array{versao: string, view: string|null, rota: string}> */
     private const REGISTRO = [
         'termo_adesao' => [
-            'versao' => 'v1-placeholder',
-            'view' => 'legal.termo-adesao-v1-placeholder',
+            'versao' => 'v2',
+            'view' => 'legal.termo-adesao-v2',
             'rota' => '/termos/termo-adesao',
         ],
         'lgpd' => [
-            'versao' => 'v1-placeholder',
-            'view' => 'legal.politica-privacidade-v1-placeholder',
+            'versao' => 'v2',
+            'view' => 'legal.politica-privacidade-v2',
             'rota' => '/termos/politica-privacidade',
         ],
         'marketing' => [

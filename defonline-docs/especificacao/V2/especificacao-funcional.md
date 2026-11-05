@@ -1,12 +1,12 @@
-# DEFOnline — Especificação Funcional (v2.5)
+# DEFOnline — Especificação Funcional (v2.6)
 
 **Projeto:** Plataforma DEFOnline — Diagnóstico Econômico-Financeiro para Micro e Pequenas Empresas
-**Versão do documento:** 2.5 (preços parametrizados — kickoff destravado)
-**Data:** 17/05/2026
+**Versão do documento:** 2.6 (decisões de cobrança — PDR-020)
+**Data:** 05/11/2026
 **Responsáveis:** EB Parcerias Ltda
 **Público-alvo do documento:** Product Owners, UX/UI, Arquitetos, Desenvolvedores, QA, Stakeholders de Negócio
 
-**Versão vigente:** 2.5 (17/05/2026), consolidada com todas as correções da EBC (22/04/2026), parecer técnico CLAUDE (20/04/2026), refatoração do modelo de domínio (Usuário ↔ Empresa Analisada), algoritmo do Resumo Executivo, NCG absoluto como indicador informativo, dimensionamento do plano Pro e parametrização de preços. As regras de negócio aqui consolidadas seguem intactas após o reset técnico de 19/05/2026 — apenas as decisões de stack foram removidas dos documentos companheiros (arquitetura técnica e RNF).
+**Versão vigente:** 2.6 (05/11/2026, decisões de cobrança do PDR-020), sobre a 2.5 (17/05/2026), consolidada com todas as correções da EBC (22/04/2026), parecer técnico CLAUDE (20/04/2026), refatoração do modelo de domínio (Usuário ↔ Empresa Analisada), algoritmo do Resumo Executivo, NCG absoluto como indicador informativo, dimensionamento do plano Pro e parametrização de preços. As regras de negócio aqui consolidadas seguem intactas após o reset técnico de 19/05/2026 — apenas as decisões de stack foram removidas dos documentos companheiros (arquitetura técnica e RNF).
 
 Documentos complementares: `requisitos-nao-funcionais-e-juridicos.md` (Bloco 3) e `roadmap-pos-v1.md` (Bloco 4). Mapa de aceite/recusa de cada crítica em `resumo-recomendacoes-e-respostas.md`.
 
@@ -132,7 +132,7 @@ A lista consolidada e priorizada das iniciativas pós-v1 está no documento comp
 
 A plataforma oferece dois planos recorrentes contratados pelo **Usuário**, cobrados em ciclo mensal ou anual (pagamento anual com desconto).
 
-> **Parametrização.** Todos os valores monetários (preços e desconto anual), cotas mensais e demais parâmetros configuráveis ficam armazenados em uma **tabela `Plan`** do banco de dados (ver `arquitetura-tecnica.md` §4.1), permitindo ajuste sem deploy. Alterações são versionadas para auditoria. Os valores abaixo são as **referências iniciais** de seed (configuração default ao subir a plataforma).
+> **Parametrização.** Todos os valores monetários (preços e desconto anual), cotas mensais e demais parâmetros configuráveis ficam armazenados em uma **tabela `Plan`** do banco de dados (ver `arquitetura-tecnica.md` §4.1), permitindo ajuste sem deploy. **A equipe cria e edita planos em tela no backoffice; nenhum plano, preço ou cota fica fixo em código (PDR-020).** Alterações são versionadas para auditoria. Os valores abaixo são as **referências iniciais** de seed (configuração default ao subir a plataforma).
 
 | Plano | Cota mensal | Empresas Analisadas | Mensal (seed) | Anual (seed) | Público-alvo |
 |---|---|---|---|---|---|
@@ -146,32 +146,33 @@ A plataforma oferece dois planos recorrentes contratados pelo **Usuário**, cobr
 - Quando o Usuário esgota a cota, pode comprar pacotes de créditos avulsos sem trocar de plano.
 - O upgrade de Básico para Pro é imediato e proporcional (cobra a diferença no ciclo vigente); o downgrade só tem efeito no próximo ciclo.
 - Ao final do ciclo, a cobrança é automática no cartão cadastrado ou em Pix (se anual).
+- **O DRM ("Raio X do Negócio") está incluído em todos os planos pagos e no trial** e seus lançamentos não consomem cota (PDR-020). Sem plano ou trial ativo, não há novos lançamentos, mas os já feitos continuam visíveis.
 
 ### 2.2 Créditos Avulsos
 
 Pacotes de créditos são comprados à vista (Pix ou cartão) e consumidos à medida que o usuário executa análises.
 
-> **Parametrização.** Tamanho do pacote, preço e validade ficam armazenados em uma **tabela `CreditPackage`** do banco de dados (ver `arquitetura-tecnica.md` §4.1). Os valores abaixo são as **referências iniciais** de seed.
+> **Parametrização.** Tamanho do pacote, preço e validade ficam armazenados em uma **tabela `CreditPackage`** do banco de dados (ver `arquitetura-tecnica.md` §4.1), **geridos em tela no backoffice (PDR-020)**. Os valores abaixo são as **referências iniciais** de seed.
 
 | Pacote | Qtd. créditos | Preço (seed) | Preço unitário equivalente | Validade (seed) |
 |---|---|---|---|---|
-| Mini | 1 | R$ 19,90 | R$ 19,90 | 12 meses |
-| Plus | 5 | R$ 79,90 | R$ 15,98 | 12 meses |
-| Max | 10 | R$ 129,90 | R$ 12,99 | 12 meses |
+| Mini | 1 | R$ 89,90 | R$ 89,90 | 12 meses |
+| Plus | 5 | R$ 349,90 | R$ 69,98 | 12 meses |
+| Max | 10 | R$ 599,90 | R$ 59,99 | 12 meses |
 
 **Regras dos créditos.**
-- O **preço unitário do crédito avulso** deve ser **superior** ao preço unitário equivalente da análise inclusa no plano Pro (R$ 19,90 com cota 10), preservando o incentivo à assinatura. Regra validada pelo administrador antes de aceitar nova configuração de preço.
+- O **preço unitário do crédito avulso** deve ser **superior** ao preço unitário mensal dos planos ativos (seed: R$ 49,90 no Básico e R$ 19,90 no Pro), preservando o incentivo à assinatura. A tela do backoffice avisa quando a regra é violada, mas não impede a configuração.
 - Créditos comprados têm validade de **12 meses** a partir da data da compra (parametrizável por pacote).
 - A cota mensal da assinatura é consumida **antes** dos créditos; créditos só são debitados quando a cota se esgota no mês.
 - Créditos não são reembolsáveis nem transferíveis entre contas.
-- Um não-assinante pode comprar pacotes de créditos sem aderir a um plano recorrente, mas perde benefícios como histórico estendido (se aplicável no roadmap).
+- Um não-assinante pode comprar pacotes de créditos sem aderir a um plano recorrente, mas não tem o DRM e perde benefícios como histórico estendido (se aplicável no roadmap).
 
 ### 2.3 Trial Gratuito
 
-`[DECIDIR]` — **A oferta de trial gratuito é uma decisão aberta para o MVP.** A versão v1 desta especificação previa o trial; a revisão de 22/04/2026 levantou a dúvida "acesso gratuito desvaloriza o produto?". A decisão final será tomada imediatamente antes do go-live do MVP, com três alternativas em aberto: **(a) ativar** o trial conforme especificado abaixo; **(b) desativar** a oferta gratuita (somente assinatura paga ou compra de créditos); ou **(c) ativar em formato reduzido** (por exemplo, hotsite com simulação guiada sem gerar o PDF completo). A especificação da Seção 2.3 permanece **pronta para ativação** — se a decisão for (b), o fluxo simplesmente não é exposto na UX, preservando o código. Ver Seção 6, item 6.10.
+`[RESOLVIDO]` — **Trial ativado: 7 dias com 1 análise, configuráveis no backoffice (PDR-020).** Histórico: A versão v1 desta especificação previa o trial; a revisão de 22/04/2026 levantou a dúvida "acesso gratuito desvaloriza o produto?". A decisão final será tomada imediatamente antes do go-live do MVP, com três alternativas em aberto: **(a) ativar** o trial conforme especificado abaixo; **(b) desativar** a oferta gratuita (somente assinatura paga ou compra de créditos); ou **(c) ativar em formato reduzido** (por exemplo, hotsite com simulação guiada sem gerar o PDF completo). A especificação da Seção 2.3 permanece **pronta para ativação** — se a decisão for (b), o fluxo simplesmente não é exposto na UX, preservando o código. Ver Seção 6, item 6.10.
 
-**Regras do trial (se ativado).**
-- Novo usuário que se cadastra tem direito a **7 dias de trial** com **1 análise inclusa**.
+**Regras do trial.**
+- Novo usuário que se cadastra tem direito a **7 dias de trial** com **1 análise inclusa** e acesso ao **DRM**.
 - Não exige cadastro de meio de pagamento.
 - Ao final do 7º dia, o acesso às funções pagas é bloqueado até o usuário assinar ou comprar créditos. O acesso ao histórico do diagnóstico realizado continua disponível durante a janela de retenção (ver seção 4.8).
 - O trial pode ser ativado uma única vez por CPF/CNPJ.
@@ -188,6 +189,19 @@ Pacotes de créditos são comprados à vista (Pix ou cartão) e consumidos à me
 **Reajuste.** Reajustes de preço são comunicados com antecedência mínima de **30 dias** por e-mail e aplicam-se apenas a novos ciclos após a data de vigência.
 
 **Nota fiscal.** Na aquisição de qualquer plano ou pacote, é emitida nota fiscal pela EB Parcerias Ltda ao assinante. Detalhe do fluxo de emissão é item de back-office (fora da v1 funcional).
+
+### 2.5 Cupons de Desconto
+
+O administrador cria e gerencia cupons em tela no backoffice (PDR-020).
+
+- **Desconto:** percentual de 1% a 100% ou valor fixo. O valor final nunca fica negativo.
+- **Configuração:** código único, vigência, limite total de usos e itens cobertos (planos, ciclos e pacotes de créditos).
+- **Duração em assinaturas:** número de ciclos ou toda a assinatura.
+- **Uso:** cada Usuário usa o mesmo cupom uma única vez, e cupons não são cumulativos.
+- **Concessão direta:** um cupom pode ser concedido a Usuários específicos e, nesse caso, é aplicado automaticamente no checkout. É assim que os usuários do beta recebem o benefício.
+- **Desconto total:** não exige meio de pagamento enquanto o valor devido for zero.
+- **Fim do desconto:** o Usuário é avisado 7 dias antes, e a assinatura segue pelo preço vigente. Sem meio de pagamento, as funções pagas são bloqueadas até a regularização.
+- **Alterações:** desativar um cupom impede novos usos, mas não afeta descontos já aplicados. Criação, alteração e uso ficam registrados para auditoria.
 
 ---
 
@@ -231,7 +245,7 @@ Após esses dois passos, o Usuário vê o painel principal: lista de Empresas An
 
 ### 3.4 Assinatura e Pagamento
 
-O usuário escolhe um caminho: **ativar trial de 7 dias** (sem pagamento) ou **assinar um plano** (Básico/Pro, mensal/anual) ou **comprar pacote de créditos**. Para assinaturas recorrentes, o cartão de crédito é obrigatório e é tokenizado pelo gateway. Para Pix (anual ou créditos), o sistema gera QR code com expiração de **30 minutos** (parametrizável via `Setting.pix_expiracao_minutos`); após confirmação do pagamento pelo gateway, a carteira é creditada automaticamente.
+O usuário escolhe um caminho: **ativar trial de 7 dias** (sem pagamento) ou **assinar um plano** (Básico/Pro, mensal/anual) ou **comprar pacote de créditos**. O checkout aceita cupom de desconto (§2.5) e registra o aceite da versão vigente do Termo de Adesão. Para assinaturas recorrentes, o cartão de crédito é obrigatório e é tokenizado pelo gateway. Para Pix (anual ou créditos), o sistema gera QR code com expiração de **30 minutos** (parametrizável via `Setting.pix_expiracao_minutos`); após confirmação do pagamento pelo gateway, a carteira é creditada automaticamente.
 
 A confirmação do pagamento libera imediatamente o acesso. Se for Pix e o usuário fechar a tela, recebe e-mail com o QR code para concluir.
 
@@ -867,7 +881,9 @@ Esta seção consolida **todas as decisões de produto identificadas pelas revis
 
 **Decisão pendente.** EB Parcerias formalizar o critério e repassar ao Product Owner para incorporação ao Anexo E.
 
-### 6.10 `[DECIDIR]` Ativação do trial gratuito no MVP
+### 6.10 `[RESOLVIDO]` Ativação do trial gratuito no MVP
+
+**Decisão (05/11/2026, PDR-020).** Alternativa (a): trial ativado, 7 dias com 1 análise, configuráveis no backoffice. O texto abaixo fica como histórico.
 
 **Problema.** A v1 previa trial de 7 dias com 1 análise; a revisão EBC de 22/04/2026 levantou a dúvida "acesso gratuito desvaloriza o produto?".
 
@@ -890,7 +906,7 @@ Esta seção consolida **todas as decisões de produto identificadas pelas revis
 | 6.7 Aviso PL simplificado | 🟡 `[DECIDIR]` | Pré-go-live | Texto jurídico |
 | 6.8 Box explicação quiz | 🟡 `[DECIDIR]` | Pré-go-live | Conteúdos finais |
 | 6.9 Critério de revisão de faixas | 🟡 `[DECIDIR]` | Pré-go-live | EB Parcerias documentar |
-| 6.10 Ativação do trial | 🟡 `[DECIDIR]` | Pré-go-live | Flag de produto |
+| 6.10 Ativação do trial | ✅ `[RESOLVIDO]` em 05/11/2026 | — | Ativado: 7 dias, 1 análise (PDR-020) |
 
 ---
 
