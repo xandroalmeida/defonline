@@ -9,6 +9,29 @@
     <x-page-header :title="'Planos e pacotes'"
                    :subtitle="'Catálogo de cobrança. Alterações valem para novas contratações; quem já assina mantém o preço contratado. Para tirar algo de venda, desative.'" />
 
+    {{-- Interruptor da cobrança (STORY-073) --}}
+    <h2 class="text-lg font-medium text-[color:var(--color-primary)] mt-0 mb-3">Cobrança</h2>
+    <x-card class="mb-8">
+        <form wire:submit="salvarCobranca" novalidate class="flex flex-col gap-3">
+            <p class="m-0 text-sm" dusk="cobranca-estado">
+                {{ $cobrancaAtiva ? 'Cobrança ligada' : 'Cobrança desligada' }}
+            </p>
+            <p class="m-0 text-sm text-[color:var(--color-secondary)]">
+                Desligada, cada análise funciona como hoje: nada é consumido e ninguém é bloqueado.
+                Ligada, cada análise concluída debita a cota do plano ou, sem cota, um crédito, e quem não tem saldo é bloqueado.
+            </p>
+            <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" wire:model="cobrancaAtiva" dusk="cobranca-ativa"> Cobrança ativa
+            </label>
+            <div class="flex items-center gap-3">
+                <x-button type="submit" variant="primary" dusk="cobranca-salvar">Salvar interruptor</x-button>
+                @if ($mensagemCobranca)
+                    <span class="text-sm text-[color:var(--color-secondary)]" role="status" dusk="cobranca-mensagem">{{ $mensagemCobranca }}</span>
+                @endif
+            </div>
+        </form>
+    </x-card>
+
     {{-- Planos --}}
     <h2 class="text-lg font-medium text-[color:var(--color-primary)] mt-0 mb-3">Planos</h2>
     <x-card class="mb-4">

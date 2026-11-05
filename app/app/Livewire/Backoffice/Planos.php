@@ -6,6 +6,7 @@ namespace App\Livewire\Backoffice;
 
 use App\Domain\Cobranca\PrecoCredito;
 use App\Livewire\Backoffice\Concerns\ExigePermissao;
+use App\Models\CobrancaConfig;
 use App\Models\PacoteCredito;
 use App\Models\Plano;
 use App\Models\TrialConfig;
@@ -48,12 +49,18 @@ final class Planos extends Component
 
     public ?string $mensagemTrial = null;
 
+    /** STORY-073 CA-1 — interruptor da cobrança (desligado por padrão). */
+    public bool $cobrancaAtiva = false;
+
+    public ?string $mensagemCobranca = null;
+
     public function mount(): void
     {
         $this->auditar('backoffice.planos_listados', 'Plano');
         $this->limparPlano();
         $this->limparPacote();
         $this->carregarTrial();
+        $this->cobrancaAtiva = CobrancaConfig::ligada();
     }
 
     public function salvarPlano(): void
@@ -226,6 +233,14 @@ final class Planos extends Component
 
         $this->carregarTrial();
         $this->mensagemTrial = 'Trial salvo.';
+    }
+
+    public function salvarCobranca(): void
+    {
+        $this->aplicar(CobrancaConfig::atual(), ['ativa' => $this->cobrancaAtiva], 'CobrancaConfig');
+
+        $this->cobrancaAtiva = CobrancaConfig::ligada();
+        $this->mensagemCobranca = 'Interruptor salvo.';
     }
 
     public function render(): View
