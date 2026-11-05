@@ -6,10 +6,10 @@ epic_id: EPIC-010
 type: implementation
 target_role: programador
 requires_design: true
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador (claude-sonnet-5-5)
 created_at: 2026-08-04
-updated_at: 2026-08-06
+updated_at: 2026-11-05
 decisoes: [ADR-008, PDR-007, PDR-008]
 estimated_session_size: M
 checkpoint: CP3
@@ -77,8 +77,42 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`.
 
 ## Notas do agente
 
+### Plano (2026-11-05, antes de codar)
+
+Lido: estória, ADR-008 (decisões 1-4, escopo recomendado, CA-3 `n/a`), `estrutura-drm` §1-§6, notas das STORY-047 a 051 e 054, `AcessoDrm` (STORY-084), `FecharLancamento`/`RetificarLancamento`, `DemonstracaoVisao`, o PDF do Diagnóstico (só para NÃO reaproveitar o dompdf).
+
+Entendimento: um controller síncrono lê a versão vigente (snapshot) e a série das vigentes, monta o XLSX em memória e o transmite por `streamDownload`; nada é gravado. A camada de impressão é CSS sobre o mesmo Blade. PDF no servidor está fora (CA-3 `n/a`).
+
+Plano: (1) `phpoffice/phpspreadsheet` + `ext-gd` no Dockerfile (ADR-008); (2) `PlanoDeFormulas` (puro) e `PlanilhaDrm`; (3) rota `drm.exportar` + controller; (4) botões e `@media print`; (5) Pest (células + fórmulas avaliadas) e Dusk (arquivo recebido, impressão).
+
 ### Decisões tomadas
+
+- **Dependência:** `phpoffice/phpspreadsheet ^5.10` (ADR-008, decisão 1). No Dockerfile, `gd` entra no `docker-php-ext-install` do runtime e o stage `composer-deps` (imagem `composer:2`, sem gd) instala com `--ignore-platform-req=ext-gd`. `gd` foi compilado nos contêineres da pista com a mesma linha, o que valida o `docker-php-ext-install gd` (a imagem em si não foi reconstruída).
+- **Fórmulas só quando provadas.** `PlanoDeFormulas` lê apenas `nivel` e `tipo` do snapshot (total = linha-base menos as deduções que vêm depois; dedução com linhas de nível 2 = soma delas; a única lista de códigos é `linhas_aditivas = [L7b]` em `config/drm/exportacao.php`). `PlanilhaDrm` escreve a fórmula de uma célula só quando a soma em centavos dos operandos reproduz o valor do snapshot e nenhum operando é nulo; senão grava o valor do snapshot. Teste adultera um snapshot e vê o valor, não a fórmula. Percentual: `=B{n}/B$âncora`, mesma regra (tolerância de 2e-4 pontos para o truncamento do snapshot a 4 casas).
+- **Posição do pró-labore:** a da preferência da empresa (a mesma que a tela abre). A tela troca a preferência ao alternar, então o arquivo sai como a pessoa está vendo.
+- **Aba "Série histórica":** uma coluna por mês, do primeiro ao último lançamento; mês sem lançamento = coluna em branco com "Não lançado" (nenhum zero); retificado = "Retificado (vN)". Duas seções (valores e % da receita), ambas com fórmulas pelo mesmo plano, mês a mês. As linhas são a união das linhas dos meses (ordem do primeiro, o resto entra depois do antecessor). O mês aberto não é destacado na aba da série: a aba "Mês" já o é.
+- **Linhas omitidas na tela (L8a/L8b agregadas) também são omitidas no arquivo:** o arquivo usa `DemonstracaoVisao`, a mesma leitura da tela, para ser reconhecível (CA-2) e não duplicar regra. `LinhaVisao` ganhou `centavos` e `percentualBruto` (opcionais, no fim do construtor).
+- **Rótulos são sempre texto** (`setCellValueExplicit`): "= Lucro Bruto" não pode virar fórmula (teste).
+- **Prejuízo:** número negativo normal e observação "Prejuízo no mês" na linha final; fonte preta, sem cor (CA-7). Sem faturamento: valores saem, % em branco com o motivo na coluna Observação.
+- **Acesso:** rota `drm.exportar` fora do middleware `drm.acesso` (é leitura do histórico; STORY-084 CA-3). Empresa alheia e mês sem lançamento = 404 (Global Scope). Nome: `drm_<empresa-slug>_<AAAA-MM>.xlsx`.
+- **Impressão (CA-12/13):** `@page { size: A4 portrait }` em `app.css`, `print:hidden` no que é navegação (breadcrumb, rodapé do app, botões de ação, troca de modo, comparativos) e tabela forçada em `print:block`/cards `print:hidden` (a 794 px o `lg` não vale). Rodapé só de impressão: motor, conteúdo (`drm.conteudo_version`) e geração. Botão "Imprimir / Salvar em PDF" (`window.print()` via Alpine); nenhuma palavra "Exportar PDF".
+- **Evento de exportação (STORY-056 CA-6)** fica para a 056: aqui o controller não emite nada.
+
 ### Descobertas
+
+- Chrome normaliza `A4 portrait` para `a4` no CSSOM (retrato é o padrão); o Dusk compara `a4` e o Pest confere o texto do CSS.
+- O pico de memória de uma geração é ~26 MB (medido), longe do limite de 128 MB; o estouro visto ao rodar o Pest com `memory_limit` padrão é do processo de testes, não da request.
+- Dompdf continua no projeto (PDF do Diagnóstico, estória anterior); não foi usado aqui.
+
 ### Bloqueios encontrados
+
+Nenhum.
+
 ### IDRs criados
+
+Nenhum.
+
 ### Cobertura final
+
+- Suíte `All`: 2590 passed (47.277 assertions) com `php -d memory_limit=-1`; Dusk completo: 83 passed (680 assertions), incluindo `DrmExportacaoBrowserTest` (arquivo recebido, impressão em A4 com mídia `print` emulada). Pint e PHPStan limpos. Cobertura: ver relatório da sessão.
+- **Não verificado:** abrir o XLSX no Excel/LibreOffice (só releitura por PhpSpreadsheet); a janela de impressão real do navegador (só a mídia emulada); a imagem Docker reconstruída; Checkpoint 3 em homologação.
