@@ -220,7 +220,16 @@ final class TrocarDePlano
         $cicloNovo = CicloCobranca::from((string) $invoice->ciclo);
         $cheioNovo = IniciarAssinatura::precoDe($plano, $cicloNovo);
 
+        // STORY-085: como a assinatura estava antes (e como fica depois), para o estorno da diferença poder voltar.
+        $invoice->forceFill(['troca_anterior' => self::retratoAnterior($assinatura)])->save();
+
         $this->aplicarLocal($assinatura, $plano, $cicloNovo, $cheioNovo, $pagoEm, $this->descontoNoPlanoNovo($assinatura, $plano, $cicloNovo, $cheioNovo));
+
+        $invoice->forceFill(['troca_anterior' => ($invoice->troca_anterior ?? []) + ['depois' => [
+            'data_inicio' => $assinatura->data_inicio->toIso8601String(),
+            'periodos_pagos' => $assinatura->periodos_pagos,
+            'cota_restante_ciclo' => $assinatura->cota_restante_ciclo,
+        ]]])->save();
 
         AuditLogger::log(
             action: 'cobranca.troca_de_plano_aplicada',
@@ -283,6 +292,31 @@ final class TrocarDePlano
     public static function agendada(Assinatura $assinatura): ?Plano
     {
         return $assinatura->troca_plano_id === null ? null : Plano::query()->find($assinatura->troca_plano_id);
+    }
+
+    /**
+     * O que o estorno da diferença precisa para desfazer a troca (STORY-085): a assinatura antes dela. O
+     * marcador `depois` (início e períodos pagos que a troca deixou) diz se o ciclo ainda é o mesmo.
+     *
+     * @return array<string, mixed>
+     */
+    private static function retratoAnterior(Assinatura $a): array
+    {
+        return [
+            'plano_id' => $a->plano_id,
+            'ciclo' => $a->ciclo,
+            'preco_snapshot_centavos' => $a->preco_snapshot_centavos,
+            'cota_snapshot' => $a->cota_snapshot,
+            'cota_restante_ciclo' => $a->cota_restante_ciclo,
+            'data_inicio' => $a->data_inicio->toIso8601String(),
+            'periodos_pagos' => $a->periodos_pagos,
+            'proximo_vencimento' => $a->proximo_vencimento->toIso8601String(),
+            'proxima_cota_em' => $a->proxima_cota_em?->toIso8601String(),
+            'aviso_renovacao_periodo' => $a->aviso_renovacao_periodo,
+            'preco_cheio_centavos' => $a->preco_cheio_centavos,
+            'desconto_centavos' => $a->desconto_centavos,
+            'desconto_periodos' => $a->desconto_periodos,
+        ];
     }
 
     /** O início do período em curso (para a proporção): a data de início ou o fim do período anterior. */

@@ -108,6 +108,11 @@ Nenhum.
 - **STORY-082 (troca de plano, na main, ainda sem commit)**: quando uma troca de plano encerrar ou criar assinatura, avaliar se vale `contratacao_concluida`/`cancelamento`; não foi tocado.
 - Configurar `TELEGRAM_BOT_TOKEN` e `TELEGRAM_CHAT_ID` antes de ligar a cobrança em produção; sem eles os alertas só aparecem no log (`alerta.alert`).
 
+### Integração na junção (2026-11-05)
+- `cupom_aplicado` sai de `CupomDoCheckout::registrarUso`, junto com a gravação do uso (inclusive contratação e compra sem cobrança); a repetição é barrada pelo uso único (cupom, conta) e pela chave do evento por Invoice. Renovação com o desconto que continua não repete.
+- Contratação sem cobrança (100% ou abaixo do mínimo) emite `checkout_iniciado` e `contratacao_concluida` (assinatura, créditos e renovação Pix) e nenhum fato de pagamento: a conversão do checkout não passa de 100% e a taxa de falha de pagamento não se mexe.
+- Datas das estórias 085 e 086 passam por `DataExibicao` (fuso, dia de Brasília e formatação na view do financeiro). Testes: `IntegracaoCupomReembolsoEventosTest`.
+
 ### IDRs criados
 
 IDR-028.

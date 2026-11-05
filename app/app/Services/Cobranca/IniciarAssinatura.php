@@ -136,6 +136,9 @@ final class IniciarAssinatura
         });
 
         if ($invoice->status === EstadoCobranca::Paga) {
+            // STORY-086: sem cobrança também é um funil (iniciado e concluído), senão a conversão passa de 100%.
+            EventosCobranca::checkoutIniciado($invoice);
+
             AuditLogger::log(
                 action: 'cobranca.assinatura_sem_cobranca',
                 subjectType: 'Invoice',

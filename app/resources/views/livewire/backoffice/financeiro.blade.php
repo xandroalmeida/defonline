@@ -29,7 +29,13 @@
         <x-card class="mb-6" dusk="reembolso-painel">
             <h2 class="text-lg font-medium text-[color:var(--color-primary)] mt-0 mb-3">Reembolsar {{ $reais($reembolsoAberto->valor_centavos) }}</h2>
             <p class="m-0 mb-2 text-sm">{{ $reembolsoAberto->usuario?->nome }} ({{ $reembolsoAberto->usuario?->email }}) · {{ $reembolsoAberto->descricao }} · paga em {{ $data($reembolsoAberto->pago_em) }}</p>
-            <p class="m-0 mb-3 text-sm" dusk="reembolso-previa">{{ $previa->descricao() }}</p>
+            @if ($reembolsoAberto->desconto_centavos > 0 && $reembolsoAberto->preco_cheio_centavos !== null)
+                <p class="m-0 mb-2 text-sm" dusk="reembolso-cupom">
+                    Preço cheio {{ $reais($reembolsoAberto->preco_cheio_centavos) }} · desconto {{ $reais($reembolsoAberto->desconto_centavos) }}@if ($cupomAberto) (cupom {{ $cupomAberto->codigo }})@endif · pago {{ $reais($reembolsoAberto->valor_centavos) }}.
+                    O estorno devolve só o que foi pago e o uso do cupom não é devolvido.
+                </p>
+            @endif
+            <p class="m-0 mb-3 text-sm @if ($previa->alerta) font-medium text-[color:var(--color-destructive)] @endif" @if ($previa->alerta) role="alert" @endif dusk="reembolso-previa">{{ $previa->descricao() }}</p>
             @if ($previa->creditosUsados > 0)
                 <p class="m-0 mb-3 text-sm font-medium text-[color:var(--color-destructive)]" role="alert" dusk="reembolso-creditos-usados">
                     Atenção: o usuário já usou {{ $previa->creditosUsados }} {{ $previa->creditosUsados === 1 ? 'crédito' : 'créditos' }} desta compra.
@@ -226,7 +232,7 @@
                             {{ $i->nf_emitida_em ? 'Emitida em '.$dia($i->nf_emitida_em).($i->nf_numero ? ' (nº '.$i->nf_numero.')' : '') : '—' }}
                         </td>
                         <td class="px-3 py-2 align-top text-right whitespace-nowrap">
-                            @if ($i->status === \App\Domain\Cobranca\EstadoCobranca::Paga && $i->reembolso_estado === null)
+                            @if ($i->status === \App\Domain\Cobranca\EstadoCobranca::Paga && $i->reembolso_estado === null && $i->valor_centavos > 0)
                                 <x-button type="button" variant="secondary" size="sm" wire:click="abrirReembolso('{{ $i->id }}')" dusk="cobranca-reembolsar-{{ $i->id }}">Reembolsar</x-button>
                             @endif
                         </td>

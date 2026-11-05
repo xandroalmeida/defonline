@@ -132,6 +132,8 @@ final class IniciarRenovacaoPix
         });
 
         if ($invoice->status === EstadoCobranca::Paga) {
+            EventosCobranca::checkoutIniciado($invoice);
+
             return $invoice;
         }
 

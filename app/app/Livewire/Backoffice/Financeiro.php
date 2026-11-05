@@ -12,6 +12,7 @@ use App\Domain\Cobranca\StatusAssinatura;
 use App\Livewire\Backoffice\Concerns\ExigePermissao;
 use App\Models\Assinatura;
 use App\Models\ConsumoAnalise;
+use App\Models\Cupom;
 use App\Models\Invoice;
 use App\Models\LoteCredito;
 use App\Models\Usuario;
@@ -114,7 +115,16 @@ final class Financeiro extends Component
         $this->resetValidation();
         $this->limparAvisos();
         $this->notaId = null;
-        $this->reembolsoId = Invoice::query()->findOrFail($id)->id;
+        $invoice = Invoice::query()->findOrFail($id);
+
+        // Contratação sem cobrança (valor zero): não há dinheiro a devolver, então o painel nem abre.
+        if ($invoice->valor_centavos === 0) {
+            $this->erro = 'Esta contratação foi feita sem cobrança (valor zero): não há o que reembolsar.';
+
+            return;
+        }
+
+        $this->reembolsoId = $invoice->id;
         $this->motivo = '';
     }
 
@@ -220,9 +230,10 @@ final class Financeiro extends Component
             'devolver' => $this->devolver(),
             'contestadas' => Invoice::query()->with('usuario')->where('status', EstadoCobranca::Contestada->value)->latest('pago_em')->limit(self::LISTA_ATENCAO)->get(),
             'semNota' => Invoice::query()->with('usuario')->where('status', EstadoCobranca::Paga->value)
-                ->whereNull('nf_emitida_em')->whereNull('devolucao_motivo')->whereNull('reembolso_estado')
+                ->where('valor_centavos', '>', 0)->whereNull('nf_emitida_em')->whereNull('devolucao_motivo')->whereNull('reembolso_estado')
                 ->orderBy('pago_em')->limit(self::LISTA_ATENCAO)->get(),
             'reembolsoAberto' => $reembolsoAberto,
+            'cupomAberto' => $reembolsoAberto?->cupom_id === null ? null : Cupom::query()->find($reembolsoAberto->cupom_id),
             'previa' => $reembolsoAberto === null ? null : $this->previaDe($reembolsoAberto),
             'notaAberta' => $this->notaId === null ? null : Invoice::query()->with('usuario')->find($this->notaId),
         ])->layoutData(['title' => 'Financeiro']);

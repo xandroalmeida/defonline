@@ -94,12 +94,15 @@ final class IniciarCompraDeCreditos
                 // CA-6: sem cobrança e sem provedor, mas nunca crédito sem Invoice e sem o registro do uso.
                 $this->cupons->registrarUso($invoice);
                 $this->carteira->concederCreditos($usuario->id, $pacote->quantidade_creditos, now()->addMonthsNoOverflow($pacote->validade_meses), $invoice->id, now());
+                EventosCobranca::contratacaoConcluida($invoice, null, renovacao: false);
             }
 
             return $invoice;
         });
 
         if ($invoice->status === EstadoCobranca::Paga) {
+            EventosCobranca::checkoutIniciado($invoice);
+
             AuditLogger::log(
                 action: 'cobranca.compra_sem_cobranca',
                 subjectType: 'Invoice',

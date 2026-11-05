@@ -11,6 +11,7 @@ use App\Models\Cupom;
 use App\Models\CupomConcessao;
 use App\Models\Invoice;
 use App\Models\Usuario;
+use App\Observabilidade\EventosCobranca;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -152,6 +153,10 @@ final class CupomDoCheckout
 
             return;
         }
+
+        // STORY-086: o evento nasce junto com o uso (inclusive em contratação sem cobrança) e só uma vez: a chave
+        // única do uso (cupom, conta) barra a repetição acima, e o evento é idempotente por Invoice.
+        EventosCobranca::cupomAplicado($invoice->usuario_id, $invoice->cupom_id, $invoice->tipo === 'credito' ? 'credito' : 'assinatura', $invoice->id, $invoice->desconto_centavos);
 
         $cupom = Cupom::query()->find($invoice->cupom_id);
 

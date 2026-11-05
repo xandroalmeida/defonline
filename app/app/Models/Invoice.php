@@ -55,6 +55,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $nf_emitida_em
  * @property string|null $nf_emitida_por_id
  * @property string|null $nf_numero
+ * @property array<string, mixed>|null $troca_anterior
  * @property Carbon|null $created_at
  */
 final class Invoice extends Model
@@ -78,6 +79,7 @@ final class Invoice extends Model
             'reembolso_solicitado_em' => 'datetime',
             'reembolsado_em' => 'datetime',
             'nf_emitida_em' => 'datetime',
+            'troca_anterior' => 'array',
         ];
     }
 

@@ -14,6 +14,7 @@ use App\Domain\Cobranca\StatusLote;
 use App\Models\Assinatura;
 use App\Models\Invoice;
 use App\Models\LoteCredito;
+use App\Models\Plano;
 use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
 use App\Observabilidade\EventosCobranca;
@@ -137,6 +138,11 @@ final class ReembolsarCobranca
                 throw new ReembolsoNaoRealizado('Só cobrança paga pode ser reembolsada.');
             }
 
+            // Contratação sem cobrança (cupom de desconto total): não houve dinheiro, não há o que devolver.
+            if ($invoice->valor_centavos === 0) {
+                throw new ReembolsoNaoRealizado('Esta contratação foi feita sem cobrança (valor zero): não há o que reembolsar.');
+            }
+
             if ($invoice->id_externo === null || $invoice->provedor !== $this->provedor->nome()) {
                 throw new ReembolsoNaoRealizado('Esta cobrança não tem registro no provedor de pagamento ativo; o estorno deve ser feito direto no provedor.');
             }
@@ -213,7 +219,11 @@ final class ReembolsarCobranca
             return PreviaDoReembolso::nada('Este pagamento não concedeu acesso nem créditos (a assinatura estava cancelada, trocada ou já existia): só o dinheiro é devolvido.');
         }
 
-        return $invoice->tipo === 'credito' ? $this->previaDeCreditos($invoice, $aplicar) : $this->previaDeAssinatura($invoice, $aplicar);
+        return match ($invoice->tipo) {
+            'credito' => $this->previaDeCreditos($invoice, $aplicar),
+            'troca_de_plano' => $this->previaDeTroca($invoice, $aplicar),
+            default => $this->previaDeAssinatura($invoice, $aplicar),
+        };
     }
 
     private function previaDeCreditos(Invoice $invoice, bool $aplicar): PreviaDoReembolso
@@ -233,6 +243,65 @@ final class ReembolsarCobranca
         }
 
         return new PreviaDoReembolso('creditos', $lote->quantidade_comprada, $usados, $retirar);
+    }
+
+    /**
+     * STORY-082 × 085 — estornar a diferença de um upgrade NÃO encerra a assinatura (ela segue paga pelo ciclo):
+     * volta ao plano anterior se o ciclo ainda é o da troca; se o ciclo já seguiu (renovou, ou outra troca),
+     * o plano atual fica e só o dinheiro da diferença é devolvido, e a tela avisa antes de confirmar.
+     */
+    private function previaDeTroca(Invoice $invoice, bool $aplicar): PreviaDoReembolso
+    {
+        $query = Assinatura::query()->whereKey($invoice->assinatura_id);
+        $assinatura = $invoice->assinatura_id === null ? null : ($aplicar ? $query->lockForUpdate() : $query)->first();
+        $antes = $invoice->troca_anterior;
+        $depois = is_array($antes) ? ($antes['depois'] ?? null) : null;
+
+        if ($assinatura === null || ! is_array($antes) || ! is_array($depois)) {
+            return PreviaDoReembolso::nada('Não dá para voltar ao plano anterior (a troca não deixou o registro do plano de antes): o plano atual é mantido e só o dinheiro da diferença é devolvido.', alerta: true);
+        }
+
+        $mesmoCiclo = $assinatura->status === StatusAssinatura::Ativa
+            && $assinatura->plano_id === $invoice->plano_id
+            && $assinatura->ciclo === $invoice->ciclo
+            && $assinatura->periodos_pagos === (int) $depois['periodos_pagos']
+            && CarbonImmutable::parse((string) $depois['data_inicio'])->equalTo($assinatura->data_inicio);
+
+        if (! $mesmoCiclo) {
+            return PreviaDoReembolso::nada('Não dá para voltar ao plano anterior: o ciclo ou o plano já mudou depois desta troca (renovou, mudou de novo ou a assinatura não está ativa). O plano atual é mantido e só o dinheiro da diferença é devolvido.', alerta: true);
+        }
+
+        $nome = Plano::query()->find($antes['plano_id'])->nome ?? 'anterior';
+
+        if ($aplicar) {
+            // O que se usou desde a troca continua usado.
+            $uso = max(0, (int) $depois['cota_restante_ciclo'] - $assinatura->cota_restante_ciclo);
+            $assinatura->forceFill([
+                'plano_id' => $antes['plano_id'],
+                'ciclo' => $antes['ciclo'],
+                'preco_snapshot_centavos' => $antes['preco_snapshot_centavos'],
+                'cota_snapshot' => $antes['cota_snapshot'],
+                'cota_restante_ciclo' => max(0, (int) $antes['cota_restante_ciclo'] - $uso),
+                'data_inicio' => $antes['data_inicio'],
+                'periodos_pagos' => $antes['periodos_pagos'],
+                'proximo_vencimento' => $antes['proximo_vencimento'],
+                'proxima_cota_em' => $antes['proxima_cota_em'],
+                'aviso_renovacao_periodo' => $antes['aviso_renovacao_periodo'],
+                'preco_cheio_centavos' => $antes['preco_cheio_centavos'],
+                'desconto_centavos' => (int) $antes['desconto_centavos'],
+                'desconto_periodos' => $antes['desconto_periodos'],
+                'troca_plano_id' => null,
+                'troca_ciclo' => null,
+                'troca_preco_centavos' => null,
+                'troca_preco_cheio_centavos' => null,
+                'troca_desconto_centavos' => null,
+                'troca_agendada_em' => null,
+                // O valor no provedor volta ao do plano anterior pela rotina horária (sem chamada de rede aqui).
+                'ajuste_provedor_pendente' => $assinatura->id_externo !== null,
+            ])->save();
+        }
+
+        return PreviaDoReembolso::voltaAoPlano($nome);
     }
 
     private function previaDeAssinatura(Invoice $invoice, bool $aplicar): PreviaDoReembolso

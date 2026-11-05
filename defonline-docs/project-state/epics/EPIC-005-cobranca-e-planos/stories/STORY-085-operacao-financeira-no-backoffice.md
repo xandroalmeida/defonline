@@ -108,6 +108,10 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 
 Nenhum.
 
+### Integração na junção (2026-11-05)
+- **Cupom:** estornar cobrança com cupom não devolve o uso (a vaga do limite continua tomada). A tela mostra preço cheio, desconto, cupom e valor pago, e diz que o uso não volta. Invoice de valor zero (contratação sem cobrança) não oferece reembolso (sem botão, painel nem serviço) e sai da lista "pagas sem nota fiscal".
+- **Troca de plano (STORY-082):** a Invoice `troca_de_plano` guarda `troca_anterior` (a assinatura antes e os marcadores de depois; migration 400087). Estornar a diferença volta ao plano anterior, sem encerrar a assinatura, quando o ciclo ainda é o da troca (uso desde a troca mantido; o valor no provedor volta pela rotina `ajuste_provedor_pendente`). Se o ciclo já seguiu (renovou, outra troca, assinatura inativa) ou a troca é anterior ao registro, o plano atual fica, só o dinheiro é devolvido, e a tela avisa em destaque ANTES de confirmar.
+
 ### IDRs criados
 
 IDR-027.

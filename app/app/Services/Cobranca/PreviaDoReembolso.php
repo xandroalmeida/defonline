@@ -11,7 +11,7 @@ namespace App\Services\Cobranca;
 final readonly class PreviaDoReembolso
 {
     public function __construct(
-        /** @var 'creditos'|'assinatura'|'nada' */
+        /** @var 'creditos'|'assinatura'|'troca'|'nada' */
         public string $tipo,
         public int $creditosComprados = 0,
         public int $creditosUsados = 0,
@@ -20,16 +20,25 @@ final readonly class PreviaDoReembolso
         public bool $encerraAssinatura = false,
         /** Por que nada é retirado, quando é o caso (para a tela explicar). */
         public ?string $porqueNada = null,
+        /** STORY-082 × 085: o plano a que a assinatura volta quando se estorna a diferença de uma troca. */
+        public ?string $planoAnterior = null,
+        /** A tela destaca este aviso (algo que o admin precisa saber antes de confirmar). */
+        public bool $alerta = false,
     ) {}
 
-    public static function nada(string $porque): self
+    public static function nada(string $porque, bool $alerta = false): self
     {
-        return new self('nada', porqueNada: $porque);
+        return new self('nada', porqueNada: $porque, alerta: $alerta);
+    }
+
+    public static function voltaAoPlano(string $plano): self
+    {
+        return new self('troca', planoAnterior: $plano);
     }
 
     public function retiraAlgo(): bool
     {
-        return $this->creditosARetirar > 0 || $this->cotaARetirar > 0 || $this->encerraAssinatura;
+        return $this->creditosARetirar > 0 || $this->cotaARetirar > 0 || $this->encerraAssinatura || $this->planoAnterior !== null;
     }
 
     /** Frase para a tela de confirmação. */
@@ -37,6 +46,10 @@ final readonly class PreviaDoReembolso
     {
         if ($this->tipo === 'nada') {
             return $this->porqueNada ?? 'Nada será retirado do acesso do usuário; só o dinheiro é devolvido.';
+        }
+
+        if ($this->tipo === 'troca') {
+            return "A troca de plano será desfeita: a assinatura volta ao plano {$this->planoAnterior}, no mesmo ciclo, com o que já foi usado descontado da cota. A assinatura continua ativa.";
         }
 
         if ($this->tipo === 'creditos') {
