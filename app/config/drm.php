@@ -26,10 +26,10 @@ declare(strict_types=1);
  * conteúdo, não como constante de código (`PDR-009` §3).
  */
 return [
-    // Ainda não há motor de DRM implementado. A versão nasce em 0.0.0 e sobe
-    // para 1.0.0 na STORY-050 (motor de cálculo). Registrada aqui desde já para
-    // que o lançamento da STORY-047 não invente um valor próprio.
-    'motor_drm_version' => '0.0.0',
+    // 1.0.0 — STORY-048: motor de cálculo (`App\Domain\Drm\MotorDrm`). Sobe quando
+    // fórmula, ordem ou existência de linha muda (MAJOR: estrutura; MINOR: linha nova
+    // compatível; PATCH: correção que muda output). Lançamento fechado nunca é recalculado.
+    'motor_drm_version' => '1.0.0',
 
     // 1.0.0 — STORY-052: pacote inicial. Rótulos e nome de interface validados;
     // tooltips e alertas provisórios; faixas de farol todas `nao_calibrada`.

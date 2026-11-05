@@ -8,6 +8,7 @@ use App\Domain\Drm\Competencia;
 use App\Domain\Drm\Dinheiro;
 use App\Domain\Drm\Lancamento;
 use App\Domain\Drm\LancamentoCanonicalizer;
+use App\Domain\Drm\MotorDrm;
 use App\Domain\Drm\Ocorrencia;
 use App\Models\DrmLancamento;
 use App\Models\DrmPreferencia;
@@ -24,11 +25,15 @@ use Illuminate\Support\Facades\DB;
  * `drm_lancamentos_vigente_unique` resolve a corrida, e a violação vira
  * {@see CompetenciaJaLancada} — o chamador oferece abrir ou corrigir o existente.
  *
- * `demonstracao` nasce vazia: o motor é a STORY-048. `alertas_aceitos` vai em coluna
- * própria, fora do `payload_hash`.
+ * **O snapshot nasce junto (STORY-048, ADR-007).** O motor roda sobre o payload canônico —
+ * o mesmo que vira o `payload_hash` — e a `demonstracao` é gravada na mesma transação, com
+ * o mesmo carimbo de `gerado_em` que o motor recebeu. A coluna é imutável: não existe
+ * "calcular depois". `alertas_aceitos` vai em coluna própria, fora do `payload_hash`.
  */
 final class FecharLancamento
 {
+    public function __construct(private readonly MotorDrm $motor) {}
+
     /**
      * @param  list<Ocorrencia>  $alertasAceitos
      *
@@ -42,9 +47,11 @@ final class FecharLancamento
         ?DrmRascunho $rascunho = null,
     ): DrmLancamento {
         $payload = LancamentoCanonicalizer::canonicalizar($lancamento->payload());
+        $agora = now();
+        $demonstracao = $this->motor->calcular($payload, $lancamento->setor, $competencia, $agora);
 
         try {
-            return DB::transaction(function () use ($empresa, $competencia, $lancamento, $alertasAceitos, $rascunho, $payload): DrmLancamento {
+            return DB::transaction(function () use ($empresa, $competencia, $lancamento, $alertasAceitos, $rascunho, $payload, $demonstracao, $agora): DrmLancamento {
                 $registro = DrmLancamento::query()->create([
                     'usuario_id' => $empresa->usuario_id,
                     'empresa_analisada_id' => $empresa->id,
@@ -53,17 +60,17 @@ final class FecharLancamento
                     'setor' => $lancamento->setor->value,
                     'lancamento_payload' => $payload,
                     'payload_hash' => LancamentoCanonicalizer::hash($payload),
-                    'demonstracao' => [],
+                    'demonstracao' => $demonstracao,
                     'alertas_aceitos' => array_map(
                         static fn (Ocorrencia $o): array => [
                             'regra' => $o->codigo,
-                            'ocorrido_em' => now()->toIso8601String(),
+                            'ocorrido_em' => $agora->toIso8601String(),
                             'valor_envolvido' => $o->valorEnvolvido === null ? null : Dinheiro::decimal($o->valorEnvolvido),
                         ],
                         $alertasAceitos,
                     ),
-                    'motor_drm_version' => (string) config('drm.motor_drm_version'),
-                    'gerado_em' => now(),
+                    'motor_drm_version' => $demonstracao['motor_drm_version'],
+                    'gerado_em' => $agora,
                 ]);
 
                 $rascunho?->delete();
