@@ -9,6 +9,7 @@ use App\Domain\Cobranca\WebhookInvalido;
 use App\Services\Cobranca\ReceberWebhook;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * STORY-076 CA-4 / ADR-010 §3 — endpoint de webhook do provedor de pagamento. Fora de sessão e de
@@ -27,6 +28,10 @@ final class WebhookPagamentoController extends Controller
         try {
             $resultado = $receber->tratar(new WebhookBruto($cabecalhos, $request->getContent()));
         } catch (WebhookInvalido) {
+            // STORY-086 CA-5: webhook rejeitado (sem autenticação válida ou ilegível) é token trocado errado (pagamentos param de ser
+            // confirmados) ou alguém batendo na porta. Alerta P1, sem corpo, cabeçalho nem IP.
+            Log::error('cobranca.webhook_rejeitado', ['module' => 'cobranca', 'action' => 'receber_webhook', 'prioridade' => 'P1']);
+
             return response()->json(['erro' => 'nao_autorizado'], 401);
         }
 

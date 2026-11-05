@@ -8,6 +8,7 @@ use App\Domain\Cobranca\PaymentProvider;
 use App\Domain\Motor\FonteRecomendacoes;
 use App\Infrastructure\Cobranca\Asaas\AsaasPaymentProvider;
 use App\Infrastructure\Cobranca\Fake\FakePaymentProvider;
+use App\Observabilidade\AlertaDeCobranca;
 use App\Observabilidade\Listeners\CollectJobMetrics;
 use App\Services\Rfb\CnpjaRfbCnpjClient;
 use App\Services\Rfb\MockRfbCnpjClient;
@@ -16,6 +17,7 @@ use App\Services\Rfb\RfbCnpjClient;
 use App\Support\RecomendacoesNoBanco;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
@@ -73,6 +75,9 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(JobProcessing::class, [CollectJobMetrics::class, 'onProcessing']);
         Event::listen(JobProcessed::class, [CollectJobMetrics::class, 'onProcessed']);
         Event::listen(JobFailed::class, [CollectJobMetrics::class, 'onFailed']);
+
+        // STORY-086 CA-5 — todo `Log::error` com module=cobranca vira alerta no canal único da equipe.
+        Event::listen(MessageLogged::class, AlertaDeCobranca::class);
 
         // Rate limit do login (ADR-001 §Autenticação padrão — 5/min por IP+email).
         RateLimiter::for('login', function (Request $request) {

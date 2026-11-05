@@ -35,8 +35,8 @@ return [
         ],
     ],
 
-    // Telegram — usado pelo RfbAlerter (STORY-015 CA-5) e por futuros alertas
-    // operacionais (ADR-004). Token vazio = canal degrada para Log::warning.
+    // Telegram — canal ÚNICO de alerta da equipe (AlertaDaEquipe: monitor RFB, abuso de trial,
+    // falhas de cobrança — STORY-015, STORY-086; ADR-004). Token vazio = canal degrada para Log::warning.
     'telegram' => [
         'bot_token' => env('TELEGRAM_BOT_TOKEN', ''),
         'chat_id' => env('TELEGRAM_CHAT_ID', ''),
