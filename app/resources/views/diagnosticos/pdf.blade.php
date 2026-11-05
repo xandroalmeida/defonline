@@ -102,7 +102,6 @@
              e o thead se repete no topo de cada página da tabela. --}}
         <div class="titulo-da-tabela">
             <h2 class="secao__titulo">Indicadores essenciais</h2>
-            <p class="secao__intro">Os {{ count($essenciais) }} indicadores com farol, na ordem da matriz de recomendações.</p>
         </div>
         <table class="indicadores" data-secao="indicadores">
             <thead>

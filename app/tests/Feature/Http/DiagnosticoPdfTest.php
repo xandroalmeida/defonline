@@ -130,7 +130,12 @@ it('nenhum título de seção fica solto: cada um está preso ao seu primeiro co
         $preso = str_contains($classes, 'manter-junto') || str_contains($classes, 'titulo-da-tabela');
         expect($preso)->toBeTrue("Título \"{$h2->textContent}\" sem amarração de quebra de página");
 
-        // E nunca é o último filho do bloco — há conteúdo depois dele no mesmo bloco/seção.
+        // O título da tabela fica sozinho no bloco: o que o segue é a tabela, conferida abaixo.
+        if (str_contains($classes, 'titulo-da-tabela')) {
+            continue;
+        }
+
+        // Nos demais, nunca é o último filho do bloco — há conteúdo depois dele no mesmo bloco.
         $irmao = $h2->nextSibling;
         while ($irmao && ! $irmao instanceof DOMElement) {
             $irmao = $irmao->nextSibling;

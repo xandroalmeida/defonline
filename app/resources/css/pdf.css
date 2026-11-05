@@ -38,6 +38,7 @@ h1, h2, h3, p, ul, dl, dd {
 
 .titulo-da-tabela {
     page-break-after: avoid;
+    margin-bottom: 4mm;
 }
 
 .nova-pagina {
