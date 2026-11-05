@@ -50,6 +50,14 @@ Reconhece quem ajudou no beta e dá à equipe uma alavanca comercial.
 - [ ] **CA-9:** Desativar o cupom não altera descontos já aplicados.
 - [ ] **CA-10:** Respeite o interruptor de cobrança (STORY-073): enquanto estiver desligado, o usuário comum não vê nem sofre nenhum efeito desta estória.
 
+## Ajustes do ADR-010 (prevalecem sobre os CAs acima onde houver conflito)
+
+O ADR-010 está `proposed`. O orquestrador adotou as recomendações dele em 2026-11-05 para não parar o trabalho, e o PO ainda vai revisá-las.
+
+- Sempre enviamos ao provedor o valor final calculado por nós: nunca usamos o desconto do Asaas.
+- Com desconto de 100% ou valor final abaixo do mínimo do provedor (R$ 5,00 no sandbox), a contratação é ativada sem cobrança, e o meio de pagamento é pedido quando o desconto acaba.
+- Conta com cupom concedido não vê o campo de digitar outro cupom.
+
 ## Fora de escopo
 
 - Vários cupons em uma compra.

@@ -2028,7 +2028,7 @@
     {
       "type": "spike",
       "target_role": "arquiteto",
-      "status": "ready",
+      "status": "in_review",
       "blocks": [
         "STORY-076",
         "STORY-077",
@@ -2036,7 +2036,7 @@
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "arquiteto (claude-sonnet-5-5)",
       "requires_design": false,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2046,7 +2046,8 @@
       "estimated_session_size": "M",
       "blocked_by": [],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-069-spike-provedor-pagamento-asaas.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "ADR-010 proposed; confirmar checkout e webhook com URL pública de sandbox."
     },
     {
       "type": "implementation",
@@ -3624,6 +3625,17 @@
         "path": "decisions/adr/ADR-011-provisao-rubricas-sazonais-drm.md",
         "decided_at": null,
         "note": "Aguarda decisão do PO. Recomenda a saída C."
+      },
+      {
+        "id": "ADR-010",
+        "slug": "abstracao-provedor-pagamento-asaas",
+        "title": "Abstração do provedor de pagamento e integração com o Asaas por Checkout hospedado",
+        "type": "integracao",
+        "status": "proposed",
+        "path": "decisions/adr/ADR-010-abstracao-provedor-pagamento-asaas.md",
+        "decided_at": null,
+        "approved_by": null,
+        "note": "Adotado provisoriamente para implementação; perguntas Q1 a Q7 e pendências de sandbox aguardam o PO."
       }
     ],
     "idr": [

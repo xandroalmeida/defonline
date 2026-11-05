@@ -44,6 +44,12 @@ Quem cresce sobe sem trocar de conta. É o caminho natural de Roberto para o Pro
 - [ ] **CA-5:** Só é possível escolher planos ativos. Um plano desativado continua valendo para quem já o tem até a troca ou o cancelamento.
 - [ ] **CA-6:** Respeite o interruptor de cobrança (STORY-073): enquanto estiver desligado, o usuário comum não vê nem sofre nenhum efeito desta estória.
 
+## Ajustes do ADR-010 (prevalecem sobre os CAs acima onde houver conflito)
+
+O ADR-010 está `proposed`. O orquestrador adotou as recomendações dele em 2026-11-05 para não parar o trabalho, e o PO ainda vai revisá-las.
+
+- Upgrade cobra a diferença por um checkout avulso e depois ajusta o valor da assinatura no provedor (`changeSubscriptionValue`). Diferença abaixo de R$ 5,00 é aplicada sem cobrança.
+
 ## Fora de escopo
 
 - Crédito em conta para downgrade.

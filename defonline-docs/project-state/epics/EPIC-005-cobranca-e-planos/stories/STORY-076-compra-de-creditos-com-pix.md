@@ -51,6 +51,15 @@ Primeiro momento em que o produto recebe dinheiro, e a comprovação da abstraç
 - [ ] **CA-9:** Teste arquitetural impede referência ao Asaas fora do adaptador.
 - [ ] **CA-10:** Respeite o interruptor de cobrança (STORY-073): enquanto estiver desligado, o usuário comum não vê nem sofre nenhum efeito desta estória.
 
+## Ajustes do ADR-010 (prevalecem sobre os CAs acima onde houver conflito)
+
+O ADR-010 está `proposed`. O orquestrador adotou as recomendações dele em 2026-11-05 para não parar o trabalho, e o PO ainda vai revisá-las.
+
+- O pagamento ocorre no Checkout hospedado do Asaas (`DETACHED`, Pix, `minutesToExpire` igual à configuração). O usuário é redirecionado após o aceite do Termo. O e-mail do CA-2 leva ao link do checkout, não a um QR Code gerado por nós.
+- A tela de retorno aguarda o evento `cobranca.paga`: o retorno por si só nunca libera crédito.
+- A interface `PaymentProvider`, o evento canônico, a tabela de eventos e o adaptador Fake nascem nesta estória, no namespace `App\Domain\Cobranca`, não `Billing`.
+- Cada CA sobre webhook é testado com o Fake e com requisição HTTP assinada no formato do Asaas. O teste contra o sandbox é opcional e não entra na suíte.
+
 ## Fora de escopo
 
 - Cartão (STORY-077 e STORY-078).

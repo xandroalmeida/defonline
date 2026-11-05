@@ -53,6 +53,15 @@ Cria a receita recorrente que sustenta o produto.
 - [ ] **CA-10:** Teste E2E percorre planos, checkout e assinatura ativa com o adaptador de teste.
 - [ ] **CA-11:** Respeite o interruptor de cobrança (STORY-073): enquanto estiver desligado, o usuário comum não vê nem sofre nenhum efeito desta estória.
 
+## Ajustes do ADR-010 (prevalecem sobre os CAs acima onde houver conflito)
+
+O ADR-010 está `proposed`. O orquestrador adotou as recomendações dele em 2026-11-05 para não parar o trabalho, e o PO ainda vai revisá-las.
+
+- O cartão é digitado no Checkout hospedado (`RECURRENT`). Nosso sistema não tem formulário de cartão: a seção de campos de `STORY-070-checkout-assinatura.md` não se aplica, e o botão leva ao Asaas após o aceite do Termo.
+- O CA-4 passa a valer assim: não há número, validade ou CVV em nenhum DTO, coluna ou log. Bandeira e 4 últimos dígitos só se o provedor informar. Inclua o teste arquitetural do ADR-010 §2.
+- A assinatura só fica ativa com `cobranca.paga`.
+- Recusa de cartão no checkout é tratada no Asaas: a volta sem pagamento mantém o usuário sem assinatura e oferece nova tentativa.
+
 ## Fora de escopo
 
 - Falha de renovação (STORY-079).

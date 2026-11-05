@@ -40,6 +40,7 @@ Ao fim deste épico, Roberto experimenta o produto no trial, assina um plano ou 
 - **Interruptor de cobrança:** toda a cobrança é publicada desligada. Assim, as estórias chegam à `main` aos poucos, sem bloquear os usuários do beta. Ligar é decisão do PO após a validação.
 - **"Logar como":** o admin não contrata, paga, cancela nem reembolsa enquanto assume a conta de um usuário.
 - **Canal do arrependimento:** e-mail `eb@ebparcerias.com`, o mesmo dos Termos, sem botão de reembolso.
+- **Pagamento:** cartão e Pix no Checkout hospedado do Asaas (ADR-010, `proposed`), adotado provisoriamente até a revisão do PO.
 - **Nota fiscal:** emissão manual no início, com controle no backoffice (spec §2.4).
 
 ## Fora de escopo (explicitamente)

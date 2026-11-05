@@ -45,6 +45,12 @@ Dá uma alternativa a quem prefere cartão.
 - [ ] **CA-5:** Dados de cartão seguem a regra da STORY-077.
 - [ ] **CA-6:** Respeite o interruptor de cobrança (STORY-073): enquanto estiver desligado, o usuário comum não vê nem sofre nenhum efeito desta estória.
 
+## Ajustes do ADR-010 (prevalecem sobre os CAs acima onde houver conflito)
+
+O ADR-010 está `proposed`. O orquestrador adotou as recomendações dele em 2026-11-05 para não parar o trabalho, e o PO ainda vai revisá-las.
+
+- O cartão é digitado no Checkout hospedado (`DETACHED`, `CREDIT_CARD`).
+
 ## Fora de escopo
 
 - Guardar cartão para compras futuras.

@@ -48,6 +48,13 @@ Permite cumprir o arrependimento e a emissão de nota sem acesso direto ao banco
 - [ ] **CA-7:** Reembolso e marcação de nota vão para `audit_logs`.
 - [ ] **CA-8:** Durante o "Logar como", essas ações ficam indisponíveis.
 
+## Ajustes do ADR-010 (prevalecem sobre os CAs acima onde houver conflito)
+
+O ADR-010 está `proposed`. O orquestrador adotou as recomendações dele em 2026-11-05 para não parar o trabalho, e o PO ainda vai revisá-las.
+
+- Estorno de cartão é total pela API (parcial só a partir do dia seguinte). Estorno de Pix fica em `aguardando_autorizacao`: a tela orienta o admin a autorizar no painel do Asaas, e o estado muda com o evento recebido.
+- Contestação (chargeback) aparece na lista com destaque.
+
 ## Fora de escopo
 
 - Emissão automática de nota fiscal.

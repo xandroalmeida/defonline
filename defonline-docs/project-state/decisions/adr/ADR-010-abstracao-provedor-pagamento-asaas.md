@@ -63,7 +63,7 @@ Também hospedada ([cobranças via cartão](https://docs.asaas.com/docs/cobranca
 
 ### 1. Contrato da abstração (CA-1)
 
-Interface única em PHP (`App\Domain\Billing\PaymentProvider`), com DTOs e enums **nossos**; nenhum tipo, status, enum ou campo do Asaas atravessa a fronteira.
+Interface única em PHP (`App\Domain\Cobranca\PaymentProvider`), com DTOs e enums **nossos**; nenhum tipo, status, enum ou campo do Asaas atravessa a fronteira.
 
 | Operação | Entrada canônica | Saída canônica |
 |---|---|---|

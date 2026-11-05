@@ -46,6 +46,12 @@ Atende quem não quer ou não pode usar cartão, com a vantagem de receber o ano
 - [ ] **CA-6:** O mesmo webhook recebido duas vezes não ativa nem renova duas vezes.
 - [ ] **CA-7:** Respeite o interruptor de cobrança (STORY-073): enquanto estiver desligado, o usuário comum não vê nem sofre nenhum efeito desta estória.
 
+## Ajustes do ADR-010 (prevalecem sobre os CAs acima onde houver conflito)
+
+O ADR-010 está `proposed`. O orquestrador adotou as recomendações dele em 2026-11-05 para não parar o trabalho, e o PO ainda vai revisá-las.
+
+- Assinatura anual com Pix é um Checkout Pix avulso por ano, sem assinatura no Asaas. A renovação envia por e-mail um novo checkout.
+
 ## Fora de escopo
 
 - Pix em plano mensal.

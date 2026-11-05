@@ -49,6 +49,13 @@ Transparência reduz chargeback e reclamação, e permite recuperar uma assinatu
 - [ ] **CA-9:** Teste E2E cobre cancelamento e troca de cartão.
 - [ ] **CA-10:** Respeite o interruptor de cobrança (STORY-073): enquanto estiver desligado, o usuário comum não vê nem sofre nenhum efeito desta estória.
 
+## Ajustes do ADR-010 (prevalecem sobre os CAs acima onde houver conflito)
+
+O ADR-010 está `proposed`. O orquestrador adotou as recomendações dele em 2026-11-05 para não parar o trabalho, e o PO ainda vai revisá-las.
+
+- Trocar o cartão significa concluir um novo Checkout recorrente e cancelar a assinatura antiga só depois da confirmação, sem cobrança em dobro no ciclo.
+- Assinatura anual com Pix não tem botão de cancelar, e a tela diz até quando vai o acesso.
+
 ## Fora de escopo
 
 - Troca de plano (STORY-082).

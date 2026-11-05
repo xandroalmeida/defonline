@@ -48,6 +48,13 @@ Preserva receita e evita cancelamento involuntário.
 - [ ] **CA-7:** A indisponibilidade do provedor não é contada como recusa do cliente e gera alerta à equipe.
 - [ ] **CA-8:** Respeite o interruptor de cobrança (STORY-073): enquanto estiver desligado, o usuário comum não vê nem sofre nenhum efeito desta estória.
 
+## Ajustes do ADR-010 (prevalecem sobre os CAs acima onde houver conflito)
+
+O ADR-010 está `proposed`. O orquestrador adotou as recomendações dele em 2026-11-05 para não parar o trabalho, e o PO ainda vai revisá-las.
+
+- A retentativa de 3 vezes a cada 48 horas é uma régua própria nossa, a menos que o sandbox mostre retentativa do Asaas (ADR-010 §4.2). Registre o que foi observado. O mecanismo não pode gerar cobrança duplicada.
+- A conciliação horária e diária do ADR-010 §3 entra aqui.
+
 ## Fora de escopo
 
 - Tela de atualização do cartão (STORY-081).
