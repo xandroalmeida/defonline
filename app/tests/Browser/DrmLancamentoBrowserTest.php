@@ -110,7 +110,14 @@ final class DrmLancamentoBrowserTest extends DuskTestCase
 
             $browser->press('Fechar o mês')
                 ->waitForRoute('drm.mes', [$empresa, Competencia::padrao(CarbonImmutable::now())->texto()])
-                ->assertSee('Mês fechado');
+                // STORY-049 CA-12: o fechamento termina na Demonstração do Mês, lida do snapshot gravado.
+                ->waitFor('@drm-demonstracao')
+                ->assertSee('Quanto vendeu')
+                ->assertSee('R$ 84.300,00')
+                ->assertSee('Sobrou depois da sua retirada')
+                ->assertSee('R$ 3.240,00')
+                ->assertSeeIn('@drm-rodape', 'motor v1.0.0');
+            $this->semScrollHorizontal($browser);
         });
 
         $l = DrmLancamento::query()->firstOrFail();
