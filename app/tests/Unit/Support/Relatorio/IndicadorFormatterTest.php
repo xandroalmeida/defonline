@@ -84,11 +84,11 @@ it('expõe a ordem canônica dos 13 essenciais (com farol) — alinhada ao Anexo
         'despesas_fin_ebitda',
         'fontes_recursos',
         'giro_ativo',
-        'ciclo_financeiro',
         'ncg_vendas',
         'pmc',
         'pme',
         'pmr',
+        'ciclo_financeiro',
         'inadimplencia',
     ]);
 });

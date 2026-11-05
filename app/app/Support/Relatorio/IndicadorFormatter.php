@@ -45,7 +45,8 @@ final class IndicadorFormatter
      * NCG absoluto é informativo e tratado à parte
      * (cards ou linhas separadas).
      *
-     * Igual à ordem do {@see Motor::indicadores()} filtrada pelos que têm farol.
+     * Difere da ordem do {@see Motor::indicadores()} só no Ciclo Financeiro, exibido
+     * logo após os prazos médios (PMC, PME e PMR) que o compõem.
      *
      * @var list<string>
      */
@@ -57,11 +58,11 @@ final class IndicadorFormatter
         'despesas_fin_ebitda',
         'fontes_recursos',
         'giro_ativo',
-        'ciclo_financeiro',
         'ncg_vendas',
         'pmc',
         'pme',
         'pmr',
+        'ciclo_financeiro',
         'inadimplencia',
     ];
 

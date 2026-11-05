@@ -46,11 +46,11 @@ final class Recomendacoes extends Component
         'despesas_fin_ebitda' => 'Desp. / EBITDA',
         'fontes_recursos' => 'Fontes',
         'giro_ativo' => 'Giro',
-        'ciclo_financeiro' => 'Ciclo',
         'ncg_vendas' => 'NCG / Vendas',
         'pmc' => 'PMC',
         'pme' => 'PME',
         'pmr' => 'PMR',
+        'ciclo_financeiro' => 'Ciclo',
         'inadimplencia' => 'Inadimplência',
     ];
 
