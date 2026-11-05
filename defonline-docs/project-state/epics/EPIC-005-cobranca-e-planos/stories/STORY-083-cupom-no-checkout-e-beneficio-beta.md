@@ -7,7 +7,7 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: true
-status: in_progress
+status: in_review
 owner_agent: claude-sonnet-5-5 (pista B)
 created_at: 2026-11-05
 updated_at: 2026-11-05
@@ -124,5 +124,8 @@ Nenhum.
 IDR-026.
 
 ### Cobertura final
+Suíte All: 2992 testes passando; cobertura total 98,4%. Pint e PHPStan limpos. Dusk inteiro em série: 103 passam, 2 falham fora desta estória (ver Evidências).
 
 ### Evidências
+`tests/Domain/Cobranca/CupomNoCheckoutDominioTest.php` (regras puras), `tests/Feature/Cobranca/CupomNoCheckoutTest.php` (CA-1 a CA-10, Pix anual e renovação, histórico), `tests/Concorrencia/CupomConcorrenciaTest.php` (CA-4 com processos reais), `tests/Browser/CupomCheckoutBrowserTest.php` (E2E: digitado em 360x800, concedido com desconto total em desktop, pacote com Pix).
+Dusk: `CompraCreditosCartaoBrowserTest::cartao recusado...` estourou o timeout de 5 s na rodada completa e passa isolado (lentidão). `DrmRetificacaoBrowserTest::mobile lanca retifica...` falha também isolado, na data do rodapé do DRM (`corrigido 1× — última correção em dd/mm/aaaa`), área que esta estória não toca.

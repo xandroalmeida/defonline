@@ -102,7 +102,6 @@ final class CupomCheckoutBrowserTest extends DuskTestCase
                 // Remover volta ao cheio.
                 ->click('@screen-checkout-cupom-remover')
                 ->waitForTextIn('@screen-checkout-resumo-a-pagar', 'R$ 49,90')
-                ->click('@screen-checkout-cupom-toggle')
                 ->waitFor('@screen-checkout-cupom-campo')
                 ->type('@screen-checkout-cupom-campo', 'BETA50')
                 ->click('@screen-checkout-cupom-aplicar')
