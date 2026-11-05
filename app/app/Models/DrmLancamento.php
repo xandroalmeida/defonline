@@ -116,6 +116,24 @@ final class DrmLancamento extends Model
         $query->whereNull('substituido_por_id');
     }
 
+    /** Retificado = a vigente não é a versão original (ADR-007: `versao > 1`, sem coluna extra nem `COUNT`). */
+    public function foiRetificado(): bool
+    {
+        return $this->versao > 1;
+    }
+
+    /** Quantas vezes o mês foi corrigido: `versao - 1`. */
+    public function vezesRetificado(): int
+    {
+        return $this->versao - 1;
+    }
+
+    /** Quando foi a última correção: o `gerado_em` da vigente. `null` se nunca foi retificado. */
+    public function retificadoEm(): ?Carbon
+    {
+        return $this->foiRetificado() ? $this->gerado_em : null;
+    }
+
     public static function vigenteDaCompetencia(EmpresaAnalisada $empresa, string $competenciaDia01): ?self
     {
         return self::query()
