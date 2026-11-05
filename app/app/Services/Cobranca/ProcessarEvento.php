@@ -16,6 +16,7 @@ use App\Models\Invoice;
 use App\Models\ProviderEvent;
 use App\Models\TrocaDeCartao;
 use App\Observabilidade\AuditLogger;
+use App\Observabilidade\EventosCobranca;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -92,6 +93,9 @@ final class ProcessarEvento
             'erro' => null,
             'processado_em' => now(),
         ])->save();
+
+        // STORY-086 CA-4: cada cobrança paga ou recusada entra na conta da taxa de falha de pagamento.
+        EventosCobranca::pagamentoDoEvento($registro, $status, $invoiceId);
     }
 
     /** @return array{0: 'processado'|'ignorado', 1: string|null} */
@@ -194,6 +198,8 @@ final class ProcessarEvento
                 usuarioId: $invoice->usuario_id,
                 after: ['valor_centavos' => $invoice->valor_centavos, 'creditos' => $invoice->quantidade_creditos, 'provedor' => $invoice->provedor],
             );
+
+            EventosCobranca::contratacaoConcluida($invoice, null, renovacao: false);
 
             return ['processado', $invoice->id];
         });
@@ -350,6 +356,7 @@ final class ProcessarEvento
             }
 
             $invoice->forceFill(['status' => $novo, 'motivo_encerramento' => $motivo])->save();
+            EventosCobranca::contratacaoAbandonada($invoice, $motivo);
 
             return ['processado', $invoice->id];
         });

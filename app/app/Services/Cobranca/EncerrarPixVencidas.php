@@ -8,6 +8,7 @@ use App\Domain\Cobranca\Carteira;
 use App\Domain\Cobranca\StatusAssinatura;
 use App\Models\Assinatura;
 use App\Observabilidade\AuditLogger;
+use App\Observabilidade\EventosCobranca;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -50,6 +51,8 @@ final class EncerrarPixVencidas
                     usuarioId: $a->usuario_id,
                     after: ['proximo_vencimento' => $a->proximo_vencimento->toIso8601String()],
                 );
+
+                EventosCobranca::cancelamento($a, EventosCobranca::ORIGEM_PIX_NAO_RENOVADO);
 
                 return 1;
             });

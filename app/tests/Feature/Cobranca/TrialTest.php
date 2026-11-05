@@ -24,7 +24,7 @@ use App\Models\TrialAtivacao;
 use App\Models\TrialConfig;
 use App\Models\TrialEmpresa;
 use App\Models\Usuario;
-use App\Services\Rfb\RfbAlerter;
+use App\Observabilidade\AlertaDaEquipe;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -48,9 +48,9 @@ function _trial(): Trial
 }
 
 beforeEach(function () {
-    $this->alerter = Mockery::mock(RfbAlerter::class);
+    $this->alerter = Mockery::mock(AlertaDaEquipe::class);
     $this->alerter->shouldReceive('enviar')->byDefault();
-    app()->instance(RfbAlerter::class, $this->alerter);
+    app()->instance(AlertaDaEquipe::class, $this->alerter);
     CobrancaConfig::atual()->update(['ativa' => true]);
     $this->usuario = Usuario::factory()->create();
 });
@@ -350,7 +350,7 @@ describe('CA-5 fim do prazo', function () {
 describe('CA-7 alerta por IP', function () {
     it('alerta, sem bloquear, quando o IP passa do limite em 30 dias', function () {
         TrialConfig::atual()->update(['limite_ip_30d' => 2]);
-        $this->alerter->shouldReceive('enviar')->once()->withArgs(fn (string $titulo, string $msg, array $ctx) => $ctx['ip'] === '198.51.100.7' && $ctx['total_30d'] === 3 && $ctx['limite'] === 2 && str_contains($msg, '198.51.100.7'));
+        $this->alerter->shouldReceive('enviar')->once()->withArgs(fn (string $titulo, string $msg, array $ctx) => $ctx['ip_mascarado'] === '198.51.100.x' && $ctx['total_30d'] === 3 && $ctx['limite'] === 2 && str_contains($msg, '198.51.100.x') && ! str_contains($msg, '198.51.100.7') && ! array_key_exists('ip', $ctx));
 
         foreach (range(1, 3) as $_) {
             $a = _trial()->ativar(Usuario::factory()->create()->id, '198.51.100.7');

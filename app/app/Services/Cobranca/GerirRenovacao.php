@@ -13,6 +13,7 @@ use App\Models\Assinatura;
 use App\Models\TrocaDeCartao;
 use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
+use App\Observabilidade\EventosCobranca;
 use App\Support\Personificacao;
 use Illuminate\Support\Facades\DB;
 
@@ -99,6 +100,10 @@ final class GerirRenovacao
 
             $assinatura = $this->carteira->mudarStatus($assinatura->id, $para);
 
+            $para === StatusAssinatura::Cancelada
+                ? EventosCobranca::cancelamento($assinatura, EventosCobranca::ORIGEM_CLIENTE)
+                : EventosCobranca::cancelamentoRevertido($assinatura);
+
             AuditLogger::log(
                 action: $acao,
                 subjectType: 'Assinatura',
@@ -129,6 +134,8 @@ final class GerirRenovacao
         ])->save();
 
         TrocaDeCartao::query()->where('assinatura_id', $assinatura->id)->where('status', 'pendente')->update(['status' => 'cancelada']);
+
+        EventosCobranca::cancelamento($assinatura, EventosCobranca::ORIGEM_CLIENTE_EM_ATRASO);
 
         AuditLogger::log(
             action: 'cobranca.renovacao_cancelada_em_atraso',

@@ -68,3 +68,15 @@ Schedule::command('assinaturas:pix-anual')
     ->hourly()
     ->onOneServer()
     ->withoutOverlapping(30);
+
+// STORY-086 CA-4 — taxa de falha de pagamento acima de 10% na última hora vira alerta P2 (silêncio de 30 min).
+Schedule::command('cobranca:alertar-falha-de-pagamento')
+    ->everyFiveMinutes()
+    ->onOneServer()
+    ->withoutOverlapping(10);
+
+// STORY-086 CA-1 — registra o fim por prazo dos testes grátis (o fim por contratação já nasce no ato).
+Schedule::command('trial:registrar-encerramento')
+    ->hourly()
+    ->onOneServer()
+    ->withoutOverlapping(30);

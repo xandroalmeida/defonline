@@ -16,6 +16,7 @@ use App\Models\Invoice;
 use App\Models\LoteCredito;
 use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
+use App\Observabilidade\EventosCobranca;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
@@ -269,6 +270,8 @@ final class ReembolsarCobranca
                 // O job da régua cancela a recorrência no provedor e repete se ele estiver fora do ar.
                 'encerramento_pendente_no_provedor' => $assinatura->id_externo !== null,
             ])->save();
+
+            EventosCobranca::cancelamento($assinatura, EventosCobranca::ORIGEM_REEMBOLSO);
         }
 
         return new PreviaDoReembolso('assinatura', cotaARetirar: $cota, encerraAssinatura: true);

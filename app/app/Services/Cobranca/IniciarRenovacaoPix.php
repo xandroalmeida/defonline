@@ -17,6 +17,7 @@ use App\Models\Invoice;
 use App\Models\Plano;
 use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
+use App\Observabilidade\EventosCobranca;
 use App\Support\Personificacao;
 use Illuminate\Support\Facades\DB;
 
@@ -113,6 +114,8 @@ final class IniciarRenovacaoPix
             urlCancelamento: route('assinatura.renovar'),
             urlExpirado: route('assinatura.retorno', $invoice),
         ), 'iniciar_renovacao_pix');
+
+        EventosCobranca::checkoutIniciado($invoice);
 
         AuditLogger::log(
             action: 'cobranca.checkout_renovacao_criado',

@@ -16,6 +16,7 @@ use App\Models\Invoice;
 use App\Models\Plano;
 use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
+use App\Observabilidade\EventosCobranca;
 use App\Support\Personificacao;
 use Illuminate\Support\Facades\DB;
 
@@ -125,6 +126,8 @@ final class IniciarAssinatura
             urlExpirado: route('assinatura.retorno', $invoice),
             recorrencia: $pix ? null : $ciclo,
         ), 'iniciar_checkout_assinatura');
+
+        EventosCobranca::checkoutIniciado($invoice);
 
         AuditLogger::log(
             action: 'cobranca.checkout_assinatura_criado',

@@ -17,6 +17,7 @@ use App\Models\Assinatura;
 use App\Models\Invoice;
 use App\Models\Plano;
 use App\Observabilidade\AuditLogger;
+use App\Observabilidade\EventosCobranca;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -129,6 +130,8 @@ final class ConfirmarAssinatura
 
         $invoice->forceFill(['assinatura_id' => $assinatura->id])->save();
 
+        EventosCobranca::contratacaoConcluida($invoice, $assinatura, renovacao: false);
+
         AuditLogger::log(
             action: 'cobranca.assinatura_ativada',
             subjectType: 'Assinatura',
@@ -186,6 +189,8 @@ final class ConfirmarAssinatura
             usuarioId: $assinatura->usuario_id,
             after: ['periodos_pagos' => $periodos, 'proximo_vencimento' => $vencimento->toIso8601String(), 'cota' => $invoice->cota_snapshot, 'valor_centavos' => $invoice->valor_centavos, 'meio' => 'pix'],
         );
+
+        EventosCobranca::contratacaoConcluida($invoice, $assinatura, renovacao: true);
 
         return ['processado', $invoice->id];
     }

@@ -14,6 +14,7 @@ use App\Models\Invoice;
 use App\Models\PacoteCredito;
 use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
+use App\Observabilidade\EventosCobranca;
 use App\Support\Personificacao;
 use Illuminate\Support\Facades\DB;
 
@@ -86,6 +87,8 @@ final class IniciarCompraDeCreditos
             urlCancelamento: route('creditos.comprar'),
             urlExpirado: route('creditos.retorno', $invoice),
         ), 'iniciar_checkout');
+
+        EventosCobranca::checkoutIniciado($invoice);
 
         AuditLogger::log(
             action: 'cobranca.checkout_criado',
