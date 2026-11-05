@@ -13,7 +13,9 @@
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-confirmacao" role="status">
             <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Pagamento confirmado</h1>
             <p class="m-0 text-[color:var(--color-primary)]">
-                @if ($cartao)
+                @if ($invoice->meio === 'nenhum')
+                    Compra confirmada sem cobrança, com o desconto do cupom.
+                @elseif ($cartao)
                     Pago com cartão{{ $final ? " {$final}" : '' }}: {{ $reais }}.
                 @else
                     Recebemos o Pix de {{ $reais }}.
@@ -21,7 +23,7 @@
                 @if ($lote)
                     Você tem {{ $lote->quantidade_comprada }} créditos, válidos até {{ $lote->data_expiracao->setTimezone('America/Sao_Paulo')->format('d/m/Y') }}.
                 @endif
-                Enviaremos a nota fiscal por e-mail.
+                @if ($invoice->meio !== 'nenhum')Enviaremos a nota fiscal por e-mail.@endif
             </p>
             <div class="flex flex-wrap gap-3">
                 @if ($rascunho)

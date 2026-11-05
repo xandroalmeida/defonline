@@ -6,6 +6,7 @@ use App\Domain\Cobranca\CicloCobranca;
 use App\Domain\Cobranca\DescontoDaAssinatura;
 use App\Domain\Cobranca\PrecoComCupom;
 use App\Domain\Cobranca\TipoDesconto;
+use Carbon\CarbonImmutable;
 
 /** STORY-083 CA-1, CA-5, CA-7, CA-8 — regras puras do desconto. */
 describe('PrecoComCupom', function () {
@@ -78,7 +79,7 @@ describe('DescontoDaAssinatura', function () {
     });
 
     it('o fim é o vencimento do último ciclo com desconto e o aviso é a 7 dias dele', function () use ($d) {
-        $inicio = \Carbon\CarbonImmutable::parse('2026-11-05 12:00:00');
+        $inicio = CarbonImmutable::parse('2026-11-05 12:00:00');
         $x = $d();
 
         expect($x->fim(CicloCobranca::Mensal, $inicio)->toDateString())->toBe('2027-02-05')

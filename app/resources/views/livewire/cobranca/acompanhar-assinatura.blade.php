@@ -19,6 +19,13 @@
                     Esta assinatura não renova sozinha: avisaremos {{ \App\Domain\Cobranca\RenovacaoPix::AVISO_DIAS }} dias antes.
                     Você tem {{ $assinatura->cota_restante_ciclo }} {{ $assinatura->cota_restante_ciclo === 1 ? 'análise disponível' : 'análises disponíveis' }} agora.
                 </p>
+            @elseif ($invoice->meio === 'nenhum')
+                <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Assinatura ativa</h1>
+                <p class="m-0 text-[color:var(--color-primary)]" dusk="screen-checkout-sem-cobranca">
+                    Plano {{ $plano?->nome }} · {{ $invoice->ciclo }}, ativado sem cobrança com o desconto do cupom.
+                    Você tem {{ $assinatura->cota_restante_ciclo }} {{ $assinatura->cota_restante_ciclo === 1 ? 'análise disponível' : 'análises disponíveis' }} agora.
+                    O ciclo atual vai até {{ $fim }}. Quando o desconto acabar, cadastre um cartão em Meu plano para continuar.
+                </p>
             @else
                 <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Assinatura ativa</h1>
                 <p class="m-0 text-[color:var(--color-primary)]">

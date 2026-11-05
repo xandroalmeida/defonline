@@ -58,9 +58,9 @@
                             <dt class="text-[color:var(--color-secondary)]">Preço</dt>
                             <dd class="m-0 text-right" dusk="screen-checkout-resumo-preco">{{ $reais($pacote->preco_centavos) }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Desconto</dt>
-                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-desconto">Sem desconto</dd>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-desconto">{{ $aplicado ? '− '.$reais($aplicado->preco->desconto).' ('.$aplicado->cupom->codigo.')' : 'Sem desconto' }}</dd>
                             <dt class="font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2">A pagar hoje</dt>
-                            <dd class="m-0 text-right font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2" dusk="screen-checkout-resumo-a-pagar">{{ $reais($pacote->preco_centavos) }}</dd>
+                            <dd class="m-0 text-right font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2" dusk="screen-checkout-resumo-a-pagar">{{ $reais($aPagar) }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Ciclo</dt>
                             <dd class="m-0 text-right" dusk="screen-checkout-resumo-ciclo">Compra única, não renova</dd>
                             <dt class="text-[color:var(--color-secondary)]">Próxima cobrança</dt>
@@ -79,12 +79,18 @@
                     </p>
 
                     <div class="flex flex-col gap-3">
+                        <x-cobranca.cupom :aplicado="$aplicado" :concedido="$cupomConcedido" :aberto="$cupomAberto" :erro="$erroCupom" :esgotou="$cupomEsgotou"/>
                         <h2 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0">Pagamento</h2>
+                        @if ($semCobranca)
+                            <p class="m-0 text-sm text-[color:var(--color-primary)]" dusk="screen-checkout-sem-pagamento">Você não precisa pagar nada agora.</p>
+                        @else
                         <x-cobranca.seletor-meio :atual="$meio" :opcoes="[
                             ['pix', 'Pix', 'libera quando o banco confirmar'],
                             ['cartao', 'Cartão de crédito', 'libera na hora, sem renovação'],
                         ]"/>
-                        @if ($meio === 'cartao')
+                        @endif
+                        @if ($semCobranca)
+                        @elseif ($meio === 'cartao')
                             <p class="m-0 text-sm text-[color:var(--color-primary)]" dusk="screen-checkout-pagamento">
                                 Cartão de crédito, digitado na página segura do processador de pagamento. Cobrança única, sem renovação. Nós guardamos só a bandeira e os 4 últimos dígitos.
                             </p>
@@ -130,7 +136,7 @@
                         <x-button type="submit" variant="primary" :disabled="$personificando"
                                   wire:loading.attr="disabled" wire:target="gerar"
                                   dusk="screen-checkout-primary-cta">
-                            <span wire:loading.remove wire:target="gerar">{{ $meio === 'cartao' ? 'Pagar com cartão' : 'Gerar QR Code Pix' }} · {{ $reais($pacote->preco_centavos) }}</span>
+                            <span wire:loading.remove wire:target="gerar">{{ $semCobranca ? 'Ativar sem pagar' : ($meio === 'cartao' ? 'Pagar com cartão' : 'Gerar QR Code Pix').' · '.$reais($aPagar) }}</span>
                             <span wire:loading wire:target="gerar">{{ $meio === 'cartao' ? 'Abrindo o pagamento…' : 'Gerando QR Code…' }}</span>
                         </x-button>
                         <p class="m-0 text-sm text-[color:var(--color-secondary)]">

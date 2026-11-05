@@ -34,6 +34,9 @@ final class IniciarAssinatura
         private readonly PaymentProvider $provedor,
         private readonly RegistrarAceiteDoCheckout $aceite,
         private readonly AbrirCheckoutDaInvoice $checkout,
+        private readonly CupomDoCheckout $cupons,
+        private readonly ConfirmarAssinatura $confirmar,
+        private readonly CiclosGratuitos $gratuitos,
     ) {}
 
     /** O plano e o ciclo mais recentes do catálogo valem a cada abertura de checkout. */
@@ -59,10 +62,13 @@ final class IniciarAssinatura
     }
 
     /**
+     * @param  string|null  $codigoCupom  cupom digitado (STORY-083); o concedido à conta vale sem código
+     *
      * @throws CompraNaoPermitida
+     * @throws CupomRecusado
      * @throws ProvedorIndisponivel
      */
-    public function executar(Usuario $usuario, Plano $plano, CicloCobranca $ciclo, ?string $ip, ?string $userAgent, MeioPagamento $meio = MeioPagamento::Cartao): Invoice
+    public function executar(Usuario $usuario, Plano $plano, CicloCobranca $ciclo, ?string $ip, ?string $userAgent, MeioPagamento $meio = MeioPagamento::Cartao, ?string $codigoCupom = null): Invoice
     {
         if (Personificacao::ativa() !== null) {
             throw CompraNaoPermitida::adminPersonificando();
@@ -76,6 +82,9 @@ final class IniciarAssinatura
             throw CompraNaoPermitida::planoIndisponivel();
         }
 
+        // Plano gratuito pelo desconto que chegou ao fim: encerra antes de dizer que o usuário já é assinante.
+        $this->gratuitos->executar($usuario->id);
+
         if (self::assinaturaVigente($usuario->id) !== null) {
             throw CompraNaoPermitida::jaAssinante();
         }
@@ -85,29 +94,59 @@ final class IniciarAssinatura
             throw CompraNaoPermitida::pixSoNoAnual();
         }
 
-        $valor = self::precoDe($plano, $ciclo);
+        $cheio = self::precoDe($plano, $ciclo);
+        $item = new ItemDeCompra($cheio, planoId: $plano->id, ciclo: $ciclo->value);
+        $aplicado = $this->cupons->para($usuario, $codigoCupom, $item);
+        $valor = $aplicado?->preco->final ?? $cheio;
         $aceiteId = $this->aceite->executar($usuario, $ip, $userAgent);
 
         // Clique repetido ou volta ao checkout: reaproveita o que ainda vale em vez de abrir outro.
-        $existente = $this->checkoutAindaValido($usuario, $plano, $ciclo, $valor, $meio);
+        $existente = $this->checkoutAindaValido($usuario, $plano, $ciclo, $valor, $meio, $aplicado?->cupom->id);
 
         if ($existente !== null) {
             return $existente;
         }
 
-        $invoice = Invoice::query()->create([
-            'usuario_id' => $usuario->id,
-            'tipo' => 'assinatura',
-            'plano_id' => $plano->id,
-            'ciclo' => $ciclo->value,
-            'cota_snapshot' => $plano->cota_mensal,
-            'descricao' => "Plano {$plano->nome} · {$ciclo->value}",
-            'valor_centavos' => $valor,
-            'status' => EstadoCobranca::Pendente,
-            'meio' => $meio->value,
-            'provedor' => $this->provedor->nome(),
-            'aceite_termo_id' => $aceiteId,
-        ]);
+        // A Invoice pendente com cupom segura a vaga do limite (CA-4): criá-la sob o lock do cupom.
+        $invoice = DB::transaction(function () use ($usuario, $plano, $ciclo, $meio, $aceiteId, $item, $aplicado, $cheio): Invoice {
+            $aplicado = $aplicado === null ? null : $this->cupons->reavaliarTravado($usuario, $aplicado, $item);
+            $semCobranca = $aplicado?->preco->semCobranca() === true;
+
+            $invoice = Invoice::query()->create([
+                'usuario_id' => $usuario->id,
+                'tipo' => 'assinatura',
+                'plano_id' => $plano->id,
+                'ciclo' => $ciclo->value,
+                'cota_snapshot' => $plano->cota_mensal,
+                'descricao' => "Plano {$plano->nome} · {$ciclo->value}",
+                'valor_centavos' => $aplicado?->preco->final ?? $cheio,
+                'status' => EstadoCobranca::Pendente,
+                'meio' => $semCobranca ? 'nenhum' : $meio->value,
+                'provedor' => $semCobranca ? 'interno' : $this->provedor->nome(),
+                'aceite_termo_id' => $aceiteId,
+            ] + $this->cupons->camposDaInvoice($aplicado, $cheio));
+
+            if ($semCobranca) {
+                // CA-6: ativa sem cobrança e sem provedor, mas sempre com a Invoice e o registro do uso.
+                $this->confirmar->ativarSemCobranca($invoice);
+            }
+
+            return $invoice->refresh();
+        });
+
+        if ($invoice->status === EstadoCobranca::Paga) {
+            AuditLogger::log(
+                action: 'cobranca.assinatura_sem_cobranca',
+                subjectType: 'Invoice',
+                subjectId: $invoice->id,
+                actorType: 'user',
+                actorId: $usuario->id,
+                usuarioId: $usuario->id,
+                after: ['plano_id' => $plano->id, 'ciclo' => $ciclo->value, 'desconto_centavos' => $invoice->desconto_centavos, 'cupom_id' => $invoice->cupom_id],
+            );
+
+            return $invoice;
+        }
 
         $pix = $meio === MeioPagamento::Pix;
 
@@ -133,13 +172,13 @@ final class IniciarAssinatura
             actorType: 'user',
             actorId: $usuario->id,
             usuarioId: $usuario->id,
-            after: ['valor_centavos' => $valor, 'plano_id' => $plano->id, 'ciclo' => $ciclo->value, 'provedor' => $invoice->provedor, 'meio' => $meio->value],
+            after: ['valor_centavos' => $valor, 'plano_id' => $plano->id, 'ciclo' => $ciclo->value, 'provedor' => $invoice->provedor, 'meio' => $meio->value, 'desconto_centavos' => $invoice->desconto_centavos],
         );
 
         return $invoice;
     }
 
-    private function checkoutAindaValido(Usuario $usuario, Plano $plano, CicloCobranca $ciclo, int $valor, MeioPagamento $meio): ?Invoice
+    private function checkoutAindaValido(Usuario $usuario, Plano $plano, CicloCobranca $ciclo, int $valor, MeioPagamento $meio, ?string $cupomId): ?Invoice
     {
         return Invoice::query()
             ->where('usuario_id', $usuario->id)
@@ -149,6 +188,7 @@ final class IniciarAssinatura
             ->where('plano_id', $plano->id)
             ->where('ciclo', $ciclo->value)
             ->where('valor_centavos', $valor)
+            ->when($cupomId === null, fn ($q) => $q->whereNull('cupom_id'), fn ($q) => $q->where('cupom_id', $cupomId))
             ->where('cota_snapshot', $plano->cota_mensal)
             ->where('provedor', $this->provedor->nome())
             ->where('status', EstadoCobranca::Pendente->value)

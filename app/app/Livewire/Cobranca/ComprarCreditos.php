@@ -13,7 +13,9 @@ use App\Models\Invoice;
 use App\Models\PacoteCredito;
 use App\Models\Usuario;
 use App\Services\Cobranca\CompraNaoPermitida;
+use App\Services\Cobranca\CupomRecusado;
 use App\Services\Cobranca\IniciarCompraDeCreditos;
+use App\Services\Cobranca\ItemDeCompra;
 use App\Support\Personificacao;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -32,6 +34,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app')]
 final class ComprarCreditos extends Component
 {
+    use ComCupom;
+
     public ?string $pacoteId = null;
 
     public bool $aceito = false;
@@ -84,7 +88,11 @@ final class ComprarCreditos extends Component
         }
 
         try {
-            $invoice = $iniciar->executar($usuario, $pacote, request()->ip(), substr((string) request()->userAgent(), 0, 255), MeioPagamento::from($this->meio));
+            $invoice = $iniciar->executar($usuario, $pacote, request()->ip(), substr((string) request()->userAgent(), 0, 255), MeioPagamento::from($this->meio), $this->codigoCupom);
+        } catch (CupomRecusado $e) {
+            $this->cupomRecusadoNoClique($e);
+
+            return null;
         } catch (CompraNaoPermitida) {
             // A própria tela já mostra o motivo (e-mail, admin, pacote): só reavalia o estado.
             return null;
@@ -94,7 +102,8 @@ final class ComprarCreditos extends Component
             return null;
         }
 
-        return $this->redirect((string) $invoice->checkout_url);
+        // Sem cobrança (STORY-083 CA-6) não há página do provedor: vai direto à confirmação.
+        return $this->redirect($invoice->checkout_url ?? route('creditos.retorno', $invoice));
     }
 
     public function reenviarConfirmacao(): void
@@ -119,9 +128,14 @@ final class ComprarCreditos extends Component
     {
         $usuario = Auth::user();
         $pacote = $this->pacote();
+        $aplicado = $pacote === null ? null : $this->cupomDaTela();
 
         return view('livewire.cobranca.comprar-creditos', [
             'pacote' => $pacote,
+            'aplicado' => $aplicado,
+            'cupomConcedido' => $aplicado?->concedido === true,
+            'aPagar' => $aplicado?->preco->final ?? ($pacote === null ? 0 : $pacote->preco_centavos),
+            'semCobranca' => $aplicado?->preco->semCobranca() === true,
             'pacotes' => $this->pacoteId === null ? $this->pacotesAtivos() : collect(),
             'emailConfirmado' => $usuario instanceof Usuario && $usuario->emailConfirmado(),
             'email' => $usuario instanceof Usuario ? $usuario->email : '',
@@ -146,6 +160,13 @@ final class ComprarCreditos extends Component
             ->first();
 
         return $aberto === null || $aberto->expirada() ? null : $aberto;
+    }
+
+    protected function itemDeCompra(): ?ItemDeCompra
+    {
+        $pacote = $this->pacote();
+
+        return $pacote === null ? null : new ItemDeCompra($pacote->preco_centavos, pacoteId: $pacote->id);
     }
 
     private function pacote(): ?PacoteCredito

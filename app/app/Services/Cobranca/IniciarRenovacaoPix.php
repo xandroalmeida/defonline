@@ -32,6 +32,8 @@ final class IniciarRenovacaoPix
         private readonly PaymentProvider $provedor,
         private readonly RegistrarAceiteDoCheckout $aceite,
         private readonly AbrirCheckoutDaInvoice $checkout,
+        private readonly CupomDoCheckout $cupons,
+        private readonly ConfirmarAssinatura $confirmar,
     ) {}
 
     /** O plano anual Pix mais recente do Usuário (vigente ou já encerrado), para a tela de renovação. */
@@ -48,10 +50,14 @@ final class IniciarRenovacaoPix
     }
 
     /**
+     * Cupom na renovação (STORY-083): se a assinatura já tem desconto para este ciclo, ele continua e nenhum
+     * outro se soma (cupons não acumulam); senão vale o concedido à conta ou o código digitado.
+     *
      * @throws CompraNaoPermitida
+     * @throws CupomRecusado
      * @throws ProvedorIndisponivel
      */
-    public function executar(Usuario $usuario, ?string $ip, ?string $userAgent): Invoice
+    public function executar(Usuario $usuario, ?string $ip, ?string $userAgent, ?string $codigoCupom = null): Invoice
     {
         if (Personificacao::ativa() !== null) {
             throw CompraNaoPermitida::adminPersonificando();
@@ -77,36 +83,60 @@ final class IniciarRenovacaoPix
             throw CompraNaoPermitida::planoIndisponivel();
         }
 
-        $valor = (int) $assinatura->preco_snapshot_centavos;
+        $periodo = $assinatura->periodos_pagos + 1;
+        $emCurso = $assinatura->desconto();
+        $continua = $emCurso?->vale($periodo) === true;
+        $cheio = $continua ? $emCurso->cheio : (int) $assinatura->preco_snapshot_centavos;
+        $item = new ItemDeCompra($cheio, planoId: $plano->id, ciclo: CicloCobranca::Anual->value);
+        $aplicado = $continua ? null : $this->cupons->para($usuario, $codigoCupom, $item);
+        $valor = $continua ? $emCurso->valorDoPeriodo($periodo) : ($aplicado?->preco->final ?? $cheio);
         $aceiteId = $this->aceite->executar($usuario, $ip, $userAgent);
 
         // Clique repetido ou volta à tela: reaproveita o QR Code que ainda vale.
-        $existente = $this->checkoutAindaValido($assinatura, $valor);
+        $existente = $this->checkoutAindaValido($assinatura, $valor, $aplicado?->cupom->id);
 
         if ($existente !== null) {
             return $existente;
         }
 
-        $invoice = Invoice::query()->create([
-            'usuario_id' => $usuario->id,
-            'tipo' => 'assinatura',
-            'plano_id' => $plano->id,
-            'ciclo' => CicloCobranca::Anual->value,
-            'cota_snapshot' => $plano->cota_mensal,
-            'descricao' => "Plano {$plano->nome} · renovação anual",
-            'valor_centavos' => $valor,
-            'status' => EstadoCobranca::Pendente,
-            'meio' => MeioPagamento::Pix->value,
-            'provedor' => $this->provedor->nome(),
-            'assinatura_id' => $assinatura->id,
-            'renovacao' => true,
-            'aceite_termo_id' => $aceiteId,
-        ]);
+        $invoice = DB::transaction(function () use ($usuario, $plano, $assinatura, $aceiteId, $item, $aplicado, $continua, $emCurso, $valor, $cheio): Invoice {
+            $aplicado = $aplicado === null ? null : $this->cupons->reavaliarTravado($usuario, $aplicado, $item);
+            $final = $aplicado?->preco->final ?? $valor;
+            $semCobranca = $final === 0;
+
+            $invoice = Invoice::query()->create([
+                'usuario_id' => $usuario->id,
+                'tipo' => 'assinatura',
+                'plano_id' => $plano->id,
+                'ciclo' => CicloCobranca::Anual->value,
+                'cota_snapshot' => $plano->cota_mensal,
+                'descricao' => "Plano {$plano->nome} · renovação anual",
+                'valor_centavos' => $final,
+                'status' => EstadoCobranca::Pendente,
+                'meio' => $semCobranca ? 'nenhum' : MeioPagamento::Pix->value,
+                'provedor' => $semCobranca ? 'interno' : $this->provedor->nome(),
+                'assinatura_id' => $assinatura->id,
+                'renovacao' => true,
+                'aceite_termo_id' => $aceiteId,
+            ] + ($continua
+                ? ['preco_cheio_centavos' => $emCurso->cheio, 'desconto_centavos' => $emCurso->desconto]
+                : $this->cupons->camposDaInvoice($aplicado, $cheio)));
+
+            if ($semCobranca) {
+                $this->confirmar->renovarAnualSemCobranca($invoice);
+            }
+
+            return $invoice->refresh();
+        });
+
+        if ($invoice->status === EstadoCobranca::Paga) {
+            return $invoice;
+        }
 
         $this->checkout->executar($invoice, new PedidoCheckout(
             referenciaInterna: $invoice->id,
             descricao: $invoice->descricao,
-            valorCentavos: $valor,
+            valorCentavos: $invoice->valor_centavos,
             meios: [MeioPagamento::Pix],
             expiraEmMinutos: (int) config('services.payments.pix_expiracao_minutos', 30),
             urlSucesso: route('assinatura.retorno', $invoice),
@@ -121,15 +151,16 @@ final class IniciarRenovacaoPix
             actorType: 'user',
             actorId: $usuario->id,
             usuarioId: $usuario->id,
-            after: ['valor_centavos' => $valor, 'assinatura_id' => $assinatura->id, 'provedor' => $invoice->provedor],
+            after: ['valor_centavos' => $invoice->valor_centavos, 'desconto_centavos' => $invoice->desconto_centavos, 'assinatura_id' => $assinatura->id, 'provedor' => $invoice->provedor],
         );
 
         return $invoice;
     }
 
-    private function checkoutAindaValido(Assinatura $assinatura, int $valor): ?Invoice
+    private function checkoutAindaValido(Assinatura $assinatura, int $valor, ?string $cupomId): ?Invoice
     {
         return Invoice::query()
+            ->when($cupomId === null, fn ($q) => $q->whereNull('cupom_id'), fn ($q) => $q->where('cupom_id', $cupomId))
             ->where('assinatura_id', $assinatura->id)
             ->where('renovacao', true)
             ->where('meio', MeioPagamento::Pix->value)

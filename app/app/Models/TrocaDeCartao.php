@@ -21,7 +21,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $checkout_url
  * @property Carbon|null $checkout_expira_em
  * @property bool $cobra_agora
- * @property string $antiga_id_externo
+ * @property string|null $antiga_id_externo
  * @property string|null $nova_id_externo
  * @property Carbon|null $concluida_em
  * @property Carbon|null $antiga_cancelada_em

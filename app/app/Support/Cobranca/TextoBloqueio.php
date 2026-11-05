@@ -24,7 +24,7 @@ final class TextoBloqueio
         'trocar-plano' => 'planos',          // STORY-075
         'creditos' => 'creditos.comprar',    // STORY-076
         'cartao' => 'cartao.atualizar',      // STORY-079
-        'cadastrar-cartao' => 'cartao.atualizar', // STORY-079 / 083
+        'cadastrar-cartao' => 'meu-plano',    // STORY-083: o cartão se cadastra em Meu plano
         'meu-plano' => 'meu-plano',          // STORY-081
     ];
 
@@ -91,6 +91,7 @@ final class TextoBloqueio
             ],
             MotivoBloqueio::TesteEncerrado => ['O lançamento do Raio X está pausado', "Seu teste terminou em {$data}. {$fim}", ['planos']],
             MotivoBloqueio::PlanoEncerrado => ['O lançamento do Raio X está pausado', "Seu plano terminou em {$data}. {$fim}", ['planos']],
+            MotivoBloqueio::DescontoAcabouSemCartao => ['O lançamento do Raio X está pausado', "O desconto terminou em {$data}. Cadastre um cartão para continuar. {$fim}", ['cadastrar-cartao']],
             default => [
                 'O Raio X do Negócio faz parte dos planos',
                 'Os créditos avulsos não incluem o Raio X do Negócio. Assine um plano'

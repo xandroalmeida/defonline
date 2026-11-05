@@ -86,15 +86,15 @@
                             <dt class="text-[color:var(--color-secondary)]">Preço</dt>
                             <dd class="m-0 text-right" dusk="screen-checkout-resumo-preco">{{ $reais($preco) }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Desconto</dt>
-                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-desconto">Sem desconto</dd>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-desconto">{{ $aplicado ? '− '.$reais($aplicado->preco->desconto).' ('.$aplicado->cupom->codigo.')' : 'Sem desconto' }}</dd>
                             <dt class="font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2">A pagar hoje</dt>
-                            <dd class="m-0 text-right font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2" dusk="screen-checkout-resumo-a-pagar">{{ $reais($preco) }}</dd>
+                            <dd class="m-0 text-right font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2" dusk="screen-checkout-resumo-a-pagar">{{ $reais($aPagar) }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Ciclo</dt>
-                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-ciclo">{{ $pix ? 'Anual, não renova sozinho — avisamos '.$avisoDias.' dias antes' : $cicloAtual->rotulo().', renova sozinho no cartão' }}</dd>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-ciclo">{{ $cupomResumo ? $cupomResumo['ciclo'] : ($pix ? 'Anual, não renova sozinho — avisamos '.$avisoDias.' dias antes' : $cicloAtual->rotulo().', renova sozinho no cartão') }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Próxima cobrança</dt>
-                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-proxima">{{ $pix ? 'Não há cobrança automática. Renovação em '.$proximaCobranca->format('d/m/Y') : $proximaCobranca->format('d/m/Y').' · '.$reais($preco) }}</dd>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-proxima">{{ $cupomResumo ? $cupomResumo['proxima'] : ($pix ? 'Não há cobrança automática. Renovação em '.$proximaCobranca->format('d/m/Y') : $proximaCobranca->format('d/m/Y').' · '.$reais($preco)) }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Depois</dt>
-                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-depois">{{ $pix ? 'Você paga '.$reais($preco).' por um novo QR Code, se quiser continuar' : $reais($preco).' '.$cicloAtual->porExtenso() }}</dd>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-depois">{{ $cupomResumo ? $cupomResumo['depois'] : ($pix ? 'Você paga '.$reais($preco).' por um novo QR Code, se quiser continuar' : $reais($preco).' '.$cicloAtual->porExtenso()) }}</dd>
                         </dl>
                     </x-card>
                     <p class="mt-3 mb-0 text-sm text-[color:var(--color-secondary)]" dusk="screen-checkout-beneficios">
@@ -104,15 +104,20 @@
 
                 <section class="lg:order-1 flex flex-col gap-4">
                     <div class="flex flex-col gap-3">
+                        <x-cobranca.cupom :aplicado="$aplicado" :concedido="$cupomConcedido" :aberto="$cupomAberto" :erro="$erroCupom" :esgotou="$cupomEsgotou"/>
                         <h2 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0">Pagamento</h2>
                         {{-- Mensal: só cartão, sem seletor (DDR-010 item 4). --}}
-                        @if ($anual)
+                        @if ($semCobranca)
+                            <p class="m-0 text-sm text-[color:var(--color-primary)]" dusk="screen-checkout-sem-pagamento">Você não precisa pagar nada agora.</p>
+                        @elseif ($anual)
                             <x-cobranca.seletor-meio :atual="$meio" :opcoes="[
                                 ['cartao', 'Cartão de crédito', 'libera na hora, renova sozinho'],
                                 ['pix', 'Pix', 'libera quando o banco confirmar, você paga a renovação'],
                             ]"/>
                         @endif
-                        @if ($pix)
+                        @if ($semCobranca)
+                            {{-- Sem meio de pagamento: a contratação é ativada sem cobrança (ADR-010 4.7). --}}
+                        @elseif ($pix)
                             <p class="m-0 text-sm text-[color:var(--color-primary)]" dusk="screen-checkout-pagamento">Pix · o QR Code vale por {{ $minutosPix }} minutos. O plano começa quando o banco confirmar o pagamento.</p>
                         @else
                             <p class="m-0 text-sm text-[color:var(--color-primary)]" dusk="screen-checkout-pagamento">Cartão de crédito, digitado na página segura do processador de pagamento. Nós guardamos só a bandeira e os 4 últimos dígitos.</p>
@@ -151,7 +156,7 @@
                         <x-button type="submit" variant="primary" :disabled="$personificando"
                                   wire:loading.attr="disabled" wire:target="assinar"
                                   dusk="screen-checkout-primary-cta">
-                            <span wire:loading.remove wire:target="assinar">{{ $pix ? 'Gerar QR Code Pix' : 'Assinar e pagar' }} · {{ $reais($preco) }}</span>
+                            <span wire:loading.remove wire:target="assinar">{{ $semCobranca ? 'Ativar sem pagar' : ($pix ? 'Gerar QR Code Pix' : 'Assinar e pagar').' · '.$reais($aPagar) }}</span>
                             <span wire:loading wire:target="assinar">{{ $pix ? 'Gerando QR Code…' : 'Abrindo o pagamento…' }}</span>
                         </x-button>
                         <p class="m-0 text-sm text-[color:var(--color-secondary)]">

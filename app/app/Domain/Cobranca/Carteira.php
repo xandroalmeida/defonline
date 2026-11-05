@@ -364,6 +364,7 @@ final class Carteira
                 $assinatura->cota_snapshot,
                 $assinatura->cota_restante_ciclo,
                 CarbonImmutable::instance($assinatura->proximo_vencimento),
+                $assinatura->semMeioDePagamento() && $assinatura->id_externo === null,
             ),
             $lotes,
             $this->trialElegivel($usuarioId),

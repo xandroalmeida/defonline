@@ -12,7 +12,10 @@
     $trocaFalhou = $troca !== null && ! $trocaAguardando && ! $trocaConcluida;
     $esperando = $retornoCartao !== null && ($trocaAguardando || ($trocaConcluida && $troca->cobra_agora));
     // Um aviso de cobrança por vez (DDR-009 item 4): o de maior severidade.
+    $reaisCiclo = fn (int $c): string => $reais($c).' '.($ciclo?->porExtenso() ?? '');
     $avisoDeCobranca = match (true) {
+        $desconto !== null && $desconto['perto'] && $desconto['semCartao'] => ['alerta', 'Seu desconto termina em '.$dia($desconto['fim']).'. Sem um cartão cadastrado, as funções pagas serão bloqueadas depois dessa data.'],
+        $desconto !== null && $desconto['perto'] => ['info', 'Seu desconto termina em '.$dia($desconto['fim']).'. A partir daí o plano custa '.$reaisCiclo($desconto['cheio']).'.'],
         $pix && $janelaPix && $situacao === S::Ativo => ['info', 'Seu plano anual termina em '.$dia($vencimento).'. Pague a renovação com Pix para não perder o acesso.'],
         $situacao === S::EmAtraso => ['alerta', 'Não conseguimos cobrar a renovação de '.$dia($vencimento).'. Atualize o cartão para manter o acesso.'],
         $temLotePerto => ['info', 'Você tem créditos que vencem em breve. Veja as datas em Análises.'],
@@ -115,6 +118,7 @@
                                 @break
                             @case(S::Encerrado)
                                 <p class="m-0 mb-1 text-sm text-[color:var(--color-primary)]" dusk="screen-meuplano-encerrado">Seu {{ $assinatura->trial ? 'teste' : 'plano' }} terminou em {{ $dia($vencimento) }}. Seus diagnósticos continuam disponíveis.</p>
+                                @if ($desconto !== null && $desconto['urlRecontratar'])<p class="m-0 mb-1 text-sm text-[color:var(--color-secondary)]" dusk="screen-meuplano-desconto-acabou">O desconto terminou e não há cartão cadastrado, então as funções pagas estão bloqueadas. Cadastre um cartão para continuar.</p>@endif
                                 @if ($pix && $urlRenovar)<p class="m-0 mb-1 text-sm text-[color:var(--color-secondary)]">Plano anual com Pix: para voltar, pague a renovação com um novo QR Code.</p>@endif
                                 @break
                             @case(S::EmAtraso)
@@ -125,6 +129,8 @@
                                     <p class="m-0 mb-1 text-sm text-[color:var(--color-primary)]" dusk="screen-meuplano-renovacao">
                                         @if ($assinatura->preco_snapshot_centavos !== null && $ciclo){{ $reais($assinatura->preco_snapshot_centavos) }} {{ $ciclo->porExtenso() }} · @endif renova em {{ $dia($vencimento) }}
                                     </p>
+                                @elseif ($desconto !== null && $desconto['semCartao'])
+                                    <p class="m-0 mb-1 text-sm text-[color:var(--color-primary)]" dusk="screen-meuplano-acesso-ate">Sem cobrança por enquanto. O ciclo atual vai até {{ $dia($vencimento) }}.</p>
                                 @else
                                     <p class="m-0 mb-1 text-sm text-[color:var(--color-primary)]" dusk="screen-meuplano-acesso-ate">Este plano não renova sozinho. Termina em {{ $dia($vencimento) }}.</p>
                                 @endif
@@ -134,7 +140,26 @@
                             <p class="m-0 mb-3 text-sm text-[color:var(--color-secondary)]" dusk="screen-meuplano-cartao">Cartão {{ $cartao }}</p>
                         @endif
 
+                        @if ($desconto !== null)
+                            <p class="m-0 mb-1 text-sm text-[color:var(--color-primary)]" dusk="screen-meuplano-desconto">
+                                Desconto{{ $desconto['cupom'] ? ' ('.$desconto['cupom'].')' : '' }}: {{ $desconto['descricao'] }}.
+                                @if ($desconto['fim'] !== null && $desconto['restantes'] > 0)
+                                    Vale até {{ $dia($desconto['fim']) }} ({{ $desconto['restantes'] }} {{ $desconto['restantes'] === 1 ? 'cobrança restante' : 'cobranças restantes' }}); depois, {{ $reaisCiclo($desconto['cheio']) }}.
+                                @elseif ($desconto['fim'] === null)
+                                    Vale enquanto o plano durar.
+                                @else
+                                    O desconto terminou em {{ $dia($desconto['fim']) }}.
+                                @endif
+                            </p>
+                        @endif
+
                         <div class="flex flex-wrap gap-3 mt-3">
+                            @if ($desconto !== null && $desconto['semCartao'] && $situacao === S::Ativo && $desconto['fim'] !== null)
+                                <x-button type="button" variant="primary" wire:click="trocarCartao" :disabled="$acaoBloqueada" dusk="screen-meuplano-cadastrar-cartao">Cadastrar cartão</x-button>
+                            @endif
+                            @if ($desconto !== null && $desconto['urlRecontratar'])
+                                <x-button :href="$desconto['urlRecontratar']" variant="primary" dusk="screen-meuplano-cadastrar-cartao-encerrado">Cadastrar cartão</x-button>
+                            @endif
                             @if ($situacao === S::Ativo && $renovaSozinha)
                                 @if ($urlTrocarPlano)
                                     <x-button :href="$urlTrocarPlano" variant="secondary" :disabled="$acaoBloqueada" dusk="screen-meuplano-trocar-plano">Trocar plano</x-button>

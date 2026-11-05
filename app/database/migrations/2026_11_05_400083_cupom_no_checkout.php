@@ -57,11 +57,16 @@ return new class extends Migration
             $table->foreign('invoice_id')->references('id')->on('invoices')->nullOnDelete();
         });
 
+        // Cadastrar o cartão de uma assinatura ativada sem cobrança: não há assinatura antiga no provedor.
+        DB::statement('ALTER TABLE trocas_de_cartao ALTER COLUMN antiga_id_externo DROP NOT NULL');
+
         DB::statement('CREATE UNIQUE INDEX cupom_usos_invoice_unico ON cupom_usos (invoice_id) WHERE invoice_id IS NOT NULL');
     }
 
     public function down(): void
     {
+        DB::statement('DELETE FROM trocas_de_cartao WHERE antiga_id_externo IS NULL');
+        DB::statement('ALTER TABLE trocas_de_cartao ALTER COLUMN antiga_id_externo SET NOT NULL');
         DB::statement('DROP INDEX IF EXISTS cupom_usos_invoice_unico');
         Schema::table('cupom_usos', fn (Blueprint $t) => $t->dropColumn('invoice_id'));
 
