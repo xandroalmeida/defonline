@@ -75,6 +75,18 @@ final class Faixas
     }
 
     /**
+     * Códigos das linhas que têm faixa configurada no setor (calibrada ou não), na ordem do arquivo.
+     *
+     * @return list<string>
+     */
+    public function linhas(string $setor = 'industria'): array
+    {
+        $linhas = config("drm.faixas-{$setor}.linhas");
+
+        return is_array($linhas) ? array_map('strval', array_keys($linhas)) : [];
+    }
+
+    /**
      * Se a linha tem faixa validada pela EBC. Falso é o estado esperado hoje.
      */
     public function calibrada(string $linha, string $setor = 'industria'): bool

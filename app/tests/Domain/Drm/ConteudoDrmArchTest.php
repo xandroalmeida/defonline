@@ -85,7 +85,7 @@ it('CA-10 — `conteudo_version` é separada de `motor_drm_version`', function (
 });
 
 it('CA-8 — cada arquivo de conteúdo carrega a própria versão', function () {
-    foreach (['rotulos', 'help', 'alertas', 'leitura', 'faixas-industria', 'faixas-comercio', 'faixas-servicos'] as $arquivo) {
+    foreach (['rotulos', 'help', 'alertas', 'leitura', 'leitura_frases', 'faixas-industria', 'faixas-comercio', 'faixas-servicos'] as $arquivo) {
         expect(config("drm.{$arquivo}.version"))->toBeString()->not->toBe("Sem version em drm/{$arquivo}.php");
     }
 
