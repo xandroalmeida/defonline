@@ -36,9 +36,12 @@ return [
     //         dependência que ele cria. Só a mensagem da faixa 1 muda; nenhum valor,
     //         farol ou veredito é afetado.
     // 2.0.0 — PDR-014 (MAJOR: NCG/Vendas passa a dividir pela venda média mensal, e não pela
-    //         anualizada, com limite amarelo/vermelho em 0,10; a faixa do NCG absoluto
+    //         anualizada, com limite amarelo/vermelho em 10,00; a faixa do NCG absoluto
     //         acompanha. Ciclo Operacional sai do motor, por pedido da EB Parcerias.)
-    'version' => '2.0.0',
+    // 2.0.1 — PDR-014, correção do PO (PATCH: o limite amarelo/vermelho do NCG/Vendas volta
+    //         de 0,10 para 10,00, que estava em produção por engano sob a 2.0.0. Muda farol e
+    //         mensagem, não a fórmula. O NCG absoluto acompanha.)
+    'version' => '2.0.1',
     'matrix_version' => 'dez-2025',
 
     // Path do arquivo de lacunas auto-append por MatrizRecomendacoes (CA-5/STORY-032).

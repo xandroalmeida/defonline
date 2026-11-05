@@ -18,19 +18,22 @@ use App\Domain\Motor\Motor;
 |
 | Os 5 cenários cobrem:
 |   - saudavel: todos os indicadores em verde + NCG abs Faixa 1 (NCG ≤ 0).
-|   - atencao: amarelos, exceto NCG/Vendas vermelho + NCG abs Faixa 3 (alto).
-|   - alerta: todos vermelho + Div Líq/EBITDA INDISPONÍVEL (ebitda_negativo) + NCG abs Faixa 3 (alto).
+|   - atencao: todos amarelo + NCG abs Faixa 2 (moderado).
+|   - alerta: vermelhos, exceto NCG/Vendas amarelo + Div Líq/EBITDA INDISPONÍVEL (ebitda_negativo) + NCG abs Faixa 2.
 |   - ncg_negativo: mistura verde/amarelo, NCG abs claramente negativo.
 |   - 70pct_indisponivel: 100% dos indicadores indisponíveis (caminho extremo).
 | ----------------------------------------------------------------------
 */
 
 dataset('golden_fixtures', [
+    // Hashes re-emitidos no motor 2.0.1 (PDR-014): o limite do NCG/Vendas volta de
+    // 0,10 para 10,00. Em `atencao` e `alerta`, NCG/Vendas volta a amarelo e o NCG
+    // absoluto, a moderado. Os 5 hashes mudam também pelo `motor_version` no payload.
+    //
     // Hashes re-emitidos no motor 2.0.0 (PDR-014): NCG/Vendas passa à base mensal,
-    // com limite 0,10, e Ciclo Operacional sai da saída. Comparando os 5 fixtures
-    // antes e depois: em `atencao`, NCG/Vendas vai de amarelo (0,05) a vermelho (0,60)
-    // e o NCG absoluto, de moderado a alto. Em `atencao` e `alerta`, ncg_vendas passa
-    // a ser destaque negativo do Resumo Executivo. Os demais não mudam de conteúdo.
+    // com limite 10,00, e Ciclo Operacional sai da saída. Comparando os 5 fixtures
+    // antes e depois, o Resumo Executivo não muda. No fixture `alerta`, NCG/Vendas
+    // vai de vermelho (0,2333) a amarelo (2,80) e o NCG absoluto, de alto a moderado.
     //
     // Hashes anteriores (motor 1.3.3):
     //   saudavel           dd804d9f8be7e6c0d00378bc02008e9f69d6499b18d1f4511bbc04b321589cb8
@@ -91,23 +94,23 @@ dataset('golden_fixtures', [
     // matriz dez-2025 (Anexo F, coluna Indústria).
     'saudavel' => [
         'quiz_industria_saudavel.json',
-        '428202edefce35afb973e06cba73a335a465093d0387eed5672f3227402b9d05',
+        '50d34125986853846a7175dc37303974ac8979d69da8fa1aff88f93c2a1ae6a7',
     ],
     'atencao' => [
         'quiz_industria_atencao.json',
-        'af3f0c4fe8f89e80d43c39e20d11b80065395606ce726e26a2933ac98e17d3f4',
+        'e255184fc20afc095787f42a2b5a3ea3cf09e519878fabb37366ad35091eb99d',
     ],
     'alerta' => [
         'quiz_industria_alerta.json',
-        'fe8cea52c777131fd4dab1e379ccd9a075840a11a6844806eeb1f906a0505e0d',
+        'd684588026c4a63a5249712a256c53c4857baf8f06f8eaf04a387c7917975c36',
     ],
     'ncg_negativo' => [
         'quiz_industria_ncg_negativo.json',
-        '9b491fa247ed4a92613ae17acab6706537d255d5dcc35abf24b8994a1a4fb672',
+        'abda35da5436cb00d0ce9fd61f7c71f50bfff7328c22f1b3416ff9ab6eb9c500',
     ],
     '70pct_indisponivel' => [
         'quiz_industria_70pct_indisponivel.json',
-        '660e4b1b36394c39ebd6eefc34ff09cfb106c34b9f8cfff2170f282208ff5330',
+        'e60a0fe5459bcf92e8cd3fb78c10750e27395db49c0f5b012bd96d4c25ee6788',
     ],
 ]);
 

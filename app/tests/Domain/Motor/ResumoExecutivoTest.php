@@ -168,7 +168,7 @@ it('CA-2 + Passo 6 — todos vermelho → em_alerta + 2 destaques negativos sem 
         'fontes_recursos' => 2.0,
         'giro_ativo' => 0.2,
         'ciclo_financeiro' => 120.0,
-        'ncg_vendas' => 0.5,
+        'ncg_vendas' => 15.0,
         'pmc' => 10.0,
         'pme' => 120.0,
         'pmr' => 120.0,

@@ -133,13 +133,13 @@ Este indicador **não possui farol** no padrão verde/amarelo/vermelho; a matriz
 
 ## F.14 NCG / Vendas
 
-*Faixas em razão sobre a venda média mensal: até 0,10 (10%) e acima de 0,10 (PDR-014). Limite provisório até a confirmação da EB Parcerias.*
+*Faixas em razão direta sobre a venda média mensal: 0,01–10,00 e acima de 10,00 (PDR-014). Limite provisório até a confirmação da EB Parcerias.*
 
 | Faixa | Indústria | Comércio | Serviços |
 |---|---|---|---|
 | Negativa | Pode indicar que a empresa não necessita de recursos para o giro de seus negócios. | É provável que a empresa não necessite de recursos para o giro de seus negócios. | Indica que o negócio não necessita de recursos para o giro. |
-| 0,01–10% | Manter-se alerta às vendas a prazo, acompanhar o crescimento da rentabilidade e disponibilidade de capital de giro para financiar as vendas a prazo. | Observar com rigor o aumento das vendas a prazo, avaliar o crescimento da rentabilidade e se a disponibilidade de capital de giro é suficiente para financiar as vendas a prazo. | Conciliar prazos concedidos com o crescimento da rentabilidade e disponibilidade de capital de giro para financiar o prazo dos recebimentos de clientes. |
-| Acima de 10% | Não é recomendável a elevação das atividades e da NCG, se não acompanhada do aumento do prazo para pagamento a fornecedores. | Manter-se alerta à elevação das atividades e da NCG. Verificar se é acompanhada do aumento do prazo para pagamento a fornecedores. | Acompanhar a elevação das atividades e da NCG. Verificar se é acompanhada do aumento do prazo para pagamento a fornecedores. |
+| 0,01–10,00 | Manter-se alerta às vendas a prazo, acompanhar o crescimento da rentabilidade e disponibilidade de capital de giro para financiar as vendas a prazo. | Observar com rigor o aumento das vendas a prazo, avaliar o crescimento da rentabilidade e se a disponibilidade de capital de giro é suficiente para financiar as vendas a prazo. | Conciliar prazos concedidos com o crescimento da rentabilidade e disponibilidade de capital de giro para financiar o prazo dos recebimentos de clientes. |
+| Acima de 10,00 | Não é recomendável a elevação das atividades e da NCG, se não acompanhada do aumento do prazo para pagamento a fornecedores. | Manter-se alerta à elevação das atividades e da NCG. Verificar se é acompanhada do aumento do prazo para pagamento a fornecedores. | Acompanhar a elevação das atividades e da NCG. Verificar se é acompanhada do aumento do prazo para pagamento a fornecedores. |
 
 ---
 

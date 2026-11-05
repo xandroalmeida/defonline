@@ -69,7 +69,7 @@ it('traz Comércio e Serviços do Anexo F, com a faixa própria do segmento', fu
         ->and($servicos->faixa)->toBe('até 25%')
         ->and(($this->registro)('servicos', 'pme', 'verde')->texto)->toBe('Não se aplica a serviços.')
         ->and(($this->registro)('industria', 'pmr', 'amarelo')->faixa)->toBe('30,01–60 dias')
-        ->and(($this->registro)('industria', 'ncg_vendas', 'vermelho')->faixa)->toBe('Acima de 10%');
+        ->and(($this->registro)('industria', 'ncg_vendas', 'vermelho')->faixa)->toBe('Acima de 10,00');
 });
 
 it('abre no primeiro indicador com os 9 textos e navega entre indicadores', function () {

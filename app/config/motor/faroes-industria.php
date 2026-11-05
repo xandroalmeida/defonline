@@ -53,14 +53,14 @@ return [
         'vermelho' => ['op' => '>', 'valor' => 3.0],
     ],
 
-    // 10) NCG / Vendas — Todos: ≤ 0 verde · até 0,10 amarelo · > 0,10 vermelho (PDR-014).
-    //     Razão sobre a venda média mensal. Limite de 10% (0,10) decidido pelo PO,
-    //     provisório até a confirmação da EB Parcerias.
+    // 10) NCG / Vendas — Todos: ≤ 0 verde · 0,01–10,00 amarelo · > 10,00 vermelho (PDR-014).
+    //     Razão direta sobre a venda média mensal, não percentual. Limite 10,00 da
+    //     planilha dez/2025, provisório até a confirmação da EB Parcerias.
     'ncg_vendas' => [
         'tipo' => 'menor_melhor',
         'verde' => ['op' => '<=', 'valor' => 0.0],
-        'amarelo' => ['min' => 0.0, 'max' => 0.10],  // (0, 0.10]
-        'vermelho' => ['op' => '>', 'valor' => 0.10],
+        'amarelo' => ['min' => 0.0, 'max' => 10.0],  // (0, 10]
+        'vermelho' => ['op' => '>', 'valor' => 10.0],
     ],
 
     // 11) PMC — Todos: > 60 dias verde · 30.01–60 amarelo · ≤ 30 vermelho.

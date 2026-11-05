@@ -18,8 +18,8 @@ use App\Domain\Motor\MotivosIndisponibilidade;
  * A interpretação semântica entra via 3 faixas de mensagem:
  *
  *   - Faixa 1 (`NCG ≤ 0`): ciclo financiado pelo fornecedor.
- *   - Faixa 2 (NCG/Vendas até 0,10): patamar moderado, atenção a prazos.
- *   - Faixa 3 (NCG/Vendas acima de 0,10): pressão sobre o caixa.
+ *   - Faixa 2 (NCG/Vendas de 0,01 a 10,00): patamar moderado, atenção a prazos.
+ *   - Faixa 3 (NCG/Vendas acima de 10,00): pressão sobre o caixa.
  *
  * O limite é o mesmo do farol do NCG/Vendas (#10), lido da config, para os dois
  * indicadores não se contradizerem no relatório (PDR-014).

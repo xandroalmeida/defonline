@@ -17,7 +17,7 @@ use App\Domain\Motor\MotivosIndisponibilidade;
  *
  * Valor em **razão direta**: 0,76 = a NCG equivale a 0,76 de um mês de vendas. A
  * base é mensal, e não Q09 × 12, porque foi assim que a EB Parcerias definiu o
- * indicador. As faixas ("≤ 0", "até 0,10", "> 0,10") estão na mesma escala.
+ * indicador. As faixas ("≤ 0", "0,01–10,00", "> 10,00") estão na mesma escala.
  *
  * Casos extremos (catálogo §10):
  *   - Vendas zero → `indisponivel:vendas_zero`.
