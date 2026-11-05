@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Drm;
 
 use App\Domain\Drm\Competencia;
+use App\Domain\Drm\Leitura\LeituraDrm;
 use App\Domain\Drm\Setor;
 use App\Models\DrmLancamento;
 use App\Models\DrmPreferencia;
@@ -65,6 +66,13 @@ final class Demonstracao extends Component
         $competencia = Competencia::deTexto($this->competencia);
         $titulo = ucfirst($competencia->mesPorExtenso()).' de '.$competencia->data->year;
         $visao = DemonstracaoVisao::de($lancamento->demonstracao->getArrayCopy(), $this->posicao);
+        $serie = HistoricoDrm::serie($this->empresa, $visao->posicao);
+
+        // STORY-054: farol e leitura são DERIVADOS aqui, do snapshot vigente + pacote de conteúdo + série.
+        // Nada disto é gravado (CA-8): recalibrar uma faixa muda a cor de um mês antigo, nunca um valor dele.
+        $setor = Setor::tryFrom($lancamento->setor);
+        $mes = $serie->mes($competencia);
+        $leitura = $setor === null || $mes === null ? null : (new LeituraDrm)->gerar($mes, $serie, $setor, $visao->posicao);
 
         return view('livewire.drm.demonstracao', [
             'visao' => $visao,
@@ -82,7 +90,9 @@ final class Demonstracao extends Component
             'retificadoEm' => $lancamento->retificadoEm(),
             'modo' => config("drm.tela.modo.{$visao->posicao}"),
             // STORY-051 CA-3: os quatro comparativos por linha de nível 1, derivados das versões vigentes.
-            'comparativos' => ComparativosVisao::dasLinhas(HistoricoDrm::serie($this->empresa, $visao->posicao), $competencia, $visao->linhas),
+            'comparativos' => ComparativosVisao::dasLinhas($serie, $competencia, $visao->linhas),
+            'leitura' => $leitura,
+            'farois' => $leitura->farois ?? [],
         ])->layoutData([
             'title' => $titulo,
             'breadcrumb' => [

@@ -61,6 +61,15 @@
         </section>
     @endif
 
+    {{-- Leitura em linguagem simples (STORY-054): derivada na exibição, nunca gravada no snapshot (CA-8). --}}
+    @if ($leitura !== null && $leitura->frases !== [])
+        <x-card as="section" class="mb-6" aria-labelledby="drm-leitura-titulo" dusk="drm-leitura">
+            <h2 id="drm-leitura-titulo" class="m-0 mb-2 text-[length:var(--text-h2)] font-medium text-[color:var(--color-primary)]">{{ config('drm.leitura_frases.titulo') }}</h2>
+            <p class="m-0 text-[length:var(--text-body)] text-[color:var(--color-primary)]" dusk="drm-leitura-texto">{{ implode(' ', $leitura->frases) }}</p>
+            <p class="m-0 mt-3 text-[length:var(--text-body-sm)] text-[color:var(--color-secondary)]" dusk="drm-leitura-rodape">{{ strtr((string) config('drm.leitura_frases.rodape'), [':versao' => (string) config('drm.conteudo_version')]) }}</p>
+        </x-card>
+    @endif
+
     {{-- Modo do pró-labore (CA-3b): a frase declara o estado, o botão oferece o outro. Muda estado, não navega. --}}
     @if ($modo !== null)
         <div class="mb-4" aria-live="polite" dusk="drm-modo">
@@ -111,6 +120,9 @@
                             @if ($l->prejuizo)
                                 <span class="pill ml-2">{{ config('drm.tela.pill_prejuizo') }}</span>
                             @endif
+                            @isset($farois[$l->codigo])
+                                <span class="ml-2 inline-block align-middle" dusk="drm-farol-{{ $l->codigo }}"><x-relatorio.farol :cor="$farois[$l->codigo]"/></span>
+                            @endisset
                         </th>
                         <td class="px-4 py-2 text-right tabular-nums {{ $classeNumero($l) }}">
                             @if ($l->nominalSemMoeda !== null)
@@ -145,6 +157,9 @@
                                 @if ($l->prejuizo)
                                     <span class="pill ml-2">{{ config('drm.tela.pill_prejuizo') }}</span>
                                 @endif
+                                @isset($farois[$l->codigo])
+                                    <span class="ml-2 inline-block align-middle" dusk="drm-cartao-farol-{{ $l->codigo }}"><x-relatorio.farol :cor="$farois[$l->codigo]"/></span>
+                                @endisset
                             </dt>
                             <dd class="m-0 flex items-baseline justify-between gap-3 tabular-nums {{ $classeNumero($l) }} {{ $recuo[$l->nivel] ?? $recuo[3] }}">
                                 <span>
