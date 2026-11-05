@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: false
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: M
@@ -84,13 +84,29 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 ## Notas do agente
 
 ### Decisões tomadas
+- Tabelas `cupons`, `cupom_itens`, `cupom_concessoes` e `cupom_usos` (migration `2026_11_05_200010_create_cupons`), com CHECKs de tipo, faixa (percentual 1 a 100, valor fixo >= 1 centavo) e vigência, e índices únicos (código; cupom+usuário em concessões e usos; item repetido).
+- Itens cobertos por id: `cupom_itens` aponta para `planos.id` (com ciclo `mensal`/`anual`) ou `pacotes_credito.id`. Nenhum código fixo; o teste arquitetural da STORY-071 continua passando.
+- Código do cupom normalizado para maiúsculas (3 a 40 caracteres: letras, números, `-`, `_`); a unicidade ignora caixa porque o armazenado é sempre maiúsculo. Corrida entre dois admins cai no índice único e vira erro de campo.
+- Regras em `app/Domain/Cobranca` para a STORY-083 reutilizar: `TipoDesconto::desconto()` (percentual com arredondamento de meio centavo para cima, valor fixo; nunca passa do preço nem fica negativo), `CupomRegras::errosDaDefinicao()` e `CupomRegras::avaliarUso()` (ativo, vigência por dia inclusive, limite total, cobertura, uso anterior), `MotivoRecusaCupom`. Ponto de entrada para o checkout: `Cupom::recusaPara($usuarioId, $planoId, $ciclo, $pacoteId, $agora)` e `Cupom::cobre(...)`.
+- "Todas as contas cadastradas até uma data" interpretado como contas com `created_at` até o fim do dia informado, excluindo anonimizadas e excluídas. Contas específicas são identificadas por e-mail (um por linha, vírgula ou ponto e vírgula); e-mail sem conta bloqueia a concessão e lista quais são.
+- A concessão copia `ciclos_duracao` do cupom para `ciclos_restantes`. A tela exige "Ver quantas contas" (prévia com total, novas e já tinham) antes de oferecer "Confirmar"; qualquer mudança no formulário descarta a prévia. Insere com `insertOrIgnore` em lotes de 500 (CA-5 garantido pelo índice).
+- Auditoria: `cupons.cupom_criado/alterado/desativado/reativado/concedido`, antes/depois e autor. Na concessão por contas vão os ids das novas; na em massa, só modo, data e contagens. Sem mudança real, edição não grava nem audita.
+- Reativar um cupom desativado é permitido (como em planos), auditado; o CA só diz que desativar impede novos usos e concessões.
+- Ao menos um item coberto é obrigatório. O limite de usos não pode ficar abaixo dos usos já feitos.
+- `cupom_usos` nasce aqui só para a tela mostrar o consumo e a regra "uma vez por usuário"; quem grava é a STORY-083 (pode acrescentar colunas, como fatura/assinatura).
 
 ### Descobertas
+- `<input type="date">` do Chromium segue o idioma do navegador (mm/dd/aaaa) e não aceita apagar e redigitar: no Dusk, as datas são definidas por script com valor ISO.
+- `AuditLog::before/after` voltam como `ArrayObject`; em teste, comparar com `->toArray()`.
 
 ### Bloqueios encontrados
+Nenhum.
 
 ### IDRs criados
+Nenhum.
 
 ### Cobertura final
+Suíte All 1438 testes passando; cobertura total 98,4%; CupomRegras, TipoDesconto, MotivoRecusaCupom e os 4 modelos 100%; Livewire Cupons 99,6%.
 
 ### Evidências
+`tests/Feature/Livewire/Backoffice/CuponsTest.php` (CA-1 a CA-8, itens e regra de uso), `tests/Unit/Domain/Cobranca/CupomRegrasTest.php` (regras de domínio), `tests/Browser/CuponsBackofficeBrowserTest.php` (E2E). Pint e PHPStan limpos.
