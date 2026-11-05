@@ -106,11 +106,11 @@ describe('CA-4 cancelar a renovação', function () {
         expect(fn () => _gerir()->cancelar($this->usuario))->toThrow(GestaoNegada::class);
     });
 
-    it('assinatura em atraso não cancela a renovação por aqui (a troca de cartão é o caminho)', function () {
+    it('assinatura em atraso cancela a renovação e encerra o acesso na hora (ver CancelarRenovacaoEmAtrasoTest)', function () {
         $a = _assinante($this->usuario);
         $a->forceFill(['status' => StatusAssinatura::EmAtraso])->save();
 
-        expect(fn () => _gerir()->cancelar($this->usuario))->toThrow(GestaoNegada::class);
+        expect(_gerir()->cancelar($this->usuario)->status)->toBe(StatusAssinatura::Expirada);
     });
 
     it('ciclo já vencido não pode mais ser alterado', function () {

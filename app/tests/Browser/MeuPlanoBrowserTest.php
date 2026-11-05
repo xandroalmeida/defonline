@@ -172,7 +172,7 @@ final class MeuPlanoBrowserTest extends DuskTestCase
                 ->waitFor('@screen-meuplano-aviso')
                 ->assertSeeIn('@screen-meuplano-aviso', 'Atualize o cartão para manter o acesso.')
                 ->assertSeeIn('@screen-meuplano-situacao', 'Em atraso')
-                ->assertMissing('@screen-meuplano-cancelar')
+                ->assertVisible('@screen-meuplano-cancelar')
                 ->click('@screen-meuplano-trocar-cartao')
                 ->waitFor('@screen-meuplano-salvar-cartao')
                 ->assertSeeIn('@screen-meuplano-salvar-cartao', 'Salvar e cobrar agora')
@@ -191,6 +191,43 @@ final class MeuPlanoBrowserTest extends DuskTestCase
 
         $this->assertSame(StatusAssinatura::Ativa, Assinatura::query()->where('usuario_id', $usuario->id)->sole()->status);
         $this->assertSame(2, Assinatura::query()->where('usuario_id', $usuario->id)->sole()->periodos_pagos);
+    }
+
+    public function test_cancelar_a_renovacao_em_atraso_encerra_o_acesso_na_hora(): void
+    {
+        $usuario = $this->assinante();
+        $assinatura = Assinatura::query()->where('usuario_id', $usuario->id)->sole();
+        $assinatura->forceFill(['status' => StatusAssinatura::EmAtraso])->save();
+        $fim = $assinatura->proximo_vencimento->setTimezone('America/Sao_Paulo')->format('d/m/Y');
+
+        $this->browse(function (Browser $browser) use ($usuario, $fim) {
+            $browser->resize(360, 800)->loginAs($usuario)
+                ->visit('/meu-plano')
+                ->waitFor('@screen-meuplano-cancelar')
+                ->assertSeeIn('@screen-meuplano-situacao', 'Em atraso')
+                ->click('@screen-meuplano-cancelar')
+                ->waitFor('@confirmacao-confirmar')
+                ->assertSeeIn('@confirmacao-mensagem', "Como o ciclo de {$fim} não foi pago, o acesso é encerrado agora, não no fim do ciclo.")
+                ->assertSeeIn('@confirmacao-cancelar', 'Voltar')
+                // Voltar não muda nada.
+                ->click('@confirmacao-cancelar')
+                ->assertVisible('@screen-meuplano-cancelar')
+                ->click('@screen-meuplano-cancelar')
+                ->waitFor('@confirmacao-confirmar')
+                ->click('@confirmacao-confirmar')
+                ->waitUntilMissing('@screen-meuplano-cancelar')
+                ->assertSeeIn('@screen-meuplano-resultado', 'o acesso foi encerrado agora e nada mais será cobrado')
+                ->assertSeeIn('@screen-meuplano-situacao', 'Encerrado')
+                ->assertSeeIn('@screen-meuplano-encerrado', "Seu plano terminou em {$fim}.")
+                ->assertSeeIn('@screen-meuplano-cobrancas', 'Plano Básico · mensal')
+                ->assertMissing('@screen-meuplano-trocar-cartao');
+            $this->assertLessThanOrEqual(0, $browser->script('return document.documentElement.scrollWidth - document.documentElement.clientWidth;')[0]);
+        });
+
+        $a = Assinatura::query()->where('usuario_id', $usuario->id)->sole();
+        $this->assertSame(StatusAssinatura::Expirada, $a->status);
+        $this->assertNotNull($a->encerrada_em);
+        $this->assertSame('cancelada', FakePaymentProvider::situacaoDaAssinatura((string) $a->id_externo));
     }
 
     public function test_cartao_recusado_na_troca_mantem_o_anterior(): void

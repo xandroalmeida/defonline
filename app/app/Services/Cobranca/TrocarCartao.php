@@ -142,14 +142,29 @@ final class TrocarCartao
      */
     public function confirmar(TrocaDeCartao $troca, string $novaId, ?string $bandeira, ?string $ultimos4): void
     {
-        $confirmada = DB::transaction(function () use ($troca, $novaId, $bandeira, $ultimos4): bool {
+        $resultado = DB::transaction(function () use ($troca, $novaId, $bandeira, $ultimos4): string {
             $troca = TrocaDeCartao::query()->lockForUpdate()->findOrFail($troca->id);
 
             if ($troca->status === 'concluida') {
-                return false;
+                return 'nada';
             }
 
             $assinatura = Assinatura::query()->lockForUpdate()->findOrFail($troca->assinatura_id);
+
+            // O usuário cancelou a renovação (ou o ciclo foi encerrado) enquanto o checkout estava aberto: o
+            // cartão novo não pode religar a cobrança. A assinatura nova, que o provedor criou, é cancelada.
+            if (in_array($assinatura->status, [StatusAssinatura::Expirada, StatusAssinatura::Cancelada], true)) {
+                Log::error('cobranca.troca_de_cartao_apos_cancelamento', [
+                    'module' => 'cobranca',
+                    'action' => 'confirmar_troca_de_cartao',
+                    'troca_id' => $troca->id,
+                    'assinatura_id' => $assinatura->id,
+                    'status' => $assinatura->status->value,
+                ]);
+                $troca->forceFill(['status' => 'cancelada'])->save();
+
+                return 'orfa';
+            }
 
             if ($assinatura->id_externo !== $troca->antiga_id_externo) {
                 // A assinatura já aponta para outra coisa (outra troca concluída antes): esta nova ficaria órfã.
@@ -160,7 +175,7 @@ final class TrocarCartao
                     'assinatura_id' => $assinatura->id,
                 ]);
 
-                return false;
+                return 'nada';
             }
 
             $assinatura->forceFill([
@@ -193,10 +208,14 @@ final class TrocarCartao
                 after: ['assinatura_id' => $assinatura->id, 'cartao_bandeira' => $bandeira, 'cartao_ultimos4' => $ultimos4],
             );
 
-            return true;
+            return 'concluida';
         });
 
-        if ($confirmada) {
+        if ($resultado === 'orfa') {
+            $this->cancelarNova($troca, $novaId);
+        }
+
+        if ($resultado === 'concluida') {
             $this->cancelarAntiga(TrocaDeCartao::query()->findOrFail($troca->id));
         }
     }
@@ -221,6 +240,22 @@ final class TrocarCartao
         }
 
         return $feitas;
+    }
+
+    /** A assinatura que o provedor criou depois do cancelamento não pode cobrar: cancela-a (ou alerta). */
+    private function cancelarNova(TrocaDeCartao $troca, string $novaId): void
+    {
+        try {
+            $this->provedor->cancelSubscription(new ReferenciaProvedor($troca->provedor, $novaId));
+        } catch (ProvedorIndisponivel $e) {
+            Log::error('cobranca.troca_de_cartao_nova_nao_cancelada', [
+                'module' => 'cobranca',
+                'action' => 'cancelar_assinatura_nova',
+                'troca_id' => $troca->id,
+                'assinatura_nova' => $novaId,
+                'motivo' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function cancelarAntiga(TrocaDeCartao $troca): bool

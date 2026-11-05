@@ -73,10 +73,19 @@ final class MeuPlano extends Component
 
     public function cancelarRenovacao(GerirRenovacao $gerir): void
     {
+        $usuario = Auth::user();
+        $emAtraso = $usuario instanceof Usuario && Assinatura::query()
+            ->where('usuario_id', $usuario->id)->where('status', StatusAssinatura::EmAtraso->value)->exists();
+
         $this->executar(
             fn (Usuario $u): Assinatura => $gerir->cancelar($u),
-            fn (Assinatura $a): string => 'Renovação cancelada. Seu acesso continua até '.self::data($a->proximo_vencimento).'.',
-            'Não conseguimos cancelar agora. Sua renovação continua ativa. Tente de novo.',
+            // Em atraso o ciclo não foi pago: o cancelamento encerra o acesso na hora (decisão do PO).
+            fn (Assinatura $a): string => $a->status === StatusAssinatura::Expirada
+                ? 'Renovação cancelada. Como o ciclo de '.self::data($a->proximo_vencimento).' não foi pago, o acesso foi encerrado agora e nada mais será cobrado. Seu histórico continua disponível.'
+                : 'Renovação cancelada. Seu acesso continua até '.self::data($a->proximo_vencimento).'.',
+            $emAtraso
+                ? 'Não conseguimos cancelar agora. Nada foi alterado: a renovação continua em atraso. Tente de novo.'
+                : 'Não conseguimos cancelar agora. Sua renovação continua ativa. Tente de novo.',
         );
     }
 

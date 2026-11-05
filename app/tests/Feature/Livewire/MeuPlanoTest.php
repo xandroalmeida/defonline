@@ -253,6 +253,41 @@ describe('CA-4 cancelar a renovação', function () {
             ->and($html)->toContain("voltar: 'Voltar'");
     });
 
+    it('em atraso: o botão existe, o diálogo diz que o acesso acaba agora, e cancelar encerra o plano e preserva o histórico', function () {
+        $a = _mpAssinar($this->usuario);
+        $a->forceFill(['status' => StatusAssinatura::EmAtraso])->save();
+        $data = _dia($a->proximo_vencimento);
+        $mensagem = "A renovação será cancelada e nada mais será cobrado. Como o ciclo de {$data} não foi pago, o acesso é encerrado agora, não no fim do ciclo. Seu histórico de cobranças e diagnósticos continua disponível.";
+
+        $t = _meuPlano($this->usuario);
+        $html = $t->html();
+        expect($html)->toContain('screen-meuplano-cancelar')
+            ->and($html)->toContain(Js::from($mensagem)->toHtml())
+            ->and($html)->toContain(Js::from('Cancelar a renovação?')->toHtml());
+
+        $t->call('cancelarRenovacao')
+            ->assertSee("Renovação cancelada. Como o ciclo de {$data} não foi pago, o acesso foi encerrado agora e nada mais será cobrado. Seu histórico continua disponível.")
+            ->assertSee('Encerrado')
+            ->assertSee("Seu plano terminou em {$data}.")
+            ->assertSee('Plano Básico')
+            ->assertDontSeeHtml('screen-meuplano-cancelar');
+
+        expect($a->refresh()->status)->toBe(StatusAssinatura::Expirada)->and(Invoice::query()->where('status', 'paga')->count())->toBe(1);
+    });
+
+    it('em atraso, com o provedor fora do ar, nada muda e a tela diz que a renovação continua em atraso', function () {
+        $a = _mpAssinar($this->usuario);
+        $a->forceFill(['status' => StatusAssinatura::EmAtraso])->save();
+        FakePaymentProvider::falharProximaOperacaoDeAssinatura();
+
+        _meuPlano($this->usuario)
+            ->call('cancelarRenovacao')
+            ->assertSee('Não conseguimos cancelar agora. Nada foi alterado: a renovação continua em atraso. Tente de novo.')
+            ->assertSee('Em atraso');
+
+        expect($a->refresh()->status)->toBe(StatusAssinatura::EmAtraso);
+    });
+
     it('com o provedor fora do ar diz o estado real: a renovação continua ativa', function () {
         $a = _mpAssinar($this->usuario);
         FakePaymentProvider::falharProximaOperacaoDeAssinatura();
@@ -328,7 +363,7 @@ describe('CA-3 trocar o cartão', function () {
         _meuPlano($this->usuario)
             ->assertSee('Em atraso')
             ->assertSee('Não conseguimos cobrar a renovação de '._dia($a->proximo_vencimento).'. Atualize o cartão para manter o acesso.')
-            ->assertDontSee('Cancelar renovação')
+            ->assertSee('Cancelar renovação')
             ->call('abrirTrocaDeCartao')
             ->assertSee('Salvar e cobrar agora')
             ->assertSee('a renovação em atraso é cobrada no cartão novo');

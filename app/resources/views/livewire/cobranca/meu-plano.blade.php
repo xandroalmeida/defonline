@@ -21,6 +21,7 @@
         : 'Você contratou '.($arrependimentoDias === 0 ? 'hoje' : "há {$arrependimentoDias} ".($arrependimentoDias === 1 ? 'dia' : 'dias')).' e ainda não fez nenhuma análise: dá para pedir o reembolso integral em '.$canalArrependimento.'.';
     $mensagemCancelar = 'Você continua com acesso até '.($vencimento ? $dia($vencimento) : '').' e não será cobrado de novo. Dá para reativar até lá.'
         .($mensagemArrependimento ? ' '.$mensagemArrependimento : '');
+    $mensagemCancelarEmAtraso = 'A renovação será cancelada e nada mais será cobrado. Como o ciclo de '.($vencimento ? $dia($vencimento) : '').' não foi pago, o acesso é encerrado agora, não no fim do ciclo. Seu histórico de cobranças e diagnósticos continua disponível.';
     $h2 = 'text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0 mb-3';
 @endphp
 <div class="max-w-[1100px]" x-data x-init="$nextTick(() => $refs.titulo?.focus())"
@@ -115,7 +116,7 @@
                                 <p class="m-0 mb-1 text-sm text-[color:var(--color-primary)]" dusk="screen-meuplano-encerrado">Seu {{ $assinatura->trial ? 'teste' : 'plano' }} terminou em {{ $dia($vencimento) }}. Seus diagnósticos continuam disponíveis.</p>
                                 @break
                             @case(S::EmAtraso)
-                                <p class="m-0 mb-1 text-sm text-[color:var(--color-primary)]">Não conseguimos cobrar a renovação. Atualize o cartão para manter o acesso.</p>
+                                <p class="m-0 mb-1 text-sm text-[color:var(--color-primary)]">Não conseguimos cobrar a renovação. Atualize o cartão para manter o acesso, ou cancele a renovação: nesse caso o acesso é encerrado na hora, porque o ciclo não foi pago.</p>
                                 @break
                             @default
                                 @if ($renovaSozinha)
@@ -149,6 +150,16 @@
                                 <x-button type="button" variant="primary" wire:click="reativarRenovacao" :disabled="$acaoBloqueada" dusk="screen-meuplano-reativar">Reativar renovação</x-button>
                             @elseif ($situacao === S::EmAtraso)
                                 <x-button type="button" variant="primary" wire:click="abrirTrocaDeCartao" :disabled="$acaoBloqueada" dusk="screen-meuplano-trocar-cartao">Trocar cartão</x-button>
+                                @if ($renovaSozinha)
+                                    <button type="button" class="btn btn--ghost" @disabled($acaoBloqueada) dusk="screen-meuplano-cancelar"
+                                            x-on:click="$dispatch('pedir-confirmacao', {
+                                                titulo: 'Cancelar a renovação?',
+                                                mensagem: {{ \Illuminate\Support\Js::from($mensagemCancelarEmAtraso) }},
+                                                rotulo: 'Cancelar renovação',
+                                                voltar: 'Voltar',
+                                                acao: () => $wire.cancelarRenovacao(),
+                                            })">Cancelar renovação</button>
+                                @endif
                             @elseif ($situacao === S::Teste || $situacao === S::Encerrado)
                                 @if ($urlPlanos)<x-button :href="$urlPlanos" variant="primary" dusk="screen-meuplano-assinar">Assinar um plano</x-button>@endif
                             @endif
