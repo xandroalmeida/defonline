@@ -72,10 +72,10 @@
 
     {{-- Modo do pró-labore (CA-3b): a frase declara o estado, o botão oferece o outro. Muda estado, não navega. --}}
     @if ($modo !== null)
-        <div class="mb-4" aria-live="polite" dusk="drm-modo">
+        <div class="mb-4 print:mb-2" aria-live="polite" dusk="drm-modo">
             <p class="m-0 text-[length:var(--text-body)] text-[color:var(--color-secondary)]" dusk="drm-modo-frase">{{ $modo['frase'] }}</p>
             <p class="sr-only">{{ count($visao->linhas) }} linhas na demonstração.</p>
-            <div class="mt-1 flex items-center gap-2">
+            <div class="mt-1 flex items-center gap-2 print:hidden">
                 <x-button type="button" variant="link" wire:click="trocarPosicao" dusk="drm-trocar-modo">{{ $modo['trocar'] }}</x-button>
                 <x-help id="drm-modo" :text="config('drm.tela.modo_ajuda')" label="Retirada fora ou dentro do resultado operacional"/>
             </div>
@@ -102,7 +102,7 @@
     @endif
 
     {{-- Desktop (CA-9): uma tabela de verdade, com cabeçalhos associados (CA-10). --}}
-    <div class="hidden lg:block" dusk="drm-tabela">
+    <div class="hidden lg:block print:block" dusk="drm-tabela">
         <table class="w-full border-collapse overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)]">
             <caption class="sr-only">Demonstração de resultado de {{ $titulo }}: cada linha com o valor em reais e o percentual sobre a receita.</caption>
             <thead>
@@ -145,7 +145,7 @@
     </div>
 
     {{-- Mobile e tablet (CA-9): um card por trecho da conta, que fecha em cada totalizador (DDR-004). --}}
-    <div class="flex flex-col gap-3 lg:hidden" dusk="drm-cards">
+    <div class="flex flex-col gap-3 lg:hidden print:hidden" dusk="drm-cards">
         @foreach ($visao->trechos as $trecho)
             <x-card as="section" class="!p-0 overflow-hidden" dusk="drm-trecho">
                 <h3 class="m-0 px-4 pt-4 pb-2 text-[length:var(--text-body)] font-semibold text-[color:var(--color-primary)]">{{ $trecho['titulo'] }}</h3>
@@ -186,7 +186,7 @@
 
     {{-- Comparativos por linha (STORY-051 CA-3/CA-4): derivados das versões vigentes; cada um diz em palavras quando não existe. --}}
     @if ($comparativos !== [])
-        <section class="mt-6" aria-labelledby="drm-comparativos-titulo" dusk="drm-comparativos">
+        <section class="mt-6 print:hidden" aria-labelledby="drm-comparativos-titulo" dusk="drm-comparativos">
             <h2 id="drm-comparativos-titulo" class="m-0 mb-1 text-[length:var(--text-h2)] font-medium text-[color:var(--color-primary)]">{{ config('drm.serie.linha.titulo') }}</h2>
             <p class="m-0 mb-3 text-[length:var(--text-body-sm)] text-[color:var(--color-secondary)]">{{ config('drm.serie.linha.introducao') }}</p>
             <div class="flex flex-col gap-2">
@@ -218,14 +218,27 @@
             $retificado ? 'corrigido '.$vezesRetificado.'× — última correção em '.$retificadoEm->setTimezone(config('app.timezone'))->format('d/m/Y') : null,
         ]));
     @endphp
+    @php
+        $rodapeImpressao = strtr((string) config('drm.exportacao.impressao_rodape'), [
+            ':motor' => $visao->motorVersion ?? '—',
+            ':conteudo' => (string) config('drm.conteudo_version'),
+            ':data' => $visao->geradoEm?->setTimezone(config('app.timezone'))->format('d/m/Y H:i') ?? '—',
+        ]);
+    @endphp
     @if ($rodape !== '')
         <p class="mt-4 mb-0 text-[length:var(--text-body-sm)] text-[color:var(--color-secondary)]" dusk="drm-rodape">{{ $rodape }}</p>
     @endif
 
-    <div class="mt-6 flex flex-wrap gap-3">
+    {{-- Só na impressão (STORY-055 CA-12): versão do motor, versão do conteúdo e data de geração do snapshot. --}}
+    <p class="hidden print:block mt-4 mb-0 text-[length:var(--text-body-sm)] text-[color:var(--color-secondary)]" dusk="drm-rodape-impressao">{{ $rodapeImpressao }}</p>
+
+    <div class="mt-6 flex flex-wrap gap-3 print:hidden">
         <x-button :href="route('drm.serie', $empresa)" variant="secondary" dusk="drm-demonstracao-ver-serie">Ver todos os meses</x-button>
         <x-button :href="route('empresas.show', $empresa)" variant="secondary" dusk="drm-voltar-empresa">Voltar para a empresa</x-button>
         <x-button :href="route('drm.lancar', $empresa)" variant="secondary" dusk="drm-lancar-outro">Lançar outro mês</x-button>
         <x-button :href="route('drm.corrigir', [$empresa, $competencia])" variant="secondary" dusk="drm-corrigir">Corrigir este mês</x-button>
+        {{-- STORY-055: planilha gerada na hora (CA-9); a impressão é interina e não promete PDF nosso (CA-13). --}}
+        <x-button :href="route('drm.exportar', [$empresa, $competencia])" variant="secondary" dusk="drm-exportar-xlsx">{{ config('drm.exportacao.botao_planilha') }}</x-button>
+        <x-button type="button" variant="secondary" x-data x-on:click="window.print()" dusk="drm-imprimir">{{ config('drm.exportacao.botao_imprimir') }}</x-button>
     </div>
 </div>

@@ -3,7 +3,7 @@
 ])
 
 @if (count($items) > 0)
-    <nav aria-label="breadcrumb" class="mb-4 text-sm" {{ $attributes }}>
+    <nav aria-label="breadcrumb" class="mb-4 text-sm print:hidden" {{ $attributes }}>
         <ol class="flex flex-wrap items-center gap-2 m-0 p-0 list-none">
             @foreach ($items as $index => $item)
                 @php $isLast = $index === count($items) - 1; @endphp
