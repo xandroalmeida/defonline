@@ -1796,7 +1796,7 @@
       "title": "Spike — provisão de férias e 13º: onde mora o saldo num módulo que só tem resultado",
       "type": "spike",
       "target_role": "arquiteto",
-      "status": "ready",
+      "status": "in_review",
       "estimated_session_size": "M",
       "blocked_by": [
         "STORY-045"
@@ -1811,8 +1811,8 @@
       "checkpoint": "CP3",
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-058-spike-provisao-rubricas-sazonais.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-04",
-      "note": "Origem: PDR-004 decisão D. A EBC pediu provisão contábil completa, que exige saldo acumulado entre meses — conta patrimonial que o DRM não tem por desenho (PDR-003, caixa puro). 3 saídas legítimas: cabe no EPIC-010 / vira EPIC-011 na onda seguinte (mais provável) / não vale a pena frente ao tratamento da STORY-051. STORY-051 entrega o interino independentemente."
+      "updated_at": "2026-11-05",
+      "note": "Origem: PDR-004 decisão D. A EBC pediu provisão contábil completa, que exige saldo acumulado entre meses — conta patrimonial que o DRM não tem por desenho (PDR-003, caixa puro). 3 saídas legítimas: cabe no EPIC-010 / vira EPIC-011 na onda seguinte (mais provável) / não vale a pena frente ao tratamento da STORY-051. STORY-051 entrega o interino independentemente. 2026-11-05: ADR-011 proposed; aguarda o PO."
     },
     {
       "id": "STORY-059",
@@ -2051,17 +2051,18 @@
     {
       "type": "implementation",
       "target_role": "designer",
-      "status": "ready",
+      "status": "in_review",
       "blocks": [
         "STORY-074",
         "STORY-075",
         "STORY-076",
         "STORY-077",
-        "STORY-087"
+        "STORY-087",
+        "STORY-073"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "designer (claude-sonnet-5-5)",
       "requires_design": true,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2071,7 +2072,8 @@
       "estimated_session_size": "M",
       "blocked_by": [],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-070-design-telas-cobranca.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "Specs liberadas para implementação pelo orquestrador; DDR-008 a 010 aguardam aprovação do PO."
     },
     {
       "type": "implementation",
@@ -2135,7 +2137,7 @@
       "epic_id": "EPIC-005",
       "sprint_id": null,
       "owner_agent": null,
-      "requires_design": false,
+      "requires_design": true,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
       "id": "STORY-073",
@@ -2143,10 +2145,12 @@
       "title": "Carteira, interruptor de cobrança e bloqueio de análise",
       "estimated_session_size": "L",
       "blocked_by": [
-        "STORY-071"
+        "STORY-071",
+        "STORY-070"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-073-carteira-consumo-e-bloqueio-de-analise.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "design_screen_id": "SCREEN-STORY-070-bloqueio-sem-saldo"
     },
     {
       "type": "implementation",
@@ -3611,6 +3615,15 @@
         "created_at": "2026-10-30",
         "updated_at": "2026-10-30",
         "note": "VPS de homolog da ADR-005 desligada em 2026-10-30. Ambiente único defonline-prod em https://defonline.zalk.com.br; Ansible/vault/backup próprios removidos do repo."
+      },
+      {
+        "id": "ADR-011",
+        "slug": "provisao-rubricas-sazonais-drm",
+        "title": "Provisão de rubricas sazonais do DRM: manter caixa e medir demanda",
+        "status": "proposed",
+        "path": "decisions/adr/ADR-011-provisao-rubricas-sazonais-drm.md",
+        "decided_at": null,
+        "note": "Aguarda decisão do PO. Recomenda a saída C."
       }
     ],
     "idr": [
@@ -4210,6 +4223,69 @@
         "created_at": "2026-08-06",
         "updated_at": "2026-08-06",
         "note": "--color-input media 1,23:1 sobre surface, contra os 3:1 que a WCAG 2.1 §1.4.11 pede para o limite de componente interativo — em TODAS as telas de formulário do produto. Os dois tokens eram idênticos desde o DS v1, o que fazia a distinção parecer decorativa; o DDR a exerce: `border` separa, `input` delimita componente interativo. Valor: #E3E8EE → #7C8798 (3,64:1 sobre surface, 3,44:1 sobre neutral). Rejeitada a variante de 3:1 exato (#8792A5) porque reprova sobre fundo neutro (2,97). Trade-off assumido e declarado: cadastro, login, nova empresa e Quiz ficam visualmente mais densos e o produto se afasta um passo da leveza Stripe do DS v1 — o PO ratificou aplicar agora, fechando o CA-10 em vez de deixá-lo aberto. Exige conferência visual em homologação, não só teste."
+      },
+      {
+        "id": "DDR-008",
+        "slug": "resumo-do-pedido-sem-letra-miuda",
+        "title": "Resumo do pedido: toda cobrança mostra as mesmas seis linhas antes da confirmação",
+        "status": "proposed",
+        "path": "decisions/ddr/DDR-008-resumo-do-pedido-sem-letra-miuda.md",
+        "decided_at": null,
+        "decided_by": "designer (claude-sonnet-5-5)",
+        "approved_by": null,
+        "scope": "cobrança",
+        "related_pdrs": [
+          "PDR-020"
+        ],
+        "related_stories": [
+          "STORY-070"
+        ],
+        "related_epics": [
+          "EPIC-005"
+        ],
+        "note": "Aguarda aprovação humana do PO; implementação segue a proposta por ordem do PO de não parar."
+      },
+      {
+        "id": "DDR-009",
+        "slug": "situacao-da-assinatura-e-avisos-de-cobranca",
+        "title": "Situação do plano em seis estados com vocabulário fixo; avisos de cobrança sem urgência fabricada",
+        "status": "proposed",
+        "path": "decisions/ddr/DDR-009-situacao-da-assinatura-e-avisos-de-cobranca.md",
+        "decided_at": null,
+        "decided_by": "designer (claude-sonnet-5-5)",
+        "approved_by": null,
+        "scope": "cobrança",
+        "related_pdrs": [
+          "PDR-020"
+        ],
+        "related_stories": [
+          "STORY-070"
+        ],
+        "related_epics": [
+          "EPIC-005"
+        ],
+        "note": "Aguarda aprovação humana do PO; implementação segue a proposta por ordem do PO de não parar."
+      },
+      {
+        "id": "DDR-010",
+        "slug": "seletor-modo-generalizado-para-opcoes-com-consequencia",
+        "title": "seletor-modo serve a qualquer escolha de duas opções com consequência factual (meio de pagamento e ciclo)",
+        "status": "proposed",
+        "path": "decisions/ddr/DDR-010-seletor-modo-generalizado-para-opcoes-com-consequencia.md",
+        "decided_at": null,
+        "decided_by": "designer (claude-sonnet-5-5)",
+        "approved_by": null,
+        "scope": "componentes",
+        "related_pdrs": [
+          "PDR-020"
+        ],
+        "related_stories": [
+          "STORY-070"
+        ],
+        "related_epics": [
+          "EPIC-005"
+        ],
+        "note": "Aguarda aprovação humana do PO; implementação segue a proposta por ordem do PO de não parar."
       }
     ]
   },
@@ -4317,6 +4393,236 @@
         "note": "Tela 3 — lista de competências com os 4 estados (lançada, retificada, não lançada, rascunho). Mês não lançado difere de mês zerado por 4 canais simultâneos, nenhum deles cor (DDR-005) — é a garantia 'ausência ≠ zero' do ADR-007 chegando à tela. Variações sem cor: a direção não tem semântica fixa. Ausência de gráfico no MVP justificada no spec §5 (série com lacunas + meses atípicos = gráfico que mente), com gatilho de reabertura. | Aprovada pelo PO em 2026-08-06 (PDR-007 §1): draft -> ready.",
         "approved_by": "Alexandro",
         "approved_at": "2026-08-06"
+      },
+      {
+        "id": "SCREEN-STORY-070-bloqueio-sem-saldo",
+        "story": "STORY-070",
+        "epic": "EPIC-005",
+        "implemented_by": "STORY-073",
+        "status": "ready",
+        "path": "design/screens/STORY-070-bloqueio-sem-saldo.md",
+        "viewports": [
+          "mobile",
+          "desktop"
+        ],
+        "related_ddrs": [
+          "DDR-008",
+          "DDR-009",
+          "DDR-010"
+        ],
+        "ds_components_used": [],
+        "owner_designer": "designer (claude-sonnet-5-5)",
+        "created_at": "2026-11-05",
+        "updated_at": "2026-11-05",
+        "approved_by": null,
+        "note": "Liberada para implementação pelo orquestrador, sob a ordem do PO de seguir sem parar (2026-11-05). Revisão do PO pendente."
+      },
+      {
+        "id": "SCREEN-STORY-070-trial",
+        "story": "STORY-070",
+        "epic": "EPIC-005",
+        "implemented_by": "STORY-074",
+        "status": "ready",
+        "path": "design/screens/STORY-070-trial.md",
+        "viewports": [
+          "mobile",
+          "desktop"
+        ],
+        "related_ddrs": [
+          "DDR-008",
+          "DDR-009",
+          "DDR-010"
+        ],
+        "ds_components_used": [],
+        "owner_designer": "designer (claude-sonnet-5-5)",
+        "created_at": "2026-11-05",
+        "updated_at": "2026-11-05",
+        "approved_by": null,
+        "note": "Liberada para implementação pelo orquestrador, sob a ordem do PO de seguir sem parar (2026-11-05). Revisão do PO pendente."
+      },
+      {
+        "id": "SCREEN-STORY-070-planos-e-precos",
+        "story": "STORY-070",
+        "epic": "EPIC-005",
+        "implemented_by": "STORY-075",
+        "status": "ready",
+        "path": "design/screens/STORY-070-planos-e-precos.md",
+        "viewports": [
+          "mobile",
+          "desktop"
+        ],
+        "related_ddrs": [
+          "DDR-008",
+          "DDR-009",
+          "DDR-010"
+        ],
+        "ds_components_used": [],
+        "owner_designer": "designer (claude-sonnet-5-5)",
+        "created_at": "2026-11-05",
+        "updated_at": "2026-11-05",
+        "approved_by": null,
+        "note": "Liberada para implementação pelo orquestrador, sob a ordem do PO de seguir sem parar (2026-11-05). Revisão do PO pendente."
+      },
+      {
+        "id": "SCREEN-STORY-070-checkout-pix-creditos",
+        "story": "STORY-070",
+        "epic": "EPIC-005",
+        "implemented_by": "STORY-076",
+        "status": "ready",
+        "path": "design/screens/STORY-070-checkout-pix-creditos.md",
+        "viewports": [
+          "mobile",
+          "desktop"
+        ],
+        "related_ddrs": [
+          "DDR-008",
+          "DDR-009",
+          "DDR-010"
+        ],
+        "ds_components_used": [],
+        "owner_designer": "designer (claude-sonnet-5-5)",
+        "created_at": "2026-11-05",
+        "updated_at": "2026-11-05",
+        "approved_by": null,
+        "note": "Liberada para implementação pelo orquestrador, sob a ordem do PO de seguir sem parar (2026-11-05). Revisão do PO pendente."
+      },
+      {
+        "id": "SCREEN-STORY-070-checkout-assinatura",
+        "story": "STORY-070",
+        "epic": "EPIC-005",
+        "implemented_by": "STORY-077",
+        "status": "ready",
+        "path": "design/screens/STORY-070-checkout-assinatura.md",
+        "viewports": [
+          "mobile",
+          "desktop"
+        ],
+        "related_ddrs": [
+          "DDR-008",
+          "DDR-009",
+          "DDR-010"
+        ],
+        "ds_components_used": [],
+        "owner_designer": "designer (claude-sonnet-5-5)",
+        "created_at": "2026-11-05",
+        "updated_at": "2026-11-05",
+        "approved_by": null,
+        "note": "Liberada para implementação pelo orquestrador, sob a ordem do PO de seguir sem parar (2026-11-05). Revisão do PO pendente."
+      },
+      {
+        "id": "SCREEN-STORY-070-checkout-creditos-cartao",
+        "story": "STORY-070",
+        "epic": "EPIC-005",
+        "implemented_by": "STORY-078",
+        "status": "ready",
+        "path": "design/screens/STORY-070-checkout-creditos-cartao.md",
+        "viewports": [
+          "mobile",
+          "desktop"
+        ],
+        "related_ddrs": [
+          "DDR-008",
+          "DDR-009",
+          "DDR-010"
+        ],
+        "ds_components_used": [],
+        "owner_designer": "designer (claude-sonnet-5-5)",
+        "created_at": "2026-11-05",
+        "updated_at": "2026-11-05",
+        "approved_by": null,
+        "note": "Liberada para implementação pelo orquestrador, sob a ordem do PO de seguir sem parar (2026-11-05). Revisão do PO pendente."
+      },
+      {
+        "id": "SCREEN-STORY-070-checkout-pix-anual",
+        "story": "STORY-070",
+        "epic": "EPIC-005",
+        "implemented_by": "STORY-080",
+        "status": "ready",
+        "path": "design/screens/STORY-070-checkout-pix-anual.md",
+        "viewports": [
+          "mobile",
+          "desktop"
+        ],
+        "related_ddrs": [
+          "DDR-008",
+          "DDR-009",
+          "DDR-010"
+        ],
+        "ds_components_used": [],
+        "owner_designer": "designer (claude-sonnet-5-5)",
+        "created_at": "2026-11-05",
+        "updated_at": "2026-11-05",
+        "approved_by": null,
+        "note": "Liberada para implementação pelo orquestrador, sob a ordem do PO de seguir sem parar (2026-11-05). Revisão do PO pendente."
+      },
+      {
+        "id": "SCREEN-STORY-070-meu-plano",
+        "story": "STORY-070",
+        "epic": "EPIC-005",
+        "implemented_by": "STORY-081",
+        "status": "ready",
+        "path": "design/screens/STORY-070-meu-plano.md",
+        "viewports": [
+          "mobile",
+          "desktop"
+        ],
+        "related_ddrs": [
+          "DDR-008",
+          "DDR-009",
+          "DDR-010"
+        ],
+        "ds_components_used": [],
+        "owner_designer": "designer (claude-sonnet-5-5)",
+        "created_at": "2026-11-05",
+        "updated_at": "2026-11-05",
+        "approved_by": null,
+        "note": "Liberada para implementação pelo orquestrador, sob a ordem do PO de seguir sem parar (2026-11-05). Revisão do PO pendente."
+      },
+      {
+        "id": "SCREEN-STORY-070-troca-de-plano",
+        "story": "STORY-070",
+        "epic": "EPIC-005",
+        "implemented_by": "STORY-082",
+        "status": "ready",
+        "path": "design/screens/STORY-070-troca-de-plano.md",
+        "viewports": [
+          "mobile",
+          "desktop"
+        ],
+        "related_ddrs": [
+          "DDR-008",
+          "DDR-009",
+          "DDR-010"
+        ],
+        "ds_components_used": [],
+        "owner_designer": "designer (claude-sonnet-5-5)",
+        "created_at": "2026-11-05",
+        "updated_at": "2026-11-05",
+        "approved_by": null,
+        "note": "Liberada para implementação pelo orquestrador, sob a ordem do PO de seguir sem parar (2026-11-05). Revisão do PO pendente."
+      },
+      {
+        "id": "SCREEN-STORY-070-cupom-no-checkout",
+        "story": "STORY-070",
+        "epic": "EPIC-005",
+        "implemented_by": "STORY-083",
+        "status": "ready",
+        "path": "design/screens/STORY-070-cupom-no-checkout.md",
+        "viewports": [
+          "mobile",
+          "desktop"
+        ],
+        "related_ddrs": [
+          "DDR-008",
+          "DDR-009",
+          "DDR-010"
+        ],
+        "ds_components_used": [],
+        "owner_designer": "designer (claude-sonnet-5-5)",
+        "created_at": "2026-11-05",
+        "updated_at": "2026-11-05",
+        "approved_by": null,
+        "note": "Liberada para implementação pelo orquestrador, sob a ordem do PO de seguir sem parar (2026-11-05). Revisão do PO pendente."
       }
     ],
     "system": {

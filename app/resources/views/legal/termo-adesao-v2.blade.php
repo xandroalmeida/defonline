@@ -35,7 +35,7 @@
 <h2>7. Pagamento, renovação e falha de cobrança</h2>
 <ul>
     <li>Os pagamentos são processados por provedor especializado. O DEFOnline não armazena os dados completos do seu cartão.</li>
-    <li>A assinatura renova automaticamente ao fim de cada ciclo até que você a cancele. Avisamos por e-mail sete dias antes do fim do ciclo.</li>
+    <li>A assinatura paga com cartão renova automaticamente ao fim de cada ciclo até que você a cancele. A assinatura paga com Pix não renova sozinha: sem novo pagamento, as funções pagas são bloqueadas ao fim do ciclo. Avisamos por e-mail sete dias antes do fim do ciclo.</li>
     <li>Se a cobrança falhar, avisamos você e tentamos novamente até três vezes, com intervalos de 48 horas. Após a terceira falha, o ciclo é encerrado e as funções pagas são bloqueadas.</li>
     <li>Reajustes são comunicados por e-mail com ao menos 30 dias de antecedência e valem apenas para novos ciclos após a data de vigência.</li>
     <li>A EB Parcerias emite nota fiscal das contratações.</li>

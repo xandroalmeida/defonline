@@ -6,7 +6,7 @@ epic_id: EPIC-005
 sprint_id: null
 type: implementation
 target_role: programador
-requires_design: false
+requires_design: true
 status: ready
 owner_agent: null
 created_at: 2026-11-05
@@ -48,6 +48,7 @@ Criar a carteira do usuário e fazer cada análise consumir cota ou crédito, co
 - [ ] **CA-7:** A carteira é do Usuário: análises em empresas diferentes consomem o mesmo saldo.
 - [ ] **CA-8:** Cada consumo fica registrado com análise, Empresa Analisada e origem (cota ou crédito).
 - [ ] **CA-9:** Diagnósticos já emitidos continuam acessíveis com ou sem saldo, dentro da janela de retenção.
+- [ ] **CA-11:** A verificação de saldo devolve o motivo do bloqueio, e a tela segue `design/screens/STORY-070-bloqueio-sem-saldo.md`, com o rascunho preservado e o texto de cada causa. Ações que levam a telas ainda inexistentes ficam ocultas até elas existirem.
 - [ ] **CA-10:** Cobertura de 98% nas regras de consumo, com testes de concorrência.
 
 ## Fora de escopo
@@ -61,7 +62,7 @@ Siga `defonline-docs/skills/po/references/quality-standards.md`: TDD; cobertura 
 
 ## Dependências
 
-- **Bloqueada por:** STORY-071
+- **Bloqueada por:** STORY-070, STORY-071
 - **Bloqueia:** STORY-074, STORY-076, STORY-077, STORY-084, STORY-087
 
 ## Decisões já tomadas (não as reabra)

@@ -180,7 +180,7 @@ Revisão → aceite marcado → `Gerar QR Code Pix` → tela Pix → webhook →
 ### 4.4 Erro
 - **Aceite não marcado ao clicar:** o botão não fica desabilitado de início (botão cinza sem explicação é pior); ao clicar, erro sob a caixa: `Marque o aceite do Termo para continuar.` com foco na caixa.
 - **E-mail não confirmado (CA-1 da STORY-076):** `aviso-inline` `bloqueio` no topo, sem formulário: `Confirme seu e-mail para comprar.` / `Enviamos um link para maria@…. Depois de confirmar, volte aqui.` Ações: `Reenviar e-mail de confirmação` (mesma página), `Voltar aos planos`.
-- **Falha do provedor ao gerar o Pix:** `aviso-inline` `alerta` no lugar do QR: `Não conseguimos gerar o QR Code agora. Nada foi cobrado.` + `Tentar de novo`. Se persistir: `Se continuar assim, escreva para suporte@defonline.com.br.` [contato = pergunta 3]
+- **Falha do provedor ao gerar o Pix:** `aviso-inline` `alerta` no lugar do QR: `Não conseguimos gerar o QR Code agora. Nada foi cobrado.` + `Tentar de novo`. Se persistir: `Se continuar assim, escreva para eb@ebparcerias.com.` [contato = pergunta 3]
 - **Pix expirado:** a tela troca o QR por `aviso-inline` `info`: `O QR Code expirou e nada foi cobrado.` / `Gere outro para pagar.` Ação `Gerar novo QR Code` (leva a Revisão com aceite já marcado). O código antigo deixa de ser mostrado.
 - **Pagamento confirmado depois da expiração (borda):** se o banco confirmar um Pix que já mostramos como expirado, vale a confirmação do banco; a tela vai para Confirmação. Não mostrar "expirado" e "pago" juntos.
 - **Erro de rede ao atualizar:** o polling continua; após 3 falhas seguidas, `aviso-inline` `info` `Não estamos conseguindo checar o pagamento. Se você já pagou, os créditos entram assim que a conexão voltar.` O usuário nunca vê "falhou" para um pagamento que pode ter acontecido.
@@ -265,7 +265,7 @@ Primeira compra: nenhuma diferença; a Confirmação cita a validade e a nota fi
 - **Perguntas ao PO (nenhuma bloqueia o desenho, todas têm padrão adotado):**
   1. **Nota fiscal/CPF-CNPJ no checkout.** Padrão adotado: não coletar nada novo; usar os dados do cadastro e dizer "Enviaremos a nota fiscal por e-mail". Se o Asaas exigir CPF/CNPJ do pagador, a tela mostra os dados do cadastro, só leitura, com `Alterar` em Meu plano. Confirma?
   2. **Valor mínimo por cobrança (ADR-010 CA-4):** a regra ainda não existe; o estado de "valor abaixo do mínimo" (cupom parcial deixando o total pequeno) está em `cupom-no-checkout` §4.4 com texto provisório.
-  3. **E-mail de suporte:** `suporte@defonline.com.br` é suposição; trocar pelo canal oficial.
+  3. **E-mail de suporte:** `eb@ebparcerias.com` é suposição; trocar pelo canal oficial.
 
 ## 10. Histórico de mudanças
 
