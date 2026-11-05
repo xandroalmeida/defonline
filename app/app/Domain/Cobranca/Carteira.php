@@ -279,7 +279,7 @@ final class Carteira
     }
 
     /** Teste ligado na configuração e ainda não usado por este Usuário (a regra por CPF é da STORY-074). */
-    private function trialElegivel(string $usuarioId): bool
+    public function trialElegivel(string $usuarioId): bool
     {
         return TrialConfig::atual()->ativo
             && ! Assinatura::query()->where('usuario_id', $usuarioId)->where('trial', true)->exists();

@@ -23,6 +23,7 @@ use App\Livewire\Drm\Lancamento as LancamentoDrm;
 use App\Livewire\Empresa\Cadastrar as CadastrarEmpresa;
 use App\Livewire\Home\MinhasEmpresas;
 use App\Livewire\Login;
+use App\Livewire\Planos\Pagina as PaginaPlanos;
 use Illuminate\Support\Facades\Route;
 
 // STORY-024 — landing pública simples (substitui a página de debug welcome + hello-world).
@@ -33,6 +34,9 @@ Route::get('/ready', [HealthController::class, 'ready'])->name('ready');
 
 Route::get('/cadastro', Cadastro::class)->name('cadastro');
 Route::get('/login', Login::class)->middleware('throttle:login')->name('login');
+
+// STORY-075 — planos e preços. Pública (o visitante é levado ao cadastro); 404 com a cobrança desligada.
+Route::get('/planos', PaginaPlanos::class)->name('planos');
 
 Route::view('/termos/termo-adesao', 'legal.termo-adesao-v2')->name('termos.termo-adesao');
 Route::view('/termos/politica-privacidade', 'legal.politica-privacidade-v2')->name('termos.politica-privacidade');

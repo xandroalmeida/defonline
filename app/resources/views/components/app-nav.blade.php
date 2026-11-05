@@ -50,6 +50,18 @@
         ],
     ];
 
+    // STORY-075 — "Planos" só existe com a cobrança ligada (STORY-073 CA-1).
+    if (\Illuminate\Support\Facades\Route::has('planos') && \App\Models\CobrancaConfig::ligada()) {
+        array_splice($items, 3, 0, [[
+            'label' => 'Planos',
+            'icon' => 'tag',
+            'href' => route('planos'),
+            'active' => request()->routeIs('planos'),
+            'disabled' => false,
+            'dusk' => 'app-nav-planos',
+        ]]);
+    }
+
     /*
      * STORY-065 / STORY-067 — cada item da área de administração só aparece para
      * quem tem a permissão dele. Sem nenhum, a seção some.

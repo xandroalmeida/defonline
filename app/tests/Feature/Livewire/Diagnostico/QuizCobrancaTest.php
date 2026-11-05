@@ -286,12 +286,16 @@ describe('CA-11 texto de cada causa', function () {
     it('esconde as ações enquanto as telas não existem e as mostra quando a rota nasce', function () {
         $acoes = TextoBloqueio::para(new Bloqueio(MotivoBloqueio::SemNada))['acoes'];
 
-        expect(TextoBloqueio::disponiveis($acoes))->toBe([]);
+        // A página de planos (STORY-075) já existe; a de créditos (STORY-076) ainda não.
+        expect(TextoBloqueio::disponiveis($acoes))->toBe([['chave' => 'planos', 'rotulo' => 'Ver planos', 'href' => route('planos')]]);
 
-        Route::get('/planos-teste', fn () => 'planos')->name('planos');
+        Route::get('/creditos-teste', fn () => 'creditos')->name('creditos.comprar');
         Route::getRoutes()->refreshNameLookups();
 
-        expect(TextoBloqueio::disponiveis($acoes))->toBe([['chave' => 'planos', 'rotulo' => 'Ver planos', 'href' => url('/planos-teste')]]);
+        expect(TextoBloqueio::disponiveis($acoes))->toBe([
+            ['chave' => 'planos', 'rotulo' => 'Ver planos', 'href' => route('planos')],
+            ['chave' => 'creditos', 'rotulo' => 'Comprar créditos', 'href' => url('/creditos-teste')],
+        ]);
     });
 
     it('com a rota existente a ação aparece no bloqueio, primária primeiro', function () {
@@ -307,11 +311,11 @@ describe('CA-11 texto de cada causa', function () {
             ->and(strpos($html, 'Ver planos'))->toBeLessThan(strpos($html, 'Comprar créditos'));
     });
 
-    it('sem nenhuma rota, o bloqueio não mostra botões de ação', function () {
+    it('só com a rota de planos, o bloqueio mostra uma única ação (a primária)', function () {
         _ligarCobrancaQuiz();
 
         $html = Livewire::test(Quiz::class, ['empresa' => $this->empresa])->html();
 
-        expect($html)->not->toContain('screen-bloqueio-acao-primaria')->and($html)->not->toContain('screen-bloqueio-acao-secundaria');
+        expect($html)->toContain('screen-bloqueio-acao-primaria')->and($html)->not->toContain('screen-bloqueio-acao-secundaria');
     });
 });

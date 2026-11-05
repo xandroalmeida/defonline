@@ -1,5 +1,6 @@
 @props([
     'title' => null,
+    'largo' => false,
 ])
 
 @php
@@ -22,7 +23,7 @@
     <x-auth-header/>
 
     <main class="flex-1 flex items-center justify-center px-4 py-8 sm:py-12" data-testid="auth-main">
-        <div class="w-full" style="max-width: var(--container-narrow);">
+        <div class="w-full" style="max-width: var({{ $largo ? '--container-default' : '--container-narrow' }});">
             {{ $slot }}
         </div>
     </main>
