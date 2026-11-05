@@ -113,6 +113,23 @@ final class ConteudoDrm
         return $this->resolver('rotulos', "grupos_por_setor.{$setor}.custo");
     }
 
+    /**
+     * Nome de cada um dos 6 blocos do lançamento (a série diz "você parou em {bloco}").
+     *
+     * @return array<int, string>
+     */
+    public function nomesDosBlocos(string $setor): array
+    {
+        return [
+            1 => 'O mês e o que entrou',
+            2 => (string) $this->rotuloGrupoCusto($setor),
+            3 => (string) $this->rotuloGrupo('vendas'),
+            4 => (string) $this->rotuloGrupo('administrativas'),
+            5 => 'Sua retirada e as despesas financeiras',
+            6 => 'Conferir e fechar',
+        ];
+    }
+
     /** Mensagem semântica de um motivo de indisponibilidade (`indisponivel:*`), DDR-005. */
     public function indisponibilidade(string $motivo): ?string
     {

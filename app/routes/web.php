@@ -25,6 +25,7 @@ use App\Livewire\Diagnostico\Quiz as QuizDiagnostico;
 use App\Livewire\Diagnostico\SelecionarEmpresa as SelecionarEmpresaDiagnostico;
 use App\Livewire\Drm\Demonstracao as DemonstracaoDrm;
 use App\Livewire\Drm\Lancamento as LancamentoDrm;
+use App\Livewire\Drm\Serie as SerieDrm;
 use App\Livewire\Empresa\Cadastrar as CadastrarEmpresa;
 use App\Livewire\Home\MinhasEmpresas;
 use App\Livewire\Login;
@@ -117,6 +118,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/pagamentos/fake/{invoice}', [PagamentoFakeController::class, 'mostrar'])->whereUuid('invoice')->name('pagamentos.fake');
     Route::post('/pagamentos/fake/{invoice}', [PagamentoFakeController::class, 'simular'])->whereUuid('invoice')->name('pagamentos.fake.simular');
 
+    // STORY-051 — série histórica: todos os meses da empresa, com lacunas, estados e comparativos.
+    Route::get('/empresas/{empresa}/drm', SerieDrm::class)
+        ->whereUuid('empresa')
+        ->name('drm.serie');
     // STORY-047 — Raio X do Negócio (DRM): lançamento mensal. Empresa de outro usuário → 404 (IDR-009).
     Route::get('/empresas/{empresa}/drm/lancar', LancamentoDrm::class)
         ->whereUuid('empresa')

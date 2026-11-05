@@ -9,7 +9,9 @@ use App\Domain\Drm\Setor;
 use App\Models\DrmLancamento;
 use App\Models\DrmPreferencia;
 use App\Models\EmpresaAnalisada;
+use App\Support\Drm\ComparativosVisao;
 use App\Support\Drm\DemonstracaoVisao;
+use App\Support\Drm\HistoricoDrm;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -79,6 +81,8 @@ final class Demonstracao extends Component
             'vezesRetificado' => $lancamento->vezesRetificado(),
             'retificadoEm' => $lancamento->retificadoEm(),
             'modo' => config("drm.tela.modo.{$visao->posicao}"),
+            // STORY-051 CA-3: os quatro comparativos por linha de nível 1, derivados das versões vigentes.
+            'comparativos' => ComparativosVisao::dasLinhas(HistoricoDrm::serie($this->empresa, $visao->posicao), $competencia, $visao->linhas),
         ])->layoutData([
             'title' => $titulo,
             'breadcrumb' => [

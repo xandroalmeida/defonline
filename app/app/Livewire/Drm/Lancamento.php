@@ -25,6 +25,7 @@ use App\Models\DrmLancamento;
 use App\Models\DrmPreferencia;
 use App\Models\DrmRascunho;
 use App\Models\EmpresaAnalisada;
+use App\Support\Drm\HistoricoDrm;
 use App\Support\Drm\MensagensDrm;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
@@ -136,6 +137,13 @@ final class Lancamento extends Component
     /** Setor gravado na versão vigente: a estrutura de campos da retificação é a do lançamento original. */
     #[Locked]
     public string $setor_fixo = '';
+
+    /**
+     * Histórico dos outros meses para A4/A6, lido uma vez por requisição.
+     *
+     * @var array{campos: array<string, array<string, int|null>>, lancadas: list<string>}|null
+     */
+    private ?array $historico = null;
 
     /** A vigente já não é a versão-base: outra sessão corrigiu o mês enquanto este rascunho estava aberto. */
     public bool $conflito = false;
@@ -434,7 +442,7 @@ final class Lancamento extends Component
             'conteudo' => $conteudo,
             'mensagens' => app(MensagensDrm::class),
             'setor' => $setor,
-            'nomesDosBlocos' => $this->nomesDosBlocos($conteudo, $setor),
+            'nomesDosBlocos' => $conteudo->nomesDosBlocos($setor->value),
             'camposDoBloco' => $this->camposDoBloco($this->bloco_atual),
             'competenciaObj' => $competencia,
             'mesesDisponiveis' => Competencia::ultimosFechados($this->hoje()),
@@ -732,7 +740,11 @@ final class Lancamento extends Component
             return [];
         }
 
-        return AvaliadorDeAlertas::padrao()->avaliar($lancamento, $competencia);
+        // A4 e A6 olham os outros meses; na retificação o mês já existe, então A6 (salto) não se aplica.
+        $historico = $this->historico ??= HistoricoDrm::paraAlertas($this->empresa);
+
+        return AvaliadorDeAlertas::comHistorico($historico['campos'], $this->retificando ? [] : $historico['lancadas'])
+            ->avaliar($lancamento, $competencia);
     }
 
     private function mensagemDeCampo(string $campo, string $erro): string
@@ -853,20 +865,5 @@ final class Lancamento extends Component
             Grupo::Financeiras => 5,
             default => 1,
         };
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function nomesDosBlocos(ConteudoDrm $conteudo, Setor $setor): array
-    {
-        return [
-            1 => 'O mês e o que entrou',
-            2 => (string) $conteudo->rotuloGrupoCusto($setor->value),
-            3 => (string) $conteudo->rotuloGrupo('vendas'),
-            4 => (string) $conteudo->rotuloGrupo('administrativas'),
-            5 => 'Sua retirada e as despesas financeiras',
-            6 => 'Conferir e fechar',
-        ];
     }
 }

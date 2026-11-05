@@ -202,6 +202,12 @@
                                             <button type="button" class="underline bg-transparent border-0 p-0 cursor-pointer min-h-[44px] text-[color:var(--color-primary)]"
                                                     wire:click="irParaCampo('{{ $alerta->campo }}')">Revisar</button>
                                         @endif
+                                        {{-- A6 (STORY-051 CA-6): oferece lançar o primeiro mês que falta. --}}
+                                        @if ($alerta->codigo === 'A6' && isset($alerta->contexto['primeira_faltante']))
+                                            <a href="{{ route('drm.lancar', [$empresa, 'competencia' => $alerta->contexto['primeira_faltante']]) }}"
+                                               class="inline-flex items-center underline min-h-[44px] text-[color:var(--color-primary)]"
+                                               dusk="drm-lancamento-a6-lancar-faltante">Lançar o mês que falta</a>
+                                        @endif
                                     </li>
                                 @endforeach
                             </ul>

@@ -96,6 +96,7 @@ final class DemonstracaoVisao
     public static function ressalvas(array $alertasAceitos): array
     {
         $textos = [];
+        $vistas = [];
         foreach ($alertasAceitos as $aceito) {
             $regra = is_array($aceito) ? ($aceito['regra'] ?? null) : $aceito;
             if (! is_string($regra) || $regra === '') {
@@ -106,7 +107,16 @@ final class DemonstracaoVisao
                 : null;
 
             $texto = self::texto(config("drm.tela.ressalvas.{$regra}"));
-            $textos[] = $texto === null || ($valor === null && str_contains($texto, ':valor'))
+            $dependeDoValor = $texto !== null && str_contains($texto, ':valor');
+
+            // A4 dispara uma vez por campo, mas a frase não depende do valor: aparece uma vez só.
+            if ($texto !== null && ! $dependeDoValor) {
+                if (isset($vistas[$regra])) {
+                    continue;
+                }
+                $vistas[$regra] = true;
+            }
+            $textos[] = $texto === null || ($valor === null && $dependeDoValor)
                 ? (string) config('drm.tela.ressalva_generica')
                 : strtr($texto, [':valor' => (string) $valor]);
         }
@@ -165,14 +175,12 @@ final class DemonstracaoVisao
     /** `−R$ 3.240,00`: sinal de menos de verdade (U+2212), nunca cor (DDR-004 item 6). */
     private static function moeda(int $centavos, bool $comMoeda): string
     {
-        $texto = ($comMoeda ? 'R$ ' : '').Dinheiro::mascara(abs($centavos));
-
-        return $centavos < 0 ? '−'.$texto : $texto;
+        return Formato::moeda($centavos, $comMoeda);
     }
 
     private static function sinal(string $percentualFormatado): string
     {
-        return str_starts_with($percentualFormatado, '-') ? '−'.substr($percentualFormatado, 1) : $percentualFormatado;
+        return Formato::sinal($percentualFormatado);
     }
 
     private static function ausente(string $modelo, mixed $motivo, mixed $mensagem): string

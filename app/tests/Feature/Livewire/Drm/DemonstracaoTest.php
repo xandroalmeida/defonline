@@ -363,7 +363,8 @@ describe('CA-7 — alertas aceitos', function () {
     it('sem alertas aceitos, o bloco não existe (nada de "Ressalvas (0)")', function () {
         mesDoGolden($this->empresa, 'saudavel_comercio');
 
-        abrirMes($this->empresa)->assertDontSee('Ressalvas')->assertDontSeeHtml('<details');
+        // O bloco de ressalvas é o <details dusk="drm-ressalvas">; os comparativos (STORY-051) também usam <details>.
+        abrirMes($this->empresa)->assertDontSee('Ressalvas')->assertDontSeeHtml('dusk="drm-ressalvas"');
     });
 });
 

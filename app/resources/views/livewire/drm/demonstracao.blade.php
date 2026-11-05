@@ -169,6 +169,32 @@
         @endforeach
     </div>
 
+    {{-- Comparativos por linha (STORY-051 CA-3/CA-4): derivados das versões vigentes; cada um diz em palavras quando não existe. --}}
+    @if ($comparativos !== [])
+        <section class="mt-6" aria-labelledby="drm-comparativos-titulo" dusk="drm-comparativos">
+            <h2 id="drm-comparativos-titulo" class="m-0 mb-1 text-[length:var(--text-h2)] font-medium text-[color:var(--color-primary)]">{{ config('drm.serie.linha.titulo') }}</h2>
+            <p class="m-0 mb-3 text-[length:var(--text-body-sm)] text-[color:var(--color-secondary)]">{{ config('drm.serie.linha.introducao') }}</p>
+            <div class="flex flex-col gap-2">
+                @foreach ($comparativos as $c)
+                    <details class="rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] px-4" dusk="drm-comparativo-{{ $c['codigo'] }}">
+                        <summary class="cursor-pointer min-h-[44px] flex items-center text-[color:var(--color-primary)]">
+                            <span class="font-medium">{{ $c['rotulo'] }}</span>
+                            <span class="sr-only"> — {{ config('drm.serie.linha.resumo') }}</span>
+                        </summary>
+                        <dl class="m-0 pb-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            @foreach ($c['itens'] as $item)
+                                <div dusk="drm-comparativo-{{ $c['codigo'] }}-{{ $item['chave'] }}">
+                                    <dt class="text-[length:var(--text-label)] uppercase tracking-wide text-[color:var(--color-secondary)]">{{ $item['titulo'] }}</dt>
+                                    <dd class="m-0 text-[length:var(--text-body-sm)] text-[color:var(--color-primary)]">{{ $item['texto'] }}</dd>
+                                </div>
+                            @endforeach
+                        </dl>
+                    </details>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
     {{-- Rodapé do snapshot (CA-8): versão do motor e data DO SNAPSHOT, nunca da configuração de hoje. --}}
     @php
         $rodape = implode(' · ', array_filter([
@@ -182,6 +208,7 @@
     @endif
 
     <div class="mt-6 flex flex-wrap gap-3">
+        <x-button :href="route('drm.serie', $empresa)" variant="secondary" dusk="drm-demonstracao-ver-serie">Ver todos os meses</x-button>
         <x-button :href="route('empresas.show', $empresa)" variant="secondary" dusk="drm-voltar-empresa">Voltar para a empresa</x-button>
         <x-button :href="route('drm.lancar', $empresa)" variant="secondary" dusk="drm-lancar-outro">Lançar outro mês</x-button>
         <x-button :href="route('drm.corrigir', [$empresa, $competencia])" variant="secondary" dusk="drm-corrigir">Corrigir este mês</x-button>
