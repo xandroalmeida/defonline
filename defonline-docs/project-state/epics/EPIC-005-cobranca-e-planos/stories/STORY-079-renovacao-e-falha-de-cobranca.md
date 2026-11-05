@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: false
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: claude-sonnet-5-5 (STORY-079)
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: M
@@ -91,13 +91,30 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 ## Notas do agente
 
 ### Decisões tomadas
+- Leitura: estória (com "Ajustes do ADR-010"), ADR-010 §3 e §4.2, IDR-018, IDR-019, notas das STORY-076 e 077, spec funcional §2.4, §3.7, §4.12 e a tela `meu-plano` §4.3.
+- Plano: (1) migration com colunas de atraso/aviso em `assinaturas`; (2) regra pura `ReguaDeCobranca` no domínio; (3) falha de renovação em `ProcessarEvento` -> atraso + e-mail; (4) pagamento em atraso restabelece (`ConfirmarAssinatura`); (5) comando horário da régua (retentar, encerrar, cancelar no provedor); (6) aviso D-7; (7) conciliação horária e diária; (8) Fake e Asaas com `retryCharge`, `cancelSubscription`, `listSubscriptionCharges`, `listCheckoutCharges`.
 
 ### Descobertas
+- **Sandbox, retentativa do Asaas (ADR-010 §4.2):** (1) cartão recusado é rejeitado SÍNCRONO ao criar a assinatura ou trocar o cartão (`invalid_action`, "Transação não autorizada"), então não há como produzir, no sandbox, uma renovação recusada nem observar retentativa automática; (2) a doc do Asaas só diz que o cartão é tentado no vencimento, sem retentativa; (3) reagendar a cobrança PENDENTE de uma assinatura para hoje (`PUT /payments/{id}` com `dueDate`) é aceito, a cobrança continua uma só, e em ~3 min de observação continuou `PENDING` (captura fica para o lote do Asaas); (4) `GET /checkouts/{id}` não existe (resposta vazia); `GET /payments?checkoutSession=` é aceito (o filtro local do adaptador protege se o Asaas o ignorar); `GET /subscriptions/{id}/payments` com `limit/offset/dateCreated[ge]` funciona; `DELETE /subscriptions/{id}` cancela e é idempotente. Conclusão: régua própria, sobre a mesma cobrança. Verificado em `tests/Sandbox/AsaasSandboxTest.php`. NÃO verificado: reagendar uma cobrança já `OVERDUE`; captura imediata em produção.
+- Bug achado pelos testes: `Http::get($url, $query)` do Laravel substitui a query da URL; filtros e paginação vão no array.
+- `Model::query()->update([...])` em massa não usa o `$dateFormat` com offset (IDR-018): datas em teste Dusk/Pest de update em massa precisam de `format('Y-m-d H:i:sP')`. O código de produção grava por `save()`.
+- CA-2: não há mecanismo de reajuste com aviso de 30 dias; o preço da renovação é o contratado (o que o provedor cobra) e o catálogo só afeta novas assinaturas. A cota é a do catálogo no momento da renovação.
+
+### Dúvidas ao PO
+- "Até 3 cobranças a cada 48 h": adotei recusa original + 3 retentativas (+48h, +96h, +144h), encerrando em +192h. A alternativa (3 tentativas no total) é mudar `ReguaDeCobranca::MAX_TENTATIVAS` para 2.
+- Acesso durante o atraso: segue a regra já existente (STORY-073): em atraso não há acesso às funções pagas.
+- Link "atualizar cartão" dos e-mails aponta a `meu-plano` (STORY-081), com queda para `/planos`.
+- Pix anual (STORY-080) precisa de ramo próprio: hoje `cobranca.vencida` de assinatura nossa entra na régua de cartão.
 
 ### Bloqueios encontrados
+- Nenhum.
 
 ### IDRs criados
+- IDR-020 (régua de cobrança, estado do atraso em `assinaturas`, conciliação por evento sintético).
 
 ### Cobertura final
+- Suíte All: 2470 testes verdes, 98,5% total; `app/Domain/Cobranca` 100% nos arquivos novos (`ReguaDeCobranca`, `AcaoDaRegua`, `CobrancaNoProvedor`) e 99,4% em `Carteira`. Serviços novos entre 95% e 100%. Pint e PHPStan limpos. Dusk inteiro: 77 verdes (625 asserções).
+- Teste antigo alterado: `AssinaturaComCartaoTest` ("renovação em atraso fica para a 079") virou "cancelada ou encerrada não renova e alerta", porque agora o atraso restabelece (CA-4).
 
 ### Evidências
+- CA-1 `RenovacaoEFalhaDeCobrancaTest` (CA-1); CA-2 idem (CA-2) + `AssinaturaComCartaoTest`; CA-3/CA-4/CA-5/CA-7/CA-8 `RenovacaoEFalhaDeCobrancaTest`, `tests/Browser/RenovacaoFalhaCobrancaBrowserTest.php`; CA-6 `ConciliacaoDeCobrancasTest`; régua sem cobrança duplicada: "retenta em +48 h, +96 h e +144 h... nunca cria cobrança nova" e "duas rodadas ao mesmo tempo"; domínio `tests/Domain/Cobranca/ReguaDeCobrancaTest.php`; adaptador `AsaasRetentativaEConciliacaoTest`; sandbox `tests/Sandbox/AsaasSandboxTest.php`.
