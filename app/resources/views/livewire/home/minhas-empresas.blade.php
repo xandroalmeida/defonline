@@ -43,10 +43,16 @@
                 <li dusk="minhas-empresas-item-{{ $empresa->id }}">
                     <x-card as="article" class="h-full flex flex-col gap-3">
                         <div class="flex items-start justify-between gap-3 flex-wrap">
-                            <h3 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0"
-                                dusk="minhas-empresas-nome-{{ $empresa->id }}">
-                                {{ $empresa->nome_fantasia ?: $empresa->razao_social }}
-                            </h3>
+                            <div class="flex flex-col gap-1">
+                                <h3 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0"
+                                    dusk="minhas-empresas-nome-{{ $empresa->id }}">
+                                    {{ $empresa->nomeExibicao() }}
+                                </h3>
+                                @if ($razaoSocial = $empresa->razaoSocialComplementar())
+                                    <p class="text-sm text-[color:var(--color-secondary)] m-0"
+                                       dusk="minhas-empresas-razao-{{ $empresa->id }}">{{ $razaoSocial }}</p>
+                                @endif
+                            </div>
                             <span class="pill" dusk="minhas-empresas-fonte-{{ $empresa->id }}">
                                 {{ $empresa->fonteBadge() }}
                             </span>

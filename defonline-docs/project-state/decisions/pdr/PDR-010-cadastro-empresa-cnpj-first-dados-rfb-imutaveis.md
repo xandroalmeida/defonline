@@ -14,6 +14,8 @@ related_idrs: [IDR-004, IDR-005]
 
 # PDR-010 — Cadastro de Empresa Analisada começa pelo CNPJ; dados da Receita são imutáveis e completos
 
+> **Complementada pela PDR-017 (2026-11-05):** o usuário pode informar um nome fantasia próprio. O valor da Receita continua imutável.
+
 ## Contexto
 
 O cadastro de Empresa Analisada (STORY-014 + STORY-015) abre um formulário de 9 campos. O botão "Consultar Receita" é opcional e pré-preenche só 7 deles. O usuário pode sobrescrever tudo o que veio da Receita. Se a consulta falha, ele digita os dados à mão. O resultado é uma base de empresas em que razão social, CNAE e situação cadastral podem ter sido digitados livremente e divergir da RFB. Faltam os dados que o DRM (EPIC-010, MEI e Simples Nacional) e o diagnóstico precisam ler: as atividades secundárias, o endereço completo, o quadro de sócios e o regime tributário (MEI/SIMEI, Simples Nacional).

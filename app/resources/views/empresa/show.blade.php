@@ -1,5 +1,5 @@
 @php
-    $nomeExibicao = $empresa->nome_fantasia ?: $empresa->razao_social;
+    $nomeExibicao = $empresa->nomeExibicao();
     $titulo = $empresa->razao_social;
 @endphp
 
@@ -47,7 +47,11 @@
                                  :nome-fantasia="$empresa->nome_fantasia"
                                  :situacao="$empresa->situacao_cadastral"
                                  :data-abertura="$empresa->data_fundacao?->format('Y-m-d')"
-                                 :ficha="$ficha"/>
+                                 :ficha="$ficha">
+                <x-slot:campoNomeFantasia>
+                    <livewire:empresa.nome-fantasia :empresa="$empresa"/>
+                </x-slot:campoNomeFantasia>
+            </x-empresa.ficha-rfb>
         @else
             @php($pf = $empresa->tipo_documento === \App\Domain\TipoDocumento::Cpf)
             <dl class="grid grid-cols-1 sm:grid-cols-[max-content_1fr] gap-x-6 gap-y-2 m-0">
@@ -61,7 +65,7 @@
                 <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-razao-social">{{ $empresa->razao_social }}</dd>
 
                 <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">{{ $pf ? 'Nome comercial' : 'Nome fantasia' }}</dt>
-                <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-nome-fantasia">{{ $empresa->nome_fantasia ?: '—' }}</dd>
+                <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-nome-fantasia"><livewire:empresa.nome-fantasia :empresa="$empresa"/></dd>
 
                 <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">{{ $pf ? 'Atividade principal' : 'CNAE' }}</dt>
                 <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-cnae">

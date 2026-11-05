@@ -40,6 +40,7 @@ use Illuminate\Support\Carbon;
  * @property string $documento
  * @property string $razao_social
  * @property string|null $nome_fantasia
+ * @property string|null $nome_fantasia_informado
  * @property string|null $cnae
  * @property string $municipio
  * @property string $uf
@@ -57,6 +58,7 @@ use Illuminate\Support\Carbon;
     'documento',
     'razao_social',
     'nome_fantasia',
+    'nome_fantasia_informado',
     'cnae',
     'municipio',
     'uf',
@@ -84,6 +86,35 @@ final class EmpresaAnalisada extends Model
         'ficha_rfb' => 'array',
         'deleted_at' => 'datetime',
     ];
+
+    /** Nome da empresa nos relatórios e nas telas: fantasia, senão razão social (PDR-017). */
+    public function nomeExibicao(): string
+    {
+        return $this->nomeFantasiaVigente() ?? $this->razao_social;
+    }
+
+    /** Razão social para mostrar abaixo do nome; null quando ela já é o próprio nome. */
+    public function razaoSocialComplementar(): ?string
+    {
+        return $this->nomeExibicao() !== $this->razao_social ? $this->razao_social : null;
+    }
+
+    /** O nome informado pelo usuário prevalece sobre o da Receita (PDR-017). */
+    public function nomeFantasiaVigente(): ?string
+    {
+        return ($this->nome_fantasia_informado ?: $this->nome_fantasia) ?: null;
+    }
+
+    /**
+     * Valor de `nome_fantasia_informado` para o texto digitado: null quando vazio
+     * ou igual ao da Receita, pois aí não há nada a sobrescrever.
+     */
+    public static function nomeFantasiaInformado(string $digitado, ?string $daReceita): ?string
+    {
+        $digitado = trim($digitado);
+
+        return $digitado === '' || $digitado === $daReceita ? null : $digitado;
+    }
 
     /**
      * @return BelongsTo<Usuario, $this>

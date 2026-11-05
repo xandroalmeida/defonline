@@ -22,7 +22,7 @@
                 <li dusk="selecionar-empresa-item-{{ $empresa->id }}">
                     <x-card as="article" class="h-full flex flex-col gap-3">
                         <h3 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0">
-                            {{ $empresa->nome_fantasia ?: $empresa->razao_social }}
+                            {{ $empresa->nomeExibicao() }}
                         </h3>
                         <div class="flex flex-col gap-1 text-sm text-[color:var(--color-secondary)]">
                             <span>{{ $empresa->documentoMascarado() }}</span>

@@ -71,14 +71,15 @@ PK `id uuid`. FK `usuario_id → usuarios` (RESTRICT). **UNIQUE parcial** `(usua
 | `tipo_documento` | varchar(8) | CHECK `cnpj\|cpf` |
 | `documento` | varchar(14) | CNPJ/CPF sem máscara |
 | `razao_social` | text | NOT NULL |
-| `nome_fantasia` | text | nullable |
+| `nome_fantasia` | text | nullable — valor da Receita em CNPJ; nome comercial digitado em CPF |
+| `nome_fantasia_informado` | text | nullable — nome informado pelo usuário em CNPJ; prevalece sobre `nome_fantasia` na exibição (PDR-017) |
 | `cnae` | varchar(7) | nullable |
 | `municipio` | varchar(255) / `uf` char(2) | NOT NULL |
 | `situacao_cadastral` | varchar(16) | CHECK `ativa\|inapta\|baixada\|suspensa\|nao_informada` (default `nao_informada`) |
 | `fonte_enriquecimento` | varchar(8) | CHECK `manual\|rfb` (default `manual`) — origem RFB via cnpja (IDR-004/005) |
 | `data_fundacao` | date / `enriquecido_at` timestamptz | |
 | `ficha_rfb` | jsonb | nullable — ficha RFB completa (natureza, porte, capital, CNAEs secundários, endereço, sócios, `simples`/`simei`). Só escrita por consulta à Receita (PDR-010, STORY-063); null em CPF e em empresas anteriores à STORY-063 |
-| `observacoes` | text | nullable — única informação livre do usuário (até 2.000 caracteres, validado na app) |
+| `observacoes` | text | nullable — anotações livres do usuário (até 2.000 caracteres, validado na app) |
 | `personificado_por_id` | uuid | nullable, FK `usuarios` (RESTRICT) — admin da última gravação pelo "Logar como" (STORY-066); null se o próprio usuário gravou por último |
 
 ### `quiz_rascunhos` — rascunhos do quiz (23 campos, Anexo A)

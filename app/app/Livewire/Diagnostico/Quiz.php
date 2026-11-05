@@ -484,7 +484,7 @@ final class Quiz extends Component
     public function render(): View
     {
         return view('livewire.diagnostico.quiz')->layoutData([
-            'title' => 'Diagnóstico — '.($this->empresa->nome_fantasia ?: $this->empresa->razao_social),
+            'title' => 'Diagnóstico — '.$this->empresa->nomeExibicao(),
         ]);
     }
 

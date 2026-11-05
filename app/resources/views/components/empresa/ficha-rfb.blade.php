@@ -2,6 +2,7 @@
     Ficha cadastral da RFB, só-leitura (STORY-063 CA-3/CA-4/CA-8; PDR-010).
     Usada no cadastro (antes de confirmar) e em /empresas/{id}.
     Campo ausente na resposta do provedor aparece como "Não informado pela Receita".
+    O slot `campoNomeFantasia` troca o nome fantasia pela edição no lugar (PDR-017).
 --}}
 @props([
     'cnpj',
@@ -54,7 +55,7 @@
             <dt class="{{ $dt }}">Razão social</dt>
             <dd class="{{ $dd }}" dusk="ficha-razao-social">{{ $razaoSocial }}</dd>
             <dt class="{{ $dt }}">Nome fantasia</dt>
-            <dd class="{{ $dd }}" dusk="ficha-nome-fantasia">{{ $nomeFantasia ?: $ni }}</dd>
+            <dd class="{{ $dd }}" dusk="ficha-nome-fantasia">{{ $campoNomeFantasia ?? ($nomeFantasia ?: $ni) }}</dd>
             <dt class="{{ $dt }}">Situação cadastral</dt>
             <dd class="{{ $dd }}" dusk="ficha-situacao">{{ $situacao->rotulo() }}{{ $dataSituacao ? ' desde '.$dataSituacao : '' }}</dd>
             <dt class="{{ $dt }}">Data de abertura</dt>

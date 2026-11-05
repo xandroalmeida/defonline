@@ -15,8 +15,7 @@ use Livewire\Component;
  * Observações do usuário sobre a Empresa Analisada, editáveis a qualquer
  * momento em `/empresas/{id}` (STORY-063 CA-5; PDR-010 item 4).
  *
- * É o único dado da empresa que o usuário altera depois do cadastro. A empresa
- * é recarregada pelo Global Scope a cada ação — o id vem `#[Locked]` e, mesmo
+ * A empresa é recarregada pelo Global Scope a cada ação — o id vem `#[Locked]` e, mesmo
  * que fosse forjado, só resolveria empresas do próprio usuário.
  */
 final class Observacoes extends Component

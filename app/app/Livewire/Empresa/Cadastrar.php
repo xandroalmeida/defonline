@@ -34,7 +34,7 @@ use Livewire\Component;
  *
  * Dois caminhos (PDR-010):
  *
- * - **CNPJ (default, STORY-063).** O usuário informa só o CNPJ (o campo
+ * - **CNPJ (default, STORY-063).** O usuário informa o CNPJ (o campo
  *   aceita CNPJ ou CPF; CPF válido desvia para o caminho do autônomo); a consulta à
  *   RFB traz a ficha completa, exibida só-leitura. O resultado fica em
  *   propriedades `#[Locked]` — o cliente não consegue forjar nem alterar dado
@@ -58,6 +58,11 @@ final class Cadastrar extends Component
     public string $razao_social = '';
 
     public string $nome_fantasia = '';
+
+    /** Texto em edição no próprio lugar, na ficha; só vale depois de aplicado (PDR-017). */
+    public string $nomeFantasiaRascunho = '';
+
+    public bool $editandoNomeFantasia = false;
 
     public string $cnae = '';
 
@@ -153,11 +158,37 @@ final class Cadastrar extends Component
         $this->resultadoRfb = RfbCnpjResultSerializer::toArray($resultado);
         $this->cnpjConsultado = $digitos;
         $this->statusConsultaRfb = 'sucesso';
+        $this->nome_fantasia = (string) $resultado->nomeFantasia;
+    }
+
+    public function editarNomeFantasia(): void
+    {
+        $this->nomeFantasiaRascunho = $this->nome_fantasia;
+        $this->editandoNomeFantasia = true;
+    }
+
+    public function cancelarNomeFantasia(): void
+    {
+        $this->resetErrorBag('nomeFantasiaRascunho');
+        $this->editandoNomeFantasia = false;
+    }
+
+    /** Campo vazio volta para o nome da Receita, como na tela da empresa. */
+    public function aplicarNomeFantasia(): void
+    {
+        $this->validate(
+            ['nomeFantasiaRascunho' => ['nullable', 'string', 'max:255']],
+            ['nomeFantasiaRascunho.max' => 'O nome fantasia pode ter até 255 caracteres.'],
+        );
+
+        $digitado = trim($this->nomeFantasiaRascunho);
+        $this->nome_fantasia = $digitado !== '' ? $digitado : (string) ($this->resultadoRfb['nome_fantasia'] ?? '');
+        $this->editandoNomeFantasia = false;
     }
 
     /**
-     * Grava a empresa a partir da ficha RFB consultada (STORY-063 CA-6). Nada
-     * do que o usuário digitou entra, exceto as observações.
+     * Grava a empresa a partir da ficha RFB consultada (STORY-063 CA-6). Do que
+     * o usuário digitou, só entram as observações e o nome fantasia (PDR-017).
      */
     public function confirmar(): mixed
     {
@@ -167,9 +198,20 @@ final class Cadastrar extends Component
             return null;
         }
 
+        // Confirmar com a edição aberta não descarta o que foi digitado.
+        if ($this->editandoNomeFantasia) {
+            $this->aplicarNomeFantasia();
+        }
+
         $this->validate(
-            ['observacoes' => ['nullable', 'string', 'max:'.self::OBSERVACOES_MAX]],
-            ['observacoes.max' => 'As observações podem ter até '.self::OBSERVACOES_MAX.' caracteres.'],
+            [
+                'nome_fantasia' => ['nullable', 'string', 'max:255'],
+                'observacoes' => ['nullable', 'string', 'max:'.self::OBSERVACOES_MAX],
+            ],
+            [
+                'nome_fantasia.max' => 'O nome fantasia pode ter até 255 caracteres.',
+                'observacoes.max' => 'As observações podem ter até '.self::OBSERVACOES_MAX.' caracteres.',
+            ],
         );
 
         if ($this->bloquearSeJaCadastrada($this->cnpjConsultado)) {
@@ -183,6 +225,7 @@ final class Cadastrar extends Component
             'documento' => $this->cnpjConsultado,
             'razao_social' => $r->razaoSocial,
             'nome_fantasia' => $r->nomeFantasia,
+            'nome_fantasia_informado' => EmpresaAnalisada::nomeFantasiaInformado($this->nome_fantasia, $r->nomeFantasia),
             'cnae' => $r->cnae,
             'municipio' => $r->municipio,
             'uf' => $r->uf,
@@ -220,6 +263,7 @@ final class Cadastrar extends Component
             $this->tipo_documento = TipoDocumento::Cnpj->value;
         }
         $this->documento = '';
+        $this->nome_fantasia = '';
         $this->resetErrorBag();
         $this->limparConsulta();
     }
@@ -396,6 +440,8 @@ final class Cadastrar extends Component
     {
         $this->resultadoRfb = null;
         $this->cnpjConsultado = null;
+        $this->nomeFantasiaRascunho = '';
+        $this->editandoNomeFantasia = false;
         $this->mensagemErro = null;
         $this->empresaExistenteId = null;
         $this->statusConsultaRfb = null;

@@ -61,7 +61,7 @@
             <x-card class="mt-6" dusk="empresa-ficha-card">
                 <p class="text-sm rounded-md border border-[color:var(--color-border)] bg-[color:var(--color-neutral)] px-3 py-2 m-0 mb-6 text-[color:var(--color-primary)]"
                    dusk="empresa-enriquecido-ok">
-                    Dados oficiais da Receita Federal. Eles não podem ser alterados — use as observações para suas anotações.
+                    Dados oficiais da Receita Federal. Só o nome fantasia pode ser alterado — use as observações para suas anotações.
                 </p>
 
                 <x-empresa.ficha-rfb :cnpj="$cnpjConsultado"
@@ -69,7 +69,20 @@
                                      :nome-fantasia="$resultado->nomeFantasia"
                                      :situacao="$resultado->situacaoCadastral"
                                      :data-abertura="$resultado->dataFundacao?->format('Y-m-d')"
-                                     :ficha="$resultado->ficha"/>
+                                     :ficha="$resultado->ficha">
+                    <x-slot:campoNomeFantasia>
+                        <x-empresa.nome-fantasia-no-lugar :editando="$editandoNomeFantasia"
+                                                          modelo="nomeFantasiaRascunho"
+                                                          :nome="$nome_fantasia"
+                                                          :nome-da-receita="$nome_fantasia !== (string) $resultado->nomeFantasia ? $resultado->nomeFantasia : null"
+                                                          texto-vazio="Não informado pela Receita"
+                                                          rotulo-salvar="Aplicar"
+                                                          acao-editar="editarNomeFantasia"
+                                                          acao-salvar="aplicarNomeFantasia"
+                                                          acao-cancelar="cancelarNomeFantasia"
+                                                          prefixo-dusk="empresa"/>
+                    </x-slot:campoNomeFantasia>
+                </x-empresa.ficha-rfb>
 
                 <form wire:submit="confirmar" novalidate class="flex flex-col gap-4 mt-6 pt-6 border-t border-[color:var(--color-border)]">
                     <div>

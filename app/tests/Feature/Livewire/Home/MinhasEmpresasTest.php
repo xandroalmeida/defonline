@@ -168,3 +168,22 @@ it('CA-14 — botão "Adicionar empresa" aparece no header em todos os estados',
         ->assertSee('Adicionar empresa')
         ->assertSee('dusk="minhas-empresas-cta-adicionar"', escape: false);
 });
+
+it('mostra a razão social abaixo do nome fantasia, sem repetir quando não há fantasia', function () {
+    EmpresaAnalisada::factory()->create([
+        'usuario_id' => $this->usuario->id,
+        'razao_social' => 'Marcenaria Roberto LTDA',
+        'nome_fantasia' => 'Marcenaria Roberto',
+    ]);
+    $semFantasia = EmpresaAnalisada::factory()->create([
+        'usuario_id' => $this->usuario->id,
+        'razao_social' => 'Joana Costureira',
+        'nome_fantasia' => null,
+    ]);
+
+    $resposta = $this->actingAs($this->usuario)->get('/home')->assertOk();
+
+    $resposta->assertSeeInOrder(['Marcenaria Roberto', 'Marcenaria Roberto LTDA']);
+    expect(substr_count($resposta->getContent(), 'Joana Costureira'))->toBe(1)
+        ->and($semFantasia->razaoSocialComplementar())->toBeNull();
+});

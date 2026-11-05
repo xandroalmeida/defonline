@@ -1,5 +1,6 @@
 @props([
     'title' => null,
+    'detalhe' => null,
     'subtitle' => null,
 ])
 
@@ -9,6 +10,11 @@
             <h1 class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)]">
                 {{ $title }}
             </h1>
+        @endif
+        @if ($detalhe)
+            <p class="text-[color:var(--color-secondary)] text-sm m-0" data-testid="page-header-detalhe">
+                {{ $detalhe }}
+            </p>
         @endif
         @if ($subtitle)
             <p class="text-[color:var(--color-secondary)] text-sm m-0">

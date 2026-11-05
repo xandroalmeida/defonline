@@ -2717,6 +2717,21 @@
           "IDR-010"
         ],
         "note": "Altera a IDR-010 e o Anexo F §F.99."
+      },
+      {
+        "id": "PDR-017",
+        "slug": "nome-fantasia-informado-pelo-usuario",
+        "title": "Usuário informa o nome fantasia exibido nos relatórios",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-017-nome-fantasia-informado-pelo-usuario.md",
+        "decided_at": "2026-11-05",
+        "decided_by": "PO (Alexandro / Claude)",
+        "related_epics": [
+          "EPIC-001"
+        ],
+        "related_adrs": [],
+        "related_idrs": [],
+        "note": "Complementa a PDR-010."
       }
     ],
     "adr": [

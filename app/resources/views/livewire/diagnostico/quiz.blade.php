@@ -82,7 +82,7 @@
 <div x-data
      x-on:focar-campo.window="$nextTick(() => document.getElementById($event.detail.campo)?.focus())"
      x-on:focar-socio.window="$nextTick(() => document.getElementById('socio-' + $event.detail.indice + '-nome')?.focus())">
-    <x-page-header :title="'Diagnóstico — ' . ($empresa->nome_fantasia ?: $empresa->razao_social)"
+    <x-page-header :title="'Diagnóstico — ' . $empresa->nomeExibicao()"
                    :subtitle="'Bloco ' . $bloco_atual . ' de 4 — ' . $tituloBloco"/>
 
     {{-- Banner de retomada / expiração — UX suave, não erro. --}}

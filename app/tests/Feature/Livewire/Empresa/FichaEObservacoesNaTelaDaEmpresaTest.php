@@ -58,7 +58,7 @@ it('mostra a ficha completa só-leitura e as observações (CA-3, CA-4, CA-5)', 
         $resposta->assertSee($atividade->codigoFormatado());
     }
 
-    // O único campo editável da tela é o das observações (o CSRF do logout é hidden).
+    // Fora do modo de edição do nome, o único campo editável é o das observações (o CSRF do logout é hidden).
     expect(preg_match_all('/<input(?![^>]*type="hidden")/', $resposta->getContent()))->toBe(0);
     expect(substr_count($resposta->getContent(), '<textarea'))->toBe(1);
 });

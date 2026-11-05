@@ -12,7 +12,7 @@
      * @var string $logoSvg  data URI do logo nas cores dos tokens
      */
     $empresa = $diagnostico->empresa;
-    $nomeEmpresa = $empresa->nome_fantasia ?: $empresa->razao_social;
+    $nomeEmpresa = $empresa->nomeExibicao();
     $snapshot = (array) $diagnostico->indicadores_calculados;
     $nominais = ValoresNominais::doSnapshot((array) $diagnostico->quiz_payload, $diagnostico->motor_version);
 
@@ -55,11 +55,7 @@
         <h1 class="capa__titulo">Diagnóstico<br>Econômico-Financeiro</h1>
 
         <p class="capa__empresa">{{ $nomeEmpresa }}</p>
-        @if ($empresa->nome_fantasia && $empresa->nome_fantasia !== $empresa->razao_social)
-            <p class="capa__razao">{{ $empresa->razao_social }}</p>
-        @else
-            <p class="capa__razao">&nbsp;</p>
-        @endif
+        <p class="capa__razao">{{ $empresa->razaoSocialComplementar() ?? "\u{00A0}" }}</p>
 
         <table class="capa__dados">
             <tr>
