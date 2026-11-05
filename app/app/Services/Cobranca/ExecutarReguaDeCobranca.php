@@ -59,17 +59,21 @@ final class ExecutarReguaDeCobranca
             return $c;
         }
 
+        // Pix anual nunca entra na régua de cartão: nada falhou, e a STORY-080 só avisa e encerra.
         $devidas = Assinatura::query()
+            ->where('meio_pagamento', '!=', 'pix')
             ->where('status', StatusAssinatura::EmAtraso->value)
             ->whereNotNull('proxima_tentativa_em')
             ->where('proxima_tentativa_em', '<=', now()->format('Y-m-d H:i:sP'))
             ->orderBy('proxima_tentativa_em')
             ->pluck('id');
         $semAviso = Assinatura::query()
+            ->where('meio_pagamento', '!=', 'pix')
             ->where('status', StatusAssinatura::EmAtraso->value)
             ->whereNull('atraso_aviso_em')
             ->pluck('id');
         $semCancelar = Assinatura::query()
+            ->where('meio_pagamento', '!=', 'pix')
             ->where('encerramento_pendente_no_provedor', true)
             ->pluck('id');
 
@@ -118,7 +122,7 @@ final class ExecutarReguaDeCobranca
     {
         $a = Assinatura::query()->find($id);
 
-        if ($a === null || $a->status !== StatusAssinatura::EmAtraso || $a->atraso_cobranca_id === null || $a->provedor === null) {
+        if ($a === null || $a->pagoComPix() || $a->status !== StatusAssinatura::EmAtraso || $a->atraso_cobranca_id === null || $a->provedor === null) {
             return 'aguardando';
         }
 

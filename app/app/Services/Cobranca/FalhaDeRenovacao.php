@@ -39,7 +39,8 @@ final class FalhaDeRenovacao
     /** @return array{0: 'processado'|'ignorado', 1: string|null} */
     public function registrar(Assinatura $assinatura, string $cobrancaId): array
     {
-        if (! CobrancaConfig::ligada()) {
+        // Pix anual não tem cobrança recorrente que possa falhar: nunca entra na régua de cartão (STORY-080).
+        if (! CobrancaConfig::ligada() || $assinatura->pagoComPix()) {
             return ['ignorado', null];
         }
 

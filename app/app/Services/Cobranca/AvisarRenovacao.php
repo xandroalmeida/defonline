@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
  * reservada com um UPDATE condicional ANTES do envio, então duas rodadas ao mesmo tempo (ou a rotina
  * rodando de novo) não mandam o e-mail duas vezes; se o envio falhar, a reserva é devolvida e a
  * próxima rodada tenta. Só avisa quem renova sozinho: assinatura `ativa`, não trial, com preço
- * contratado. Cancelada, em atraso e encerrada não recebem.
+ * contratado. Cancelada, em atraso, encerrada e Pix anual (aviso próprio) não recebem.
  */
 final class AvisarRenovacao
 {
@@ -37,6 +37,8 @@ final class AvisarRenovacao
         $ids = Assinatura::query()
             ->where('status', StatusAssinatura::Ativa->value)
             ->where('trial', false)
+            // Pix anual não é cartão: o aviso dele é o da STORY-080 (`assinaturas:pix-anual`), com o link do QR Code.
+            ->where('meio_pagamento', '!=', 'pix')
             ->whereNotNull('plano_id')
             ->whereNotNull('preco_snapshot_centavos')
             ->where('proximo_vencimento', '>', $agora->format('Y-m-d H:i:sP'))

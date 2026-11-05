@@ -23,6 +23,7 @@ use App\Services\Cobranca\GerirRenovacao;
 use App\Services\Cobranca\TrocarCartao;
 use App\Support\Cobranca\HistoricoDeCobrancas;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Js;
 use Livewire\Features\SupportTesting\Testable;
@@ -497,5 +498,64 @@ describe('CA-8 "Logar como"', function () {
             ->assertSee(_plano()->nome);
 
         expect($resposta->getContent())->toMatch('/<button[^>]*disabled[^>]*dusk="screen-meuplano-cancelar"/s');
+    });
+});
+
+describe('plano anual com Pix (STORY-080 × 081)', function () {
+    it('nos últimos 7 dias avisa, oferece "Pagar renovação" com o link da renovação e não oferece cancelar nem trocar cartão', function () {
+        $a = _assinaturaPixAtiva($this->usuario);
+        $this->travelTo($a->proximo_vencimento->copy()->subDays(5));
+        $data = _dia($a->proximo_vencimento);
+
+        $html = _meuPlano($this->usuario)
+            ->assertSee("Seu plano anual termina em {$data}. Pague a renovação com Pix para não perder o acesso.")
+            ->assertSee("Este plano não renova sozinho. Termina em {$data}.")
+            ->assertSee('Pagar renovação')
+            ->assertDontSee('Cancelar renovação')
+            ->assertDontSee('Trocar cartão')
+            ->assertDontSeeHtml('screen-meuplano-cancelar')
+            ->assertDontSeeHtml('screen-meuplano-trocar-cartao')
+            ->html();
+
+        expect($html)->toContain('href="'.route('assinatura.renovar').'"');
+    });
+
+    it('fora da janela de 7 dias não há aviso nem botão de renovação, e continua sem cancelar', function () {
+        _assinaturaPixAtiva($this->usuario);
+
+        _meuPlano($this->usuario)
+            ->assertSee('Este plano não renova sozinho.')
+            ->assertDontSee('Pagar renovação')
+            ->assertDontSee('Cancelar renovação')
+            ->assertDontSee('Seu plano anual termina em');
+    });
+
+    it('depois do fim: estado Encerrado da spec, histórico à vista e "Renovar com Pix" para a renovação', function () {
+        $a = _assinaturaPixAtiva($this->usuario);
+        $this->travelTo($a->proximo_vencimento->copy()->addHour());
+        $data = _dia($a->proximo_vencimento);
+
+        $html = _meuPlano($this->usuario)
+            ->assertSee('Encerrado')
+            ->assertSee("Seu plano terminou em {$data}. Seus diagnósticos continuam disponíveis.")
+            ->assertSee('Renovar com Pix')
+            ->assertSee('Assinar um plano')
+            ->assertSee('Plano Básico')
+            ->assertDontSee('Cancelar renovação')
+            ->assertDontSee('Trocar cartão')
+            ->html();
+
+        expect($html)->toContain('href="'.route('assinatura.renovar').'"');
+
+        // Também depois de a rotina da 080 fechar o estado (`expirada`).
+        Artisan::call('assinaturas:pix-anual');
+        _meuPlano($this->usuario)->assertSee('Encerrado')->assertSee('Renovar com Pix');
+    });
+
+    it('o cartão anual não ganha nada disso', function () {
+        $a = Assinatura::query()->findOrFail(_pagarAssinatura(_assinaturaPendente($this->usuario, null, CicloCobranca::Anual))->assinatura_id);
+        $this->travelTo($a->proximo_vencimento->copy()->subDays(5));
+
+        _meuPlano($this->usuario)->assertDontSee('Pagar renovação')->assertDontSee('Seu plano anual termina em')->assertSee('Cancelar renovação');
     });
 });

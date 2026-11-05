@@ -129,6 +129,8 @@ final class ConciliarCobrancas
         $q = Assinatura::query()
             ->where('provedor', $this->provedor->nome())
             ->whereNotNull('id_externo')
+            // Pix anual não tem assinatura no provedor; as cobranças dele entram pelas Invoices em aberto.
+            ->where('meio_pagamento', '!=', 'pix')
             ->where('trial', false)
             ->whereIn('status', [StatusAssinatura::Ativa->value, StatusAssinatura::EmAtraso->value]);
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Browser;
 
 use App\Domain\Cobranca\CicloCobranca;
+use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PaymentProvider;
 use App\Domain\Cobranca\StatusAssinatura;
 use App\Infrastructure\Cobranca\Fake\FakePaymentProvider;
@@ -228,6 +229,43 @@ final class MeuPlanoBrowserTest extends DuskTestCase
         $this->assertSame(StatusAssinatura::Expirada, $a->status);
         $this->assertNotNull($a->encerrada_em);
         $this->assertSame('cancelada', FakePaymentProvider::situacaoDaAssinatura((string) $a->id_externo));
+    }
+
+    public function test_plano_anual_com_pix_avisa_nos_ultimos_dias_e_depois_do_fim_leva_a_renovacao(): void
+    {
+        $usuario = Usuario::factory()->create();
+        $invoice = app(IniciarAssinatura::class)->executar($usuario, Plano::query()->where('nome', 'Básico')->firstOrFail(), CicloCobranca::Anual, '203.0.113.7', 'Dusk', MeioPagamento::Pix);
+        $fake = app(PaymentProvider::class);
+        $this->assertInstanceOf(FakePaymentProvider::class, $fake);
+        app(ReceberWebhook::class)->tratar($fake->simularPagamento((string) $invoice->checkout_id_externo));
+        $this->processarFila();
+        $assinatura = Assinatura::query()->where('usuario_id', $usuario->id)->sole();
+        $assinatura->forceFill(['proximo_vencimento' => now()->addDays(3)])->save();
+        $fim = $assinatura->fresh()->proximo_vencimento->setTimezone('America/Sao_Paulo')->format('d/m/Y');
+
+        $this->browse(function (Browser $browser) use ($usuario, $assinatura, $fim) {
+            $browser->resize(360, 800)->loginAs($usuario)
+                ->visit('/meu-plano')
+                ->waitFor('@screen-meuplano-aviso')
+                ->assertSeeIn('@screen-meuplano-aviso', "Seu plano anual termina em {$fim}. Pague a renovação com Pix")
+                ->assertSeeIn('@screen-meuplano-situacao', 'Ativo')
+                ->assertVisible('@screen-meuplano-renovar-pix')
+                ->assertMissing('@screen-meuplano-cancelar')
+                ->assertMissing('@screen-meuplano-trocar-cartao');
+            $this->assertLessThanOrEqual(0, $browser->script('return document.documentElement.scrollWidth - document.documentElement.clientWidth;')[0]);
+
+            $browser->click('@screen-meuplano-renovar-pix')->waitForLocation('/assinar/renovar');
+
+            // Depois do fim: Encerrado, com o caminho de volta.
+            $assinatura->forceFill(['proximo_vencimento' => now()->subHour()])->save();
+            $browser->visit('/meu-plano')
+                ->waitFor('@screen-meuplano-encerrado')
+                ->assertSeeIn('@screen-meuplano-situacao', 'Encerrado')
+                ->assertSeeIn('@screen-meuplano-encerrado', 'Seus diagnósticos continuam disponíveis.')
+                ->assertSeeIn('@screen-meuplano-renovar-pix', 'Renovar com Pix')
+                ->assertSeeIn('@screen-meuplano-cobrancas', 'Plano Básico')
+                ->assertMissing('@screen-meuplano-cancelar');
+        });
     }
 
     public function test_cartao_recusado_na_troca_mantem_o_anterior(): void

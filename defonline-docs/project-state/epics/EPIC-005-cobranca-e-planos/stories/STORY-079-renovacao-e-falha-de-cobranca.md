@@ -106,6 +106,9 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 - **Cancelar em atraso (decisão do PO, Termo v2 "a qualquer momento")**: `GerirRenovacao::cancelar` aceita `EmAtraso`. Efeito: `cancelSubscription` no provedor (a recorrência acaba de vez), status `Expirada` com `encerrada_em` e `data_cancelamento` agora, `proxima_tentativa_em` nulo; acesso bloqueado na hora; faturas, `atraso_desde` e `atraso_cobranca_id` preservados; troca de cartão pendente vira `cancelada`. Provedor fora do ar: nada muda, a régua segue. Auditoria `cobranca.renovacao_cancelada_em_atraso`.
 - **Corrida cancelar × retentativa em voo**: a régua só reserva a tentativa sob lock e o cancelamento trava a mesma linha, então ou o cancelamento vem antes (a rodada vira `Aguardar`, zero tentativas) ou depois da reserva. Neste caso o pedido de retentativa já saiu e o banco pode aprovar: o pagamento NÃO restabelece (assinatura `Expirada`), cai em `cobranca.renovacao_de_assinatura_inativa` (alerta, devolução manual na 087) e a régua não volta a agir. Não há como desfazer uma captura no provedor com a porta atual (sem estorno até a 087). Testes: `CancelarRenovacaoEmAtrasoTest`, `AtrasoComTrocaDeCartaoTest`.
 
+### Pix anual fora da régua (2026-11-05, pós-junção com a 080)
+- A pendência "Pix anual precisa de ramo próprio" está resolvida: assinatura com `meio_pagamento = pix` é excluída da régua, do aviso D-7 de cartão e da conciliação por assinatura; as cobranças dela entram na conciliação pelas Invoices. Ver notas da STORY-080.
+
 ### Dúvidas ao PO
 - "Até 3 cobranças a cada 48 h": adotei recusa original + 3 retentativas (+48h, +96h, +144h), encerrando em +192h. A alternativa (3 tentativas no total) é mudar `ReguaDeCobranca::MAX_TENTATIVAS` para 2.
 - Acesso durante o atraso: segue a regra já existente (STORY-073): em atraso não há acesso às funções pagas.

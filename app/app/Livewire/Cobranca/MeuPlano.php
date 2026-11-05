@@ -8,6 +8,7 @@ use App\Domain\Cobranca\Arrependimento;
 use App\Domain\Cobranca\Carteira;
 use App\Domain\Cobranca\LoteVisto;
 use App\Domain\Cobranca\ProvedorIndisponivel;
+use App\Domain\Cobranca\RenovacaoPix;
 use App\Domain\Cobranca\SituacaoDoPlano;
 use App\Domain\Cobranca\StatusAssinatura;
 use App\Domain\Cobranca\StatusLote;
@@ -146,6 +147,8 @@ final class MeuPlano extends Component
         $personificando = Personificacao::ativa() !== null;
         $paga = $assinatura !== null && ! $assinatura->trial;
         $renovaSozinha = $paga && $assinatura->id_externo !== null;
+        // Plano anual pago com Pix (STORY-080): não renova sozinho; a renovação é um novo QR Code pago por ele.
+        $pix = $paga && $assinatura->pagoComPix();
 
         [$cobrancas, $cobrancasFalharam] = $this->cobrancas($usuario->id);
 
@@ -156,6 +159,9 @@ final class MeuPlano extends Component
             'plano' => $assinatura?->plano_id === null ? null : Plano::query()->find($assinatura->plano_id),
             'paga' => $paga,
             'renovaSozinha' => $renovaSozinha,
+            'pix' => $pix,
+            'janelaPix' => $pix && $vencimento !== null && RenovacaoPix::janelaAberta($vencimento, $agora),
+            'urlRenovar' => $pix ? RotasCobranca::url(RotasCobranca::RENOVAR) : null,
             'lotes' => $lotes,
             'creditosTotal' => array_sum(array_column($lotes, 'restante')),
             'temLotePerto' => in_array(true, array_column($lotes, 'perto'), true),

@@ -103,6 +103,12 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 - `FakePaymentProvider` usa o relógio real no prazo do checkout; em testes com `travelTo` é preciso ajustar `checkout_expira_em`.
 - Flake preexistente: `TrialTest` "CA-8 assinar durante o trial" (empate de `data_inicio` na ordenação de `Carteira::snapshot`) e a ordenação por `occurred_at` em `CobrancaInterruptorTest` falham de vez em quando em suíte cheia e passam isoladas. Não mexi.
 
+### Integração com as STORY-079 e 081 (2026-11-05, pós-junção)
+- Pix anual nunca entra na régua de cartão nem no aviso D-7 de cartão: `AvisarRenovacao`, `ExecutarReguaDeCobranca`, `FalhaDeRenovacao` e `ConciliarCobrancas` (assinaturas) excluem `meio_pagamento = pix`. Ele segue só `assinaturas:pix-anual` (aviso e encerramento). Teste: `PixAnualComReguaEConciliacaoTest`.
+- Meu plano (081) mostra para Pix: aviso `info` nos últimos 7 dias ("Seu plano anual termina em {data}. Pague a renovação com Pix para não perder o acesso."), "Pagar renovação" e, depois do fim, o estado Encerrado da spec com "Renovar com Pix" (ambos para `RotasCobranca::RENOVAR`). Sem cancelar nem trocar cartão. Testes: `MeuPlanoTest` (grupo "plano anual com Pix") e `MeuPlanoBrowserTest::test_plano_anual_com_pix_...`.
+- Conciliação: as cobranças de Pix (QR de contratação e de renovação) são Invoices com checkout e entram em `invoicesEmAberto`; pago com webhook perdido ativa/renova uma vez só (a Invoice paga sai da busca e o webhook tardio é ignorado); QR sem pagamento só expira.
+- Flakes corrigidos (a nota "não mexi" acima ficou superada): `Carteira::snapshot` desempata por paga sobre trial, não encerrada sobre encerrada e maior id (`CarteiraDesempateDeAssinaturaTest`); `CobrancaInterruptorTest` não ordena mais por `occurred_at`.
+
 ### Bloqueios encontrados
 - Nenhum. Perguntas ao PO: (1) a spec §9 propõe não ter "Cancelar renovação" no Pix; implementei assim (a 081 decide a tela). (2) Confirmar o preço da renovação Pix = último preço contratado. (3) Reembolso/estorno de Pix de renovação é da 087.
 

@@ -13,6 +13,7 @@
     $esperando = $retornoCartao !== null && ($trocaAguardando || ($trocaConcluida && $troca->cobra_agora));
     // Um aviso de cobrança por vez (DDR-009 item 4): o de maior severidade.
     $avisoDeCobranca = match (true) {
+        $pix && $janelaPix && $situacao === S::Ativo => ['info', 'Seu plano anual termina em '.$dia($vencimento).'. Pague a renovação com Pix para não perder o acesso.'],
         $situacao === S::EmAtraso => ['alerta', 'Não conseguimos cobrar a renovação de '.$dia($vencimento).'. Atualize o cartão para manter o acesso.'],
         $temLotePerto => ['info', 'Você tem créditos que vencem em breve. Veja as datas em Análises.'],
         default => null,
@@ -114,6 +115,7 @@
                                 @break
                             @case(S::Encerrado)
                                 <p class="m-0 mb-1 text-sm text-[color:var(--color-primary)]" dusk="screen-meuplano-encerrado">Seu {{ $assinatura->trial ? 'teste' : 'plano' }} terminou em {{ $dia($vencimento) }}. Seus diagnósticos continuam disponíveis.</p>
+                                @if ($pix && $urlRenovar)<p class="m-0 mb-1 text-sm text-[color:var(--color-secondary)]">Plano anual com Pix: para voltar, pague a renovação com um novo QR Code.</p>@endif
                                 @break
                             @case(S::EmAtraso)
                                 <p class="m-0 mb-1 text-sm text-[color:var(--color-primary)]">Não conseguimos cobrar a renovação. Atualize o cartão para manter o acesso, ou cancele a renovação: nesse caso o acesso é encerrado na hora, porque o ciclo não foi pago.</p>
@@ -160,6 +162,9 @@
                                                 acao: () => $wire.cancelarRenovacao(),
                                             })">Cancelar renovação</button>
                                 @endif
+                            @elseif ($pix && $urlRenovar && ($situacao === S::Ativo ? $janelaPix : $situacao === S::Encerrado))
+                                <x-button :href="$urlRenovar" variant="primary" dusk="screen-meuplano-renovar-pix">{{ $situacao === S::Encerrado ? 'Renovar com Pix' : 'Pagar renovação' }}</x-button>
+                                @if ($situacao === S::Encerrado && $urlPlanos)<x-button :href="$urlPlanos" variant="secondary" dusk="screen-meuplano-assinar">Assinar um plano</x-button>@endif
                             @elseif ($situacao === S::Teste || $situacao === S::Encerrado)
                                 @if ($urlPlanos)<x-button :href="$urlPlanos" variant="primary" dusk="screen-meuplano-assinar">Assinar um plano</x-button>@endif
                             @endif
