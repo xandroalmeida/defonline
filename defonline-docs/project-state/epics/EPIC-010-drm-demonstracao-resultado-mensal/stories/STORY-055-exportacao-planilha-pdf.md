@@ -114,5 +114,5 @@ Nenhum.
 
 ### Cobertura final
 
-- Suíte `All`: 2590 passed (47.277 assertions) com `php -d memory_limit=-1`; Dusk completo: 83 passed (680 assertions), incluindo `DrmExportacaoBrowserTest` (arquivo recebido, impressão em A4 com mídia `print` emulada). Pint e PHPStan limpos. Cobertura: ver relatório da sessão.
+- Suíte `All`: 2590 passed (47.277 assertions) com `php -d memory_limit=-1`; Dusk completo: 83 passed (680 assertions), incluindo `DrmExportacaoBrowserTest` (arquivo recebido, impressão em A4 com mídia `print` emulada). Pint e PHPStan limpos. Cobertura (`--coverage --min=80`): total 98,6%; `DrmExportacaoController` 100%, `PlanoDeFormulas` 100%, `PlanilhaDrm` 99,0% (ramos de contingência do percentual e da espinha de linhas).
 - **Não verificado:** abrir o XLSX no Excel/LibreOffice (só releitura por PhpSpreadsheet); a janela de impressão real do navegador (só a mídia emulada); a imagem Docker reconstruída; Checkpoint 3 em homologação.
