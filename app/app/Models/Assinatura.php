@@ -35,8 +35,16 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $proxima_cota_em
  * @property string|null $cartao_bandeira
  * @property string|null $cartao_ultimos4
+ * @property int|null $aviso_renovacao_periodo
+ * @property Carbon|null $atraso_desde
+ * @property string|null $atraso_cobranca_id
+ * @property int $tentativas_cobranca
+ * @property Carbon|null $proxima_tentativa_em
+ * @property Carbon|null $atraso_aviso_em
+ * @property bool $encerramento_pendente_no_provedor
+ * @property Carbon|null $encerrada_em
  */
-#[Fillable(['usuario_id', 'plano_id', 'trial', 'status', 'ciclo', 'data_inicio', 'proximo_vencimento', 'data_cancelamento', 'cota_snapshot', 'cota_restante_ciclo', 'aviso_d2_em', 'aviso_d0_em', 'provedor', 'id_externo', 'preco_snapshot_centavos', 'periodos_pagos', 'proxima_cota_em', 'cartao_bandeira', 'cartao_ultimos4'])]
+#[Fillable(['usuario_id', 'plano_id', 'trial', 'status', 'ciclo', 'data_inicio', 'proximo_vencimento', 'data_cancelamento', 'cota_snapshot', 'cota_restante_ciclo', 'aviso_d2_em', 'aviso_d0_em', 'provedor', 'id_externo', 'preco_snapshot_centavos', 'periodos_pagos', 'proxima_cota_em', 'cartao_bandeira', 'cartao_ultimos4', 'aviso_renovacao_periodo', 'atraso_desde', 'atraso_cobranca_id', 'tentativas_cobranca', 'proxima_tentativa_em', 'atraso_aviso_em', 'encerramento_pendente_no_provedor', 'encerrada_em'])]
 final class Assinatura extends Model
 {
     use HasUuids;
@@ -57,6 +65,11 @@ final class Assinatura extends Model
             'aviso_d2_em' => 'datetime',
             'aviso_d0_em' => 'datetime',
             'proxima_cota_em' => 'datetime',
+            'atraso_desde' => 'datetime',
+            'proxima_tentativa_em' => 'datetime',
+            'atraso_aviso_em' => 'datetime',
+            'encerrada_em' => 'datetime',
+            'encerramento_pendente_no_provedor' => 'boolean',
         ];
     }
 }
