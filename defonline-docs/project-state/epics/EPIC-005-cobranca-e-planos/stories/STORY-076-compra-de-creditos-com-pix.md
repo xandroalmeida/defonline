@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: true
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: claude-sonnet-5-5
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: L
@@ -97,13 +97,28 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 ## Notas do agente
 
 ### Decisões tomadas
+- Leitura: estória, ADR-010, spec STORY-070-checkout-pix-creditos, skill do programador. A spec descreve QR na nossa tela; pelo ADR-010 (que prevalece) o pagamento é no checkout hospedado do Asaas: a tela "Pagar com Pix" virou a tela de retorno/aguardando (link para abrir o QR, expiração, aviso, cancelar), e o e-mail leva ao link do checkout.
+- Entrada: `GET /creditos/comprar/{pacote?}` (`creditos.comprar`, rota já citada por `TextoBloqueio`). Sem pacote lista os ativos (sem depender da STORY-075). Retorno: `/creditos/pagamentos/{invoice}` (`creditos.retorno`, polling de 3 s). Webhook: `POST /webhooks/pagamentos`.
+- `ensureCustomer` não foi implementado (o checkout hospedado coleta os dados do pagador; `customerData` exige endereço completo, verificado no sandbox). `Asaas` não recebe CPF/e-mail nossos.
+- Cupom (STORY-083) e cartão (077/078) ficam fora; "Adicionar cupom" não aparece.
+- Conciliação com o provedor (jobs horário/diário do ADR-010) NÃO foi feita: só o reprocessamento de eventos gravados (`cobranca:reprocessar-eventos`). Fica para quem precisar (087).
+- Estorno/contestação: eventos são gravados e ignorados; não há reversão de crédito nesta estória.
+- Alertas: falha do provedor, valor divergente e pagamento sem compra viram `Log::error` com `module=cobranca` (sem Telegram dedicado).
+- Registrada IDR-018.
 
 ### Descobertas
+- Sandbox real: `POST /checkouts` devolve `link` e aceita/devolve `externalReference`; `customerData` exige endereço completo (rejeitado sem ele); `POST /checkouts/{id}/cancel` funciona. O teste `tests/Sandbox` abriu e cancelou um checkout de verdade.
+- O banco local roda em America/Sao_Paulo e a app em UTC: datas sem offset deslocam 3 h. Corrigido em `Invoice`, `ProviderEvent` e `LoteCredito` (IDR-018). `Assinatura`, `Cupom*` etc. continuam com o risco (só no banco local).
+- `docker compose` imprime, como aviso, um trecho da chave do sandbox: `app/.env` (ou o `.env` lido pelo compose) tem `ASAAS_SANDBOX_API_KEY=$aact_hmlg_...` e o `$` é interpolado. Convém escapar como `$$` ou aspar com `'`. Não imprimi a chave de propósito.
 
 ### Bloqueios encontrados
+- Nenhum. Dúvida para o PO: o aceite pré-marcado ao "Gerar novo QR Code" (spec §4.4) foi implementado como a spec manda; confirme se o jurídico aceita aceite pré-marcado (cada clique grava novo aceite com data/IP/hash de qualquer forma).
 
 ### IDRs criados
+- IDR-018.
 
 ### Cobertura final
+- Suíte All: 98,4% total; `app/Domain` 99,8% (gate 98). Pint e PHPStan limpos.
 
 ### Evidências
+- `tests/Feature/Cobranca/*`, `tests/Feature/Livewire/{ComprarCreditos,AcompanharPagamento}Test.php`, `tests/Unit/Arch/PagamentoArchTest.php`, `tests/Browser/CompraCreditosPixBrowserTest.php`, `tests/Sandbox/AsaasSandboxTest.php`.
