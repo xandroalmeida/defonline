@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace App\Livewire\Diagnostico;
 
 use App\Actions\CalcularDiagnostico;
+use App\Domain\Cobranca\AnaliseJaConcluida;
+use App\Domain\Cobranca\Bloqueio;
+use App\Domain\Cobranca\Carteira;
+use App\Domain\Cobranca\SaldoInsuficiente;
 use App\Domain\Quiz\Alerta;
 use App\Domain\Quiz\ValidacoesCruzadas;
 use App\Domain\Quiz\ValidaSocios;
+use App\Models\CobrancaConfig;
 use App\Models\EmpresaAnalisada;
 use App\Models\QuizRascunho;
 use App\Observabilidade\EventLogger;
+use App\Support\Cobranca\TextoBloqueio;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -58,6 +64,20 @@ final class Quiz extends Component
 
     /** True quando o rascunho anterior expirou (banner "começamos do início"). */
     public bool $rascunho_expirou = false;
+
+    /**
+     * STORY-073 CA-3/CA-11 — com a cobrança ligada e sem saldo, o bloqueio toma o lugar do quiz.
+     * Já traz o texto da causa; o rascunho continua intacto.
+     *
+     * @var array{motivo: string, titulo: string, causa: string, acoes: list<array{chave: string, rotulo: string}>, rascunho: bool}|null
+     */
+    public ?array $bloqueio_saldo = null;
+
+    /** A carteira não pôde ser consultada: não bloqueia nem libera, pede para tentar de novo. */
+    public bool $erro_carteira = false;
+
+    /** CA-6: outra conclusão do mesmo quiz já foi cobrada; guarda o diagnóstico emitido. */
+    public ?string $diagnostico_ja_concluido = null;
 
     /**
      * Alertas de validação cruzada pendentes no gate Bloco 3 → 4 (STORY-034).
@@ -142,6 +162,50 @@ final class Quiz extends Component
     public function mount(EmpresaAnalisada $empresa): void
     {
         $this->empresa = $empresa;
+
+        $this->hidratarRascunho();
+        $this->conferirSaldo();
+    }
+
+    /**
+     * STORY-073 CA-3 — confere o saldo ao abrir o quiz (e no "Tentar de novo"). Interruptor
+     * desligado: nada a conferir. Falha ao consultar a carteira não bloqueia nem libera.
+     */
+    public function conferirSaldo(): void
+    {
+        $this->bloqueio_saldo = null;
+        $this->erro_carteira = false;
+
+        try {
+            if (! CobrancaConfig::ligada()) {
+                return;
+            }
+
+            $decisao = app(Carteira::class)->verificar((string) $this->empresa->usuario_id);
+        } catch (Throwable $e) {
+            Log::error('quiz.carteira.falha_consulta', ['empresa_id' => $this->empresa->id, 'exception' => $e::class, 'message' => $e->getMessage()]);
+            $this->erro_carteira = true;
+
+            return;
+        }
+
+        if ($decisao->bloqueio !== null) {
+            $this->bloquear($decisao->bloqueio);
+        }
+    }
+
+    private function bloquear(Bloqueio $bloqueio): void
+    {
+        $this->bloqueio_saldo = [
+            'motivo' => $bloqueio->motivo->value,
+            ...TextoBloqueio::para($bloqueio),
+            'rascunho' => QuizRascunho::paraEmpresa($this->empresa) !== null,
+        ];
+    }
+
+    private function hidratarRascunho(): void
+    {
+        $empresa = $this->empresa;
 
         // Hidratação: rascunho ativo retoma onde Roberto parou.
         $rascunho = QuizRascunho::paraEmpresa($empresa);
@@ -457,6 +521,18 @@ final class Quiz extends Component
                 $quizId,
                 $duracaoSeg,
             );
+        } catch (SaldoInsuficiente $e) {
+            // CA-3: o saldo acabou entre abrir e concluir. Guarda as respostas do bloco 4 também,
+            // para o usuário voltar de onde parou.
+            $this->persistirRascunho();
+            $this->bloquear($e->bloqueio);
+
+            return null;
+        } catch (AnaliseJaConcluida $e) {
+            // CA-6: outra aba concluiu este quiz primeiro. Não é erro e não cobra de novo.
+            $this->diagnostico_ja_concluido = $e->diagnosticoId ?? '';
+
+            return null;
         } catch (Throwable $e) {
             // CA-9: exception inesperada não persiste registro parcial (action usa transaction).
             // Loga com request_id (padrão ADR-004) e devolve mensagem genérica.

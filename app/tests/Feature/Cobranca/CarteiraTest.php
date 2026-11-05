@@ -377,3 +377,12 @@ it('o banco recusa saldo negativo e consumo sem origem', function (string $sql, 
     'lote negativo' => ['insert into lotes_credito (id, usuario_id, quantidade_comprada, quantidade_restante, status, data_compra, data_expiracao, created_at, updated_at) select gen_random_uuid(), id, 1, -1, \'ativo\', now(), now(), now(), now() from usuarios limit 1', []],
     'consumo sem origem' => ['insert into consumos_analise (id, usuario_id, origem, consumido_em, created_at, updated_at) select gen_random_uuid(), id, \'cota\', now(), now(), now() from usuarios limit 1', []],
 ]);
+
+it('sem a linha de configuração, a cobrança conta como desligada e a linha renasce desligada', function () {
+    DB::table('cobranca_config')->delete();
+
+    expect(CobrancaConfig::ligada())->toBeFalse()
+        ->and(_analisar($this->empresa)->exists)->toBeTrue()
+        ->and(CobrancaConfig::atual()->ativa)->toBeFalse()
+        ->and(DB::table('cobranca_config')->count())->toBe(1);
+});

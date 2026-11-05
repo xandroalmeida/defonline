@@ -31,14 +31,17 @@ final class CobrancaConfig extends Model
         return ['ativa' => 'boolean'];
     }
 
-    /** A linha única criada pela migration. */
+    /**
+     * A linha única criada pela migration. Se alguém a apagou (truncate em ambiente de teste, por
+     * exemplo), nasce de novo DESLIGADA: faltar a linha nunca pode ligar a cobrança nem derrubar o produto.
+     */
     public static function atual(): self
     {
-        return self::query()->firstOrFail();
+        return self::query()->first() ?? self::query()->create(['ativa' => false]);
     }
 
     public static function ligada(): bool
     {
-        return self::atual()->ativa;
+        return (bool) self::query()->value('ativa');
     }
 }
