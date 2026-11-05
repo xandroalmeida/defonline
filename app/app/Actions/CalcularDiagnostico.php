@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Domain\Cobranca\AnaliseJaConcluida;
+use App\Domain\Cobranca\Carteira;
+use App\Domain\Cobranca\SaldoInsuficiente;
 use App\Domain\Motor\Motor;
 use App\Domain\Motor\QuizPayloadCanonicalizer;
+use App\Models\CobrancaConfig;
 use App\Models\Diagnostico;
 use App\Models\EmpresaAnalisada;
 use App\Observabilidade\EventLogger;
@@ -25,12 +29,17 @@ use Illuminate\Support\Facades\DB;
  * vezes conscientemente (são 2 registros — IDR-010 §sub-decisão 2). A garantia
  * de idempotência vive nos golden hashes do motor, não em UNIQUE no banco.
  *
+ * **Cobrança (STORY-073).** Com o interruptor ligado, a análise é cobrada na MESMA transação do
+ * Diagnóstico: cota primeiro, depois crédito. Sem saldo, nada é gravado ({@see SaldoInsuficiente});
+ * se o mesmo quiz já foi cobrado por outra conclusão, {@see AnaliseJaConcluida}. Falha no motor
+ * acontece antes de qualquer débito. Desligado, o fluxo é o de sempre.
+ *
  * **Setor.** V1 só processa Indústria. Para outros setores (Comércio/Serviços),
  * abrir IDR específica.
  */
 final class CalcularDiagnostico
 {
-    public function __construct(private readonly Motor $motor) {}
+    public function __construct(private readonly Motor $motor, private readonly Carteira $carteira) {}
 
     /**
      * @param  array<string, mixed>  $quizPayload  Respostas brutas do quiz (será canonicalizado).
@@ -42,6 +51,8 @@ final class CalcularDiagnostico
      * @param  int|null  $duracaoPreenchimentoSeg  Segundos entre o início do quiz e o submit (STORY-035).
      *
      * @throws \InvalidArgumentException se `$empresa->setor` não é suportado nesta versão.
+     * @throws SaldoInsuficiente com a cobrança ligada e sem cota nem crédito válido.
+     * @throws AnaliseJaConcluida com a cobrança ligada e o `$quizId` já cobrado.
      */
     public function execute(
         EmpresaAnalisada $empresa,
@@ -62,7 +73,7 @@ final class CalcularDiagnostico
             $quizPayloadPersistido['alertas_aceitos'] = $alertasAceitos;
         }
 
-        return DB::transaction(function () use ($empresa, $saida, $quizPayloadPersistido, $payloadHash, $canonical, $quizId, $duracaoPreenchimentoSeg): Diagnostico {
+        $emitir = function () use ($empresa, $saida, $quizPayloadPersistido, $payloadHash, $canonical, $quizId, $duracaoPreenchimentoSeg): Diagnostico {
             $diagnostico = Diagnostico::create([
                 'usuario_id' => $empresa->usuario_id,
                 'empresa_analisada_id' => $empresa->id,
@@ -95,7 +106,11 @@ final class CalcularDiagnostico
             );
 
             return $diagnostico;
-        });
+        };
+
+        return DB::transaction(fn (): Diagnostico => CobrancaConfig::ligada()
+            ? $this->carteira->consumir($empresa->usuario_id, $empresa->id, $quizId, $emitir)
+            : $emitir());
     }
 
     /**

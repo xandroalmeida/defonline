@@ -29,6 +29,7 @@
             <directory>tests/Unit</directory>
             <directory>tests/Domain</directory>
             <directory>tests/Feature</directory>
+            <directory>tests/Concorrencia</directory>
         </testsuite>
     </testsuites>
 

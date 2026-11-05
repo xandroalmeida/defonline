@@ -1,0 +1,287 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Cobranca;
+
+use App\Models\Assinatura;
+use App\Models\ConsumoAnalise;
+use App\Models\LoteCredito;
+use App\Models\TrialConfig;
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
+use Closure;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
+use LogicException;
+
+/**
+ * STORY-073 / espec §4.3 — a carteira do Usuário (não da Empresa Analisada).
+ *
+ * **Consumo.** {@see consumir()} faz tudo numa transação só, sob um lock da linha do Usuário:
+ * confere se a conclusão já foi cobrada, decide a origem ({@see RegrasConsumo}), debita, emite o
+ * Diagnóstico (callback do chamador) e registra o consumo. Falha em qualquer passo desfaz o
+ * débito (CA-5); duas conclusões simultâneas passam uma por vez (CA-6), e os CHECKs do banco
+ * impedem saldo negativo mesmo se a aplicação errar.
+ *
+ * **Concessão.** {@see concederCota()}, {@see renovarCota()}, {@see mudarStatus()} e
+ * {@see concederCreditos()} são a interface para o trial (STORY-074) e os pagamentos
+ * (STORY-076, 077, 079): quem paga ou ativa só chama estes métodos.
+ */
+final class Carteira
+{
+    /** Consulta sem lock, para decidir se a tela do quiz abre ou bloqueia. */
+    public function verificar(string $usuarioId): Decisao
+    {
+        return RegrasConsumo::decidir($this->snapshot($usuarioId, $this->agora()));
+    }
+
+    /**
+     * @template T of Model
+     *
+     * @param  Closure(): T  $emitir  cria o Diagnóstico; só roda com saldo garantido
+     * @return T
+     *
+     * @throws SaldoInsuficiente se não há cota nem crédito válido
+     * @throws AnaliseJaConcluida se `$quizId` já foi cobrado
+     */
+    public function consumir(string $usuarioId, ?string $empresaId, ?string $quizId, Closure $emitir): Model
+    {
+        return DB::transaction(function () use ($usuarioId, $empresaId, $quizId, $emitir): Model {
+            $this->travar($usuarioId);
+
+            if ($quizId !== null) {
+                $existente = ConsumoAnalise::query()->where('quiz_id', $quizId)->first();
+
+                if ($existente !== null) {
+                    throw new AnaliseJaConcluida($existente->diagnostico_id);
+                }
+            }
+
+            $agora = $this->agora();
+            $this->expirarLotesVencidos($usuarioId);
+
+            $decisao = RegrasConsumo::decidir($this->snapshot($usuarioId, $agora));
+
+            if ($decisao->bloqueio !== null) {
+                throw new SaldoInsuficiente($decisao->bloqueio);
+            }
+
+            $this->debitar($decisao);
+            $diagnostico = $emitir();
+
+            ConsumoAnalise::query()->create([
+                'usuario_id' => $usuarioId,
+                'diagnostico_id' => $diagnostico->getKey(),
+                'empresa_analisada_id' => $empresaId,
+                'origem' => $decisao->origem,
+                'assinatura_id' => $decisao->assinaturaId,
+                'lote_credito_id' => $decisao->loteId,
+                'quiz_id' => $quizId,
+                'consumido_em' => $agora,
+            ]);
+
+            return $diagnostico;
+        });
+    }
+
+    /**
+     * Abre uma assinatura (ou o trial, com `$trial` e sem plano) com a cota do ciclo.
+     *
+     * @throws AssinaturaVigenteJaExiste
+     */
+    public function concederCota(
+        string $usuarioId,
+        int $cota,
+        CarbonInterface $inicio,
+        CarbonInterface $vencimento,
+        ?string $planoId = null,
+        ?string $ciclo = null,
+        bool $trial = false,
+    ): Assinatura {
+        if ($cota < 1) {
+            throw new InvalidArgumentException('A cota concedida deve ser de pelo menos 1 análise.');
+        }
+
+        if ($vencimento->lessThanOrEqualTo($inicio)) {
+            throw new InvalidArgumentException('O vencimento deve ser depois do início.');
+        }
+
+        $vigente = Assinatura::query()
+            ->where('usuario_id', $usuarioId)
+            ->whereIn('status', [StatusAssinatura::Ativa->value, StatusAssinatura::EmAtraso->value])
+            ->exists();
+
+        if ($vigente) {
+            throw new AssinaturaVigenteJaExiste($usuarioId);
+        }
+
+        try {
+            return Assinatura::query()->create([
+                'usuario_id' => $usuarioId,
+                'plano_id' => $planoId,
+                'trial' => $trial,
+                'status' => StatusAssinatura::Ativa,
+                'ciclo' => $ciclo,
+                'data_inicio' => $inicio,
+                'proximo_vencimento' => $vencimento,
+                'cota_snapshot' => $cota,
+                'cota_restante_ciclo' => $cota,
+            ]);
+        } catch (UniqueConstraintViolationException) {
+            // Corrida entre duas concessões: o índice parcial barra a segunda.
+            throw new AssinaturaVigenteJaExiste($usuarioId);
+        }
+    }
+
+    /** Novo ciclo: a cota volta cheia e não acumula (espec §2.1, `analise_cota_acumula` = false). */
+    public function renovarCota(string $assinaturaId, int $cota, CarbonInterface $novoVencimento): Assinatura
+    {
+        if ($cota < 1) {
+            throw new InvalidArgumentException('A cota concedida deve ser de pelo menos 1 análise.');
+        }
+
+        return DB::transaction(function () use ($assinaturaId, $cota, $novoVencimento): Assinatura {
+            $assinatura = Assinatura::query()->lockForUpdate()->findOrFail($assinaturaId);
+
+            if ($novoVencimento->lessThanOrEqualTo($assinatura->proximo_vencimento)) {
+                throw new InvalidArgumentException('O novo vencimento deve ser depois do atual.');
+            }
+
+            $assinatura->forceFill([
+                'cota_snapshot' => $cota,
+                'cota_restante_ciclo' => $cota,
+                'proximo_vencimento' => $novoVencimento,
+            ])->save();
+
+            return $assinatura;
+        });
+    }
+
+    /** Atraso, cancelamento e encerramento. Cancelar registra a data e mantém o acesso até o vencimento. */
+    public function mudarStatus(string $assinaturaId, StatusAssinatura $status): Assinatura
+    {
+        $assinatura = Assinatura::query()->findOrFail($assinaturaId);
+        $assinatura->status = $status;
+
+        if ($status === StatusAssinatura::Cancelada) {
+            $assinatura->data_cancelamento = now();
+        }
+
+        $assinatura->save();
+
+        return $assinatura;
+    }
+
+    public function concederCreditos(
+        string $usuarioId,
+        int $quantidade,
+        CarbonInterface $expiraEm,
+        ?string $invoiceId = null,
+        ?CarbonInterface $compradoEm = null,
+    ): LoteCredito {
+        $compradoEm ??= $this->agora();
+
+        if ($quantidade < 1) {
+            throw new InvalidArgumentException('O lote deve ter pelo menos 1 crédito.');
+        }
+
+        if ($expiraEm->lessThanOrEqualTo($compradoEm)) {
+            throw new InvalidArgumentException('O lote deve vencer depois da compra.');
+        }
+
+        return LoteCredito::query()->create([
+            'usuario_id' => $usuarioId,
+            'invoice_id' => $invoiceId,
+            'quantidade_comprada' => $quantidade,
+            'quantidade_restante' => $quantidade,
+            'status' => StatusLote::Ativo,
+            'data_compra' => $compradoEm,
+            'data_expiracao' => $expiraEm,
+        ]);
+    }
+
+    private function agora(): CarbonImmutable
+    {
+        return CarbonImmutable::instance(now());
+    }
+
+    /**
+     * Serializa as operações do Usuário. `FOR NO KEY UPDATE` não conflita com o `FOR KEY SHARE`
+     * que as FKs de outras tabelas tomam na linha do Usuário, então só os consumos esperam entre si.
+     */
+    private function travar(string $usuarioId): void
+    {
+        DB::select('select id from usuarios where id = ? for no key update', [$usuarioId]);
+    }
+
+    /**
+     * Marca como expirados os lotes cujo prazo passou (todos, ou só os do Usuário). A decisão de
+     * consumo já ignora o lote vencido pela data; a marca serve a relatórios e a uma varredura
+     * agendada futura.
+     */
+    public function expirarLotesVencidos(?string $usuarioId = null): int
+    {
+        return LoteCredito::query()
+            ->when($usuarioId !== null, fn ($q) => $q->where('usuario_id', $usuarioId))
+            ->where('status', StatusLote::Ativo->value)
+            ->where('data_expiracao', '<=', $this->agora())
+            ->update(['status' => StatusLote::Expirado->value]);
+    }
+
+    private function debitar(Decisao $decisao): void
+    {
+        $linhas = $decisao->origem === Origem::Cota
+            ? DB::update('update assinaturas set cota_restante_ciclo = cota_restante_ciclo - 1, updated_at = now() where id = ? and cota_restante_ciclo > 0', [$decisao->assinaturaId])
+            : DB::update("update lotes_credito set quantidade_restante = quantidade_restante - 1, status = case when quantidade_restante - 1 = 0 then 'esgotado' else status end, updated_at = now() where id = ? and status = 'ativo' and quantidade_restante > 0", [$decisao->loteId]);
+
+        if ($linhas !== 1) {
+            throw new LogicException('O saldo decidido não estava mais disponível sob o lock.');
+        }
+    }
+
+    private function snapshot(string $usuarioId, CarbonImmutable $agora): SnapshotCarteira
+    {
+        $assinatura = Assinatura::query()
+            ->where('usuario_id', $usuarioId)
+            ->orderByDesc('data_inicio')
+            ->orderByDesc('created_at')
+            ->first();
+
+        $lotes = LoteCredito::query()
+            ->where('usuario_id', $usuarioId)
+            ->where('quantidade_restante', '>', 0)
+            ->get()
+            ->map(fn (LoteCredito $l): LoteVisto => new LoteVisto(
+                $l->id,
+                $l->status,
+                $l->quantidade_restante,
+                CarbonImmutable::instance($l->data_compra),
+                CarbonImmutable::instance($l->data_expiracao),
+            ))
+            ->all();
+
+        return new SnapshotCarteira(
+            $agora,
+            $assinatura === null ? null : new AssinaturaVista(
+                $assinatura->id,
+                $assinatura->trial,
+                $assinatura->status,
+                $assinatura->cota_snapshot,
+                $assinatura->cota_restante_ciclo,
+                CarbonImmutable::instance($assinatura->proximo_vencimento),
+            ),
+            $lotes,
+            $this->trialElegivel($usuarioId),
+        );
+    }
+
+    /** Teste ligado na configuração e ainda não usado por este Usuário (a regra por CPF é da STORY-074). */
+    private function trialElegivel(string $usuarioId): bool
+    {
+        return TrialConfig::atual()->ativo
+            && ! Assinatura::query()->where('usuario_id', $usuarioId)->where('trial', true)->exists();
+    }
+}
