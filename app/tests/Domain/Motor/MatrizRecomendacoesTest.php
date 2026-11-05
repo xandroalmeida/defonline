@@ -140,13 +140,23 @@ it('auto-append idempotente em matriz-lacunas.md — escreve uma linha por par l
     }
 });
 
-it('auto-append silencia quando o diretório do path não existe', function () {
+it('auto-append não lança quando o destino não é gravável, e avisa (STORY-062 CA-3)', function () {
     Log::spy();
-    config(['motor.matriz_lacunas_path' => '/tmp/nao-existe-mesmo/qualquer/matriz-lacunas.md']);
+    // Pai é um arquivo comum: o diretório não pode existir nem ser criado.
+    $pai = tempnam(sys_get_temp_dir(), 'lacunas-pai-');
+    $destino = $pai.'/sub/matriz-lacunas.md';
+    config(['motor.matriz_lacunas_path' => $destino]);
 
-    // Não pode lançar exception.
-    $texto = (new MatrizRecomendacoes)->texto('codigo_x', Farol::VERMELHO);
+    try {
+        $texto = (new MatrizRecomendacoes)->texto('codigo_x', Farol::VERMELHO);
+    } finally {
+        @unlink($pai);
+    }
+
     expect($texto)->toBe(MatrizRecomendacoes::FALLBACK);
+    Log::shouldHaveReceived('warning')
+        ->withArgs(fn (string $msg, array $ctx = []) => $msg === 'lacunas.inventario.nao_gravavel' && $ctx['path'] === $destino)
+        ->once();
 });
 
 it('auto-append silencia quando matriz_lacunas_path é string vazia (desligado)', function () {

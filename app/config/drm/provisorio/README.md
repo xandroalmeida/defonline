@@ -33,4 +33,4 @@ Lançamento fechado carrega no snapshot o texto com que nasceu (`IDR-010`, `ADR-
 
 ## Inventário
 
-As chaves efetivamente servidas a partir daqui em runtime são registradas em `defonline-docs/project-state/epics/EPIC-010-drm-demonstracao-resultado-mensal/design/conteudo-lacunas.md`, no mesmo padrão que `MatrizRecomendacoes` já usa no Diagnóstico. O PO abre um arquivo e vê o que falta, sem ler código.
+As chaves efetivamente servidas a partir daqui em runtime são registradas em `app/storage/app/private/lacunas/drm-conteudo-lacunas.md` (STORY-062) e levadas para `defonline-docs/project-state/epics/EPIC-010-drm-demonstracao-resultado-mensal/design/conteudo-lacunas.md` por `scripts/sincronizar-lacunas.sh`, no mesmo padrão que `MatrizRecomendacoes` já usa no Diagnóstico. O PO abre um arquivo e vê o que falta, sem ler código.

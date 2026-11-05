@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Drm;
 
+use App\Support\InventarioLacunas;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -144,27 +145,15 @@ final class ConteudoDrm
     {
         Log::debug('drm.conteudo.provisorio', ['arquivo' => $arquivo, 'chave' => $caminho]);
 
-        $destino = (string) config('drm.lacunas_path', '');
-        if ($destino === '' || ! is_dir(dirname($destino))) {
-            return;
-        }
-
-        $linha = sprintf('- `%s` → `%s`', $arquivo, $caminho);
-
-        $existente = is_file($destino) ? (string) @file_get_contents($destino) : '';
-        if (str_contains($existente, $linha."\n")) {
-            return;
-        }
-
-        if ($existente === '') {
-            $existente = "# Conteúdo do DRM servido a partir de `provisorio/`\n\n".
-                "Chaves que o produto exibiu em runtime **sem validação da EBC**.\n".
-                "Auto-append por `App\\Domain\\Drm\\ConteudoDrm` (idempotente).\n\n".
-                "Promover uma entrada: mover a linha do arquivo em `config/drm/provisorio/`\n".
-                "para o homônimo em `config/drm/`, subir os dois `version` e o\n".
-                "`conteudo_version` de `config/drm.php`. Ver o README daquele diretório.\n\n";
-        }
-
-        @file_put_contents($destino, $existente.$linha."\n");
+        InventarioLacunas::registrar(
+            (string) config('drm.lacunas_path', ''),
+            "# Conteúdo do DRM servido a partir de `provisorio/`\n\n".
+            "Chaves que o produto exibiu em runtime **sem validação da EBC**.\n".
+            "Auto-append por `App\\Domain\\Drm\\ConteudoDrm` (idempotente).\n\n".
+            "Promover uma entrada: mover a linha do arquivo em `config/drm/provisorio/`\n".
+            "para o homônimo em `config/drm/`, subir os dois `version` e o\n".
+            "`conteudo_version` de `config/drm.php`. Ver o README daquele diretório.\n\n",
+            sprintf('- `%s` → `%s`', $arquivo, $caminho),
+        );
     }
 }

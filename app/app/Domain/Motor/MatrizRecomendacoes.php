@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Motor;
 
+use App\Support\InventarioLacunas;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -64,41 +65,20 @@ final class MatrizRecomendacoes
     }
 
     /**
-     * Append idempotente no arquivo `design/matriz-lacunas.md`.
+     * Append idempotente no inventário `matriz-lacunas.md` (STORY-062: via
+     * `InventarioLacunas`, o mesmo caminho do DRM).
      *
-     * Idempotência: a mesma linha não é gravada duas vezes — se a lacuna já está
-     * documentada, a escrita é silenciosamente ignorada. Isso garante que 100×
-     * cálculos com o mesmo par lacunoso não inflam o arquivo.
-     *
-     * Em ambientes de teste sem o doc root, ou se a base_path() não existir, a
-     * função silencia o I/O para não quebrar o teste por motivo de file system.
+     * Idempotência: a mesma linha não é gravada duas vezes — 100× cálculos com o
+     * mesmo par lacunoso não inflam o arquivo.
      */
     private function appendLacunaIdempotente(string $codigo, string $farol, string $setor, string $matrixVersion): void
     {
-        $caminho = (string) config('motor.matriz_lacunas_path', '');
-        if ($caminho === '') {
-            return;
-        }
-
-        $dir = dirname($caminho);
-        if (! is_dir($dir)) {
-            return;
-        }
-
-        $linha = sprintf('- `%s` × `%s` (setor=%s, matrix_version=%s)', $codigo, $farol, $setor, $matrixVersion);
-
-        $existente = is_file($caminho) ? (string) @file_get_contents($caminho) : '';
-        if (str_contains($existente, $linha)) {
-            return;
-        }
-
-        if ($existente === '') {
-            $cabecalho = "# Lacunas da Matriz de Recomendações\n\n".
-                "Pares `(indicador, farol)` que disparam fallback `\"Recomendação em revisão.\"` em runtime.\n".
-                "Auto-append por `App\\Domain\\Motor\\MatrizRecomendacoes` (idempotente).\n\n";
-            $existente = $cabecalho;
-        }
-
-        @file_put_contents($caminho, $existente.$linha."\n");
+        InventarioLacunas::registrar(
+            (string) config('motor.matriz_lacunas_path', ''),
+            "# Lacunas da Matriz de Recomendações\n\n".
+            "Pares `(indicador, farol)` que disparam fallback `\"Recomendação em revisão.\"` em runtime.\n".
+            "Auto-append por `App\\Domain\\Motor\\MatrizRecomendacoes` (idempotente).\n\n",
+            sprintf('- `%s` × `%s` (setor=%s, matrix_version=%s)', $codigo, $farol, $setor, $matrixVersion),
+        );
     }
 }

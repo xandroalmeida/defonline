@@ -7,10 +7,10 @@ sprint_id: null
 type: bugfix
 target_role: programador
 requires_design: false
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador
 created_at: 2026-08-06
-updated_at: 2026-08-06
+updated_at: 2026-11-05
 estimated_session_size: S
 origem: "Achado da STORY-052, aprovado pelo PO em 2026-08-06 para virar estória"
 ---
@@ -81,6 +81,22 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Se a solução 
 ## Notas do agente
 
 ### Decisões tomadas
+- **Solução (CA-5):** o inventário passa a viver em `storage/app/private/lacunas/` (`matriz-lacunas.md`, `drm-conteudo-lacunas.md`), gravável em dev e em produção e visível no host porque `./app` já é montado. `scripts/sincronizar-lacunas.sh` (host, idempotente) acrescenta ao arquivo versionado em `defonline-docs/` as linhas que faltam. Um único componente, `App\Support\InventarioLacunas`, serve os dois mecanismos (CA-2).
+- **Descartado:** montar `defonline-docs/` no container. Mexe em `docker-compose.yml` e, pela direção contrária, em imagem/deploy (a documentação não pertence à imagem de produção); o protocolo da estória manda escalar isso, e não era necessário. Também descartado: gravar direto em `defonline-docs/` por path absoluto do host, que não existe no container.
+- **CA-3:** o guard deixou de ser silencioso. Diretório ausente é criado (`mkdir -p`); se não der para criar ou gravar, `Log::warning('lacunas.inventario.nao_gravavel', path, motivo)`, uma vez por path e processo para não inundar o log a cada cálculo. Nunca lança.
+- **CA-4:** `.env.testing` fixa `MOTOR_MATRIZ_LACUNAS_PATH=` e `DRM_LACUNAS_PATH=` vazios; a suíte não toca o repositório. Testes que exercitam a escrita usam diretório temporário.
+- Teste antigo alterado: `MatrizRecomendacoesTest` "auto-append silencia quando o diretório do path não existe" virou "não lança quando o destino não é gravável, e avisa". O contrato de não lançar permanece; a parte "silencia" é exatamente o que o CA-3 manda mudar.
+- A checagem de idempotência da matriz passou a exigir a linha seguida de `\n` (igual à do DRM); como toda linha é gravada com `\n`, não muda o comportamento.
+
 ### Descobertas
+- Os dois arquivos de inventário (`matriz-lacunas.md`, `conteudo-lacunas.md`) em `defonline-docs/` não são mais escritos em runtime; passam a ser atualizados por `scripts/sincronizar-lacunas.sh`. Quem precisar do inventário atual roda o script (não foi executado aqui para não alterar docs fora da estória).
+- `ConteudoDrm` é do EPIC-010 (pista DRM): a mudança nele é pequena (corpo de `registrarLacuna`), mas pode dar conflito de merge se aquela pista também o editar.
+- O README de `config/drm/provisorio/` foi atualizado com o novo local.
+
 ### Bloqueios encontrados
+Nenhum.
+
 ### Cobertura final
+- CA-1: `tinker` no container com os defaults reais criou os dois arquivos em `storage/app/private/lacunas/` (verificado, depois removido); teste "Diagnóstico e DRM gravam no inventário quando o destino é gravável".
+- CA-2: mesmo teste (os dois mecanismos) e componente único. CA-3: testes de destino não gravável (um no componente, um na `MatrizRecomendacoes`). CA-4: teste "suíte roda com o inventário desligado". CA-6: teste "destino gravável recebe a linha, uma vez só" e o dos dois mecanismos, que falham se o mecanismo voltar a silenciar.
+- Suíte completa: 1462 testes passando; Pint e PHPStan limpos.

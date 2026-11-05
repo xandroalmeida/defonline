@@ -7,10 +7,10 @@ sprint_id: null
 type: bugfix
 target_role: programador
 requires_design: false
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador
 created_at: 2026-08-06
-updated_at: 2026-08-06
+updated_at: 2026-11-05
 estimated_session_size: S
 origem: "Achado da STORY-059, aprovado pelo PO em 2026-08-06 para virar estória"
 ---
@@ -72,6 +72,18 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Se o CA-5 revel
 ## Notas do agente
 
 ### Decisões tomadas
+- Gate reescrito em `app/tests/Unit/Arch/DesignTokensTest.php`: em vez de lista fechada de hex, reprova qualquer cor literal (hex 3/4/6/8 dígitos, `rgb/rgba/hsl/hsla`, e também `hwb/lab/lch/oklab/oklch`) em Blade e CSS fora das exclusões (`tokens.css`, `legal.blade.php`, `email-confirmacao.blade.php` — inalteradas).
+- Comentários (CSS, Blade, HTML) são removidos antes da busca: citar "era #E7F5F0" num comentário não é usar a cor. Âncoras `href="#id"` e `url(#id)` também são ignoradas, pois `#add`/`#fee` parecem hex mas são id.
+- Mensagem (CA-6): arquivo, cor encontrada e `use var(--token)` quando o hex/rgb bate com algum token de `tokens.css` (alpha ignorado; `rgba(99,91,255,.1)` aponta `--color-tertiary`); senão pede para criar o token.
+- `color-mix`, `currentColor`, `transparent`, `inherit` e `var()` não casam com o regex (testes de CA-2).
+
 ### Descobertas
+- CA-5: o gate novo, sobre o código atual (incluindo cupons e catálogo de cobrança desta pista), acusa **zero** ocorrências em Blade e CSS. A única ocorrência textual fora de `tokens.css` é um comentário em `app.css` (`#E7F5F0`), tratado pela remoção de comentários. Nenhuma exclusão nova foi necessária. Sem violação a corrigir.
+- `tokens.css` mantém `hsla()` em `--color-ring` e `rgba()` em `--color-highlight-pulse`; é o lugar autorizado.
+
 ### Bloqueios encontrados
+Nenhum.
+
 ### Cobertura final
+- CA-1: dataset `reprova cada notação de cor literal` (9 notações). CA-2: dataset `não acusa composição de token…` (8 casos). CA-3: lista de exclusões preservada e varredura real passa. CA-4: teste `reprova o markup que passava antes` com o `style` exato do badge. CA-5: acima. CA-6: asserções de arquivo, cor e `var(--color-tertiary)` no teste da fixture.
+- Suíte completa: 1456 testes passando; Pint e PHPStan limpos.

@@ -103,6 +103,15 @@
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-planos',
             ],
+            [
+                'permissao' => \App\Support\PermissaoAdmin::GerenciarCupons,
+                'label' => 'Cupons',
+                'icon' => 'tag',
+                'href' => route('backoffice.cupons'),
+                'active' => request()->routeIs('backoffice.cupons'),
+                'disabled' => false,
+                'dusk' => 'app-nav-backoffice-cupons',
+            ],
         ], fn (array $item): bool => $usuarioNav->podeUsarBackoffice($item['permissao'])));
     }
 

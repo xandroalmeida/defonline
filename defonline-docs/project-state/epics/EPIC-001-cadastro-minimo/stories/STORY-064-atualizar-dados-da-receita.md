@@ -7,10 +7,10 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: true
-status: ready
-owner_agent: null
+status: blocked
+owner_agent: programador (claude-sonnet-5-5)
 created_at: 2026-11-02
-updated_at: 2026-11-02
+updated_at: 2026-11-05
 estimated_session_size: M
 ---
 
@@ -71,8 +71,13 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`.
 ## Notas do agente
 
 ### Decisões tomadas
+Nenhuma ainda; nada foi implementado.
+
 ### Descobertas
+- 2026-11-05 — **CA-6 NÃO vale hoje.** A tabela `diagnosticos` guarda só `quiz_payload`, `indicadores_calculados` e `resumo_executivo`; não há cópia dos dados da empresa. A tela (`resources/views/diagnosticos/show.blade.php`, linhas 7-8, 46 e 51) e o PDF (`resources/views/diagnosticos/pdf.blade.php`, linhas 14-15 e 57-67; `app/Support/Relatorio/PdfDiagnostico.php`, linhas 67 e 137) leem `$diagnostico->empresa` ao vivo: nome de exibição, razão social, documento, município/UF. Se "Atualizar dados da Receita" trocar razão social, fantasia da Receita ou município/UF, os relatórios antigos mudam retroativamente. Isso contraria o CA-6 e o "snapshot imutável" do model `Diagnostico`.
+- 2026-11-05 — O restante é viável sobre a STORY-063: `EmpresaAnalisada::fichaRfb()`, `RfbConsultarCnpj` (cache de 300s, ignorado no mock) e `Livewire/Empresa/Observacoes` como modelo de componente. Para o CA-5, o `consultado_at` vem preservado do cache; se for igual a `enriquecido_at`, a consulta já está aplicada e dá para avisar "dados já atualizados".
 ### Bloqueios encontrados
+- [ESCALONAMENTO-PO] CA-6 falha na verificação (ver Descobertas). A estória manda parar e escalar. Decisão necessária. Opção A: congelar no diagnóstico um snapshot dos dados da empresa (nome, razão social, documento, município/UF) na emissão, e fazer tela e PDF lerem dele; exige migração e decisão sobre os diagnósticos já emitidos (backfill com os dados atuais). Opção B: aceitar que o relatório reflita a empresa atual e reescrever o CA-6. Sugiro a A, por causa do "snapshot imutável" (IDR-010). Pode virar estória própria, pré-requisito desta.
 ### IDRs criados
 ### Cobertura final
 ### Links de evidência
