@@ -102,6 +102,12 @@ final class ConteudoDrm
         return $this->resolver('rotulos', "campos.{$campo}");
     }
 
+    /** Rótulo de `vendas`, `administrativas` ou `financeiras` — iguais nos três setores. */
+    public function rotuloGrupo(string $grupo): ?string
+    {
+        return $this->resolver('rotulos', "grupos.{$grupo}");
+    }
+
     public function rotuloGrupoCusto(string $setor): ?string
     {
         return $this->resolver('rotulos', "grupos_por_setor.{$setor}.custo");

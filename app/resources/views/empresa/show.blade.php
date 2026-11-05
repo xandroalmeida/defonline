@@ -90,6 +90,13 @@
         @endif
     </x-card>
 
+    {{-- STORY-047: entrada do lançamento mensal do DRM. --}}
+    <x-card class="mt-6">
+        <h2 class="text-lg font-medium m-0 mb-1 text-[color:var(--color-primary)]">{{ app(\App\Domain\Drm\ConteudoDrm::class)->nomeModulo() }}</h2>
+        <p class="m-0 mb-4 text-sm text-[color:var(--color-secondary)]">{{ config('drm.rotulos.modulo.chamada') }}</p>
+        <x-button :href="route('drm.lancar', $empresa)" variant="primary" dusk="empresa-show-lancar-mes">Lançar o mês</x-button>
+    </x-card>
+
     <x-card class="mt-6">
         <livewire:empresa.contato :empresa="$empresa"/>
     </x-card>

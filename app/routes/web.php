@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\CnaeController;
 use App\Http\Controllers\DiagnosticoController;
+use App\Http\Controllers\DrmMesController;
 use App\Http\Controllers\EmailConfirmacaoController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\HealthController;
@@ -18,6 +19,7 @@ use App\Livewire\Backoffice\Usuarios as BackofficeUsuarios;
 use App\Livewire\Cadastro;
 use App\Livewire\Diagnostico\Quiz as QuizDiagnostico;
 use App\Livewire\Diagnostico\SelecionarEmpresa as SelecionarEmpresaDiagnostico;
+use App\Livewire\Drm\Lancamento as LancamentoDrm;
 use App\Livewire\Empresa\Cadastrar as CadastrarEmpresa;
 use App\Livewire\Home\MinhasEmpresas;
 use App\Livewire\Login;
@@ -74,6 +76,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/diagnosticos/{diagnostico}/pdf', [DiagnosticoController::class, 'pdf'])
         ->whereUuid('diagnostico')
         ->name('diagnosticos.pdf');
+
+    // STORY-047 — Raio X do Negócio (DRM): lançamento mensal. Empresa de outro usuário → 404 (IDR-009).
+    Route::get('/empresas/{empresa}/drm/lancar', LancamentoDrm::class)
+        ->whereUuid('empresa')
+        ->name('drm.lancar');
+    Route::get('/empresas/{empresa}/drm/{competencia}', [DrmMesController::class, 'show'])
+        ->whereUuid('empresa')
+        ->where('competencia', '\d{4}-(0[1-9]|1[0-2])')
+        ->name('drm.mes');
 });
 
 // STORY-065, 066 e 067 — backoffice: cada rota exige uma permissão de admin (PDR-013).
