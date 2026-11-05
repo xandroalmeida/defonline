@@ -210,3 +210,12 @@ it('CA-10 — chave validada não entra no inventário de lacunas', function () 
 
     expect($existe)->toBeFalse('Chave validada não é lacuna e não pode ser registrada como tal.');
 });
+
+it('STORY-054 — frase-modelo da leitura existe e a ausência é erro de configuração', function () {
+    $conteudo = new ConteudoDrm;
+
+    expect($conteudo->fraseDeLeitura('abertura.lucro'))->toContain(':resultado');
+
+    config()->set('drm.leitura_frases.abertura.lucro', null);
+    expect(fn () => $conteudo->fraseDeLeitura('abertura.lucro'))->toThrow(LogicException::class);
+});

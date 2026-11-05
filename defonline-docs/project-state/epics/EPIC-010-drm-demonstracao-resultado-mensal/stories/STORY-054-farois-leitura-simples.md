@@ -6,10 +6,10 @@ epic_id: EPIC-010
 type: implementation
 target_role: programador
 requires_design: true
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador (agente Claude)
 created_at: 2026-08-04
-updated_at: 2026-08-04
+updated_at: 2026-11-05
 estimated_session_size: M
 checkpoint: CP3
 ---
@@ -95,7 +95,33 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`.
 ## Notas do agente
 
 ### Decisões tomadas
+
+- **Domínio `App\Domain\Drm\Leitura\LeituraDrm`** (puro; recebe `MesDaSerie` + `SerieDrm` + setor + posição, devolve `Leitura{farois, frases}`). O farol vem de `Faixas::farol()` (a regra "não calibrada não produz farol" continua só no motor). A prosa tem ordem fixa: abertura (lucro / zero a zero / prejuízo / sem faturamento), custo de manter o negócio e linha que mais pesou (prejuízo e mês parado), comparativos do resultado final com o mês anterior e a média + a causa que mais explica a diferença, e um item por farol aceso (vermelho, amarelo, verde).
+- **Derivado na exibição (CA-8):** `Livewire\Drm\Demonstracao` chama o gerador a cada render; nada vai para o snapshot (teste confere que o JSON não contém farol/leitura/faixa e que recalibrar muda a cor sem mexer em `demonstracao` nem `payload_hash`). O card da leitura traz o `conteudo_version` e diz que farol e leitura são interpretação recalibrável, e que valores e percentuais não mudam.
+- **Frases dos fatos em `config/drm/leitura_frases.php`** (arquivo novo, validado, com `version`). `leitura.php` (interpretação por linha e farol) continua vazio e sem provisório, como manda o PDR-009 §1. Separei os dois porque "o que o mês vendeu, o que mudou" não é interpretação de farol; sem isso CA-1b/4/5/6 ficariam sem prosa. Nenhuma frase julga número.
+- **CA-7:** combinação sem texto em `leitura.php` vira "“Linha”: farol cor." e `ConteudoDrm::registrarLacunaDeLeitura()` grava a linha no inventário de lacunas (mesmo arquivo e padrão idempotente do provisório).
+- **Farol na tela:** `<x-relatorio.farol>` (DDR-006) dentro da célula do rótulo (tabela e cards); ícone + texto + cor. Linha sem farol não renderiza nada.
+- **Mês sem faturamento:** sem farol (percentual nulo), sem comparativos; só o custo de manter (L6+L8+L10) e a maior saída.
+- Nada em `Faixas` mudou além do método `linhas()`.
+
 ### Descobertas
+
+- As faixas são por código de linha e não por modo: no modo "dentro" `L6b` e `L7` têm outra definição (inclui pró-labore / EBITDA). Apliquei a faixa pelo código nos dois modos.
+- O Dusk não consegue calibrar faixa em runtime (config do servidor), então o farol calibrado é provado no Pest e o Dusk cobre o grau zero.
+
+### Dúvidas para o PO (não bloqueiam)
+
+1. As frases de `leitura_frases.php` são microcopy de produto não validada pela EBC; confirmar que podem ir ao ar (não são interpretação de farol).
+2. A mesma faixa vale para os dois modos do pró-labore (ver Descobertas)? Se a EBC calibrar L6b/L7, precisa dizer para qual modo.
+
 ### Bloqueios encontrados
+
+Nenhum.
+
 ### IDRs criados
+
+Nenhum.
+
 ### Cobertura final
+
+Suíte All: 2563 passed (46.727 assertions), cobertura total 98,6%; gate `phpunit-domain.xml --min=98` verde (`Drm/Faixas` e `Drm/ConteudoDrm` 100%). Pint e PHPStan limpos. Dusk completo: 81 passed (654 assertions), incluindo `DrmFaroisLeituraBrowserTest` (grau zero em 360x800). Não verificado: farol calibrado em browser (config do servidor do Dusk não muda em runtime), axe e deploy em homologação.

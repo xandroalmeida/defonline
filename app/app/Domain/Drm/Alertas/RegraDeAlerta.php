@@ -11,9 +11,8 @@ use App\Domain\Drm\Ocorrencia;
 /**
  * Ponto de extensão dos alertas do Anexo K §K.6.
  *
- * A4 (rubrica atípica) e A6 (salto de competência) dependem de histórico e entram
- * na STORY-051: basta uma classe nova que implemente isto e o registro em
- * {@see AvaliadorDeAlertas::padrao()} — o bloco de conferência não muda.
+ * A4 (rubrica atípica) e A6 (salto de competência) dependem de histórico e entraram
+ * na STORY-051 por {@see AvaliadorDeAlertas::comHistorico()} — o bloco de conferência não mudou.
  */
 interface RegraDeAlerta
 {

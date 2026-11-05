@@ -83,6 +83,34 @@ final class ConteudoDrm
     }
 
     /**
+     * Frase-modelo da leitura que descreve um fato do mês (`leitura_frases.php`, STORY-054).
+     *
+     * Diferente de {@see leitura()}, que é interpretação de farol e pode faltar, estas frases são o
+     * esqueleto da prosa e **precisam existir**: chave ausente é erro de configuração, nunca texto
+     * improvisado (CA-3, leitura nunca generativa).
+     */
+    public function fraseDeLeitura(string $caminho): string
+    {
+        $frase = config("drm.leitura_frases.{$caminho}");
+        if (! is_string($frase) || $frase === '') {
+            throw new \LogicException("Frase de leitura ausente em drm/leitura_frases.php: {$caminho}.");
+        }
+
+        return $frase;
+    }
+
+    /**
+     * Registra no inventário do PO que uma combinação de linha e farol apareceu sem texto de leitura
+     * (CA-7). Mesmo arquivo e mesmo padrão idempotente das chaves servidas do provisório.
+     */
+    public function registrarLacunaDeLeitura(string $linha, string $farol): void
+    {
+        Log::debug('drm.conteudo.leitura_sem_texto', ['linha' => $linha, 'farol' => $farol]);
+
+        $this->registrarNoInventario(sprintf('- `leitura` → `por_linha_e_farol.%s.%s` — **sem texto**; a tela exibiu a mensagem neutra de reserva', $linha, $farol));
+    }
+
+    /**
      * Rótulo de linha da demonstração, no modo de apresentação pedido.
      *
      * `L4` é a única linha cujo rótulo varia por setor (Anexo K §K.4), e é
@@ -111,6 +139,23 @@ final class ConteudoDrm
     public function rotuloGrupoCusto(string $setor): ?string
     {
         return $this->resolver('rotulos', "grupos_por_setor.{$setor}.custo");
+    }
+
+    /**
+     * Nome de cada um dos 6 blocos do lançamento (a série diz "você parou em {bloco}").
+     *
+     * @return array<int, string>
+     */
+    public function nomesDosBlocos(string $setor): array
+    {
+        return [
+            1 => 'O mês e o que entrou',
+            2 => (string) $this->rotuloGrupoCusto($setor),
+            3 => (string) $this->rotuloGrupo('vendas'),
+            4 => (string) $this->rotuloGrupo('administrativas'),
+            5 => 'Sua retirada e as despesas financeiras',
+            6 => 'Conferir e fechar',
+        ];
     }
 
     /** Mensagem semântica de um motivo de indisponibilidade (`indisponivel:*`), DDR-005. */
@@ -157,6 +202,11 @@ final class ConteudoDrm
     {
         Log::debug('drm.conteudo.provisorio', ['arquivo' => $arquivo, 'chave' => $caminho]);
 
+        $this->registrarNoInventario(sprintf('- `%s` → `%s`', $arquivo, $caminho));
+    }
+
+    private function registrarNoInventario(string $linha): void
+    {
         InventarioLacunas::registrar(
             (string) config('drm.lacunas_path', ''),
             "# Conteúdo do DRM servido a partir de `provisorio/`\n\n".
@@ -165,7 +215,7 @@ final class ConteudoDrm
             "Promover uma entrada: mover a linha do arquivo em `config/drm/provisorio/`\n".
             "para o homônimo em `config/drm/`, subir os dois `version` e o\n".
             "`conteudo_version` de `config/drm.php`. Ver o README daquele diretório.\n\n",
-            sprintf('- `%s` → `%s`', $arquivo, $caminho),
+            $linha,
         );
     }
 }

@@ -26,6 +26,10 @@ final readonly class LinhaVisao
         public bool $negativo,
         public bool $final,
         public bool $prejuizo,
+        /** Valor do snapshot em centavos, sem formatar (a exportação em planilha lê daqui, STORY-055). */
+        public ?int $centavos = null,
+        /** Percentual do snapshot como veio (`12.3456`), sem formatar. */
+        public ?string $percentualBruto = null,
     ) {}
 
     public function ehTotal(): bool

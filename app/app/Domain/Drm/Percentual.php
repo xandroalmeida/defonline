@@ -51,4 +51,38 @@ final class Percentual
 
         return ($negativo && $decimos > 0 ? '-' : '').intdiv($decimos, 10).','.($decimos % 10);
     }
+
+    /**
+     * O percentual do snapshot (`-13.3333`) em unidades de 0,0001 ponto (`-133333`), para somar sem float.
+     * Texto fora do formato é recusado, nunca adivinhado.
+     */
+    public static function emUnidades(string $percentual): int
+    {
+        if (preg_match('/^(-?)(\d+)\.(\d{4})$/', $percentual, $m) !== 1) {
+            throw new \InvalidArgumentException("Percentual fora do formato do snapshot: {$percentual}");
+        }
+        $unidades = (int) $m[2] * 10_000 + (int) $m[3];
+
+        return $m[1] === '-' ? -$unidades : $unidades;
+    }
+
+    /** O inverso de {@see emUnidades()}: `-133333` → `-13.3333`. */
+    public static function deUnidades(int $unidades): string
+    {
+        $magnitude = abs($unidades);
+
+        return ($unidades < 0 ? '-' : '').intdiv($magnitude, 10_000).'.'.str_pad((string) ($magnitude % 10_000), self::CASAS, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Média simples de percentuais do snapshot, truncada em direção a zero na quarta casa.
+     *
+     * @param  non-empty-list<string>  $percentuais
+     */
+    public static function media(array $percentuais): string
+    {
+        $soma = array_sum(array_map(self::emUnidades(...), $percentuais));
+
+        return self::deUnidades(intdiv($soma, count($percentuais)));
+    }
 }

@@ -585,3 +585,23 @@
 
 /* Alpine: esconde elementos até o Alpine inicializar. */
 [x-cloak] { display: none !important; }
+
+/*
+ * Impressão da Demonstração do Mês (STORY-055 CA-12, ADR-008): o MESMO markup da tela, em A4 retrato.
+ * Navegação, drawer e botões saem pelas variantes `print:hidden` do próprio template; aqui só a página.
+ * É uma camada interina: quando o PDF da plataforma existir (EPIC-007), ela é substituída, não acumulada.
+ */
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 14mm;
+    }
+
+    body {
+        background: var(--color-surface);
+    }
+
+    main {
+        padding: 0;
+    }
+}

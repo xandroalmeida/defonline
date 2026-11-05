@@ -28,6 +28,7 @@ pest()->extend(TestCase::class)->beforeEach(function () {
 
 // STORY-076 — ajudantes compartilhados dos testes de pagamento.
 require_once __DIR__.'/Support/pagamento.php';
+require_once __DIR__.'/Support/drm_serie.php';
 
 // Teste sob demanda contra o sandbox do Asaas (grupo `asaas-sandbox`, fora da suíte padrão).
 pest()->extend(TestCase::class)->in('Sandbox');

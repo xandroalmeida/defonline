@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\CnaeController;
 use App\Http\Controllers\DiagnosticoController;
+use App\Http\Controllers\DrmExportacaoController;
 use App\Http\Controllers\EmailConfirmacaoController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\HealthController;
@@ -29,6 +30,7 @@ use App\Livewire\Diagnostico\Quiz as QuizDiagnostico;
 use App\Livewire\Diagnostico\SelecionarEmpresa as SelecionarEmpresaDiagnostico;
 use App\Livewire\Drm\Demonstracao as DemonstracaoDrm;
 use App\Livewire\Drm\Lancamento as LancamentoDrm;
+use App\Livewire\Drm\Serie as SerieDrm;
 use App\Livewire\Empresa\Cadastrar as CadastrarEmpresa;
 use App\Livewire\Home\MinhasEmpresas;
 use App\Livewire\Login;
@@ -129,6 +131,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/pagamentos/fake/troca/{troca}', [PagamentoFakeController::class, 'mostrarTroca'])->whereUuid('troca')->name('pagamentos.fake.troca');
     Route::post('/pagamentos/fake/troca/{troca}', [PagamentoFakeController::class, 'simularTroca'])->whereUuid('troca')->name('pagamentos.fake.troca.simular');
 
+    // STORY-051 — série histórica: todos os meses da empresa, com lacunas, estados e comparativos.
+    Route::get('/empresas/{empresa}/drm', SerieDrm::class)
+        ->whereUuid('empresa')
+        ->name('drm.serie');
     // STORY-047 — Raio X do Negócio (DRM): lançamento mensal. Empresa de outro usuário → 404 (IDR-009).
     Route::get('/empresas/{empresa}/drm/lancar', LancamentoDrm::class)
         ->whereUuid('empresa')
@@ -138,6 +144,11 @@ Route::middleware('auth')->group(function () {
         ->whereUuid('empresa')
         ->where('competencia', '\d{4}-(0[1-9]|1[0-2])')
         ->name('drm.mes');
+    // STORY-055 — planilha XLSX da competência (e da série): leitura do histórico, fora de `drm.acesso`.
+    Route::get('/empresas/{empresa}/drm/{competencia}/exportar', DrmExportacaoController::class)
+        ->whereUuid('empresa')
+        ->where('competencia', '\d{4}-(0[1-9]|1[0-2])')
+        ->name('drm.exportar');
     // STORY-050 — retificação: o mesmo formulário, semeado com a versão vigente. Sem vigente (ou empresa alheia) → 404.
     Route::get('/empresas/{empresa}/drm/{competencia}/corrigir', LancamentoDrm::class)
         ->whereUuid('empresa')
