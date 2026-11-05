@@ -61,9 +61,10 @@ it('duas retificações simultâneas da versão 1: uma vira a versão 2, a outra
     }, $processos);
 
     $porResultado = array_count_values(array_column($resultados, 'resultado'));
+    ksort($porResultado);
     $versoes = DrmLancamento::query()->where('empresa_analisada_id', $this->empresa->id)->orderBy('versao')->get();
 
-    expect($porResultado)->toBe(['ok' => 1, 'conflito' => 1], json_encode($resultados))
+    expect($porResultado)->toBe(['conflito' => 1, 'ok' => 1], json_encode($resultados))
         ->and($versoes->pluck('versao')->all())->toBe([1, 2])
         ->and($versoes->whereNull('substituido_por_id')->count())->toBe(1)
         ->and($versoes[0]->substituido_por_id)->toBe($versoes[1]->id);

@@ -1537,7 +1537,7 @@
       "title": "Tela da Demonstração do Mês — valor nominal e percentual em cada linha",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "estimated_session_size": "M",
       "blocked_by": [
         "STORY-045",
@@ -1553,14 +1553,14 @@
         "STORY-056",
         "STORY-057"
       ],
-      "note": "Fecha o Checkpoint 1 — caminho feliz vivo em homologação. Materializa o pedido do Key User (valor nominal junto ao indicador). Lê snapshot, não invoca motor. Ganhou CA-3b (troca de modo de pró-labore) e CA-3c (linhas não operacionais) pelo PDR-004. | 2026-08-06: spec SCREEN-STORY-046-demonstracao-mes em `ready` e DDRs `accepted` (PDR-007) — invariante 12 satisfeita, sem decisão de design pendente à frente.",
+      "note": "4a803e8..d51adfa. Revisado pelo orquestrador na main.",
       "epic_id": "EPIC-010",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-049-tela-demonstracao-mes.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-06",
+      "updated_at": "2026-11-05",
       "checkpoint": "CP1",
       "design_screen_id": "SCREEN-STORY-046-demonstracao-mes"
     },
@@ -1570,7 +1570,7 @@
       "title": "Retificação de competência — corrigir um mês já lançado sem perder o histórico",
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "estimated_session_size": "M",
       "blocked_by": [
         "STORY-045",
@@ -1583,14 +1583,14 @@
         "STORY-056",
         "STORY-057"
       ],
-      "note": "Materializa a decisão da STORY-045. Retificar altera comparativos dos meses seguintes (derivado esperado), mas nenhuma outra competência é recalculada.",
+      "note": "849698d..c9e8ddf; aditivo no IDR-016. Revisado pelo orquestrador na main.",
       "epic_id": "EPIC-010",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-050-retificacao-competencia.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-04",
+      "updated_at": "2026-11-05",
       "checkpoint": "CP2"
     },
     {
@@ -2160,7 +2160,7 @@
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-084",
         "STORY-086",
@@ -2168,7 +2168,7 @@
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2181,12 +2181,13 @@
         "STORY-073"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-074-trial-gratuito.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "68e4721. Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-076",
         "STORY-077",
@@ -2194,7 +2195,7 @@
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2207,12 +2208,13 @@
         "STORY-071"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-075-pagina-de-planos.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "bd1b363. Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-078",
         "STORY-080",
@@ -2223,7 +2225,7 @@
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2238,7 +2240,8 @@
         "STORY-075"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-076-compra-de-creditos-com-pix.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "e569cbf..6c8c2cb; IDR-018; pagamento real no checkout segue pendente do ADR-010. Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
@@ -3983,6 +3986,13 @@
         "title": "Carteira, regra de consumo e lock por usuário",
         "status": "accepted",
         "path": "decisions/idr/IDR-017-carteira-consumo-e-lock-por-usuario.md",
+        "decided_at": "2026-11-05"
+      },
+      {
+        "id": "IDR-018",
+        "title": "Pagamentos: provedor Fake, webhook e fuso do banco",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-018-pagamentos-provedor-fake-webhook-e-fuso-do-banco.md",
         "decided_at": "2026-11-05"
       }
     ],
