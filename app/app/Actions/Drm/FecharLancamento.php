@@ -14,6 +14,7 @@ use App\Models\DrmLancamento;
 use App\Models\DrmPreferencia;
 use App\Models\DrmRascunho;
 use App\Models\EmpresaAnalisada;
+use App\Observabilidade\EventosDrm;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
@@ -75,6 +76,9 @@ final class FecharLancamento
 
                 $rascunho?->delete();
                 DrmPreferencia::gravarModos($empresa, $lancamento->modos);
+
+                // STORY-056: o evento nasce na transação do fato; se ele falhar, o mês não fecha (ADR-004 §2.3).
+                EventosDrm::lancamentoConcluido($registro, $empresa, $lancamento, $rascunho);
 
                 return $registro;
             });
