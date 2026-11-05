@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 use App\Domain\Cobranca\CicloCobranca;
+use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PedidoCheckout;
 use App\Domain\Cobranca\ReferenciaProvedor;
 use App\Infrastructure\Cobranca\Asaas\AsaasPaymentProvider;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 /**
@@ -55,5 +57,65 @@ it('abre e cancela um checkout de assinatura com cartão (RECURRENT) no sandbox'
         expect($sessao->url)->toStartWith('https://sandbox.asaas.com/');
 
         $provedor->cancelCheckout(new ReferenciaProvedor('asaas', $sessao->referencia->id));
+    }
+})->group('asaas-sandbox');
+
+/**
+ * STORY-079 — o que a régua e a conciliação usam, no sandbox de verdade: lista as cobranças de uma
+ * assinatura (com paginação por query string), reagenda a MESMA cobrança para hoje (retentativa) sem
+ * criar cobrança nova, lista um checkout aberto (vazio) e cancela a recorrência. A assinatura é criada
+ * direto na API com o cartão de TESTE público do Asaas, só neste teste e só no sandbox.
+ */
+it('lista, retenta e cancela uma assinatura no sandbox', function () {
+    $chave = env('ASAAS_SANDBOX_API_KEY');
+
+    if (! is_string($chave) || $chave === '') {
+        $this->markTestSkipped('ASAAS_SANDBOX_API_KEY não definida.');
+    }
+
+    $api = fn () => Http::baseUrl('https://api-sandbox.asaas.com/v3')->withHeaders(['access_token' => $chave, 'User-Agent' => 'DEFOnline-story079'])->acceptJson()->asJson();
+    $cliente = $api()->post('/customers', ['name' => 'Teste STORY-079', 'cpfCnpj' => '24971563792', 'email' => 'sandbox@example.com'])->json('id');
+    $assinaturaId = null;
+
+    try {
+        $assinaturaId = $api()->post('/subscriptions', [
+            'customer' => $cliente, 'billingType' => 'CREDIT_CARD', 'value' => 49.9, 'cycle' => 'MONTHLY', 'description' => 'Teste STORY-079',
+            'nextDueDate' => now('America/Sao_Paulo')->addDay()->format('Y-m-d'),
+            'creditCard' => ['holderName' => 'Teste Sandbox', 'number' => '4539656048392220', 'expiryMonth' => '12', 'expiryYear' => '2030', 'ccv' => '123'],
+            'creditCardHolderInfo' => ['name' => 'Teste Sandbox', 'email' => 'sandbox@example.com', 'cpfCnpj' => '24971563792', 'postalCode' => '89223005', 'addressNumber' => '277', 'phone' => '4738010919'],
+            'remoteIp' => '203.0.113.10',
+        ])->json('id');
+        expect($assinaturaId)->toBeString();
+
+        $provedor = _asaasSandbox();
+        $cobrancas = $provedor->listSubscriptionCharges(new ReferenciaProvedor('asaas', $assinaturaId), new DateTimeImmutable('-1 day'));
+
+        expect($cobrancas)->toHaveCount(1)
+            ->and($cobrancas[0]->estado)->toBe(EstadoCobranca::Pendente)
+            ->and($cobrancas[0]->assinaturaId)->toBe($assinaturaId)
+            ->and($cobrancas[0]->vencimento)->not->toBeNull();
+
+        // Retentativa = reagendar a mesma cobrança: continua sendo uma só.
+        $depois = $provedor->retryCharge($cobrancas[0]->referencia);
+        $de = $provedor->listSubscriptionCharges(new ReferenciaProvedor('asaas', $assinaturaId), new DateTimeImmutable('-1 day'));
+
+        expect($depois->referencia->id)->toBe($cobrancas[0]->referencia->id)
+            ->and($depois->vencimento?->format('Y-m-d'))->toBe(now('America/Sao_Paulo')->format('Y-m-d'))
+            ->and($de)->toHaveCount(1);
+
+        // Checkout aberto e sem pagamento: nenhuma cobrança.
+        $sessao = $provedor->startCheckout(new PedidoCheckout((string) Str::uuid7(), 'Teste STORY-079', 500, [MeioPagamento::Pix], 30, 'https://example.com/ok', 'https://example.com/c', 'https://example.com/e'));
+        expect($provedor->listCheckoutCharges($sessao->referencia))->toBe([]);
+        $provedor->cancelCheckout($sessao->referencia);
+
+        $provedor->cancelSubscription(new ReferenciaProvedor('asaas', $assinaturaId));
+        $provedor->cancelSubscription(new ReferenciaProvedor('asaas', $assinaturaId)); // já cancelada: sem erro
+        $assinaturaId = null;
+    } finally {
+        if ($assinaturaId !== null) {
+            $api()->delete("/subscriptions/{$assinaturaId}");
+        }
+
+        $api()->delete("/customers/{$cliente}");
     }
 })->group('asaas-sandbox');

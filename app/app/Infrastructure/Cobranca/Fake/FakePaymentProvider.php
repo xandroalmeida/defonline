@@ -23,8 +23,9 @@ use Illuminate\Support\Str;
  * ADR-010 §6 — provedor de mentira para desenvolvimento e testes: sem rede, determinístico e com
  * estado no cache (compartilhado entre o processo de teste e o servidor do Dusk).
  *
- * Gatilhos: {@see falharProximoCheckout()}, {@see simularPagamento()}, {@see simularExpiracao()} e
- * {@see simularCancelamento()}. Os webhooks gerados passam por {@see parseWebhook()}, como os reais.
+ * Gatilhos: {@see falharProximoCheckout()}, {@see simularPagamento()}, {@see simularExpiracao()},
+ * {@see simularCancelamento()} e, para a STORY-079, {@see ficarIndisponivel()},
+ * {@see aprovarProximaTentativa()}, {@see criarCobrancaDeRenovacao()} e {@see simularRecusaDeRenovacao()}. Os webhooks gerados passam por {@see parseWebhook()}, como os reais.
  */
 final class FakePaymentProvider implements PaymentProvider
 {
@@ -33,6 +34,9 @@ final class FakePaymentProvider implements PaymentProvider
     public const CABECALHO_TOKEN = 'x-fake-token';
 
     private const PREFIXO = 'fake-pagamento:';
+
+    /** Longo o bastante para testes que "viajam" até a renovação de um plano anual. */
+    private const TTL_DIAS = 400;
 
     public function __construct(private readonly ?string $webhookToken = null) {}
 
@@ -58,7 +62,7 @@ final class FakePaymentProvider implements PaymentProvider
         Cache::put(self::PREFIXO."chk:{$id}", [
             'referencia' => $pedido->referenciaInterna,
             'valor' => $pedido->valorCentavos,
-        ], now()->addDays(2));
+        ], now()->addDays(self::TTL_DIAS));
         Cache::put(self::PREFIXO."pay:{$this->cobrancaDe($id)}", [
             'checkout' => $id,
             'referencia' => $pedido->referenciaInterna,
@@ -66,7 +70,9 @@ final class FakePaymentProvider implements PaymentProvider
             'estado' => EstadoCobranca::Pendente->value,
             'pago_em' => null,
             'assinatura' => $pedido->recorrencia === null ? null : 'fakesub_'.Str::after($id, 'fakechk_'),
-        ], now()->addDays(2));
+            'vencimento' => now()->toDateString(),
+        ], now()->addDays(self::TTL_DIAS));
+        $this->indexarDaAssinatura($pedido->recorrencia === null ? null : 'fakesub_'.Str::after($id, 'fakechk_'), $this->cobrancaDe($id));
 
         return new SessaoCheckout(
             new ReferenciaProvedor(self::NOME, $id),
@@ -82,12 +88,28 @@ final class FakePaymentProvider implements PaymentProvider
 
     public function getCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
     {
-        /** @var array{checkout: string, referencia: string|null, valor: int, estado: string, pago_em: string|null, assinatura?: string|null}|null $c */
-        $c = Cache::get(self::PREFIXO."pay:{$cobranca->id}");
+        $this->exigirDisponivel();
 
-        if ($c === null) {
+        return $this->retrato($cobranca->id);
+    }
+
+    /** @return array<string, mixed> */
+    private function cobrancaGravada(string $id): array
+    {
+        $c = Cache::get(self::PREFIXO."pay:{$id}");
+
+        if (! is_array($c)) {
             throw new ProvedorIndisponivel('Cobrança desconhecida no provedor fake.');
         }
+
+        return $c;
+    }
+
+    private function retrato(string $id): CobrancaNoProvedor
+    {
+        /** @var array{checkout: string|null, referencia: string|null, valor: int, estado: string, pago_em: string|null, assinatura?: string|null, vencimento?: string|null} $c */
+        $c = $this->cobrancaGravada($id);
+        $cobranca = new ReferenciaProvedor(self::NOME, $id);
 
         return new CobrancaNoProvedor(
             $cobranca,
@@ -99,7 +121,104 @@ final class FakePaymentProvider implements PaymentProvider
             $c['assinatura'] ?? null,
             ($c['assinatura'] ?? null) !== null && $c['estado'] === EstadoCobranca::Paga->value ? 'VISA' : null,
             ($c['assinatura'] ?? null) !== null && $c['estado'] === EstadoCobranca::Paga->value ? '4242' : null,
+            isset($c['vencimento']) ? new DateTimeImmutable($c['vencimento']) : null,
         );
+    }
+
+    /**
+     * Nova tentativa da mesma cobrança. Por padrão o banco continua recusando; {@see aprovarProximaTentativa()}
+     * faz a próxima passar. Nunca cria cobrança: só conta a tentativa (para o teste provar que não há duplicidade).
+     */
+    public function retryCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
+    {
+        $this->exigirDisponivel();
+        $c = $this->cobrancaGravada($cobranca->id);
+
+        $contador = self::PREFIXO."tentativas:{$cobranca->id}";
+        Cache::put($contador, (int) Cache::get($contador, 0) + 1, now()->addDays(self::TTL_DIAS));
+
+        if (Cache::pull(self::PREFIXO."aprovar:{$cobranca->id}") === true && $c['estado'] !== EstadoCobranca::Paga->value) {
+            $this->gravarEstado($cobranca->id, EstadoCobranca::Paga);
+        }
+
+        return $this->retrato($cobranca->id);
+    }
+
+    public function cancelSubscription(ReferenciaProvedor $assinatura): void
+    {
+        $this->exigirDisponivel();
+        Cache::put(self::PREFIXO."sub-cancelada:{$assinatura->id}", true, now()->addDays(self::TTL_DIAS));
+    }
+
+    public function listSubscriptionCharges(ReferenciaProvedor $assinatura, DateTimeImmutable $desde): array
+    {
+        $this->exigirDisponivel();
+
+        /** @var list<string> $ids */
+        $ids = Cache::get(self::PREFIXO."sub-pays:{$assinatura->id}", []);
+
+        return array_map(fn (string $id): CobrancaNoProvedor => $this->retrato($id), $ids);
+    }
+
+    public function listCheckoutCharges(ReferenciaProvedor $sessao): array
+    {
+        $this->exigirDisponivel();
+        $id = $this->cobrancaDe($sessao->id);
+        $c = Cache::get(self::PREFIXO."pay:{$id}");
+
+        // No provedor real a cobrança de um checkout só existe depois que alguém paga.
+        return is_array($c) && $c['estado'] !== EstadoCobranca::Pendente->value ? [$this->retrato($id)] : [];
+    }
+
+    /** O provedor sai do ar (rede, 5xx): toda chamada que precisa dele falha até {@see ficarIndisponivel()}(false). */
+    public static function ficarIndisponivel(bool $indisponivel = true): void
+    {
+        $indisponivel ? Cache::put(self::PREFIXO.'indisponivel', true, now()->addDays(self::TTL_DIAS)) : Cache::forget(self::PREFIXO.'indisponivel');
+    }
+
+    /** A próxima retentativa desta cobrança passa (o cliente acertou o cartão). */
+    public static function aprovarProximaTentativa(string $cobrancaId): void
+    {
+        Cache::put(self::PREFIXO."aprovar:{$cobrancaId}", true, now()->addDays(self::TTL_DIAS));
+    }
+
+    public static function tentativasDe(string $cobrancaId): int
+    {
+        return (int) Cache::get(self::PREFIXO."tentativas:{$cobrancaId}", 0);
+    }
+
+    /** @return list<string> ids das cobranças que o provedor gerou para a assinatura */
+    public static function cobrancasDaAssinatura(string $assinaturaId): array
+    {
+        /** @var list<string> $ids */
+        $ids = Cache::get(self::PREFIXO."sub-pays:{$assinaturaId}", []);
+
+        return $ids;
+    }
+
+    public static function assinaturaCancelada(string $assinaturaId): bool
+    {
+        return Cache::get(self::PREFIXO."sub-cancelada:{$assinaturaId}") === true;
+    }
+
+    private function exigirDisponivel(): void
+    {
+        if (Cache::get(self::PREFIXO.'indisponivel') === true) {
+            throw new ProvedorIndisponivel('Provedor fake indisponível (simulado).');
+        }
+    }
+
+    private function indexarDaAssinatura(?string $assinaturaId, string $cobrancaId): void
+    {
+        if ($assinaturaId === null) {
+            return;
+        }
+
+        $chave = self::PREFIXO."sub-pays:{$assinaturaId}";
+        /** @var list<string> $ids */
+        $ids = Cache::get($chave, []);
+        $ids[] = $cobrancaId;
+        Cache::put($chave, array_values(array_unique($ids)), now()->addDays(self::TTL_DIAS));
     }
 
     public function parseWebhook(WebhookBruto $requisicao): EventoDoProvedor
@@ -151,6 +270,25 @@ final class FakePaymentProvider implements PaymentProvider
      */
     public function simularRenovacao(string $checkoutId, ?string $eventoId = null): WebhookBruto
     {
+        $nova = $this->criarCobrancaDeRenovacao($checkoutId, EstadoCobranca::Paga);
+
+        return $this->webhookDaCobranca(TipoEvento::CobrancaPaga, $nova, $eventoId);
+    }
+
+    /** O banco recusa a cobrança do ciclo seguinte: o provedor cria a cobrança, ela não é paga e ele avisa. */
+    public function simularRecusaDeRenovacao(string $checkoutId, ?string $eventoId = null): WebhookBruto
+    {
+        $nova = $this->criarCobrancaDeRenovacao($checkoutId, EstadoCobranca::Vencida);
+
+        return $this->webhookDaCobranca(TipoEvento::CobrancaFalhou, $nova, $eventoId);
+    }
+
+    /**
+     * Cria no provedor a cobrança do ciclo seguinte SEM avisar ninguém (webhook perdido): quem descobre
+     * é a conciliação. Devolve o id da cobrança.
+     */
+    public function criarCobrancaDeRenovacao(string $checkoutId, EstadoCobranca $estado): string
+    {
         /** @var array<string, mixed>|null $origem */
         $origem = Cache::get(self::PREFIXO."pay:{$this->cobrancaDe($checkoutId)}");
         $nova = 'fakepay_'.Str::lower((string) Str::ulid());
@@ -160,18 +298,36 @@ final class FakePaymentProvider implements PaymentProvider
             'checkout' => null,
             'referencia' => null,
             'valor' => is_array($origem) ? $origem['valor'] : 0,
-            'estado' => EstadoCobranca::Paga->value,
-            'pago_em' => now()->toIso8601String(),
+            'estado' => $estado->value,
+            'pago_em' => $estado === EstadoCobranca::Paga ? now()->toIso8601String() : null,
             'assinatura' => $assinatura,
-        ], now()->addDays(2));
+            'vencimento' => now()->toDateString(),
+        ], now()->addDays(self::TTL_DIAS));
+        $this->indexarDaAssinatura(is_string($assinatura) ? $assinatura : null, $nova);
+
+        return $nova;
+    }
+
+    /** O banco confirma uma cobrança que já existia (por exemplo, a que a régua retentou). */
+    public function simularPagamentoDaCobranca(string $cobrancaId, ?string $eventoId = null): WebhookBruto
+    {
+        $this->gravarEstado($cobrancaId, EstadoCobranca::Paga);
+
+        return $this->webhookDaCobranca(TipoEvento::CobrancaPaga, $cobrancaId, $eventoId);
+    }
+
+    /** Webhook de qualquer tipo para uma cobrança de assinatura (sem checkout). */
+    public function webhookDaCobranca(TipoEvento $tipo, string $cobrancaId, ?string $eventoId = null): WebhookBruto
+    {
+        $c = $this->cobrancaGravada($cobrancaId);
 
         return new WebhookBruto(
             [self::CABECALHO_TOKEN => $this->token(), 'content-type' => 'application/json'],
             (string) json_encode([
                 'id' => $eventoId ?? 'fakeevt_'.Str::lower((string) Str::ulid()),
-                'tipo' => TipoEvento::CobrancaPaga->value,
-                'cobranca_id' => $nova,
-                'assinatura_id' => $assinatura,
+                'tipo' => $tipo->value,
+                'cobranca_id' => $cobrancaId,
+                'assinatura_id' => $c['assinatura'] ?? null,
             ]),
         );
     }
@@ -220,7 +376,12 @@ final class FakePaymentProvider implements PaymentProvider
 
     private function mudarEstado(string $checkoutId, EstadoCobranca $estado): void
     {
-        $chave = self::PREFIXO."pay:{$this->cobrancaDe($checkoutId)}";
+        $this->gravarEstado($this->cobrancaDe($checkoutId), $estado);
+    }
+
+    private function gravarEstado(string $cobrancaId, EstadoCobranca $estado): void
+    {
+        $chave = self::PREFIXO."pay:{$cobrancaId}";
         $c = Cache::get($chave);
 
         if (! is_array($c)) {
@@ -229,7 +390,7 @@ final class FakePaymentProvider implements PaymentProvider
 
         $c['estado'] = $estado->value;
         $c['pago_em'] = $estado === EstadoCobranca::Paga ? now()->toIso8601String() : $c['pago_em'];
-        Cache::put($chave, $c, now()->addDays(2));
+        Cache::put($chave, $c, now()->addDays(self::TTL_DIAS));
     }
 
     private function token(): string

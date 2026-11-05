@@ -14,6 +14,7 @@ use App\Domain\Cobranca\PedidoCheckout;
 use App\Domain\Cobranca\ProvedorIndisponivel;
 use App\Domain\Cobranca\ReferenciaProvedor;
 use App\Domain\Cobranca\SessaoCheckout;
+use App\Domain\Cobranca\TentativaNaoRealizada;
 use App\Domain\Cobranca\TipoEvento;
 use App\Domain\Cobranca\WebhookBruto;
 use App\Domain\Cobranca\WebhookInvalido;
@@ -61,6 +62,8 @@ final class AsaasPaymentProvider implements PaymentProvider
     ];
 
     private const CHAVES_DE_CARTAO = ['creditCard', 'creditCardToken', 'creditCardNumber', 'creditCardBrand'];
+
+    private const PAGINA = 100;
 
     private string $baseUrl;
 
@@ -134,19 +137,100 @@ final class AsaasPaymentProvider implements PaymentProvider
     public function getCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
     {
         $r = $this->enviar('get', '/payments/'.rawurlencode($cobranca->id));
-        $valor = $r->json('value');
-        $pago = $r->json('paymentDate') ?? $r->json('confirmedDate');
+
+        return $this->cobranca($cobranca, (array) $r->json());
+    }
+
+    /**
+     * STORY-079 — o Asaas tenta o cartão no vencimento da cobrança (doc: FAQ de assinaturas) e não
+     * documenta retentativa nem endpoint para forçá-la sem o cartão. Por isso a retentativa reagenda a
+     * MESMA cobrança para hoje (`PUT /payments/{id}` com `dueDate`), o que nunca cria cobrança nova.
+     * Se o Asaas recusar o reagendamento (4xx, ex.: cobrança não editável) a tentativa não fez nada e
+     * vira `TentativaNaoRealizada`: a régua conta como tentativa sem sucesso, com alerta. Rede e 5xx
+     * continuam sendo `ProvedorIndisponivel`.
+     */
+    public function retryCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
+    {
+        $hoje = (new DateTimeImmutable('now', new DateTimeZone('America/Sao_Paulo')))->format('Y-m-d');
+        $r = $this->requisitar('put', '/payments/'.rawurlencode($cobranca->id), ['dueDate' => $hoje]);
+
+        if ($r->failed() && $r->serverError()) {
+            throw $this->indisponibilidade($r);
+        }
+
+        if ($r->failed()) {
+            throw new TentativaNaoRealizada("O Asaas recusou reagendar a cobrança (HTTP {$r->status()}).");
+        }
+
+        return $this->getCharge($cobranca);
+    }
+
+    public function cancelSubscription(ReferenciaProvedor $assinatura): void
+    {
+        $r = $this->requisitar('delete', '/subscriptions/'.rawurlencode($assinatura->id));
+
+        // Já removida lá (404) é o resultado desejado.
+        if ($r->failed() && $r->status() !== 404) {
+            throw $this->indisponibilidade($r);
+        }
+    }
+
+    public function listSubscriptionCharges(ReferenciaProvedor $assinatura, DateTimeImmutable $desde): array
+    {
+        return $this->listar('/subscriptions/'.rawurlencode($assinatura->id).'/payments', ['dateCreated[ge]' => $desde->format('Y-m-d')], fn (array $p): bool => ($p['subscription'] ?? null) === $assinatura->id);
+    }
+
+    public function listCheckoutCharges(ReferenciaProvedor $sessao): array
+    {
+        // O filtro `checkoutSession` do Asaas não está documentado como garantido: o filtro local
+        // abaixo impede que cobranças de outro checkout entrem se ele for ignorado.
+        return $this->listar('/payments', ['checkoutSession' => $sessao->id], fn (array $p): bool => ($p['checkoutSession'] ?? null) === $sessao->id);
+    }
+
+    /**
+     * @param  array<string, string>  $filtros  vão como query string (num GET o corpo do cliente É a query)
+     * @param  callable(array<string, mixed>): bool  $pertence
+     * @return list<CobrancaNoProvedor>
+     */
+    private function listar(string $caminho, array $filtros, callable $pertence): array
+    {
+        $achadas = [];
+        $offset = 0;
+
+        do {
+            $r = $this->enviar('get', $caminho, [...$filtros, 'limit' => self::PAGINA, 'offset' => $offset]);
+
+            foreach ((array) $r->json('data') as $p) {
+                if (is_array($p) && is_string($p['id'] ?? null) && $pertence($p)) {
+                    $achadas[] = $this->cobranca(new ReferenciaProvedor(self::NOME, $p['id']), $p);
+                }
+            }
+
+            $offset += self::PAGINA;
+        } while ($r->json('hasMore') === true && $offset < self::PAGINA * 50);
+
+        return $achadas;
+    }
+
+    /** @param array<array-key, mixed> $r */
+    private function cobranca(ReferenciaProvedor $referencia, array $r): CobrancaNoProvedor
+    {
+        $valor = $r['value'] ?? null;
+        $pago = $r['paymentDate'] ?? $r['confirmedDate'] ?? null;
+        $cartao = is_array($r['creditCard'] ?? null) ? $r['creditCard'] : [];
+        $vence = $r['dueDate'] ?? null;
 
         return new CobrancaNoProvedor(
-            $cobranca,
-            $this->estado((string) $r->json('status'), (bool) $r->json('deleted')),
+            $referencia,
+            $this->estado((string) ($r['status'] ?? ''), (bool) ($r['deleted'] ?? false)),
             is_numeric($valor) ? (int) round(((float) $valor) * 100) : 0,
-            $this->texto($r->json('checkoutSession')),
-            $this->texto($r->json('externalReference')),
+            $this->texto($r['checkoutSession'] ?? null),
+            $this->texto($r['externalReference'] ?? null),
             is_string($pago) && $pago !== '' ? new DateTimeImmutable($pago) : null,
-            $this->texto($r->json('subscription')),
-            $this->bandeira($r->json('creditCard.creditCardBrand')),
-            $this->ultimos4($r->json('creditCard.creditCardNumber')),
+            $this->texto($r['subscription'] ?? null),
+            $this->bandeira($cartao['creditCardBrand'] ?? null),
+            $this->ultimos4($cartao['creditCardNumber'] ?? null),
+            is_string($vence) && $vence !== '' ? new DateTimeImmutable($vence) : null,
         );
     }
 
@@ -237,29 +321,49 @@ final class AsaasPaymentProvider implements PaymentProvider
     /** @param array<string, mixed>|null $corpo */
     private function enviar(string $metodo, string $caminho, ?array $corpo = null): Response
     {
+        $r = $this->requisitar($metodo, $caminho, $corpo);
+
+        if ($r->failed()) {
+            throw $this->indisponibilidade($r);
+        }
+
+        return $r;
+    }
+
+    /**
+     * Faz a chamada e devolve a resposta mesmo com HTTP de erro; só rede e timeout viram exceção.
+     *
+     * @param  array<string, mixed>|null  $corpo
+     */
+    private function requisitar(string $metodo, string $caminho, ?array $corpo = null): Response
+    {
         try {
-            $r = $this->cliente()->{$metodo}($caminho, $corpo ?? []);
+            return $this->cliente()->{$metodo}($caminho, $corpo ?? []);
         } catch (ConnectionException) {
             throw new ProvedorIndisponivel('O Asaas não respondeu a tempo.');
         } catch (Throwable $e) {
             throw new ProvedorIndisponivel('Falha ao falar com o Asaas: '.$e::class);
         }
+    }
 
-        if ($r->failed()) {
-            $codigos = [];
+    private function indisponibilidade(Response $r): ProvedorIndisponivel
+    {
+        $codigos = $this->codigosDeErro($r);
 
-            foreach ((array) ($r->json('errors') ?? []) as $erro) {
-                if (is_array($erro) && is_string($erro['code'] ?? null)) {
-                    $codigos[] = $erro['code'];
-                }
+        return new ProvedorIndisponivel("O Asaas respondeu HTTP {$r->status()}".($codigos !== '' ? " ({$codigos})" : '').'.');
+    }
+
+    private function codigosDeErro(Response $r): string
+    {
+        $codigos = [];
+
+        foreach ((array) ($r->json('errors') ?? []) as $erro) {
+            if (is_array($erro) && is_string($erro['code'] ?? null)) {
+                $codigos[] = $erro['code'];
             }
-
-            $codigos = implode(',', $codigos);
-
-            throw new ProvedorIndisponivel("O Asaas respondeu HTTP {$r->status()}".($codigos !== '' ? " ({$codigos})" : '').'.');
         }
 
-        return $r;
+        return implode(',', $codigos);
     }
 
     private function cliente(): PendingRequest

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Cobranca\CicloCobranca;
 use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PedidoCheckout;
@@ -86,4 +87,85 @@ it('deriva um token estável da chave da aplicação quando nenhum é configurad
 
     expect($a->parseWebhook((new FakePaymentProvider(''))->webhook(TipoEvento::CobrancaPaga, $sessao->referencia->id))->tipo)
         ->toBe(TipoEvento::CobrancaPaga);
+});
+
+// STORY-079 — gatilhos do fake para retentativa, cancelamento, listagem e indisponibilidade.
+describe('STORY-079', function () {
+    afterEach(fn () => FakePaymentProvider::ficarIndisponivel(false));
+
+    function _fakeComAssinatura(FakePaymentProvider $fake): array
+    {
+        $pedido = new PedidoCheckout('33333333-3333-4333-8333-333333333333', 'Plano', 4990, [MeioPagamento::Cartao], 30, 'https://app/ok', 'https://app/c', 'https://app/e', CicloCobranca::Mensal);
+        $sessao = $fake->startCheckout($pedido);
+        $fake->simularPagamento($sessao->referencia->id);
+        $c = $fake->getCharge(new ReferenciaProvedor('fake', 'fakepay_'.substr($sessao->referencia->id, strlen('fakechk_'))));
+
+        return [$sessao, $c];
+    }
+
+    it('a retentativa não cria cobrança, conta a tentativa e só paga quando o teste manda', function () {
+        $fake = new FakePaymentProvider('token-fake');
+        [$sessao, $paga] = _fakeComAssinatura($fake);
+        $nova = $fake->criarCobrancaDeRenovacao($sessao->referencia->id, EstadoCobranca::Vencida);
+        $ref = new ReferenciaProvedor('fake', $nova);
+        $antes = count(FakePaymentProvider::cobrancasDaAssinatura((string) $paga->assinaturaId));
+
+        expect($fake->retryCharge($ref)->estado)->toBe(EstadoCobranca::Vencida);
+
+        FakePaymentProvider::aprovarProximaTentativa($nova);
+        expect($fake->retryCharge($ref)->estado)->toBe(EstadoCobranca::Paga)
+            ->and($fake->retryCharge($ref)->estado)->toBe(EstadoCobranca::Paga)
+            ->and(FakePaymentProvider::tentativasDe($nova))->toBe(3)
+            ->and(count(FakePaymentProvider::cobrancasDaAssinatura((string) $paga->assinaturaId)))->toBe($antes);
+    });
+
+    it('lista as cobranças da assinatura e a do checkout só depois que existe pagamento ou recusa', function () {
+        $fake = new FakePaymentProvider('token-fake');
+        $sessao = $fake->startCheckout(_pedidoFake('44444444-4444-4444-8444-444444444444'));
+        expect($fake->listCheckoutCharges($sessao->referencia))->toBe([]);
+
+        $fake->simularPagamento($sessao->referencia->id);
+        expect($fake->listCheckoutCharges($sessao->referencia))->toHaveCount(1);
+
+        [$s, $paga] = _fakeComAssinatura($fake);
+        $fake->criarCobrancaDeRenovacao($s->referencia->id, EstadoCobranca::Pendente);
+        expect($fake->listSubscriptionCharges(new ReferenciaProvedor('fake', (string) $paga->assinaturaId), new DateTimeImmutable('-1 day')))->toHaveCount(2);
+    });
+
+    it('cancela a recorrência e lembra que cancelou', function () {
+        $fake = new FakePaymentProvider('token-fake');
+        [, $paga] = _fakeComAssinatura($fake);
+
+        expect(FakePaymentProvider::assinaturaCancelada((string) $paga->assinaturaId))->toBeFalse();
+        $fake->cancelSubscription(new ReferenciaProvedor('fake', (string) $paga->assinaturaId));
+        expect(FakePaymentProvider::assinaturaCancelada((string) $paga->assinaturaId))->toBeTrue();
+    });
+
+    it('indisponível: toda chamada que precisa do provedor falha até ele voltar', function () {
+        $fake = new FakePaymentProvider('token-fake');
+        [$sessao, $paga] = _fakeComAssinatura($fake);
+        $ref = new ReferenciaProvedor('fake', $paga->referencia->id);
+        FakePaymentProvider::ficarIndisponivel();
+
+        foreach ([
+            fn () => $fake->getCharge($ref),
+            fn () => $fake->retryCharge($ref),
+            fn () => $fake->cancelSubscription(new ReferenciaProvedor('fake', 'fakesub_x')),
+            fn () => $fake->listSubscriptionCharges(new ReferenciaProvedor('fake', 'fakesub_x'), new DateTimeImmutable),
+            fn () => $fake->listCheckoutCharges($sessao->referencia),
+        ] as $chamada) {
+            expect($chamada)->toThrow(ProvedorIndisponivel::class, 'indisponível');
+        }
+
+        FakePaymentProvider::ficarIndisponivel(false);
+        expect($fake->getCharge($ref)->estado)->toBe(EstadoCobranca::Paga);
+    });
+
+    it('cobrança de renovação perdida e webhook de cobrança desconhecida', function () {
+        $fake = new FakePaymentProvider('token-fake');
+        [$sessao] = _fakeComAssinatura($fake);
+
+        expect($fake->criarCobrancaDeRenovacao($sessao->referencia->id, EstadoCobranca::Paga))->toStartWith('fakepay_')
+            ->and(fn () => $fake->webhookDaCobranca(TipoEvento::CobrancaPaga, 'fakepay_inexistente'))->toThrow(ProvedorIndisponivel::class);
+    });
 });
