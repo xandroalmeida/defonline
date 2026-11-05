@@ -30,8 +30,12 @@ beforeEach(function () {
  * O caminho da retificação (STORY-050): aponta a vigente para a nova versão e só então insere a nova.
  * Inserir primeiro violaria o índice único parcial; a FK adiada permite esta ordem.
  */
-function trocarVersao(DrmLancamento $atual, int $versao, array $payload): DrmLancamento
+function trocarVersao(DrmLancamento $atual, int $versao, array $alteracao): DrmLancamento
 {
+    // A nova versão parte do payload da anterior com a alteração aplicada: o snapshot nasce do motor
+    // sobre esse payload (STORY-048), então ele precisa ser um payload de verdade.
+    $payload = [...$atual->lancamento_payload->getArrayCopy(), ...$alteracao];
+
     return DB::transaction(function () use ($atual, $versao, $payload) {
         $id = (string) Str::uuid7();
         $atual->update(['substituido_por_id' => $id]);
@@ -71,7 +75,7 @@ describe('drm_lancamentos', function () {
 
     it('a cadeia de versões: v1 apontada para a v2 deixa de ser vigente', function () {
         $v1 = DrmLancamento::factory()->create(['empresa_analisada_id' => $this->empresa->id]);
-        $v2 = trocarVersao($v1, 2, ['x' => '1.00']);
+        $v2 = trocarVersao($v1, 2, ['D40' => '1.00']);
 
         expect(DrmLancamento::vigenteDaCompetencia($this->empresa, '2026-09-01')?->id)->toBe($v2->id)
             ->and(DrmLancamento::query()->vigente()->count())->toBe(1);
@@ -106,8 +110,8 @@ describe('drm_lancamentos', function () {
 
     it('o ponteiro de vigência vai de NULL para um id e nunca é reescrito', function () {
         $v1 = DrmLancamento::factory()->create(['empresa_analisada_id' => $this->empresa->id]);
-        $v2 = trocarVersao($v1, 2, ['x' => '1.00']);
-        $v3 = trocarVersao($v2, 3, ['x' => '2.00']);
+        $v2 = trocarVersao($v1, 2, ['D40' => '1.00']);
+        $v3 = trocarVersao($v2, 3, ['D40' => '2.00']);
 
         expect(fn () => $v1->update(['substituido_por_id' => $v3->id]))->toThrow(LogicException::class, 'ponteiro')
             ->and(fn () => $v1->update(['substituido_por_id' => null]))->toThrow(LogicException::class);

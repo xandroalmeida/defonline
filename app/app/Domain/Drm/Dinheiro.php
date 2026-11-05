@@ -61,17 +61,21 @@ final class Dinheiro
         return [self::OK, $centavos];
     }
 
-    /** `1234.56` — forma canônica do payload e do hash. */
+    /** `1234.56` (ou `-1234.56`) — forma canônica do payload, do hash e do snapshot. */
     public static function decimal(int $centavos): string
     {
-        return intdiv($centavos, 100).'.'.str_pad((string) ($centavos % 100), 2, '0', STR_PAD_LEFT);
+        $abs = abs($centavos);
+
+        return ($centavos < 0 ? '-' : '').intdiv($abs, 100).'.'.str_pad((string) ($abs % 100), 2, '0', STR_PAD_LEFT);
     }
 
     public static function deDecimal(string $decimal): int
     {
-        [$inteiro, $fracao] = array_pad(explode('.', $decimal), 2, '0');
+        $negativo = str_starts_with($decimal, '-');
+        [$inteiro, $fracao] = array_pad(explode('.', ltrim($decimal, '-')), 2, '0');
+        $centavos = (int) $inteiro * 100 + (int) str_pad(substr($fracao, 0, 2), 2, '0');
 
-        return (int) $inteiro * 100 + (int) str_pad(substr($fracao, 0, 2), 2, '0');
+        return $negativo ? -$centavos : $centavos;
     }
 
     /** `1.234,56` — o que o campo mascarado exibe. */

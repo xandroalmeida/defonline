@@ -74,10 +74,14 @@ it('CA-10 — o diretório do provisório carrega o README que explica como prom
 
 it('CA-10 — `conteudo_version` é separada de `motor_drm_version`', function () {
     // Confundi-las produz recálculo indevido: promover texto nunca pode
-    // parecer mudança de motor (IDR-010, ADR-007).
-    expect(config('drm.conteudo_version'))->toBeString()->not->toBe('')
-        ->and(config('drm.motor_drm_version'))->toBeString()->not->toBe('')
-        ->and(config('drm.conteudo_version'))->not->toBe(config('drm.motor_drm_version'));
+    // parecer mudança de motor (IDR-010, ADR-007). São duas chaves, ambas semver.
+    // Antes da STORY-048 a separação era provada por os valores diferirem (0.0.0 x 1.0.0);
+    // com o motor em 1.0.0 igualar valores é coincidência de numeração, não confusão, então a
+    // prova passa a ser a independência real: o motor não lê `conteudo_version`
+    // (MotorDrmVersaoTest cobre o resto).
+    expect(config('drm.conteudo_version'))->toMatch('/^\d+\.\d+\.\d+$/')
+        ->and(config('drm.motor_drm_version'))->toMatch('/^\d+\.\d+\.\d+$/')
+        ->and((string) file_get_contents(app_path('Domain/Drm/MotorDrm.php')))->not->toContain('conteudo_version');
 });
 
 it('CA-8 — cada arquivo de conteúdo carrega a própria versão', function () {

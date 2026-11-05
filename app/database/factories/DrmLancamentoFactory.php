@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Domain\Drm\Competencia;
 use App\Domain\Drm\Grupo;
 use App\Domain\Drm\Lancamento;
 use App\Domain\Drm\LancamentoCanonicalizer;
 use App\Domain\Drm\Modo;
+use App\Domain\Drm\MotorDrm;
 use App\Domain\Drm\Setor;
 use App\Models\DrmLancamento;
 use App\Models\EmpresaAnalisada;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -41,10 +44,16 @@ final class DrmLancamentoFactory extends Factory
             'setor' => Setor::Comercio->value,
             'lancamento_payload' => fn (array $atributos) => $this->payloadPadrao(Setor::tryFrom($atributos['setor']) ?? Setor::Comercio),
             'payload_hash' => fn (array $atributos) => LancamentoCanonicalizer::hash($atributos['lancamento_payload']),
-            'demonstracao' => [],
-            'alertas_aceitos' => [],
-            'motor_drm_version' => '0.0.0',
             'gerado_em' => now(),
+            // O snapshot que o motor produziria para o próprio payload (o CHECK da tabela o exige).
+            'demonstracao' => fn (array $atributos) => app(MotorDrm::class)->calcular(
+                $atributos['lancamento_payload'],
+                Setor::tryFrom($atributos['setor']) ?? Setor::Comercio,
+                Competencia::deData(CarbonImmutable::parse((string) $atributos['competencia'])),
+                CarbonImmutable::parse($atributos['gerado_em']),
+            ),
+            'alertas_aceitos' => [],
+            'motor_drm_version' => fn (array $atributos) => $atributos['demonstracao']['motor_drm_version'],
         ];
     }
 

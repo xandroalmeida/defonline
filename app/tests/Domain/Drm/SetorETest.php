@@ -128,3 +128,11 @@ describe('Dinheiro', function () {
             ->and(Dinheiro::brl(99))->toBe('R$ 0,99');
     });
 });
+
+it('serializa e lê centavos negativos (STORY-048: prejuízo)', function () {
+    expect(Dinheiro::decimal(-2550))->toBe('-25.50')
+        ->and(Dinheiro::decimal(-5))->toBe('-0.05')
+        ->and(Dinheiro::deDecimal('-25.50'))->toBe(-2550)
+        ->and(Dinheiro::deDecimal('-0.05'))->toBe(-5)
+        ->and(Dinheiro::deDecimal(Dinheiro::decimal(-123456)))->toBe(-123456);
+});

@@ -701,7 +701,7 @@ describe('CA-10 — persistência', function () {
             ->and($l->substituido_por_id)->toBeNull()
             ->and($l->competencia->format('Y-m-d'))->toBe('2026-10-01')
             ->and($l->setor)->toBe('comercio')
-            ->and($l->motor_drm_version)->toBe('0.0.0')
+            ->and($l->motor_drm_version)->toBe('1.0.0')
             ->and($l->usuario_id)->toBe($this->usuario->id)
             ->and($l->lancamento_payload['D01'])->toBe('10000.00')
             ->and($l->lancamento_payload['D05'])->toBeNull();
