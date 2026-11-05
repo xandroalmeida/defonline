@@ -7,8 +7,8 @@ sprint_id: null
 type: spike
 target_role: arquiteto
 requires_design: false
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: arquiteto
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: M
@@ -83,12 +83,34 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 
 ### Decisões tomadas
 
+- ADR-010 (`proposed`): `decisions/adr/ADR-010-abstracao-provedor-pagamento-asaas.md`. Cartão e Pix por Asaas Checkout hospedado; interface `PaymentProvider` com eventos canônicos; webhook com `asaas-access-token`, `provider_events` único por evento, `SEQUENTIALLY`, conferência do estado atual antes de agir e conciliação horária/diária; Fake para a suíte; desconto do Asaas **não usado** (enviamos sempre o valor final).
+- `arquitetura-tecnica.md` §3.2 e §4.1 ajustados (provedor + id_externo, PaymentCustomer, CheckoutSession, ProviderEvent, Refund; sem token de cartão).
+
 ### Descobertas
+
+- Pix em `POST /payments` não expira em 30 min (QR vale vencimento + 12 meses); só o Checkout aceita `minutesToExpire` (10 a 1440).
+- Checkout recorrente só aceita cartão; Pix anual = Checkout Pix avulso por ano (ou Pix Automático, não avaliado).
+- Mínimo R$ 5,00 em Pix, cartão e "pergunte ao cliente", calculado depois do desconto.
+- Desconto é descartado em cobrança de cartão (sandbox); desconto de Pix não é testável no sandbox (doc).
+- Estorno de cartão: total OK, parcial só no dia seguinte. Estorno Pix: fica aguardando autorização por token (ação crítica), não documentado na página de estorno.
+- O Asaas não documenta chave de idempotência de saída nem retentativa de cartão recusado em assinatura.
+- Eventos pendentes de webhook são guardados por até 14 dias; reenvio não é documentado.
 
 ### Bloqueios encontrados
 
+Nenhum bloqueio. **Pendências de confirmação (por isso o ADR segue `proposed`):** pagamento real no Checkout e recebimento de webhook (exige URL pública de sandbox); expiração efetiva de 30 min; retentativa de cartão recusado; busca por `externalReference`; Checkout `YEARLY` e cartão avulso; dados de cartão devolvidos pelo Checkout; estorno Pix e mínimo em produção; enquadramento formal de SAQ. Detalhe e passo de fechamento na seção "Pendências" do ADR.
+
+**Perguntas ao PO (Q1 a Q7, texto completo no ADR):** Q1 aceita checkout hospedado; Q2 estorno Pix manual; Q3 renovação anual no Pix por novo Pix; Q4 regra de cupom (valor final, abaixo de R$ 5 ou 100%); Q5 régua própria de retentativa; Q6 troca de cartão por novo checkout; Q7 habilitações no Asaas em produção.
+
 ### IDRs criados
+
+Nenhum.
 
 ### Cobertura final
 
+Estória de documentação: sem código de aplicação. CA-1, 2, 3, 5, 6 e 7 descritos no ADR. CA-4: itens verificados no sandbox e itens marcados PENDENTE DE CONFIRMAÇÃO (tabela do ADR §4). CA-2 e CA-3 dependem em parte das pendências 1, 6 e 7.
+
 ### Evidências
+
+- `scripts/asaas-sandbox-verificar.sh` (lê `ASAAS_SANDBOX_API_KEY` do ambiente, só host de sandbox, limpa o que cria). Execuções de 2026-11-05: 42 s e 44 s, saída "RESULTADO ..." por item; dados de teste removidos.
+- Fontes oficiais citadas por URL em cada afirmação do ADR.

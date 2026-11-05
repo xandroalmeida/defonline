@@ -145,13 +145,13 @@ Banco relacional **PostgreSQL** é o modelo natural para o domínio (usuários, 
 **Propósito:** processar pagamentos via Pix (à vista) e cartão de crédito (recorrente).
 
 **Características esperadas do gateway:**
-- Tokenização do cartão (a plataforma **nunca** armazena número, CVV ou validade em plain text — apenas token opaco).
-- API para criar cobrança única (Pix) e assinatura recorrente (cartão).
+- O cartão é digitado numa página hospedada do provedor (Checkout); a plataforma **nunca** recebe, armazena nem loga número, CVV ou validade, e não guarda token de cartão (ADR-010).
+- API para criar sessão de pagamento avulsa (Pix ou cartão) e recorrente (cartão), com expiração configurável do Pix.
 - Webhook de notificação para confirmação de pagamento, falha e cancelamento — a plataforma mantém endpoint dedicado para consumir esses eventos.
 - Suporte a reembolsos (política de arrependimento de 7 dias).
 - Emissão de nota fiscal é responsabilidade da EB Parcerias (backoffice futuro); a integração com API de NFSe/NFe fica no roadmap.
 
-**Provedor específico:** `[A DEFINIR]` na spec de construção. Critérios de escolha: suporte a Pix recorrente futuro, preço por transação, qualidade da API, suporte no Brasil.
+**Provedor:** Asaas (PDR-020), atrás da interface `PaymentProvider` e de eventos canônicos; contrato, webhook, conciliação e ambientes em **ADR-010** (`proposed`). O adaptador do Asaas é o único código que conhece tipos do provedor.
 
 ### 3.3 Provedor de E-mail Transacional `[A DEFINIR]`
 
@@ -274,7 +274,7 @@ Banco relacional **PostgreSQL** é o modelo natural para o domínio (usuários, 
 - data_alteracao
 - alterado_por_usuario_id
 
-> Settings cobrem parâmetros operacionais que não pertencem a uma entidade própria: expiração do QR Pix (default 30), expiração de rascunho (default 90 dias — item 6.4), política de não-acúmulo da cota (default `false`), SLA da análise de captação (default 5 dias úteis), limite caractere recomendação (default 300), etc.
+> Settings cobrem parâmetros operacionais que não pertencem a uma entidade própria: expiração do QR Pix (default 30; faixa válida 10–1440 do Checkout Asaas), expiração de rascunho (default 90 dias — item 6.4), política de não-acúmulo da cota (default `false`), SLA da análise de captação (default 5 dias úteis), limite caractere recomendação (default 300), etc.
 
 **Subscription** *(assinatura — vinculada ao Usuário)*
 - id, usuario_id, plan_id (FK para Plan)
@@ -285,24 +285,39 @@ Banco relacional **PostgreSQL** é o modelo natural para o domínio (usuários, 
 - **cota_snapshot** (integer — cota do plano no momento da contratação ou renovação)
 - cota_restante_ciclo
 - meio_pagamento_id
+- provedor, id_externo_assinatura (nullable até a conclusão do checkout) — `UNIQUE (provedor, id_externo_assinatura)`
 
 **PaymentMethod** *(vinculado ao Usuário)*
 - id, usuario_id
 - tipo (Cartão | Pix)
-- token (quando cartão — referência no gateway)
-- ultimos_4_digitos (se cartão)
-- bandeira (se cartão)
-- titular (nome)
+- provedor, id_externo (nullable — a plataforma não guarda token de cartão; ADR-010)
+- ultimos_4_digitos, bandeira (se cartão e se o provedor informar)
 - status (Ativo | Expirado | Removido)
+
+**PaymentCustomer** *(cliente no provedor — ADR-010)*
+- id, usuario_id, provedor, id_externo — `UNIQUE (provedor, id_externo)`
+
+**CheckoutSession** *(sessão de pagamento hospedada — ADR-010)*
+- id (interno, enviado ao provedor como `externalReference`), usuario_id, invoice_id, provedor, id_externo, url
+- tipo (Avulsa | Recorrente), meios (Cartão, Pix), valor_centavos (valor final, já com cupom)
+- status (Ativa | Concluída | Expirada | Cancelada), expira_em
+
+**ProviderEvent** *(evento recebido do provedor — idempotência e reprocessamento; ADR-010)*
+- id, provedor, evento_id (`UNIQUE (provedor, evento_id)`), tipo, payload (jsonb, sem dado de cartão)
+- status (Recebido | Processado | Ignorado | Erro), recebido_em, processado_em
+
+**Refund**
+- id, invoice_id, provedor, id_externo, valor_centavos, motivo
+- status (Pendente | Aguardando autorização | Concluído | Recusado)
 
 **Invoice / Transaction** *(vinculada ao Usuário pagante)*
 - id, usuario_id, subscription_id (nullable — créditos avulsos não têm subscription)
 - tipo (Assinatura | Crédito)
 - valor, moeda
-- status (Pendente | Paga | Falhou | Estornada)
+- status (Pendente | Paga | Vencida | Falhou | Cancelada | Estornada | Estornada Parcial | Contestada)
 - data_vencimento, data_pagamento
 - meio_pagamento_id
-- id_externo_gateway
+- provedor, id_externo — `UNIQUE (provedor, id_externo)` (substitui `id_externo_gateway`)
 - nota_fiscal_emitida (bool)
 
 **CreditLot** (lotes FIFO — vinculados ao Usuário)
