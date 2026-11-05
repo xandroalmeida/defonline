@@ -80,6 +80,8 @@ PK `id uuid`. FK `usuario_id → usuarios` (RESTRICT). **UNIQUE parcial** `(usua
 | `data_fundacao` | date / `enriquecido_at` timestamptz | |
 | `ficha_rfb` | jsonb | nullable — ficha RFB completa (natureza, porte, capital, CNAEs secundários, endereço, sócios, `simples`/`simei`). Só escrita por consulta à Receita (PDR-010, STORY-063); null em CPF e em empresas anteriores à STORY-063 |
 | `observacoes` | text | nullable — anotações livres do usuário (até 2.000 caracteres, validado na app) |
+| `email` | varchar(255) | nullable — contato da empresa, informado pelo usuário (PDR-019) |
+| `telefone` | varchar(11) | nullable — telefone/WhatsApp da empresa, só dígitos (PDR-019) |
 | `personificado_por_id` | uuid | nullable, FK `usuarios` (RESTRICT) — admin da última gravação pelo "Logar como" (STORY-066); null se o próprio usuário gravou por último |
 
 ### `quiz_rascunhos` — rascunhos do quiz (23 campos, Anexo A)

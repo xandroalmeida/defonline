@@ -85,6 +85,8 @@
                 </x-empresa.ficha-rfb>
 
                 <form wire:submit="confirmar" novalidate class="flex flex-col gap-4 mt-6 pt-6 border-t border-[color:var(--color-border)]">
+                    <x-empresa.campos-contato/>
+
                     <div>
                         <x-label for="observacoes">
                             Observações <span class="normal-case font-normal tracking-normal text-[color:var(--color-secondary)]">(opcional — suas anotações sobre a empresa)</span>
@@ -221,6 +223,8 @@
                     <p class="text-[color:var(--color-destructive)] text-sm mt-1 mb-0" dusk="erro-data-fundacao">{{ $message }}</p>
                 @enderror
             </div>
+
+            <x-empresa.campos-contato/>
 
             <div>
                 <x-label for="observacoes">

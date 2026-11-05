@@ -91,6 +91,10 @@
     </x-card>
 
     <x-card class="mt-6">
+        <livewire:empresa.contato :empresa="$empresa"/>
+    </x-card>
+
+    <x-card class="mt-6">
         <livewire:empresa.observacoes :empresa="$empresa"/>
     </x-card>
 

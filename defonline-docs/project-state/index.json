@@ -2749,6 +2749,21 @@
           "IDR-010"
         ],
         "note": "Revê o PDR-016 §1 e §7, o PDR-006 §2 e a espec §4.5."
+      },
+      {
+        "id": "PDR-019",
+        "slug": "contato-da-empresa",
+        "title": "E-mail e telefone/WhatsApp da empresa, opcionais",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-019-contato-da-empresa.md",
+        "decided_at": "2026-11-05",
+        "decided_by": "PO (Alexandro / Claude)",
+        "related_epics": [
+          "EPIC-001"
+        ],
+        "related_adrs": [],
+        "related_idrs": [],
+        "note": "Complementa a PDR-010."
       }
     ],
     "adr": [

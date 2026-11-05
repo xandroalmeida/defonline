@@ -50,6 +50,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $enriquecido_at
  * @property array<string, mixed>|null $ficha_rfb
  * @property string|null $observacoes
+ * @property string|null $email
+ * @property string|null $telefone
  * @property Carbon|null $deleted_at
  */
 #[Fillable([
@@ -68,6 +70,8 @@ use Illuminate\Support\Carbon;
     'enriquecido_at',
     'ficha_rfb',
     'observacoes',
+    'email',
+    'telefone',
 ])]
 #[ScopedBy([BelongsToUsuarioScope::class])]
 final class EmpresaAnalisada extends Model
@@ -163,6 +167,18 @@ final class EmpresaAnalisada extends Model
     public function fichaRfb(): ?FichaRfb
     {
         return is_array($this->ficha_rfb) ? FichaRfb::fromArray($this->ficha_rfb) : null;
+    }
+
+    /** `11988887777` → `(11) 98888-7777`; null sem telefone. */
+    public function telefoneFormatado(): ?string
+    {
+        if ($this->telefone === null) {
+            return null;
+        }
+
+        $meio = strlen($this->telefone) - 6;
+
+        return '('.substr($this->telefone, 0, 2).') '.substr($this->telefone, 2, $meio).'-'.substr($this->telefone, -4);
     }
 
     public function ufEnum(): Uf

@@ -15,6 +15,8 @@ related_idrs: [IDR-004, IDR-005]
 # PDR-010 — Cadastro de Empresa Analisada começa pelo CNPJ; dados da Receita são imutáveis e completos
 
 > **Complementada pela PDR-017 (2026-11-05):** o usuário pode informar um nome fantasia próprio. O valor da Receita continua imutável.
+>
+> **Complementada pela PDR-019 (2026-11-05):** o usuário pode informar e-mail e telefone/WhatsApp da empresa, opcionais.
 
 ## Contexto
 

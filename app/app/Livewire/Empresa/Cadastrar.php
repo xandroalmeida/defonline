@@ -12,6 +12,7 @@ use App\Domain\Rfb\RfbCnpjStatus;
 use App\Domain\SituacaoCadastral;
 use App\Domain\TipoDocumento;
 use App\Domain\Uf;
+use App\Livewire\Empresa\Concerns\ContatoDaEmpresa;
 use App\Models\EmpresaAnalisada;
 use App\Observabilidade\AuditLogger;
 use App\Observabilidade\EventLogger;
@@ -51,6 +52,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app')]
 final class Cadastrar extends Component
 {
+    use ContatoDaEmpresa;
+
     public string $tipo_documento = TipoDocumento::Cnpj->value;
 
     public string $documento = '';
@@ -159,6 +162,9 @@ final class Cadastrar extends Component
         $this->cnpjConsultado = $digitos;
         $this->statusConsultaRfb = 'sucesso';
         $this->nome_fantasia = (string) $resultado->nomeFantasia;
+        // O contato digitado era da empresa da consulta anterior.
+        $this->email = '';
+        $this->telefone = '';
     }
 
     public function editarNomeFantasia(): void
@@ -188,7 +194,8 @@ final class Cadastrar extends Component
 
     /**
      * Grava a empresa a partir da ficha RFB consultada (STORY-063 CA-6). Do que
-     * o usuário digitou, só entram as observações e o nome fantasia (PDR-017).
+     * o usuário digitou, só entram as observações, o nome fantasia (PDR-017) e o
+     * contato (PDR-019).
      */
     public function confirmar(): mixed
     {
@@ -203,16 +210,21 @@ final class Cadastrar extends Component
             $this->aplicarNomeFantasia();
         }
 
-        $this->validate(
+        $contato = $this->dadosContato();
+
+        Validator::make(
+            ['nome_fantasia' => $this->nome_fantasia, 'observacoes' => $this->observacoes, ...$contato],
             [
                 'nome_fantasia' => ['nullable', 'string', 'max:255'],
                 'observacoes' => ['nullable', 'string', 'max:'.self::OBSERVACOES_MAX],
+                ...$this->regrasContato(),
             ],
             [
                 'nome_fantasia.max' => 'O nome fantasia pode ter até 255 caracteres.',
                 'observacoes.max' => 'As observações podem ter até '.self::OBSERVACOES_MAX.' caracteres.',
+                ...$this->mensagensContato(),
             ],
-        );
+        )->validate();
 
         if ($this->bloquearSeJaCadastrada($this->cnpjConsultado)) {
             return null;
@@ -235,6 +247,7 @@ final class Cadastrar extends Component
             'enriquecido_at' => $r->consultadoAt,
             'ficha_rfb' => $r->ficha->toArray(),
             'observacoes' => self::observacoesOuNull($this->observacoes),
+            ...$contato,
         ]);
 
         return $this->redirect("/empresas/{$empresa->id}", navigate: false);
@@ -264,6 +277,8 @@ final class Cadastrar extends Component
         }
         $this->documento = '';
         $this->nome_fantasia = '';
+        $this->email = '';
+        $this->telefone = '';
         $this->resetErrorBag();
         $this->limparConsulta();
     }
@@ -295,6 +310,7 @@ final class Cadastrar extends Component
             'situacao_cadastral' => SituacaoCadastral::NaoInformada->value,
             'data_fundacao' => trim($this->data_fundacao) === '' ? null : trim($this->data_fundacao),
             'observacoes' => $this->observacoes,
+            ...$this->dadosContato(),
         ];
 
         $tamanhoDocumento = $tipo->tamanho();
@@ -331,6 +347,7 @@ final class Cadastrar extends Component
             'situacao_cadastral' => ['required', Rule::in(array_map(static fn (SituacaoCadastral $s) => $s->value, SituacaoCadastral::cases()))],
             'data_fundacao' => ['nullable', 'date', 'before_or_equal:today'],
             'observacoes' => ['nullable', 'string', 'max:'.self::OBSERVACOES_MAX],
+            ...$this->regrasContato(),
         ], [
             'documento.required' => 'Informe o documento.',
             'documento.size' => 'O CPF deve ter 11 dígitos.',
@@ -343,6 +360,7 @@ final class Cadastrar extends Component
             'uf.in' => 'Informe uma UF válida.',
             'data_fundacao.before_or_equal' => 'A data de início da atividade não pode ser no futuro.',
             'observacoes.max' => 'As observações podem ter até '.self::OBSERVACOES_MAX.' caracteres.',
+            ...$this->mensagensContato(),
         ])->validate();
 
         $empresa = $this->criarEmpresa([
