@@ -74,6 +74,10 @@ final class Demonstracao extends Component
                 null => $lancamento->setor,
             },
             'ressalvas' => DemonstracaoVisao::ressalvas($lancamento->alertas_aceitos),
+            // CA-4: tudo da linha vigente — versao > 1, versao - 1 e gerado_em.
+            'retificado' => $lancamento->foiRetificado(),
+            'vezesRetificado' => $lancamento->vezesRetificado(),
+            'retificadoEm' => $lancamento->retificadoEm(),
             'modo' => config("drm.tela.modo.{$visao->posicao}"),
         ])->layoutData([
             'title' => $titulo,

@@ -85,6 +85,11 @@ Route::middleware('auth')->group(function () {
         ->whereUuid('empresa')
         ->where('competencia', '\d{4}-(0[1-9]|1[0-2])')
         ->name('drm.mes');
+    // STORY-050 — retificação: o mesmo formulário, semeado com a versão vigente. Sem vigente (ou empresa alheia) → 404.
+    Route::get('/empresas/{empresa}/drm/{competencia}/corrigir', LancamentoDrm::class)
+        ->whereUuid('empresa')
+        ->where('competencia', '\d{4}-(0[1-9]|1[0-2])')
+        ->name('drm.corrigir');
 });
 
 // STORY-065, 066 e 067 — backoffice: cada rota exige uma permissão de admin (PDR-013).

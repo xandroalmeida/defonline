@@ -470,9 +470,12 @@ describe('CA-9/CA-10/CA-11 — marcação, acessibilidade e navegação', functi
         expect($blade)->not->toMatch('/#[0-9a-fA-F]{3,8}\b/')->not->toContain('destructive');
     });
 
-    it('"Corrigir este mês" está no lugar, desligado até a STORY-050', function () {
+    it('"Corrigir este mês" leva à retificação daquele mês (STORY-050)', function () {
         mesDoGolden($this->empresa, 'saudavel_comercio');
 
-        abrirMes($this->empresa)->assertSeeHtml('dusk="drm-corrigir"')->assertSeeHtml('disabled');
+        abrirMes($this->empresa)
+            ->assertSeeHtml('dusk="drm-corrigir"')
+            ->assertSeeHtml('href="'.route('drm.corrigir', [$this->empresa, '2026-09']).'"')
+            ->assertDontSeeHtml('disabled');
     });
 });

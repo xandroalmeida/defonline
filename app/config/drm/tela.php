@@ -56,6 +56,7 @@ return [
         'prejuizo' => 'Faltou depois da sua retirada',
     ],
     'pill_prejuizo' => 'Prejuízo no mês',
+    'pill_retificado' => 'Retificado', // STORY-050 CA-4 (spec §4.9).
 
     /* Frase do modo vigente e o botão que oferece o outro (PDR-004 decisão B, CA-3b). */
     'modo' => [

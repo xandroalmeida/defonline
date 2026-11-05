@@ -16,7 +16,7 @@
      x-on:focar-bloco.window="$nextTick(() => document.getElementById('drm-bloco-titulo')?.focus())"
      x-on:focar-campo.window="$nextTick(() => document.getElementById('campo-' + $event.detail.campo)?.focus())">
 
-    <x-page-header :title="'Lançar '.($competenciaObj?->rotulo() ?? '')"
+    <x-page-header :title="($retificando ? 'Corrigir ' : 'Lançar ').($competenciaObj?->rotulo() ?? '')"
                    :subtitle="$empresaNome.' · '.match ($setor) { \App\Domain\Drm\Setor::Industria => 'Indústria', \App\Domain\Drm\Setor::Comercio => 'Comércio', \App\Domain\Drm\Setor::Servicos => 'Serviços' }"/>
 
     @if ($retomando_rascunho)
@@ -46,14 +46,19 @@
                                 <x-label for="campo-D00" class="mb-0">{{ $detalhes('D00') }}</x-label>
                                 <x-help id="D00" :text="$conteudo->help('D00')" :label="$detalhes('D00')"/>
                             </div>
-                            <x-select id="campo-D00" wire:model.live="competencia" dusk="drm-lancamento-campo-D00">
-                                @if ($competenciaObj && ! collect($mesesDisponiveis)->contains(fn ($m) => $m->texto() === $competencia))
-                                    <option value="{{ $competencia }}">{{ $competenciaObj->rotulo() }}</option>
-                                @endif
-                                @foreach ($mesesDisponiveis as $mes)
-                                    <option value="{{ $mes->texto() }}">{{ $mes->rotulo() }}</option>
-                                @endforeach
-                            </x-select>
+                            @if ($retificando)
+                                {{-- A competência retificada não se troca: é o mês daquela versão vigente. --}}
+                                <p id="campo-D00" class="m-0 min-h-[44px] flex items-center font-medium text-[color:var(--color-primary)]" dusk="drm-lancamento-campo-D00">{{ $competenciaObj?->rotulo() }}</p>
+                            @else
+                                <x-select id="campo-D00" wire:model.live="competencia" dusk="drm-lancamento-campo-D00">
+                                    @if ($competenciaObj && ! collect($mesesDisponiveis)->contains(fn ($m) => $m->texto() === $competencia))
+                                        <option value="{{ $competencia }}">{{ $competenciaObj->rotulo() }}</option>
+                                    @endif
+                                    @foreach ($mesesDisponiveis as $mes)
+                                        <option value="{{ $mes->texto() }}">{{ $mes->rotulo() }}</option>
+                                    @endforeach
+                                </x-select>
+                            @endif
                         </div>
 
                         @foreach ($bloqueios as $bloqueio)
@@ -65,15 +70,19 @@
                             @endif
                         @endforeach
 
-                        @if ($existente)
+                        @if ($retificando)
+                            {{-- Spec §4.9: aviso permanente; B1 não se aplica; os valores são os daquele mês, sem marca de herança. --}}
+                            <x-drm.aviso-inline variant="info" dusk="drm-lancamento-retificacao-aviso">
+                                Você está corrigindo um mês já fechado. A versão anterior fica guardada.
+                            </x-drm.aviso-inline>
+                        @elseif ($existente)
                             @php $m = $mensagens->de(new \App\Domain\Drm\Ocorrencia('B1'), $extras); @endphp
                             <x-drm.aviso-inline variant="bloqueio" dusk="drm-lancamento-bloqueio-B1">
                                 <p class="m-0 mb-3">Você já lançou {{ $existente->rotulo() }} para esta empresa.</p>
                                 <div class="flex flex-wrap gap-3">
                                     <x-button :href="route('drm.mes', [$empresa, $existente->texto()])" variant="secondary"
                                               dusk="drm-lancamento-b1-abrir">Abrir {{ $existente->rotulo() }}</x-button>
-                                    {{-- Retificação é a STORY-050; o botão fica no lugar e desligado até lá. --}}
-                                    <x-button type="button" variant="secondary" :disabled="true" title="Em breve"
+                                    <x-button :href="route('drm.corrigir', [$empresa, $existente->texto()])" variant="secondary"
                                               dusk="drm-lancamento-b1-corrigir">Corrigir {{ $existente->rotulo() }}</x-button>
                                 </div>
                             </x-drm.aviso-inline>
@@ -204,6 +213,20 @@
                         </x-drm.aviso-inline>
                     @endif
 
+                    @if ($conflito)
+                        <x-drm.aviso-inline variant="bloqueio" dusk="drm-lancamento-retificacao-conflito">
+                            <p class="m-0 mb-3">Este mês foi corrigido em outra sessão enquanto você preenchia. Abra a versão atual para não sobrescrever a correção.</p>
+                            <x-button type="button" variant="secondary" wire:click="abrirVersaoAtual" dusk="drm-lancamento-retificacao-conflito-abrir">Abrir a versão atual</x-button>
+                        </x-drm.aviso-inline>
+                    @endif
+
+                    @if ($sem_mudanca)
+                        <x-drm.aviso-inline variant="info" dusk="drm-lancamento-retificacao-noop">
+                            <p class="m-0 mb-3">Nenhum valor mudou, então não há o que corrigir.</p>
+                            <x-button :href="route('drm.mes', [$empresa, $competencia])" variant="secondary" dusk="drm-lancamento-retificacao-noop-voltar">Voltar à demonstração</x-button>
+                        </x-drm.aviso-inline>
+                    @endif
+
                     @if ($erro_geral)
                         <x-drm.aviso-inline variant="bloqueio" dusk="drm-lancamento-erro-geral">{{ $erro_geral }}</x-drm.aviso-inline>
                     @endif
@@ -278,7 +301,7 @@
                 @endif
 
                 @if ($ultimoBloco)
-                    <x-button type="submit" variant="primary" :disabled="$alertasPendentes !== [] || (bool) $existente"
+                    <x-button type="submit" variant="primary" :disabled="$alertasPendentes !== [] || (bool) $existente || $conflito"
                               wire:loading.attr="disabled" wire:target="fechar" dusk="drm-lancamento-fechar">
                         <span wire:loading.remove wire:target="fechar">Fechar o mês</span>
                         <span wire:loading wire:target="fechar">Fechando o mês…</span>

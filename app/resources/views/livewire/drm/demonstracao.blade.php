@@ -18,7 +18,12 @@
 @endphp
 
 <div dusk="drm-demonstracao">
-    <x-page-header :title="$titulo" :subtitle="$empresa->nomeExibicao().' · '.$setorRotulo"/>
+    <x-page-header :title="$titulo" :subtitle="$empresa->nomeExibicao().' · '.$setorRotulo">
+        {{-- STORY-050 CA-4: o selo sai da linha vigente (versao > 1), sem coluna extra (ADR-007). --}}
+        @if ($retificado)
+            <x-slot:badge><span class="pill" dusk="drm-demonstracao-retificado">{{ config('drm.tela.pill_retificado') }}</span></x-slot:badge>
+        @endif
+    </x-page-header>
 
     {{-- Os três números, antes da conta (CA-4). Sem destaque no snapshot, a seção não existe. --}}
     @if ($visao->destaques !== [])
@@ -169,6 +174,7 @@
         $rodape = implode(' · ', array_filter([
             $visao->motorVersion === null ? null : 'motor v'.$visao->motorVersion,
             $visao->geradoEm === null ? null : 'gerado em '.$visao->geradoEm->setTimezone(config('app.timezone'))->format('d/m/Y H:i'),
+            $retificado ? 'corrigido '.$vezesRetificado.'× — última correção em '.$retificadoEm->setTimezone(config('app.timezone'))->format('d/m/Y') : null,
         ]));
     @endphp
     @if ($rodape !== '')
@@ -178,7 +184,6 @@
     <div class="mt-6 flex flex-wrap gap-3">
         <x-button :href="route('empresas.show', $empresa)" variant="secondary" dusk="drm-voltar-empresa">Voltar para a empresa</x-button>
         <x-button :href="route('drm.lancar', $empresa)" variant="secondary" dusk="drm-lancar-outro">Lançar outro mês</x-button>
-        {{-- Retificação é a STORY-050; o botão fica no lugar e desligado até lá, como no lançamento. --}}
-        <x-button type="button" variant="secondary" :disabled="true" title="Em breve" dusk="drm-corrigir">Corrigir este mês</x-button>
+        <x-button :href="route('drm.corrigir', [$empresa, $competencia])" variant="secondary" dusk="drm-corrigir">Corrigir este mês</x-button>
     </div>
 </div>
