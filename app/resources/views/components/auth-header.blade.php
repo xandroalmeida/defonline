@@ -11,6 +11,8 @@
     if (! $cta) {
         if (request()->routeIs('cadastro')) {
             $cta = ['label' => 'Entrar', 'href' => route('login')];
+        } elseif (request()->routeIs('planos')) {
+            $cta = ['label' => 'Entrar', 'href' => route('login')];
         } elseif (request()->routeIs('login')) {
             $cta = ['label' => 'Criar conta', 'href' => route('cadastro')];
         }

@@ -44,8 +44,8 @@ final class Planos extends Component
     /** @var array{id: ?string, nome: string, quantidade_creditos: string, preco: string, validade_meses: string, ordem: string, ativo: bool} */
     public array $pacote = ['id' => null, 'nome' => '', 'quantidade_creditos' => '', 'preco' => '', 'validade_meses' => '12', 'ordem' => '1', 'ativo' => true];
 
-    /** @var array{ativo: bool, dias: string, analises: string} */
-    public array $trial = ['ativo' => true, 'dias' => '', 'analises' => ''];
+    /** @var array{ativo: bool, dias: string, analises: string, limite_ip_30d: string} */
+    public array $trial = ['ativo' => true, 'dias' => '', 'analises' => '', 'limite_ip_30d' => '3'];
 
     public ?string $mensagemTrial = null;
 
@@ -217,6 +217,7 @@ final class Planos extends Component
         $dados = $this->validar([
             'dias' => $this->regraInteiro(),
             'analises' => $this->regraInteiro(),
+            'limite_ip_30d' => $this->regraInteiro(),
         ], [
             'dias.required' => 'Informe os dias do trial.',
             'dias.integer' => 'Os dias devem ser um número inteiro.',
@@ -226,10 +227,14 @@ final class Planos extends Component
             'analises.integer' => 'As análises devem ser um número inteiro.',
             'analises.min' => 'O trial deve incluir pelo menos 1 análise.',
             'analises.max' => 'As análises são grandes demais.',
+            'limite_ip_30d.required' => 'Informe o limite de trials por IP.',
+            'limite_ip_30d.integer' => 'O limite deve ser um número inteiro.',
+            'limite_ip_30d.min' => 'O limite deve ser de pelo menos 1 trial.',
+            'limite_ip_30d.max' => 'O limite é grande demais.',
         ], 'trial');
 
         $config = TrialConfig::atual();
-        $this->aplicar($config, ['ativo' => $this->trial['ativo'], 'dias' => (int) $dados['dias'], 'analises' => (int) $dados['analises']], 'TrialConfig');
+        $this->aplicar($config, ['ativo' => $this->trial['ativo'], 'dias' => (int) $dados['dias'], 'analises' => (int) $dados['analises'], 'limite_ip_30d' => (int) $dados['limite_ip_30d']], 'TrialConfig');
 
         $this->carregarTrial();
         $this->mensagemTrial = 'Trial salvo.';
@@ -396,7 +401,7 @@ final class Planos extends Component
     private function carregarTrial(): void
     {
         $config = TrialConfig::atual();
-        $this->trial = ['ativo' => $config->ativo, 'dias' => (string) $config->dias, 'analises' => (string) $config->analises];
+        $this->trial = ['ativo' => $config->ativo, 'dias' => (string) $config->dias, 'analises' => (string) $config->analises, 'limite_ip_30d' => (string) $config->limite_ip_30d];
         $this->mensagemTrial = null;
         $this->resetValidation();
     }

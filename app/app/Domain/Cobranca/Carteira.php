@@ -7,13 +7,14 @@ namespace App\Domain\Cobranca;
 use App\Models\Assinatura;
 use App\Models\ConsumoAnalise;
 use App\Models\LoteCredito;
-use App\Models\TrialConfig;
+use App\Models\TrialEmpresa;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 use LogicException;
 
@@ -32,10 +33,34 @@ use LogicException;
  */
 final class Carteira
 {
-    /** Consulta sem lock, para decidir se a tela do quiz abre ou bloqueia. */
-    public function verificar(string $usuarioId): Decisao
+    /**
+     * Consulta sem lock, para decidir se a tela do quiz abre ou bloqueia. Com `$empresaId`, vale também a
+     * regra do trial por CNPJ (STORY-074 CA-2).
+     */
+    public function verificar(string $usuarioId, ?string $empresaId = null): Decisao
     {
-        return RegrasConsumo::decidir($this->snapshot($usuarioId, $this->agora()));
+        return RegrasConsumo::decidir($this->snapshot($usuarioId, $this->agora(), $empresaId));
+    }
+
+    /**
+     * STORY-074 — o aviso do trial para a Home, ou nulo se o último vínculo do Usuário não é um trial.
+     *
+     * @return array{severidade: 'info'|'bloqueio', texto: string, acao: string, rotulo: string}|null
+     */
+    public function avisoDoTeste(string $usuarioId): ?array
+    {
+        $foto = $this->snapshot($usuarioId, $this->agora());
+
+        if ($foto->assinatura === null) {
+            return null;
+        }
+
+        $temCredito = array_filter(
+            $foto->lotes,
+            fn (LoteVisto $l): bool => $l->status === StatusLote::Ativo && $l->restante > 0 && $l->expiraEm->greaterThan($foto->agora),
+        ) !== [];
+
+        return AvisoTrial::para($foto->assinatura, $foto->agora, $temCredito);
     }
 
     /**
@@ -63,12 +88,13 @@ final class Carteira
             $agora = $this->agora();
             $this->expirarLotesVencidos($usuarioId);
 
-            $decisao = RegrasConsumo::decidir($this->snapshot($usuarioId, $agora));
+            $decisao = RegrasConsumo::decidir($this->snapshot($usuarioId, $agora, $empresaId));
 
             if ($decisao->bloqueio !== null) {
                 throw new SaldoInsuficiente($decisao->bloqueio);
             }
 
+            $this->registrarEmpresaDeTrial($decisao, $usuarioId, $empresaId, $agora);
             $this->debitar($decisao);
             $diagnostico = $emitir();
 
@@ -109,27 +135,36 @@ final class Carteira
             throw new InvalidArgumentException('O vencimento deve ser depois do início.');
         }
 
-        $vigente = Assinatura::query()
-            ->where('usuario_id', $usuarioId)
-            ->whereIn('status', [StatusAssinatura::Ativa->value, StatusAssinatura::EmAtraso->value])
-            ->exists();
-
-        if ($vigente) {
-            throw new AssinaturaVigenteJaExiste($usuarioId);
-        }
-
         try {
-            return Assinatura::query()->create([
-                'usuario_id' => $usuarioId,
-                'plano_id' => $planoId,
-                'trial' => $trial,
-                'status' => StatusAssinatura::Ativa,
-                'ciclo' => $ciclo,
-                'data_inicio' => $inicio,
-                'proximo_vencimento' => $vencimento,
-                'cota_snapshot' => $cota,
-                'cota_restante_ciclo' => $cota,
-            ]);
+            return DB::transaction(function () use ($usuarioId, $cota, $inicio, $vencimento, $planoId, $ciclo, $trial): Assinatura {
+                $vigente = Assinatura::query()
+                    ->where('usuario_id', $usuarioId)
+                    ->whereIn('status', [StatusAssinatura::Ativa->value, StatusAssinatura::EmAtraso->value])
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($vigente !== null) {
+                    // Assinar durante o trial encerra o trial (STORY-074 CA-8): a análise que sobrou não
+                    // soma à cota nova, porque a nova assinatura tem a própria cota.
+                    if (! $vigente->trial || $trial) {
+                        throw new AssinaturaVigenteJaExiste($usuarioId);
+                    }
+
+                    $vigente->forceFill(['status' => StatusAssinatura::Expirada])->save();
+                }
+
+                return Assinatura::query()->create([
+                    'usuario_id' => $usuarioId,
+                    'plano_id' => $planoId,
+                    'trial' => $trial,
+                    'status' => StatusAssinatura::Ativa,
+                    'ciclo' => $ciclo,
+                    'data_inicio' => $inicio,
+                    'proximo_vencimento' => $vencimento,
+                    'cota_snapshot' => $cota,
+                    'cota_restante_ciclo' => $cota,
+                ]);
+            });
         } catch (UniqueConstraintViolationException) {
             // Corrida entre duas concessões: o índice parcial barra a segunda.
             throw new AssinaturaVigenteJaExiste($usuarioId);
@@ -242,7 +277,7 @@ final class Carteira
         }
     }
 
-    private function snapshot(string $usuarioId, CarbonImmutable $agora): SnapshotCarteira
+    private function snapshot(string $usuarioId, CarbonImmutable $agora, ?string $empresaId = null): SnapshotCarteira
     {
         $assinatura = Assinatura::query()
             ->where('usuario_id', $usuarioId)
@@ -275,13 +310,62 @@ final class Carteira
             ),
             $lotes,
             $this->trialElegivel($usuarioId),
+            $this->empresaJaEmTesteDeOutraConta($usuarioId, $empresaId),
         );
     }
 
-    /** Teste ligado na configuração e ainda não usado por este Usuário (a regra por CPF é da STORY-074). */
-    private function trialElegivel(string $usuarioId): bool
+    /** O Usuário pode ativar o trial agora? (ligado, nunca usado por ele nem pelo CPF, sem assinatura vigente) */
+    public function trialElegivel(string $usuarioId): bool
     {
-        return TrialConfig::atual()->ativo
-            && ! Assinatura::query()->where('usuario_id', $usuarioId)->where('trial', true)->exists();
+        return (new ElegibilidadeTrial)->motivo($usuarioId) === null;
+    }
+
+    /**
+     * STORY-074 CA-2 — a empresa (por CNPJ) já recebeu análise de trial de OUTRA conta? Só olha empresas de
+     * CNPJ; o mesmo Usuário pode reanalisar a sua.
+     */
+    private function empresaJaEmTesteDeOutraConta(string $usuarioId, ?string $empresaId): bool
+    {
+        $hash = $this->hashDoCnpj($empresaId);
+
+        return $hash !== null
+            && TrialEmpresa::query()->where('cnpj_hash', $hash)->where(fn ($q) => $q->whereNull('usuario_id')->orWhere('usuario_id', '!=', $usuarioId))->exists();
+    }
+
+    private function hashDoCnpj(?string $empresaId): ?string
+    {
+        if ($empresaId === null) {
+            return null;
+        }
+
+        $documento = DB::table('empresas_analisadas')->where('id', $empresaId)->where('tipo_documento', 'cnpj')->value('documento');
+
+        return is_string($documento) && $documento !== '' ? DocumentoHash::de($documento) : null;
+    }
+
+    /**
+     * Ao gastar a análise do trial, grava o CNPJ como "já analisado em teste". O índice único serializa
+     * duas contas que analisem a mesma empresa ao mesmo tempo: a segunda espera a primeira e, se o CNPJ
+     * já for de outra conta, a transação inteira desfaz (nada é cobrado) e a tela explica.
+     */
+    private function registrarEmpresaDeTrial(Decisao $decisao, string $usuarioId, ?string $empresaId, CarbonImmutable $agora): void
+    {
+        if ($decisao->origem !== Origem::Cota) {
+            return;
+        }
+
+        $hash = $this->hashDoCnpj($empresaId);
+
+        if ($hash === null || ! Assinatura::query()->whereKey($decisao->assinaturaId)->where('trial', true)->exists()) {
+            return;
+        }
+
+        DB::table('trial_empresas')->insertOrIgnore([
+            'id' => (string) Str::uuid7(), 'cnpj_hash' => $hash, 'usuario_id' => $usuarioId, 'created_at' => $agora, 'updated_at' => $agora,
+        ]);
+
+        if ($this->empresaJaEmTesteDeOutraConta($usuarioId, $empresaId)) {
+            throw new SaldoInsuficiente(new Bloqueio(MotivoBloqueio::TesteEmpresaJaAnalisada));
+        }
     }
 }

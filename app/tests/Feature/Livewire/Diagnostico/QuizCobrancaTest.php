@@ -309,11 +309,12 @@ describe('CA-11 texto de cada causa', function () {
             ->and(strpos($html, 'Ver planos'))->toBeLessThan(strpos($html, 'Comprar créditos'));
     });
 
-    it('sem nenhuma rota, o bloqueio não mostra botões de ação', function () {
+    it('com planos e créditos no ar (teste desativado), o bloqueio mostra as duas ações', function () {
         _ligarCobrancaQuiz();
+        DB::table('trial_config')->update(['ativo' => false]);
 
         $html = Livewire::test(Quiz::class, ['empresa' => $this->empresa])->html();
 
-        expect($html)->not->toContain('screen-bloqueio-acao-primaria')->and($html)->not->toContain('screen-bloqueio-acao-secundaria');
+        expect($html)->toContain('screen-bloqueio-acao-primaria')->and($html)->toContain('screen-bloqueio-acao-secundaria');
     });
 });

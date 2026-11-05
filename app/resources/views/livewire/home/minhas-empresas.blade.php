@@ -16,6 +16,20 @@
     {{-- Saudação preservada para compatibilidade com testes Dusk existentes. --}}
     <p class="sr-only" dusk="saudacao">Olá, {{ $usuario->primeiroNome() }}</p>
 
+    {{-- STORY-074: aviso do teste em andamento, ou a oferta do teste para quem ainda pode ativá-lo. --}}
+    @if ($avisoTrial)
+        <x-drm.aviso-inline :variant="$avisoTrial['severidade']" dusk="screen-trial-aviso">
+            {{ $avisoTrial['texto'] }}
+            <x-link :href="route($avisoTrial['acao'])" dusk="screen-trial-aviso-acao">{{ $avisoTrial['rotulo'] }}</x-link>
+        </x-drm.aviso-inline>
+    @elseif ($ofertaTrial)
+        <x-card class="mb-6" dusk="screen-trial-oferta-home">
+            <h2 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0 mb-1">Teste grátis</h2>
+            <p class="m-0 mb-1 text-[color:var(--color-primary)]">{{ $ofertaTrial->dias }} {{ $ofertaTrial->dias === 1 ? 'dia' : 'dias' }}, {{ \App\Support\Cobranca\TextoTrial::analises($ofertaTrial->analises) }} e o Raio X do Negócio. Sem cartão.</p>
+            <x-button :href="route('trial.iniciar')" variant="secondary" dusk="screen-trial-oferta-home-cta">Começar teste grátis</x-button>
+        </x-card>
+    @endif
+
     @if ($empresas->isEmpty())
         <x-card class="text-center" dusk="minhas-empresas-vazio">
             <div class="mx-auto w-16 h-16 rounded-full bg-[color:var(--color-neutral)] flex items-center justify-center mb-4"

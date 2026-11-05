@@ -181,7 +181,7 @@ final class Quiz extends Component
                 return;
             }
 
-            $decisao = app(Carteira::class)->verificar((string) $this->empresa->usuario_id);
+            $decisao = app(Carteira::class)->verificar((string) $this->empresa->usuario_id, $this->empresa->id);
         } catch (Throwable $e) {
             Log::error('quiz.carteira.falha_consulta', ['empresa_id' => $this->empresa->id, 'exception' => $e::class, 'message' => $e->getMessage()]);
             $this->erro_carteira = true;

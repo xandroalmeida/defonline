@@ -28,6 +28,8 @@ use App\Livewire\Drm\Lancamento as LancamentoDrm;
 use App\Livewire\Empresa\Cadastrar as CadastrarEmpresa;
 use App\Livewire\Home\MinhasEmpresas;
 use App\Livewire\Login;
+use App\Livewire\Planos\Pagina as PaginaPlanos;
+use App\Livewire\Trial\Ativar as AtivarTrial;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -44,6 +46,9 @@ Route::get('/ready', [HealthController::class, 'ready'])->name('ready');
 
 Route::get('/cadastro', Cadastro::class)->name('cadastro');
 Route::get('/login', Login::class)->middleware('throttle:login')->name('login');
+
+// STORY-075 — planos e preços. Pública (o visitante é levado ao cadastro); 404 com a cobrança desligada.
+Route::get('/planos', PaginaPlanos::class)->name('planos');
 
 Route::view('/termos/termo-adesao', 'legal.termo-adesao-v2')->name('termos.termo-adesao');
 Route::view('/termos/politica-privacidade', 'legal.politica-privacidade-v2')->name('termos.politica-privacidade');
@@ -76,6 +81,8 @@ Route::middleware('auth')->group(function () {
     // STORY-016 — "Minhas Empresas" substitui a /home mínima da STORY-011.
     Route::get('/home', MinhasEmpresas::class)->name('home');
     Route::post('/logout', [HomeController::class, 'logout'])->name('logout');
+    // STORY-074 — oferta e ativação do teste grátis. 404 com a cobrança desligada.
+    Route::get('/teste-gratis', AtivarTrial::class)->name('trial.iniciar');
     // STORY-066 — fora do grupo do backoffice: quem chama está logado como o usuário assumido.
     Route::post('/personificacao/encerrar', [PersonificacaoController::class, 'encerrar'])->name('personificacao.encerrar');
 

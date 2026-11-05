@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: true
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador (pista B)
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: S
@@ -81,14 +81,35 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 
 ## Notas do agente
 
+### Plano (antes de codar)
+- Lido: estória, spec `STORY-070-planos-e-precos`, PDR-020, notas das STORY-071/072/073, `Carteira`, `TextoBloqueio`, `app-nav`, layouts.
+- Componente Livewire público `App\Livewire\Planos\Pagina` (rota `planos`), regras de derivação em `App\Domain\Cobranca\VitrinePrecos`, destinos em `App\Support\Cobranca\RotasCobranca`.
+
 ### Decisões tomadas
+- Rota pública `GET /planos` (nome `planos`, o mesmo que `TextoBloqueio::ROTAS` já esperava). Visitante usa o layout `auth` (ganhou o parâmetro `largo`, 960px) e o cabeçalho mostra `Entrar`; logado usa o layout do app. Com a cobrança desligada: 404 para todos (spec §4), e o item `Planos` do menu só existe com a cobrança ligada.
+- Tudo é lido do catálogo a cada render (CA-4); leitura dentro de transação curta, e qualquer falha mostra `Não conseguimos carregar os planos agora.` + `Tentar de novo`, nunca preço velho.
+- Derivados em `VitrinePrecos` (centavos inteiros, meio centavo para cima): equivalente mensal do anual, economia % e unitário do pacote. O rótulo `Anual — economize N%` usa a maior economia entre os planos ativos; sem economia, só `Anual`.
+- Botões de contratar dependem de rotas das estórias paralelas, protegidos por `Route::has` em `RotasCobranca`: `checkout.assinatura` (parâmetros `plano`, `ciclo`; STORY-077), `creditos.comprar` (parâmetro `pacote`; STORY-076, o mesmo nome de `TextoBloqueio`), `plano.trocar` (`plano`, `ciclo`; STORY-082) e `trial.iniciar` (STORY-074). Sem a rota, o botão não aparece. Quem criar as rotas deve usar estes nomes e parâmetros (ou ajustar `RotasCobranca`).
+- Elegibilidade ao teste: `Carteira::trialElegivel` passou a `public` (ligado na configuração e nunca usado pelo Usuário). A regra por CPF/CNPJ é da STORY-074 e entra no mesmo ponto.
+- Plano atual = assinatura não-trial vigente (ativa ou em atraso): o card dele mostra `Seu plano`, os outros `Trocar para este`.
+- Sem benefícios em texto livre (padrão da spec §9): só cota, empresas sem limite e Raio X.
 
 ### Descobertas
+- Três testes da STORY-073 (`QuizCobrancaTest`) assumiam que a rota `planos` não existia. Com a página, `Ver planos` aparece de verdade; ajustei os testes para usar a rota ainda ausente (`creditos.comprar`) e mantive a intenção (ações somem sem a rota, aparecem quando ela nasce). Nenhuma asserção foi enfraquecida.
+- Erro de consulta dentro de transação aberta aborta o Postgres para o resto do request; por isso a leitura do catálogo usa `DB::transaction` (savepoint).
 
 ### Bloqueios encontrados
+Nenhum.
+
+### Pendências e dúvidas
+- Visitante: o cadastro não aceita "retorno" ao item escolhido (spec §2 pede). Cadastro e login não têm esse mecanismo; ficou só o envio ao cadastro (CA-5). Pergunta ao PO: abrir estória para o retorno pós-cadastro/confirmação de e-mail?
+- Skeleton de carregamento (spec §4) não foi feito: a página é renderizada no servidor e o preço nunca aparece provisório.
 
 ### IDRs criados
+Nenhum.
 
 ### Cobertura final
+Suíte All: 1940 testes passando; cobertura total 98,4%; Pagina, VitrinePrecos e RotasCobranca 100%. Dusk completo: 53 passando. Pint e PHPStan limpos.
 
 ### Evidências
+`tests/Feature/Livewire/Planos/PaginaTest.php` (CA-1 a CA-7), `tests/Unit/Domain/Cobranca/VitrinePrecosTest.php`, `tests/Browser/PlanosPaginaBrowserTest.php` (E2E).
