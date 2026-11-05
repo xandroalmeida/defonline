@@ -2246,7 +2246,7 @@
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-078",
         "STORY-079",
@@ -2259,7 +2259,7 @@
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": true,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2274,7 +2274,8 @@
         "STORY-075"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-077-assinatura-com-cartao.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "de27a6c..740e08f; IDR-019; pagamento real no checkout segue pendente do ADR-010. Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
@@ -2427,13 +2428,13 @@
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-087"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2447,7 +2448,8 @@
         "STORY-047"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-084-acesso-ao-drm-por-plano.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "c0585de; CA-7 só aplicável depois da STORY-056. Revisado pelo orquestrador na main."
     },
     {
       "type": "implementation",
@@ -3993,6 +3995,13 @@
         "title": "Pagamentos: provedor Fake, webhook e fuso do banco",
         "status": "accepted",
         "path": "decisions/idr/IDR-018-pagamentos-provedor-fake-webhook-e-fuso-do-banco.md",
+        "decided_at": "2026-11-05"
+      },
+      {
+        "id": "IDR-019",
+        "title": "Assinatura com cartão no checkout hospedado",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-019-assinatura-invoice-por-cobranca-e-cota-mensal-do-anual.md",
         "decided_at": "2026-11-05"
       }
     ],
