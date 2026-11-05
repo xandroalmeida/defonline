@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: false
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: M
@@ -87,13 +87,25 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 ## Notas do agente
 
 ### Decisões tomadas
+- Tabelas `planos`, `pacotes_credito` e `trial_config` (linha única). O trial ficou como configuração separada, não como linha de `Plano` (a arquitetura-tecnica §4.1 o previa como plano `trial`): assim não aparece na lista de planos e nada precisa comparar `codigo = 'trial'` (CA-9). Para as próximas estórias: ler `TrialConfig::atual()`.
+- `codigo` é gerado do nome na criação (slug, com sufixo se colidir) e nunca editado; é só identificador, o código não ramifica por ele.
+- Preços em centavos inteiros; digitados em reais ("49,90", "1.599,00"). Sem máscara de JS.
+- Aviso do CA-7 em `App\Domain\Cobranca\PrecoCredito` (produto cruzado, sem arredondamento), avisando no formulário (ao digitar) e na linha do pacote.
+- Auditoria: ações `planos.plano_criado/alterado`, `planos.pacote_credito_criado/alterado`, `planos.trial_config_alterado`, com before/after só dos campos gravados; sem mudança real, nada é gravado nem auditado. Desativar é uma alteração de `ativo`.
+- Teste arquitetural `tests/Unit/Arch/CatalogoCobrancaTest.php`: varre app, routes, views e config atrás de comparação, case, in_array, match ou where com códigos seed ou `->codigo`.
 
 ### Descobertas
+- Dusk: `keys()` com `'{backspace}'` em array digita literal; usar `WebDriverKeys`.
+- Rodar a suíte em paralelo com a de cobertura gera falhas espúrias (banco de teste compartilhado).
 
 ### Bloqueios encontrados
+Nenhum.
 
 ### IDRs criados
+Nenhum.
 
 ### Cobertura final
+Suíte All 1306 passando; cobertura total 98,2%; Planos, PrecoCredito e os 3 modelos 100%.
 
 ### Evidências
+`tests/Feature/Livewire/Backoffice/PlanosTest.php` (CA-1 a CA-8), `tests/Unit/Domain/Cobranca/PrecoCreditoTest.php` (CA-7), `tests/Unit/Arch/CatalogoCobrancaTest.php` (CA-9), `tests/Browser/PlanosBackofficeBrowserTest.php` (E2E). Pint e PHPStan limpos.
