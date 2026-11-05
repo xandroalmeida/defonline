@@ -15,3 +15,9 @@ Schedule::command('rfb:monitorar-error-rate')
     ->everyFiveMinutes()
     ->onOneServer()
     ->withoutOverlapping(10);
+
+// STORY-076 / ADR-010 — retoma webhooks de pagamento gravados e não aplicados.
+Schedule::command('cobranca:reprocessar-eventos')
+    ->everyFiveMinutes()
+    ->onOneServer()
+    ->withoutOverlapping(10);

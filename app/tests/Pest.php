@@ -25,3 +25,9 @@ pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Feature');
 pest()->extend(TestCase::class)->beforeEach(function () {
     app()->bind(FonteRecomendacoes::class, RecomendacoesCongeladas::class);
 })->in('Domain');
+
+// STORY-076 — ajudantes compartilhados dos testes de pagamento.
+require_once __DIR__.'/Support/pagamento.php';
+
+// Teste sob demanda contra o sandbox do Asaas (grupo `asaas-sandbox`, fora da suíte padrão).
+pest()->extend(TestCase::class)->in('Sandbox');

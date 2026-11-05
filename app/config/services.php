@@ -90,4 +90,28 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Pagamentos (STORY-076 / ADR-010)
+    |--------------------------------------------------------------------------
+    |
+    | - `provider`: `fake` (local/testes, sem rede) ou `asaas`. O `fake` é recusado em produção.
+    | - Asaas: host e chave vêm SEMPRE do ambiente, sem padrão de produção. O sandbox é
+    |   `https://api-sandbox.asaas.com/v3` com chave `$aact_hmlg_...`; produção é `https://api.asaas.com/v3`
+    |   com `$aact_prod_...`. O adaptador recusa prefixo de chave que não bate com o host.
+    | - `webhook_token`: segredo do cabeçalho `asaas-access-token` (32-255 caracteres, diferente da chave).
+    */
+    'payments' => [
+        'provider' => env('PAYMENTS_PROVIDER', 'fake'),
+        'pix_expiracao_minutos' => (int) env('PIX_EXPIRACAO_MINUTOS', 30),
+        'webhook_token' => env('PAYMENTS_WEBHOOK_TOKEN'),
+    ],
+
+    'asaas' => [
+        'base_url' => env('ASAAS_BASE_URL'),
+        'api_key' => env('ASAAS_API_KEY') ?: env('ASAAS_SANDBOX_API_KEY'),
+        'webhook_token' => env('ASAAS_WEBHOOK_TOKEN'),
+        'timeout' => (int) env('ASAAS_TIMEOUT', 30),
+    ],
+
 ];

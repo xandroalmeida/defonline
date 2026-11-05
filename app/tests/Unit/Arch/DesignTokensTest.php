@@ -33,6 +33,7 @@ $exclusoes = [
     // ignoram CSS vars). Os hex viram cópia manual da paleta v1; mudar tokens
     // implica atualizar aqui à mão. Aceito por isolamento e baixa rotatividade.
     'resources/views/mail/email-confirmacao.blade.php',
+    'resources/views/mail/link-de-pagamento.blade.php',
 ];
 
 function _designTokensProjectRoot(): string

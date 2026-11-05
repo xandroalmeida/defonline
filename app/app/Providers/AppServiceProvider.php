@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Domain\Cobranca\PaymentProvider;
 use App\Domain\Motor\FonteRecomendacoes;
+use App\Infrastructure\Cobranca\Asaas\AsaasPaymentProvider;
+use App\Infrastructure\Cobranca\Fake\FakePaymentProvider;
 use App\Observabilidade\Listeners\CollectJobMetrics;
 use App\Services\Rfb\CnpjaRfbCnpjClient;
 use App\Services\Rfb\MockRfbCnpjClient;
@@ -42,6 +45,27 @@ class AppServiceProvider extends ServiceProvider
                 ),
             };
         });
+
+        // STORY-076 / ADR-010 — provedor de pagamento escolhido por `services.payments.provider`.
+        // O fake nunca sobe em produção: cobrança de mentira aprovada em produção seria dinheiro perdido.
+        $this->app->singleton(PaymentProvider::class, function () {
+            $provider = (string) config('services.payments.provider', 'fake');
+
+            return match ($provider) {
+                'fake' => $this->app->environment('production')
+                    ? throw new \InvalidArgumentException('O provedor de pagamento fake não pode ser usado em produção.')
+                    : new FakePaymentProvider(config('services.payments.webhook_token')),
+                'asaas' => new AsaasPaymentProvider(
+                    config('services.asaas.base_url'),
+                    config('services.asaas.api_key'),
+                    config('services.asaas.webhook_token'),
+                    (int) config('services.asaas.timeout', 30),
+                ),
+                default => throw new \InvalidArgumentException(
+                    "Provedor de pagamento desconhecido: '{$provider}'. Use fake|asaas (ADR-010).",
+                ),
+            };
+        });
     }
 
     public function boot(): void
@@ -56,5 +80,8 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute(5)->by($email.'|'.$request->ip());
         });
+
+        // STORY-076 — teto folgado para o webhook (o Asaas em rajada), só para barrar abuso.
+        RateLimiter::for('webhook-pagamentos', fn (Request $request) => Limit::perMinute(300)->by($request->ip()));
     }
 }

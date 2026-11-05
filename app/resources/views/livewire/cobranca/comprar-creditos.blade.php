@@ -1,0 +1,131 @@
+@php
+    $reais = fn (int $centavos): string => 'R$ '.number_format($centavos / 100, 2, ',', '.');
+@endphp
+<div x-data x-init="$nextTick(() => $refs.titulo?.focus())">
+    <x-breadcrumb :items="[['label' => 'Início', 'url' => route('home')], ['label' => 'Comprar créditos']]"/>
+
+    <h1 x-ref="titulo" tabindex="-1" dusk="screen-checkout-titulo"
+        class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-1">
+        Comprar créditos
+    </h1>
+
+    @if ($pacoteId === null)
+        {{-- Sem pacote escolhido: lista simples, até a página de planos (STORY-075) ser a entrada. --}}
+        <p class="text-[color:var(--color-secondary)] text-sm mt-0 mb-6">Escolha o pacote de análises.</p>
+        <ul class="grid grid-cols-1 md:grid-cols-3 gap-4 list-none p-0 m-0" dusk="screen-checkout-pacotes">
+            @forelse ($pacotes as $p)
+                <li>
+                    <x-card as="article" class="h-full flex flex-col gap-3" dusk="screen-checkout-pacote-{{ $p->codigo }}">
+                        <h2 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0">Pacote {{ $p->nome }}</h2>
+                        <p class="m-0 text-sm text-[color:var(--color-secondary)]">{{ $p->quantidade_creditos }} análises · {{ $reais($p->preco_centavos) }}</p>
+                        <x-button :href="route('creditos.comprar', $p->id)" variant="primary" class="mt-auto"
+                                  dusk="screen-checkout-comprar-{{ $p->codigo }}">Comprar</x-button>
+                    </x-card>
+                </li>
+            @empty
+                <li class="text-[color:var(--color-secondary)]">Nenhum pacote disponível no momento.</li>
+            @endforelse
+        </ul>
+    @elseif ($pacote === null)
+        <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4 max-w-[640px] flex flex-col gap-3"
+             role="alert" dusk="screen-checkout-indisponivel">
+            <p class="m-0 text-[color:var(--color-primary)]">Este pacote não está mais disponível.</p>
+            <div><x-button :href="route('creditos.comprar')" variant="secondary">Ver os pacotes disponíveis</x-button></div>
+        </div>
+    @else
+        <p class="text-[color:var(--color-secondary)] text-sm mt-0 mb-6">Pacote {{ $pacote->nome }} · {{ $pacote->quantidade_creditos }} análises</p>
+
+        @if (! $emailConfirmado)
+            <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4 max-w-[640px] flex flex-col gap-3"
+                 role="alert" dusk="screen-checkout-email-nao-confirmado">
+                <p class="m-0 font-medium text-[color:var(--color-primary)]">Confirme seu e-mail para comprar.</p>
+                <p class="m-0 text-sm text-[color:var(--color-primary)]">Enviamos um link para {{ $email }}. Depois de confirmar, volte aqui.</p>
+                @if ($confirmacaoReenviada)
+                    <p class="m-0 text-sm text-[color:var(--color-secondary)]" role="status" dusk="screen-checkout-confirmacao-reenviada">Enviamos um novo link. Veja sua caixa de entrada.</p>
+                @endif
+                <div class="flex flex-wrap gap-3">
+                    <x-button type="button" variant="primary" wire:click="reenviarConfirmacao" dusk="screen-checkout-reenviar">Reenviar e-mail de confirmação</x-button>
+                    <x-button :href="route('creditos.comprar')" variant="secondary">Voltar aos pacotes</x-button>
+                </div>
+            </div>
+        @else
+            <div class="flex flex-col gap-6 lg:grid lg:grid-cols-[3fr_2fr] lg:items-start lg:gap-8">
+                {{-- Em mobile o resumo vem antes ("quanto?" antes de "como?"); em desktop fica à direita, fixo. --}}
+                <section aria-labelledby="resumo-titulo" class="lg:order-2 lg:sticky lg:top-4">
+                    <x-card dusk="screen-checkout-resumo">
+                        <h2 id="resumo-titulo" class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0 mb-3">Resumo do pedido</h2>
+                        <dl class="m-0 grid grid-cols-[1fr_auto] gap-x-4 gap-y-2 text-sm">
+                            <dt class="text-[color:var(--color-secondary)]">Preço</dt>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-preco">{{ $reais($pacote->preco_centavos) }}</dd>
+                            <dt class="text-[color:var(--color-secondary)]">Desconto</dt>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-desconto">Sem desconto</dd>
+                            <dt class="font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2">A pagar hoje</dt>
+                            <dd class="m-0 text-right font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2" dusk="screen-checkout-resumo-a-pagar">{{ $reais($pacote->preco_centavos) }}</dd>
+                            <dt class="text-[color:var(--color-secondary)]">Ciclo</dt>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-ciclo">Compra única, não renova</dd>
+                            <dt class="text-[color:var(--color-secondary)]">Próxima cobrança</dt>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-proxima">Não há</dd>
+                            <dt class="text-[color:var(--color-secondary)]">Depois</dt>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-depois">Não há</dd>
+                            <dt class="text-[color:var(--color-secondary)]">Validade dos créditos</dt>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-validade">até {{ $validade->setTimezone('America/Sao_Paulo')->format('d/m/Y') }}</dd>
+                        </dl>
+                    </x-card>
+                </section>
+
+                <section class="lg:order-1 flex flex-col gap-4">
+                    <p class="m-0 text-sm text-[color:var(--color-secondary)]" dusk="screen-checkout-aviso-raiox">
+                        Os créditos não incluem o Raio X do Negócio. Ele faz parte dos planos e do teste.
+                    </p>
+
+                    <div>
+                        <h2 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0 mb-1">Pagamento</h2>
+                        <p class="m-0 text-sm text-[color:var(--color-primary)]" dusk="screen-checkout-pagamento">Pix · o QR Code vale por {{ $minutosPix }} minutos.</p>
+                    </div>
+
+                    @if ($personificando)
+                        <p class="m-0 rounded-md border border-[color:var(--color-border)] p-3 text-sm text-[color:var(--color-primary)]" dusk="screen-checkout-admin">
+                            Você está acessando como administrador. Contratar e pagar não está disponível nesse modo.
+                        </p>
+                    @endif
+
+                    @if ($falhaDoProvedor)
+                        <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4 flex flex-col gap-1"
+                             role="alert" dusk="screen-checkout-falha">
+                            <p class="m-0 font-medium text-[color:var(--color-primary)]">Não conseguimos gerar o QR Code agora. Nada foi cobrado.</p>
+                            <p class="m-0 text-sm text-[color:var(--color-secondary)]">Tente de novo. Se continuar assim, escreva para eb@ebparcerias.com.</p>
+                        </div>
+                    @endif
+
+                    <form wire:submit="gerar" class="flex flex-col gap-3 m-0" novalidate>
+                        <label class="flex gap-2.5 items-start text-sm font-normal cursor-pointer min-h-[44px]">
+                            <input type="checkbox" wire:model="aceito" dusk="screen-checkout-aceite"
+                                   aria-describedby="@error('aceito')aceite-erro @enderror"
+                                   class="mt-1 accent-[color:var(--color-tertiary)]">
+                            <span class="text-[color:var(--color-primary)]">
+                                Li e aceito o
+                                <a href="{{ route('termos.termo-adesao') }}" target="_blank" rel="noopener" class="link">Termo de Adesão</a> (v2) e a
+                                <a href="{{ route('termos.politica-privacidade') }}" target="_blank" rel="noopener" class="link">Política de Privacidade</a>.
+                            </span>
+                        </label>
+                        @error('aceito')
+                            <p id="aceite-erro" class="text-[color:var(--color-destructive)] text-sm m-0" dusk="screen-checkout-error-aceite">{{ $message }}</p>
+                        @enderror
+
+                        <x-button type="submit" variant="primary" :disabled="$personificando"
+                                  wire:loading.attr="disabled" wire:target="gerar"
+                                  dusk="screen-checkout-primary-cta">
+                            <span wire:loading.remove wire:target="gerar">Gerar QR Code Pix · {{ $reais($pacote->preco_centavos) }}</span>
+                            <span wire:loading wire:target="gerar">Gerando QR Code…</span>
+                        </x-button>
+                        <p class="m-0 text-sm text-[color:var(--color-secondary)]">
+                            Reembolso em até 7 dias, se você ainda não tiver feito nenhuma análise.
+                        </p>
+                    </form>
+
+                    <div><x-link :href="route('creditos.comprar')" dusk="screen-checkout-voltar">Voltar aos pacotes</x-link></div>
+                </section>
+            </div>
+        @endif
+    @endif
+</div>

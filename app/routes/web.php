@@ -9,7 +9,10 @@ use App\Http\Controllers\EmailConfirmacaoController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PagamentoFakeController;
 use App\Http\Controllers\PersonificacaoController;
+use App\Http\Controllers\WebhookPagamentoController;
+use App\Http\Middleware\AuditarPersonificacao;
 use App\Livewire\Backoffice\Administradores as BackofficeAdministradores;
 use App\Livewire\Backoffice\Cupons as BackofficeCupons;
 use App\Livewire\Backoffice\Glossario as BackofficeGlossario;
@@ -17,13 +20,21 @@ use App\Livewire\Backoffice\Planos as BackofficePlanos;
 use App\Livewire\Backoffice\Recomendacoes as BackofficeRecomendacoes;
 use App\Livewire\Backoffice\Usuarios as BackofficeUsuarios;
 use App\Livewire\Cadastro;
+use App\Livewire\Cobranca\AcompanharPagamento;
+use App\Livewire\Cobranca\ComprarCreditos;
 use App\Livewire\Diagnostico\Quiz as QuizDiagnostico;
 use App\Livewire\Diagnostico\SelecionarEmpresa as SelecionarEmpresaDiagnostico;
 use App\Livewire\Drm\Lancamento as LancamentoDrm;
 use App\Livewire\Empresa\Cadastrar as CadastrarEmpresa;
 use App\Livewire\Home\MinhasEmpresas;
 use App\Livewire\Login;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 // STORY-024 — landing pública simples (substitui a página de debug welcome + hello-world).
 Route::view('/', 'landing')->name('landing');
@@ -45,6 +56,21 @@ Route::view('/email/confirmado', 'email.confirmado')->name('email.confirmado');
 Route::view('/email/confirmar-erro', 'email.confirmar-erro')->name('email.confirmar-erro');
 Route::post('/email/reenviar-confirmacao', [EmailConfirmacaoController::class, 'reenviar'])
     ->name('email.reenviar');
+
+// STORY-076 / ADR-010 — webhook do provedor de pagamento. Sem sessão e sem CSRF (ver bootstrap/app.php);
+// autenticado pelo token do provedor, conferido no adaptador. Não depende do interruptor de cobrança.
+Route::post('/webhooks/pagamentos', WebhookPagamentoController::class)
+    ->middleware('throttle:webhook-pagamentos')
+    ->withoutMiddleware([
+        EncryptCookies::class,
+        AddQueuedCookiesToResponse::class,
+        StartSession::class,
+        ShareErrorsFromSession::class,
+        ValidateCsrfToken::class,
+        PreventRequestForgery::class,
+        AuditarPersonificacao::class,
+    ])
+    ->name('webhooks.pagamentos');
 
 Route::middleware('auth')->group(function () {
     // STORY-016 — "Minhas Empresas" substitui a /home mínima da STORY-011.
@@ -76,6 +102,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/diagnosticos/{diagnostico}/pdf', [DiagnosticoController::class, 'pdf'])
         ->whereUuid('diagnostico')
         ->name('diagnosticos.pdf');
+
+    // STORY-076 — compra de créditos com Pix. Cobrança desligada = 404 (ver os componentes).
+    Route::get('/creditos/comprar/{pacote?}', ComprarCreditos::class)->whereUuid('pacote')->name('creditos.comprar');
+    Route::get('/creditos/pagamentos/{invoice}', AcompanharPagamento::class)->whereUuid('invoice')->name('creditos.retorno');
+    // "Página do provedor" do adaptador fake (dev/E2E): 404 fora do provedor fake.
+    Route::get('/pagamentos/fake/{invoice}', [PagamentoFakeController::class, 'mostrar'])->whereUuid('invoice')->name('pagamentos.fake');
+    Route::post('/pagamentos/fake/{invoice}', [PagamentoFakeController::class, 'simular'])->whereUuid('invoice')->name('pagamentos.fake.simular');
 
     // STORY-047 — Raio X do Negócio (DRM): lançamento mensal. Empresa de outro usuário → 404 (IDR-009).
     Route::get('/empresas/{empresa}/drm/lancar', LancamentoDrm::class)

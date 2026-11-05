@@ -27,6 +27,9 @@ final class LoteCredito extends Model
 {
     use HasUuids;
 
+    /** Com offset: o banco local roda em America/Sao_Paulo e a aplicação em UTC (mesmo ajuste de Recomendacao). */
+    protected $dateFormat = 'Y-m-d H:i:sP';
+
     protected $table = 'lotes_credito';
 
     protected function casts(): array
