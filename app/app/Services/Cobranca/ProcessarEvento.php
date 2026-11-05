@@ -12,6 +12,7 @@ use App\Domain\Cobranca\ReferenciaProvedor;
 use App\Domain\Cobranca\TipoEvento;
 use App\Models\Invoice;
 use App\Models\ProviderEvent;
+use App\Models\TrocaDeCartao;
 use App\Observabilidade\AuditLogger;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +31,9 @@ use Throwable;
  * - estado final (estornada, contestada, cancelada) nunca vira `paga`. Já `vencida` (Pix que
  *   passou do prazo) ainda aceita a confirmação do banco;
  * - evento sem efeito vira `ignorado`, não erro;
- * - pagamento de assinatura (ativação e renovação) é de {@see ConfirmarAssinatura} (STORY-077).
+ * - pagamento de assinatura (ativação e renovação) é de {@see ConfirmarAssinatura} (STORY-077);
+ * - checkout de troca de cartão (STORY-081) não tem Invoice: é uma {@see TrocaDeCartao}, e o cartão novo
+ *   só vale quando o provedor confirma (checkout concluído ou 1ª cobrança paga).
  */
 final class ProcessarEvento
 {
@@ -38,6 +41,7 @@ final class ProcessarEvento
         private readonly PaymentProvider $provedor,
         private readonly Carteira $carteira,
         private readonly ConfirmarAssinatura $assinaturas,
+        private readonly TrocarCartao $trocas,
     ) {}
 
     public function executar(string $providerEventId): void
@@ -77,6 +81,7 @@ final class ProcessarEvento
     {
         return match (TipoEvento::from($evento->tipo)) {
             TipoEvento::CobrancaPaga => $this->aplicarPagamento($evento),
+            TipoEvento::CheckoutConcluido => $this->concluirTroca($evento),
             TipoEvento::CheckoutExpirado => $this->encerrarCheckout($evento, EstadoCobranca::Vencida, 'expirado'),
             TipoEvento::CheckoutCancelado => $this->encerrarCheckout($evento, EstadoCobranca::Cancelada, 'cancelado'),
             TipoEvento::CobrancaFalhou => $this->encerrarCheckout($evento, EstadoCobranca::Falhou, 'recusado'),
@@ -103,9 +108,25 @@ final class ProcessarEvento
             return ['ignorado', $invoice?->id];
         }
 
+        // A 1ª cobrança do cartão novo: confirma a troca (se o aviso de checkout ainda não confirmou) e,
+        // numa assinatura em atraso, é ela que a recupera.
+        $troca = $invoice === null ? $this->localizarTroca($evento, $cobranca) : null;
+
+        // Com `$invoice` nulo e a guarda acima, a cobrança tem assinatura: a troca sempre sabe a nova.
+        if ($troca !== null) {
+            $this->trocas->confirmar($troca, $cobranca->assinaturaId, $cobranca->cartaoBandeira, $cobranca->cartaoUltimos4);
+        }
+
         // Daqui em diante, sem assinatura na cobrança, a Invoice existe (a guarda acima já devolveu o resto).
         if ($cobranca->assinaturaId !== null || $invoice->tipo === 'assinatura') {
-            return $this->assinaturas->aplicar($invoice, $cobranca, $evento->provedor);
+            $resultado = $this->assinaturas->aplicar($invoice, $cobranca, $evento->provedor, recuperaAtraso: $troca?->cobra_agora === true);
+
+            // A cobrança "de hoje" do cartão novo foi paga: a partir daqui o atraso não é mais dela.
+            if ($troca !== null && $resultado[0] === 'processado') {
+                TrocaDeCartao::query()->whereKey($troca->id)->update(['cobra_agora' => false]);
+            }
+
+            return $resultado;
         }
 
         return DB::transaction(function () use ($invoice, $cobranca): array {
@@ -157,8 +178,46 @@ final class ProcessarEvento
     }
 
     /** @return array{0: 'processado'|'ignorado', 1: string|null} */
+    private function concluirTroca(ProviderEvent $evento): array
+    {
+        $troca = $this->localizarTroca($evento, null);
+
+        if ($troca === null) {
+            return ['ignorado', null];
+        }
+
+        if ($evento->assinatura_id_externo === null) {
+            // Sem o id da assinatura nova não dá para trocar o ponteiro: a troca fica pendente, para a equipe olhar.
+            Log::error('cobranca.troca_de_cartao_sem_assinatura', [
+                'module' => 'cobranca',
+                'action' => 'processar_evento',
+                'provider_event_id' => $evento->id,
+                'troca_id' => $troca->id,
+            ]);
+
+            return ['ignorado', null];
+        }
+
+        $this->trocas->confirmar($troca, $evento->assinatura_id_externo, null, null);
+
+        return ['processado', null];
+    }
+
+    /** @return array{0: 'processado'|'ignorado', 1: string|null} */
     private function encerrarCheckout(ProviderEvent $evento, EstadoCobranca $novo, string $motivo): array
     {
+        $troca = $this->localizarTroca($evento, null);
+
+        if ($troca !== null) {
+            $this->trocas->encerrar($troca, match ($novo) {
+                EstadoCobranca::Vencida => 'expirada',
+                EstadoCobranca::Cancelada => 'cancelada',
+                default => 'falhou',
+            });
+
+            return ['processado', null];
+        }
+
         $invoice = $this->localizar($evento, null);
 
         if ($invoice === null) {
@@ -202,6 +261,36 @@ final class ProcessarEvento
         return $evento->cobranca_id_externo === null ? null : Invoice::query()
             ->where('provedor', $evento->provedor)
             ->where('id_externo', $evento->cobranca_id_externo)
+            ->first();
+    }
+
+    /** A troca de cartão a que o evento (ou a cobrança) se refere, pela referência, pelo checkout ou pela assinatura nova. */
+    private function localizarTroca(ProviderEvent $evento, ?CobrancaNoProvedor $cobranca): ?TrocaDeCartao
+    {
+        $referencia = $cobranca->referenciaInterna ?? $evento->referencia_externa;
+        $checkout = $cobranca->checkoutId ?? $evento->checkout_id_externo;
+        $assinatura = $cobranca->assinaturaId ?? $evento->assinatura_id_externo;
+
+        if ($referencia !== null && Str::isUuid($referencia)) {
+            $porId = TrocaDeCartao::query()->where('provedor', $evento->provedor)->find($referencia);
+
+            if ($porId !== null) {
+                return $porId;
+            }
+        }
+
+        if ($checkout !== null) {
+            $porCheckout = TrocaDeCartao::query()->where('provedor', $evento->provedor)->where('checkout_id_externo', $checkout)->first();
+
+            if ($porCheckout !== null) {
+                return $porCheckout;
+            }
+        }
+
+        return $assinatura === null ? null : TrocaDeCartao::query()
+            ->where('provedor', $evento->provedor)
+            ->where('nova_id_externo', $assinatura)
+            ->latest('concluida_em')
             ->first();
     }
 

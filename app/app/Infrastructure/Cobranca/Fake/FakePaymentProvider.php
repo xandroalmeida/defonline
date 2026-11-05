@@ -17,6 +17,7 @@ use App\Domain\Cobranca\WebhookBruto;
 use App\Domain\Cobranca\WebhookInvalido;
 use DateTimeImmutable;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
@@ -39,6 +40,20 @@ final class FakePaymentProvider implements PaymentProvider
     public static function falharProximoCheckout(): void
     {
         Cache::put(self::PREFIXO.'falhar', true, now()->addMinutes(10));
+    }
+
+    /** A próxima operação sobre assinatura (suspender, religar, cancelar) falha, como um provedor fora do ar. */
+    public static function falharProximaOperacaoDeAssinatura(): void
+    {
+        Cache::put(self::PREFIXO.'falhar-assinatura', true, now()->addMinutes(10));
+    }
+
+    /** `ativa`, `suspensa` ou `cancelada`; `null` se o provedor nunca viu a assinatura. */
+    public static function situacaoDaAssinatura(string $assinaturaId): ?string
+    {
+        $v = Cache::get(self::PREFIXO."sub:{$assinaturaId}");
+
+        return is_string($v) ? $v : null;
     }
 
     public function nome(): string
@@ -66,11 +81,22 @@ final class FakePaymentProvider implements PaymentProvider
             'estado' => EstadoCobranca::Pendente->value,
             'pago_em' => null,
             'assinatura' => $pedido->recorrencia === null ? null : 'fakesub_'.Str::after($id, 'fakechk_'),
+            // Troca de cartão no meio do ciclo (STORY-081): nada é cobrado agora, a 1ª cobrança é no vencimento.
+            'cobra_agora' => $pedido->primeiraCobrancaEm === null || $pedido->primeiraCobrancaEm <= new DateTimeImmutable,
         ], now()->addDays(2));
+
+        if ($pedido->recorrencia !== null) {
+            Cache::put(self::PREFIXO.'sub:fakesub_'.Str::after($id, 'fakechk_'), 'ativa', now()->addDays(2));
+        }
+
+        // A referência é o id da Invoice, ou o da troca de cartão (STORY-081): cada uma tem a sua "página do provedor".
+        $ehTroca = DB::table('trocas_de_cartao')->where('id', $pedido->referenciaInterna)->exists();
 
         return new SessaoCheckout(
             new ReferenciaProvedor(self::NOME, $id),
-            route('pagamentos.fake', ['invoice' => $pedido->referenciaInterna, 'checkout' => $id]),
+            $ehTroca
+                ? route('pagamentos.fake.troca', ['troca' => $pedido->referenciaInterna])
+                : route('pagamentos.fake', ['invoice' => $pedido->referenciaInterna, 'checkout' => $id]),
             $expira,
         );
     }
@@ -78,6 +104,21 @@ final class FakePaymentProvider implements PaymentProvider
     public function cancelCheckout(ReferenciaProvedor $sessao): void
     {
         $this->mudarEstado($sessao->id, EstadoCobranca::Cancelada);
+    }
+
+    public function cancelSubscription(ReferenciaProvedor $assinatura): void
+    {
+        $this->mudarAssinatura($assinatura, 'cancelada');
+    }
+
+    public function suspendSubscription(ReferenciaProvedor $assinatura): void
+    {
+        $this->mudarAssinatura($assinatura, 'suspensa');
+    }
+
+    public function resumeSubscription(ReferenciaProvedor $assinatura): void
+    {
+        $this->mudarAssinatura($assinatura, 'ativa');
     }
 
     public function getCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
@@ -204,6 +245,23 @@ final class FakePaymentProvider implements PaymentProvider
                 'assinatura_id' => $this->assinaturaDe($checkoutId),
             ]),
         );
+    }
+
+    /** A 1ª cobrança do checkout é hoje (e não no vencimento já pago)? Define se o pagamento do cartão novo chega junto. */
+    public function cobraNaHora(string $checkoutId): bool
+    {
+        $c = Cache::get(self::PREFIXO."pay:{$this->cobrancaDe($checkoutId)}");
+
+        return is_array($c) && ($c['cobra_agora'] ?? false) === true;
+    }
+
+    private function mudarAssinatura(ReferenciaProvedor $assinatura, string $situacao): void
+    {
+        if (Cache::pull(self::PREFIXO.'falhar-assinatura') === true) {
+            throw new ProvedorIndisponivel('Falha simulada do provedor fake.');
+        }
+
+        Cache::put(self::PREFIXO."sub:{$assinatura->id}", $situacao, now()->addDays(2));
     }
 
     private function assinaturaDe(string $checkoutId): ?string

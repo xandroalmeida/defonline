@@ -9,8 +9,7 @@ namespace App\Domain\Cobranca;
  * são NOSSOS: nada do Asaas (ou de outro provedor) atravessa esta fronteira. Trocar de provedor
  * é escrever outra implementação e registrá-la; regra de plano, carteira e crédito não muda.
  *
- * Esta estória (076) usa o checkout hospedado avulso. `ensureCustomer`, assinatura, estorno e
- * conciliação entram com as estórias que precisam deles (077, 079, 087).
+ * `ensureCustomer`, estorno e conciliação entram com as estórias que precisam deles (079, 087).
  */
 interface PaymentProvider
 {
@@ -34,6 +33,29 @@ interface PaymentProvider
      * @throws ProvedorIndisponivel
      */
     public function getCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor;
+
+    /**
+     * STORY-081 — encerra a recorrência de vez (a assinatura antiga depois de uma troca de cartão).
+     * Idempotente: cancelar o que já não existe não é erro.
+     *
+     * @throws ProvedorIndisponivel
+     */
+    public function cancelSubscription(ReferenciaProvedor $assinatura): void;
+
+    /**
+     * STORY-081 CA-4 — para de cobrar as próximas renovações sem apagar a assinatura, para que
+     * {@see resumeSubscription()} possa religá-la (CA-5).
+     *
+     * @throws ProvedorIndisponivel
+     */
+    public function suspendSubscription(ReferenciaProvedor $assinatura): void;
+
+    /**
+     * STORY-081 CA-5 — volta a cobrar a renovação da assinatura suspensa.
+     *
+     * @throws ProvedorIndisponivel
+     */
+    public function resumeSubscription(ReferenciaProvedor $assinatura): void;
 
     /**
      * Autentica e traduz um webhook bruto para o evento canônico.

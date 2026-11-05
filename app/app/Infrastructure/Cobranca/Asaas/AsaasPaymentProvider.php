@@ -94,8 +94,10 @@ final class AsaasPaymentProvider implements PaymentProvider
             'chargeTypes' => [$pedido->recorrencia === null ? 'DETACHED' : 'RECURRENT'],
             ...($pedido->recorrencia === null ? [] : ['subscription' => [
                 'cycle' => $pedido->recorrencia === CicloCobranca::Mensal ? 'MONTHLY' : 'YEARLY',
-                // A primeira cobrança é a do próprio checkout: hoje, no fuso do negócio.
-                'nextDueDate' => (new DateTimeImmutable('now', new DateTimeZone('America/Sao_Paulo')))->format('Y-m-d').' 00:00:00',
+                // Por padrão a primeira cobrança é a do próprio checkout: hoje, no fuso do negócio. Na troca
+                // de cartão no meio do ciclo (STORY-081) é o vencimento já pago, para não cobrar em dobro.
+                'nextDueDate' => ($pedido->primeiraCobrancaEm ?? new DateTimeImmutable('now', new DateTimeZone('America/Sao_Paulo')))
+                    ->setTimezone(new DateTimeZone('America/Sao_Paulo'))->format('Y-m-d').' 00:00:00',
             ]]),
             'minutesToExpire' => $pedido->expiraEmMinutos,
             'externalReference' => $pedido->referenciaInterna,
@@ -129,6 +131,32 @@ final class AsaasPaymentProvider implements PaymentProvider
     public function cancelCheckout(ReferenciaProvedor $sessao): void
     {
         $this->enviar('post', '/checkouts/'.rawurlencode($sessao->id).'/cancel');
+    }
+
+    public function cancelSubscription(ReferenciaProvedor $assinatura): void
+    {
+        try {
+            $this->enviar('delete', '/subscriptions/'.rawurlencode($assinatura->id));
+        } catch (ProvedorIndisponivel $e) {
+            // Já removida no provedor: o resultado desejado já existe.
+            if (! str_contains($e->getMessage(), 'HTTP 404')) {
+                throw $e;
+            }
+        }
+    }
+
+    /**
+     * `PUT /subscriptions/{id}` com `status`: INACTIVE pausa e ACTIVE religa (ADR-010, "Cancelamento").
+     * PENDENTE DE CONFIRMAÇÃO NO SANDBOX: que `status` seja aceito no PUT e que religar não gere cobrança retroativa.
+     */
+    public function suspendSubscription(ReferenciaProvedor $assinatura): void
+    {
+        $this->enviar('put', '/subscriptions/'.rawurlencode($assinatura->id), ['status' => 'INACTIVE']);
+    }
+
+    public function resumeSubscription(ReferenciaProvedor $assinatura): void
+    {
+        $this->enviar('put', '/subscriptions/'.rawurlencode($assinatura->id), ['status' => 'ACTIVE']);
     }
 
     public function getCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
@@ -174,7 +202,9 @@ final class AsaasPaymentProvider implements PaymentProvider
             cobrancaId: $this->texto($pagamento['id'] ?? null),
             checkoutId: $this->texto($pagamento['checkoutSession'] ?? ($checkout['id'] ?? null)),
             referenciaInterna: $this->texto($pagamento['externalReference'] ?? ($checkout['externalReference'] ?? null)),
-            assinaturaId: $this->texto($pagamento['subscription'] ?? null),
+            // No CHECKOUT_PAID de uma recorrência a assinatura vem em `checkout.subscription`
+            // (PENDENTE DE CONFIRMAÇÃO NO SANDBOX, ADR-010 pendência 6): sem ela a troca de cartão fica pendente.
+            assinaturaId: $this->texto($pagamento['subscription'] ?? ($checkout['subscription'] ?? null)),
             payload: $this->semDadosDeCartao($dados),
         );
     }

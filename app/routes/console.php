@@ -33,3 +33,9 @@ Schedule::command('assinaturas:renovar-cota')
     ->hourly()
     ->onOneServer()
     ->withoutOverlapping(30);
+
+// STORY-081 — termina o cancelamento da assinatura antiga das trocas de cartão (o provedor pode ter falhado na hora).
+Schedule::command('assinaturas:cancelar-antigas')
+    ->hourly()
+    ->onOneServer()
+    ->withoutOverlapping(30);

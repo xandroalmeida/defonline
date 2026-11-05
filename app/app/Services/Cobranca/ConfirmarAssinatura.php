@@ -38,9 +38,9 @@ final class ConfirmarAssinatura
     public function __construct(private readonly Carteira $carteira) {}
 
     /** @return array{0: 'processado'|'ignorado', 1: string|null} */
-    public function aplicar(?Invoice $invoice, CobrancaNoProvedor $cobranca, string $provedor): array
+    public function aplicar(?Invoice $invoice, CobrancaNoProvedor $cobranca, string $provedor, bool $recuperaAtraso = false): array
     {
-        return DB::transaction(function () use ($invoice, $cobranca, $provedor): array {
+        return DB::transaction(function () use ($invoice, $cobranca, $provedor, $recuperaAtraso): array {
             if ($invoice !== null) {
                 $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
 
@@ -55,7 +55,7 @@ final class ConfirmarAssinatura
                 }
             }
 
-            return $this->renovar($cobranca, $provedor, $invoice);
+            return $this->renovar($cobranca, $provedor, $invoice, $recuperaAtraso);
         });
     }
 
@@ -134,8 +134,13 @@ final class ConfirmarAssinatura
         return ['processado', $invoice->id];
     }
 
-    /** @return array{0: 'processado'|'ignorado', 1: string|null} */
-    private function renovar(CobrancaNoProvedor $cobranca, string $provedor, ?Invoice $referencia): array
+    /**
+     * `$recuperaAtraso` (STORY-081 CA-3): o pagamento é a 1ª cobrança do cartão novo de uma assinatura em
+     * atraso, então ela volta a ativa. Qualquer outro pagamento em atraso continua com a STORY-079.
+     *
+     * @return array{0: 'processado'|'ignorado', 1: string|null}
+     */
+    private function renovar(CobrancaNoProvedor $cobranca, string $provedor, ?Invoice $referencia, bool $recuperaAtraso): array
     {
         $assinatura = $cobranca->assinaturaId === null ? null : Assinatura::query()
             ->where('provedor', $provedor)
@@ -158,7 +163,9 @@ final class ConfirmarAssinatura
         }
 
         // Atraso, cancelamento e reativação são da STORY-079: aqui só se renova assinatura em dia.
-        if ($assinatura->status !== StatusAssinatura::Ativa) {
+        $recupera = $recuperaAtraso && $assinatura->status === StatusAssinatura::EmAtraso;
+
+        if ($assinatura->status !== StatusAssinatura::Ativa && ! $recupera) {
             Log::error('cobranca.renovacao_de_assinatura_inativa', [
                 'module' => 'cobranca',
                 'action' => 'processar_evento',
@@ -205,6 +212,10 @@ final class ConfirmarAssinatura
             'cartao_bandeira' => $cobranca->cartaoBandeira,
             'cartao_ultimos4' => $cobranca->cartaoUltimos4,
         ]);
+
+        if ($recupera) {
+            $this->carteira->mudarStatus($assinatura->id, StatusAssinatura::Ativa);
+        }
 
         $this->carteira->renovarCota($assinatura->id, $cota, $vencimento);
 

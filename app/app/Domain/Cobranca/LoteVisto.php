@@ -16,4 +16,10 @@ final readonly class LoteVisto
         public CarbonImmutable $compradoEm,
         public CarbonImmutable $expiraEm,
     ) {}
+
+    /** STORY-081 CA-1 — vence dentro de `$dias` (e ainda não venceu). */
+    public function pertoDeVencer(CarbonImmutable $agora, int $dias): bool
+    {
+        return $this->expiraEm->greaterThan($agora) && $this->expiraEm->lessThanOrEqualTo($agora->addDays($dias));
+    }
 }

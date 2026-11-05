@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Cobranca;
 
+use DateTimeImmutable;
 use InvalidArgumentException;
 
 /**
@@ -24,6 +25,8 @@ final readonly class PedidoCheckout
         public string $urlCancelamento,
         public string $urlExpirado,
         public ?CicloCobranca $recorrencia = null,
+        /** STORY-081: data da primeira cobrança da recorrência (troca de cartão no meio do ciclo); `null` = hoje. */
+        public ?DateTimeImmutable $primeiraCobrancaEm = null,
     ) {
         if ($valorCentavos < 1) {
             throw new InvalidArgumentException('O valor do checkout deve ser positivo.');
