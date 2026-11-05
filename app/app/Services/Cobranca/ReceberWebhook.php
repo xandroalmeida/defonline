@@ -43,6 +43,7 @@ final class ReceberWebhook
             'cobranca_id_externo' => $evento->cobrancaId,
             'checkout_id_externo' => $evento->checkoutId,
             'referencia_externa' => $evento->referenciaInterna,
+            'assinatura_id_externo' => $evento->assinaturaId,
             'payload' => json_encode($evento->payload, JSON_THROW_ON_ERROR),
             'status' => 'recebido',
             'recebido_em' => now()->format('Y-m-d H:i:sP'),

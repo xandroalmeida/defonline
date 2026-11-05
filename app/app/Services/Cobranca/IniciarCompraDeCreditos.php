@@ -9,18 +9,14 @@ use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PaymentProvider;
 use App\Domain\Cobranca\PedidoCheckout;
 use App\Domain\Cobranca\ProvedorIndisponivel;
-use App\Domain\TermoTipo;
 use App\Jobs\EnviarEmailPagamento;
 use App\Models\Invoice;
 use App\Models\PacoteCredito;
-use App\Models\TermAcceptance;
 use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
 use App\Support\Personificacao;
-use App\Support\TermosVigentes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 /**
  * STORY-076 CA-1, CA-2, CA-6, CA-7 — da revisão do pedido até o checkout hospedado.
@@ -31,7 +27,10 @@ use Illuminate\Support\Str;
  */
 final class IniciarCompraDeCreditos
 {
-    public function __construct(private readonly PaymentProvider $provedor) {}
+    public function __construct(
+        private readonly PaymentProvider $provedor,
+        private readonly RegistrarAceiteDoCheckout $aceite,
+    ) {}
 
     /**
      * @throws CompraNaoPermitida
@@ -51,7 +50,7 @@ final class IniciarCompraDeCreditos
             throw CompraNaoPermitida::pacoteIndisponivel();
         }
 
-        $aceiteId = $this->registrarAceite($usuario, $ip, $userAgent);
+        $aceiteId = $this->aceite->executar($usuario, $ip, $userAgent);
 
         // Clique repetido ou volta ao checkout: reaproveita o que ainda vale em vez de abrir outro.
         $existente = $this->checkoutAindaValido($usuario, $pacote);
@@ -136,41 +135,5 @@ final class IniciarCompraDeCreditos
             ->where('checkout_expira_em', '>', DB::raw('now()'))
             ->latest('created_at')
             ->first();
-    }
-
-    private function registrarAceite(Usuario $usuario, ?string $ip, ?string $userAgent): string
-    {
-        return DB::transaction(function () use ($usuario, $ip, $userAgent): string {
-            $termoAdesaoId = null;
-
-            foreach ([TermoTipo::TermoAdesao, TermoTipo::Lgpd] as $tipo) {
-                $vigente = TermosVigentes::para($tipo);
-                $id = (string) Str::uuid7();
-
-                TermAcceptance::query()->create([
-                    'id' => $id,
-                    'usuario_id' => $usuario->id,
-                    'termo_tipo' => $tipo->value,
-                    'aceito' => true,
-                    'versao' => $vigente->versao,
-                    'conteudo_hash' => $vigente->conteudoHash,
-                    'ip' => $ip,
-                    'user_agent' => $userAgent,
-                ]);
-
-                AuditLogger::log(
-                    action: 'termo.aceito',
-                    subjectType: 'TermAcceptance',
-                    actorType: 'user',
-                    actorId: $usuario->id,
-                    usuarioId: $usuario->id,
-                    after: ['termo_tipo' => $tipo->value, 'versao' => $vigente->versao, 'contexto' => 'checkout'],
-                );
-
-                $termoAdesaoId ??= $id;
-            }
-
-            return (string) $termoAdesaoId;
-        });
     }
 }

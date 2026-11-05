@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use App\Domain\Cobranca\CobrancaNoProvedor;
 
 /**
  * STORY-076 CA-9 / ADR-010 §2 e §8 — o Asaas mora só no adaptador, e nada de cartão no nosso código.
@@ -102,4 +103,36 @@ it('a rota do webhook não passa por sessão nem CSRF', function () {
         ->and($bloco[0])->toContain('StartSession::class')
         ->and($bloco[0])->toContain('PreventRequestForgery::class')
         ->and($bloco[0])->toContain('ValidateCsrfToken::class');
+});
+
+it('nenhum DTO, enum ou model do domínio de cobrança tem campo de número, validade ou CVV de cartão (ADR-010 §2a, STORY-077 CA-4)', function () {
+    $proibido = '/(^|_)(numero|number|pan|cvv|cvc|ccv|validade|expiry|holder|titular|token)(_|$)|^(card|cartao)(Numero|Number|Validade|Cvv|Token)/i';
+    $achados = [];
+
+    foreach (glob(dirname(__DIR__, 3).'/app/Domain/Cobranca/*.php') ?: [] as $arquivo) {
+        $classe = 'App\\Domain\\Cobranca\\'.basename($arquivo, '.php');
+
+        if (! class_exists($classe)) {
+            continue;
+        }
+
+        foreach ((new ReflectionClass($classe))->getProperties() as $p) {
+            $nome = (string) preg_replace('/(?<!^)([A-Z])/', '_$1', $p->getName());
+
+            if (preg_match($proibido, $nome) === 1 && ! in_array($p->getName(), ['validade', 'validadeMeses'], true)) {
+                $achados[] = "{$classe}::\${$p->getName()}";
+            }
+        }
+    }
+
+    // `validade` no domínio é a validade do CRÉDITO (meses), nunca a do cartão: está liberada por nome acima.
+    expect($achados)->toBe([]);
+});
+
+it('só a bandeira e os 4 últimos dígitos do cartão existem como dado nosso (ADR-010 §2)', function () {
+    $dto = new ReflectionClass(CobrancaNoProvedor::class);
+    $campos = array_map(fn (ReflectionProperty $p) => $p->getName(), $dto->getProperties());
+
+    expect($campos)->toContain('cartaoBandeira')->toContain('cartaoUltimos4')
+        ->and(array_values(array_filter($campos, fn (string $c) => str_starts_with($c, 'cartao'))))->toBe(['cartaoBandeira', 'cartaoUltimos4']);
 });
