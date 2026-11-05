@@ -112,6 +112,12 @@ final class ConteudoDrm
         return $this->resolver('rotulos', "grupos_por_setor.{$setor}.custo");
     }
 
+    /** Mensagem semântica de um motivo de indisponibilidade (`indisponivel:*`), DDR-005. */
+    public function indisponibilidade(string $motivo): ?string
+    {
+        return $this->resolver('rotulos', "indisponibilidade.{$motivo}");
+    }
+
     /**
      * Nome do módulo na interface — "Raio X do Negócio" (`PDR-009` §3).
      *

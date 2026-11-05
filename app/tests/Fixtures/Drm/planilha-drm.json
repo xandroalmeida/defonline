@@ -1,0 +1,35 @@
+{
+  "origem": "Demonstração de Resultado Mensal - DRM.xlsx (Key User José Marques, 03/08/2026), planilha única, extraída célula a célula do XML (xl/worksheets/sheet1.xml). Só fórmulas e mapeamento; nenhum dado de cliente.",
+  "formulas": {
+    "D2": "D3",
+    "D4": "D5",
+    "D6": "D2-D4",
+    "D7": "D8+D9+D10+D11",
+    "D12": "D6-D7",
+    "D13": "D14+D21",
+    "D14": "D15+D16+D17+D18+D19+D20",
+    "D21": "SUM(D22:D42)",
+    "D43": "D12-D13",
+    "D44": "D45+D46",
+    "D47": "D43-D44",
+    "D49": "D47-D48"
+  },
+  "percentual": {
+    "formula": "D<n>/D$2*100",
+    "celulas_da_planilha": ["E7", "E12", "E13", "E14", "E21", "E43", "E44", "E47", "E48", "E49"],
+    "nota": "A planilha traz % só nessas linhas; L2, L3, L1, L8a e L8b ganham % pelo PDR-004 (decisão C), com a mesma fórmula."
+  },
+  "entradas": {
+    "D3": "D01", "D5": "D02",
+    "D8": "D04", "D9": "D05", "D10": "D06", "D11": "D07",
+    "D15": "D09", "D16": "D10", "D17": "D11", "D18": "D12", "D19": "D13", "D20": "D14",
+    "D22": "D16", "D23": "D17", "D24": "D18", "D25": "D19", "D26": "D20", "D27": "D21", "D28": "D22",
+    "D29": "D23", "D30": "D24", "D31": "D25", "D32": "D26", "D33": "D27", "D34": "D28", "D35": "D29",
+    "D36": "D30", "D37": "D31", "D38": "D32", "D39": "D33", "D40": "D34", "D41": "D35", "D42": "D36",
+    "D45": "D38", "D46": "D39", "D48": "D40"
+  },
+  "linhas": {
+    "D2": "L1", "D4": "L2", "D6": "L3", "D7": "L4", "D12": "L5", "D13": "L6", "D14": "L6a", "D21": "L6b",
+    "D43": "L7", "D44": "L8", "D45": "L8a", "D46": "L8b", "D47": "L9", "D48": "L10", "D49": "L11"
+  }
+}
