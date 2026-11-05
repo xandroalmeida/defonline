@@ -33,3 +33,26 @@ Schedule::command('assinaturas:renovar-cota')
     ->hourly()
     ->onOneServer()
     ->withoutOverlapping(30);
+
+// STORY-079 CA-1 — lembrete de renovação a 7 dias do fim do ciclo (um por ciclo).
+Schedule::command('assinaturas:avisar-renovacao')
+    ->hourly()
+    ->onOneServer()
+    ->withoutOverlapping(30);
+
+// STORY-079 CA-3 a CA-5 — régua: retentativas a cada 48 h, encerramento depois da última.
+Schedule::command('cobranca:regua')
+    ->hourly()
+    ->onOneServer()
+    ->withoutOverlapping(30);
+
+// STORY-079 CA-6 / ADR-010 §3 — conciliação horária (pendências) e diária (14 dias).
+Schedule::command('cobranca:conciliar --modo=horaria')
+    ->hourlyAt(20)
+    ->onOneServer()
+    ->withoutOverlapping(30);
+
+Schedule::command('cobranca:conciliar --modo=diaria')
+    ->dailyAt('06:30')
+    ->onOneServer()
+    ->withoutOverlapping(120);

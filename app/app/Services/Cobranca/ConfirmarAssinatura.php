@@ -28,13 +28,24 @@ use UnexpectedValueException;
  * - **Ativação:** a Invoice do checkout é paga e nasce a assinatura, com a cota cheia, o preço e
  *   a cota do momento da escolha (CA-5) e o cartão (só bandeira e 4 dígitos, se vierem).
  * - **Renovação:** uma cobrança paga que não é a da Invoice, mas é de uma assinatura nossa, estende
- *   o período e devolve a cota cheia. Cada cobrança vira uma Invoice (`UNIQUE (provedor, id_externo)`),
+ *   o período e devolve a cota cheia. Se a assinatura estava "Em atraso" (STORY-079 CA-4), o pagamento
+ *   a restabelece e encerra a régua de retentativas. Cada cobrança vira uma Invoice (`UNIQUE (provedor, id_externo)`),
  *   então o mesmo pagamento avisado duas vezes renova uma vez só (CA-8).
  *
  * Retorno: `[status do evento, id da Invoice]` no formato de ProcessarEvento.
  */
 final class ConfirmarAssinatura
 {
+    /** O que se zera quando o pagamento chega durante o atraso: a régua para. */
+    private const FIM_DO_ATRASO = [
+        'status' => StatusAssinatura::Ativa,
+        'atraso_desde' => null,
+        'atraso_cobranca_id' => null,
+        'tentativas_cobranca' => 0,
+        'proxima_tentativa_em' => null,
+        'atraso_aviso_em' => null,
+    ];
+
     public function __construct(private readonly Carteira $carteira) {}
 
     /** @return array{0: 'processado'|'ignorado', 1: string|null} */
@@ -157,8 +168,11 @@ final class ConfirmarAssinatura
             return ['ignorado', $referencia?->id];
         }
 
-        // Atraso, cancelamento e reativação são da STORY-079: aqui só se renova assinatura em dia.
-        if ($assinatura->status !== StatusAssinatura::Ativa) {
+        $emAtraso = $assinatura->status === StatusAssinatura::EmAtraso;
+
+        // Cancelada ou encerrada não renova sozinha: o dinheiro entrou, mas não há ciclo a estender.
+        // Fica o alerta para a equipe (devolução é manual, STORY-087).
+        if ($assinatura->status !== StatusAssinatura::Ativa && ! $emAtraso) {
             Log::error('cobranca.renovacao_de_assinatura_inativa', [
                 'module' => 'cobranca',
                 'action' => 'processar_evento',
@@ -214,7 +228,19 @@ final class ConfirmarAssinatura
             'proxima_cota_em' => $ciclo === CicloCobranca::Anual ? CotaMensal::proxima($assinatura->data_inicio, $pagoEm, $vencimento) : null,
             'cartao_bandeira' => $cobranca->cartaoBandeira ?? $assinatura->cartao_bandeira,
             'cartao_ultimos4' => $cobranca->cartaoUltimos4 ?? $assinatura->cartao_ultimos4,
+            ...($emAtraso ? self::FIM_DO_ATRASO : []),
         ])->save();
+
+        if ($emAtraso) {
+            AuditLogger::log(
+                action: 'cobranca.assinatura_restabelecida',
+                subjectType: 'Assinatura',
+                subjectId: $assinatura->id,
+                actorType: 'system',
+                usuarioId: $assinatura->usuario_id,
+                after: ['cobranca' => $cobranca->referencia->id, 'periodos_pagos' => $periodos],
+            );
+        }
 
         AuditLogger::log(
             action: 'cobranca.assinatura_renovada',

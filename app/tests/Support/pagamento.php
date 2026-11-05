@@ -3,9 +3,15 @@
 declare(strict_types=1);
 
 use App\Domain\Cobranca\CicloCobranca;
+use App\Domain\Cobranca\CobrancaNoProvedor;
+use App\Domain\Cobranca\EventoDoProvedor;
 use App\Domain\Cobranca\PaymentProvider;
+use App\Domain\Cobranca\PedidoCheckout;
+use App\Domain\Cobranca\ReferenciaProvedor;
+use App\Domain\Cobranca\SessaoCheckout;
 use App\Domain\Cobranca\WebhookBruto;
 use App\Infrastructure\Cobranca\Fake\FakePaymentProvider;
+use App\Models\Assinatura;
 use App\Models\CobrancaConfig;
 use App\Models\Invoice;
 use App\Models\PacoteCredito;
@@ -15,6 +21,8 @@ use App\Services\Cobranca\IniciarAssinatura;
 use App\Services\Cobranca\IniciarCompraDeCreditos;
 use App\Services\Cobranca\ReceberWebhook;
 use Illuminate\Http\Client\Request;
+use Illuminate\Mail\MailManager;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -177,4 +185,140 @@ function _pagarAssinatura(Invoice $invoice): Invoice
     _entregar(_fake()->simularPagamento((string) $invoice->checkout_id_externo));
 
     return $invoice->fresh();
+}
+
+// STORY-079 — ajudantes da renovação e da falha de cobrança.
+
+/**
+ * Assinatura paga no provedor fake (ciclo 1 pago).
+ *
+ * @return array{0: Assinatura, 1: Invoice}
+ */
+function _assinaturaAtivaNoFake(Usuario $usuario, CicloCobranca $ciclo = CicloCobranca::Mensal): array
+{
+    $invoice = _pagarAssinatura(_assinaturaPendente($usuario, null, $ciclo));
+
+    return [Assinatura::query()->where('usuario_id', $usuario->id)->sole(), $invoice];
+}
+
+/** Viaja até o fim do período pago e entrega o aviso de que o banco recusou a cobrança do ciclo seguinte. */
+function _recusarRenovacao(Assinatura $assinatura, Invoice $primeira, ?string $eventoId = null): Assinatura
+{
+    test()->travelTo($assinatura->proximo_vencimento);
+    _entregar(_fake()->simularRecusaDeRenovacao((string) $primeira->checkout_id_externo, $eventoId));
+
+    return $assinatura->fresh();
+}
+
+/** Anda `$horas` no tempo e roda a régua de cobrança como o agendador faria. */
+function _rodarRegua(int $horas = 0): int
+{
+    if ($horas > 0) {
+        test()->travelTo(now()->addHours($horas));
+    }
+
+    return Artisan::call('cobranca:regua');
+}
+
+/**
+ * Provedor que repassa tudo ao fake, mas deixa o teste fazer métodos específicos falharem: cada
+ * entrada de `$falhas` é `nomeDoMetodo => fn(...$argumentos): ?Throwable` (devolver erro = lançar).
+ * Serve para provar o que a régua e a conciliação fazem quando o provedor cai ou recusa na hora errada.
+ *
+ * @param  array<string, callable>  $falhas
+ */
+function _provedorQueFalha(array $falhas): PaymentProvider
+{
+    return new class(_fake(), $falhas) implements PaymentProvider
+    {
+        /** @param array<string, callable> $falhas */
+        public function __construct(private readonly PaymentProvider $real, private readonly array $falhas) {}
+
+        private function checar(string $metodo, mixed ...$args): void
+        {
+            $erro = isset($this->falhas[$metodo]) ? ($this->falhas[$metodo])(...$args) : null;
+
+            if ($erro instanceof Throwable) {
+                throw $erro;
+            }
+        }
+
+        public function nome(): string
+        {
+            return $this->real->nome();
+        }
+
+        public function startCheckout(PedidoCheckout $pedido): SessaoCheckout
+        {
+            $this->checar(__FUNCTION__, $pedido);
+
+            return $this->real->startCheckout($pedido);
+        }
+
+        public function cancelCheckout(ReferenciaProvedor $sessao): void
+        {
+            $this->checar(__FUNCTION__, $sessao);
+            $this->real->cancelCheckout($sessao);
+        }
+
+        public function getCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
+        {
+            $this->checar(__FUNCTION__, $cobranca);
+
+            return $this->real->getCharge($cobranca);
+        }
+
+        public function retryCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
+        {
+            $this->checar(__FUNCTION__, $cobranca);
+
+            return $this->real->retryCharge($cobranca);
+        }
+
+        public function cancelSubscription(ReferenciaProvedor $assinatura): void
+        {
+            $this->checar(__FUNCTION__, $assinatura);
+            $this->real->cancelSubscription($assinatura);
+        }
+
+        public function listSubscriptionCharges(ReferenciaProvedor $assinatura, DateTimeImmutable $desde): array
+        {
+            $this->checar(__FUNCTION__, $assinatura);
+
+            return $this->real->listSubscriptionCharges($assinatura, $desde);
+        }
+
+        public function listCheckoutCharges(ReferenciaProvedor $sessao): array
+        {
+            $this->checar(__FUNCTION__, $sessao);
+
+            return $this->real->listCheckoutCharges($sessao);
+        }
+
+        public function parseWebhook(WebhookBruto $requisicao): EventoDoProvedor
+        {
+            return $this->real->parseWebhook($requisicao);
+        }
+    };
+}
+
+function _provedorQueFalhaNaRetentativa(Throwable $erro): PaymentProvider
+{
+    return _provedorQueFalha(['retryCharge' => fn () => $erro]);
+}
+
+/** Faz o envio de e-mail falhar na próxima chamada (SMTP fora); `Mail::fake()` depois restaura. */
+function _emailForaDoAr(): void
+{
+    $gerente = Mockery::mock(MailManager::class);
+    $gerente->shouldReceive('to')->andThrow(new RuntimeException('smtp fora'));
+    Mail::swap($gerente);
+}
+
+/** O SMTP volta: descarta o gerente falso e troca por um `Mail::fake()` novo. */
+function _emailVoltou(): void
+{
+    app()->forgetInstance('mail.manager');
+    Mail::clearResolvedInstance('mail.manager');
+    Mail::fake();
 }

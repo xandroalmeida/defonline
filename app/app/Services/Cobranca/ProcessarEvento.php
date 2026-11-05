@@ -8,8 +8,10 @@ use App\Domain\Cobranca\Carteira;
 use App\Domain\Cobranca\CobrancaNoProvedor;
 use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\PaymentProvider;
+use App\Domain\Cobranca\ProvedorIndisponivel;
 use App\Domain\Cobranca\ReferenciaProvedor;
 use App\Domain\Cobranca\TipoEvento;
+use App\Models\Assinatura;
 use App\Models\Invoice;
 use App\Models\ProviderEvent;
 use App\Observabilidade\AuditLogger;
@@ -30,7 +32,10 @@ use Throwable;
  * - estado final (estornada, contestada, cancelada) nunca vira `paga`. Já `vencida` (Pix que
  *   passou do prazo) ainda aceita a confirmação do banco;
  * - evento sem efeito vira `ignorado`, não erro;
- * - pagamento de assinatura (ativação e renovação) é de {@see ConfirmarAssinatura} (STORY-077).
+ * - pagamento de assinatura (ativação e renovação) é de {@see ConfirmarAssinatura} (STORY-077);
+ * - recusa ou vencimento da cobrança de uma assinatura nossa é de {@see FalhaDeRenovacao} (STORY-079);
+ * - provedor fora do ar NÃO é recusa do cliente: o evento fica em `erro`, a equipe é alertada e o
+ *   reprocessador tenta de novo (STORY-079 CA-7).
  */
 final class ProcessarEvento
 {
@@ -38,6 +43,7 @@ final class ProcessarEvento
         private readonly PaymentProvider $provedor,
         private readonly Carteira $carteira,
         private readonly ConfirmarAssinatura $assinaturas,
+        private readonly FalhaDeRenovacao $falhas,
     ) {}
 
     public function executar(string $providerEventId): void
@@ -52,6 +58,15 @@ final class ProcessarEvento
             [$status, $invoiceId] = $this->aplicar($registro);
         } catch (Throwable $e) {
             $registro->forceFill(['status' => 'erro', 'erro' => mb_substr($e::class.': '.$e->getMessage(), 0, 500)])->save();
+
+            if ($e instanceof ProvedorIndisponivel) {
+                Log::error('cobranca.provedor_indisponivel', [
+                    'module' => 'cobranca',
+                    'action' => 'processar_evento',
+                    'provider_event_id' => $registro->id,
+                    'tipo' => $registro->tipo,
+                ]);
+            }
 
             Log::error('cobranca.evento_com_erro', [
                 'module' => 'cobranca',
@@ -79,7 +94,7 @@ final class ProcessarEvento
             TipoEvento::CobrancaPaga => $this->aplicarPagamento($evento),
             TipoEvento::CheckoutExpirado => $this->encerrarCheckout($evento, EstadoCobranca::Vencida, 'expirado'),
             TipoEvento::CheckoutCancelado => $this->encerrarCheckout($evento, EstadoCobranca::Cancelada, 'cancelado'),
-            TipoEvento::CobrancaFalhou => $this->encerrarCheckout($evento, EstadoCobranca::Falhou, 'recusado'),
+            TipoEvento::CobrancaFalhou, TipoEvento::CobrancaVencida => $this->aplicarFalha($evento),
             default => ['ignorado', null],
         };
     }
@@ -154,6 +169,30 @@ final class ProcessarEvento
 
             return ['processado', $invoice->id];
         });
+    }
+
+    /**
+     * Cobrança recusada ou vencida. Se é de uma assinatura que já existe, é uma renovação que falhou
+     * (régua de cobrança); senão é o checkout inicial, que apenas não se concretizou.
+     *
+     * @return array{0: 'processado'|'ignorado', 1: string|null}
+     */
+    private function aplicarFalha(ProviderEvent $evento): array
+    {
+        $assinatura = $evento->assinatura_id_externo === null ? null : Assinatura::query()
+            ->where('provedor', $evento->provedor)
+            ->where('id_externo', $evento->assinatura_id_externo)
+            ->first();
+
+        if ($assinatura !== null && $evento->cobranca_id_externo !== null) {
+            return $this->falhas->registrar($assinatura, $evento->cobranca_id_externo);
+        }
+
+        if (TipoEvento::from($evento->tipo) === TipoEvento::CobrancaFalhou) {
+            return $this->encerrarCheckout($evento, EstadoCobranca::Falhou, 'recusado');
+        }
+
+        return ['ignorado', null];
     }
 
     /** @return array{0: 'processado'|'ignorado', 1: string|null} */

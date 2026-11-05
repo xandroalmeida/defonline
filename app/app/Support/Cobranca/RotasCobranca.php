@@ -21,6 +21,8 @@ final class RotasCobranca
 
     public const TESTE = 'trial.iniciar';           // STORY-074
 
+    public const MEU_PLANO = 'meu-plano';           // STORY-081: destino dos e-mails de renovação e de falha de cobrança
+
     /** @param  array<string, string>  $parametros */
     public static function url(string $rota, array $parametros = []): ?string
     {

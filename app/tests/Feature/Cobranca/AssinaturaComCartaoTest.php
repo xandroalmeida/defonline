@@ -368,16 +368,16 @@ describe('renovação de assinatura que não é nossa ou não está em dia', fun
         Log::shouldHaveReceived('error')->withArgs(fn (string $m) => $m === 'cobranca.evento_sem_invoice')->once();
     });
 
-    it('renovação de assinatura em atraso fica para a STORY-079: não renova e alerta', function () {
+    it('renovação de assinatura cancelada ou encerrada não estende o ciclo: o dinheiro entrou e vira alerta', function (StatusAssinatura $status) {
         Log::spy();
         $invoice = _pagarAssinatura(_assinaturaPendente($this->usuario));
-        Assinatura::query()->update(['status' => StatusAssinatura::EmAtraso]);
+        Assinatura::query()->update(['status' => $status]);
 
         _entregar(_fake()->simularRenovacao((string) $invoice->checkout_id_externo));
 
         expect(Assinatura::query()->sole()->periodos_pagos)->toBe(1);
         Log::shouldHaveReceived('error')->withArgs(fn (string $m) => $m === 'cobranca.renovacao_de_assinatura_inativa')->once();
-    });
+    })->with([StatusAssinatura::Cancelada, StatusAssinatura::Expirada]);
 
     it('registra aviso quando o valor da renovação mudou, e passa a valer o cobrado', function () {
         Log::spy();
