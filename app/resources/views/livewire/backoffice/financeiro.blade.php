@@ -41,7 +41,7 @@
                 {!! $erroDe('motivo', 'erro-reembolso-motivo') !!}
             </div>
             <div class="flex gap-2">
-                <x-botao-confirmar titulo="Confirmar reembolso" mensagem="O estorno de {{ $reais($reembolsoAberto->valor_centavos) }} será pedido ao provedor e o que a cobrança concedeu será retirado. Não dá para desfazer." acao="confirmarReembolso" dusk="reembolso-confirmar">Confirmar reembolso</x-botao-confirmar>
+                <x-botao-confirmar titulo="Confirmar reembolso" mensagem="O estorno de {{ $reais($reembolsoAberto->valor_centavos) }} será pedido ao provedor e o que a cobrança concedeu será retirado. Não dá para desfazer." acao="confirmarReembolso()" dusk="reembolso-confirmar">Confirmar reembolso</x-botao-confirmar>
                 <x-button type="button" variant="secondary" wire:click="cancelarReembolso" dusk="reembolso-cancelar">Cancelar</x-button>
             </div>
         </x-card>
