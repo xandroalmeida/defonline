@@ -382,7 +382,7 @@
       "slug": "cobranca-e-planos",
       "title": "Cobrança e planos — trial, assinatura, créditos e cupons com catálogo configurável",
       "wave": "WAVE-2026-02",
-      "status": "ready",
+      "status": "in_progress",
       "path": "epics/EPIC-005-cobranca-e-planos/epic.md",
       "story_ids": [
         "STORY-069",
@@ -2079,7 +2079,7 @@
     {
       "type": "implementation",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-072",
         "STORY-073",
@@ -2088,7 +2088,7 @@
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2098,7 +2098,8 @@
       "estimated_session_size": "M",
       "blocked_by": [],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-071-catalogo-planos-e-pacotes-backoffice.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "88333bb. Revisado pelo orquestrador; suíte verde. Trial em TrialConfig, não em Plano."
     },
     {
       "type": "implementation",
