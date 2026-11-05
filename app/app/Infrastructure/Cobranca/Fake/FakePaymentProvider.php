@@ -65,6 +65,7 @@ final class FakePaymentProvider implements PaymentProvider
             'valor' => $pedido->valorCentavos,
             'estado' => EstadoCobranca::Pendente->value,
             'pago_em' => null,
+            'assinatura' => $pedido->recorrencia === null ? null : 'fakesub_'.Str::after($id, 'fakechk_'),
         ], now()->addDays(2));
 
         return new SessaoCheckout(
@@ -81,7 +82,7 @@ final class FakePaymentProvider implements PaymentProvider
 
     public function getCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
     {
-        /** @var array{checkout: string, referencia: string, valor: int, estado: string, pago_em: string|null}|null $c */
+        /** @var array{checkout: string, referencia: string|null, valor: int, estado: string, pago_em: string|null, assinatura?: string|null}|null $c */
         $c = Cache::get(self::PREFIXO."pay:{$cobranca->id}");
 
         if ($c === null) {
@@ -95,6 +96,9 @@ final class FakePaymentProvider implements PaymentProvider
             $c['checkout'],
             $c['referencia'],
             $c['pago_em'] === null ? null : new DateTimeImmutable($c['pago_em']),
+            $c['assinatura'] ?? null,
+            ($c['assinatura'] ?? null) !== null && $c['estado'] === EstadoCobranca::Paga->value ? 'VISA' : null,
+            ($c['assinatura'] ?? null) !== null && $c['estado'] === EstadoCobranca::Paga->value ? '4242' : null,
         );
     }
 
@@ -120,6 +124,7 @@ final class FakePaymentProvider implements PaymentProvider
             is_string($d['cobranca_id'] ?? null) ? $d['cobranca_id'] : null,
             is_string($d['checkout_id'] ?? null) ? $d['checkout_id'] : null,
             is_string($d['referencia_externa'] ?? null) ? $d['referencia_externa'] : null,
+            is_string($d['assinatura_id'] ?? null) ? $d['assinatura_id'] : null,
             $d,
         );
     }
@@ -130,6 +135,45 @@ final class FakePaymentProvider implements PaymentProvider
         $this->mudarEstado($checkoutId, EstadoCobranca::Paga);
 
         return $this->webhook(TipoEvento::CobrancaPaga, $checkoutId, $eventoId);
+    }
+
+    /** O banco do cartão recusa: o provedor avisa que a cobrança falhou. */
+    public function simularRecusa(string $checkoutId, ?string $eventoId = null): WebhookBruto
+    {
+        $this->mudarEstado($checkoutId, EstadoCobranca::Falhou);
+
+        return $this->webhook(TipoEvento::CobrancaFalhou, $checkoutId, $eventoId);
+    }
+
+    /**
+     * Próximo ciclo de uma assinatura já paga: o provedor cria outra cobrança (sem checkout e sem
+     * nossa referência, como no Asaas) e avisa que foi paga.
+     */
+    public function simularRenovacao(string $checkoutId, ?string $eventoId = null): WebhookBruto
+    {
+        /** @var array<string, mixed>|null $origem */
+        $origem = Cache::get(self::PREFIXO."pay:{$this->cobrancaDe($checkoutId)}");
+        $nova = 'fakepay_'.Str::lower((string) Str::ulid());
+        $assinatura = is_array($origem) ? $origem['assinatura'] : null;
+
+        Cache::put(self::PREFIXO."pay:{$nova}", [
+            'checkout' => null,
+            'referencia' => null,
+            'valor' => is_array($origem) ? $origem['valor'] : 0,
+            'estado' => EstadoCobranca::Paga->value,
+            'pago_em' => now()->toIso8601String(),
+            'assinatura' => $assinatura,
+        ], now()->addDays(2));
+
+        return new WebhookBruto(
+            [self::CABECALHO_TOKEN => $this->token(), 'content-type' => 'application/json'],
+            (string) json_encode([
+                'id' => $eventoId ?? 'fakeevt_'.Str::lower((string) Str::ulid()),
+                'tipo' => TipoEvento::CobrancaPaga->value,
+                'cobranca_id' => $nova,
+                'assinatura_id' => $assinatura,
+            ]),
+        );
     }
 
     public function simularExpiracao(string $checkoutId, ?string $eventoId = null): WebhookBruto
@@ -157,8 +201,16 @@ final class FakePaymentProvider implements PaymentProvider
                 'cobranca_id' => $this->cobrancaDe($checkoutId),
                 'checkout_id' => $checkoutId,
                 'referencia_externa' => is_array($c) ? $c['referencia'] : null,
+                'assinatura_id' => $this->assinaturaDe($checkoutId),
             ]),
         );
+    }
+
+    private function assinaturaDe(string $checkoutId): ?string
+    {
+        $c = Cache::get(self::PREFIXO."pay:{$this->cobrancaDe($checkoutId)}");
+
+        return is_array($c) && is_string($c['assinatura'] ?? null) ? $c['assinatura'] : null;
     }
 
     private function cobrancaDe(string $checkoutId): string

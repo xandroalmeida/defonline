@@ -104,6 +104,8 @@ return [
     'payments' => [
         'provider' => env('PAYMENTS_PROVIDER', 'fake'),
         'pix_expiracao_minutos' => (int) env('PIX_EXPIRACAO_MINUTOS', 30),
+        // Validade do link do checkout de assinatura com cartão (o provedor aceita 10 a 1440).
+        'cartao_expiracao_minutos' => (int) env('CARTAO_EXPIRACAO_MINUTOS', 60),
         'webhook_token' => env('PAYMENTS_WEBHOOK_TOKEN'),
     ],
 

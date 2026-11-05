@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: false
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: programador (pista B)
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: M
@@ -84,13 +84,25 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 ## Notas do agente
 
 ### Decisões tomadas
+- **Um único ponto da regra:** `App\Support\Cobranca\AcessoDrm::bloqueioPara($usuarioId): ?Bloqueio` (e `permitido()`). Respeita o interruptor (desligado = `null`). A regra pura está em `RegrasConsumo::bloqueioDoDrm` e `Carteira::bloqueioDoDrm`. As estórias STORY-051 (série) e STORY-056 (eventos) devem chamar `AcessoDrm` em qualquer ação nova que **grave** dados do DRM; leitura nunca passa por ele.
+- **Regra:** assinatura ativa ou cancelada dentro do ciclo, ou trial vigente (mesmo com a cota zerada, pois lançar não consome cota) libera. Sem assinatura (inclui só créditos e créditos vencidos) = `SemNada`; em atraso, plano encerrado e teste encerrado = "lançamento pausado" (spec STORY-070 §4, variante Raio X). Crédito avulso nunca dá acesso.
+- **Aplicação:** middleware `drm.acesso` (`ExigirAcessoDrm`) nas rotas `drm.lancar` e `drm.corrigir`, que devolve a view `drm.bloqueio` (reaproveita `x-bloqueio-sem-saldo`, com prop nova `rodape` e prefixo `screen-bloqueio-raiox`, e `TextoBloqueio::paraDrm`). `drm.mes` (demonstração) fica fora, então histórico e exportação seguem visíveis (CA-3).
+- **Toque em `app/Livewire/Drm/*`:** só um guard de 3 linhas no início de `Lancamento::fechar` (acesso perdido com a página aberta: recarrega e mostra o bloqueio; o rascunho fica).
+- Ações: Ver planos (primária) e Começar teste grátis quando elegível; em atraso, Atualizar cartão e Ver meu plano. Ações só aparecem se a rota existir (padrão da 073).
 
 ### Descobertas
+- CA-7: a STORY-056 ainda não está na main; nenhum evento foi tocado. O bloqueio acontece antes do componente montar, então nenhum evento de DRM é emitido por tentativa bloqueada. Quando a 056 chegar, ela deve emitir só dentro de ações liberadas por `AcessoDrm`.
+- CA-3 "exportação": não existe exportação do DRM ainda; nada a manter além de `drm.mes`.
+- A série histórica (051) não existe ainda; quando existir, não deve usar o middleware.
 
 ### Bloqueios encontrados
+Nenhum.
 
 ### IDRs criados
+Nenhum (decisão local, sem impacto transversal).
 
 ### Cobertura final
+Ver relatório do orquestrador.
 
 ### Evidências
+`app/tests/Feature/Cobranca/AcessoDrmTest.php` (20 casos) e `app/tests/Browser/AcessoDrmBrowserTest.php`.

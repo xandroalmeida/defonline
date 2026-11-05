@@ -25,6 +25,7 @@ use App\Models\DrmLancamento;
 use App\Models\DrmPreferencia;
 use App\Models\DrmRascunho;
 use App\Models\EmpresaAnalisada;
+use App\Support\Cobranca\AcessoDrm;
 use App\Support\Drm\HistoricoDrm;
 use App\Support\Drm\MensagensDrm;
 use Carbon\CarbonImmutable;
@@ -368,6 +369,11 @@ final class Lancamento extends Component
     {
         $this->limparFeedback();
         $this->erro_geral = null;
+
+        // STORY-084: o acesso pode ter acabado com a página aberta; recarregar mostra o bloqueio e o rascunho fica.
+        if (! AcessoDrm::permitido((string) Auth::id())) {
+            return $this->redirect(request()->header('Referer') ?? route('home'), navigate: false);
+        }
 
         if ($this->competencia_ja_lancada) {
             return null;

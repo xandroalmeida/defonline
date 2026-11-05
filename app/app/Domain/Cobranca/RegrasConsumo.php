@@ -27,6 +27,29 @@ final class RegrasConsumo
         return Decisao::bloquear(self::motivo($carteira));
     }
 
+    /**
+     * STORY-084 — acesso ao Raio X do Negócio (DRM): plano ativo ou trial vigente, nunca crédito avulso
+     * (PDR-020). Lançar não consome cota, então cota esgotada não bloqueia. `null` = acesso liberado.
+     */
+    public static function bloqueioDoDrm(SnapshotCarteira $carteira): ?Bloqueio
+    {
+        $assinatura = $carteira->assinatura;
+
+        if ($assinatura === null) {
+            return new Bloqueio(MotivoBloqueio::SemNada, trialElegivel: $carteira->trialElegivel);
+        }
+
+        if ($assinatura->status === StatusAssinatura::EmAtraso) {
+            return new Bloqueio(MotivoBloqueio::EmAtraso, $assinatura->vencimento);
+        }
+
+        if (self::daAcesso($assinatura, $carteira)) {
+            return null;
+        }
+
+        return new Bloqueio($assinatura->trial ? MotivoBloqueio::TesteEncerrado : MotivoBloqueio::PlanoEncerrado, $assinatura->vencimento);
+    }
+
     /** O trial não vale para uma empresa que já gastou análise de trial em outra conta (STORY-074 CA-2); crédito comprado vale. */
     private static function testeBarradoPelaEmpresa(AssinaturaVista $assinatura, SnapshotCarteira $carteira): bool
     {

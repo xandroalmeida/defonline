@@ -27,3 +27,9 @@ Schedule::command('trial:avisar-fim')
     ->hourly()
     ->onOneServer()
     ->withoutOverlapping(30);
+
+// STORY-077 CA-6 — cota mensal das assinaturas anuais, no dia de aniversário.
+Schedule::command('assinaturas:renovar-cota')
+    ->hourly()
+    ->onOneServer()
+    ->withoutOverlapping(30);

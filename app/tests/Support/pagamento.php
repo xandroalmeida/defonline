@@ -2,12 +2,18 @@
 
 declare(strict_types=1);
 
+use App\Domain\Cobranca\CicloCobranca;
 use App\Domain\Cobranca\PaymentProvider;
+use App\Domain\Cobranca\WebhookBruto;
+use App\Infrastructure\Cobranca\Fake\FakePaymentProvider;
 use App\Models\CobrancaConfig;
 use App\Models\Invoice;
 use App\Models\PacoteCredito;
+use App\Models\Plano;
 use App\Models\Usuario;
+use App\Services\Cobranca\IniciarAssinatura;
 use App\Services\Cobranca\IniciarCompraDeCreditos;
+use App\Services\Cobranca\ReceberWebhook;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -138,4 +144,37 @@ function _adminDaEquipe(): Usuario
     config(['backoffice.equipe_emails' => ['equipe@ebparcerias.com.br']]);
 
     return Usuario::factory()->create(['email' => 'equipe@ebparcerias.com.br']);
+}
+
+// STORY-077 — ajudantes da assinatura com cartão.
+function _plano(string $nome = 'Básico'): Plano
+{
+    return Plano::query()->where('nome', $nome)->firstOrFail();
+}
+
+function _assinaturaPendente(Usuario $usuario, ?Plano $plano = null, CicloCobranca $ciclo = CicloCobranca::Mensal): Invoice
+{
+    return app(IniciarAssinatura::class)->executar($usuario, $plano ?? _plano(), $ciclo, '203.0.113.7', 'PestAgent');
+}
+
+function _fake(): FakePaymentProvider
+{
+    $p = app(PaymentProvider::class);
+    assert($p instanceof FakePaymentProvider);
+
+    return $p;
+}
+
+/** Entrega o webhook ao app (a fila é síncrona nos testes). */
+function _entregar(WebhookBruto $webhook): string
+{
+    return app(ReceberWebhook::class)->tratar($webhook);
+}
+
+/** O banco aprova o cartão no checkout fake: devolve a Invoice atualizada. */
+function _pagarAssinatura(Invoice $invoice): Invoice
+{
+    _entregar(_fake()->simularPagamento((string) $invoice->checkout_id_externo));
+
+    return $invoice->fresh();
 }

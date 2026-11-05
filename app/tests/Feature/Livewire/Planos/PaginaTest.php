@@ -183,7 +183,6 @@ describe('CA-5 destino dos botões', function () {
     });
 
     it('leva o logado ao checkout do item, com o ciclo escolhido', function () {
-        rotaFalsa(RotasCobranca::ASSINAR);
         rotaFalsa(RotasCobranca::COMPRAR);
         $basico = Plano::query()->where('nome', 'Básico')->firstOrFail();
         $plus = PacoteCredito::query()->where('nome', 'Plus')->firstOrFail();
@@ -194,9 +193,24 @@ describe('CA-5 destino dos botões', function () {
             ->assertSee(route(RotasCobranca::COMPRAR, ['pacote' => $plus->id]), false);
     });
 
-    it('esconde Assinar enquanto o checkout de assinatura não existe e mostra Comprar', function () {
+    it('mostra Assinar em cada plano ativo, apontando ao checkout existente com plano e ciclo, e mostra Comprar', function () {
+        expect(Route::has(RotasCobranca::ASSINAR))->toBeTrue();
+
+        $resposta = $this->actingAs(Usuario::factory()->create())->get('/planos')->assertOk()
+            ->assertSee('screen-planos-comprar-', false);
+
+        foreach (Plano::query()->where('ativo', true)->get() as $plano) {
+            $resposta->assertSee('screen-planos-assinar-'.$plano->id, false)
+                ->assertSee(route(RotasCobranca::ASSINAR, ['plano' => $plano->id, 'ciclo' => 'mensal']), false);
+        }
+    });
+
+    it('não mostra Assinar para o plano inativo', function () {
+        $inativo = Plano::query()->where('nome', 'Pro')->firstOrFail();
+        $inativo->update(['ativo' => false]);
+
         $this->actingAs(Usuario::factory()->create())->get('/planos')->assertOk()
-            ->assertDontSee('screen-planos-assinar-', false)->assertSee('screen-planos-comprar-', false);
+            ->assertDontSee('screen-planos-assinar-'.$inativo->id, false);
     });
 
     it('marca o plano atual e oferece a troca nos outros', function () {
@@ -213,7 +227,6 @@ describe('CA-5 destino dos botões', function () {
     });
 
     it('desativa os botões de quem está logado como o usuário', function () {
-        rotaFalsa(RotasCobranca::ASSINAR);
         config(['backoffice.equipe_emails' => ['equipe@ebparcerias.com.br']]);
         $admin = Usuario::factory()->create(['email' => 'equipe@ebparcerias.com.br']);
         $alvo = Usuario::factory()->create();

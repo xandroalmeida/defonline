@@ -23,6 +23,7 @@ final readonly class PedidoCheckout
         public string $urlSucesso,
         public string $urlCancelamento,
         public string $urlExpirado,
+        public ?CicloCobranca $recorrencia = null,
     ) {
         if ($valorCentavos < 1) {
             throw new InvalidArgumentException('O valor do checkout deve ser positivo.');
@@ -30,6 +31,11 @@ final readonly class PedidoCheckout
 
         if ($meios === []) {
             throw new InvalidArgumentException('Informe ao menos um meio de pagamento.');
+        }
+
+        // ADR-010 4.4: o checkout recorrente do provedor só aceita cartão (Pix anual é da STORY-080).
+        if ($recorrencia !== null && $meios !== [MeioPagamento::Cartao]) {
+            throw new InvalidArgumentException('A assinatura recorrente aceita somente cartão.');
         }
 
         if ($expiraEmMinutos < 10 || $expiraEmMinutos > 1440) {

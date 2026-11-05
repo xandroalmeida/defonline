@@ -42,6 +42,12 @@ final class Carteira
         return RegrasConsumo::decidir($this->snapshot($usuarioId, $this->agora(), $empresaId));
     }
 
+    /** STORY-084 — o Usuário pode usar o Raio X do Negócio agora? `null` = sim; senão, o motivo. */
+    public function bloqueioDoDrm(string $usuarioId): ?Bloqueio
+    {
+        return RegrasConsumo::bloqueioDoDrm($this->snapshot($usuarioId, $this->agora()));
+    }
+
     /**
      * STORY-074 — o aviso do trial para a Home, ou nulo se o último vínculo do Usuário não é um trial.
      *
@@ -193,6 +199,46 @@ final class Carteira
 
             return $assinatura;
         });
+    }
+
+    /**
+     * STORY-077 CA-6 — ciclo anual: a cota volta cheia todo mês, no dia de aniversário (sem acumular).
+     * Roda todo dia e é idempotente: só toca assinatura cuja `proxima_cota_em` já chegou, e a avança
+     * para o próximo aniversário (ou para nulo, se o ano pago acaba antes). Mensal não usa isto:
+     * a cota renova junto com o pagamento do mês ({@see renovarCota()}).
+     *
+     * @return int quantas assinaturas tiveram a cota renovada
+     */
+    public function renovarCotasMensais(): int
+    {
+        $agora = $this->agora();
+        $ids = Assinatura::query()
+            ->where('status', StatusAssinatura::Ativa->value)
+            ->whereNotNull('proxima_cota_em')
+            ->where('proxima_cota_em', '<=', $agora->format('Y-m-d H:i:sP'))
+            ->pluck('id');
+
+        $renovadas = 0;
+
+        foreach ($ids as $id) {
+            $renovadas += DB::transaction(function () use ($id, $agora): int {
+                $a = Assinatura::query()->lockForUpdate()->find($id);
+
+                // Outra execução (ou o webhook) já cuidou dela entre a consulta e o lock.
+                if ($a === null || $a->proxima_cota_em === null || $a->proxima_cota_em->greaterThan($agora) || $a->status !== StatusAssinatura::Ativa) {
+                    return 0;
+                }
+
+                $a->forceFill([
+                    'cota_restante_ciclo' => $a->cota_snapshot,
+                    'proxima_cota_em' => CotaMensal::proxima($a->data_inicio, $agora, $a->proximo_vencimento),
+                ])->save();
+
+                return 1;
+            });
+        }
+
+        return $renovadas;
     }
 
     /** Atraso, cancelamento e encerramento. Cancelar registra a data e mantém o acesso até o vencimento. */

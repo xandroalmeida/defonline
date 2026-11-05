@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Cobranca\CicloCobranca;
 use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PedidoCheckout;
 use App\Domain\Cobranca\ReferenciaProvedor;
@@ -36,4 +37,23 @@ it('abre e cancela um checkout Pix no sandbox', function () {
     expect($sessao->url)->toStartWith('https://sandbox.asaas.com/');
 
     $provedor->cancelCheckout(new ReferenciaProvedor('asaas', $sessao->referencia->id));
+})->group('asaas-sandbox');
+
+it('abre e cancela um checkout de assinatura com cartão (RECURRENT) no sandbox', function () {
+    if (! is_string(env('ASAAS_SANDBOX_API_KEY')) || env('ASAAS_SANDBOX_API_KEY') === '') {
+        $this->markTestSkipped('ASAAS_SANDBOX_API_KEY não definida.');
+    }
+
+    $provedor = _asaasSandbox();
+
+    foreach ([CicloCobranca::Mensal, CicloCobranca::Anual] as $ciclo) {
+        $sessao = $provedor->startCheckout(new PedidoCheckout(
+            (string) Str::uuid7(), 'Teste STORY-077 '.$ciclo->value, 4990, [MeioPagamento::Cartao], 60,
+            'https://example.com/ok', 'https://example.com/cancelar', 'https://example.com/expirou', $ciclo,
+        ));
+
+        expect($sessao->url)->toStartWith('https://sandbox.asaas.com/');
+
+        $provedor->cancelCheckout(new ReferenciaProvedor('asaas', $sessao->referencia->id));
+    }
 })->group('asaas-sandbox');

@@ -16,5 +16,8 @@ final readonly class CobrancaNoProvedor
         public ?string $checkoutId = null,
         public ?string $referenciaInterna = null,
         public ?DateTimeImmutable $pagoEm = null,
+        public ?string $assinaturaId = null,
+        public ?string $cartaoBandeira = null,
+        public ?string $cartaoUltimos4 = null,
     ) {}
 }

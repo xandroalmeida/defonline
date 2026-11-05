@@ -19,6 +19,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $cobranca_id_externo
  * @property string|null $checkout_id_externo
  * @property string|null $referencia_externa
+ * @property string|null $assinatura_id_externo
  * @property string|null $invoice_id
  * @property array<string, mixed> $payload
  * @property string $status recebido|processado|ignorado|erro

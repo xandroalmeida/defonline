@@ -15,6 +15,10 @@ final class CompraNaoPermitida extends RuntimeException
 
     public const PACOTE_INDISPONIVEL = 'pacote_indisponivel';
 
+    public const PLANO_INDISPONIVEL = 'plano_indisponivel';
+
+    public const JA_ASSINANTE = 'ja_assinante';
+
     private function __construct(public readonly string $motivo)
     {
         parent::__construct("Compra não permitida: {$motivo}.");
@@ -33,5 +37,15 @@ final class CompraNaoPermitida extends RuntimeException
     public static function pacoteIndisponivel(): self
     {
         return new self(self::PACOTE_INDISPONIVEL);
+    }
+
+    public static function planoIndisponivel(): self
+    {
+        return new self(self::PLANO_INDISPONIVEL);
+    }
+
+    public static function jaAssinante(): self
+    {
+        return new self(self::JA_ASSINANTE);
     }
 }

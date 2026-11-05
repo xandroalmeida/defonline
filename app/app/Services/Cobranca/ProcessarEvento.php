@@ -29,13 +29,15 @@ use Throwable;
  * - o valor que o provedor cobrou tem que ser o da Invoice, senão não credita e alerta;
  * - estado final (estornada, contestada, cancelada) nunca vira `paga`. Já `vencida` (Pix que
  *   passou do prazo) ainda aceita a confirmação do banco;
- * - evento sem efeito vira `ignorado`, não erro.
+ * - evento sem efeito vira `ignorado`, não erro;
+ * - pagamento de assinatura (ativação e renovação) é de {@see ConfirmarAssinatura} (STORY-077).
  */
 final class ProcessarEvento
 {
     public function __construct(
         private readonly PaymentProvider $provedor,
         private readonly Carteira $carteira,
+        private readonly ConfirmarAssinatura $assinaturas,
     ) {}
 
     public function executar(string $providerEventId): void
@@ -92,12 +94,18 @@ final class ProcessarEvento
         $cobranca = $this->provedor->getCharge(new ReferenciaProvedor($evento->provedor, $evento->cobranca_id_externo));
         $invoice = $this->localizar($evento, $cobranca);
 
-        if ($invoice === null) {
+        // Sem Invoice, só uma cobrança de assinatura nossa (renovação) ainda pode ter destino.
+        if ($invoice === null && $cobranca->assinaturaId === null) {
             return $this->semInvoice($evento, 'pagamento sem invoice correspondente');
         }
 
         if ($cobranca->estado !== EstadoCobranca::Paga) {
-            return ['ignorado', $invoice->id];
+            return ['ignorado', $invoice?->id];
+        }
+
+        // Daqui em diante, sem assinatura na cobrança, a Invoice existe (a guarda acima já devolveu o resto).
+        if ($cobranca->assinaturaId !== null || $invoice->tipo === 'assinatura') {
+            return $this->assinaturas->aplicar($invoice, $cobranca, $evento->provedor);
         }
 
         return DB::transaction(function () use ($invoice, $cobranca): array {

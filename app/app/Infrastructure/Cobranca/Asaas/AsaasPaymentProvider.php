@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Cobranca\Asaas;
 
+use App\Domain\Cobranca\CicloCobranca;
 use App\Domain\Cobranca\CobrancaNoProvedor;
 use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\EventoDoProvedor;
@@ -17,6 +18,7 @@ use App\Domain\Cobranca\TipoEvento;
 use App\Domain\Cobranca\WebhookBruto;
 use App\Domain\Cobranca\WebhookInvalido;
 use DateTimeImmutable;
+use DateTimeZone;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -89,7 +91,12 @@ final class AsaasPaymentProvider implements PaymentProvider
     {
         $resposta = $this->enviar('post', '/checkouts', [
             'billingTypes' => array_map(fn (MeioPagamento $m): string => $m === MeioPagamento::Pix ? 'PIX' : 'CREDIT_CARD', $pedido->meios),
-            'chargeTypes' => ['DETACHED'],
+            'chargeTypes' => [$pedido->recorrencia === null ? 'DETACHED' : 'RECURRENT'],
+            ...($pedido->recorrencia === null ? [] : ['subscription' => [
+                'cycle' => $pedido->recorrencia === CicloCobranca::Mensal ? 'MONTHLY' : 'YEARLY',
+                // A primeira cobrança é a do próprio checkout: hoje, no fuso do negócio.
+                'nextDueDate' => (new DateTimeImmutable('now', new DateTimeZone('America/Sao_Paulo')))->format('Y-m-d').' 00:00:00',
+            ]]),
             'minutesToExpire' => $pedido->expiraEmMinutos,
             'externalReference' => $pedido->referenciaInterna,
             'items' => [[
@@ -137,6 +144,9 @@ final class AsaasPaymentProvider implements PaymentProvider
             $this->texto($r->json('checkoutSession')),
             $this->texto($r->json('externalReference')),
             is_string($pago) && $pago !== '' ? new DateTimeImmutable($pago) : null,
+            $this->texto($r->json('subscription')),
+            $this->bandeira($r->json('creditCard.creditCardBrand')),
+            $this->ultimos4($r->json('creditCard.creditCardNumber')),
         );
     }
 
@@ -164,6 +174,7 @@ final class AsaasPaymentProvider implements PaymentProvider
             cobrancaId: $this->texto($pagamento['id'] ?? null),
             checkoutId: $this->texto($pagamento['checkoutSession'] ?? ($checkout['id'] ?? null)),
             referenciaInterna: $this->texto($pagamento['externalReference'] ?? ($checkout['externalReference'] ?? null)),
+            assinaturaId: $this->texto($pagamento['subscription'] ?? null),
             payload: $this->semDadosDeCartao($dados),
         );
     }
@@ -181,6 +192,22 @@ final class AsaasPaymentProvider implements PaymentProvider
             'CHARGEBACK_REQUESTED', 'CHARGEBACK_DISPUTE', 'AWAITING_CHARGEBACK_REVERSAL' => EstadoCobranca::Contestada,
             default => EstadoCobranca::Pendente,
         };
+    }
+
+    /** Só a bandeira, em maiúsculas e curta. Nunca o token do cartão. */
+    private function bandeira(mixed $valor): ?string
+    {
+        $v = $this->texto($valor);
+
+        return $v === null ? null : mb_substr(mb_strtoupper($v), 0, 20);
+    }
+
+    /** O Asaas devolve os 4 últimos dígitos; por garantia, só os últimos 4 dígitos do que vier. */
+    private function ultimos4(mixed $valor): ?string
+    {
+        $digitos = preg_replace('/\D/', '', (string) (is_scalar($valor) ? $valor : ''));
+
+        return strlen((string) $digitos) >= 4 ? substr((string) $digitos, -4) : null;
     }
 
     private function texto(mixed $valor): ?string
