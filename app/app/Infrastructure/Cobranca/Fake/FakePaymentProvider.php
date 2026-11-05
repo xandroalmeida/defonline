@@ -96,6 +96,7 @@ final class FakePaymentProvider implements PaymentProvider
 
         if ($pedido->recorrencia !== null) {
             Cache::put(self::PREFIXO.'sub:fakesub_'.Str::after($id, 'fakechk_'), 'ativa', now()->addDays(self::TTL_DIAS));
+            Cache::put(self::PREFIXO.'sub-valor-inicial:fakesub_'.Str::after($id, 'fakechk_'), $pedido->valorCentavos, now()->addDays(self::TTL_DIAS));
         }
 
         // A referência é o id da Invoice, ou o da troca de cartão (STORY-081): cada uma tem a sua "página do provedor".
@@ -138,6 +139,17 @@ final class FakePaymentProvider implements PaymentProvider
             'ciclo' => $ciclo->value,
             'proxima' => $proximaCobrancaEm->format('Y-m-d H:i:s'),
         ], now()->addDays(self::TTL_DIAS));
+    }
+
+    /**
+     * O valor (centavos) que o provedor cobra nas próximas renovações: o último pedido de
+     * `changeSubscriptionValue` ou, se nunca mudou, o do checkout (STORY-083). `null` se nunca viu a assinatura.
+     */
+    public static function valorCobradoDaAssinatura(string $assinaturaId): ?int
+    {
+        $inicial = Cache::get(self::PREFIXO."sub-valor-inicial:{$assinaturaId}");
+
+        return self::valorDaAssinatura($assinaturaId)['valor'] ?? (is_int($inicial) ? $inicial : null);
     }
 
     /**
@@ -361,12 +373,14 @@ final class FakePaymentProvider implements PaymentProvider
         $origem = Cache::get(self::PREFIXO."pay:{$this->cobrancaDe($checkoutId)}");
         $nova = 'fakepay_'.Str::lower((string) Str::ulid());
         $assinatura = is_array($origem) ? $origem['assinatura'] : null;
+        // A renovação cobra o valor ATUAL da recorrência (STORY-083: muda quando o desconto acaba).
+        $valorAtual = is_string($assinatura) ? self::valorCobradoDaAssinatura($assinatura) : null;
 
         Cache::put(self::PREFIXO."pay:{$nova}", [
             'checkout' => null,
             'referencia' => null,
-            // Depois de `changeSubscriptionValue` (STORY-082) o provedor cobra o valor novo.
-            'valor' => (is_string($assinatura) ? self::valorDaAssinatura($assinatura)['valor'] ?? null : null) ?? (is_array($origem) ? $origem['valor'] : 0),
+            // Depois de `changeSubscriptionValue` (STORY-082/083) o provedor cobra o valor novo.
+            'valor' => $valorAtual ?? (is_array($origem) ? $origem['valor'] : 0),
             'estado' => $estado->value,
             'pago_em' => $estado === EstadoCobranca::Paga ? now()->toIso8601String() : null,
             'assinatura' => $assinatura,

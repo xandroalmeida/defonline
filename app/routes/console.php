@@ -74,3 +74,15 @@ Schedule::command('assinaturas:ajustar-no-provedor')
     ->hourly()
     ->onOneServer()
     ->withoutOverlapping(30);
+
+// STORY-083 CA-6 e CA-7 — ciclos gratuitos do desconto, fim do desconto sem cartão e valor de volta ao cheio no provedor.
+Schedule::command('assinaturas:ciclos-gratuitos')
+    ->hourly()
+    ->onOneServer()
+    ->withoutOverlapping(30);
+
+// STORY-083 CA-8 — aviso 7 dias antes do fim do desconto.
+Schedule::command('cupons:avisar-fim-do-desconto')
+    ->hourly()
+    ->onOneServer()
+    ->withoutOverlapping(30);

@@ -41,6 +41,10 @@ use Illuminate\Support\Carbon;
  * @property string|null $cartao_bandeira
  * @property string|null $cartao_ultimos4
  * @property int|null $periodo_base
+ * @property string|null $cupom_id
+ * @property int|null $cupom_ciclos
+ * @property int|null $preco_cheio_centavos
+ * @property int $desconto_centavos
  * @property Carbon|null $created_at
  */
 final class Invoice extends Model

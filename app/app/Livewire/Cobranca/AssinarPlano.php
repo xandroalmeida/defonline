@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Cobranca;
 
 use App\Domain\Cobranca\CicloCobranca;
+use App\Domain\Cobranca\DescontoDaAssinatura;
 use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\ProvedorIndisponivel;
 use App\Domain\Cobranca\RenovacaoPix;
@@ -15,8 +16,12 @@ use App\Models\CobrancaConfig;
 use App\Models\Plano;
 use App\Models\Usuario;
 use App\Services\Cobranca\CompraNaoPermitida;
+use App\Services\Cobranca\CupomAplicado;
+use App\Services\Cobranca\CupomRecusado;
 use App\Services\Cobranca\IniciarAssinatura;
+use App\Services\Cobranca\ItemDeCompra;
 use App\Support\Cobranca\RotasCobranca;
+use App\Support\DataExibicao;
 use App\Support\Personificacao;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -34,6 +39,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app')]
 final class AssinarPlano extends Component
 {
+    use ComCupom;
+
     public string $planoId;
 
     public string $ciclo;
@@ -97,7 +104,11 @@ final class AssinarPlano extends Component
         }
 
         try {
-            $invoice = $iniciar->executar($usuario, $plano, CicloCobranca::from($this->ciclo), request()->ip(), substr((string) request()->userAgent(), 0, 255), MeioPagamento::from($this->meio));
+            $invoice = $iniciar->executar($usuario, $plano, CicloCobranca::from($this->ciclo), request()->ip(), substr((string) request()->userAgent(), 0, 255), MeioPagamento::from($this->meio), $this->codigoCupom);
+        } catch (CupomRecusado $e) {
+            $this->cupomRecusadoNoClique($e);
+
+            return null;
         } catch (CompraNaoPermitida) {
             // A própria tela já mostra o motivo (e-mail, admin, plano, já assinante): só reavalia o estado.
             return null;
@@ -107,7 +118,8 @@ final class AssinarPlano extends Component
             return null;
         }
 
-        return $this->redirect((string) $invoice->checkout_url);
+        // Sem cobrança (STORY-083 CA-6) não há página do provedor: vai direto à confirmação.
+        return $this->redirect($invoice->checkout_url ?? route('assinatura.retorno', $invoice));
     }
 
     public function reenviarConfirmacao(): void
@@ -134,11 +146,19 @@ final class AssinarPlano extends Component
         $plano = $this->plano();
         $ciclo = CicloCobranca::from($this->ciclo);
         $vigente = $usuario instanceof Usuario ? IniciarAssinatura::assinaturaVigente($usuario->id) : null;
+        $preco = $plano === null ? 0 : IniciarAssinatura::precoDe($plano, $ciclo);
+        $aplicado = $plano === null || $vigente !== null ? null : $this->cupomDaTela();
+        $final = $aplicado?->preco->final ?? $preco;
 
         return view('livewire.cobranca.assinar-plano', [
             'plano' => $plano,
             'cicloAtual' => $ciclo,
-            'preco' => $plano === null ? 0 : IniciarAssinatura::precoDe($plano, $ciclo),
+            'preco' => $preco,
+            'aplicado' => $aplicado,
+            'cupomConcedido' => $aplicado?->concedido === true,
+            'aPagar' => $final,
+            'semCobranca' => $aplicado?->preco->semCobranca() === true,
+            'cupomResumo' => $aplicado === null ? null : $this->resumoDoCupom($aplicado, $ciclo),
             'economia' => $plano === null ? 0 : VitrinePrecos::economiaPercentual($plano->preco_mensal_centavos, $plano->preco_anual_centavos),
             'proximaCobranca' => $ciclo->vencimento(now()),
             'meioAtual' => MeioPagamento::from($this->meio),
@@ -154,6 +174,52 @@ final class AssinarPlano extends Component
             'urlMeuPlano' => Route::has('meu-plano') ? route('meu-plano') : null,
             'urlTrocar' => $plano === null ? null : RotasCobranca::url(RotasCobranca::TROCAR, ['plano' => $plano->id, 'ciclo' => $this->ciclo]),
         ])->layoutData(['title' => 'Assinar plano']);
+    }
+
+    protected function itemDeCompra(): ?ItemDeCompra
+    {
+        $plano = $this->plano();
+        $ciclo = CicloCobranca::tryFrom($this->ciclo);
+
+        return $plano === null || $ciclo === null ? null : new ItemDeCompra(IniciarAssinatura::precoDe($plano, $ciclo), $plano->id, $ciclo->value);
+    }
+
+    /**
+     * As linhas "Próxima cobrança" e "Depois" do resumo (spec STORY-070-cupom-no-checkout §3): o desconto tem fim e ele
+     * está dito antes de pagar (CA-7).
+     *
+     * @return array{proxima: string, depois: string, ciclo: string}
+     */
+    private function resumoDoCupom(CupomAplicado $aplicado, CicloCobranca $ciclo): array
+    {
+        $reais = fn (int $c): string => 'R$ '.number_format($c / 100, 2, ',', '.');
+        $d = new DescontoDaAssinatura($aplicado->preco->cheio, $aplicado->preco->desconto, $aplicado->ciclos);
+        $fim = $d->fim($ciclo, now());
+        $segundo = $d->valorDoPeriodo(2);
+        $pix = $this->meio === MeioPagamento::Pix->value;
+        $cheio = $reais($aplicado->preco->cheio).' '.$ciclo->porExtenso();
+
+        if ($pix) {
+            return [
+                'ciclo' => 'Anual, não renova sozinho — avisamos '.RenovacaoPix::AVISO_DIAS.' dias antes',
+                'proxima' => 'Não há cobrança automática. Renovação em '.DataExibicao::data($ciclo->vencimento(now())),
+                'depois' => $fim === null ? 'Você paga '.$reais($segundo).' por um novo QR Code, se quiser continuar' : 'Você paga '.$reais($d->cheio).' por um novo QR Code, a partir de '.DataExibicao::data($fim).', se quiser continuar',
+            ];
+        }
+
+        if ($aplicado->preco->semCobranca()) {
+            return [
+                'ciclo' => $ciclo->rotulo().'. Sem cobrança enquanto durar o desconto',
+                'proxima' => $fim === null ? 'Nenhuma' : 'Nenhuma até '.DataExibicao::data($fim),
+                'depois' => $fim === null ? $cheio : $cheio.', a partir de '.DataExibicao::data($fim).'. Cadastre um cartão em Meu plano para continuar.',
+            ];
+        }
+
+        return [
+            'ciclo' => $ciclo->rotulo().', renova sozinho no cartão',
+            'proxima' => DataExibicao::data($ciclo->vencimento(now())).' · '.$reais($segundo),
+            'depois' => $fim === null ? $reais($segundo).' '.$ciclo->porExtenso() : $cheio.', a partir de '.DataExibicao::data($fim),
+        ];
     }
 
     private function plano(): ?Plano

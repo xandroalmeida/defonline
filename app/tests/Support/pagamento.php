@@ -296,7 +296,7 @@ function _provedorQueFalha(array $falhas): PaymentProvider
 
         public function changeSubscriptionValue(ReferenciaProvedor $assinatura, int $valorCentavos, CicloCobranca $ciclo, DateTimeImmutable $proximaCobrancaEm): void
         {
-            $this->checar(__FUNCTION__, $assinatura);
+            $this->checar(__FUNCTION__, $assinatura, $valorCentavos);
             $this->real->changeSubscriptionValue($assinatura, $valorCentavos, $ciclo, $proximaCobrancaEm);
         }
 

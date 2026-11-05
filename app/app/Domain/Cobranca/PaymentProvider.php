@@ -95,6 +95,9 @@ interface PaymentProvider
      * (cobranças já geradas e ainda não pagas também passam ao valor novo). Repetir o mesmo pedido não
      * tem efeito a mais: é seguro tentar de novo.
      *
+     * Também é o gancho do cupom (STORY-083 CA-7, ADR-010 4.7): quando o desconto acaba, o chamador passa o preço
+     * cheio, o ciclo e a data da próxima cobrança atuais da assinatura.
+     *
      * @throws ProvedorIndisponivel
      */
     public function changeSubscriptionValue(ReferenciaProvedor $assinatura, int $valorCentavos, CicloCobranca $ciclo, DateTimeImmutable $proximaCobrancaEm): void;

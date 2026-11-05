@@ -48,6 +48,8 @@ final class ProcessarEvento
         private readonly ConfirmarAssinatura $assinaturas,
         private readonly FalhaDeRenovacao $falhas,
         private readonly TrocarCartao $trocas,
+        private readonly CupomDoCheckout $cupons,
+        private readonly AjustarValorDaAssinatura $ajustes,
     ) {}
 
     public function executar(string $providerEventId): void
@@ -136,6 +138,11 @@ final class ProcessarEvento
         if ($cobranca->assinaturaId !== null || in_array($invoice->tipo, ['assinatura', 'troca_de_plano'], true)) {
             $resultado = $this->assinaturas->aplicar($invoice, $cobranca, $evento->provedor);
 
+            // STORY-083 CA-7: o último ciclo com desconto foi pago, o valor no provedor volta ao cheio (fora da transação).
+            if ($resultado[0] === 'processado' && $cobranca->assinaturaId !== null) {
+                $this->ajustarValor($evento->provedor, $cobranca->assinaturaId);
+            }
+
             // A cobrança "de hoje" do cartão novo foi paga: a partir daqui o atraso não é mais dela.
             if ($troca !== null && $resultado[0] === 'processado') {
                 TrocaDeCartao::query()->whereKey($troca->id)->update(['cobra_agora' => false]);
@@ -172,6 +179,8 @@ final class ProcessarEvento
                 'cartao_bandeira' => $cobranca->cartaoBandeira,
                 'cartao_ultimos4' => $cobranca->cartaoUltimos4,
             ])->save();
+
+            $this->cupons->registrarUso($invoice);
 
             $this->carteira->concederCreditos(
                 $invoice->usuario_id,
@@ -333,6 +342,15 @@ final class ProcessarEvento
             ->where('nova_id_externo', $assinatura)
             ->latest('concluida_em')
             ->first();
+    }
+
+    private function ajustarValor(string $provedor, string $assinaturaIdExterno): void
+    {
+        $id = Assinatura::query()->where('provedor', $provedor)->where('id_externo', $assinaturaIdExterno)->where('valor_pendente_no_provedor', true)->value('id');
+
+        if (is_string($id)) {
+            $this->ajustes->ajustar($id);
+        }
     }
 
     /** @return array{0: 'ignorado', 1: null} */

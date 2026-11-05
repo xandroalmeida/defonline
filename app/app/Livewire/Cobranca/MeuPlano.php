@@ -6,6 +6,7 @@ namespace App\Livewire\Cobranca;
 
 use App\Domain\Cobranca\Arrependimento;
 use App\Domain\Cobranca\Carteira;
+use App\Domain\Cobranca\CicloCobranca;
 use App\Domain\Cobranca\LoteVisto;
 use App\Domain\Cobranca\ProvedorIndisponivel;
 use App\Domain\Cobranca\RenovacaoPix;
@@ -15,11 +16,13 @@ use App\Domain\Cobranca\StatusLote;
 use App\Models\Assinatura;
 use App\Models\CobrancaConfig;
 use App\Models\ConsumoAnalise;
+use App\Models\Cupom;
 use App\Models\LoteCredito;
 use App\Models\PacoteCredito;
 use App\Models\Plano;
 use App\Models\TrocaDeCartao;
 use App\Models\Usuario;
+use App\Services\Cobranca\AvisarFimDoDesconto;
 use App\Services\Cobranca\GerirRenovacao;
 use App\Services\Cobranca\GestaoNegada;
 use App\Services\Cobranca\TrocaNegada;
@@ -176,6 +179,7 @@ final class MeuPlano extends Component
         $pix = $paga && $assinatura->pagoComPix();
 
         [$cobrancas, $cobrancasFalharam] = $this->cobrancas($usuario->id);
+        $desconto = $this->desconto($assinatura, $agora);
 
         return view('livewire.cobranca.meu-plano', [
             'assinatura' => $assinatura,
@@ -190,6 +194,7 @@ final class MeuPlano extends Component
             'lotes' => $lotes,
             'creditosTotal' => array_sum(array_column($lotes, 'restante')),
             'temLotePerto' => in_array(true, array_column($lotes, 'perto'), true),
+            'desconto' => $desconto,
             'cobrancas' => $cobrancas,
             'cobrancasFalharam' => $cobrancasFalharam,
             'personificando' => $personificando,
@@ -286,6 +291,41 @@ final class MeuPlano extends Component
         }
 
         return TrocaDeCartao::query()->where('assinatura_id', $assinatura->id)->latest('created_at')->first();
+    }
+
+    /**
+     * STORY-083 CA-7, CA-8 — o desconto de cupom da assinatura para a tela: quanto, até quando, e o que acontece depois.
+     *
+     * @return array{cupom: string|null, descricao: string, cheio: int, fim: CarbonImmutable|null, perto: bool, semCartao: bool, gratis: bool, restantes: int|null, urlRecontratar: string|null}|null
+     */
+    private function desconto(?Assinatura $assinatura, CarbonImmutable $agora): ?array
+    {
+        $d = $assinatura?->desconto();
+
+        if ($assinatura === null || $d === null || $assinatura->trial) {
+            return null;
+        }
+
+        $ciclo = CicloCobranca::from((string) $assinatura->ciclo);
+        $proximo = $assinatura->periodos_pagos + 1;
+        $restantes = $d->periodos === null ? null : max(0, $d->periodos - $assinatura->periodos_pagos);
+        $semCartao = $assinatura->id_externo === null && ! $assinatura->pagoComPix();
+        $encerrada = $assinatura->status === StatusAssinatura::Expirada;
+        $fim = $d->fim($ciclo, $assinatura->data_inicio);
+
+        return [
+            'cupom' => $assinatura->cupom_id === null ? null : Cupom::query()->whereKey($assinatura->cupom_id)->value('codigo'),
+            'descricao' => $d->valorDoPeriodo(1) === 0 ? 'Sem cobrança' : 'R$ '.number_format($d->desconto / 100, 2, ',', '.').' de desconto por cobrança',
+            'cheio' => $d->cheio,
+            'fim' => $fim,
+            'perto' => $d->pertoDoFim($ciclo, $assinatura->data_inicio, $agora, AvisarFimDoDesconto::DIAS) && ! $encerrada,
+            'semCartao' => $semCartao,
+            'gratis' => $d->gratuito($proximo),
+            'restantes' => $restantes,
+            'urlRecontratar' => $encerrada && $semCartao && $assinatura->plano_id !== null
+                ? RotasCobranca::url(RotasCobranca::ASSINAR, ['plano' => $assinatura->plano_id, 'ciclo' => $ciclo->value])
+                : null,
+        ];
     }
 
     private function cartao(?Assinatura $assinatura): ?string

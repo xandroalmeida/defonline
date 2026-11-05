@@ -42,7 +42,10 @@ final class AvisarRenovacaoPix
         $falhas = 0;
 
         foreach ($candidatas as $i => $assinatura) {
-            if (RenovacaoPix::avisoDevido($assinatura->proximo_vencimento, $assinatura->aviso_renovacao_pix_para, $agora)) {
+            // STORY-083: o próximo ano é gratuito (desconto), a renovação é automática: não há o que pagar.
+            $gratuita = $assinatura->desconto()?->gratuito($assinatura->periodos_pagos + 1) === true;
+
+            if (! $gratuita && RenovacaoPix::avisoDevido($assinatura->proximo_vencimento, $assinatura->aviso_renovacao_pix_para, $agora)) {
                 if ($this->avisar($assinatura)) {
                     $enviados++;
                 } else {

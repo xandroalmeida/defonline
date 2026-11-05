@@ -107,11 +107,16 @@
                             <dt class="text-[color:var(--color-secondary)]">Ciclo</dt>
                             <dd class="m-0 text-right">{{ $pix ? 'Anual, não renova sozinho' : $cicloNovo->rotulo().', renova sozinho no cartão' }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Próxima cobrança</dt>
-                            <dd class="m-0 text-right" dusk="screen-troca-resumo-proxima">{{ $pix ? 'Renovação em '.$dia($previa->proximaCobranca) : $dia($previa->proximaCobranca).' · '.$reais($previa->precoNovoCentavos) }}</dd>
+                            <dd class="m-0 text-right" dusk="screen-troca-resumo-proxima">{{ $pix ? 'Renovação em '.$dia($previa->proximaCobranca) : $dia($previa->proximaCobranca).' · '.$reais($previa->proximoValorCentavos) }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Depois</dt>
-                            <dd class="m-0 text-right">{{ $pix ? $reais($previa->precoNovoCentavos).' por ano, por um novo QR Code' : $reais($previa->precoNovoCentavos).' '.$cicloNovo->porExtenso() }}</dd>
+                            <dd class="m-0 text-right">{{ $pix ? $reais($previa->precoNovoCheioCentavos).' por ano, por um novo QR Code' : $reais($previa->precoNovoCheioCentavos).' '.$cicloNovo->porExtenso() }}</dd>
                         </dl>
                     </x-card>
+                    @if ($previa->descontoTermina)
+                        <x-drm.aviso-inline variant="alerta" dusk="screen-troca-desconto-termina">Seu desconto de cupom não vale para o {{ $destino->nome }} {{ $nomeCiclo }}: ele termina nesta troca e o preço passa a ser o cheio.</x-drm.aviso-inline>
+                    @elseif ($previa->descontoNovo !== null)
+                        <p class="mt-3 mb-0 text-sm text-[color:var(--color-primary)]" dusk="screen-troca-desconto-continua">Seu desconto de cupom continua no {{ $destino->nome }}: {{ $reais($previa->descontoNovo->desconto) }} a menos por ciclo, pelos ciclos que restam.</p>
+                    @endif
                     <p class="mt-3 mb-0 text-sm text-[color:var(--color-primary)]" dusk="screen-troca-explicacao">
                         @if ($upgrade && $previa->mesmoCiclo)
                             @if ($cobra)Hoje você paga só a diferença pelos {{ $previa->diasRestantes }} dias que faltam neste ciclo. @else A diferença é pequena demais para cobrar: a troca é feita sem cobrança. @endif

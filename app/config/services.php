@@ -109,6 +109,9 @@ return [
         'webhook_token' => env('PAYMENTS_WEBHOOK_TOKEN'),
         // STORY-081 CA-1 — a partir de quantos dias do vencimento o lote de créditos ganha o alerta.
         'lote_perto_de_vencer_dias' => (int) env('LOTE_PERTO_DE_VENCER_DIAS', 30),
+        // STORY-083 / ADR-010 4.5 — menor cobrança que o provedor aceita (R$ 5,00 no sandbox do Asaas). Abaixo disso a
+        // contratação é ativada sem cobrança.
+        'valor_minimo_centavos' => (int) env('PAGAMENTO_VALOR_MINIMO_CENTAVOS', 500),
     ],
 
     'asaas' => [

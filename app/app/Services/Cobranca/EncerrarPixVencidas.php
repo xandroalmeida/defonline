@@ -40,6 +40,11 @@ final class EncerrarPixVencidas
                     return 0;
                 }
 
+                // STORY-083: o ano seguinte é gratuito (desconto) e renova sozinho em `CiclosGratuitos`.
+                if ($a->desconto()?->gratuito($a->periodos_pagos + 1) === true) {
+                    return 0;
+                }
+
                 $this->carteira->mudarStatus($a->id, StatusAssinatura::Expirada);
 
                 AuditLogger::log(

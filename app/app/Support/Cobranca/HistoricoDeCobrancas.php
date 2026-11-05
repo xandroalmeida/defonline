@@ -12,7 +12,7 @@ use Illuminate\Support\Carbon;
 /**
  * STORY-081 CA-2 — as cobranças do Usuário para a tela Meu plano: data, descrição, valor, desconto,
  * meio e situação. Não mostra o que nunca virou cobrança (checkout abandonado, vencido ou cancelado,
- * falha nossa com o provedor). Desconto de cupom entra com a STORY-083; até lá é sempre zero.
+ * falha nossa com o provedor). O desconto de cupom (STORY-083) vem da própria Invoice.
  */
 class HistoricoDeCobrancas
 {
@@ -49,8 +49,12 @@ class HistoricoDeCobrancas
             'data' => $i->pago_em ?? $i->created_at ?? now(),
             'descricao' => $i->descricao,
             'valor_centavos' => $i->valor_centavos,
-            'desconto_centavos' => 0,
-            'meio' => $i->meio === MeioPagamento::Pix->value ? 'Pix' : 'Cartão',
+            'desconto_centavos' => $i->desconto_centavos,
+            'meio' => match ($i->meio) {
+                MeioPagamento::Pix->value => 'Pix',
+                'nenhum' => 'Sem cobrança',
+                default => 'Cartão',
+            },
             'status' => $status,
         ];
     }

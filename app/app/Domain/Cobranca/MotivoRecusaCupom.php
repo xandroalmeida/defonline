@@ -12,6 +12,8 @@ enum MotivoRecusaCupom: string
     case LimiteEsgotado = 'limite_esgotado';
     case ItemNaoCoberto = 'item_nao_coberto';
     case JaUtilizado = 'ja_utilizado';
+    /** STORY-083: o código digitado não é de nenhum cupom. */
+    case Inexistente = 'inexistente';
 
     public function mensagem(): string
     {
@@ -21,6 +23,7 @@ enum MotivoRecusaCupom: string
             self::LimiteEsgotado => 'Este cupom atingiu o limite de usos.',
             self::ItemNaoCoberto => 'Este cupom não vale para o item escolhido.',
             self::JaUtilizado => 'Você já usou este cupom.',
+            self::Inexistente => 'Não encontramos esse cupom. Confira o código.',
         };
     }
 }

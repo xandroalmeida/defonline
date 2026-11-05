@@ -19,8 +19,9 @@ use Illuminate\Support\Carbon;
  * @property int $desconto_centavos
  * @property int|null $ciclos_restantes
  * @property Carbon $usado_em
+ * @property string|null $invoice_id
  */
-#[Fillable(['cupom_id', 'usuario_id', 'desconto_centavos', 'ciclos_restantes', 'usado_em'])]
+#[Fillable(['cupom_id', 'usuario_id', 'desconto_centavos', 'ciclos_restantes', 'usado_em', 'invoice_id'])]
 final class CupomUso extends Model
 {
     use HasUuids;

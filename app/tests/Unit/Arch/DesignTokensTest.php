@@ -39,6 +39,7 @@ $exclusoes = [
     'resources/views/mail/falha-de-cobranca.blade.php',
     'resources/views/mail/assinatura-encerrada.blade.php',
     'resources/views/mail/renovacao-pix.blade.php',
+    'resources/views/mail/fim-do-desconto.blade.php',
 ];
 
 function _designTokensProjectRoot(): string

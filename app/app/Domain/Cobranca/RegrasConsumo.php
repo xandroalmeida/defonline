@@ -47,7 +47,19 @@ final class RegrasConsumo
             return null;
         }
 
-        return new Bloqueio($assinatura->trial ? MotivoBloqueio::TesteEncerrado : MotivoBloqueio::PlanoEncerrado, $assinatura->vencimento);
+        return self::bloqueioDeAssinaturaEncerrada($assinatura);
+    }
+
+    /** Teste ou plano encerrado; se o plano era gratuito pelo desconto e não tem cartão, o desconto acabou. */
+    private static function bloqueioDeAssinaturaEncerrada(AssinaturaVista $assinatura): Bloqueio
+    {
+        $motivo = match (true) {
+            $assinatura->trial => MotivoBloqueio::TesteEncerrado,
+            $assinatura->semCartao => MotivoBloqueio::DescontoAcabouSemCartao,
+            default => MotivoBloqueio::PlanoEncerrado,
+        };
+
+        return new Bloqueio($motivo, $assinatura->vencimento);
     }
 
     /** O trial não vale para uma empresa que já gastou análise de trial em outra conta (STORY-074 CA-2); crédito comprado vale. */
@@ -105,10 +117,7 @@ final class RegrasConsumo
         }
 
         if (! self::daAcesso($assinatura, $carteira)) {
-            return new Bloqueio(
-                $assinatura->trial ? MotivoBloqueio::TesteEncerrado : MotivoBloqueio::PlanoEncerrado,
-                $assinatura->vencimento,
-            );
+            return self::bloqueioDeAssinaturaEncerrada($assinatura);
         }
 
         if (self::testeBarradoPelaEmpresa($assinatura, $carteira)) {

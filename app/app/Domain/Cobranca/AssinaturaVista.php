@@ -16,5 +16,7 @@ final readonly class AssinaturaVista
         public int $cotaSnapshot,
         public int $cotaRestante,
         public CarbonImmutable $vencimento,
+        /** STORY-083: ativada sem cobrança e sem cartão cadastrado. Quando o ciclo acaba, o motivo é o fim do desconto. */
+        public bool $semCartao = false,
     ) {}
 }

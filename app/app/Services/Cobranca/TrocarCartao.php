@@ -56,7 +56,11 @@ final class TrocarCartao
             throw GestaoNegada::semAssinatura();
         }
 
-        if ($assinatura->id_externo === null) {
+        // STORY-083 CA-8: a assinatura ativada sem cobrança também aceita o cartão (que passa a cobrar quando o desconto acaba).
+        $semCobranca = $assinatura->id_externo === null && $assinatura->semMeioDePagamento();
+        $fimDoDesconto = $semCobranca ? $assinatura->desconto()?->fim(CicloCobranca::from((string) $assinatura->ciclo), $assinatura->data_inicio) : null;
+
+        if ($assinatura->id_externo === null && ($fimDoDesconto === null)) {
             throw GestaoNegada::naoRenovaSozinha();
         }
 
@@ -77,14 +81,19 @@ final class TrocarCartao
         // STORY-082: com downgrade agendado o provedor já cobra o plano novo; o cartão novo nasce igual.
         $ciclo = CicloCobranca::from((string) ($assinatura->troca_ciclo ?? $assinatura->ciclo));
         $plano = Plano::query()->findOrFail($assinatura->troca_plano_id ?? $assinatura->plano_id);
-        $valor = $assinatura->troca_preco_centavos ?? $assinatura->preco_snapshot_centavos ?? IniciarAssinatura::precoDe($plano, $ciclo);
+        $valor = $semCobranca
+            ? (int) ($assinatura->troca_preco_cheio_centavos ?? $assinatura->preco_cheio_centavos)
+            : ($assinatura->troca_preco_centavos ?? $assinatura->preco_snapshot_centavos ?? IniciarAssinatura::precoDe($plano, $ciclo));
+        // Sem cobrança: a 1ª cobrança do cartão é no fim do desconto (hoje, se o fim já passou).
+        $primeira = $fimDoDesconto ?? $assinatura->proximo_vencimento->toImmutable();
+        $cobraAgora = $atraso || ($semCobranca && $primeira->isPast());
 
         $troca = TrocaDeCartao::query()->create([
             'usuario_id' => $usuario->id,
             'assinatura_id' => $assinatura->id,
             'provedor' => $this->provedor->nome(),
             'status' => 'pendente',
-            'cobra_agora' => $atraso,
+            'cobra_agora' => $cobraAgora,
             'antiga_id_externo' => $assinatura->id_externo,
         ]);
 
@@ -101,7 +110,7 @@ final class TrocarCartao
                 urlCancelamento: $volta,
                 urlExpirado: $volta,
                 recorrencia: $ciclo,
-                primeiraCobrancaEm: $atraso ? null : $assinatura->proximo_vencimento->toDateTimeImmutable(),
+                primeiraCobrancaEm: $cobraAgora ? null : $primeira->toDateTimeImmutable(),
             ));
         } catch (ProvedorIndisponivel $e) {
             $troca->forceFill(['status' => 'falhou'])->save();
@@ -130,7 +139,7 @@ final class TrocarCartao
             actorType: 'user',
             actorId: $usuario->id,
             usuarioId: $usuario->id,
-            after: ['assinatura_id' => $assinatura->id, 'cobra_agora' => $atraso, 'provedor' => $troca->provedor],
+            after: ['assinatura_id' => $assinatura->id, 'cobra_agora' => $cobraAgora, 'provedor' => $troca->provedor],
         );
 
         return $troca;
@@ -182,6 +191,7 @@ final class TrocarCartao
             $assinatura->forceFill([
                 'provedor' => $troca->provedor,
                 'id_externo' => $novaId,
+                'meio_pagamento' => $assinatura->semMeioDePagamento() ? 'cartao' : $assinatura->meio_pagamento,
                 'cartao_bandeira' => $bandeira ?? $assinatura->cartao_bandeira,
                 'cartao_ultimos4' => $ultimos4 ?? $assinatura->cartao_ultimos4,
             ])->save();
@@ -261,6 +271,13 @@ final class TrocarCartao
 
     private function cancelarAntiga(TrocaDeCartao $troca): bool
     {
+        // Assinatura ativada sem cobrança: não havia recorrência antiga no provedor.
+        if ($troca->antiga_id_externo === null) {
+            $troca->forceFill(['antiga_cancelada_em' => CarbonImmutable::now()])->save();
+
+            return true;
+        }
+
         try {
             $this->provedor->cancelSubscription(new ReferenciaProvedor($troca->provedor, $troca->antiga_id_externo));
         } catch (ProvedorIndisponivel $e) {

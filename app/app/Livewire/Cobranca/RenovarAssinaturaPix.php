@@ -12,7 +12,9 @@ use App\Models\CobrancaConfig;
 use App\Models\Plano;
 use App\Models\Usuario;
 use App\Services\Cobranca\CompraNaoPermitida;
+use App\Services\Cobranca\CupomRecusado;
 use App\Services\Cobranca\IniciarRenovacaoPix;
+use App\Services\Cobranca\ItemDeCompra;
 use App\Support\Personificacao;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +31,8 @@ use Livewire\Component;
 #[Layout('components.layouts.app')]
 final class RenovarAssinaturaPix extends Component
 {
+    use ComCupom;
+
     public bool $aceito = false;
 
     public bool $falhaDoProvedor = false;
@@ -58,7 +62,11 @@ final class RenovarAssinaturaPix extends Component
         }
 
         try {
-            $invoice = $iniciar->executar($usuario, request()->ip(), substr((string) request()->userAgent(), 0, 255));
+            $invoice = $iniciar->executar($usuario, request()->ip(), substr((string) request()->userAgent(), 0, 255), $this->codigoCupom);
+        } catch (CupomRecusado $e) {
+            $this->cupomRecusadoNoClique($e);
+
+            return null;
         } catch (CompraNaoPermitida) {
             // A própria tela já mostra o motivo (e-mail, admin, fora da janela): só reavalia o estado.
             return null;
@@ -68,7 +76,8 @@ final class RenovarAssinaturaPix extends Component
             return null;
         }
 
-        return $this->redirect((string) $invoice->checkout_url);
+        // Renovação sem cobrança (STORY-083): já está paga, vai direto à confirmação.
+        return $this->redirect($invoice->checkout_url ?? route('assinatura.retorno', $invoice));
     }
 
     public function reenviarConfirmacao(): void
@@ -95,6 +104,13 @@ final class RenovarAssinaturaPix extends Component
         $assinatura = $usuario instanceof Usuario ? IniciarRenovacaoPix::assinaturaDoUsuario($usuario->id) : null;
         $vigente = $assinatura !== null && $assinatura->status === StatusAssinatura::Ativa;
         $plano = $assinatura?->plano_id === null ? null : Plano::query()->find($assinatura->plano_id);
+        $emCurso = $assinatura?->desconto();
+        $periodo = ($assinatura === null ? 0 : $assinatura->periodos_pagos) + 1;
+        // Desconto que continua nesta renovação (CA-7); senão vale o concedido ou o digitado, e nunca os dois (CA-5).
+        $continua = $emCurso?->vale($periodo) === true;
+        $aplicado = $vigente && ! $continua ? $this->cupomDaTela() : null;
+        $cheio = $continua ? $emCurso->cheio : (int) $assinatura?->preco_snapshot_centavos;
+        $aPagar = $continua ? $emCurso->valorDoPeriodo($periodo) : ($aplicado?->preco->final ?? $cheio);
 
         return view('livewire.cobranca.renovar-assinatura-pix', [
             'assinatura' => $assinatura,
@@ -104,11 +120,29 @@ final class RenovarAssinaturaPix extends Component
             'abreEm' => $vigente ? RenovacaoPix::abreEm($assinatura->proximo_vencimento) : null,
             'fim' => $assinatura?->proximo_vencimento,
             'novoFim' => $assinatura === null ? null : RenovacaoPix::novoVencimento($assinatura->data_inicio, $assinatura->periodos_pagos),
-            'valor' => (int) $assinatura?->preco_snapshot_centavos,
+            'valor' => $aPagar,
+            'cheio' => $cheio,
+            'descontoValor' => $cheio - $aPagar,
+            'continua' => $continua,
+            'aplicado' => $aplicado,
+            'cupomConcedido' => $aplicado?->concedido === true,
+            'semCobranca' => $aPagar === 0,
             'emailConfirmado' => $usuario instanceof Usuario && $usuario->emailConfirmado(),
             'email' => $usuario instanceof Usuario ? $usuario->email : '',
             'personificando' => Personificacao::ativa() !== null,
             'minutosPix' => (int) config('services.payments.pix_expiracao_minutos', 30),
         ])->layoutData(['title' => 'Renovar plano']);
+    }
+
+    protected function itemDeCompra(): ?ItemDeCompra
+    {
+        $usuario = Auth::user();
+        $assinatura = $usuario instanceof Usuario ? IniciarRenovacaoPix::assinaturaDoUsuario($usuario->id) : null;
+
+        if ($assinatura === null || $assinatura->plano_id === null || $assinatura->desconto()?->vale($assinatura->periodos_pagos + 1) === true) {
+            return null;
+        }
+
+        return new ItemDeCompra((int) $assinatura->preco_snapshot_centavos, $assinatura->plano_id, 'anual');
     }
 }

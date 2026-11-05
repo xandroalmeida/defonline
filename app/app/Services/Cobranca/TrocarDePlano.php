@@ -8,6 +8,8 @@ use App\Domain\Cobranca\CalculoDeTroca;
 use App\Domain\Cobranca\CicloCobranca;
 use App\Domain\Cobranca\CobrancaNoProvedor;
 use App\Domain\Cobranca\CotaMensal;
+use App\Domain\Cobranca\DescontoDaAssinatura;
+use App\Domain\Cobranca\DescontoNaTroca;
 use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PaymentProvider;
@@ -17,6 +19,7 @@ use App\Domain\Cobranca\ProvedorIndisponivel;
 use App\Domain\Cobranca\ReferenciaProvedor;
 use App\Domain\Cobranca\StatusAssinatura;
 use App\Models\Assinatura;
+use App\Models\Cupom;
 use App\Models\Invoice;
 use App\Models\Plano;
 use App\Models\Usuario;
@@ -71,7 +74,13 @@ final class TrocarDePlano
 
         $atual = Plano::query()->find($assinatura->plano_id);
         $cicloAtual = CicloCobranca::from((string) $assinatura->ciclo);
-        $precoAtual = $assinatura->preco_snapshot_centavos ?? ($atual === null ? 0 : IniciarAssinatura::precoDe($atual, $cicloAtual));
+        $contratado = $assinatura->preco_snapshot_centavos ?? ($atual === null ? 0 : IniciarAssinatura::precoDe($atual, $cicloAtual));
+        // STORY-083: o crédito do plano atual é o preço do ciclo em vigor, COM o desconto de cupom desse ciclo.
+        $precoAtual = DescontoNaTroca::precoDoCicloEmVigor($assinatura->desconto(), $assinatura->periodos_pagos, $contratado);
+        $cheioNovo = IniciarAssinatura::precoDe($destino, $ciclo);
+        $descontoNovo = $this->descontoNoPlanoNovo($assinatura, $destino, $ciclo, $cheioNovo);
+        $termina = DescontoNaTroca::termina($assinatura->desconto(), $assinatura->periodos_pagos, $descontoNovo);
+        $efetivoNovo = $descontoNovo?->valorDoPeriodo(max(1, $assinatura->periodos_pagos)) ?? $cheioNovo;
 
         return CalculoDeTroca::calcular(
             $precoAtual,
@@ -80,9 +89,34 @@ final class TrocarDePlano
             self::inicioDoPeriodo($assinatura, $cicloAtual),
             $assinatura->proximo_vencimento,
             CarbonImmutable::now(),
-            IniciarAssinatura::precoDe($destino, $ciclo),
+            $efetivoNovo,
             $ciclo,
             $destino->cota_mensal,
+        )->comDesconto($cheioNovo, $descontoNovo, $termina, $descontoNovo?->valorDoPeriodo($assinatura->periodos_pagos + 1) ?? $cheioNovo);
+    }
+
+    /**
+     * O desconto de cupom da assinatura sobre o plano novo (STORY-083), ou `null` se ele não continua: o
+     * cupom vinculado não é reaplicado (sem novo uso), só vale se cobre o plano e o ciclo novos.
+     */
+    private function descontoNoPlanoNovo(Assinatura $assinatura, Plano $destino, CicloCobranca $ciclo, int $cheioNovo): ?DescontoDaAssinatura
+    {
+        $atual = $assinatura->desconto();
+        $cupom = $atual === null || $assinatura->cupom_id === null ? null : Cupom::query()->find($assinatura->cupom_id);
+
+        if ($atual === null || $cupom === null) {
+            return null;
+        }
+
+        return DescontoNaTroca::sobreOPlanoNovo(
+            $atual,
+            $assinatura->periodos_pagos,
+            $ciclo->value === $assinatura->ciclo,
+            $cupom->cobre($destino->id, $ciclo->value, null),
+            $cupom->tipo,
+            $cupom->valor,
+            $cheioNovo,
+            (int) config('services.payments.valor_minimo_centavos', 500),
         );
     }
 
@@ -122,7 +156,7 @@ final class TrocarDePlano
 
         $this->empurrarAoProvedor($assinatura, (int) $assinatura->preco_snapshot_centavos, CicloCobranca::from((string) $assinatura->ciclo));
 
-        $assinatura->forceFill(['troca_plano_id' => null, 'troca_ciclo' => null, 'troca_preco_centavos' => null, 'troca_agendada_em' => null])->save();
+        $assinatura->forceFill(['troca_plano_id' => null, 'troca_ciclo' => null, 'troca_preco_centavos' => null, 'troca_preco_cheio_centavos' => null, 'troca_desconto_centavos' => null, 'troca_agendada_em' => null])->save();
 
         AuditLogger::log(
             action: 'cobranca.troca_de_plano_desfeita',
@@ -183,7 +217,10 @@ final class TrocarDePlano
             return ['processado', $invoice->id];
         }
 
-        $this->aplicarLocal($assinatura, $plano, CicloCobranca::from((string) $invoice->ciclo), IniciarAssinatura::precoDe($plano, CicloCobranca::from((string) $invoice->ciclo)), $pagoEm);
+        $cicloNovo = CicloCobranca::from((string) $invoice->ciclo);
+        $cheioNovo = IniciarAssinatura::precoDe($plano, $cicloNovo);
+
+        $this->aplicarLocal($assinatura, $plano, $cicloNovo, $cheioNovo, $pagoEm, $this->descontoNoPlanoNovo($assinatura, $plano, $cicloNovo, $cheioNovo));
 
         AuditLogger::log(
             action: 'cobranca.troca_de_plano_aplicada',
@@ -289,12 +326,16 @@ final class TrocarDePlano
 
     private function agendar(Usuario $usuario, Assinatura $assinatura, Plano $destino, CicloCobranca $ciclo, PreviaDeTroca $previa): ResultadoDaTroca
     {
-        $this->empurrarAoProvedor($assinatura, $previa->precoNovoCentavos, $ciclo);
+        // O que o provedor vai cobrar na renovação: o preço cheio novo, ou com o desconto que continua (STORY-083).
+        $this->empurrarAoProvedor($assinatura, $previa->proximoValorCentavos, $ciclo);
 
+        $continua = $previa->descontoNovo?->vale($assinatura->periodos_pagos + 1) === true;
         $assinatura->forceFill([
             'troca_plano_id' => $destino->id,
             'troca_ciclo' => $ciclo->value,
-            'troca_preco_centavos' => $previa->precoNovoCentavos,
+            'troca_preco_centavos' => $previa->proximoValorCentavos,
+            'troca_preco_cheio_centavos' => $previa->precoNovoCheioCentavos,
+            'troca_desconto_centavos' => $continua ? $previa->descontoNovo->desconto : 0,
             'troca_agendada_em' => now(),
         ])->save();
 
@@ -320,7 +361,7 @@ final class TrocarDePlano
                 throw TrocaNegada::porque(TrocaNegada::MUDOU);
             }
 
-            $this->aplicarLocal($travada, $destino, $ciclo, $previa->precoNovoCentavos, CarbonImmutable::now());
+            $this->aplicarLocal($travada, $destino, $ciclo, $previa->precoNovoCheioCentavos, CarbonImmutable::now(), $previa->descontoNovo);
 
             AuditLogger::log(
                 action: 'cobranca.troca_de_plano_aplicada',
@@ -337,7 +378,7 @@ final class TrocarDePlano
     }
 
     /** O plano novo, a cota e o preço na carteira; se o ciclo mudou, um período novo começa agora. */
-    private function aplicarLocal(Assinatura $a, Plano $plano, CicloCobranca $ciclo, int $preco, CarbonImmutable $agora): void
+    private function aplicarLocal(Assinatura $a, Plano $plano, CicloCobranca $ciclo, int $cheio, CarbonImmutable $agora, ?DescontoDaAssinatura $descontoNovo = null): void
     {
         $cicloMudou = $ciclo->value !== $a->ciclo;
         // O que já foi gasto no ciclo continua gasto: a cota nova vale "a partir de agora".
@@ -346,14 +387,25 @@ final class TrocarDePlano
         $campos = [
             'plano_id' => $plano->id,
             'ciclo' => $ciclo->value,
-            'preco_snapshot_centavos' => $preco,
+            // O que o provedor cobra na próxima vez: com o desconto que continua, o do próximo ciclo.
+            'preco_snapshot_centavos' => $descontoNovo?->valorDoPeriodo(($cicloMudou ? 1 : $a->periodos_pagos) + 1) ?? $cheio,
             'cota_snapshot' => $plano->cota_mensal,
             'cota_restante_ciclo' => $cicloMudou ? $plano->cota_mensal : max(0, $plano->cota_mensal - $gastas),
             'troca_plano_id' => null,
             'troca_ciclo' => null,
             'troca_preco_centavos' => null,
+            'troca_preco_cheio_centavos' => null,
+            'troca_desconto_centavos' => null,
             'troca_agendada_em' => null,
         ];
+
+        // STORY-083: o retrato do desconto passa a ser o do plano novo, ou some se o desconto terminou na troca.
+        // O cupom vinculado não é reaplicado: nenhum novo uso é registrado.
+        if ($descontoNovo !== null) {
+            $campos += ['preco_cheio_centavos' => $cheio, 'desconto_centavos' => $descontoNovo->desconto];
+        } elseif ($a->desconto_centavos > 0) {
+            $campos += ['preco_cheio_centavos' => null, 'desconto_centavos' => 0, 'desconto_periodos' => null];
+        }
 
         if ($cicloMudou) {
             $vencimento = $ciclo->vencimento($agora);

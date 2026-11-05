@@ -7,8 +7,8 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: true
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: claude-sonnet-5-5 (pista B)
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: M
@@ -93,14 +93,40 @@ Siga `defonline-docs/skills/po/references/agent-task-format.md`. Ao iniciar, atu
 
 ## Notas do agente
 
+### Plano (entrada inicial)
+Lidos: estória, ADR-010 (4.5, 4.7, Q4, `changeSubscriptionValue`), spec STORY-070-cupom-no-checkout, notas da STORY-072, IDR-019/020/021, `Cupom::recusaPara`, `CupomRegras`, `TipoDesconto`, os quatro checkouts e `ConfirmarAssinatura`.
+Entendimento: o cupom (digitado ou concedido) vira desconto em centavos sobre o preço; ao provedor vai sempre o valor final. Valor final zero ou abaixo do mínimo = ativação sem cobrança (Invoice paga de valor 0 + uso + carteira, tudo numa transação, sem chamar o provedor). O uso só é gravado quando a contratação conclui (pagamento confirmado ou ativação sem cobrança); a Invoice pendente reserva a vaga do limite (CA-4). O desconto da assinatura é um retrato na própria assinatura (CA-9), vale pelos N ciclos, e ao fim o valor no provedor volta ao cheio.
+Plano: (1) domínio puro `PrecoComCupom` + `DescontoDaAssinatura`; (2) migration (invoices, assinaturas, cupom_usos); (3) `CupomDoCheckout` (resolução, reserva, uso) + os quatro `Iniciar*` + Livewire/telas; (4) confirmação (créditos, ativação, renovação), `changeSubscriptionValue`, ciclos gratuitos, aviso D-7; (5) Meu plano; (6) testes (domínio, feature, concorrência real, Dusk).
+
 ### Decisões tomadas
+Ver IDR-029 (reserva da vaga pela Invoice pendente, uso na transação do pagamento, desconto como retrato na assinatura, ciclo gratuito como renovação nossa). Em resumo:
+- O valor enviado ao provedor é sempre o final (`PrecoComCupom`); final zero ou abaixo de R$ 5,00 (`services.payments.valor_minimo_centavos`) ativa sem cobrança, sem provedor, numa transação única com Invoice de valor zero (`meio = nenhum`) e o registro do uso.
+- O concedido vence o digitado e esconde o campo; entre concedidos vale o de maior desconto.
+- `PaymentProvider::changeSubscriptionValue` não existia: criado (interface, Asaas, Fake). Fica pendente e é repetido por `assinaturas:ciclos-gratuitos` se o provedor falhar.
+- Cadastrar cartão com o desconto em curso reaproveita `TrocarCartao` (1ª cobrança no fim do desconto). Depois do fim, sem cartão, a assinatura é encerrada e o bloqueio é `desconto_acabou_sem_cartao`; a ação "Cadastrar cartão" do bloqueio agora leva a Meu plano (`cartao.atualizar` nunca foi criada).
+- A renovação Pix aceita cupom (concedido ou digitado) quando não há desconto em curso; desconto total na renovação é aplicado na hora.
+- Migration com prefixo `2026_11_05_400083` (precisa vir depois da `300080`, cujas constraints altera), fora do `2NNNNN` da pista.
 
 ### Descobertas
+- `DB::now()` não viaja com `travelTo`: prazo de checkout aberto, nos testes, se vence na linha com `now() - interval`.
+- `Invoice::update()` pelo query builder grava Carbon sem offset (banco em America/Sao_Paulo, app em UTC): use `DB::raw`.
+- `TextoBloqueio::ROTAS['cadastrar-cartao']` apontava para `cartao.atualizar`, que não existe: a ação sumia da tela.
+
+### Dúvidas ao PO
+- "Preço vigente" ao fim do desconto: adotei o preço cheio contratado (o que "Depois" mostrou). Se o catálogo mudou no meio, o cliente continua no preço mostrado. Confirmar.
+- Pix pago depois do prazo com a vaga do limite já tomada ainda credita e alerta (`cobranca.cupom_acima_do_limite`), porque o dinheiro entrou. Confirmar.
+- Cupom com final entre R$ 0,01 e R$ 4,99 vira gratuito (ADR-010 4.7, ainda `proposed`): o cliente ganha mais desconto que o cupom diz.
 
 ### Bloqueios encontrados
+Nenhum.
 
 ### IDRs criados
+IDR-029 (numerado 029 na junção, porque o IDR-026 é da troca de plano).
 
 ### Cobertura final
+Suíte All: 2992 testes passando; cobertura total 98,4%. Pint e PHPStan limpos. Dusk inteiro em série: 103 passam, 2 falham fora desta estória (ver Evidências).
 
 ### Evidências
+`tests/Domain/Cobranca/CupomNoCheckoutDominioTest.php` (regras puras), `tests/Feature/Cobranca/CupomNoCheckoutTest.php` (CA-1 a CA-10, Pix anual e renovação, histórico), `tests/Concorrencia/CupomConcorrenciaTest.php` (CA-4 com processos reais), `tests/Browser/CupomCheckoutBrowserTest.php` (E2E: digitado em 360x800, concedido com desconto total em desktop, pacote com Pix).
+Dusk: `CompraCreditosCartaoBrowserTest::cartao recusado...` estourou o timeout de 5 s na rodada completa e passa isolado (lentidão). `DrmRetificacaoBrowserTest::mobile lanca retifica...` falha também isolado, na data do rodapé do DRM (`corrigido 1× — última correção em dd/mm/aaaa`), área que esta estória não toca.
+

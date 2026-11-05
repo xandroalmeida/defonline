@@ -58,7 +58,9 @@
                         <dt class="text-[color:var(--color-secondary)]">Plano</dt>
                         <dd class="m-0 text-right" dusk="screen-checkout-resumo-plano">{{ $plano?->nome }} · anual</dd>
                         <dt class="text-[color:var(--color-secondary)]">Preço</dt>
-                        <dd class="m-0 text-right" dusk="screen-checkout-resumo-preco">{{ $reais($valor) }}</dd>
+                        <dd class="m-0 text-right" dusk="screen-checkout-resumo-preco">{{ $reais($cheio) }}</dd>
+                        <dt class="text-[color:var(--color-secondary)]">Desconto</dt>
+                        <dd class="m-0 text-right" dusk="screen-checkout-resumo-desconto">{{ $descontoValor > 0 ? '− '.$reais($descontoValor).($aplicado ? ' ('.$aplicado->cupom->codigo.')' : '') : 'Sem desconto' }}</dd>
                         <dt class="font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2">A pagar hoje</dt>
                         <dd class="m-0 text-right font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2" dusk="screen-checkout-resumo-a-pagar">{{ $reais($valor) }}</dd>
                         <dt class="text-[color:var(--color-secondary)]">Ciclo</dt>
@@ -70,9 +72,18 @@
             </section>
 
             <section class="lg:order-1 flex flex-col gap-4">
+                @if ($continua)
+                    <x-drm.aviso-inline variant="info" dusk="screen-checkout-desconto-continua">O desconto do seu cupom continua nesta renovação.</x-drm.aviso-inline>
+                @else
+                    <x-cobranca.cupom :aplicado="$aplicado" :concedido="$cupomConcedido" :aberto="$cupomAberto" :erro="$erroCupom" :esgotou="$cupomEsgotou"/>
+                @endif
                 <div>
                     <h2 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0 mb-1">Pagamento</h2>
+                    @if ($semCobranca)
+                        <p class="m-0 text-sm text-[color:var(--color-primary)]" dusk="screen-checkout-sem-pagamento">Você não precisa pagar nada agora.</p>
+                    @else
                     <p class="m-0 text-sm text-[color:var(--color-primary)]" dusk="screen-checkout-pagamento">Pix · o QR Code vale por {{ $minutosPix }} minutos. A renovação começa quando o ciclo atual termina, sem perder dias.</p>
+                    @endif
                 </div>
 
                 @if ($personificando)
@@ -107,7 +118,7 @@
                     <x-button type="submit" variant="primary" :disabled="$personificando"
                               wire:loading.attr="disabled" wire:target="renovar"
                               dusk="screen-checkout-primary-cta">
-                        <span wire:loading.remove wire:target="renovar">Pagar renovação · {{ $reais($valor) }}</span>
+                        <span wire:loading.remove wire:target="renovar">{{ $semCobranca ? 'Renovar sem pagar' : 'Pagar renovação · '.$reais($valor) }}</span>
                         <span wire:loading wire:target="renovar">Gerando QR Code…</span>
                     </x-button>
                 </form>

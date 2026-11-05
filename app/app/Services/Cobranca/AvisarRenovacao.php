@@ -38,7 +38,7 @@ final class AvisarRenovacao
             ->where('status', StatusAssinatura::Ativa->value)
             ->where('trial', false)
             // Pix anual não é cartão: o aviso dele é o da STORY-080 (`assinaturas:pix-anual`), com o link do QR Code.
-            ->where('meio_pagamento', '!=', 'pix')
+            ->whereNotIn('meio_pagamento', ['pix', 'nenhum'])
             ->whereNotNull('plano_id')
             ->whereNotNull('preco_snapshot_centavos')
             ->where('proximo_vencimento', '>', $agora->format('Y-m-d H:i:sP'))
