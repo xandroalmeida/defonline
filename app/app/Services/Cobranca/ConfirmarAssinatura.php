@@ -11,6 +11,7 @@ use App\Domain\Cobranca\CobrancaNoProvedor;
 use App\Domain\Cobranca\CotaMensal;
 use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\MeioPagamento;
+use App\Domain\Cobranca\RenovacaoPix;
 use App\Domain\Cobranca\StatusAssinatura;
 use App\Models\Assinatura;
 use App\Models\Invoice;
@@ -27,6 +28,7 @@ use UnexpectedValueException;
  *
  * - **Ativação:** a Invoice do checkout é paga e nasce a assinatura, com a cota cheia, o preço e
  *   a cota do momento da escolha (CA-5) e o cartão (só bandeira e 4 dígitos, se vierem).
+ * - **Renovação por Pix (STORY-080):** a Invoice da renovação, paga, estende o ano (ver {@see renovarPorPix()}).
  * - **Renovação:** uma cobrança paga que não é a da Invoice, mas é de uma assinatura nossa, estende
  *   o período e devolve a cota cheia. Se a assinatura estava "Em atraso" (STORY-079 CA-4), o pagamento
  *   a restabelece e encerra a régua de retentativas. Cada cobrança vira uma Invoice (`UNIQUE (provedor, id_externo)`),
@@ -56,7 +58,7 @@ final class ConfirmarAssinatura
                 $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
 
                 if (in_array($invoice->status, [EstadoCobranca::Pendente, EstadoCobranca::Vencida, EstadoCobranca::Falhou], true)) {
-                    return $this->ativar($invoice, $cobranca);
+                    return $invoice->renovacao ? $this->renovarPorPix($invoice, $cobranca) : $this->ativar($invoice, $cobranca);
                 }
 
                 // A Invoice já está paga: o mesmo pagamento de novo, ou a cobrança do mês seguinte
@@ -73,17 +75,7 @@ final class ConfirmarAssinatura
     /** @return array{0: 'processado'|'ignorado', 1: string|null} */
     private function ativar(Invoice $invoice, CobrancaNoProvedor $cobranca): array
     {
-        if ($cobranca->valorCentavos !== $invoice->valor_centavos) {
-            Log::error('cobranca.valor_divergente', [
-                'module' => 'cobranca',
-                'action' => 'processar_evento',
-                'invoice_id' => $invoice->id,
-                'esperado_centavos' => $invoice->valor_centavos,
-                'recebido_centavos' => $cobranca->valorCentavos,
-            ]);
-
-            throw new UnexpectedValueException('Valor pago diferente do valor da invoice.');
-        }
+        $this->conferirValor($invoice, $cobranca);
 
         $ciclo = CicloCobranca::from((string) $invoice->ciclo);
         $pagoEm = $cobranca->pagoEm !== null ? CarbonImmutable::instance($cobranca->pagoEm) : CarbonImmutable::now();
@@ -125,6 +117,7 @@ final class ConfirmarAssinatura
             'provedor' => $invoice->provedor,
             'id_externo' => $cobranca->assinaturaId,
             'preco_snapshot_centavos' => $invoice->valor_centavos,
+            'meio_pagamento' => $invoice->meio,
             'periodos_pagos' => 1,
             'proxima_cota_em' => $ciclo === CicloCobranca::Anual ? CotaMensal::proxima($pagoEm, $pagoEm, $vencimento) : null,
             'cartao_bandeira' => $cobranca->cartaoBandeira,
@@ -143,6 +136,72 @@ final class ConfirmarAssinatura
         );
 
         return ['processado', $invoice->id];
+    }
+
+    /**
+     * STORY-080 — renovação do plano anual pago com Pix: a Invoice pendente da renovação foi paga. O ciclo
+     * avança um ano a partir do fim do atual (nada se perde), a cota do mês em curso não é zerada (o
+     * aniversário do fim do ciclo a devolve cheia) e o preço fica o da Invoice. Se o plano já acabou
+     * (Pix pago depois do fim), o pagamento vira uma assinatura nova, como qualquer contratação.
+     *
+     * @return array{0: 'processado'|'ignorado', 1: string|null}
+     */
+    private function renovarPorPix(Invoice $invoice, CobrancaNoProvedor $cobranca): array
+    {
+        $assinatura = Assinatura::query()->lockForUpdate()->find($invoice->assinatura_id);
+
+        if ($assinatura === null || $assinatura->status !== StatusAssinatura::Ativa) {
+            return $this->ativar($invoice, $cobranca);
+        }
+
+        $this->conferirValor($invoice, $cobranca);
+
+        $pagoEm = $cobranca->pagoEm !== null ? CarbonImmutable::instance($cobranca->pagoEm) : CarbonImmutable::now();
+        $periodos = $assinatura->periodos_pagos + 1;
+        $vencimento = RenovacaoPix::novoVencimento($assinatura->data_inicio, $assinatura->periodos_pagos);
+
+        $invoice->forceFill([
+            'status' => EstadoCobranca::Paga,
+            'id_externo' => $cobranca->referencia->id,
+            'checkout_id_externo' => $invoice->checkout_id_externo ?? $cobranca->checkoutId,
+            'pago_em' => $pagoEm,
+        ])->save();
+
+        $assinatura->forceFill([
+            'proximo_vencimento' => $vencimento,
+            'periodos_pagos' => $periodos,
+            'cota_snapshot' => (int) $invoice->cota_snapshot,
+            'preco_snapshot_centavos' => $invoice->valor_centavos,
+            'proxima_cota_em' => CotaMensal::proxima($assinatura->data_inicio, $pagoEm, $vencimento),
+        ])->save();
+
+        AuditLogger::log(
+            action: 'cobranca.assinatura_renovada',
+            subjectType: 'Assinatura',
+            subjectId: $assinatura->id,
+            actorType: 'system',
+            usuarioId: $assinatura->usuario_id,
+            after: ['periodos_pagos' => $periodos, 'proximo_vencimento' => $vencimento->toIso8601String(), 'cota' => $invoice->cota_snapshot, 'valor_centavos' => $invoice->valor_centavos, 'meio' => 'pix'],
+        );
+
+        return ['processado', $invoice->id];
+    }
+
+    private function conferirValor(Invoice $invoice, CobrancaNoProvedor $cobranca): void
+    {
+        if ($cobranca->valorCentavos === $invoice->valor_centavos) {
+            return;
+        }
+
+        Log::error('cobranca.valor_divergente', [
+            'module' => 'cobranca',
+            'action' => 'processar_evento',
+            'invoice_id' => $invoice->id,
+            'esperado_centavos' => $invoice->valor_centavos,
+            'recebido_centavos' => $cobranca->valorCentavos,
+        ]);
+
+        throw new UnexpectedValueException('Valor pago diferente do valor da invoice.');
     }
 
     /**

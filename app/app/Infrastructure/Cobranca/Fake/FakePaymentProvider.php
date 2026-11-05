@@ -7,6 +7,7 @@ namespace App\Infrastructure\Cobranca\Fake;
 use App\Domain\Cobranca\CobrancaNoProvedor;
 use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\EventoDoProvedor;
+use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PaymentProvider;
 use App\Domain\Cobranca\PedidoCheckout;
 use App\Domain\Cobranca\ProvedorIndisponivel;
@@ -86,6 +87,7 @@ final class FakePaymentProvider implements PaymentProvider
             'pago_em' => null,
             'assinatura' => $pedido->recorrencia === null ? null : 'fakesub_'.Str::after($id, 'fakechk_'),
             'vencimento' => now()->toDateString(),
+            'cartao' => in_array(MeioPagamento::Cartao, $pedido->meios, true),
             // Troca de cartão no meio do ciclo (STORY-081): nada é cobrado agora, a 1ª cobrança é no vencimento.
             'cobra_agora' => $pedido->primeiraCobrancaEm === null || $pedido->primeiraCobrancaEm <= new DateTimeImmutable,
         ], now()->addDays(self::TTL_DIAS));
@@ -143,9 +145,11 @@ final class FakePaymentProvider implements PaymentProvider
 
     private function retrato(string $id): CobrancaNoProvedor
     {
-        /** @var array{checkout: string|null, referencia: string|null, valor: int, estado: string, pago_em: string|null, assinatura?: string|null, vencimento?: string|null} $c */
+        /** @var array{checkout: string|null, referencia: string|null, valor: int, estado: string, pago_em: string|null, assinatura?: string|null, vencimento?: string|null, cartao?: bool} $c */
         $c = $this->cobrancaGravada($id);
         $cobranca = new ReferenciaProvedor(self::NOME, $id);
+
+        $comCartao = ($c['assinatura'] ?? null) !== null || ($c['cartao'] ?? false) === true;
 
         return new CobrancaNoProvedor(
             $cobranca,
@@ -155,8 +159,8 @@ final class FakePaymentProvider implements PaymentProvider
             $c['referencia'],
             $c['pago_em'] === null ? null : new DateTimeImmutable($c['pago_em']),
             $c['assinatura'] ?? null,
-            ($c['assinatura'] ?? null) !== null && $c['estado'] === EstadoCobranca::Paga->value ? 'VISA' : null,
-            ($c['assinatura'] ?? null) !== null && $c['estado'] === EstadoCobranca::Paga->value ? '4242' : null,
+            $comCartao && $c['estado'] === EstadoCobranca::Paga->value ? 'VISA' : null,
+            $comCartao && $c['estado'] === EstadoCobranca::Paga->value ? '4242' : null,
             isset($c['vencimento']) ? new DateTimeImmutable($c['vencimento']) : null,
         );
     }

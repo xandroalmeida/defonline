@@ -7,7 +7,7 @@
         </p>
         <form method="POST" action="{{ route('pagamentos.fake.simular', $invoice) }}" class="flex flex-wrap gap-3 m-0">
             @csrf
-            @if ($invoice->tipo === 'assinatura')
+            @if ($invoice->meio === 'cartao')
                 <x-button type="submit" name="acao" value="pagar" variant="primary" dusk="pagamento-fake-pagar">Simular cartão aprovado</x-button>
                 <x-button type="submit" name="acao" value="recusar" variant="secondary" dusk="pagamento-fake-recusar">Simular cartão recusado</x-button>
                 <x-button type="submit" name="acao" value="expirar" variant="secondary" dusk="pagamento-fake-expirar">Simular desistência (prazo vencido)</x-button>

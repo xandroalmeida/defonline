@@ -10,6 +10,7 @@ use App\Models\CobrancaConfig;
 use App\Models\Invoice;
 use App\Models\TermAcceptance;
 use App\Models\Usuario;
+use App\Services\Cobranca\IniciarCompraDeCreditos;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
@@ -157,4 +158,90 @@ it('o aceite previamente dado continua marcado ao gerar outro código', function
     session()->flash('aceite_previo', true);
 
     Livewire::actingAs($usuario)->test(ComprarCreditos::class, ['pacote' => _pacote()->id])->assertSet('aceito', true);
+});
+
+// STORY-078 — escolha entre Pix e cartão (spec STORY-070-checkout-creditos-cartao).
+describe('seletor de meio (STORY-078 CA-1)', function () {
+    it('o Pix vem selecionado, sem "recomendado", e o resumo diz que não renova nos dois meios', function () {
+        $usuario = _compradorConfirmado();
+
+        Livewire::actingAs($usuario)->test(ComprarCreditos::class, ['pacote' => _pacote()->id])
+            ->assertSet('meio', 'pix')
+            ->assertSee('Como você quer pagar?')
+            ->assertSee('Cartão de crédito')
+            ->assertSee('libera na hora, sem renovação')
+            ->assertSee('Gerar QR Code Pix')
+            ->assertDontSee('ecomendado')
+            ->set('meio', 'cartao')
+            ->assertSee('Pagar com cartão')
+            ->assertDontSee('Gerar QR Code Pix')
+            ->assertSee('Compra única, não renova');
+    });
+
+    it('um meio inválido volta ao Pix', function () {
+        Livewire::actingAs(_compradorConfirmado())->test(ComprarCreditos::class, ['pacote' => _pacote()->id])
+            ->set('meio', 'boleto')->assertSet('meio', 'pix');
+    });
+
+    it('?meio=cartao abre já no cartão', function () {
+        $this->actingAs(_compradorConfirmado())->get(route('creditos.comprar', ['pacote' => _pacote()->id, 'meio' => 'cartao']))
+            ->assertOk()->assertSee('Pagar com cartão');
+    });
+
+    it('trocar o meio mantém o aceite marcado', function () {
+        Livewire::actingAs(_compradorConfirmado())->test(ComprarCreditos::class, ['pacote' => _pacote()->id])
+            ->set('aceito', true)->set('meio', 'cartao')->assertSet('aceito', true);
+    });
+
+    it('com cartão e aceite, abre o checkout do cartão e leva ao provedor', function () {
+        $usuario = _compradorConfirmado();
+
+        Livewire::actingAs($usuario)->test(ComprarCreditos::class, ['pacote' => _pacote()->id])
+            ->set('meio', 'cartao')->set('aceito', true)->call('gerar')
+            ->assertRedirect(Invoice::query()->sole()->checkout_url);
+
+        expect(Invoice::query()->sole()->meio)->toBe('cartao');
+    });
+
+    it('com cartão, sem aceite, não gera nada', function () {
+        $usuario = _compradorConfirmado();
+
+        Livewire::actingAs($usuario)->test(ComprarCreditos::class, ['pacote' => _pacote()->id])
+            ->set('meio', 'cartao')->call('gerar')->assertHasErrors(['aceito']);
+
+        expect(Invoice::query()->count())->toBe(0);
+    });
+
+    it('falha do provedor no cartão usa a mensagem do cartão e deixa tentar de novo', function () {
+        FakePaymentProvider::falharProximoCheckout();
+
+        Livewire::actingAs(_compradorConfirmado())->test(ComprarCreditos::class, ['pacote' => _pacote()->id])
+            ->set('meio', 'cartao')->set('aceito', true)->call('gerar')
+            ->assertSee('Não conseguimos abrir o pagamento agora. Nada foi cobrado.')
+            ->call('gerar')->assertRedirect();
+    });
+
+    it('avisa do QR Code Pix em aberto ao escolher cartão, e só então', function () {
+        $usuario = _compradorConfirmado();
+        $pix = app(IniciarCompraDeCreditos::class)->executar($usuario, _pacote(), null, null);
+
+        $c = Livewire::actingAs($usuario)->test(ComprarCreditos::class, ['pacote' => _pacote()->id])
+            ->assertDontSee('QR Code Pix em aberto')
+            ->set('meio', 'cartao')
+            ->assertSee('Você tem um QR Code Pix em aberto, válido até '.$pix->checkout_expira_em->setTimezone('America/Sao_Paulo')->format('H:i'))
+            ->assertSee('Se pagar com cartão, ignore-o.');
+
+        $pix->forceFill(['checkout_expira_em' => now()->subMinute()])->save();
+        $c->call('$refresh')->assertDontSee('QR Code Pix em aberto');
+
+        $pix->forceFill(['status' => EstadoCobranca::Paga, 'checkout_expira_em' => now()->addMinutes(20)])->save();
+        $c->call('$refresh')->assertDontSee('QR Code Pix em aberto');
+    });
+
+    it('com a cobrança desligada o cartão também é 404 (CA-6)', function () {
+        $usuario = Usuario::factory()->create();
+        CobrancaConfig::atual()->update(['ativa' => false]);
+
+        $this->actingAs($usuario)->get(route('creditos.comprar', ['pacote' => _pacote()->id, 'meio' => 'cartao']))->assertNotFound();
+    });
 });

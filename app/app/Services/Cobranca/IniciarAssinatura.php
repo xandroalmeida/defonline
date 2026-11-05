@@ -18,10 +18,10 @@ use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
 use App\Support\Personificacao;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 /**
- * STORY-077 CA-1, CA-5, CA-7, CA-9 — da revisão do plano até o checkout recorrente hospedado.
+ * STORY-077 CA-1, CA-5, CA-7, CA-9 — da revisão do plano até o checkout recorrente hospedado (cartão) ou
+ * o checkout Pix avulso do plano anual (STORY-080).
  *
  * Mesma ordem da compra de créditos: valida, registra o aceite, grava a Invoice ANTES de falar com
  * o provedor (o id dela é a chave de idempotência) e só então abre o checkout. A Invoice guarda o
@@ -33,6 +33,7 @@ final class IniciarAssinatura
     public function __construct(
         private readonly PaymentProvider $provedor,
         private readonly RegistrarAceiteDoCheckout $aceite,
+        private readonly AbrirCheckoutDaInvoice $checkout,
     ) {}
 
     /** O plano e o ciclo mais recentes do catálogo valem a cada abertura de checkout. */
@@ -61,7 +62,7 @@ final class IniciarAssinatura
      * @throws CompraNaoPermitida
      * @throws ProvedorIndisponivel
      */
-    public function executar(Usuario $usuario, Plano $plano, CicloCobranca $ciclo, ?string $ip, ?string $userAgent): Invoice
+    public function executar(Usuario $usuario, Plano $plano, CicloCobranca $ciclo, ?string $ip, ?string $userAgent, MeioPagamento $meio = MeioPagamento::Cartao): Invoice
     {
         if (Personificacao::ativa() !== null) {
             throw CompraNaoPermitida::adminPersonificando();
@@ -79,11 +80,16 @@ final class IniciarAssinatura
             throw CompraNaoPermitida::jaAssinante();
         }
 
+        // STORY-080: o Pix existe só no ciclo anual (não há débito automático; o mensal fica no cartão).
+        if ($meio === MeioPagamento::Pix && $ciclo !== CicloCobranca::Anual) {
+            throw CompraNaoPermitida::pixSoNoAnual();
+        }
+
         $valor = self::precoDe($plano, $ciclo);
         $aceiteId = $this->aceite->executar($usuario, $ip, $userAgent);
 
         // Clique repetido ou volta ao checkout: reaproveita o que ainda vale em vez de abrir outro.
-        $existente = $this->checkoutAindaValido($usuario, $plano, $ciclo, $valor);
+        $existente = $this->checkoutAindaValido($usuario, $plano, $ciclo, $valor, $meio);
 
         if ($existente !== null) {
             return $existente;
@@ -98,46 +104,27 @@ final class IniciarAssinatura
             'descricao' => "Plano {$plano->nome} · {$ciclo->value}",
             'valor_centavos' => $valor,
             'status' => EstadoCobranca::Pendente,
-            'meio' => MeioPagamento::Cartao->value,
+            'meio' => $meio->value,
             'provedor' => $this->provedor->nome(),
             'aceite_termo_id' => $aceiteId,
         ]);
 
-        try {
-            $sessao = $this->provedor->startCheckout(new PedidoCheckout(
-                referenciaInterna: $invoice->id,
-                descricao: $invoice->descricao,
-                valorCentavos: $valor,
-                meios: [MeioPagamento::Cartao],
-                expiraEmMinutos: (int) config('services.payments.cartao_expiracao_minutos', 60),
-                urlSucesso: route('assinatura.retorno', $invoice),
-                urlCancelamento: route('checkout.assinatura', ['plano' => $plano->id, 'ciclo' => $ciclo->value]),
-                urlExpirado: route('assinatura.retorno', $invoice),
-                recorrencia: $ciclo,
-            ));
-        } catch (ProvedorIndisponivel $e) {
-            $invoice->forceFill([
-                'status' => EstadoCobranca::Falhou,
-                'motivo_encerramento' => 'provedor',
-                'falha_motivo' => mb_substr($e->getMessage(), 0, 200),
-            ])->save();
+        $pix = $meio === MeioPagamento::Pix;
 
-            Log::error('cobranca.provedor_falhou', [
-                'module' => 'cobranca',
-                'action' => 'iniciar_checkout_assinatura',
-                'invoice_id' => $invoice->id,
-                'provedor' => $this->provedor->nome(),
-                'motivo' => $e->getMessage(),
-            ]);
-
-            throw $e;
-        }
-
-        $invoice->forceFill([
-            'checkout_id_externo' => $sessao->referencia->id,
-            'checkout_url' => $sessao->url,
-            'checkout_expira_em' => $sessao->expiraEm,
-        ])->save();
+        // Pix anual = Checkout Pix avulso, sem assinatura no provedor (ADR-010, ajuste da STORY-080).
+        $this->checkout->executar($invoice, new PedidoCheckout(
+            referenciaInterna: $invoice->id,
+            descricao: $invoice->descricao,
+            valorCentavos: $valor,
+            meios: [$meio],
+            expiraEmMinutos: $pix
+                ? (int) config('services.payments.pix_expiracao_minutos', 30)
+                : (int) config('services.payments.cartao_expiracao_minutos', 60),
+            urlSucesso: route('assinatura.retorno', $invoice),
+            urlCancelamento: route('checkout.assinatura', ['plano' => $plano->id, 'ciclo' => $ciclo->value] + ($pix ? ['meio' => 'pix'] : [])),
+            urlExpirado: route('assinatura.retorno', $invoice),
+            recorrencia: $pix ? null : $ciclo,
+        ), 'iniciar_checkout_assinatura');
 
         AuditLogger::log(
             action: 'cobranca.checkout_assinatura_criado',
@@ -146,17 +133,19 @@ final class IniciarAssinatura
             actorType: 'user',
             actorId: $usuario->id,
             usuarioId: $usuario->id,
-            after: ['valor_centavos' => $valor, 'plano_id' => $plano->id, 'ciclo' => $ciclo->value, 'provedor' => $invoice->provedor],
+            after: ['valor_centavos' => $valor, 'plano_id' => $plano->id, 'ciclo' => $ciclo->value, 'provedor' => $invoice->provedor, 'meio' => $meio->value],
         );
 
         return $invoice;
     }
 
-    private function checkoutAindaValido(Usuario $usuario, Plano $plano, CicloCobranca $ciclo, int $valor): ?Invoice
+    private function checkoutAindaValido(Usuario $usuario, Plano $plano, CicloCobranca $ciclo, int $valor, MeioPagamento $meio): ?Invoice
     {
         return Invoice::query()
             ->where('usuario_id', $usuario->id)
             ->where('tipo', 'assinatura')
+            ->where('renovacao', false)
+            ->where('meio', $meio->value)
             ->where('plano_id', $plano->id)
             ->where('ciclo', $ciclo->value)
             ->where('valor_centavos', $valor)

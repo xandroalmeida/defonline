@@ -15,6 +15,8 @@ final class RotasCobranca
 {
     public const ASSINAR = 'checkout.assinatura';   // STORY-077: parâmetros plano e ciclo
 
+    public const RENOVAR = 'assinatura.renovar';    // STORY-080: renovação do plano anual pago com Pix (sem parâmetros)
+
     public const COMPRAR = 'creditos.comprar';      // STORY-076: parâmetro pacote
 
     public const TROCAR = 'plano.trocar';           // STORY-082: parâmetros plano e ciclo

@@ -4,6 +4,7 @@
     $reais = fn (int $centavos): string => 'R$ '.number_format($centavos / 100, 2, ',', '.');
     $analises = fn (int $n): string => $n.' '.($n === 1 ? 'análise' : 'análises');
     $anual = $cicloAtual === CicloCobranca::Anual;
+    $pix = $meioAtual === \App\Domain\Cobranca\MeioPagamento::Pix;
 @endphp
 <div x-data x-init="$nextTick(() => $refs.titulo?.focus())">
     <x-breadcrumb :items="[['label' => 'Planos e preços', 'url' => route('planos')], ['label' => 'Assinar']]"/>
@@ -18,8 +19,13 @@
     @elseif ($vigente)
         <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-4">Assinar plano {{ $plano->nome }}</h1>
         <x-drm.aviso-inline variant="info" dusk="screen-checkout-ja-assinante">
-            <p class="m-0 mb-2">Você já tem o plano {{ $planoVigente?->nome }}, {{ $vigente->status === \App\Domain\Cobranca\StatusAssinatura::Cancelada ? 'com a renovação cancelada e acesso até' : 'que renova em' }} {{ $vigente->proximo_vencimento->setTimezone('America/Sao_Paulo')->format('d/m/Y') }}.</p>
+            @if ($vigente->pagoComPix())
+                <p class="m-0 mb-2">Você já tem o plano {{ $planoVigente?->nome }}, que termina em {{ $vigente->proximo_vencimento->setTimezone('America/Sao_Paulo')->format('d/m/Y') }} e não renova sozinho.</p>
+            @else
+                <p class="m-0 mb-2">Você já tem o plano {{ $planoVigente?->nome }}, {{ $vigente->status === \App\Domain\Cobranca\StatusAssinatura::Cancelada ? 'com a renovação cancelada e acesso até' : 'que renova em' }} {{ $vigente->proximo_vencimento->setTimezone('America/Sao_Paulo')->format('d/m/Y') }}.</p>
+            @endif
             <div class="flex flex-wrap gap-3">
+                @if ($urlRenovar)<x-button :href="$urlRenovar" variant="primary" dusk="screen-meuplano-renovar-pix">Pagar renovação</x-button>@endif
                 @if ($urlMeuPlano)<x-button :href="$urlMeuPlano" variant="secondary">Ver meu plano</x-button>@endif
                 @if ($urlTrocar)<x-button :href="$urlTrocar" variant="secondary">Trocar de plano</x-button>@endif
                 <x-button :href="route('planos')" variant="secondary">Voltar aos planos</x-button>
@@ -63,7 +69,7 @@
                                          peer-checked:border-[color:var(--color-tertiary)] peer-checked:bg-[color:var(--color-surface)] peer-checked:text-[color:var(--color-primary)]
                                          peer-focus-visible:ring-2 peer-focus-visible:ring-[color:var(--color-ring)]">
                                 <span class="font-medium">{{ $c->rotulo() }} — {{ $reais($p) }} {{ $c->porExtenso() }}</span>
-                                <span>{{ $c === CicloCobranca::Mensal ? 'renova todo mês' : 'renova a cada 12 meses'.($economia > 0 ? " · economia de {$economia}%" : '') }}</span>
+                                <span>{{ $c === CicloCobranca::Mensal ? 'renova todo mês' : ($pix ? '12 meses, você paga a renovação' : 'renova a cada 12 meses').($economia > 0 ? " · economia de {$economia}%" : '') }}</span>
                             </span>
                         </label>
                     @endforeach
@@ -84,11 +90,11 @@
                             <dt class="font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2">A pagar hoje</dt>
                             <dd class="m-0 text-right font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2" dusk="screen-checkout-resumo-a-pagar">{{ $reais($preco) }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Ciclo</dt>
-                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-ciclo">{{ $cicloAtual->rotulo() }}, renova sozinho no cartão</dd>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-ciclo">{{ $pix ? 'Anual, não renova sozinho — avisamos '.$avisoDias.' dias antes' : $cicloAtual->rotulo().', renova sozinho no cartão' }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Próxima cobrança</dt>
-                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-proxima">{{ $proximaCobranca->format('d/m/Y') }} · {{ $reais($preco) }}</dd>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-proxima">{{ $pix ? 'Não há cobrança automática. Renovação em '.$proximaCobranca->format('d/m/Y') : $proximaCobranca->format('d/m/Y').' · '.$reais($preco) }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Depois</dt>
-                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-depois">{{ $reais($preco) }} {{ $cicloAtual->porExtenso() }}</dd>
+                            <dd class="m-0 text-right" dusk="screen-checkout-resumo-depois">{{ $pix ? 'Você paga '.$reais($preco).' por um novo QR Code, se quiser continuar' : $reais($preco).' '.$cicloAtual->porExtenso() }}</dd>
                         </dl>
                     </x-card>
                     <p class="mt-3 mb-0 text-sm text-[color:var(--color-secondary)]" dusk="screen-checkout-beneficios">
@@ -97,9 +103,20 @@
                 </section>
 
                 <section class="lg:order-1 flex flex-col gap-4">
-                    <div>
-                        <h2 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0 mb-1">Pagamento</h2>
-                        <p class="m-0 text-sm text-[color:var(--color-primary)]" dusk="screen-checkout-pagamento">Cartão de crédito, digitado na página segura do processador de pagamento. Nós guardamos só a bandeira e os 4 últimos dígitos.</p>
+                    <div class="flex flex-col gap-3">
+                        <h2 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0">Pagamento</h2>
+                        {{-- Mensal: só cartão, sem seletor (DDR-010 item 4). --}}
+                        @if ($anual)
+                            <x-cobranca.seletor-meio :atual="$meio" :opcoes="[
+                                ['cartao', 'Cartão de crédito', 'libera na hora, renova sozinho'],
+                                ['pix', 'Pix', 'libera quando o banco confirmar, você paga a renovação'],
+                            ]"/>
+                        @endif
+                        @if ($pix)
+                            <p class="m-0 text-sm text-[color:var(--color-primary)]" dusk="screen-checkout-pagamento">Pix · o QR Code vale por {{ $minutosPix }} minutos. O plano começa quando o banco confirmar o pagamento.</p>
+                        @else
+                            <p class="m-0 text-sm text-[color:var(--color-primary)]" dusk="screen-checkout-pagamento">Cartão de crédito, digitado na página segura do processador de pagamento. Nós guardamos só a bandeira e os 4 últimos dígitos.</p>
+                        @endif
                     </div>
 
                     @if ($personificando)
@@ -111,7 +128,7 @@
                     @if ($falhaDoProvedor)
                         <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4 flex flex-col gap-1"
                              role="alert" dusk="screen-checkout-falha">
-                            <p class="m-0 font-medium text-[color:var(--color-primary)]">Não conseguimos falar com o processador de pagamento agora. Não é problema com o seu cartão.</p>
+                            <p class="m-0 font-medium text-[color:var(--color-primary)]">{{ $pix ? 'Não conseguimos gerar o QR Code agora. Nada foi cobrado.' : 'Não conseguimos falar com o processador de pagamento agora. Não é problema com o seu cartão.' }}</p>
                             <p class="m-0 text-sm text-[color:var(--color-secondary)]">Tente de novo. Se continuar assim, escreva para eb@ebparcerias.com.</p>
                         </div>
                     @endif
@@ -134,11 +151,11 @@
                         <x-button type="submit" variant="primary" :disabled="$personificando"
                                   wire:loading.attr="disabled" wire:target="assinar"
                                   dusk="screen-checkout-primary-cta">
-                            <span wire:loading.remove wire:target="assinar">Assinar e pagar · {{ $reais($preco) }}</span>
-                            <span wire:loading wire:target="assinar">Abrindo o pagamento…</span>
+                            <span wire:loading.remove wire:target="assinar">{{ $pix ? 'Gerar QR Code Pix' : 'Assinar e pagar' }} · {{ $reais($preco) }}</span>
+                            <span wire:loading wire:target="assinar">{{ $pix ? 'Gerando QR Code…' : 'Abrindo o pagamento…' }}</span>
                         </x-button>
                         <p class="m-0 text-sm text-[color:var(--color-secondary)]">
-                            Cancele quando quiser em Meu plano. Reembolso em até 7 dias, se você ainda não tiver feito nenhuma análise.
+                            {{ $pix ? 'Este plano não renova sozinho, então não há o que cancelar.' : 'Cancele quando quiser em Meu plano.' }} Reembolso em até 7 dias, se você ainda não tiver feito nenhuma análise.
                         </p>
                     </form>
 

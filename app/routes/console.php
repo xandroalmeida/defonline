@@ -62,3 +62,9 @@ Schedule::command('assinaturas:cancelar-antigas')
     ->hourly()
     ->onOneServer()
     ->withoutOverlapping(30);
+
+// STORY-080 CA-4 e CA-5 — plano anual pago com Pix: aviso 7 dias antes do fim e encerramento sem renovação.
+Schedule::command('assinaturas:pix-anual')
+    ->hourly()
+    ->onOneServer()
+    ->withoutOverlapping(30);

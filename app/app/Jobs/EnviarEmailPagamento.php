@@ -36,6 +36,7 @@ final class EnviarEmailPagamento extends BaseJob
             valor: 'R$ '.number_format($invoice->valor_centavos / 100, 2, ',', '.'),
             link: $invoice->checkout_url,
             expiraEm: $invoice->checkout_expira_em?->setTimezone('America/Sao_Paulo')->format('H:i') ?? '',
+            cartao: $invoice->meio === 'cartao',
         ));
     }
 }

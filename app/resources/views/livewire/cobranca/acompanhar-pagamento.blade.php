@@ -2,6 +2,9 @@
     $reais = 'R$ '.number_format($invoice->valor_centavos / 100, 2, ',', '.');
     $estado = $invoice->status;
     $paga = $estado === \App\Domain\Cobranca\EstadoCobranca::Paga;
+    $recusado = $cartao && $estado === \App\Domain\Cobranca\EstadoCobranca::Falhou && $invoice->motivo_encerramento === 'recusado';
+    $final = $invoice->cartao_ultimos4 ? ($invoice->cartao_bandeira ? ucfirst(strtolower($invoice->cartao_bandeira)).' ' : '').'final '.$invoice->cartao_ultimos4 : null;
+    $titulo = $cartao ? 'Pague com cartão' : 'Pague com Pix';
     $pendente = $estado === \App\Domain\Cobranca\EstadoCobranca::Pendente && ! $invoice->expirada();
 @endphp
 {{-- O polling só roda enquanto há o que esperar; confirmado, expirado ou cancelado, para. --}}
@@ -10,7 +13,11 @@
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-confirmacao" role="status">
             <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Pagamento confirmado</h1>
             <p class="m-0 text-[color:var(--color-primary)]">
-                Recebemos o Pix de {{ $reais }}.
+                @if ($cartao)
+                    Pago com cartão{{ $final ? " {$final}" : '' }}: {{ $reais }}.
+                @else
+                    Recebemos o Pix de {{ $reais }}.
+                @endif
                 @if ($lote)
                     Você tem {{ $lote->quantidade_comprada }} créditos, válidos até {{ $lote->data_expiracao->setTimezone('America/Sao_Paulo')->format('d/m/Y') }}.
                 @endif
@@ -33,48 +40,73 @@
             <p class="m-0 text-[color:var(--color-primary)]">Nada foi cobrado.</p>
             <div><x-button :href="route('creditos.comprar')" variant="secondary">Ver os pacotes</x-button></div>
         </section>
+    @elseif ($recusado)
+        <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-recusa">
+            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Comprar créditos</h1>
+            <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4" role="alert">
+                <p class="m-0 font-medium text-[color:var(--color-primary)]">Cartão recusado</p>
+                <p class="m-0 text-sm text-[color:var(--color-primary)]">O banco não autorizou o pagamento. Nada foi cobrado e nenhum crédito foi liberado.</p>
+                <p class="m-0 text-sm text-[color:var(--color-primary)]">Você pode tentar outro cartão ou pagar com Pix.</p>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <x-button type="button" variant="primary" wire:click="novoCodigo" dusk="screen-checkout-tentar-de-novo">Tentar de novo</x-button>
+                <x-button type="button" variant="secondary" wire:click="pagarComPix" dusk="screen-checkout-pagar-com-pix">Pagar com Pix</x-button>
+            </div>
+        </section>
     @elseif ($estado === \App\Domain\Cobranca\EstadoCobranca::Falhou)
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-falhou">
-            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Pague com Pix</h1>
+            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">{{ $titulo }}</h1>
             <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4" role="alert">
-                <p class="m-0 text-[color:var(--color-primary)]">Não conseguimos gerar o QR Code agora. Nada foi cobrado.</p>
+                <p class="m-0 text-[color:var(--color-primary)]">{{ $cartao ? 'Não conseguimos abrir o pagamento agora.' : 'Não conseguimos gerar o QR Code agora.' }} Nada foi cobrado.</p>
             </div>
             <div><x-button type="button" variant="primary" wire:click="novoCodigo">Tentar de novo</x-button></div>
         </section>
     @elseif ($invoice->expirada())
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-expirado">
-            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Pague com Pix</h1>
+            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">{{ $titulo }}</h1>
             <div class="rounded-md border border-[color:var(--color-tertiary)]/30 bg-[color:var(--color-tertiary)]/5 p-4" role="status">
-                <p class="m-0 font-medium text-[color:var(--color-primary)]">O QR Code expirou e nada foi cobrado.</p>
-                <p class="m-0 text-sm text-[color:var(--color-primary)]">Gere outro para pagar.</p>
+                <p class="m-0 font-medium text-[color:var(--color-primary)]">{{ $cartao ? 'O pagamento não foi concluído e nada foi cobrado.' : 'O QR Code expirou e nada foi cobrado.' }}</p>
+                <p class="m-0 text-sm text-[color:var(--color-primary)]">{{ $cartao ? 'Tente de novo quando quiser.' : 'Gere outro para pagar.' }}</p>
             </div>
             <div>
-                <x-button type="button" variant="primary" wire:click="novoCodigo" dusk="screen-checkout-pix-novo">Gerar novo QR Code</x-button>
+                <x-button type="button" variant="primary" wire:click="novoCodigo" dusk="screen-checkout-pix-novo">{{ $cartao ? 'Tentar de novo' : 'Gerar novo QR Code' }}</x-button>
             </div>
         </section>
     @else
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-aguardando">
             <div>
-                <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Pague com Pix</h1>
+                <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">{{ $titulo }}</h1>
                 <p class="m-0 text-sm text-[color:var(--color-secondary)]">{{ $invoice->descricao }} · {{ $reais }}</p>
             </div>
 
-            <p class="m-0 text-[color:var(--color-primary)]">
-                O pagamento é feito na página segura do provedor. Abra o QR Code, escaneie ou copie o código e cole no app do seu banco.
-            </p>
-            <div>
-                <x-button :href="$invoice->checkout_url" variant="primary" dusk="screen-checkout-abrir-pagamento">Abrir o QR Code Pix</x-button>
-            </div>
-
-            <p class="m-0 text-sm text-[color:var(--color-secondary)]" role="timer" dusk="screen-checkout-pix-expira">
-                Este código vale por {{ (int) config('services.payments.pix_expiracao_minutos', 30) }} minutos.
-                Expira às {{ $invoice->checkout_expira_em?->setTimezone('America/Sao_Paulo')->format('H:i') }} ·
-                <span aria-live="polite" aria-atomic="true">restam {{ $minutosRestantes }} min</span>
-            </p>
+            @if ($cartao)
+                <p class="m-0 text-[color:var(--color-primary)]">
+                    O cartão é digitado na página segura do processador de pagamento. É uma cobrança única: não renova.
+                </p>
+                <div>
+                    <x-button :href="$invoice->checkout_url" variant="primary" dusk="screen-checkout-abrir-pagamento">Abrir o pagamento com cartão</x-button>
+                </div>
+                <p class="m-0 text-sm text-[color:var(--color-secondary)]" role="timer" dusk="screen-checkout-pix-expira">
+                    Este link vale até as {{ $invoice->checkout_expira_em?->setTimezone('America/Sao_Paulo')->format('H:i') }} ·
+                    <span aria-live="polite" aria-atomic="true">restam {{ $minutosRestantes }} min</span>
+                </p>
+            @else
+                <p class="m-0 text-[color:var(--color-primary)]">
+                    O pagamento é feito na página segura do provedor. Abra o QR Code, escaneie ou copie o código e cole no app do seu banco.
+                </p>
+                <div>
+                    <x-button :href="$invoice->checkout_url" variant="primary" dusk="screen-checkout-abrir-pagamento">Abrir o QR Code Pix</x-button>
+                </div>
+                <p class="m-0 text-sm text-[color:var(--color-secondary)]" role="timer" dusk="screen-checkout-pix-expira">
+                    Este código vale por {{ (int) config('services.payments.pix_expiracao_minutos', 30) }} minutos.
+                    Expira às {{ $invoice->checkout_expira_em?->setTimezone('America/Sao_Paulo')->format('H:i') }} ·
+                    <span aria-live="polite" aria-atomic="true">restam {{ $minutosRestantes }} min</span>
+                </p>
+            @endif
 
             <div class="rounded-md border border-[color:var(--color-tertiary)]/30 bg-[color:var(--color-tertiary)]/5 p-4" role="status" dusk="screen-checkout-aguardando-aviso">
-                <p class="m-0 font-medium text-[color:var(--color-primary)]">Aguardando o pagamento…</p>
-                <p class="m-0 text-sm text-[color:var(--color-primary)]">Esta tela se atualiza sozinha quando o banco confirmar. Também enviamos o link do QR Code para {{ $email }}.</p>
+                <p class="m-0 font-medium text-[color:var(--color-primary)]">{{ $cartao ? 'Aguardando a confirmação do pagamento…' : 'Aguardando o pagamento…' }}</p>
+                <p class="m-0 text-sm text-[color:var(--color-primary)]">Esta tela se atualiza sozinha quando {{ $cartao ? 'o processador' : 'o banco' }} confirmar. Também enviamos o link {{ $cartao ? 'do pagamento' : 'do QR Code' }} para {{ $email }}.</p>
             </div>
 
             @if ($cancelamentoFalhou)

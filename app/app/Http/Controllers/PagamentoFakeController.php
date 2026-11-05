@@ -36,7 +36,7 @@ final class PagamentoFakeController extends Controller
         $webhook = match ($request->input('acao')) {
             'pagar' => $fake->simularPagamento($checkout),
             'expirar' => $fake->simularExpiracao($checkout),
-            'recusar' => $invoice->tipo === 'assinatura' ? $fake->simularRecusa($checkout) : abort(422),
+            'recusar' => $invoice->meio === 'cartao' ? $fake->simularRecusa($checkout) : abort(422),
             default => abort(422),
         };
 

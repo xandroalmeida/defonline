@@ -78,9 +78,24 @@
                         Os créditos não incluem o Raio X do Negócio. Ele faz parte dos planos e do teste.
                     </p>
 
-                    <div>
-                        <h2 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0 mb-1">Pagamento</h2>
-                        <p class="m-0 text-sm text-[color:var(--color-primary)]" dusk="screen-checkout-pagamento">Pix · o QR Code vale por {{ $minutosPix }} minutos.</p>
+                    <div class="flex flex-col gap-3">
+                        <h2 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0">Pagamento</h2>
+                        <x-cobranca.seletor-meio :atual="$meio" :opcoes="[
+                            ['pix', 'Pix', 'libera quando o banco confirmar'],
+                            ['cartao', 'Cartão de crédito', 'libera na hora, sem renovação'],
+                        ]"/>
+                        @if ($meio === 'cartao')
+                            <p class="m-0 text-sm text-[color:var(--color-primary)]" dusk="screen-checkout-pagamento">
+                                Cartão de crédito, digitado na página segura do processador de pagamento. Cobrança única, sem renovação. Nós guardamos só a bandeira e os 4 últimos dígitos.
+                            </p>
+                            @if ($pixEmAberto)
+                                <x-drm.aviso-inline variant="info" dusk="screen-checkout-pix-em-aberto">
+                                    Você tem um QR Code Pix em aberto, válido até {{ $pixEmAberto->checkout_expira_em->setTimezone('America/Sao_Paulo')->format('H:i') }}. Se pagar com cartão, ignore-o.
+                                </x-drm.aviso-inline>
+                            @endif
+                        @else
+                            <p class="m-0 text-sm text-[color:var(--color-primary)]" dusk="screen-checkout-pagamento">Pix · o QR Code vale por {{ $minutosPix }} minutos.</p>
+                        @endif
                     </div>
 
                     @if ($personificando)
@@ -92,7 +107,7 @@
                     @if ($falhaDoProvedor)
                         <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4 flex flex-col gap-1"
                              role="alert" dusk="screen-checkout-falha">
-                            <p class="m-0 font-medium text-[color:var(--color-primary)]">Não conseguimos gerar o QR Code agora. Nada foi cobrado.</p>
+                            <p class="m-0 font-medium text-[color:var(--color-primary)]">{{ $meio === 'cartao' ? 'Não conseguimos abrir o pagamento agora. Nada foi cobrado.' : 'Não conseguimos gerar o QR Code agora. Nada foi cobrado.' }}</p>
                             <p class="m-0 text-sm text-[color:var(--color-secondary)]">Tente de novo. Se continuar assim, escreva para eb@ebparcerias.com.</p>
                         </div>
                     @endif
@@ -115,8 +130,8 @@
                         <x-button type="submit" variant="primary" :disabled="$personificando"
                                   wire:loading.attr="disabled" wire:target="gerar"
                                   dusk="screen-checkout-primary-cta">
-                            <span wire:loading.remove wire:target="gerar">Gerar QR Code Pix · {{ $reais($pacote->preco_centavos) }}</span>
-                            <span wire:loading wire:target="gerar">Gerando QR Code…</span>
+                            <span wire:loading.remove wire:target="gerar">{{ $meio === 'cartao' ? 'Pagar com cartão' : 'Gerar QR Code Pix' }} · {{ $reais($pacote->preco_centavos) }}</span>
+                            <span wire:loading wire:target="gerar">{{ $meio === 'cartao' ? 'Abrindo o pagamento…' : 'Gerando QR Code…' }}</span>
                         </x-button>
                         <p class="m-0 text-sm text-[color:var(--color-secondary)]">
                             Reembolso em até 7 dias, se você ainda não tiver feito nenhuma análise.

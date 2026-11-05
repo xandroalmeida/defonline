@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Cobranca;
 
 use App\Domain\Cobranca\EstadoCobranca;
+use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PaymentProvider;
 use App\Domain\Cobranca\ProvedorIndisponivel;
 use App\Domain\Cobranca\ReferenciaProvedor;
@@ -23,7 +24,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 /**
- * STORY-076 CA-3, CA-5 — tela de retorno do checkout. Só LÊ a Invoice: quem a marca como paga é o
+ * STORY-076 CA-3, CA-5 / STORY-078 CA-2, CA-3 — tela de retorno do checkout (Pix ou cartão). Só LÊ a Invoice: quem a marca como paga é o
  * webhook (ADR-010: o retorno do navegador nunca libera crédito). Atualiza sozinha por polling.
  */
 #[Layout('components.layouts.app')]
@@ -74,13 +75,23 @@ final class AcompanharPagamento extends Component
         return $this->redirectRoute('creditos.comprar');
     }
 
-    /** "Gerar novo QR Code": volta à revisão do mesmo pacote com o aceite já marcado (spec §4.4). */
+    /** "Gerar novo QR Code" / "Tentar de novo": volta à revisão do mesmo pacote e meio com o aceite já marcado (spec §4.4). */
     public function novoCodigo(): mixed
     {
         $invoice = $this->invoice($this->invoiceId);
         session()->flash('aceite_previo', true);
 
-        return $this->redirectRoute('creditos.comprar', ['pacote' => $invoice->pacote_credito_id]);
+        // O Pix é o padrão da revisão: só o cartão precisa ir na URL.
+        return $this->redirectRoute('creditos.comprar', ['pacote' => $invoice->pacote_credito_id] + ($invoice->meio === MeioPagamento::Cartao->value ? ['meio' => $invoice->meio] : []));
+    }
+
+    /** Cartão recusado: "Pagar com Pix" volta à revisão com o seletor no Pix (spec STORY-070-checkout-creditos-cartao §4). */
+    public function pagarComPix(): mixed
+    {
+        $invoice = $this->invoice($this->invoiceId);
+        session()->flash('aceite_previo', true);
+
+        return $this->redirectRoute('creditos.comprar', ['pacote' => $invoice->pacote_credito_id, 'meio' => MeioPagamento::Pix->value]);
     }
 
     public function render(): View
@@ -91,6 +102,7 @@ final class AcompanharPagamento extends Component
 
         return view('livewire.cobranca.acompanhar-pagamento', [
             'invoice' => $invoice,
+            'cartao' => $invoice->meio === MeioPagamento::Cartao->value,
             'lote' => $lote,
             'rascunho' => $rascunho,
             'personificando' => Personificacao::ativa() !== null,

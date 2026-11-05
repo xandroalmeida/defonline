@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\Cobranca\CicloCobranca;
 use App\Domain\Cobranca\CobrancaNoProvedor;
 use App\Domain\Cobranca\EventoDoProvedor;
+use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PaymentProvider;
 use App\Domain\Cobranca\PedidoCheckout;
 use App\Domain\Cobranca\ReferenciaProvedor;
@@ -160,9 +161,9 @@ function _plano(string $nome = 'Básico'): Plano
     return Plano::query()->where('nome', $nome)->firstOrFail();
 }
 
-function _assinaturaPendente(Usuario $usuario, ?Plano $plano = null, CicloCobranca $ciclo = CicloCobranca::Mensal): Invoice
+function _assinaturaPendente(Usuario $usuario, ?Plano $plano = null, CicloCobranca $ciclo = CicloCobranca::Mensal, MeioPagamento $meio = MeioPagamento::Cartao): Invoice
 {
-    return app(IniciarAssinatura::class)->executar($usuario, $plano ?? _plano(), $ciclo, '203.0.113.7', 'PestAgent');
+    return app(IniciarAssinatura::class)->executar($usuario, $plano ?? _plano(), $ciclo, '203.0.113.7', 'PestAgent', $meio);
 }
 
 function _fake(): FakePaymentProvider
@@ -333,4 +334,12 @@ function _emailVoltou(): void
     app()->forgetInstance('mail.manager');
     Mail::clearResolvedInstance('mail.manager');
     Mail::fake();
+}
+
+/** STORY-080 — plano anual pago com Pix já ativo (checkout fake pago). */
+function _assinaturaPixAtiva(Usuario $usuario, ?Plano $plano = null): Assinatura
+{
+    $invoice = _pagarAssinatura(_assinaturaPendente($usuario, $plano, CicloCobranca::Anual, MeioPagamento::Pix));
+
+    return Assinatura::query()->findOrFail($invoice->assinatura_id);
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Cobranca;
 
+use App\Domain\Cobranca\MeioPagamento;
 use App\Models\Assinatura;
 use App\Models\CobrancaConfig;
 use App\Models\Invoice;
@@ -15,7 +16,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 /**
- * STORY-077 CA-2, CA-3 — volta do checkout de assinatura. Só LÊ: quem ativa a assinatura é o webhook
+ * STORY-077 CA-2, CA-3 / STORY-080 — volta do checkout de assinatura (cartão, Pix anual ou renovação por Pix). Só LÊ: quem ativa a assinatura é o webhook
  * (`cobranca.paga`); o retorno do navegador nunca libera nada (ADR-010). Atualiza por polling até
  * a confirmação, a recusa ou o fim do prazo.
  */
@@ -40,9 +41,21 @@ final class AcompanharAssinatura extends Component
         return view('livewire.cobranca.acompanhar-assinatura', [
             'invoice' => $invoice,
             'assinatura' => $assinatura,
+            'pix' => $invoice->meio === MeioPagamento::Pix->value,
+            'urlDeNovo' => $this->urlDeNovo($invoice),
             'plano' => $invoice->plano_id === null ? null : Plano::query()->find($invoice->plano_id),
             'temMeuPlano' => Route::has('meu-plano'),
         ])->layoutData(['title' => 'Assinatura']);
+    }
+
+    /** Onde "Tentar de novo" / "Gerar novo QR Code" leva: nova contratação ou, na renovação por Pix, a tela de renovação. */
+    private function urlDeNovo(Invoice $invoice): string
+    {
+        if ($invoice->renovacao) {
+            return route('assinatura.renovar');
+        }
+
+        return route('checkout.assinatura', ['plano' => $invoice->plano_id, 'ciclo' => $invoice->ciclo] + ($invoice->meio === MeioPagamento::Pix->value ? ['meio' => 'pix'] : []));
     }
 
     private function invoice(string $id): Invoice
@@ -50,7 +63,8 @@ final class AcompanharAssinatura extends Component
         return Invoice::query()
             ->where('usuario_id', Auth::id())
             ->where('tipo', 'assinatura')
-            ->where('renovacao', false)
+            // Renovação por cartão nasce já paga, sem tela de retorno; a renovação por Pix tem (STORY-080).
+            ->where(fn ($q) => $q->where('renovacao', false)->orWhere('meio', MeioPagamento::Pix->value))
             ->findOrFail($id);
     }
 }
