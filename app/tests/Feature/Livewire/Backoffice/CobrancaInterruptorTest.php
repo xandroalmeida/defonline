@@ -36,7 +36,10 @@ it('liga e desliga pela tela, com mensagem e auditoria de antes, depois e autor'
 
     expect(CobrancaConfig::ligada())->toBeFalse();
 
-    $auditorias = AuditLog::where('action', 'planos.cobranca_config_alterado')->orderBy('occurred_at')->get();
+    $auditorias = AuditLog::where('action', 'planos.cobranca_config_alterado')->get()
+        // Não ordena por `occurred_at`: as duas auditorias podem cair no mesmo instante. A ordem lógica é
+        // "ligou" (depois = true) e depois "desligou" (depois = false).
+        ->sortByDesc(fn (AuditLog $a) => (int) $a->after['ativa'])->values();
     expect($auditorias)->toHaveCount(2)
         ->and($auditorias[0]->subject_type)->toBe('CobrancaConfig')
         ->and($auditorias[0]->before['ativa'])->toBeFalse()

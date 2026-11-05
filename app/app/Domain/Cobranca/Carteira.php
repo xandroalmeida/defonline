@@ -334,6 +334,12 @@ final class Carteira
             ->where('usuario_id', $usuarioId)
             ->orderByDesc('data_inicio')
             ->orderByDesc('created_at')
+            // Desempate determinístico (a decisão de consumo depende de qual assinatura vale): com o mesmo
+            // início e criação no mesmo instante — trial encerrado e plano pago nascem juntos — vale a
+            // paga sobre o trial, a não encerrada sobre a encerrada, e por fim o maior id.
+            ->orderBy('trial')
+            ->orderByRaw("status = 'expirada'")
+            ->orderByDesc('id')
             ->first();
 
         $lotes = LoteCredito::query()
