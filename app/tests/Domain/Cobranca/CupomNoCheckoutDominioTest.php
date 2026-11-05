@@ -2,9 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Domain\Cobranca\AssinaturaVista;
 use App\Domain\Cobranca\CicloCobranca;
 use App\Domain\Cobranca\DescontoDaAssinatura;
+use App\Domain\Cobranca\MotivoBloqueio;
 use App\Domain\Cobranca\PrecoComCupom;
+use App\Domain\Cobranca\RegrasConsumo;
+use App\Domain\Cobranca\SnapshotCarteira;
+use App\Domain\Cobranca\StatusAssinatura;
 use App\Domain\Cobranca\TipoDesconto;
 use Carbon\CarbonImmutable;
 
@@ -86,5 +91,31 @@ describe('DescontoDaAssinatura', function () {
             ->and($x->pertoDoFim(CicloCobranca::Mensal, $inicio, $inicio->setDate(2027, 1, 29)))->toBeTrue()
             ->and($x->pertoDoFim(CicloCobranca::Mensal, $inicio, $inicio->setDate(2027, 1, 20)))->toBeFalse()
             ->and($x->pertoDoFim(CicloCobranca::Mensal, $inicio, $inicio->setDate(2027, 2, 6)))->toBeFalse();
+    });
+});
+
+describe('bloqueio quando o desconto acaba sem cartão (CA-8)', function () {
+    $snap = fn (bool $semCartao, string $vence = '2026-11-01 00:00:00', bool $trial = false, StatusAssinatura $status = StatusAssinatura::Expirada) => new SnapshotCarteira(
+        CarbonImmutable::parse('2026-11-10 12:00:00'),
+        new AssinaturaVista('a', $trial, $status, 10, 10, CarbonImmutable::parse($vence), $semCartao),
+        [],
+        false,
+    );
+
+    it('plano gratuito pelo desconto e sem cartão bloqueia com o motivo do fim do desconto', function () use ($snap) {
+        $d = RegrasConsumo::decidir($snap(true));
+
+        expect($d->bloqueio?->motivo)->toBe(MotivoBloqueio::DescontoAcabouSemCartao)
+            ->and($d->bloqueio?->data?->toDateString())->toBe('2026-11-01');
+    });
+
+    it('plano comum encerrado e trial encerrado mantêm os motivos de sempre', function () use ($snap) {
+        expect(RegrasConsumo::decidir($snap(false))->bloqueio?->motivo)->toBe(MotivoBloqueio::PlanoEncerrado)
+            ->and(RegrasConsumo::decidir($snap(true, trial: true))->bloqueio?->motivo)->toBe(MotivoBloqueio::TesteEncerrado);
+    });
+
+    it('o Raio X também pausa com o motivo do fim do desconto, e libera enquanto o ciclo vale', function () use ($snap) {
+        expect(RegrasConsumo::bloqueioDoDrm($snap(true))?->motivo)->toBe(MotivoBloqueio::DescontoAcabouSemCartao)
+            ->and(RegrasConsumo::bloqueioDoDrm($snap(true, '2026-12-01 00:00:00', false, StatusAssinatura::Ativa)))->toBeNull();
     });
 });

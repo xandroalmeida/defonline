@@ -99,12 +99,29 @@ Entendimento: o cupom (digitado ou concedido) vira desconto em centavos sobre o 
 Plano: (1) domínio puro `PrecoComCupom` + `DescontoDaAssinatura`; (2) migration (invoices, assinaturas, cupom_usos); (3) `CupomDoCheckout` (resolução, reserva, uso) + os quatro `Iniciar*` + Livewire/telas; (4) confirmação (créditos, ativação, renovação), `changeSubscriptionValue`, ciclos gratuitos, aviso D-7; (5) Meu plano; (6) testes (domínio, feature, concorrência real, Dusk).
 
 ### Decisões tomadas
+Ver IDR-026 (reserva da vaga pela Invoice pendente, uso na transação do pagamento, desconto como retrato na assinatura, ciclo gratuito como renovação nossa). Em resumo:
+- O valor enviado ao provedor é sempre o final (`PrecoComCupom`); final zero ou abaixo de R$ 5,00 (`services.payments.valor_minimo_centavos`) ativa sem cobrança, sem provedor, numa transação única com Invoice de valor zero (`meio = nenhum`) e o registro do uso.
+- O concedido vence o digitado e esconde o campo; entre concedidos vale o de maior desconto.
+- `PaymentProvider::changeSubscriptionValue` não existia: criado (interface, Asaas, Fake). Fica pendente e é repetido por `assinaturas:ciclos-gratuitos` se o provedor falhar.
+- Cadastrar cartão com o desconto em curso reaproveita `TrocarCartao` (1ª cobrança no fim do desconto). Depois do fim, sem cartão, a assinatura é encerrada e o bloqueio é `desconto_acabou_sem_cartao`; a ação "Cadastrar cartão" do bloqueio agora leva a Meu plano (`cartao.atualizar` nunca foi criada).
+- A renovação Pix aceita cupom (concedido ou digitado) quando não há desconto em curso; desconto total na renovação é aplicado na hora.
+- Migration com prefixo `2026_11_05_400083` (precisa vir depois da `300080`, cujas constraints altera), fora do `2NNNNN` da pista.
 
 ### Descobertas
+- `DB::now()` não viaja com `travelTo`: prazo de checkout aberto, nos testes, se vence na linha com `now() - interval`.
+- `Invoice::update()` pelo query builder grava Carbon sem offset (banco em America/Sao_Paulo, app em UTC): use `DB::raw`.
+- `TextoBloqueio::ROTAS['cadastrar-cartao']` apontava para `cartao.atualizar`, que não existe: a ação sumia da tela.
+
+### Dúvidas ao PO
+- "Preço vigente" ao fim do desconto: adotei o preço cheio contratado (o que "Depois" mostrou). Se o catálogo mudou no meio, o cliente continua no preço mostrado. Confirmar.
+- Pix pago depois do prazo com a vaga do limite já tomada ainda credita e alerta (`cobranca.cupom_acima_do_limite`), porque o dinheiro entrou. Confirmar.
+- Cupom com final entre R$ 0,01 e R$ 4,99 vira gratuito (ADR-010 4.7, ainda `proposed`): o cliente ganha mais desconto que o cupom diz.
 
 ### Bloqueios encontrados
+Nenhum.
 
 ### IDRs criados
+IDR-026.
 
 ### Cobertura final
 
