@@ -34,12 +34,13 @@ final class PagamentoFakeController extends Controller
         $webhook = match ($request->input('acao')) {
             'pagar' => $fake->simularPagamento($checkout),
             'expirar' => $fake->simularExpiracao($checkout),
+            'recusar' => $invoice->tipo === 'assinatura' ? $fake->simularRecusa($checkout) : abort(422),
             default => abort(422),
         };
 
         $receber->tratar($webhook);
 
-        return redirect()->route('creditos.retorno', $invoice);
+        return redirect()->route($invoice->tipo === 'assinatura' ? 'assinatura.retorno' : 'creditos.retorno', $invoice);
     }
 
     private function exigirFake(Request $request, Invoice $invoice, PaymentProvider $provedor): FakePaymentProvider

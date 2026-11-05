@@ -19,7 +19,9 @@ use App\Livewire\Backoffice\Planos as BackofficePlanos;
 use App\Livewire\Backoffice\Recomendacoes as BackofficeRecomendacoes;
 use App\Livewire\Backoffice\Usuarios as BackofficeUsuarios;
 use App\Livewire\Cadastro;
+use App\Livewire\Cobranca\AcompanharAssinatura;
 use App\Livewire\Cobranca\AcompanharPagamento;
+use App\Livewire\Cobranca\AssinarPlano;
 use App\Livewire\Cobranca\ComprarCreditos;
 use App\Livewire\Diagnostico\Quiz as QuizDiagnostico;
 use App\Livewire\Diagnostico\SelecionarEmpresa as SelecionarEmpresaDiagnostico;
@@ -113,6 +115,9 @@ Route::middleware('auth')->group(function () {
     // STORY-076 — compra de créditos com Pix. Cobrança desligada = 404 (ver os componentes).
     Route::get('/creditos/comprar/{pacote?}', ComprarCreditos::class)->whereUuid('pacote')->name('creditos.comprar');
     Route::get('/creditos/pagamentos/{invoice}', AcompanharPagamento::class)->whereUuid('invoice')->name('creditos.retorno');
+    // STORY-077 — assinatura com cartão (checkout hospedado). Cobrança desligada = 404.
+    Route::get('/assinar/retorno/{invoice}', AcompanharAssinatura::class)->whereUuid('invoice')->name('assinatura.retorno');
+    Route::get('/assinar/{plano}/{ciclo}', AssinarPlano::class)->whereUuid('plano')->whereIn('ciclo', ['mensal', 'anual'])->name('checkout.assinatura');
     // "Página do provedor" do adaptador fake (dev/E2E): 404 fora do provedor fake.
     Route::get('/pagamentos/fake/{invoice}', [PagamentoFakeController::class, 'mostrar'])->whereUuid('invoice')->name('pagamentos.fake');
     Route::post('/pagamentos/fake/{invoice}', [PagamentoFakeController::class, 'simular'])->whereUuid('invoice')->name('pagamentos.fake.simular');

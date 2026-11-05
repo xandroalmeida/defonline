@@ -7,8 +7,14 @@
         </p>
         <form method="POST" action="{{ route('pagamentos.fake.simular', $invoice) }}" class="flex flex-wrap gap-3 m-0">
             @csrf
-            <x-button type="submit" name="acao" value="pagar" variant="primary" dusk="pagamento-fake-pagar">Simular pagamento do Pix</x-button>
-            <x-button type="submit" name="acao" value="expirar" variant="secondary" dusk="pagamento-fake-expirar">Simular Pix expirado</x-button>
+            @if ($invoice->tipo === 'assinatura')
+                <x-button type="submit" name="acao" value="pagar" variant="primary" dusk="pagamento-fake-pagar">Simular cartão aprovado</x-button>
+                <x-button type="submit" name="acao" value="recusar" variant="secondary" dusk="pagamento-fake-recusar">Simular cartão recusado</x-button>
+                <x-button type="submit" name="acao" value="expirar" variant="secondary" dusk="pagamento-fake-expirar">Simular desistência (prazo vencido)</x-button>
+            @else
+                <x-button type="submit" name="acao" value="pagar" variant="primary" dusk="pagamento-fake-pagar">Simular pagamento do Pix</x-button>
+                <x-button type="submit" name="acao" value="expirar" variant="secondary" dusk="pagamento-fake-expirar">Simular Pix expirado</x-button>
+            @endif
         </form>
     </x-card>
 </x-layouts.app>
