@@ -38,15 +38,37 @@ final class CotaMensal
      */
     public static function janela(CarbonInterface $inicio, CarbonInterface $agora, CarbonInterface $fimDoPeriodo): array
     {
+        // Como em `proxima()`: o aniversário que cai no ÚLTIMO dia do período já é da renovação, não de uma janela de
+        // horas. Sem isto, a data só com o dia do provedor (meia-noite de Brasília) fazia o upgrade do último dia
+        // ratear a cota por 24 h em vez de por mês (STORY-093).
+        $ultimoDia = DataExibicao::fimDoDia($fimDoPeriodo)->startOfDay();
+        $aniversario = fn (int $n): CarbonImmutable => CarbonImmutable::instance($inicio)->addMonthsNoOverflow($n);
         $n = 0;
 
-        while (CarbonImmutable::instance($inicio)->addMonthsNoOverflow($n + 1)->lessThanOrEqualTo($agora)) {
+        while ($aniversario($n + 1)->lessThanOrEqualTo($agora) && $aniversario($n + 1)->lessThan($ultimoDia)) {
             $n++;
         }
 
-        $fim = CarbonImmutable::instance($inicio)->addMonthsNoOverflow($n + 1);
+        $fim = $aniversario($n + 1);
         $limite = CarbonImmutable::instance($fimDoPeriodo);
 
-        return [CarbonImmutable::instance($inicio)->addMonthsNoOverflow($n), $fim->greaterThan($limite) ? $limite : $fim];
+        // O fim do período entra como o NOMINAL (como o preço proporcional, ver `fimNominal()`), não com as horas a mais.
+        return [$aniversario($n), $fim->greaterThanOrEqualTo($ultimoDia) || $fim->greaterThan($limite) ? self::fimNominal($limite, $inicio) : $fim];
+    }
+
+    /**
+     * O vencimento gravado vai até o último segundo do dia (STORY-089), mas o ciclo pago tem o tamanho de
+     * "início + n meses": a proporção do preço e da cota usa esse fim nominal, o mesmo dia no mesmo horário do
+     * início, e não ganha horas só porque o acesso dura o dia inteiro.
+     */
+    public static function fimNominal(CarbonImmutable $fim, CarbonInterface $inicio): CarbonImmutable
+    {
+        if (! $fim->equalTo(DataExibicao::fimDoDia($fim))) {
+            return $fim;
+        }
+
+        $horaDoInicio = DataExibicao::converter($inicio);
+
+        return DataExibicao::converter($fim)->setTime($horaDoInicio->hour, $horaDoInicio->minute, $horaDoInicio->second);
     }
 }

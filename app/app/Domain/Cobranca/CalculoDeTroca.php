@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domain\Cobranca;
 
-use App\Support\DataExibicao;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 
@@ -40,7 +39,7 @@ final class CalculoDeTroca
         ?CarbonInterface $fimDaCota = null,
     ): PreviaDeTroca {
         $fim = CarbonImmutable::instance($fimDoPeriodo);
-        $limite = self::fimNominal($fim, $inicioDoPeriodo)->getTimestamp();
+        $limite = CotaMensal::fimNominal($fim, $inicioDoPeriodo)->getTimestamp();
         $total = max(1, $limite - $inicioDoPeriodo->getTimestamp());
         $restante = max(0, min($total, $limite - $agora->getTimestamp()));
         $mesmoCiclo = $cicloAtual === $cicloNovo;
@@ -66,22 +65,6 @@ final class CalculoDeTroca
         $cotaCheiaEm = $mesmoCiclo ? $fimDaCota : null;
 
         return new PreviaDeTroca(true, $mesmoCiclo, $precoNovoCentavos, $precoAtualCentavos, $parcela, $credito, $aPagar, $aPagar < self::MINIMO_COBRANCA_CENTAVOS, $dias, $proxima, $proxima, $cicloNovo, $cotaNova, cotaExtraAgora: $cotaExtra, cotaCheiaEm: $cotaCheiaEm);
-    }
-
-    /**
-     * O vencimento gravado vai até o último segundo do dia (STORY-089), mas o ciclo pago tem o tamanho de
-     * "início + n meses": a proporção do preço usa esse fim nominal, o mesmo dia no mesmo horário do início,
-     * e não ganha horas só porque o acesso dura o dia inteiro.
-     */
-    private static function fimNominal(CarbonImmutable $fim, CarbonInterface $inicio): CarbonImmutable
-    {
-        if (! $fim->equalTo(DataExibicao::fimDoDia($fim))) {
-            return $fim;
-        }
-
-        $horaDoInicio = DataExibicao::converter($inicio);
-
-        return DataExibicao::converter($fim)->setTime($horaDoInicio->hour, $horaDoInicio->minute, $horaDoInicio->second);
     }
 
     public static function ehUpgrade(int $precoAtual, CicloCobranca $cicloAtual, int $cotaAtual, int $precoNovo, CicloCobranca $cicloNovo, int $cotaNova): bool

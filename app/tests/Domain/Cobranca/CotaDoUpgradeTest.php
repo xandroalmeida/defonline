@@ -62,6 +62,17 @@ describe('CotaMensal::janela', function () {
         expect($ini->toDateString())->toBe('2026-11-05')->and($fim->toDateString())->toBe('2026-12-05');
     });
 
+    it('o aniversário do último dia do período é a renovação: a janela mensal vai até o fim do período, não 24 h (STORY-093)', function () {
+        // Início à meia-noite de Brasília (data só com o dia do provedor); o vencimento é o último segundo do dia 05/12.
+        $inicio = _t('2026-11-05 03:00:00');
+        $fimDoPeriodo = _t('2026-12-06 02:59:59');
+
+        [$ini, $fim] = CotaMensal::janela($inicio, _t('2026-12-05 14:59:00'), $fimDoPeriodo);
+
+        expect($ini->equalTo($inicio))->toBeTrue()->and($fim->equalTo(_t('2026-12-05 03:00:00')))->toBeTrue()
+            ->and(CotaExtraNoUpgrade::calcular(1, 10, $ini, $fim, _t('2026-12-02 03:00:00')))->toBe(0);
+    });
+
     it('anual: do último aniversário ao próximo', function () {
         [$ini, $fim] = CotaMensal::janela(_t('2026-01-31'), _t('2026-03-10'), _t('2027-01-31'));
 

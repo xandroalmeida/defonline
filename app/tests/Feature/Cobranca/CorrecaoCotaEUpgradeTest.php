@@ -10,6 +10,7 @@ use App\Models\Assinatura;
 use App\Models\Invoice;
 use App\Services\Cobranca\GerirRenovacao;
 use App\Services\Cobranca\TrocarDePlano;
+use App\Support\DataExibicao;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -136,7 +137,10 @@ describe('CA-3 — upgrade com cota extra proporcional (E6, E6b)', function () {
 
     it('E6b upgrade 3 dias antes do fim: paga a parte do período e a cota extra é proporcional (0 de 9)', function () {
         [$a] = _assinaturaAtivaNoFake($this->u);
-        $this->travelTo($a->proximo_vencimento->copy()->subDays(3));
+        // "3 dias antes do fim" do ciclo NOMINAL (início + 1 mês). O vencimento gravado vai até 23:59:59 do dia
+        // (STORY-089) e o provedor devolve o início só com o dia (meia-noite de Brasília): subtrair 3 dias do
+        // vencimento deixaria 2 dias e 1 segundo de ciclo.
+        $this->travelTo(DataExibicao::converter($a->data_inicio)->addMonthsNoOverflow(1)->subDays(3));
 
         $t = app(TrocarDePlano::class)->confirmar($this->u, _plano('Pro'), CicloCobranca::Mensal);
         _pagarAssinatura($t->invoice);
