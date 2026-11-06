@@ -127,8 +127,9 @@ describe('CA-1 lembrete de renovação (D-7)', function () {
 });
 
 describe('CA-2 renovação paga', function () {
-    it('o ciclo avança com a cota de hoje e o preço contratado, mesmo que o catálogo tenha subido', function () {
+    it('o ciclo avança com a cota e o preço contratados, mesmo que o catálogo tenha mudado (STORY-091 CA-2)', function () {
         [$a, $primeira] = _assinaturaAtivaNoFake($this->usuario);
+        $cotaContratada = $a->cota_snapshot;
         $contratado = $a->preco_snapshot_centavos;
         $plano = _plano();
         $plano->update(['preco_mensal_centavos' => $contratado + 2000, 'cota_mensal' => $plano->cota_mensal + 3]);
@@ -140,8 +141,8 @@ describe('CA-2 renovação paga', function () {
         // A mudança de preço do catálogo não chega ao assinante sem o aviso de 30 dias: o provedor segue cobrando o contratado.
         expect($a->periodos_pagos)->toBe(2)
             ->and($a->preco_snapshot_centavos)->toBe($contratado)
-            ->and($a->cota_snapshot)->toBe($plano->cota_mensal)
-            ->and($a->cota_restante_ciclo)->toBe($plano->cota_mensal)
+            ->and($a->cota_snapshot)->toBe($cotaContratada)
+            ->and($a->cota_restante_ciclo)->toBe($cotaContratada)
             ->and(Invoice::query()->where('renovacao', true)->sole()->valor_centavos)->toBe($contratado);
     });
 });

@@ -72,8 +72,21 @@
     @endif
 
     {{-- Atenção: devolver e contestações --}}
-    @if ($devolver->isNotEmpty() || $contestadas->isNotEmpty())
+    @if ($devolver->isNotEmpty() || $contestadas->isNotEmpty() || $divergentes->isNotEmpty())
         <h2 class="text-lg font-medium text-[color:var(--color-destructive)] mt-0 mb-3">Atenção</h2>
+        @if ($divergentes->isNotEmpty())
+            <x-card class="mb-4 {{ $alerta }}" dusk="financeiro-divergentes">
+                <h3 class="text-base font-medium mt-0 mb-2">Renovações com valor diferente do contratado ({{ $divergentes->count() }})</h3>
+                <p class="m-0 mb-3 text-sm text-[color:var(--color-secondary)]">O provedor cobrou outro valor. A renovação valeu; confira a assinatura no provedor e, se for o caso, devolva a diferença.</p>
+                <ul class="list-none p-0 m-0 text-sm">
+                    @foreach ($divergentes as $i)
+                        <li class="py-2 border-t border-[color:var(--color-border)]" dusk="divergente-{{ $i->id }}" wire:key="div-{{ $i->id }}">
+                            <strong>Cobrado {{ $reais($i->valor_centavos) }}, esperado {{ $reais($i->valor_esperado_centavos) }}</strong> · {{ $i->usuario?->nome }} ({{ $i->usuario?->email }}) · {{ $dia($i->pago_em) }} · {{ $i->descricao }}
+                        </li>
+                    @endforeach
+                </ul>
+            </x-card>
+        @endif
         @if ($devolver->isNotEmpty())
             <x-card class="mb-4 {{ $alerta }}" dusk="financeiro-devolver">
                 <h3 class="text-base font-medium mt-0 mb-2">Pagamentos a devolver ({{ $devolver->count() }})</h3>
@@ -208,6 +221,9 @@
                             {{ $i->status->rotulo() }}
                             @if ($i->status === \App\Domain\Cobranca\EstadoCobranca::Contestada)
                                 <strong class="block text-[color:var(--color-destructive)]">Contestação aberta</strong>
+                            @endif
+                            @if ($i->valor_esperado_centavos !== null)
+                                <strong class="block text-[color:var(--color-destructive)]" dusk="cobranca-divergente-{{ $i->id }}">Valor diferente do contratado (esperado {{ $reais($i->valor_esperado_centavos) }})</strong>
                             @endif
                             @if ($i->devolucao_motivo && $i->status === \App\Domain\Cobranca\EstadoCobranca::Paga)
                                 <strong class="block text-[color:var(--color-destructive)]" dusk="cobranca-devolver-{{ $i->id }}">Devolver: {{ $motivosDevolucao[$i->devolucao_motivo] ?? $i->devolucao_motivo }}</strong>

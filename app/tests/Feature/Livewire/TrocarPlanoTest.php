@@ -72,7 +72,8 @@ describe('CA-1 — revisão do upgrade', function () {
             ->assertSee('R$ 33,27')
             ->assertSee('R$ 99,40')
             ->assertSee('Hoje você paga só a diferença pelos 20 dias que faltam neste ciclo.')
-            ->assertSee('Sua cota passa a ser de 10 análises a partir de agora.')
+            ->assertSee('Neste ciclo você ganha 6 análises a mais, proporcionais aos dias que faltam.')
+            ->assertSee('Sua cota passa a ser de 10 análises por mês a partir de '.DataExibicao::data($a->proximo_vencimento).'.')
             ->assertSee(DataExibicao::data($a->proximo_vencimento).' · R$ 199,00')
             ->assertSeeHtml('dusk="screen-troca-confirmar"');
         expect(Invoice::query()->where('tipo', 'troca_de_plano')->count())->toBe(0);
@@ -110,7 +111,7 @@ describe('CA-1 — revisão do upgrade', function () {
 
         _trocaTela($this->usuario, $this->pro->id)->call('confirmar')
             ->assertSeeHtml('dusk="screen-troca-aplicada"')
-            ->assertSee('Você agora está no plano Pro. Sua cota é de 10 análises e você já pode usá-las.');
+            ->assertSee('Você agora está no plano Pro. Neste ciclo você tem 1 análise, e sua cota de 10 análises por mês vale a partir de '.DataExibicao::data($a->proximo_vencimento).'.');
         expect($a->fresh()->plano_id)->toBe($this->pro->id);
     });
 
@@ -251,7 +252,8 @@ describe('CA-2 — retorno do checkout', function () {
         _pagarAssinatura($invoice);
 
         $tela->call('$refresh')->assertSeeHtml('dusk="screen-troca-aplicada"')
-            ->assertSee('Você agora está no plano Pro. Sua cota é de 10 análises e você já pode usá-las.')
+            ->assertSee('Você agora está no plano Pro.')->assertSee('Você ganhou 6 análises a mais neste ciclo.')
+            ->assertSee('Sua cota é de 10 análises por mês a partir de '.DataExibicao::data($a->fresh()->proximo_vencimento).'.')
             ->assertSee('Pagamos R$ 99,40');
     });
 

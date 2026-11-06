@@ -57,7 +57,7 @@ describe('CA-1 e CA-2 — upgrade', function () {
         expect($a->fresh()->plano_id)->toBe($this->basico->id)->and(Invoice::query()->where('tipo', 'troca_de_plano')->count())->toBe(0);
     });
 
-    it('abre o checkout da diferença sem trocar o plano; pago, o plano e a cota valem na hora', function () {
+    it('abre o checkout da diferença sem trocar o plano; pago, o plano vale na hora e a cota extra é proporcional', function () {
         $a = _basicoNoMeioDoCiclo($this->usuario);
         $vencimento = $a->proximo_vencimento->toIso8601String();
 
@@ -74,7 +74,8 @@ describe('CA-1 e CA-2 — upgrade', function () {
         $a = $a->fresh();
 
         expect($paga->status)->toBe(EstadoCobranca::Paga)->and($paga->pago_em)->not->toBeNull()
-            ->and($a->plano_id)->toBe($this->pro->id)->and($a->cota_snapshot)->toBe(10)->and($a->cota_restante_ciclo)->toBe(10)
+            // 20 de 30 dias: 1 + floor(9 × 20/30) = 7; a cota cheia (10) vale da próxima virada (STORY-091 CA-3).
+            ->and($a->plano_id)->toBe($this->pro->id)->and($a->cota_snapshot)->toBe(10)->and($a->cota_restante_ciclo)->toBe(7)
             ->and($a->preco_snapshot_centavos)->toBe(19900)->and($a->ciclo)->toBe('mensal')
             ->and($a->proximo_vencimento->toIso8601String())->toBe($vencimento)->and($a->periodos_pagos)->toBe(1)
             ->and($a->ajuste_provedor_pendente)->toBeFalse();
@@ -83,13 +84,13 @@ describe('CA-1 e CA-2 — upgrade', function () {
         expect(AuditLog::query()->where('action', 'cobranca.troca_de_plano_aplicada')->count())->toBe(1);
     });
 
-    it('o que já foi gasto no ciclo continua gasto: a cota nova vale a partir de agora', function () {
+    it('o que já foi gasto no ciclo continua gasto: só entra a parte proporcional da cota extra', function () {
         $a = _basicoNoMeioDoCiclo($this->usuario);
         $a->forceFill(['cota_restante_ciclo' => 0])->save();
 
         _pagarAssinatura(_trocas()->confirmar($this->usuario, $this->pro, CicloCobranca::Mensal)->invoice);
 
-        expect($a->fresh()->cota_restante_ciclo)->toBe(9);
+        expect($a->fresh()->cota_restante_ciclo)->toBe(6);
     });
 
     it('upgrade recusado mantém o plano atual e não cobra', function () {

@@ -29,4 +29,24 @@ final class CotaMensal
         // O período vai até o último segundo do dia do vencimento; o aniversário nesse dia já é do ciclo seguinte.
         return $proxima->lessThan(DataExibicao::fimDoDia($fimDoPeriodo)->startOfDay()) ? $proxima : null;
     }
+
+    /**
+     * A janela da cota em curso: do último aniversário (ou do início) até o próximo, limitado ao fim do
+     * período pago. É dela que o upgrade tira a proporção da cota extra (STORY-091).
+     *
+     * @return array{0: CarbonImmutable, 1: CarbonImmutable}
+     */
+    public static function janela(CarbonInterface $inicio, CarbonInterface $agora, CarbonInterface $fimDoPeriodo): array
+    {
+        $n = 0;
+
+        while (CarbonImmutable::instance($inicio)->addMonthsNoOverflow($n + 1)->lessThanOrEqualTo($agora)) {
+            $n++;
+        }
+
+        $fim = CarbonImmutable::instance($inicio)->addMonthsNoOverflow($n + 1);
+        $limite = CarbonImmutable::instance($fimDoPeriodo);
+
+        return [CarbonImmutable::instance($inicio)->addMonthsNoOverflow($n), $fim->greaterThan($limite) ? $limite : $fim];
+    }
 }

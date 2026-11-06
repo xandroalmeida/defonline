@@ -205,16 +205,17 @@ describe('CA-4 renovação e aviso', function () {
         expect(app(IniciarRenovacaoPix::class)->executar($this->usuario, null, null)->id)->toBe($um->id);
     });
 
-    it('o preço é o da última contratação e a cota, a do catálogo de hoje', function () {
+    it('o preço é o da última contratação e a cota, a contratada (retrato, STORY-091 CA-2)', function () {
         $a = _assinaturaPixAtiva($this->usuario);
         $plano = Plano::query()->findOrFail($a->plano_id);
+        $contratada = $a->cota_snapshot;
         $plano->update(['preco_anual_centavos' => $plano->preco_anual_centavos + 5000, 'cota_mensal' => $plano->cota_mensal + 3]);
         _viajarParaAntesDoFim($a, 1);
 
         $renov = app(IniciarRenovacaoPix::class)->executar($this->usuario, null, null);
         _entregar(_fake()->simularPagamento((string) $renov->checkout_id_externo));
 
-        expect($renov->valor_centavos)->toBe($a->preco_snapshot_centavos)->and($a->fresh()->cota_snapshot)->toBe($plano->cota_mensal);
+        expect($renov->valor_centavos)->toBe($a->preco_snapshot_centavos)->and($a->fresh()->cota_snapshot)->toBe($contratada);
     });
 
     it('recusa quem não tem plano Pix, plano de cartão, e-mail não confirmado, plano desativado e admin', function () {

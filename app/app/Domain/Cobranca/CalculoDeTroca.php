@@ -36,6 +36,8 @@ final class CalculoDeTroca
         int $precoNovoCentavos,
         CicloCobranca $cicloNovo,
         int $cotaNova,
+        ?CarbonInterface $inicioDaCota = null,
+        ?CarbonInterface $fimDaCota = null,
     ): PreviaDeTroca {
         $fim = CarbonImmutable::instance($fimDoPeriodo);
         $limite = self::fimNominal($fim, $inicioDoPeriodo)->getTimestamp();
@@ -47,6 +49,10 @@ final class CalculoDeTroca
         $dias = (int) ceil($restante / 86400);
         $credito = self::proporcional($precoAtualCentavos, $restante, $total);
 
+        // STORY-091: a janela da cota em curso (o mês, ou o aniversário no anual); sem ela, o próprio período.
+        $inicioDaCota ??= $inicioDoPeriodo;
+        $fimDaCota = CarbonImmutable::instance($fimDaCota ?? $fimDoPeriodo);
+
         if (! $imediata) {
             return new PreviaDeTroca(false, $mesmoCiclo, $precoNovoCentavos, $precoAtualCentavos, $precoNovoCentavos, 0, 0, true, $dias, $fim, $fim, $cicloNovo, $cotaNova);
         }
@@ -55,7 +61,11 @@ final class CalculoDeTroca
         $aPagar = max(0, $parcela - $credito);
         $proxima = $mesmoCiclo ? $fim : $cicloNovo->vencimento($agora);
 
-        return new PreviaDeTroca(true, $mesmoCiclo, $precoNovoCentavos, $precoAtualCentavos, $parcela, $credito, $aPagar, $aPagar < self::MINIMO_COBRANCA_CENTAVOS, $dias, $proxima, $proxima, $cicloNovo, $cotaNova);
+        // Período novo: cota cheia já. Mesmo período: só a parte proporcional (CotaExtraNoUpgrade) e a cheia na virada da cota.
+        $cotaExtra = $mesmoCiclo ? CotaExtraNoUpgrade::calcular($cotaAtual, $cotaNova, $inicioDaCota, $fimDaCota, $agora) : $cotaNova;
+        $cotaCheiaEm = $mesmoCiclo ? $fimDaCota : null;
+
+        return new PreviaDeTroca(true, $mesmoCiclo, $precoNovoCentavos, $precoAtualCentavos, $parcela, $credito, $aPagar, $aPagar < self::MINIMO_COBRANCA_CENTAVOS, $dias, $proxima, $proxima, $cicloNovo, $cotaNova, cotaExtraAgora: $cotaExtra, cotaCheiaEm: $cotaCheiaEm);
     }
 
     /**

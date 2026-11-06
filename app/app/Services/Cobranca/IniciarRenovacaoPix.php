@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Cobranca;
 
 use App\Domain\Cobranca\CicloCobranca;
+use App\Domain\Cobranca\CotaContratada;
 use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PaymentProvider;
@@ -111,7 +112,7 @@ final class IniciarRenovacaoPix
                 'tipo' => 'assinatura',
                 'plano_id' => $plano->id,
                 'ciclo' => CicloCobranca::Anual->value,
-                'cota_snapshot' => $plano->cota_mensal,
+                'cota_snapshot' => CotaContratada::naRenovacao($assinatura->cota_snapshot, (string) $assinatura->plano_id, $plano->id, $plano->cota_mensal),
                 'descricao' => "Plano {$plano->nome} · renovação anual",
                 'valor_centavos' => $final,
                 'status' => EstadoCobranca::Pendente,

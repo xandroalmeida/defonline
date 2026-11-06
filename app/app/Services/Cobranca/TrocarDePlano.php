@@ -81,6 +81,7 @@ final class TrocarDePlano
         $descontoNovo = $this->descontoNoPlanoNovo($assinatura, $destino, $ciclo, $cheioNovo);
         $termina = DescontoNaTroca::termina($assinatura->desconto(), $assinatura->periodos_pagos, $descontoNovo);
         $efetivoNovo = $descontoNovo?->valorDoPeriodo(max(1, $assinatura->periodos_pagos)) ?? $cheioNovo;
+        [$inicioDaCota, $fimDaCota] = CotaMensal::janela($assinatura->data_inicio, CarbonImmutable::now(), $assinatura->proximo_vencimento);
 
         return CalculoDeTroca::calcular(
             $precoAtual,
@@ -92,6 +93,8 @@ final class TrocarDePlano
             $efetivoNovo,
             $ciclo,
             $destino->cota_mensal,
+            $inicioDaCota,
+            $fimDaCota,
         )->comDesconto($cheioNovo, $descontoNovo, $termina, $descontoNovo?->valorDoPeriodo($assinatura->periodos_pagos + 1) ?? $cheioNovo);
     }
 
@@ -223,7 +226,7 @@ final class TrocarDePlano
         // STORY-085: como a assinatura estava antes (e como fica depois), para o estorno da diferença poder voltar.
         $invoice->forceFill(['troca_anterior' => self::retratoAnterior($assinatura)])->save();
 
-        $this->aplicarLocal($assinatura, $plano, $cicloNovo, $cheioNovo, $pagoEm, $this->descontoNoPlanoNovo($assinatura, $plano, $cicloNovo, $cheioNovo));
+        $this->aplicarLocal($assinatura, $plano, $cicloNovo, $cheioNovo, $pagoEm, $this->descontoNoPlanoNovo($assinatura, $plano, $cicloNovo, $cheioNovo), (int) $invoice->cota_extra_troca);
 
         $invoice->forceFill(['troca_anterior' => ($invoice->troca_anterior ?? []) + ['depois' => [
             'data_inicio' => $assinatura->data_inicio->toIso8601String(),
@@ -259,6 +262,30 @@ final class TrocarDePlano
         return $feitos;
     }
 
+    /**
+     * O que o provedor deve cobrar da assinatura na próxima vez: valor, ciclo e quando. O downgrade agendado já vale
+     * (o provedor cobra o plano novo). Se o próximo ciclo é gratuito (desconto total, renovação nossa), o valor é o
+     * cheio e a data é o fim do desconto: o provedor não pode cobrar antes (STORY-090).
+     *
+     * @return array{0: int, 1: CicloCobranca, 2: CarbonImmutable}
+     */
+    public static function alvoNoProvedor(Assinatura $a): array
+    {
+        $ciclo = CicloCobranca::from((string) ($a->troca_ciclo ?? $a->ciclo));
+        $desconto = $a->descontoDaProximaCobranca();
+        $proximo = $a->periodos_pagos + 1;
+        $semCobranca = $desconto !== null && $desconto->vale($proximo) && $desconto->valorDoPeriodo($proximo) < (int) config('services.payments.valor_minimo_centavos', 500);
+
+        if ($semCobranca) {
+            return [$desconto->cheio, $ciclo, $desconto->fim(CicloCobranca::from((string) $a->ciclo), $a->data_inicio) ?? CarbonImmutable::instance($a->proximo_vencimento)];
+        }
+
+        $valor = $a->troca_preco_centavos ?? $a->preco_snapshot_centavos
+            ?? IniciarAssinatura::precoDe(Plano::query()->findOrFail($a->troca_plano_id ?? $a->plano_id), $ciclo);
+
+        return [(int) $valor, $ciclo, CarbonImmutable::instance($a->proximo_vencimento)];
+    }
+
     /** O valor, o ciclo e a próxima cobrança do provedor passam a ser os da assinatura. Falhou = marcado para repetir. */
     public function ajustarNoProvedor(Assinatura $assinatura): bool
     {
@@ -267,7 +294,8 @@ final class TrocarDePlano
         }
 
         try {
-            $this->empurrarAoProvedor($assinatura, (int) $assinatura->preco_snapshot_centavos, CicloCobranca::from((string) $assinatura->ciclo));
+            [$valor, $ciclo, $quando] = self::alvoNoProvedor($assinatura);
+            $this->empurrarAoProvedor($assinatura, $valor, $ciclo, $quando);
         } catch (ProvedorIndisponivel $e) {
             $assinatura->forceFill(['ajuste_provedor_pendente' => true])->save();
 
@@ -395,7 +423,7 @@ final class TrocarDePlano
                 throw TrocaNegada::porque(TrocaNegada::MUDOU);
             }
 
-            $this->aplicarLocal($travada, $destino, $ciclo, $previa->precoNovoCheioCentavos, CarbonImmutable::now(), $previa->descontoNovo);
+            $this->aplicarLocal($travada, $destino, $ciclo, $previa->precoNovoCheioCentavos, CarbonImmutable::now(), $previa->descontoNovo, $previa->cotaExtraAgora);
 
             AuditLogger::log(
                 action: 'cobranca.troca_de_plano_aplicada',
@@ -411,12 +439,15 @@ final class TrocarDePlano
         return new ResultadoDaTroca('aplicada', $previa);
     }
 
-    /** O plano novo, a cota e o preço na carteira; se o ciclo mudou, um período novo começa agora. */
-    private function aplicarLocal(Assinatura $a, Plano $plano, CicloCobranca $ciclo, int $cheio, CarbonImmutable $agora, ?DescontoDaAssinatura $descontoNovo = null): void
+    /**
+     * O plano novo, a cota e o preço na carteira; se o ciclo mudou, um período novo começa agora.
+     *
+     * STORY-091 CA-3: no mesmo período a cota disponível só cresce por `$cotaExtra` (a parte proporcional que a
+     * revisão mostrou); o `cota_snapshot` já é a cota cheia do plano novo, que volta cheia na próxima virada.
+     */
+    private function aplicarLocal(Assinatura $a, Plano $plano, CicloCobranca $ciclo, int $cheio, CarbonImmutable $agora, ?DescontoDaAssinatura $descontoNovo = null, int $cotaExtra = 0): void
     {
         $cicloMudou = $ciclo->value !== $a->ciclo;
-        // O que já foi gasto no ciclo continua gasto: a cota nova vale "a partir de agora".
-        $gastas = max(0, $a->cota_snapshot - $a->cota_restante_ciclo);
 
         $campos = [
             'plano_id' => $plano->id,
@@ -424,7 +455,7 @@ final class TrocarDePlano
             // O que o provedor cobra na próxima vez: com o desconto que continua, o do próximo ciclo.
             'preco_snapshot_centavos' => $descontoNovo?->valorDoPeriodo(($cicloMudou ? 1 : $a->periodos_pagos) + 1) ?? $cheio,
             'cota_snapshot' => $plano->cota_mensal,
-            'cota_restante_ciclo' => $cicloMudou ? $plano->cota_mensal : max(0, $plano->cota_mensal - $gastas),
+            'cota_restante_ciclo' => $cicloMudou ? $plano->cota_mensal : $a->cota_restante_ciclo + $cotaExtra,
             'troca_plano_id' => null,
             'troca_ciclo' => null,
             'troca_preco_centavos' => null,
@@ -457,7 +488,7 @@ final class TrocarDePlano
     }
 
     /** @throws ProvedorIndisponivel */
-    private function empurrarAoProvedor(Assinatura $assinatura, int $valorCentavos, CicloCobranca $ciclo): void
+    private function empurrarAoProvedor(Assinatura $assinatura, int $valorCentavos, CicloCobranca $ciclo, ?CarbonImmutable $quando = null): void
     {
         if ($assinatura->id_externo === null) {
             return;
@@ -467,7 +498,7 @@ final class TrocarDePlano
             new ReferenciaProvedor((string) $assinatura->provedor, $assinatura->id_externo),
             $valorCentavos,
             $ciclo,
-            $assinatura->proximo_vencimento->toDateTimeImmutable(),
+            ($quando ?? $assinatura->proximo_vencimento)->toDateTimeImmutable(),
         );
     }
 
@@ -509,6 +540,7 @@ final class TrocarDePlano
             'provedor' => $this->provedor->nome(),
             'assinatura_id' => $assinatura->id,
             'periodo_base' => $assinatura->periodos_pagos,
+            'cota_extra_troca' => $previa->mesmoCiclo ? $previa->cotaExtraAgora : null,
         ]);
 
         $pix = $meio === MeioPagamento::Pix;

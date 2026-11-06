@@ -57,10 +57,11 @@ final class TrocarCartao
         }
 
         // STORY-083 CA-8: a assinatura ativada sem cobrança também aceita o cartão (que passa a cobrar quando o desconto acaba).
+        // STORY-090 CA-3: sem desconto nenhum (acabou numa troca de plano) também: a cobrança começa no fim do ciclo pago.
         $semCobranca = $assinatura->id_externo === null && $assinatura->semMeioDePagamento();
-        $fimDoDesconto = $semCobranca ? $assinatura->desconto()?->fim(CicloCobranca::from((string) $assinatura->ciclo), $assinatura->data_inicio) : null;
+        $desconto = $semCobranca ? $assinatura->desconto() : null;
 
-        if ($assinatura->id_externo === null && ($fimDoDesconto === null)) {
+        if ($assinatura->id_externo === null && (! $semCobranca || ($desconto !== null && $desconto->fim(CicloCobranca::from((string) $assinatura->ciclo), $assinatura->data_inicio) === null))) {
             throw GestaoNegada::naoRenovaSozinha();
         }
 
@@ -79,13 +80,9 @@ final class TrocarCartao
 
         $atraso = $assinatura->status === StatusAssinatura::EmAtraso;
         // STORY-082: com downgrade agendado o provedor já cobra o plano novo; o cartão novo nasce igual.
-        $ciclo = CicloCobranca::from((string) ($assinatura->troca_ciclo ?? $assinatura->ciclo));
         $plano = Plano::query()->findOrFail($assinatura->troca_plano_id ?? $assinatura->plano_id);
-        $valor = $semCobranca
-            ? (int) ($assinatura->troca_preco_cheio_centavos ?? $assinatura->preco_cheio_centavos)
-            : ($assinatura->troca_preco_centavos ?? $assinatura->preco_snapshot_centavos ?? IniciarAssinatura::precoDe($plano, $ciclo));
-        // Sem cobrança: a 1ª cobrança do cartão é no fim do desconto (hoje, se o fim já passou).
-        $primeira = $fimDoDesconto ?? $assinatura->proximo_vencimento->toImmutable();
+        // STORY-090 CA-1: o valor e o ciclo são os VIGENTES; a 1ª cobrança é no vencimento já pago (ou no fim do desconto).
+        [$valor, $ciclo, $primeira] = TrocarDePlano::alvoNoProvedor($assinatura);
         $cobraAgora = $atraso || ($semCobranca && $primeira->isPast());
 
         $troca = TrocaDeCartao::query()->create([
@@ -95,6 +92,8 @@ final class TrocarCartao
             'status' => 'pendente',
             'cobra_agora' => $cobraAgora,
             'antiga_id_externo' => $assinatura->id_externo,
+            'valor_centavos' => $valor,
+            'ciclo' => $ciclo->value,
         ]);
 
         $volta = route('meu-plano');
@@ -152,7 +151,8 @@ final class TrocarCartao
      */
     public function confirmar(TrocaDeCartao $troca, string $novaId, ?string $bandeira, ?string $ultimos4): void
     {
-        $resultado = DB::transaction(function () use ($troca, $novaId, $bandeira, $ultimos4): string {
+        $corrigir = false;
+        $resultado = DB::transaction(function () use ($troca, $novaId, $bandeira, $ultimos4, &$corrigir): string {
             $troca = TrocaDeCartao::query()->lockForUpdate()->findOrFail($troca->id);
 
             if ($troca->status === 'concluida') {
@@ -208,6 +208,15 @@ final class TrocarCartao
                 ])->save();
             }
 
+            // STORY-090 CA-1: o checkout nasceu com o valor e o ciclo de quando foi aberto. Se a assinatura mudou desde
+            // então (um upgrade), a recorrência nova nasceu com o preço antigo: corrige no provedor, fora da transação.
+            [$valor, $ciclo] = TrocarDePlano::alvoNoProvedor($assinatura);
+            $corrigir = $troca->valor_centavos !== null && ($troca->valor_centavos !== $valor || $troca->ciclo !== $ciclo->value);
+
+            if ($corrigir) {
+                $assinatura->forceFill(['ajuste_provedor_pendente' => true])->save();
+            }
+
             $troca->forceFill(['status' => 'concluida', 'nova_id_externo' => $novaId, 'concluida_em' => now()])->save();
 
             AuditLogger::log(
@@ -227,6 +236,11 @@ final class TrocarCartao
         }
 
         if ($resultado === 'concluida') {
+            if ($corrigir) {
+                // Falhou? A marca fica e a rotina horária `assinaturas:ajustar-no-provedor` repete (alerta no log).
+                app(TrocarDePlano::class)->ajustarNoProvedor(Assinatura::query()->findOrFail($troca->assinatura_id));
+            }
+
             $this->cancelarAntiga(TrocaDeCartao::query()->findOrFail($troca->id));
         }
     }

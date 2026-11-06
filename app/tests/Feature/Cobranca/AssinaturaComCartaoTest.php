@@ -210,15 +210,16 @@ describe('CA-6 renovação da cota', function () {
         expect($a->fresh()->cota_restante_ciclo)->toBe($a->cota_snapshot);
     });
 
-    it('na renovação vale a cota do catálogo de hoje, e o preço é o que o provedor cobrou', function () {
+    it('na renovação vale a cota contratada (retrato, STORY-091 CA-2), e o preço é o que o provedor cobrou', function () {
         $plano = _plano();
         $invoice = _pagarAssinatura(_assinaturaPendente($this->usuario, $plano));
+        $contratada = $plano->cota_mensal;
         $plano->update(['cota_mensal' => $plano->cota_mensal + 2]);
 
         _entregar(_fake()->simularRenovacao((string) $invoice->checkout_id_externo));
         $a = Assinatura::query()->sole();
 
-        expect($a->cota_snapshot)->toBe($plano->cota_mensal)->and($a->preco_snapshot_centavos)->toBe($invoice->valor_centavos);
+        expect($a->cota_snapshot)->toBe($contratada)->and($a->preco_snapshot_centavos)->toBe($invoice->valor_centavos);
     });
 
     it('no anual a cota volta cheia no aniversário do mês, uma vez só, e o último ano não agenda mais', function () {
@@ -380,7 +381,7 @@ describe('renovação de assinatura que não é nossa ou não está em dia', fun
         Log::shouldHaveReceived('error')->withArgs(fn (string $m) => $m === 'cobranca.renovacao_de_assinatura_inativa')->once();
     })->with([StatusAssinatura::Cancelada, StatusAssinatura::Expirada]);
 
-    it('registra aviso quando o valor da renovação mudou, e passa a valer o cobrado', function () {
+    it('alerta a equipe quando o valor da renovação mudou, marca a Invoice e passa a valer o cobrado (STORY-090 CA-2)', function () {
         Log::spy();
         $invoice = _pagarAssinatura(_assinaturaPendente($this->usuario));
         $webhook = _fake()->simularRenovacao((string) $invoice->checkout_id_externo);
@@ -392,7 +393,9 @@ describe('renovação de assinatura que não é nossa ou não está em dia', fun
         _entregar($webhook);
 
         expect(Assinatura::query()->sole()->preco_snapshot_centavos)->toBe(3990);
-        Log::shouldHaveReceived('warning')->withArgs(fn (string $m) => $m === 'cobranca.valor_da_renovacao_mudou')->once();
+        Log::shouldHaveReceived('error')->withArgs(fn (string $m, array $c) => $m === 'cobranca.valor_da_renovacao_divergente' && $c['module'] === 'cobranca' && $c['esperado_centavos'] === $invoice->valor_centavos && $c['recebido_centavos'] === 3990)->once();
+        expect(Invoice::query()->where('renovacao', true)->sole()->valor_esperado_centavos)->toBe($invoice->valor_centavos)
+            ->and($invoice->fresh()->valor_esperado_centavos)->toBeNull();
     });
 });
 

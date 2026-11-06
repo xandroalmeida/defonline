@@ -8,6 +8,7 @@ use App\Domain\Cobranca\AssinaturaVigenteJaExiste;
 use App\Domain\Cobranca\Carteira;
 use App\Domain\Cobranca\CicloCobranca;
 use App\Domain\Cobranca\CobrancaNoProvedor;
+use App\Domain\Cobranca\CotaContratada;
 use App\Domain\Cobranca\CotaMensal;
 use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\MeioPagamento;
@@ -51,7 +52,7 @@ final class ConfirmarAssinatura
     ];
 
     /** A troca agendada (STORY-082) deixa de estar agendada quando a renovação a aplica. */
-    private const LIMPA_TROCA = ['troca_plano_id' => null, 'troca_ciclo' => null, 'troca_preco_centavos' => null, 'troca_preco_cheio_centavos' => null, 'troca_desconto_centavos' => null, 'troca_agendada_em' => null];
+    public const LIMPA_TROCA = ['troca_plano_id' => null, 'troca_ciclo' => null, 'troca_preco_centavos' => null, 'troca_preco_cheio_centavos' => null, 'troca_desconto_centavos' => null, 'troca_agendada_em' => null];
 
     public function __construct(private readonly Carteira $carteira, private readonly TrocarDePlano $trocas, private readonly CupomDoCheckout $cupons) {}
 
@@ -383,8 +384,8 @@ final class ConfirmarAssinatura
         $inicio = $cicloMudou ? CarbonImmutable::instance($assinatura->proximo_vencimento) : CarbonImmutable::instance($assinatura->data_inicio);
         $periodos = $cicloMudou ? 1 : $assinatura->periodos_pagos + 1;
         $vencimento = DataExibicao::fimDoDia($ciclo->vencimento($inicio, $periodos));
-        // Na renovação vale o catálogo de hoje para a cota (CA-5: o snapshot protege até aqui).
-        $cota = $plano->cota_mensal;
+        // STORY-091 CA-2: a cota contratada é retrato. O catálogo de hoje só vale se ele trocou de plano.
+        $cota = CotaContratada::naRenovacao($assinatura->cota_snapshot, (string) $assinatura->plano_id, $plano->id, $plano->cota_mensal);
 
         // STORY-083 CA-7: com desconto de cupom em curso o esperado é o valor do ciclo (já com desconto).
         // STORY-082 × 083: o downgrade agendado traz o desconto que continua (ou o fim dele) no plano novo.
@@ -392,15 +393,11 @@ final class ConfirmarAssinatura
         $desconto = $assinatura->desconto();
         $comDesconto = $desconto?->vale($periodos) === true;
 
-        if ($cobranca->valorCentavos !== ($assinatura->troca_preco_centavos ?? $assinatura->preco_snapshot_centavos)) {
-            Log::warning('cobranca.valor_da_renovacao_mudou', [
-                'module' => 'cobranca',
-                'action' => 'processar_evento',
-                'assinatura_id' => $assinatura->id,
-                'anterior_centavos' => $assinatura->troca_preco_centavos ?? $assinatura->preco_snapshot_centavos,
-                'cobrado_centavos' => $cobranca->valorCentavos,
-            ]);
-        }
+        // STORY-090 CA-2: cobrar um valor diferente do contratado não passa em silêncio. O dinheiro entrou e a renovação
+        // vale, mas a equipe é alertada (Log::error ligado ao canal da equipe) e a Invoice guarda o que se esperava,
+        // para o Financeiro mostrar a divergência.
+        $esperado = (int) ($assinatura->troca_preco_centavos ?? $assinatura->preco_snapshot_centavos);
+        $divergente = $cobranca->valorCentavos !== $esperado;
 
         $invoice = Invoice::query()->create([
             'usuario_id' => $assinatura->usuario_id,
@@ -417,6 +414,7 @@ final class ConfirmarAssinatura
             'pago_em' => $pagoEm,
             'assinatura_id' => $assinatura->id,
             'renovacao' => true,
+            'valor_esperado_centavos' => $divergente ? $esperado : null,
             'cartao_bandeira' => $cobranca->cartaoBandeira,
             'cartao_ultimos4' => $cobranca->cartaoUltimos4,
             ...($comDesconto ? [
@@ -425,6 +423,17 @@ final class ConfirmarAssinatura
                 'desconto_centavos' => $desconto->desconto,
             ] : []),
         ]);
+
+        if ($divergente) {
+            Log::error('cobranca.valor_da_renovacao_divergente', [
+                'module' => 'cobranca',
+                'action' => 'processar_evento',
+                'assinatura_id' => $assinatura->id,
+                'invoice_id' => $invoice->id,
+                'esperado_centavos' => $esperado,
+                'recebido_centavos' => $cobranca->valorCentavos,
+            ]);
+        }
 
         $this->carteira->renovarCota($assinatura->id, $cota, $vencimento);
 
