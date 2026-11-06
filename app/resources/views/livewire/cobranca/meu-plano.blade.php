@@ -90,14 +90,14 @@
             @endif
         </section>
     @else
-        <div class="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:items-start mb-6">
-            <section aria-labelledby="plano-titulo" dusk="screen-meuplano-plano">
-                <x-card>
+        <div class="flex flex-col gap-4 lg:grid lg:grid-cols-2 mb-4">
+            <section aria-labelledby="plano-titulo" class="flex flex-col" dusk="screen-meuplano-plano">
+                <x-card class="flex-1 flex flex-col">
                     <h2 id="plano-titulo" class="{{ $h2 }}">Plano</h2>
 
                     @if ($situacao === S::SemPlano)
-                        <p class="m-0 mb-3 text-[color:var(--color-primary)]" dusk="screen-meuplano-situacao">Sem plano. Você usa créditos avulsos.</p>
-                        <div class="flex flex-wrap gap-3">
+                        <p class="m-0 mb-3 text-sm text-[color:var(--color-primary)]" dusk="screen-meuplano-situacao">Sem plano. Você usa créditos avulsos.</p>
+                        <div class="flex flex-wrap gap-3 mt-auto">
                             @if ($urlPlanos)<x-button :href="$urlPlanos" variant="secondary" dusk="screen-meuplano-ver-planos">Ver planos</x-button>@endif
                         </div>
                     @else
@@ -164,7 +164,7 @@
                             </p>
                         @endif
 
-                        <div class="flex flex-wrap gap-3 mt-3">
+                        <div class="flex flex-wrap gap-3 mt-auto pt-3">
                             @if (($desconto !== null && $desconto['semCartao'] && $situacao === S::Ativo && $desconto['fim'] !== null) || ($semCartaoSemDesconto !== null && $situacao === S::Ativo))
                                 <x-button type="button" variant="primary" wire:click="trocarCartao" :disabled="$acaoBloqueada" dusk="screen-meuplano-cadastrar-cartao">Cadastrar cartão</x-button>
                             @endif
@@ -227,8 +227,8 @@
                 </x-card>
             </section>
 
-            <section aria-labelledby="analises-titulo" dusk="screen-meuplano-analises">
-                <x-card>
+            <section aria-labelledby="analises-titulo" class="flex flex-col" dusk="screen-meuplano-analises">
+                <x-card class="flex-1 flex flex-col">
                     <h2 id="analises-titulo" class="{{ $h2 }}">Análises</h2>
 
                     @if (in_array($situacao, [S::Teste, S::Ativo, S::Cancelado, S::EmAtraso], true))
@@ -250,23 +250,18 @@
                         {{ $creditosTotal === 0 ? 'nenhum' : $creditosTotal.' no total' }}
                     </p>
                     @if ($lotes !== [])
-                        <ul class="m-0 mt-1 mb-3 pl-5 text-sm text-[color:var(--color-primary)]" dusk="screen-meuplano-lotes">
+                        <ul class="m-0 mt-1 mb-3 p-0 list-none text-sm text-[color:var(--color-primary)]" dusk="screen-meuplano-lotes">
                             @foreach ($lotes as $l)
                                 <li dusk="screen-meuplano-lote">
-                                    {{ $l['restante'] }} — vencem em {{ $dia($l['expira']) }}
+                                    {{ $l['restante'] }} — {{ $l['restante'] === 1 ? 'vence' : 'vencem' }} em {{ $dia($l['expira']) }}
                                     @if ($l['perto'])<span class="pill ml-1" dusk="screen-meuplano-lote-perto">vence em breve</span>@endif
                                 </li>
                             @endforeach
                         </ul>
                     @endif
 
-                    <div class="flex flex-wrap gap-3 mt-2">
-                        @if ($urlComprar)
-                            <x-button :href="route('creditos.comprar')" variant="secondary" :disabled="$acaoBloqueada" dusk="screen-meuplano-comprar-creditos">Comprar créditos</x-button>
-                        @endif
-                    </div>
 
-                    <p class="m-0 mt-3 text-sm text-[color:var(--color-secondary)]" dusk="screen-meuplano-drm">
+                    <p class="m-0 mb-3 text-sm text-[color:var(--color-secondary)]" dusk="screen-meuplano-drm">
                         @if (in_array($situacao, [S::Teste, S::Ativo, S::Cancelado, S::EmAtraso], true))
                             O Raio X do Negócio está incluído no plano.
                         @else
@@ -274,6 +269,12 @@
                             @if ($urlPlanos)<a href="{{ $urlPlanos }}" class="link">Assinar para ter o Raio X</a>@endif
                         @endif
                     </p>
+
+                    <div class="flex flex-wrap gap-3 mt-auto">
+                        @if ($urlComprar)
+                            <x-button :href="route('creditos.comprar')" variant="secondary" :disabled="$acaoBloqueada" dusk="screen-meuplano-comprar-creditos">Comprar créditos</x-button>
+                        @endif
+                    </div>
                 </x-card>
             </section>
         </div>

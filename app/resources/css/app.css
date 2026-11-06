@@ -36,6 +36,11 @@
         outline-offset: 2px;
         border-radius: 2px;
     }
+
+    /* RNF-UI-02: foco por script (título ao abrir a tela) não desenha contorno; quem usa leitor de tela continua sendo levado até ele. */
+    [tabindex="-1"]:focus-visible {
+        outline: none;
+    }
 }
 
 /*

@@ -277,3 +277,7 @@ Em ordem, sem pular:
 10. Notifica PO com resumo + link.
 
 > **Validação boa parece rotineira por fora. Por dentro, é disciplina sem atalho.**
+
+## Alinhamento visual
+
+Para cada tela do épico, abra a tela em 1280 px e 390 px e registre screenshot como evidência. Tela fora do RNF-UI-02 é `fail`.

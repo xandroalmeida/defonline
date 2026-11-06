@@ -193,3 +193,8 @@ Se a resposta para qualquer uma é **não**, **conserte primeiro**, marca pronto
 > **Não diga "está pronto" quando ainda não está.**
 
 Adiar 30 minutos para fazer direito hoje vale dias de retrabalho amanhã. Esse é o cálculo que vale.
+
+## Alinhamento visual (telas novas ou alteradas)
+
+- [ ] Conferi a tela renderizada em 1280 px e 390 px, nos estados que mudam o conteúdo (RNF-UI-02).
+- [ ] Cards lado a lado têm teste Dusk com `assertAlinhados`.

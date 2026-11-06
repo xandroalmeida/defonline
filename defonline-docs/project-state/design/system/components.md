@@ -229,3 +229,7 @@ Botão com aparência de link, para ação que **muda estado sem navegar**. Caso
 - **Só sobre `--color-surface`.** Sobre `--color-neutral` o `tertiary` mede 4,45:1 e reprova AA.
 - Área de toque ≥44px, ainda que o texto seja menor.
 - **Não usar** onde `ghost` serve — `ghost` tem peso de botão e é a escolha certa quando a ação está numa barra de ações, não no meio de texto corrido.
+
+## Alinhamento (RNF-UI-02)
+
+Cards lado a lado: `flex flex-col gap-4 lg:grid lg:grid-cols-2` na grade, `flex flex-col` na seção, `flex-1 flex flex-col` no `<x-card>` e `mt-auto` no bloco de ações.

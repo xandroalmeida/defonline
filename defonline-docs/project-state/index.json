@@ -2758,6 +2758,39 @@
       "blocked_by": [],
       "path": "epics/EPIC-004-app-shell-navegacao/stories/STORY-096-mascaras-de-dinheiro-e-percentual.md",
       "note": "Requisito RNF-UI-01, pedido pelo PO em 2026-11-06."
+    },
+    {
+      "type": "feature",
+      "target_role": "programador",
+      "status": "in_review",
+      "blocks": [],
+      "epic_id": "EPIC-004",
+      "sprint_id": null,
+      "owner_agent": "claude-opus-5-5",
+      "requires_design": false,
+      "created_at": "2026-11-06",
+      "updated_at": "2026-11-06",
+      "id": "STORY-097",
+      "slug": "minha-conta",
+      "title": "Minha conta: editar perfil e ver plano, créditos, cupons e cobranças",
+      "estimated_session_size": "M"
+    },
+    {
+      "type": "feature",
+      "target_role": "programador",
+      "status": "in_review",
+      "blocks": [],
+      "epic_id": "EPIC-004",
+      "sprint_id": null,
+      "owner_agent": "claude-opus-5-5",
+      "requires_design": false,
+      "created_at": "2026-11-06",
+      "updated_at": "2026-11-06",
+      "id": "STORY-098",
+      "slug": "alinhamento-visual",
+      "title": "Requisito de alinhamento visual e correção de Meu plano e Minha conta",
+      "estimated_session_size": "S",
+      "note": "Requisito RNF-UI-02, pedido pelo PO em 2026-11-06."
     }
   ],
   "sprints": [

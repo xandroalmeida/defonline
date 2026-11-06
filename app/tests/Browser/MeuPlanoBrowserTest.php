@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Browser;
 
+use App\Domain\Cobranca\Carteira;
 use App\Domain\Cobranca\CicloCobranca;
 use App\Domain\Cobranca\MeioPagamento;
 use App\Domain\Cobranca\PaymentProvider;
@@ -20,6 +21,7 @@ use App\Services\Cobranca\ReceberWebhook;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Dusk\Browser;
+use Tests\Browser\Concerns\VerificaAlinhamento;
 use Tests\DuskTestCase;
 
 /**
@@ -31,7 +33,7 @@ use Tests\DuskTestCase;
  */
 final class MeuPlanoBrowserTest extends DuskTestCase
 {
-    use DatabaseTruncation;
+    use DatabaseTruncation, VerificaAlinhamento;
 
     /** @var list<string> */
     protected array $tablesToTruncate = [
@@ -292,6 +294,25 @@ final class MeuPlanoBrowserTest extends DuskTestCase
 
         $this->assertSame($antiga, Assinatura::query()->where('usuario_id', $usuario->id)->sole()->id_externo);
         $this->assertSame('falhou', TrocaDeCartao::query()->sole()->status);
+    }
+
+    public function test_cards_e_botoes_ficam_alinhados_com_e_sem_plano(): void
+    {
+        $avulso = Usuario::factory()->create();
+        app(Carteira::class)->concederCreditos($avulso->id, 1, now()->addYear());
+        $assinante = $this->assinante();
+        app(Carteira::class)->concederCreditos($assinante->id, 2, now()->addYear());
+
+        $this->browse(function (Browser $browser) use ($avulso, $assinante) {
+            $browser->resize(1280, 900)->loginAs($avulso)->visit('/meu-plano')->waitFor('@screen-meuplano-plano');
+            $this->assertAlinhados($browser, [
+                ['screen-meuplano-plano', 'screen-meuplano-analises'],
+                ['screen-meuplano-ver-planos', 'screen-meuplano-comprar-creditos'],
+            ]);
+
+            $browser->logout()->loginAs($assinante)->visit('/meu-plano')->waitFor('@screen-meuplano-trocar-cartao');
+            $this->assertAlinhados($browser, [['screen-meuplano-plano', 'screen-meuplano-analises']]);
+        });
     }
 
     public function test_quem_nao_tem_plano_nem_creditos_ve_a_oferta(): void

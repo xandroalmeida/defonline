@@ -82,6 +82,11 @@ Isso é exigência por estória que entrega serviço novo, não opcional.
 - Componentes interativos novos têm rótulos acessíveis e funcionam por teclado.
 - Contraste mínimo respeitado conforme `defonline-docs/especificacao/V2/design-system.md`.
 
+## 5.1. Alinhamento visual (frontend)
+
+- Toda tela nova ou alterada segue o RNF-UI-02 (`defonline-docs/especificacao/V2/requisitos-nao-funcionais-e-juridicos.md` §12).
+- Estória com tela só fica pronta depois da conferência em 1280 px e 390 px. Cards lado a lado exigem teste com `assertAlinhados`.
+
 ## 6. O que NÃO é exigência transversal (e portanto é decisão técnica do time)
 
 Para deixar claro o que NÃO entra aqui:

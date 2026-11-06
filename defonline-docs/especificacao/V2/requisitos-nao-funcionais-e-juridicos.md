@@ -24,6 +24,7 @@
 9. [Gestão de Risco Técnico do Diagnóstico (TDD e E2E)](#9-gestão-de-risco-técnico-do-diagnóstico-tdd-e-e2e)
 10. [Critérios de Aceite para Kickoff](#10-critérios-de-aceite-para-kickoff)
 11. [Entrada de Dados](#11-entrada-de-dados)
+12. [Alinhamento Visual](#12-alinhamento-visual)
 
 ---
 
@@ -419,3 +420,22 @@ Decidido pelo PO em 2026-11-06. Vale para todo campo do sistema, inclusive a ár
 - **O que foi exibido é o que foi gravado:** o valor enviado ao servidor é o valor mostrado, mesmo digitando devagar e com a rede lenta (IDR-034).
 
 **Verificação:** `tests/Feature/Regras/MascarasDeEntradaTest.php` reprova campo decimal, máscara própria ou rótulo com unidade fora dos componentes. Campo novo também precisa de teste Dusk que compare o valor gravado com o exibido.
+
+---
+
+## 12. Alinhamento Visual
+
+### RNF-UI-02 — Toda tela entregue com os elementos alinhados
+
+Decidido pelo PO em 2026-11-06, depois de telas entregues com cards, botões e textos desalinhados. Vale para toda tela nova ou alterada, inclusive a área administrativa. Tela desalinhada não está pronta.
+
+- **Cards lado a lado:** têm o mesmo topo e a mesma altura. Nunca use `items-start` em grades de cards.
+- **Espaçamento:** o espaço entre cards é igual na horizontal e na vertical, inclusive entre grupos de cards da mesma tela.
+- **Ações:** botões e links equivalentes de cards vizinhos ficam no pé do card e na mesma altura. Texto de apoio vem antes da ação.
+- **Borda esquerda:** breadcrumb, título, cards e textos da página começam na mesma coluna. Dentro do card, listas e textos também, salvo hierarquia real.
+- **Mesma função, mesmo estilo:** rótulos de campos editáveis e somente leitura usam o mesmo estilo. Blocos vizinhos usam a mesma escala de texto.
+- **Tabelas:** cabeçalho e conteúdo da coluna têm o mesmo alinhamento.
+- **Foco:** o foco por script no título não desenha contorno, que passaria da coluna da página. O foco por teclado em elementos interativos continua visível.
+- **Celular:** em 390 px, a tela empilha os cards, mantém a borda esquerda e não rola para o lado.
+
+**Verificação:** antes de entregar, confira a tela renderizada em 1280 px e em 390 px, com o conteúdo real de cada estado, como sem plano e com plano. Toda tela com cards lado a lado tem teste Dusk com `assertAlinhados` (`tests/Browser/Concerns/VerificaAlinhamento.php`, tolerância de 1 px). A validação de épico reprova tela fora desta regra.

@@ -95,6 +95,12 @@ Detalhe em `references/tone-and-voice.md`.
 
 Detalhe em `references/accessibility-basics.md`.
 
+### 5.1. Alinhamento é critério de entrega
+
+> Cards, ações, rótulos e textos seguem o RNF-UI-02. A spec define a grade, o espaçamento e onde ficam as ações em cada estado, e a tela implementada é conferida em 1280 px e 390 px.
+
+**Sinais de alerta.** Cards vizinhos com alturas diferentes; botões equivalentes em níveis diferentes; texto recuado sem hierarquia real; contorno de foco por script aparecendo no título.
+
 ### 6. Performance percebida é parte do design
 
 > Latência é problema de design tanto quanto de back. Skeleton states, otimismo visual, feedback imediato a toque, transições curtas (≤300ms) que comunicam progresso. Spinner longo é falha de design.

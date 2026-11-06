@@ -144,7 +144,7 @@ describe('CA-1 plano, ciclo, renovação, cota e lotes', function () {
         $t = _meuPlano($this->usuario)
             ->assertSee('3 no total')
             ->assertSee('2 — vencem em '._dia(now()->addDays(10)))
-            ->assertSee('1 — vencem em '._dia(now()->addMonths(10)))
+            ->assertSee('1 — vence em '._dia(now()->addMonths(10)))
             ->assertSeeHtml('screen-meuplano-lote-perto')
             ->assertSeeHtml('screen-meuplano-aviso')
             ->assertSee('Você tem créditos que vencem em breve.');
