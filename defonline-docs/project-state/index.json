@@ -312,7 +312,7 @@
       "slug": "drm-demonstracao-resultado-mensal",
       "title": "DRM — Demonstração de Resultado Mensal (o negócio deu lucro este mês?)",
       "wave": "WAVE-2026-02",
-      "status": "in_progress",
+      "status": "in_review",
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/epic.md",
       "story_ids": [
         "STORY-045",
@@ -328,7 +328,8 @@
         "STORY-055",
         "STORY-056",
         "STORY-057",
-        "STORY-058"
+        "STORY-058",
+        "STORY-095"
       ],
       "validation_report": null,
       "blocked_by_epics": [],
@@ -1770,7 +1771,7 @@
       "title": "Validação final do EPIC-010",
       "type": "validation",
       "target_role": "validador",
-      "status": "ready",
+      "status": "blocked",
       "estimated_session_size": "L",
       "blocked_by": [
         "STORY-045",
@@ -1785,17 +1786,18 @@
         "STORY-054",
         "STORY-055",
         "STORY-056",
-        "STORY-058"
+        "STORY-058",
+        "STORY-095"
       ],
       "blocks": [],
-      "note": "Checklist de 14 seções. Seção 2 (correção aritmética) é bloqueante por si só. Seção 6 inclui percurso cronometrado do 2º lançamento (≤5 min) — único item não verificável por teste automatizado.",
+      "note": "Rodada 1 reprovada: dígitos perdidos ao digitar (D-1). Repetir após a STORY-095.",
       "epic_id": "EPIC-010",
       "sprint_id": null,
       "owner_agent": null,
       "requires_design": false,
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-057-validacao-final-drm.md",
       "created_at": "2026-08-04",
-      "updated_at": "2026-08-04"
+      "updated_at": "2026-11-05"
     },
     {
       "id": "STORY-058",
@@ -2715,6 +2717,28 @@
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-094-correcao-termos-e-arrependimento.md",
       "related_pdr": "PDR-020",
       "note": "Correção da rodada 1 da validação: D-11"
+    },
+    {
+      "type": "bugfix",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-057"
+      ],
+      "epic_id": "EPIC-010",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-095",
+      "slug": "correcao-digitacao-e-achados-da-validacao-drm",
+      "title": "Correção — dígitos perdidos ao digitar e achados da validação do DRM",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-095-correcao-digitacao-e-achados-da-validacao-drm.md",
+      "related_pdr": "PDR-003",
+      "note": "Correção da rodada 1 da validação do DRM. D-1 é bloqueante."
     }
   ],
   "sprints": [
