@@ -16,6 +16,7 @@ use App\Models\ConsumoAnalise;
 use App\Models\Diagnostico;
 use App\Models\EmpresaAnalisada;
 use App\Models\Invoice;
+use App\Models\LoteCredito;
 use App\Models\TrialConfig;
 use App\Models\TrocaDeCartao;
 use App\Models\Usuario;
@@ -485,6 +486,60 @@ describe('CA-6 arrependimento', function () {
         $a->forceFill(['data_inicio' => now()->subDays(3)])->save();
 
         expect(_meuPlano($this->usuario)->html())->toContain('Você contratou há 3 dias e ainda não fez nenhuma análise');
+    });
+});
+
+describe('STORY-094 CA-4 arrependimento de quem comprou só créditos', function () {
+    function _compraDeCreditos(Usuario $u): Invoice
+    {
+        $i = _compraPendenteAsaas($u);
+        _entregar(_fake()->simularPagamento((string) $i->checkout_id_externo));
+
+        return $i->fresh();
+    }
+
+    it('nos 7 dias e sem usar o crédito, Meu plano diz há quantos dias e orienta o pedido de reembolso', function () {
+        $i = _compraDeCreditos($this->usuario);
+        $i->forceFill(['pago_em' => now()->subDays(2)])->save();
+
+        _meuPlano($this->usuario)
+            ->assertSeeHtml('screen-meuplano-arrependimento-creditos')
+            ->assertSee('Você comprou créditos há 2 dias e ainda não fez nenhuma análise com eles: dá para pedir o reembolso integral em')
+            ->assertSee('eb@ebparcerias.com');
+    });
+
+    it('comprou hoje: diz "hoje"', function () {
+        _compraDeCreditos($this->usuario);
+
+        _meuPlano($this->usuario)->assertSee('Você comprou créditos hoje e ainda não fez nenhuma análise com eles');
+    });
+
+    it('depois de 7 dias, ou depois de usar um crédito, ou com o reembolso já pedido, a orientação sai', function () {
+        $i = _compraDeCreditos($this->usuario);
+        $lote = LoteCredito::query()->where('invoice_id', $i->id)->sole();
+
+        $i->forceFill(['pago_em' => now()->subDays(8)])->save();
+        _meuPlano($this->usuario)->assertDontSeeHtml('screen-meuplano-arrependimento-creditos');
+
+        $i->forceFill(['pago_em' => now()->subDay()])->save();
+        _meuPlano($this->usuario)->assertSeeHtml('screen-meuplano-arrependimento-creditos');
+
+        $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $this->usuario->id]);
+        $diagnostico = Diagnostico::factory()->create(['usuario_id' => $this->usuario->id, 'empresa_analisada_id' => $empresa->id]);
+        ConsumoAnalise::query()->create([
+            'usuario_id' => $this->usuario->id, 'diagnostico_id' => $diagnostico->id, 'empresa_analisada_id' => $empresa->id,
+            'origem' => Origem::Credito, 'lote_credito_id' => $lote->id, 'consumido_em' => now(),
+        ]);
+        _meuPlano($this->usuario)->assertDontSeeHtml('screen-meuplano-arrependimento-creditos');
+    });
+
+    it('quem tem assinatura e comprou créditos também vê; quem nunca comprou, não', function () {
+        _meuPlano($this->usuario)->assertDontSeeHtml('screen-meuplano-arrependimento-creditos');
+
+        _mpAssinar($this->usuario);
+        _compraDeCreditos($this->usuario);
+
+        _meuPlano($this->usuario)->assertSeeHtml('screen-meuplano-arrependimento-creditos');
     });
 });
 

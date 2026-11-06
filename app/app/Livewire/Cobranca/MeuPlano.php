@@ -7,6 +7,7 @@ namespace App\Livewire\Cobranca;
 use App\Domain\Cobranca\Arrependimento;
 use App\Domain\Cobranca\Carteira;
 use App\Domain\Cobranca\CicloCobranca;
+use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\LoteVisto;
 use App\Domain\Cobranca\ProvedorIndisponivel;
 use App\Domain\Cobranca\RenovacaoPix;
@@ -17,6 +18,7 @@ use App\Models\Assinatura;
 use App\Models\CobrancaConfig;
 use App\Models\ConsumoAnalise;
 use App\Models\Cupom;
+use App\Models\Invoice;
 use App\Models\LoteCredito;
 use App\Models\PacoteCredito;
 use App\Models\Plano;
@@ -203,6 +205,7 @@ final class MeuPlano extends Component
             'cartao' => $this->cartao($assinatura),
             'renovaCotaEm' => $assinatura === null ? null : CarbonImmutable::instance($assinatura->proxima_cota_em ?? $assinatura->proximo_vencimento),
             'arrependimentoDias' => $this->arrependimento($assinatura, $situacao, $agora),
+            'arrependimentoCreditosDias' => $this->arrependimentoDeCreditos($usuario->id, $agora),
             'canalArrependimento' => Arrependimento::CANAL,
             'planos' => $situacao === SituacaoDoPlano::SemPlano && $lotes === [] ? Plano::query()->where('ativo', true)->orderBy('ordem')->get() : collect(),
             'pacotes' => $situacao === SituacaoDoPlano::SemPlano && $lotes === [] ? PacoteCredito::query()->where('ativo', true)->orderBy('ordem')->get() : collect(),
@@ -379,6 +382,41 @@ final class MeuPlano extends Component
             $agora,
             ConsumoAnalise::query()->where('assinatura_id', $assinatura->id)->exists(),
         );
+    }
+
+    /**
+     * STORY-094 CA-4 (Termo, cl. 9) — quem comprou créditos também tem o arrependimento: a compra paga mais recente,
+     * ainda nos 7 dias, sem reembolso em curso e sem nenhuma análise feita com os créditos dela. Devolve há quantos
+     * dias foi paga (0 = hoje), ou `null` se não há nenhuma nessa situação.
+     */
+    private function arrependimentoDeCreditos(string $usuarioId, CarbonImmutable $agora): ?int
+    {
+        $compras = Invoice::query()
+            ->where('usuario_id', $usuarioId)
+            ->where('tipo', 'credito')
+            ->where('status', EstadoCobranca::Paga->value)
+            ->whereNotNull('pago_em')
+            ->where('valor_centavos', '>', 0)
+            ->whereNull('devolucao_motivo')
+            ->whereNull('reembolso_estado')
+            ->where('pago_em', '>=', $agora->subDays(Arrependimento::DIAS)->subDay())
+            ->orderByDesc('pago_em')
+            ->get();
+
+        foreach ($compras as $compra) {
+            $lotes = LoteCredito::query()->where('invoice_id', $compra->id)->pluck('id');
+            $dias = Arrependimento::diasDesde(
+                CarbonImmutable::instance($compra->pago_em),
+                $agora,
+                $lotes->isEmpty() || ConsumoAnalise::query()->whereIn('lote_credito_id', $lotes)->exists(),
+            );
+
+            if ($dias !== null) {
+                return $dias;
+            }
+        }
+
+        return null;
     }
 
     private static function data(\DateTimeInterface $d): string

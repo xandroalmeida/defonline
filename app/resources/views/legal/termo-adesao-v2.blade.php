@@ -19,33 +19,34 @@
 </ul>
 
 <h2>4. Planos e pacotes de créditos</h2>
-<p>Nenhum valor é cobrado sem que você contrate expressamente um plano ou um pacote. Preços, ciclos, quantidade de análises e demais condições são os exibidos no momento da contratação.</p>
+<p>Nenhum valor é cobrado sem que você contrate expressamente um plano ou um pacote. Preços, ciclos, quantidade de análises e demais condições são os exibidos no momento da contratação, e a cota e o preço contratados valem até você trocar de plano ou até um reajuste comunicado com aviso de 30 dias (cláusula 7).</p>
 <ul>
-    <li><strong>Planos de assinatura:</strong> dão direito a uma cota de análises por mês e ao Raio X do Negócio. A cota é renovada a cada mês na data de aniversário da assinatura e, salvo indicação em contrário na oferta, a cota não usada não acumula.</li>
+    <li><strong>Planos de assinatura:</strong> dão direito a uma cota de análises por mês e ao Raio X do Negócio. A cota volta cheia a cada renovação, na data de aniversário da assinatura, e, salvo indicação em contrário na oferta, a cota não usada não acumula.</li>
     <li><strong>Pacotes de créditos:</strong> cada crédito dá direito a uma análise, são pagos à vista, não criam recorrência e não incluem o Raio X do Negócio. A validade é informada na compra. A cota do plano é consumida antes dos créditos, e os créditos com vencimento mais próximo são usados primeiro. Créditos não são transferíveis entre contas.</li>
-    <li><strong>Troca de plano:</strong> a mudança para um plano superior vale de imediato, com cobrança proporcional da diferença no ciclo vigente. A mudança para um plano inferior vale a partir do ciclo seguinte.</li>
+    <li><strong>Troca de plano:</strong> a mudança para um plano superior vale de imediato, com cobrança proporcional da diferença de preço no ciclo vigente e uma cota extra proporcional ao tempo que falta para a cota voltar cheia; a cota cheia do plano novo vale a partir da próxima renovação. A mudança para um plano inferior vale a partir do ciclo seguinte.</li>
 </ul>
 
 <h2>5. Trial gratuito</h2>
 <p>O trial dá acesso, sem cadastro de meio de pagamento, às análises e ao Raio X do Negócio, pelo período e na quantidade informados na oferta. Ele pode ser usado uma única vez por CPF ou CNPJ. Ao final, as funções pagas são bloqueadas até que você assine um plano ou compre créditos, e não há cobrança automática.</p>
 
 <h2>6. Cupons de desconto</h2>
-<p>Cupons podem conceder desconto parcial ou total e valem nas condições informadas ao serem aplicados, como itens cobertos, vigência e número de ciclos. Cupons não têm valor em dinheiro e não são transferíveis. Quando o desconto termina, a assinatura segue pelo preço vigente do plano, e você será avisado antes disso. Se não houver meio de pagamento cadastrado, o acesso às funções pagas é bloqueado até a regularização.</p>
+<p>Cupons podem conceder desconto parcial ou total e valem nas condições informadas ao serem aplicados, como itens cobertos, vigência e número de ciclos. Cupons não têm valor em dinheiro e não são transferíveis. Quando o desconto termina, a assinatura volta ao preço cheio informado na contratação, e você será avisado antes disso. Se não houver meio de pagamento cadastrado, o acesso às funções pagas é bloqueado até a regularização.</p>
 
 <h2>7. Pagamento, renovação e falha de cobrança</h2>
 <ul>
     <li>Os pagamentos são processados por provedor especializado. O DEFOnline não armazena os dados completos do seu cartão.</li>
     <li>A assinatura paga com cartão renova automaticamente ao fim de cada ciclo até que você a cancele. A assinatura paga com Pix não renova sozinha: sem novo pagamento, as funções pagas são bloqueadas ao fim do ciclo. Avisamos por e-mail sete dias antes do fim do ciclo.</li>
-    <li>Se a cobrança falhar, avisamos você e tentamos novamente até três vezes, com intervalos de 48 horas. Após a terceira falha, o ciclo é encerrado e as funções pagas são bloqueadas.</li>
-    <li>Reajustes são comunicados por e-mail com ao menos 30 dias de antecedência e valem apenas para novos ciclos após a data de vigência.</li>
+    <li>Se a cobrança falhar, avisamos você e tentamos cobrar novamente três vezes, a cada 48 horas. Durante essas tentativas a assinatura fica em atraso, mas as funções pagas continuam disponíveis: as análises consomem a cota que sobrou e, sem cota, os créditos que você tiver; sem cota nem créditos, a análise não é feita por falta de saldo, até a cobrança ser paga ou o cartão atualizado. Se a cobrança não for paga em até 48 horas depois da terceira tentativa, o ciclo é encerrado e as funções pagas são bloqueadas.</li>
+    <li>Reajustes são comunicados por e-mail com ao menos 30 dias de antecedência e valem apenas para novos ciclos após a data de vigência. Até lá, o preço e a cota contratados não mudam.</li>
     <li>A EB Parcerias emite nota fiscal das contratações.</li>
 </ul>
 
 <h2>8. Cancelamento</h2>
-<p>Você pode cancelar a renovação automática a qualquer momento no painel. O acesso continua até o fim do ciclo pago, sem reembolso proporcional do valor já pago. Depois disso, a conta continua existindo, o histórico de diagnósticos fica disponível pelos 12 meses mais recentes, e você pode reativar a assinatura quando quiser.</p>
+<p>Você pode cancelar a renovação automática a qualquer momento no painel. O acesso continua até o fim do ciclo pago, sem reembolso proporcional do valor já pago, e você pode reativar a renovação até lá.</p>
+<p>A assinatura em atraso pode ser cancelada a qualquer momento, mas o acesso às funções pagas é encerrado imediatamente, porque o ciclo não foi pago. Em qualquer caso, a conta continua existindo, e o histórico de diagnósticos e os lançamentos do Raio X do Negócio continuam disponíveis, inclusive para exportação.</p>
 
 <h2>9. Direito de arrependimento</h2>
-<p>Nos termos do art. 49 do Código de Defesa do Consumidor, você pode solicitar reembolso integral em até 7 dias corridos após a contratação, desde que nenhuma análise tenha sido executada nesse período. Fora dessa hipótese, créditos e valores pagos não são reembolsáveis, sem prejuízo dos direitos previstos em lei. O pedido é feito pelo e-mail <a href="mailto:eb@ebparcerias.com">eb@ebparcerias.com</a>.</p>
+<p>Nos termos do art. 49 do Código de Defesa do Consumidor, você pode solicitar reembolso integral em até 7 dias corridos após a contratação de um plano ou pacote de créditos, desde que nenhuma análise tenha sido executada com o que você comprou. Fora dessa hipótese, créditos e valores pagos não são reembolsáveis, sem prejuízo dos direitos previstos em lei. O pedido é feito pelo e-mail <a href="mailto:eb@ebparcerias.com">eb@ebparcerias.com</a>, e a página Meu plano lembra esse direito a quem contratou um plano e a quem comprou só créditos. Pagamentos por Pix são devolvidos depois de autorizados por nossa equipe no provedor de pagamento.</p>
 
 <h2>10. Empresas de terceiros</h2>
 <p>Se você cadastrar uma empresa que não é sua, como contador ou consultor:</p>

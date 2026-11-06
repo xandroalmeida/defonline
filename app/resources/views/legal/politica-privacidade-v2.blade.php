@@ -12,7 +12,7 @@
     <li><strong>Cadastro:</strong> CPF, nome, e-mail e telefone.</li>
     <li><strong>Empresas:</strong> dados públicos obtidos na Receita Federal a partir do CNPJ, incluindo quadro societário, e os dados que você informa.</li>
     <li><strong>Financeiros:</strong> as informações que você declara nos questionários e nos lançamentos mensais.</li>
-    <li><strong>Pagamento:</strong> plano ou pacote contratado, cupons, situação e histórico das cobranças. Os dados completos do cartão ficam apenas com o provedor de pagamento.</li>
+    <li><strong>Pagamento:</strong> plano ou pacote contratado, cupons, situação e histórico das cobranças e, do cartão, apenas a bandeira e os quatro últimos dígitos, para você reconhecê-lo em Meu plano. O número completo, o código de segurança e a validade ficam apenas com o provedor de pagamento.</li>
     <li><strong>Uso:</strong> eventos de uso sem informações pessoais identificáveis, para análise agregada, e registros de acesso e auditoria.</li>
 </ul>
 
@@ -27,7 +27,7 @@
 <h2>3. Compartilhamento</h2>
 <p>Não vendemos dados a terceiros. Compartilhamos apenas o necessário com:</p>
 <ul>
-    <li><strong>Asaas</strong>, provedor de pagamento: nome, CPF ou CNPJ, e-mail e dados da cobrança, quando você contrata um plano ou pacote.</li>
+    <li><strong>Asaas</strong>, provedor de pagamento: a descrição e o valor da cobrança e o código interno da compra, quando você contrata um plano ou pacote. O DEFOnline não envia seu nome, CPF ou e-mail ao provedor: os dados do cartão e os de identificação que o provedor exigir, você os informa diretamente na página de pagamento do provedor. Do provedor recebemos a confirmação do pagamento, a bandeira e os quatro últimos dígitos do cartão.</li>
     <li><strong>Provedores de infraestrutura:</strong> hospedagem, backup e e-mail transacional.</li>
     <li><strong>Provedores de consulta à Receita Federal:</strong> o CNPJ informado no cadastro da empresa.</li>
     <li><strong>Autoridades:</strong> quando exigido por lei ou ordem judicial.</li>

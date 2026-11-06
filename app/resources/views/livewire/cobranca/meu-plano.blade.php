@@ -334,6 +334,14 @@
         </x-card>
     </section>
 
+    @if ($arrependimentoCreditosDias !== null)
+        <p class="m-0 mb-3 text-sm" dusk="screen-meuplano-arrependimento-creditos">
+            Você comprou créditos {{ $arrependimentoCreditosDias === 0 ? 'hoje' : "há {$arrependimentoCreditosDias} ".($arrependimentoCreditosDias === 1 ? 'dia' : 'dias') }} e ainda não fez nenhuma análise com eles: dá para pedir o reembolso integral em
+            <a href="mailto:{{ $canalArrependimento }}" class="link">{{ $canalArrependimento }}</a>.
+            Em pagamento por Pix, o reembolso depende de autorização da nossa equipe no provedor antes de o valor voltar.
+        </p>
+    @endif
+
     <p class="m-0 text-sm text-[color:var(--color-secondary)]" dusk="screen-meuplano-arrependimento">
         Arrependimento: em até 7 dias da contratação, se você ainda não fez nenhuma análise, peça o reembolso em
         <a href="mailto:{{ $canalArrependimento }}" class="link">{{ $canalArrependimento }}</a>.
