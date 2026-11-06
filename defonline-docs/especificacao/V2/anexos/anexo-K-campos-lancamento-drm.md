@@ -77,7 +77,7 @@ O grupo com maior número de itens (21) e, por isso, o principal alvo dos mecani
 | Ref | Campo | Tipo | Formato | Obrigatório | Visível quando | Observação |
 |---|---|---|---|---|---|---|
 | D15 | Total das despesas administrativas e gerais | Numérico | R$ ≥ 0 | Se grupo em modo agregado | modo agregado | Substitui D16–D36. |
-| D16 | Salários | Numérico | R$ ≥ 0 | Não | modo detalhado | Folha líquida paga no mês. Não inclui a retirada do dono (ver D39). |
+| D16 | Salários | Numérico | R$ ≥ 0 | Não | modo detalhado | Folha líquida paga no mês. Não inclui a retirada do dono (ver D40). |
 | D17 | Encargos trabalhistas (FGTS, INSS) | Numérico | R$ ≥ 0 | Não | modo detalhado | — |
 | D18 | Vale transporte | Numérico | R$ ≥ 0 | Não | modo detalhado | — |
 | D19 | Vale refeição / cesta alimentação | Numérico | R$ ≥ 0 | Não | modo detalhado | — |
@@ -106,7 +106,7 @@ O grupo com maior número de itens (21) e, por isso, o principal alvo dos mecani
 | D37 | Total das despesas financeiras | Numérico | R$ ≥ 0 | Se grupo em modo agregado | modo agregado | Substitui D38–D39. |
 | D38 | Juros pagos das dívidas | Numérico | R$ ≥ 0 | Não | modo detalhado | Inclui juros de antecipação de recebíveis e desconto de boletos. |
 | D39 | Tarifas bancárias | Numérico | R$ ≥ 0 | Não | modo detalhado | — |
-| D40 | Pró-labore (retirada dos sócios/dono) | Numérico | R$ ≥ 0 | Sim | sempre | **Sempre campo próprio**, nunca dentro de D15/D16. Posição na demonstração pende de `[DECIDIR-B]`. |
+| D40 | Pró-labore (retirada dos sócios/dono) | Numérico | R$ ≥ 0 | Sim | sempre | **Sempre campo próprio**, nunca dentro de D15/D16. Posição na demonstração parametrizável por Empresa Analisada (`[DECIDIR-B]`, resolvido no `PDR-004`; ver K.5-A), default `fora`. |
 
 ### K.3.7 Receitas e despesas não operacionais
 
@@ -117,7 +117,7 @@ Aprovadas pelo `PDR-004`, decisão E (resolve F7 do parecer). Ficam ocultas na d
 | D41 | Outras receitas do mês | Numérico | R$ ≥ 0 | Não | sempre | Venda de equipamento usado, rendimento de aplicação, indenização recebida. Não é venda de mercadoria ou serviço — isso é D01. |
 | D42 | Outras despesas do mês | Numérico | R$ ≥ 0 | Não | sempre | Multas, perdas, despesas não operacionais. |
 
-**Totais.** **38 campos monetários** na configuração completa, sem contar os agregadores. Com os quatro grupos em modo agregado, caem para **9**: D01, D02, D03, D08, D15, D37, D40, D41 e D42 — e destes, D41 e D42 tipicamente ficam zerados.
+**Totais.** **38 campos monetários** na configuração completa, sem contar os agregadores. Com os quatro grupos em modo agregado, caem para **9**: **7 obrigatórios** (D01, D02, D03, D08, D15, D37 e D40) e **2 opcionais** (D41 e D42), que ficam recolhidos na tela e tipicamente zerados. Em "7 campos" (checklist de validação) contam-se só os obrigatórios.
 
 ## K.4 Adaptação por setor
 
@@ -222,15 +222,15 @@ Redação final e revisão editorial pertencem ao pacote de conteúdo da EBC (`S
 
 ## K.11 Rastreabilidade com a planilha original
 
-| Campo deste anexo | Célula em `Demonstração de Resultado Mensal - DRM.xlsx` |
+| Campo deste anexo | Célula do **valor** em `Demonstração de Resultado Mensal - DRM.xlsx` (coluna D; a coluna A traz o rótulo) |
 |---|---|
-| D01 | C3 |
-| D02 | C5 |
-| D04–D07 | C8, C9, C10, C11 |
-| D09–D14 | C15 a C20 |
-| D16–D36 | C22 a C42 |
-| D38–D39 | C45, C46 |
-| D40 | B48 |
+| D01 | D3 |
+| D02 | D5 |
+| D04–D07 | D8, D9, D10, D11 |
+| D09–D14 | D15 a D20 |
+| D16–D36 | D22 a D42 |
+| D38–D39 | D45, D46 |
+| D40 | D48 |
 | D00 | — (só no título, A1: `"...DRM: AGO/2026"`) |
 | D03, D08, D15, D37 | — (agregadores, não existem na planilha) |
 | D41, D42 | — (`[DECIDIR-E]`) |
@@ -239,13 +239,14 @@ Redação final e revisão editorial pertencem ao pacote de conteúdo da EBC (`S
 
 | Item | Decisão | Onde |
 |---|---|---|
-| `[DECIDIR-B]` | Posição do pró-labore parametrizável, default `fora` | K.5-A, `design/estrutura-drm.md` §1 |
+| `[DECIDIR-B]` | **Resolvido** (`PDR-004`): posição do pró-labore parametrizável, default `fora` | K.3.6, K.5-A, `design/estrutura-drm.md` §1 |
 | `[DECIDIR-C]` | Percentual em todas as linhas; "antes do pró-labore" no lugar de "antes do IR/CSLL" | `design/estrutura-drm.md` §2 e §3.2 |
 | `[DECIDIR-D]` | Provisão contábil como alvo; caixa + alerta A4 enquanto o spike não conclui | K.8 |
 | `[DECIDIR-E]` | Outras receitas e despesas aprovadas | K.3.7 |
-| `[DECIDIR-A]` | **Em aberto** — nome "Raio X do Negócio". Não bloqueia nada | — |
+| `[DECIDIR-A]` | **Resolvido** (`PDR-009`, decisão 3): o módulo se chama "Raio X do Negócio" na interface | — |
 
 ## Histórico
 
+- 05/11/2026 — correções da validação do EPIC-010 (STORY-095, D-6): K.11 aponta as células de valor (coluna D) e não as de rótulo; D16 remete a D40; K.3.6 e K.12 refletem `[DECIDIR-B]` e `[DECIDIR-A]` resolvidos; K.3 distingue 7 obrigatórios e 2 opcionais.
 - 04/08/2026 — versão 1.1: incorpora o `PDR-004`. D41/D42 deixam de ser condicionais (38 campos monetários), nova seção K.5-A com os parâmetros da empresa, K.8 reescrita com o encaminhamento da provisão, nova K.12.
 - 04/08/2026 — versão 1.0, derivada do feedback do Key User de 03/08/2026 e das decisões do PDR-003.

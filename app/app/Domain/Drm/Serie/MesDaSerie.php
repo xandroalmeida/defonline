@@ -65,6 +65,38 @@ final readonly class MesDaSerie
         return new self($competencia, $versao, $nominais, $percentuais, self::camposDoPayload($payload), $nivel1);
     }
 
+    /**
+     * Valor nominal da linha neste mês, ou `null` se o mês não a informou (grupo agregado).
+     *
+     * Linha OMITIDA por estar zerada não é linha não informada: a L7b some do snapshot quando D41 e D42
+     * são zero (`estrutura-drm` §3.3) e vale 0 (STORY-095, D-2). Sem isto, os comparativos dela
+     * ficavam indisponíveis por "grupo agregado" e o acumulado do ano se perdia.
+     */
+    public function nominal(string $linha): ?int
+    {
+        if (array_key_exists($linha, $this->nominais)) {
+            return $this->nominais[$linha];
+        }
+
+        return $this->omitidaPorZero($linha) ? 0 : null;
+    }
+
+    /** Percentual da linha neste mês: o da linha omitida por zero é 0%, se o mês tem faturamento. */
+    public function percentual(string $linha): ?string
+    {
+        if (array_key_exists($linha, $this->percentuais)) {
+            return $this->percentuais[$linha];
+        }
+        $ancora = $this->codigoAncora();
+
+        return $this->omitidaPorZero($linha) && $ancora !== null && ($this->percentuais[$ancora] ?? null) !== null ? '0.0000' : null;
+    }
+
+    private function omitidaPorZero(string $linha): bool
+    {
+        return $linha === 'L7b' && ($this->campos['D41'] ?? null) === 0 && ($this->campos['D42'] ?? null) === 0;
+    }
+
     /** O resultado final: a última linha de nível 1 (DDR-004 item 3), nos dois modos. */
     public function codigoFinal(): ?string
     {

@@ -35,6 +35,12 @@ final class Formato
         return ($formatado === '0,0' ? '' : '+').$formatado.'%';
     }
 
+    /** `1 mês lançado` / `3 meses lançados` (STORY-095, O-5). */
+    public static function mesesLancados(int $n): string
+    {
+        return $n === 1 ? '1 mês lançado' : $n.' meses lançados';
+    }
+
     public static function sinal(string $percentualFormatado): string
     {
         return str_starts_with($percentualFormatado, '-') ? '−'.substr($percentualFormatado, 1) : $percentualFormatado;

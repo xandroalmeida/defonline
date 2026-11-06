@@ -121,6 +121,17 @@ final class Lancamento extends Component
      */
     public array $alertas_aceitos = [];
 
+    /**
+     * Assinatura do que cada alerta aceito dizia quando foi aceito (código => hash do valor e do contexto).
+     * O aceite vale para ESTE valor: se ele muda, o alerta volta a pedir aceite (STORY-095, O-1).
+     *
+     * @var array<string, string>
+     */
+    public array $alertas_assinaturas = [];
+
+    /** O bloco "Teve algo fora do movimento normal" foi aberto à mão; o servidor não pode recolhê-lo (STORY-095, O-4). */
+    public bool $nao_operacionais_aberto = false;
+
     /** Já tentou avançar/fechar e falhou: só então B3/B4 aparecem (B4 mudaria a cada dígito digitado). */
     public bool $tentou = false;
 
@@ -353,12 +364,43 @@ final class Lancamento extends Component
     /** O aceite único do bloco 6: registra os alertas hoje presentes. */
     public function aceitarAlertas(): void
     {
-        foreach ($this->alertasAtuais() as $alerta) {
+        $atuais = $this->alertasAtuais();
+        foreach ($atuais as $alerta) {
             if (! in_array($alerta->codigo, $this->alertas_aceitos, true)) {
                 $this->alertas_aceitos[] = $alerta->codigo;
             }
+            $this->alertas_assinaturas[$alerta->codigo] = self::assinatura($alerta->codigo, $atuais);
         }
         $this->salvarRascunho($this->bloco_atual);
+    }
+
+    /**
+     * Alertas que ainda pedem aceite: os nunca aceitos e os aceitos para outro valor (O-1). Um aceite sem
+     * assinatura (rascunho anterior a esta regra) não vale: o alerta pede de novo.
+     *
+     * @param  list<Ocorrencia>  $alertas
+     * @return list<Ocorrencia>
+     */
+    private function alertasPendentes(array $alertas): array
+    {
+        return array_values(array_filter(
+            $alertas,
+            fn (Ocorrencia $a): bool => ! in_array($a->codigo, $this->alertas_aceitos, true)
+                || ($this->alertas_assinaturas[$a->codigo] ?? null) !== self::assinatura($a->codigo, $alertas),
+        ));
+    }
+
+    /**
+     * O que o alerta diz agora: campo, valores e texto de todas as suas ocorrências (A4 pode ter várias).
+     *
+     * @param  list<Ocorrencia>  $alertas
+     */
+    private static function assinatura(string $codigo, array $alertas): string
+    {
+        $dele = array_values(array_filter($alertas, fn (Ocorrencia $a): bool => $a->codigo === $codigo));
+        $partes = array_map(fn (Ocorrencia $a): array => [$a->campo, $a->valorEnvolvido, $a->contexto], $dele);
+
+        return hash('sha256', (string) json_encode($partes));
     }
 
     /** Conflito de versão: descarta o rascunho velho e leva à versão atual, de onde se reabre a correção. */
@@ -389,8 +431,7 @@ final class Lancamento extends Component
         }
 
         $alertas = $this->alertasAtuais();
-        $pendentes = array_filter($alertas, fn (Ocorrencia $a): bool => ! in_array($a->codigo, $this->alertas_aceitos, true));
-        if ($pendentes !== []) {
+        if ($this->alertasPendentes($alertas) !== []) {
             return null;
         }
 
@@ -439,6 +480,20 @@ final class Lancamento extends Component
 
     // ------------------------------------------------------------------ render
 
+    /**
+     * Todo campo existe em `valores` (vazio), desde a primeira renderização (STORY-095, D-1).
+     *
+     * Chave AUSENTE vira, no cliente, uma atualização do array INTEIRO (`valores`), e a resposta
+     * a substitui por completo: o Livewire reescreve o <input> com o valor que a requisição levou
+     * e apaga as teclas digitadas enquanto ela voava. Com a chave já presente, a atualização é só
+     * a da folha (`valores.D01`) e o que foi digitado depois fica. Texto vazio e chave ausente
+     * significam o mesmo para o domínio (`Dinheiro::interpretar`), então isto não muda nenhum valor.
+     */
+    public function dehydrate(): void
+    {
+        $this->valores = [...array_fill_keys(LancamentoDrm::todosOsCampos(), ''), ...$this->valores];
+    }
+
     public function render(): View
     {
         $conteudo = app(ConteudoDrm::class);
@@ -461,7 +516,7 @@ final class Lancamento extends Component
             'lancamento' => $lancamento,
             'bloqueios' => $bloqueios,
             'alertas' => $alertas,
-            'alertasPendentes' => array_values(array_filter($alertas, fn (Ocorrencia $a): bool => ! in_array($a->codigo, $this->alertas_aceitos, true))),
+            'alertasPendentes' => $this->alertasPendentes($alertas),
             'repetidosDoBloco' => array_values(array_intersect($this->repetidos, $this->camposDoBloco($this->bloco_atual))),
             'origem' => $this->mes_origem === '' ? null : Competencia::deTexto($this->mes_origem),
             'grupos' => Grupo::cases(),
@@ -521,6 +576,7 @@ final class Lancamento extends Component
 
         $this->competencia_ja_lancada = DrmLancamento::vigenteDaCompetencia($this->empresa, $competencia->dia01()) !== null;
         $this->alertas_aceitos = [];
+        $this->alertas_assinaturas = [];
         $this->confirmando_detalhar = null;
 
         $rascunho = DrmRascunho::paraCompetencia($this->empresa, $competencia->dia01());
@@ -552,6 +608,7 @@ final class Lancamento extends Component
         $this->total_anterior = array_map('intval', (array) ($p['total_anterior'] ?? []));
         $this->mes_origem = (string) ($p['mes_origem'] ?? '');
         $this->alertas_aceitos = array_values((array) ($p['alertas_aceitos'] ?? []));
+        $this->alertas_assinaturas = array_map('strval', (array) ($p['alertas_assinaturas'] ?? []));
         $this->oferta_dispensada = (bool) ($p['oferta_dispensada'] ?? false);
         $this->bloco_atual = max(1, min(self::BLOCOS, (int) ($p['bloco'] ?? 1)));
         $this->retomando_rascunho = true;
@@ -645,13 +702,14 @@ final class Lancamento extends Component
                     'origem' => $this->retificando ? 'retificacao' : 'inicial',
                     'base_versao' => $this->retificando ? $this->base_versao : null,
                     'rascunho_payload' => [
-                        'valores' => $this->valores,
+                        'valores' => array_filter($this->valores, fn (?string $v): bool => trim((string) $v) !== ''), // vazio = ausente (ver dehydrate).
                         'modos' => $this->modos,
                         'repetidos' => $this->repetidos,
                         'somados' => $this->somados,
                         'total_anterior' => $this->total_anterior,
                         'mes_origem' => $this->mes_origem,
                         'alertas_aceitos' => $this->alertas_aceitos,
+                        'alertas_assinaturas' => $this->alertas_assinaturas,
                         'oferta_dispensada' => $this->oferta_dispensada,
                         'bloco' => $bloco,
                     ],
