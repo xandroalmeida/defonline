@@ -102,7 +102,7 @@
 
                 <form wire:submit="renovar" class="flex flex-col gap-3 m-0" novalidate>
                     <label class="flex gap-2.5 items-start text-sm font-normal cursor-pointer min-h-[44px]">
-                        <input type="checkbox" wire:model="aceito" dusk="screen-checkout-aceite"
+                        <input type="checkbox" wire:model.live="aceito" dusk="screen-checkout-aceite"
                                aria-describedby="@error('aceito')aceite-erro @enderror"
                                class="mt-1 accent-[color:var(--color-tertiary)]">
                         <span class="text-[color:var(--color-primary)]">

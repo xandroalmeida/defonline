@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Cobranca\EstadoCobranca;
+use App\Domain\Cobranca\MeioPagamento;
 use App\Infrastructure\Cobranca\Fake\FakePaymentProvider;
 use App\Jobs\EnviarEmailConfirmacao;
 use App\Livewire\Cobranca\ComprarCreditos;
@@ -244,4 +245,32 @@ describe('seletor de meio (STORY-078 CA-1)', function () {
 
         $this->actingAs($usuario)->get(route('creditos.comprar', ['pacote' => _pacote()->id, 'meio' => 'cartao']))->assertNotFound();
     });
+});
+
+it('STORY-098 — pacote de 1 análise fica no singular na tela e na descrição da cobrança', function () {
+    CobrancaConfig::atual()->update(['ativa' => true]);
+    _usarProvedor('fake');
+    $u = _compradorConfirmado();
+    $pacote = _pacote();
+    $pacote->forceFill(['quantidade_creditos' => 1])->save();
+
+    Livewire::actingAs($u)->test(ComprarCreditos::class, ['pacote' => $pacote->id])
+        ->assertSee('1 análise')
+        ->assertDontSee('1 análises');
+
+    $invoice = app(IniciarCompraDeCreditos::class)->executar($u, $pacote->fresh(), '127.0.0.1', 'teste', MeioPagamento::Pix, null);
+
+    expect($invoice->descricao)->toEndWith('· 1 análise');
+});
+
+it('marcar o aceite tira o erro na hora, e desmarcar não o traz de volta sem novo clique', function () {
+    CobrancaConfig::atual()->update(['ativa' => true]);
+    _usarProvedor('fake');
+
+    Livewire::actingAs(_compradorConfirmado())->test(ComprarCreditos::class, ['pacote' => _pacote()->id])
+        ->call('gerar')
+        ->assertHasErrors('aceito')
+        ->set('aceito', true)
+        ->assertHasNoErrors('aceito')
+        ->assertDontSee('Marque o aceite do Termo para continuar.');
 });

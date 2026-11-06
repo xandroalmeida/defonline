@@ -49,6 +49,14 @@ final class ComprarCreditos extends Component
 
     public bool $confirmacaoReenviada = false;
 
+    /** Marcou o aceite: o erro de quando faltava some na hora. */
+    public function updatedAceito(): void
+    {
+        if ($this->aceito) {
+            $this->resetErrorBag('aceito');
+        }
+    }
+
     public function mount(?string $pacote = null): void
     {
         abort_unless(CobrancaConfig::ligada(), 404);

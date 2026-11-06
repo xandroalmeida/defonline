@@ -17,7 +17,7 @@
                 <li>
                     <x-card as="article" class="h-full flex flex-col gap-3" dusk="screen-checkout-pacote-{{ $p->codigo }}">
                         <h2 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0">Pacote {{ $p->nome }}</h2>
-                        <p class="m-0 text-sm text-[color:var(--color-secondary)]">{{ $p->quantidade_creditos }} análises · {{ $reais($p->preco_centavos) }}</p>
+                        <p class="m-0 text-sm text-[color:var(--color-secondary)]">{{ $p->quantidadePorExtenso() }} · {{ $reais($p->preco_centavos) }}</p>
                         <x-button :href="route('creditos.comprar', $p->id)" variant="primary" class="mt-auto"
                                   dusk="screen-checkout-comprar-{{ $p->codigo }}">Comprar</x-button>
                     </x-card>
@@ -33,7 +33,7 @@
             <div><x-button :href="route('creditos.comprar')" variant="secondary">Ver os pacotes disponíveis</x-button></div>
         </div>
     @else
-        <p class="text-[color:var(--color-secondary)] text-sm mt-0 mb-6">Pacote {{ $pacote->nome }} · {{ $pacote->quantidade_creditos }} análises</p>
+        <p class="text-[color:var(--color-secondary)] text-sm mt-0 mb-6">Pacote {{ $pacote->nome }} · {{ $pacote->quantidadePorExtenso() }}</p>
 
         @if (! $emailConfirmado)
             <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4 max-w-[640px] flex flex-col gap-3"
@@ -120,7 +120,7 @@
 
                     <form wire:submit="gerar" class="flex flex-col gap-3 m-0" novalidate>
                         <label class="flex gap-2.5 items-start text-sm font-normal cursor-pointer min-h-[44px]">
-                            <input type="checkbox" wire:model="aceito" dusk="screen-checkout-aceite"
+                            <input type="checkbox" wire:model.live="aceito" dusk="screen-checkout-aceite"
                                    aria-describedby="@error('aceito')aceite-erro @enderror"
                                    class="mt-1 accent-[color:var(--color-tertiary)]">
                             <span class="text-[color:var(--color-primary)]">

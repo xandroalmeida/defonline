@@ -35,4 +35,10 @@ final class PacoteCredito extends Model
     {
         return ['ativo' => 'boolean'];
     }
+
+    /** "1 análise", "5 análises". */
+    public function quantidadePorExtenso(): string
+    {
+        return $this->quantidade_creditos.' '.($this->quantidade_creditos === 1 ? 'análise' : 'análises');
+    }
 }

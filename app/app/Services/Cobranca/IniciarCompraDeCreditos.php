@@ -79,7 +79,7 @@ final class IniciarCompraDeCreditos
                 'usuario_id' => $usuario->id,
                 'tipo' => 'credito',
                 'pacote_credito_id' => $pacote->id,
-                'descricao' => "Pacote {$pacote->nome} · {$pacote->quantidade_creditos} análises",
+                'descricao' => "Pacote {$pacote->nome} · {$pacote->quantidadePorExtenso()}",
                 'quantidade_creditos' => $pacote->quantidade_creditos,
                 'validade_meses' => $pacote->validade_meses,
                 'valor_centavos' => $aplicado?->preco->final ?? $pacote->preco_centavos,
