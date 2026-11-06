@@ -8,6 +8,13 @@
             Acesse sua conta para gerenciar suas empresas.
         </p>
 
+        @if (session('senha_redefinida'))
+            <div class="rounded-md border border-[color:var(--color-border)] bg-[color:var(--color-neutral)] text-sm text-[color:var(--color-primary)] px-4 py-3 mb-4"
+                 role="status" dusk="senha-redefinida">
+                Senha alterada. Entre com a nova senha.
+            </div>
+        @endif
+
         @if (session('cadastro_sucesso'))
             <div class="rounded-md border border-[color:var(--color-border)] bg-[color:var(--color-neutral)] text-[color:var(--color-primary)] text-sm px-4 py-3 mb-4"
                  dusk="cadastro-sucesso">
@@ -47,6 +54,9 @@
         </form>
 
         <div class="mt-6 flex flex-col gap-2 text-sm text-center">
+            <a href="{{ route('senha.esqueci') }}" wire:navigate class="link" dusk="login-esqueci-senha">
+                Esqueci minha senha
+            </a>
             <a href="{{ route('email.confirmar-erro') }}" wire:navigate class="link"
                dusk="login-reenviar-email">
                 Reenviar email de confirmação

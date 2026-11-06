@@ -39,6 +39,8 @@ use App\Livewire\Empresa\Cadastrar as CadastrarEmpresa;
 use App\Livewire\Home\MinhasEmpresas;
 use App\Livewire\Login;
 use App\Livewire\Planos\Pagina as PaginaPlanos;
+use App\Livewire\Senha\RedefinirSenha;
+use App\Livewire\Senha\SolicitarRedefinicao;
 use App\Livewire\Trial\Ativar as AtivarTrial;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -56,6 +58,9 @@ Route::get('/ready', [HealthController::class, 'ready'])->name('ready');
 
 Route::get('/cadastro', Cadastro::class)->name('cadastro');
 Route::get('/login', Login::class)->middleware('throttle:login')->name('login');
+// STORY-100 — recuperação de senha. O link leva o id, nunca o e-mail, para não pôr dado pessoal na URL.
+Route::get('/senha/esqueci', SolicitarRedefinicao::class)->name('senha.esqueci');
+Route::get('/senha/redefinir/{usuario}/{token}', RedefinirSenha::class)->whereUuid('usuario')->name('senha.redefinir');
 
 // STORY-075 — planos e preços. Pública (o visitante é levado ao cadastro); 404 com a cobrança desligada.
 Route::get('/planos', PaginaPlanos::class)->name('planos');
