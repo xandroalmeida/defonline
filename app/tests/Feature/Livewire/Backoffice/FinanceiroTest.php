@@ -6,13 +6,16 @@ use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\MeioPagamento;
 use App\Infrastructure\Cobranca\Fake\FakePaymentProvider;
 use App\Livewire\Backoffice\Financeiro;
+use App\Models\Assinatura;
 use App\Models\AuditLog;
 use App\Models\ConsumoAnalise;
 use App\Models\Invoice;
 use App\Models\LoteCredito;
 use App\Models\Usuario;
 use App\Services\Cobranca\IniciarCompraDeCreditos;
+use App\Support\DataExibicao;
 use App\Support\PermissaoAdmin;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
@@ -102,6 +105,21 @@ describe('CA-2 lista e filtros', function () {
 
         $tela->call('limparFiltros')->set('de', now()->addDays(2)->format('Y-m-d'))->call('filtrar')
             ->assertSeeHtml('dusk="cobrancas-vazio"');
+    });
+
+    it('às 22:30 de Brasília (01:30 UTC do dia seguinte) o filtro de hoje ainda acha a assinatura e a cobrança de hoje (STORY-093 CA-2)', function () {
+        $this->travelTo(CarbonImmutable::parse('2026-11-06 01:30:00', 'UTC'));
+        $a = ($this->paga)();
+        _assinaturaAtivaNoFake(Usuario::factory()->create(['email_confirmed_at' => now()]));
+        $assinatura = Assinatura::query()->latest('data_inicio')->firstOrFail();
+        $hoje = DataExibicao::agora()->format('Y-m-d');
+        $amanha = DataExibicao::agora()->addDay()->format('Y-m-d');
+
+        expect($hoje)->toBe('2026-11-05');
+        ($this->tela)()->set('de', $hoje)->set('ate', $hoje)->call('filtrar')
+            ->assertSeeHtml('dusk="cobranca-'.$a->id.'"')->assertSeeHtml('dusk="assinatura-'.$assinatura->id.'"')
+            ->call('limparFiltros')->set('de', $amanha)->call('filtrar')
+            ->assertSeeHtml('dusk="cobrancas-vazio"')->assertSeeHtml('dusk="assinaturas-vazio"');
     });
 
     it('rejeita data inválida e período invertido', function () {

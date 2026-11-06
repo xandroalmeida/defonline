@@ -157,9 +157,13 @@ final class TrocarDePlano
             return false;
         }
 
-        $this->empurrarAoProvedor($assinatura, (int) $assinatura->preco_snapshot_centavos, CicloCobranca::from((string) $assinatura->ciclo));
+        $assinatura->forceFill(['troca_plano_id' => null, 'troca_ciclo' => null, 'troca_preco_centavos' => null, 'troca_preco_cheio_centavos' => null, 'troca_desconto_centavos' => null, 'troca_agendada_em' => null]);
 
-        $assinatura->forceFill(['troca_plano_id' => null, 'troca_ciclo' => null, 'troca_preco_centavos' => null, 'troca_preco_cheio_centavos' => null, 'troca_desconto_centavos' => null, 'troca_agendada_em' => null])->save();
+        // STORY-093: o alvo do provedor sem a troca (valor, ciclo e data); em ciclo gratuito, o valor cheio no fim do desconto.
+        // Se o provedor falhar, nada foi gravado.
+        [$valor, $ciclo, $quando] = self::alvoNoProvedor($assinatura);
+        $this->empurrarAoProvedor($assinatura, $valor, $ciclo, $quando);
+        $assinatura->save();
 
         AuditLogger::log(
             action: 'cobranca.troca_de_plano_desfeita',
@@ -388,9 +392,6 @@ final class TrocarDePlano
 
     private function agendar(Usuario $usuario, Assinatura $assinatura, Plano $destino, CicloCobranca $ciclo, PreviaDeTroca $previa): ResultadoDaTroca
     {
-        // O que o provedor vai cobrar na renovação: o preço cheio novo, ou com o desconto que continua (STORY-083).
-        $this->empurrarAoProvedor($assinatura, $previa->proximoValorCentavos, $ciclo);
-
         $continua = $previa->descontoNovo?->vale($assinatura->periodos_pagos + 1) === true;
         $assinatura->forceFill([
             'troca_plano_id' => $destino->id,
@@ -399,7 +400,15 @@ final class TrocarDePlano
             'troca_preco_cheio_centavos' => $previa->precoNovoCheioCentavos,
             'troca_desconto_centavos' => $continua ? $previa->descontoNovo->desconto : 0,
             'troca_agendada_em' => now(),
-        ])->save();
+        ]);
+
+        // O que o provedor vai cobrar na renovação: o preço cheio novo, ou com o desconto que continua (STORY-083).
+        // STORY-093: a data é a de `alvoNoProvedor`. Com o ciclo seguinte gratuito ela é o fim do desconto, e empurrar o
+        // vencimento do ciclo atual anteciparia a cobrança de quem cadastrou o cartão durante o desconto.
+        // Se o provedor falhar, nada foi gravado (o `save` vem depois).
+        [$valor, $cicloNoProvedor, $quando] = self::alvoNoProvedor($assinatura);
+        $this->empurrarAoProvedor($assinatura, $valor, $cicloNoProvedor, $quando);
+        $assinatura->save();
 
         AuditLogger::log(
             action: 'cobranca.troca_de_plano_agendada',
