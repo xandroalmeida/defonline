@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domain\Cobranca\PaymentProvider;
+use App\Domain\Cobranca\ProvedorIndisponivel;
 use App\Domain\Motor\FonteRecomendacoes;
 use App\Infrastructure\Cobranca\Asaas\AsaasPaymentProvider;
 use App\Infrastructure\Cobranca\Fake\FakePaymentProvider;
+use App\Infrastructure\Cobranca\Nenhum\ProvedorNaoConfigurado;
 use App\Observabilidade\AlertaDeCobranca;
 use App\Observabilidade\Listeners\CollectJobMetrics;
 use App\Services\Rfb\CnpjaRfbCnpjClient;
@@ -50,24 +52,46 @@ class AppServiceProvider extends ServiceProvider
 
         // STORY-076 / ADR-010 — provedor de pagamento escolhido por `services.payments.provider`.
         // O fake nunca sobe em produção: cobrança de mentira aprovada em produção seria dinheiro perdido.
+        // STORY-093 CA-1 — provedor NÃO definido em produção, ou Asaas com configuração incompleta, não derruba o
+        // contêiner (agendadores com exit 1, webhook com 500): entra o `ProvedorNaoConfigurado`, que não cobra nada,
+        // rejeita o webhook e impede ligar a cobrança. Valor explícito errado (typo, `fake` em produção) segue
+        // estourando: é erro de deploy e tem que aparecer.
         $this->app->singleton(PaymentProvider::class, function () {
-            $provider = (string) config('services.payments.provider', 'fake');
+            $provider = (string) config('services.payments.provider');
+            $producao = $this->app->environment('production');
+
+            if ($provider === '') {
+                if ($producao) {
+                    return new ProvedorNaoConfigurado('PAYMENTS_PROVIDER não está definido (use asaas).');
+                }
+
+                $provider = 'fake';
+            }
 
             return match ($provider) {
-                'fake' => $this->app->environment('production')
+                'fake' => $producao
                     ? throw new \InvalidArgumentException('O provedor de pagamento fake não pode ser usado em produção.')
                     : new FakePaymentProvider(config('services.payments.webhook_token')),
-                'asaas' => new AsaasPaymentProvider(
-                    config('services.asaas.base_url'),
-                    config('services.asaas.api_key'),
-                    config('services.asaas.webhook_token'),
-                    (int) config('services.asaas.timeout', 30),
-                ),
+                'asaas' => $this->asaas(),
                 default => throw new \InvalidArgumentException(
                     "Provedor de pagamento desconhecido: '{$provider}'. Use fake|asaas (ADR-010).",
                 ),
             };
         });
+    }
+
+    private function asaas(): PaymentProvider
+    {
+        try {
+            return new AsaasPaymentProvider(
+                config('services.asaas.base_url'),
+                config('services.asaas.api_key'),
+                config('services.asaas.webhook_token'),
+                (int) config('services.asaas.timeout', 30),
+            );
+        } catch (ProvedorIndisponivel $e) {
+            return new ProvedorNaoConfigurado($e->getMessage());
+        }
     }
 
     public function boot(): void

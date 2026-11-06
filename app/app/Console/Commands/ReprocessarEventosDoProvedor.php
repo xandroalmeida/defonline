@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Console\Concerns\SemProvedorNaoAge;
 use App\Jobs\ProcessarEventoDoProvedor;
 use App\Models\ProviderEvent;
 use Illuminate\Console\Command;
@@ -15,12 +16,18 @@ use Throwable;
  */
 final class ReprocessarEventosDoProvedor extends Command
 {
+    use SemProvedorNaoAge;
+
     protected $signature = 'cobranca:reprocessar-eventos {--minutos=2 : só eventos parados há mais que isto}';
 
     protected $description = 'Reprocessa eventos de pagamento recebidos e ainda não aplicados';
 
     public function handle(): int
     {
+        if ($this->semProvedorECobrancaDesligada()) {
+            return self::SUCCESS;
+        }
+
         $eventos = ProviderEvent::query()
             ->whereIn('status', ['recebido', 'erro'])
             ->whereRaw('recebido_em < now() - make_interval(mins => ?)', [(int) $this->option('minutos')])

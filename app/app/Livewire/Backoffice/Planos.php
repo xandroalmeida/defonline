@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Backoffice;
 
 use App\Domain\Cobranca\PrecoCredito;
+use App\Infrastructure\Cobranca\Nenhum\ProvedorNaoConfigurado;
 use App\Livewire\Backoffice\Concerns\ExigePermissao;
 use App\Models\CobrancaConfig;
 use App\Models\PacoteCredito;
@@ -242,6 +243,15 @@ final class Planos extends Component
 
     public function salvarCobranca(): void
     {
+        // STORY-093 CA-1: ligar a cobrança sem provedor de pagamento válido deixaria o cliente sem como pagar (e o
+        // webhook sem como confirmar). Recusa e diz o que falta; desligar sempre pode.
+        if ($this->cobrancaAtiva && ! CobrancaConfig::ligada() && ($motivo = ProvedorNaoConfigurado::motivo()) !== null) {
+            $this->cobrancaAtiva = false;
+            $this->mensagemCobranca = 'Não dá para ligar a cobrança: o provedor de pagamento não está configurado. '.$motivo;
+
+            return;
+        }
+
         $this->aplicar(CobrancaConfig::atual(), ['ativa' => $this->cobrancaAtiva], 'CobrancaConfig');
 
         $this->cobrancaAtiva = CobrancaConfig::ligada();

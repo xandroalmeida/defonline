@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Console\Concerns\SemProvedorNaoAge;
 use App\Models\CobrancaConfig;
 use App\Services\Cobranca\AjustarValorDaAssinatura;
 use App\Services\Cobranca\CiclosGratuitos;
@@ -15,12 +16,18 @@ use Illuminate\Console\Command;
  */
 final class RenovarCiclosGratuitosCommand extends Command
 {
+    use SemProvedorNaoAge;
+
     protected $signature = 'assinaturas:ciclos-gratuitos';
 
     protected $description = 'Renova ciclos gratuitos de cupom, encerra descontos sem cartão e ajusta o valor no provedor (STORY-083)';
 
     public function handle(CiclosGratuitos $gratuitos, AjustarValorDaAssinatura $ajustes): int
     {
+        if ($this->semProvedorECobrancaDesligada()) {
+            return self::SUCCESS;
+        }
+
         if (! CobrancaConfig::ligada()) {
             $this->info('Cobrança desligada: nada a fazer.');
 

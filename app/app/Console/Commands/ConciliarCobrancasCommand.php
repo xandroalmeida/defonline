@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Console\Concerns\RelataProgresso;
+use App\Console\Concerns\SemProvedorNaoAge;
 use App\Services\Cobranca\ConciliarCobrancas;
 use Illuminate\Console\Command;
 
@@ -15,6 +16,7 @@ use Illuminate\Console\Command;
 final class ConciliarCobrancasCommand extends Command
 {
     use RelataProgresso;
+    use SemProvedorNaoAge;
 
     protected $signature = 'cobranca:conciliar {--modo=horaria : horaria ou diaria}';
 
@@ -22,6 +24,10 @@ final class ConciliarCobrancasCommand extends Command
 
     public function handle(ConciliarCobrancas $conciliar): int
     {
+        if ($this->semProvedorECobrancaDesligada()) {
+            return self::SUCCESS;
+        }
+
         $modo = (string) $this->option('modo');
 
         if (! in_array($modo, [ConciliarCobrancas::HORARIA, ConciliarCobrancas::DIARIA], true)) {

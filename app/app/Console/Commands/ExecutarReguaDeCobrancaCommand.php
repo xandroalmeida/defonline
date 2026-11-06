@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Console\Concerns\RelataProgresso;
+use App\Console\Concerns\SemProvedorNaoAge;
 use App\Services\Cobranca\ExecutarReguaDeCobranca;
 use Illuminate\Console\Command;
 
@@ -16,6 +17,7 @@ use Illuminate\Console\Command;
 final class ExecutarReguaDeCobrancaCommand extends Command
 {
     use RelataProgresso;
+    use SemProvedorNaoAge;
 
     protected $signature = 'cobranca:regua';
 
@@ -23,6 +25,10 @@ final class ExecutarReguaDeCobrancaCommand extends Command
 
     public function handle(ExecutarReguaDeCobranca $regua): int
     {
+        if ($this->semProvedorECobrancaDesligada()) {
+            return self::SUCCESS;
+        }
+
         $this->iniciarProgresso('regua');
 
         $c = $regua->executar(fn (int $feitas, int $total, array $c) => $this->progresso(

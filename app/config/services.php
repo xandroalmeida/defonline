@@ -102,7 +102,8 @@ return [
     | - `webhook_token`: segredo do cabeçalho `asaas-access-token` (32-255 caracteres, diferente da chave).
     */
     'payments' => [
-        'provider' => env('PAYMENTS_PROVIDER', 'fake'),
+        // Sem valor: `fake` fora de produção; em produção, nenhum provedor (a cobrança fica desligada, STORY-093).
+        'provider' => env('PAYMENTS_PROVIDER'),
         'pix_expiracao_minutos' => (int) env('PIX_EXPIRACAO_MINUTOS', 30),
         // Validade do link do checkout de assinatura com cartão (o provedor aceita 10 a 1440).
         'cartao_expiracao_minutos' => (int) env('CARTAO_EXPIRACAO_MINUTOS', 60),
