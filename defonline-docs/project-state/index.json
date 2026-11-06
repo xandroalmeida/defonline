@@ -251,13 +251,15 @@
       "wave": "WAVE-2026-02",
       "status": "ready",
       "path": "epics/EPIC-003-historico-basico/epic.md",
-      "story_ids": [],
+      "story_ids": [
+        "STORY-099"
+      ],
       "validation_report": null,
       "blocked_by_epics": [
         "EPIC-002"
       ],
       "created_at": "2026-05-20",
-      "updated_at": "2026-08-04",
+      "updated_at": "2026-11-06",
       "unblocked_by": "EPIC-002 done_under_review (2026-05-26)",
       "note": "Adiado da WAVE-2026-01 para a WAVE-2026-02 em 2026-08-04 (PDR-005). Nunca foi decomposto em estórias. Serve a uso episódico — o usuário típico tem 1 ou 2 diagnósticos —, enquanto o EPIC-010 (DRM) cria recorrência mensal. Entra depois do DRM. Não é substituído pela série histórica do DRM: são objetos diferentes (diagnósticos anuais vs. competências mensais)."
     },
@@ -2791,6 +2793,23 @@
       "title": "Requisito de alinhamento visual e correção de Meu plano e Minha conta",
       "estimated_session_size": "S",
       "note": "Requisito RNF-UI-02, pedido pelo PO em 2026-11-06."
+    },
+    {
+      "type": "feature",
+      "target_role": "programador",
+      "status": "backlog",
+      "blocks": [],
+      "epic_id": "EPIC-003",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": true,
+      "created_at": "2026-11-06",
+      "updated_at": "2026-11-06",
+      "id": "STORY-099",
+      "slug": "aviso-renovar-diagnostico",
+      "title": "Aviso para renovar o diagnóstico na plataforma e por e-mail",
+      "estimated_session_size": "M",
+      "note": "Requisito §4.12.1, pedido pelo PO em 2026-11-06. Pendente: validação jurídica do e-mail."
     }
   ],
   "sprints": [

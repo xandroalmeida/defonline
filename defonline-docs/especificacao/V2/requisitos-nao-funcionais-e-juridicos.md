@@ -246,6 +246,7 @@ A especificação funcional cobre os aceites e os direitos do titular. Este docu
 |---|---|
 | Execução do contrato (quiz, diagnóstico, cobrança) | Execução de contrato — Art. 7º, V |
 | Comunicações de marketing | Consentimento — Art. 7º, I (opt-in desacoplado) |
+| Aviso para renovar o diagnóstico | Legítimo interesse — Art. 7º, IX, com descadastro `[A VALIDAR COM O JURÍDICO]` |
 | Comunicações transacionais | Execução de contrato |
 | Dados de navegação (analytics) | Legítimo interesse — Art. 7º, IX, com opt-out via banner de cookies |
 | Anonimização pós-exclusão | Obrigação legal / legítimo interesse (auditoria) |

@@ -576,9 +576,20 @@ E-mails transacionais obrigatórios da v1:
 | Análise concluída | Assinante | Link para o relatório |
 | Solicitação de captação recebida | EB Parcerias + assinante | Confirmação com dados do pedido |
 | Expiração próxima de diagnóstico (D-7) | Assinante | Aviso para exportar PDF |
+| Prazo de renovação do diagnóstico vencido, e 30 dias depois | Usuário dono da Empresa | Convite para fazer um novo diagnóstico (§4.12.1) |
 | Aviso LGPD — nova versão de termos | Todos | Aviso de nova versão + pedido de novo aceite |
 
 Os templates são versionados, enviam em texto e HTML, e incluem links de rastreamento (UTM) quando aplicável para marketing. Opção de opt-out em cada e-mail de marketing (não transacional).
+
+#### 4.12.1 Aviso para renovar o diagnóstico
+
+Decidido pelo PO em 2026-11-06.
+
+- **Prazo:** o Usuário escolhe, para cada Empresa Analisada, 3, 6, 9 ou 12 meses desde o último diagnóstico concluído. O padrão é 6 meses, o check-up semestral do §IV.3 do resumo de recomendações.
+- **Na plataforma:** com o prazo vencido, a Empresa mostra um alerta com a ação de fazer um novo diagnóstico. O alerta some com um novo diagnóstico ou quando o Usuário o dispensa.
+- **Por e-mail:** um aviso quando o prazo vence e um lembrete 30 dias depois, sem outras repetições.
+- **Descadastro:** todo aviso traz um link para parar de receber esses e-mails, sem exigir login. O alerta na plataforma continua.
+- **Novo ciclo:** um novo diagnóstico da Empresa encerra os avisos pendentes e reinicia a contagem.
 
 ---
 
