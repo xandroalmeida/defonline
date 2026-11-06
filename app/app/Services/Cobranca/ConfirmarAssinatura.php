@@ -90,12 +90,14 @@ final class ConfirmarAssinatura
                     // CA-3: dinheiro confirmado para um checkout já cancelado/estornado/contestado nunca some em silêncio.
                     $devolver = $this->registrarPagamentoSemDestino($cobranca, $provedor, $invoice->usuario_id, $invoice->assinatura_id, 'checkout_encerrado');
 
-                    Log::error('cobranca.pagamento_de_checkout_encerrado', [
-                        'module' => 'cobranca',
-                        'action' => 'processar_evento',
-                        'invoice_id' => $invoice->id,
-                        'status' => $invoice->status->value,
-                    ]);
+                    if ($devolver->wasRecentlyCreated) {
+                        Log::error('cobranca.pagamento_de_checkout_encerrado', [
+                            'module' => 'cobranca',
+                            'action' => 'processar_evento',
+                            'invoice_id' => $invoice->id,
+                            'status' => $invoice->status->value,
+                        ]);
+                    }
 
                     return ['ignorado', $devolver->id];
                 }
@@ -328,12 +330,14 @@ final class ConfirmarAssinatura
             if ($duplicada !== null) {
                 $devolver = $this->registrarPagamentoSemDestino($cobranca, $provedor, $duplicada->usuario_id, $duplicada->assinatura_id, (string) $duplicada->devolucao_motivo);
 
-                Log::error('cobranca.pagamento_de_recorrencia_duplicada', [
-                    'module' => 'cobranca',
-                    'action' => 'processar_evento',
-                    'cobranca' => $cobranca->referencia->id,
-                    'invoice_origem' => $duplicada->id,
-                ]);
+                if ($devolver->wasRecentlyCreated) {
+                    Log::error('cobranca.pagamento_de_recorrencia_duplicada', [
+                        'module' => 'cobranca',
+                        'action' => 'processar_evento',
+                        'cobranca' => $cobranca->referencia->id,
+                        'invoice_origem' => $duplicada->id,
+                    ]);
+                }
 
                 return ['ignorado', $devolver->id];
             }
@@ -346,12 +350,14 @@ final class ConfirmarAssinatura
             if ($troca !== null) {
                 $orfa = $this->registrarPagamentoSemDestino($cobranca, $provedor, (string) $troca->usuario_id, (string) $troca->assinatura_id, 'assinatura_antiga');
 
-                Log::error('cobranca.pagamento_da_assinatura_antiga', [
-                    'module' => 'cobranca',
-                    'action' => 'processar_evento',
-                    'cobranca' => $cobranca->referencia->id,
-                    'assinatura_antiga' => $cobranca->assinaturaId,
-                ]);
+                if ($orfa->wasRecentlyCreated) {
+                    Log::error('cobranca.pagamento_da_assinatura_antiga', [
+                        'module' => 'cobranca',
+                        'action' => 'processar_evento',
+                        'cobranca' => $cobranca->referencia->id,
+                        'assinatura_antiga' => $cobranca->assinaturaId,
+                    ]);
+                }
 
                 return ['ignorado', $orfa->id];
             }
@@ -376,12 +382,14 @@ final class ConfirmarAssinatura
         if ($assinatura->status !== StatusAssinatura::Ativa && ! $emAtraso) {
             $orfa = $this->registrarPagamentoSemDestino($cobranca, $provedor, $assinatura->usuario_id, $assinatura->id, 'assinatura_cancelada');
 
-            Log::error('cobranca.renovacao_de_assinatura_inativa', [
-                'module' => 'cobranca',
-                'action' => 'processar_evento',
-                'assinatura_id' => $assinatura->id,
-                'status' => $assinatura->status->value,
-            ]);
+            if ($orfa->wasRecentlyCreated) {
+                Log::error('cobranca.renovacao_de_assinatura_inativa', [
+                    'module' => 'cobranca',
+                    'action' => 'processar_evento',
+                    'assinatura_id' => $assinatura->id,
+                    'status' => $assinatura->status->value,
+                ]);
+            }
 
             return ['ignorado', $orfa->id];
         }

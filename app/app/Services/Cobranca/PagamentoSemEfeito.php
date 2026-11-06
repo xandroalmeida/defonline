@@ -16,6 +16,11 @@ use Illuminate\Support\Facades\Log;
  * mudou, a renovação do ano já estava paga, o checkout já tinha sido cancelado). O dinheiro entrou: a Invoice
  * fica `paga` e marcada com o motivo da devolução, o que a coloca na lista "a devolver" do Financeiro
  * (STORY-085), e sai um alerta para a equipe. Nada é concedido. Chamar dentro da transação do pagamento.
+ *
+ * Um pagamento tem UM destino e UM alerta. Este é o único tratamento de pagamento em Invoice que já existe e não
+ * pode receber o dinheiro (inclusive checkout cancelado). Pagamento que não casa com Invoice nenhuma, ou que casa
+ * com uma Invoice já estornada ou contestada, gera uma Invoice nova de devolução em
+ * {@see ConfirmarAssinatura::registrarPagamentoSemDestino()}. Os dois ramos são excludentes pelo estado da Invoice.
  */
 final class PagamentoSemEfeito
 {
@@ -51,6 +56,9 @@ final class PagamentoSemEfeito
             'cartao_bandeira' => $cobranca->cartaoBandeira,
             'cartao_ultimos4' => $cobranca->cartaoUltimos4,
             'devolucao_motivo' => $motivo,
+            // A recorrência que esse pagamento criou no provedor (checkout de assinatura): é por ela que a cobrança
+            // do mês seguinte volta a cair na devolução (ConfirmarAssinatura::renovar) e que ela é cancelada.
+            'assinatura_id_externo' => $invoice->assinatura_id_externo ?? $cobranca->assinaturaId,
         ])->save();
 
         Log::error(self::ALERTAS[$motivo], [

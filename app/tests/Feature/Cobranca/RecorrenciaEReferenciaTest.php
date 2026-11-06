@@ -205,14 +205,19 @@ describe('asaas simulado', function () {
         Log::spy();
         _postarWebhookAsaas($this, 'PAYMENT_CONFIRMED', 'evt_1', ['payment' => ['id' => 'pay_1', 'subscription' => 'sub_9', 'checkoutSession' => 'chk-1', 'externalReference' => $i->id]])->assertOk();
 
+        // Um destino só (STORY-093): a própria Invoice cancelada vira a devolução; não nasce uma segunda.
         $devolver = Invoice::query()->where('id_externo', 'pay_1')->sole();
-        expect($devolver->devolucao_motivo)->toBe('checkout_encerrado')
+        expect($devolver->id)->toBe($i->id)
+            ->and($devolver->devolucao_motivo)->toBe('checkout_cancelado')
+            ->and($devolver->assinatura_id_externo)->toBe('sub_9')
             ->and($devolver->status)->toBe(EstadoCobranca::Paga)
             ->and($devolver->usuario_id)->toBe($this->u->id)
+            ->and(Invoice::query()->count())->toBe(1)
             ->and(Assinatura::query()->count())->toBe(0)
             ->and(AsaasSimulado::$assinaturasCanceladas)->toBe(['sub_9'])
             ->and(ProviderEvent::query()->where('evento_id', 'evt_1')->value('invoice_id'))->toBe($devolver->id);
-        Log::shouldHaveReceived('error')->with('cobranca.pagamento_de_checkout_encerrado', Mockery::any());
+        Log::shouldHaveReceived('error')->with('cobranca.pagamento_de_checkout_cancelado', Mockery::any())->once();
+        Log::shouldNotHaveReceived('error', ['cobranca.pagamento_de_checkout_encerrado', Mockery::any()]);
     });
 
     it('CA-3: pagamento de assinatura desconhecida, sem dono, não some em silêncio: fica o alerta', function () {
@@ -271,7 +276,7 @@ describe('asaas simulado', function () {
 
         expect($i->fresh()->status)->toBe(EstadoCobranca::Paga)->and($i->fresh()->reembolso_estado)->toBeNull()
             ->and(ProviderEvent::query()->where('evento_id', 'evt_d')->value('status'))->toBe('processado');
-        Log::shouldHaveReceived('error')->with('cobranca.estorno_negado', Mockery::any());
+        Log::shouldHaveReceived('error')->with('cobranca.reembolso_negado', Mockery::any())->once();
 
         // Repetido (ou sem estorno pendente): nada a fazer.
         _postarWebhookAsaas($this, 'PAYMENT_REFUND_DENIED', 'evt_d2', $payment('pay_1'))->assertOk();

@@ -415,12 +415,9 @@ final class ProcessarEvento
     }
 
     /**
-     * STORY-088 CA-4 — o estorno pedido foi negado (o admin recusou a autorização do Pix no painel do provedor):
-     * a cobrança continua paga e o admin é alertado. ÚNICO PONTO de tratamento do estorno negado.
-     *
-     * LIGAÇÃO COM A PISTA C: é aqui que entra a chamada a `ReembolsarCobranca::negar($invoice->id)`, que devolve
-     * ao cliente o crédito travado durante o estorno pendente (E12/D-12). Depois da junção, chamar `negar()`
-     * dentro de `negarEstorno()` (STORY-092). Hoje `negarEstorno()` só libera a trava `reembolso_estado`.
+     * STORY-088 CA-4 e STORY-093 — o estorno pedido foi negado (o admin recusou a autorização do Pix no painel do
+     * provedor): a cobrança continua paga e o crédito travado durante o estorno pendente volta ao consumo
+     * ({@see ReembolsarCobranca::negar()}, que também alerta o admin e audita). ÚNICO PONTO de tratamento do estorno negado.
      *
      * @return array{0: 'processado'|'ignorado', 1: string|null}
      */
@@ -432,38 +429,7 @@ final class ProcessarEvento
             return ['ignorado', $invoice?->id];
         }
 
-        return $this->negarEstorno($invoice->id);
-    }
-
-    /** @return array{0: 'processado'|'ignorado', 1: string|null} */
-    private function negarEstorno(string $invoiceId): array
-    {
-        return DB::transaction(function () use ($invoiceId): array {
-            $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoiceId);
-
-            if ($invoice->status !== EstadoCobranca::Paga || $invoice->reembolso_estado === null || $invoice->reembolso_estado === 'concluido') {
-                return ['ignorado', $invoice->id];
-            }
-
-            $invoice->forceFill(['reembolso_estado' => null])->save();
-
-            Log::error('cobranca.estorno_negado', [
-                'module' => 'cobranca',
-                'action' => 'processar_evento',
-                'invoice_id' => $invoice->id,
-            ]);
-
-            AuditLogger::log(
-                action: 'cobranca.estorno_negado',
-                subjectType: 'Invoice',
-                subjectId: $invoice->id,
-                actorType: 'system',
-                usuarioId: $invoice->usuario_id,
-                after: ['valor_centavos' => $invoice->valor_centavos, 'provedor' => $invoice->provedor],
-            );
-
-            return ['processado', $invoice->id];
-        });
+        return [$this->reembolsos->negar($invoice->id) ? 'processado' : 'ignorado', $invoice->id];
     }
 
     /**
@@ -637,7 +603,7 @@ final class ProcessarEvento
 
         $motivo = Invoice::query()->whereKey($invoiceId)->value('devolucao_motivo');
 
-        if (! in_array($motivo, ['assinatura_duplicada', 'checkout_encerrado'], true)) {
+        if (! in_array($motivo, ['assinatura_duplicada', 'checkout_encerrado', PagamentoSemEfeito::CHECKOUT_CANCELADO], true)) {
             return;
         }
 
