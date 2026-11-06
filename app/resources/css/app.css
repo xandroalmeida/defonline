@@ -101,19 +101,20 @@
 
     /*
      * Botão com cara de link — ação que muda estado sem navegar (DDR-004, troca de modo do
-     * pró-labore). `tertiary` mede 4,70:1 sobre `surface` e 4,45:1 sobre `neutral`: usar só
-     * sobre superfície branca (DDR-002).
+     * pró-labore). `tertiary` mede 4,70:1 sobre `surface` e 4,45:1 sobre `neutral`, e a
+     * Demonstração fica sobre o fundo da página (STORY-095, D-4: 4,44:1 medido pelo axe). Por isso
+     * a tinta é `tertiary-hover`, que passa de 5,5:1 nos dois fundos; o hover escurece para `-active`.
      */
     .btn--link {
         background: transparent;
-        color: var(--color-tertiary);
+        color: var(--color-tertiary-hover);
         padding-left: 0;
         padding-right: 0;
         text-decoration: underline;
         text-underline-offset: 3px;
     }
     .btn--link:hover:not(:disabled) {
-        color: var(--color-tertiary-hover);
+        color: var(--color-tertiary-active);
     }
 
     .btn--sm {

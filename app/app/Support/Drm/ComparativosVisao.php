@@ -73,7 +73,7 @@ final class ComparativosVisao
             return self::motivo($c, '');
         }
 
-        return strtr((string) config('drm.serie.linha.media_de'), [':variacao' => Formato::variacao($c->percentual), ':n' => (string) $c->meses]);
+        return strtr((string) config('drm.serie.linha.media_de'), [':variacao' => Formato::variacao($c->percentual), ':meses' => Formato::mesesLancados($c->meses)]);
     }
 
     public static function acumulado(Competencia $competencia, Comparativo $c): string
@@ -84,7 +84,7 @@ final class ComparativosVisao
 
         return strtr((string) config('drm.serie.linha.acumulado_de'), [
             ':valor' => Formato::moeda($c->centavos),
-            ':n' => (string) $c->meses,
+            ':meses' => Formato::mesesLancados($c->meses),
             ':ano' => (string) $competencia->data->year,
         ]);
     }
@@ -95,7 +95,7 @@ final class ComparativosVisao
             return self::motivo($c, '');
         }
 
-        return strtr((string) config('drm.serie.linha.participacao_de'), [':percentual' => Formato::percentual($c->percentual), ':n' => (string) $c->meses]);
+        return strtr((string) config('drm.serie.linha.participacao_de'), [':percentual' => Formato::percentual($c->percentual), ':meses' => Formato::mesesLancados($c->meses)]);
     }
 
     private static function motivo(Comparativo $c, string $mesDeBase): string

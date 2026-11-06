@@ -149,8 +149,11 @@
 
                     @include('livewire.drm.partials.grupo', ['grupo' => Grupo::Financeiras])
 
-                    @php $naoOperacionaisAbertos = collect(['D41', 'D42'])->contains(fn ($c) => trim((string) ($valores[$c] ?? '')) !== '' || $errors->has("valores.{$c}") || in_array($c, $repetidos, true)); @endphp
-                    <details class="mt-4" @if ($naoOperacionaisAbertos) open @endif dusk="drm-lancamento-nao-operacionais">
+                    @php $naoOperacionaisAbertos = $nao_operacionais_aberto || collect(['D41', 'D42'])->contains(fn ($c) => trim((string) ($valores[$c] ?? '')) !== '' || $errors->has("valores.{$c}") || in_array($c, $repetidos, true)); @endphp
+                    {{-- O servidor devolve o HTML com `open` só quando há valor; sem avisá-lo, a resposta recolhia o bloco que a
+                         pessoa abriu. `toggle` guarda no estado do cliente (sem requisição) e a próxima resposta já vem aberta (O-4). --}}
+                    <details class="mt-4" @if ($naoOperacionaisAbertos) open @endif dusk="drm-lancamento-nao-operacionais"
+                             x-data x-on:toggle="$wire.$set('nao_operacionais_aberto', $el.open, false)">
                         <summary class="cursor-pointer min-h-[44px] flex items-center text-sm text-[color:var(--color-secondary)]">
                             Teve algo fora do movimento normal neste mês? (opcional)
                         </summary>
@@ -307,13 +310,16 @@
                 @endif
 
                 @if ($ultimoBloco)
+                    {{-- `wire:key` próprio nos dois botões (STORY-095, O-3). O `wire:submit` desabilita o formulário durante a
+                         requisição do "Próximo" e, ao terminar, DESFAZ isso no mesmo nó do DOM; sem chave, o morph reaproveita o
+                         nó do "Próximo" como "Fechar o mês" e o desfazer apaga o `disabled` que o servidor acabou de renderizar. --}}
                     <x-button type="submit" variant="primary" :disabled="$alertasPendentes !== [] || (bool) $existente || $conflito"
-                              wire:loading.attr="disabled" wire:target="fechar" dusk="drm-lancamento-fechar">
+                              wire:key="drm-lancamento-btn-fechar" wire:target="fechar" dusk="drm-lancamento-fechar">
                         <span wire:loading.remove wire:target="fechar">Fechar o mês</span>
                         <span wire:loading wire:target="fechar">Fechando o mês…</span>
                     </x-button>
                 @else
-                    <x-button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="proximo" dusk="drm-lancamento-proximo">
+                    <x-button type="submit" variant="primary" wire:loading.attr="disabled" wire:key="drm-lancamento-btn-proximo" wire:target="proximo" dusk="drm-lancamento-proximo">
                         <span wire:loading.remove wire:target="proximo">Próximo</span>
                         <span wire:loading wire:target="proximo">Salvando…</span>
                     </x-button>

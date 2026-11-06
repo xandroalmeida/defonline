@@ -313,6 +313,69 @@ describe('granularidades mistas (CA-8)', function () {
     });
 });
 
+describe('linha omitida por estar zerada x item agregado (STORY-095, D-2)', function () {
+    /** Mês em que a L7b foi omitida do snapshot porque D41 = D42 = 0. */
+    function mesSemL7b(string $competencia): MesDaSerie
+    {
+        return mesLancado($competencia, 1_000, '5.0000', campos: ['D41' => 0, 'D42' => 0]);
+    }
+
+    /** Mês com L7b exibida (D41 = 500,00). */
+    function mesComL7b(string $competencia, int $valor = 50_000): MesDaSerie
+    {
+        return mesLancado($competencia, 1_000, '5.0000', ['L7b' => $valor], ['L7b' => '50.0000'], ['D41' => $valor, 'D42' => 0]);
+    }
+
+    it('L7b omitida vale zero: comparativos corretos no mês em que ela volta, sem "grupo agregado"', function () {
+        $serie = new SerieDrm([mesSemL7b('2026-01'), mesSemL7b('2026-02'), mesSemL7b('2026-03'), mesComL7b('2026-04')]);
+
+        $c = comparativosDe($serie, '2026-04', 'L7b');
+
+        // Base zero (mês anterior sem a linha): indisponível pelo motivo certo, não por agregação.
+        expect($c->vsAnterior->motivo)->toBe(Comparativo::BASE_ZERO)
+            ->and($c->vsMedia->motivo)->toBe(Comparativo::BASE_ZERO)             // média dos 3 anteriores = 0
+            ->and($c->acumuladoAno->disponivel())->toBeTrue()
+            ->and($c->acumuladoAno->centavos)->toBe(50_000)                      // 0 + 0 + 0 + 500,00
+            ->and($c->acumuladoAno->meses)->toBe(4)
+            ->and($c->participacaoMedia->disponivel())->toBeTrue()
+            ->and($c->participacaoMedia->percentual)->toBe('12.5000');           // (0 + 0 + 0 + 50) / 4
+    });
+
+    it('com a linha presente nos meses anteriores, a variação e a média saem da conta e a omissão conta como zero', function () {
+        $serie = new SerieDrm([mesComL7b('2026-01', 10_000), mesComL7b('2026-02', 10_000), mesComL7b('2026-03', 10_000), mesSemL7b('2026-04')]);
+
+        $c = comparativosDe($serie, '2026-04', 'L7b');
+
+        expect($c->vsAnterior->percentual)->toBe('-100.0000')                    // (0 − 100) / 100
+            ->and($c->vsMedia->percentual)->toBe('-100.0000')
+            ->and($c->acumuladoAno->centavos)->toBe(30_000);
+    });
+
+    it('o acumulado segue disponível a partir do 1º lançamento', function () {
+        $c = comparativosDe(new SerieDrm([mesSemL7b('2026-01')]), '2026-01', 'L7b');
+
+        expect($c->acumuladoAno->disponivel())->toBeTrue()->and($c->acumuladoAno->centavos)->toBe(0)
+            ->and($c->vsAnterior->motivo)->toBe(Comparativo::PRIMEIRO_LANCAMENTO);
+    });
+
+    it('sem faturamento a participação da linha omitida segue indisponível, e item agregado de outra linha continua grupo_agregado', function () {
+        $semReceita = mesLancado('2026-01', 1_000, null, percentuais: ['L1' => null], campos: ['D41' => 0, 'D42' => 0]);
+        $serie = new SerieDrm([$semReceita, mesComItem('2026-02', null, null)]);
+
+        expect(comparativosDe($serie, '2026-01', 'L7b')->participacaoMedia->motivo)->toBe(Comparativo::SEM_FATURAMENTO)
+            ->and(comparativosDe($serie, '2026-02', 'L8a')->acumuladoAno->motivo)->toBe(Comparativo::GRUPO_AGREGADO);
+    });
+
+    it('só a L7b é omitida por zero: outra linha ausente, ou D41/D42 diferentes de zero, segue sem valor', function () {
+        $mes = mesLancado('2026-01', 1, campos: ['D41' => 0, 'D42' => 0]);
+        $comD41 = mesLancado('2026-01', 1, campos: ['D41' => 0, 'D42' => 100]);
+
+        expect($mes->nominal('L7b'))->toBe(0)->and($mes->percentual('L7b'))->toBe('0.0000')
+            ->and($mes->nominal('L8a'))->toBeNull()->and($mes->percentual('L8a'))->toBeNull()
+            ->and($comD41->nominal('L7b'))->toBeNull()->and($comD41->percentual('L7b'))->toBeNull();
+    });
+});
+
 describe('o mês fora da série e a retificação (CA-2, CA-9)', function () {
     it('competência sem lançamento: tudo indisponível por sem_lancamento', function () {
         $c = comparativosDe(serieConsecutiva('2026-01', [100]), '2026-03');

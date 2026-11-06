@@ -61,9 +61,11 @@ Definição contábil padrão. O Resultado Operacional é o EBITDA de verdade, c
 | L7 | 1 | **= Resultado Operacional (EBITDA)** | `L5 − L6` | sim |
 | L7b | 1 | (±) Outras receitas e despesas | `D41 − D42` | sim |
 | L8 | 1 | (–) Despesas Financeiras | `D37` ou `D38+D39` | sim |
+| L8a | 2 | Juros pagos | `D38` | sim |
+| L8b | 2 | Tarifas bancárias | `D39` | sim |
 | L11 | 1 | **= Lucro Líquido do Mês (Margem Líquida)** | `L7 + L7b − L8` | sim |
 
-**L9 e L10 não existem neste modo** — colapsam no Lucro Líquido, porque o pró-labore já foi deduzido em L6b. O pró-labore aparece como item de nível 3 (L6c) quando o grupo administrativo está em modo detalhado.
+**L9 e L10 não existem neste modo** — colapsam no Lucro Líquido, porque o pró-labore já foi deduzido em L6b. L8a e L8b existem nos dois modos, com o grupo financeiro detalhado. O pró-labore aparece como item de nível 3 (L6c) quando o grupo administrativo está em modo detalhado.
 
 ### 1.3 Invariante entre os modos
 

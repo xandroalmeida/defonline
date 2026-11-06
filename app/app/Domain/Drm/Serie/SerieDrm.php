@@ -87,7 +87,7 @@ final class SerieDrm
             return ComparativosDaLinha::todosIndisponiveis(Comparativo::SEM_LANCAMENTO);
         }
 
-        $atual = $mes->nominais[$linha] ?? null;
+        $atual = $mes->nominal($linha);
         if ($atual === null) {
             // Item que o mês não informou (grupo agregado): nunca se infere do total.
             return ComparativosDaLinha::todosIndisponiveis(Comparativo::GRUPO_AGREGADO);
@@ -128,7 +128,7 @@ final class SerieDrm
             return Comparativo::indisponivel($this->existeAnteriorA($mes) ? Comparativo::SEM_LANCAMENTO : Comparativo::PRIMEIRO_LANCAMENTO);
         }
 
-        $base = $anterior->nominais[$linha] ?? null;
+        $base = $anterior->nominal($linha);
         if ($base === null) {
             return Comparativo::indisponivel(Comparativo::GRUPO_AGREGADO);
         }
@@ -148,7 +148,7 @@ final class SerieDrm
 
         $valores = [];
         foreach ($janela as $anterior) {
-            $valor = $anterior->nominais[$linha] ?? null;
+            $valor = $anterior->nominal($linha);
             if ($valor !== null) {
                 $valores[] = $valor;
             }
@@ -176,7 +176,7 @@ final class SerieDrm
             if ($outro->competencia->data->year !== $ano || $outro->competencia->texto() > $mes->competencia->texto()) {
                 continue;
             }
-            $valor = $outro->nominais[$linha] ?? null;
+            $valor = $outro->nominal($linha);
             if ($valor === null) {
                 return Comparativo::indisponivel(Comparativo::GRUPO_AGREGADO);
             }
@@ -192,8 +192,8 @@ final class SerieDrm
         $percentuais = [];
         $algumNominal = false;
         foreach ([$mes, ...$this->anterioresNaJanela($mes, self::JANELA - 1)] as $dessaJanela) {
-            $algumNominal = $algumNominal || ($dessaJanela->nominais[$linha] ?? null) !== null;
-            $percentual = $dessaJanela->percentuais[$linha] ?? null;
+            $algumNominal = $algumNominal || $dessaJanela->nominal($linha) !== null;
+            $percentual = $dessaJanela->percentual($linha);
             if ($percentual !== null) {
                 $percentuais[] = $percentual;
             }

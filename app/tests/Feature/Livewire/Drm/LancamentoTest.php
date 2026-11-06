@@ -730,6 +730,58 @@ describe('STORY-095 — D-1: todo campo existe em `valores` desde o início', fu
     });
 });
 
+describe('STORY-095 — O-1: o aceite do alerta vale para o valor que o gerou', function () {
+    function ateOAlertaDePrejuizo($teste, string $custo): Testable
+    {
+        $c = lancador($teste->empresa);
+        preencherTudo(todosAgregados($c), ['D03' => $custo, 'D40' => '1.000,00']);
+
+        return avancarAte($c, 6);
+    }
+
+    it('mudar o valor que gerou o alerta derruba o aceite e o mês não fecha sem aceitar de novo', function () {
+        $c = ateOAlertaDePrejuizo($this, '12.000,00');
+        $c->call('aceitarAlertas')->assertSee('Alertas aceitos.');
+
+        // Agrava o prejuízo: o texto do A3 e o do A2 mudam.
+        $c->call('irParaBloco', 2)->set('valores.D03', '20.000,00');
+        avancarAte($c, 6);
+        $c->assertSeeHtml('dusk="drm-lancamento-aceitar-alertas"')->assertDontSee('Alertas aceitos.')->call('fechar');
+        expect(DrmLancamento::query()->count())->toBe(0);
+
+        $c->call('aceitarAlertas')->call('fechar');
+        expect(DrmLancamento::query()->count())->toBe(1);
+    });
+
+    it('mudar o que não altera o alerta mantém o aceite', function () {
+        $c = lancador($this->empresa);
+        preencherTudo(todosAgregados($c), ['D40' => '0']);   // só A5 (sem retirada): não tem valor nem texto que mude
+        avancarAte($c, 6);
+        $c->call('aceitarAlertas');
+
+        $c->call('irParaBloco', 1)->set('valores.D01', '10.500,00');
+        avancarAte($c, 6);
+        $c->assertSee('Alertas aceitos.')->call('fechar');
+        expect(DrmLancamento::query()->count())->toBe(1);
+    });
+
+    it('o aceite guardado no rascunho carrega a assinatura, e um aceite antigo sem ela volta a pedir', function () {
+        $c = ateOAlertaDePrejuizo($this, '12.000,00');
+        $c->call('aceitarAlertas');
+
+        $payload = DrmRascunho::query()->firstOrFail()->rascunho_payload;
+        expect($payload['alertas_aceitos'])->not->toBeEmpty()
+            ->and(array_keys($payload['alertas_assinaturas']))->toBe($payload['alertas_aceitos']);
+
+        lancador($this->empresa)->assertSet('alertas_assinaturas', fn (array $a): bool => $a !== []);
+
+        $antigo = $payload->getArrayCopy();
+        unset($antigo['alertas_assinaturas']);
+        DrmRascunho::query()->update(['rascunho_payload' => $antigo]);
+        lancador($this->empresa)->assertSeeHtml('dusk="drm-lancamento-aceitar-alertas"');
+    });
+});
+
 describe('CA-10 — persistência', function () {
     it('grava versao 1, vigente, com setor, motor e hash', function () {
         $c = lancador($this->empresa);

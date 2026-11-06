@@ -66,8 +66,8 @@ return [
         'acumulado' => 'Acumulado no ano',
         'participacao' => 'Participação média sobre a receita',
         'em_relacao_a' => ':variacao em relação a :mes',
-        'media_de' => ':variacao (média de :n meses lançados)',
-        'acumulado_de' => ':valor (:n meses lançados em :ano)',
-        'participacao_de' => ':percentual (média de :n meses lançados)',
+        'media_de' => ':variacao (média de :meses)',
+        'acumulado_de' => ':valor (:meses em :ano)',
+        'participacao_de' => ':percentual (média de :meses)',
     ],
 ];

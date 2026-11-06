@@ -86,7 +86,7 @@ describe('CA-4 — cada comparativo diz por que não existe', function () {
 
         expect(itemDeComparativo($c, 'L11', 'anterior'))->toContain('primeiro mês lançado')
             ->and(itemDeComparativo($c, 'L11', 'media'))->toContain('média disponível a partir do 4º mês lançado')
-            ->and(itemDeComparativo($c, 'L11', 'acumulado'))->toContain('R$ 1.000,00 (1 meses lançados em 2026)')
+            ->and(itemDeComparativo($c, 'L11', 'acumulado'))->toContain('R$ 1.000,00 (1 mês lançado em 2026)')
             ->and(itemDeComparativo($c, 'L11', 'participacao'))->toContain('10,0%');
     });
 
