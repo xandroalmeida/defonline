@@ -15,7 +15,11 @@
         <section class="max-w-[640px] flex flex-col gap-4" role="status" dusk="screen-troca-aplicada">
             <h1 x-ref="titulo" tabindex="-1" class="{{ $h1 }}">Plano trocado</h1>
             <p class="m-0 text-[color:var(--color-primary)]">
-                Você agora está no plano {{ $destino?->nome }}. Sua cota é de {{ $assinatura->cota_snapshot }} {{ $assinatura->cota_snapshot === 1 ? 'análise' : 'análises' }} e você já pode usá-las.
+                @if ($invoice->cota_extra_troca !== null)
+                    Você agora está no plano {{ $destino?->nome }}. @if ($invoice->cota_extra_troca > 0)Você ganhou {{ $invoice->cota_extra_troca }} {{ $invoice->cota_extra_troca === 1 ? 'análise' : 'análises' }} a mais neste ciclo. @endif Sua cota é de {{ $assinatura->cota_snapshot }} {{ $assinatura->cota_snapshot === 1 ? 'análise' : 'análises' }} por mês a partir de {{ \App\Support\DataExibicao::data($assinatura->proxima_cota_em ?? $assinatura->proximo_vencimento) }}.
+                @else
+                    Você agora está no plano {{ $destino?->nome }}. Sua cota é de {{ $assinatura->cota_snapshot }} {{ $assinatura->cota_snapshot === 1 ? 'análise' : 'análises' }} e você já pode usá-las.
+                @endif
                 Pagamos {{ $reais($invoice->valor_centavos) }}{{ $invoice->cartao_ultimos4 ? ' no cartão final '.$invoice->cartao_ultimos4 : '' }}.
             </p>
             <div class="flex flex-wrap gap-3">

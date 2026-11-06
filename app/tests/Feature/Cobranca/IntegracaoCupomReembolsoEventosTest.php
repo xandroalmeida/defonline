@@ -210,7 +210,8 @@ describe('4 — reembolso da diferença de uma troca de plano', function () {
     it('estornar a diferença volta ao plano anterior no mesmo ciclo, com o uso mantido, sem encerrar a assinatura', function () {
         [$invoice, $a] = _upgradePago($this->usuario);
         expect($a->plano_id)->toBe($this->pro->id)->and($a->cota_snapshot)->toBe(10);
-        Assinatura::query()->whereKey($a->id)->update(['cota_restante_ciclo' => 8]);   // usou 2 depois da troca
+        // O upgrade deixou 1 + 6 (proporcional, STORY-091 CA-3); usou 2 depois da troca.
+        Assinatura::query()->whereKey($a->id)->update(['cota_restante_ciclo' => 5]);
         $vencimento = $a->proximo_vencimento->toIso8601String();
 
         $previa = app(ReembolsarCobranca::class)->previa($invoice);

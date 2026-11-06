@@ -100,7 +100,7 @@ final class TrocaDePlanoBrowserTest extends DuskTestCase
                 ->assertSeeIn('@screen-troca-credito', '−')
                 ->assertSeeIn('@screen-troca-resumo-preco', 'R$')
                 ->assertSeeIn('@screen-troca-explicacao', 'Hoje você paga só a diferença')
-                ->assertSeeIn('@screen-troca-explicacao', 'Sua cota passa a ser de 10 análises a partir de agora.');
+                ->assertSeeIn('@screen-troca-explicacao', 'Sua cota passa a ser de 10 análises por mês a partir de');
 
             $this->assertTrue($browser->script('return document.documentElement.scrollWidth <= window.innerWidth')[0], 'a página não pode rolar de lado');
 
@@ -108,7 +108,8 @@ final class TrocaDePlanoBrowserTest extends DuskTestCase
                 ->waitFor('@pagamento-fake')
                 ->click('@pagamento-fake-pagar')
                 ->waitFor('@screen-troca-aplicada', 15)
-                ->assertSeeIn('@screen-troca-aplicada', 'Você agora está no plano Pro. Sua cota é de 10 análises e você já pode usá-las.')
+                ->assertSeeIn('@screen-troca-aplicada', 'Você agora está no plano Pro.')
+                ->assertSeeIn('@screen-troca-aplicada', 'Sua cota é de 10 análises por mês a partir de')
                 ->visit('/meu-plano')
                 ->waitFor('@screen-meuplano-plano')
                 ->assertSeeIn('@screen-meuplano-plano', 'Pro · mensal');

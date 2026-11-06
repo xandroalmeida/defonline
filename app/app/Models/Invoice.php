@@ -42,6 +42,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $cartao_bandeira
  * @property string|null $cartao_ultimos4
  * @property int|null $periodo_base
+ * @property int|null $cota_extra_troca
  * @property string|null $cupom_id
  * @property int|null $cupom_ciclos
  * @property int|null $preco_cheio_centavos

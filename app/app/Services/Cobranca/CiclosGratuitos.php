@@ -6,6 +6,7 @@ namespace App\Services\Cobranca;
 
 use App\Domain\Cobranca\Carteira;
 use App\Domain\Cobranca\CicloCobranca;
+use App\Domain\Cobranca\CotaContratada;
 use App\Domain\Cobranca\CotaMensal;
 use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\RenovacaoPix;
@@ -90,6 +91,7 @@ final class CiclosGratuitos
         $plano = Plano::query()->findOrFail($a->plano_id);
         $ciclo = CicloCobranca::from((string) $a->ciclo);
         $agora = CarbonImmutable::now();
+        $cota = CotaContratada::naRenovacao($a->cota_snapshot, (string) $a->plano_id, $plano->id, $plano->cota_mensal);
         $desconto = $a->desconto();
         // Pix anual conta o ano a partir do início (RenovacaoPix); os demais, pelo ciclo.
         $vencimento = $a->pagoComPix() ? RenovacaoPix::novoVencimento($a->data_inicio, $a->periodos_pagos) : $ciclo->vencimento($a->data_inicio, $periodo);
@@ -99,7 +101,7 @@ final class CiclosGratuitos
             'tipo' => 'assinatura',
             'plano_id' => $plano->id,
             'ciclo' => $ciclo->value,
-            'cota_snapshot' => $plano->cota_mensal,
+            'cota_snapshot' => $cota,
             'descricao' => "Plano {$plano->nome} · renovação {$ciclo->value}",
             'valor_centavos' => 0,
             'status' => EstadoCobranca::Paga,
@@ -113,7 +115,7 @@ final class CiclosGratuitos
             'desconto_centavos' => $desconto === null ? 0 : $desconto->desconto,
         ]);
 
-        app(Carteira::class)->renovarCota($a->id, $plano->cota_mensal, $vencimento);
+        app(Carteira::class)->renovarCota($a->id, $cota, $vencimento);
 
         $a->refresh()->forceFill([
             'periodos_pagos' => $periodo,

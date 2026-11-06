@@ -39,7 +39,11 @@
                 <p class="m-0 text-[color:var(--color-primary)]">Troca agendada para {{ $dia($previa?->vigenteAte ?? $assinatura?->proximo_vencimento) }}. Dá para desfazer até lá, em Meu plano.</p>
             @else
                 <h1 x-ref="titulo" tabindex="-1" class="{{ $h1 }}">Plano trocado</h1>
-                <p class="m-0 text-[color:var(--color-primary)]">Você agora está no plano {{ $destino->nome }}. Sua cota é de {{ $analises($destino->cota_mensal) }} e você já pode usá-las.</p>
+                @if ($assinatura !== null && $assinatura->cota_restante_ciclo < $assinatura->cota_snapshot)
+                    <p class="m-0 text-[color:var(--color-primary)]" dusk="screen-troca-aplicada-cota">Você agora está no plano {{ $destino->nome }}. Neste ciclo você tem {{ $assinatura->cota_restante_ciclo }} {{ $assinatura->cota_restante_ciclo === 1 ? 'análise' : 'análises' }}, e sua cota de {{ $analises($destino->cota_mensal) }} por mês vale a partir de {{ $dia($assinatura->proxima_cota_em ?? $assinatura->proximo_vencimento) }}.</p>
+                @else
+                    <p class="m-0 text-[color:var(--color-primary)]" dusk="screen-troca-aplicada-cota">Você agora está no plano {{ $destino->nome }}. Sua cota é de {{ $analises($destino->cota_mensal) }} e você já pode usá-las.</p>
+                @endif
             @endif
             <div class="flex flex-wrap gap-3">
                 <x-button :href="route('meu-plano')" variant="primary" dusk="screen-troca-ver-meu-plano">Ver meu plano</x-button>
@@ -120,7 +124,8 @@
                     <p class="mt-3 mb-0 text-sm text-[color:var(--color-primary)]" dusk="screen-troca-explicacao">
                         @if ($upgrade && $previa->mesmoCiclo)
                             @if ($cobra)Hoje você paga só a diferença pelos {{ $previa->diasRestantes }} dias que faltam neste ciclo. @else A diferença é pequena demais para cobrar: a troca é feita sem cobrança. @endif
-                            Sua cota passa a ser de {{ $analises($previa->cotaNova) }} a partir de agora.
+                            @if ($previa->cotaExtraAgora > 0)Neste ciclo você ganha {{ $analises($previa->cotaExtraAgora) }} a mais, proporcionais aos dias que faltam. @else Como faltam poucos dias, neste ciclo você mantém as análises que tem. @endif
+                            Sua cota passa a ser de {{ $analises($previa->cotaNova) }} por mês a partir de {{ $dia($previa->cotaCheiaEm) }}.
                         @elseif ($upgrade)
                             Um novo ciclo {{ $nomeCiclo }} começa hoje, e o que você não usou do ciclo atual vira crédito. Sua cota passa a ser de {{ $analises($previa->cotaNova) }} a partir de agora.
                         @else

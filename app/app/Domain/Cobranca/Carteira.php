@@ -34,6 +34,9 @@ use LogicException;
  */
 final class Carteira
 {
+    /** Status que ainda recebem a cota mensal do ano anual pago (cancelada = sem renovar, mas com ano pago). */
+    private const STATUS_COM_COTA_MENSAL = ['ativa', 'cancelada'];
+
     /**
      * Consulta sem lock, para decidir se a tela do quiz abre ou bloqueia. Com `$empresaId`, vale também a
      * regra do trial por CNPJ (STORY-074 CA-2).
@@ -205,6 +208,8 @@ final class Carteira
 
     /**
      * STORY-077 CA-6 — ciclo anual: a cota volta cheia todo mês, no dia de aniversário (sem acumular).
+     * STORY-091 CA-1: o anual cancelado dentro do ano pago também recebe (Termo, cláusula 8); a
+     * `proxima_cota_em` nunca passa do fim do período pago, então o ano acaba junto com a cota.
      * Roda todo dia e é idempotente: só toca assinatura cuja `proxima_cota_em` já chegou, e a avança
      * para o próximo aniversário (ou para nulo, se o ano pago acaba antes). Mensal não usa isto:
      * a cota renova junto com o pagamento do mês ({@see renovarCota()}).
@@ -215,7 +220,7 @@ final class Carteira
     {
         $agora = $this->agora();
         $ids = Assinatura::query()
-            ->where('status', StatusAssinatura::Ativa->value)
+            ->whereIn('status', self::STATUS_COM_COTA_MENSAL)
             ->whereNotNull('proxima_cota_em')
             ->where('proxima_cota_em', '<=', $agora->format('Y-m-d H:i:sP'))
             ->pluck('id');
@@ -227,7 +232,7 @@ final class Carteira
                 $a = Assinatura::query()->lockForUpdate()->find($id);
 
                 // Outra execução (ou o webhook) já cuidou dela entre a consulta e o lock.
-                if ($a === null || $a->proxima_cota_em === null || $a->proxima_cota_em->greaterThan($agora) || $a->status !== StatusAssinatura::Ativa) {
+                if ($a === null || $a->proxima_cota_em === null || $a->proxima_cota_em->greaterThan($agora) || ! in_array($a->status->value, self::STATUS_COM_COTA_MENSAL, true)) {
                     return 0;
                 }
 

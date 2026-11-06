@@ -209,15 +209,16 @@ describe('CA-6 renovação da cota', function () {
         expect($a->fresh()->cota_restante_ciclo)->toBe($a->cota_snapshot);
     });
 
-    it('na renovação vale a cota do catálogo de hoje, e o preço é o que o provedor cobrou', function () {
+    it('na renovação vale a cota contratada (retrato, STORY-091 CA-2), e o preço é o que o provedor cobrou', function () {
         $plano = _plano();
         $invoice = _pagarAssinatura(_assinaturaPendente($this->usuario, $plano));
+        $contratada = $plano->cota_mensal;
         $plano->update(['cota_mensal' => $plano->cota_mensal + 2]);
 
         _entregar(_fake()->simularRenovacao((string) $invoice->checkout_id_externo));
         $a = Assinatura::query()->sole();
 
-        expect($a->cota_snapshot)->toBe($plano->cota_mensal)->and($a->preco_snapshot_centavos)->toBe($invoice->valor_centavos);
+        expect($a->cota_snapshot)->toBe($contratada)->and($a->preco_snapshot_centavos)->toBe($invoice->valor_centavos);
     });
 
     it('no anual a cota volta cheia no aniversário do mês, uma vez só, e o último ano não agenda mais', function () {

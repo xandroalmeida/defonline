@@ -40,6 +40,13 @@ final readonly class PreviaDeTroca
         public bool $descontoTermina = false,
         /** O que a PRÓXIMA cobrança do plano novo vai cobrar (com o desconto que continua). */
         public int $proximoValorCentavos = 0,
+        /**
+         * STORY-091 CA-3: as análises a mais que o upgrade dá no ciclo em curso (proporcionais ao que falta). Num
+         * período novo (troca de ciclo) é a cota cheia, que vale já.
+         */
+        public int $cotaExtraAgora = 0,
+        /** Quando a cota cheia do plano novo passa a valer (upgrade no mesmo período); `null` = já vale (período novo). */
+        public ?CarbonImmutable $cotaCheiaEm = null,
     ) {}
 
     public function comDesconto(int $precoCheioNovo, ?DescontoDaAssinatura $descontoNovo, bool $termina, int $proximoValor): self
@@ -48,6 +55,7 @@ final readonly class PreviaDeTroca
             $this->imediata, $this->mesmoCiclo, $this->precoNovoCentavos, $this->precoAtualCentavos, $this->parcelaNovaCentavos,
             $this->creditoCentavos, $this->aPagarCentavos, $this->semCobranca, $this->diasRestantes, $this->vigenteAte,
             $this->proximaCobranca, $this->cicloNovo, $this->cotaNova, $precoCheioNovo, $descontoNovo, $termina, $proximoValor,
+            $this->cotaExtraAgora, $this->cotaCheiaEm,
         );
     }
 }

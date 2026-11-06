@@ -8,6 +8,7 @@ use App\Domain\Cobranca\AssinaturaVigenteJaExiste;
 use App\Domain\Cobranca\Carteira;
 use App\Domain\Cobranca\CicloCobranca;
 use App\Domain\Cobranca\CobrancaNoProvedor;
+use App\Domain\Cobranca\CotaContratada;
 use App\Domain\Cobranca\CotaMensal;
 use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\MeioPagamento;
@@ -345,8 +346,8 @@ final class ConfirmarAssinatura
         $inicio = $cicloMudou ? CarbonImmutable::instance($assinatura->proximo_vencimento) : CarbonImmutable::instance($assinatura->data_inicio);
         $periodos = $cicloMudou ? 1 : $assinatura->periodos_pagos + 1;
         $vencimento = $ciclo->vencimento($inicio, $periodos);
-        // Na renovação vale o catálogo de hoje para a cota (CA-5: o snapshot protege até aqui).
-        $cota = $plano->cota_mensal;
+        // STORY-091 CA-2: a cota contratada é retrato. O catálogo de hoje só vale se ele trocou de plano.
+        $cota = CotaContratada::naRenovacao($assinatura->cota_snapshot, (string) $assinatura->plano_id, $plano->id, $plano->cota_mensal);
 
         // STORY-083 CA-7: com desconto de cupom em curso o esperado é o valor do ciclo (já com desconto).
         // STORY-082 × 083: o downgrade agendado traz o desconto que continua (ou o fim dele) no plano novo.
