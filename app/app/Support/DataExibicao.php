@@ -54,6 +54,15 @@ final class DataExibicao
         return CarbonImmutable::instance($instante)->setTimezone(self::fuso())->setTime(23, 59, 59);
     }
 
+    /**
+     * `$instante + $meses` no calendário de Brasília, sem estourar o mês (31/01 + 1 = 28/02), devolvido em UTC.
+     * Somar em UTC erra perto da virada: 28/02 22:00 em Brasília já é 01/03 em UTC e venceria em 31/03, não 28/03.
+     */
+    public static function somarMeses(DateTimeInterface $instante, int $meses): CarbonImmutable
+    {
+        return CarbonImmutable::instance($instante)->setTimezone(self::fuso())->addMonthsNoOverflow($meses)->utc();
+    }
+
     public static function agora(): CarbonImmutable
     {
         return CarbonImmutable::now(self::fuso());

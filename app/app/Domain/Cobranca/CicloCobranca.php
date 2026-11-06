@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Cobranca;
 
+use App\Support\DataExibicao;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 
@@ -24,7 +25,7 @@ enum CicloCobranca: string
     /** Fim do período `$periodos` (1 = o primeiro) contado a partir do início. */
     public function vencimento(CarbonInterface $inicio, int $periodos = 1): CarbonImmutable
     {
-        return CarbonImmutable::instance($inicio)->addMonthsNoOverflow($this->meses() * max(1, $periodos));
+        return DataExibicao::somarMeses($inicio, $this->meses() * max(1, $periodos));
     }
 
     public function precoDe(int $mensalCentavos, int $anualCentavos): int

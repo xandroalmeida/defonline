@@ -20,11 +20,11 @@ final class CotaMensal
     {
         $n = 1;
 
-        while (CarbonImmutable::instance($inicio)->addMonthsNoOverflow($n)->lessThanOrEqualTo($agora)) {
+        while (DataExibicao::somarMeses($inicio, $n)->lessThanOrEqualTo($agora)) {
             $n++;
         }
 
-        $proxima = CarbonImmutable::instance($inicio)->addMonthsNoOverflow($n);
+        $proxima = DataExibicao::somarMeses($inicio, $n);
 
         // O período vai até o último segundo do dia do vencimento; o aniversário nesse dia já é do ciclo seguinte.
         return $proxima->lessThan(DataExibicao::fimDoDia($fimDoPeriodo)->startOfDay()) ? $proxima : null;
@@ -42,7 +42,7 @@ final class CotaMensal
         // horas. Sem isto, a data só com o dia do provedor (meia-noite de Brasília) fazia o upgrade do último dia
         // ratear a cota por 24 h em vez de por mês (STORY-093).
         $ultimoDia = DataExibicao::fimDoDia($fimDoPeriodo)->startOfDay();
-        $aniversario = fn (int $n): CarbonImmutable => CarbonImmutable::instance($inicio)->addMonthsNoOverflow($n);
+        $aniversario = fn (int $n): CarbonImmutable => DataExibicao::somarMeses($inicio, $n);
         $n = 0;
 
         while ($aniversario($n + 1)->lessThanOrEqualTo($agora) && $aniversario($n + 1)->lessThan($ultimoDia)) {

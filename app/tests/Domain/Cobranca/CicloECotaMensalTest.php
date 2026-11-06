@@ -34,7 +34,7 @@ describe('CicloCobranca', function () {
         expect(CicloCobranca::Mensal->vencimento($inicio)->toDateString())->toBe('2026-02-28')
             ->and(CicloCobranca::Mensal->vencimento($inicio, 2)->toDateString())->toBe('2026-03-31')
             ->and(CicloCobranca::Anual->vencimento($inicio)->toDateString())->toBe('2027-01-31')
-            ->and(CicloCobranca::Anual->vencimento(_d('2028-02-29'))->toDateString())->toBe('2029-02-28')
+            ->and(CicloCobranca::Anual->vencimento(_d('2028-02-29 12:00:00'))->toDateString())->toBe('2029-02-28')
             ->and(CicloCobranca::Mensal->vencimento($inicio, 0)->toDateString())->toBe('2026-02-28');
     });
 });
@@ -80,5 +80,61 @@ describe('PedidoCheckout recorrente', function () {
             ->toThrow(InvalidArgumentException::class)
             ->and(fn () => new PedidoCheckout('ref', 'Plano', 39900, [MeioPagamento::Cartao, MeioPagamento::Pix], 60, 'https://a/ok', 'https://a/c', 'https://a/e', CicloCobranca::Anual))
             ->toThrow(InvalidArgumentException::class);
+    });
+});
+
+describe('calendário de Brasília na soma de meses', function () {
+    function _br(string $data): CarbonImmutable
+    {
+        return CarbonImmutable::parse($data, 'America/Sao_Paulo')->utc(); // como vem do banco: em UTC
+    }
+
+    it('vence no mesmo dia de Brasília quando o pagamento da noite já é o mês seguinte em UTC', function () {
+        $inicio = _br('2026-02-28 22:00:00'); // 01/03 01:00 UTC
+
+        expect($inicio->utc()->toDateString())->toBe('2026-03-01')
+            ->and(CicloCobranca::Mensal->vencimento($inicio)->setTimezone('America/Sao_Paulo')->format('Y-m-d H:i'))->toBe('2026-03-28 22:00')
+            ->and(CicloCobranca::Anual->vencimento($inicio)->setTimezone('America/Sao_Paulo')->format('Y-m-d H:i'))->toBe('2027-02-28 22:00');
+    });
+
+    it('31/01 à noite vira 28/02 e volta a 31/03 sem deriva, mensal e anual', function () {
+        $inicio = _br('2026-01-31 22:00:00');
+        $em = fn (CarbonImmutable $d) => $d->setTimezone('America/Sao_Paulo')->format('Y-m-d H:i');
+
+        expect($em(CicloCobranca::Mensal->vencimento($inicio)))->toBe('2026-02-28 22:00')
+            ->and($em(CicloCobranca::Mensal->vencimento($inicio, 2)))->toBe('2026-03-31 22:00')
+            ->and($em(CicloCobranca::Anual->vencimento($inicio)))->toBe('2027-01-31 22:00');
+    });
+
+    it('respeita o ano bissexto', function () {
+        $inicio = _br('2028-01-29 23:00:00');
+        $em = fn (CarbonImmutable $d) => $d->setTimezone('America/Sao_Paulo')->format('Y-m-d');
+
+        expect($em(CicloCobranca::Mensal->vencimento($inicio)))->toBe('2028-02-29')
+            ->and($em(CicloCobranca::Mensal->vencimento(_br('2028-02-29 22:00:00'))))->toBe('2028-03-29')
+            ->and($em(CicloCobranca::Anual->vencimento(_br('2028-02-29 22:00:00'))))->toBe('2029-02-28');
+    });
+
+    it('a cota mensal do anual cai no dia de Brasília, não no de UTC', function () {
+        $inicio = _br('2026-02-28 22:00:00');
+        $fim = CicloCobranca::Anual->vencimento($inicio);
+        $em = fn (?CarbonImmutable $d) => $d?->setTimezone('America/Sao_Paulo')->format('Y-m-d H:i');
+
+        expect($em(CotaMensal::proxima($inicio, $inicio, $fim)))->toBe('2026-03-28 22:00')
+            ->and($em(CotaMensal::proxima($inicio, _br('2026-03-28 22:00:00'), $fim)))->toBe('2026-04-28 22:00');
+
+        [$ini, $fimJanela] = CotaMensal::janela($inicio, _br('2026-03-30 10:00:00'), $fim);
+
+        expect($em($ini))->toBe('2026-03-28 22:00')
+            ->and($em($fimJanela))->toBe('2026-04-28 22:00');
+    });
+
+    it('o dia 31 da cota volta a 31 depois de fevereiro, no horário de Brasília', function () {
+        $inicio = _br('2026-01-31 22:00:00');
+        $fim = CicloCobranca::Anual->vencimento($inicio);
+        $em = fn (?CarbonImmutable $d) => $d?->setTimezone('America/Sao_Paulo')->format('Y-m-d');
+
+        expect($em(CotaMensal::proxima($inicio, $inicio, $fim)))->toBe('2026-02-28')
+            ->and($em(CotaMensal::proxima($inicio, _br('2026-02-28 22:00:00'), $fim)))->toBe('2026-03-31');
     });
 });

@@ -74,7 +74,7 @@ describe('CotaMensal::janela', function () {
     });
 
     it('anual: do último aniversário ao próximo', function () {
-        [$ini, $fim] = CotaMensal::janela(_t('2026-01-31'), _t('2026-03-10'), _t('2027-01-31'));
+        [$ini, $fim] = CotaMensal::janela(_t('2026-01-31 12:00'), _t('2026-03-10'), _t('2027-01-31 12:00'));
 
         expect($ini->toDateString())->toBe('2026-02-28')->and($fim->toDateString())->toBe('2026-03-31');
     });
