@@ -67,12 +67,12 @@ describe('1 — cupom_aplicado onde o uso é gravado', function () {
     });
 
     it('contratação SEM cobrança também emite, e compra de créditos emite como crédito', function () {
-        $total = _cupomPara(['codigo' => 'TOTAL', 'valor' => 100]);
+        $total = _cupomPara(['codigo' => 'TOTAL', 'valor' => 1000]);
         $semCobranca = _contratar($this->usuario, 'TOTAL');
         expect($semCobranca->status)->toBe(EstadoCobranca::Paga);
 
         $outro = _compradorConfirmado();
-        $creditos = _cupomPara(['codigo' => 'CRED', 'valor' => 100], pacoteId: _pacote('plus')->id);
+        $creditos = _cupomPara(['codigo' => 'CRED', 'valor' => 1000], pacoteId: _pacote('plus')->id);
         $compra = app(IniciarCompraDeCreditos::class)->executar($outro, _pacote('plus'), null, null, MeioPagamento::Pix, 'CRED');
         expect($compra->status)->toBe(EstadoCobranca::Paga);
 
@@ -95,7 +95,7 @@ describe('1 — cupom_aplicado onde o uso é gravado', function () {
 
 describe('2 — contratação sem cobrança no funil, fora da taxa de falha', function () {
     it('assinatura sem cobrança: checkout_iniciado e contratacao_concluida, e nenhum fato de pagamento', function () {
-        _cupomPara(['codigo' => 'TOTAL', 'valor' => 100]);
+        _cupomPara(['codigo' => 'TOTAL', 'valor' => 1000]);
         $invoice = _contratar($this->usuario, 'TOTAL');
 
         $iniciados = _eventos(EventosCobranca::CHECKOUT_INICIADO);
@@ -115,7 +115,7 @@ describe('2 — contratação sem cobrança no funil, fora da taxa de falha', fu
     });
 
     it('compra de créditos sem cobrança entra no funil e não vira pagamento', function () {
-        _cupomPara(['codigo' => 'CRED', 'valor' => 100], pacoteId: _pacote('plus')->id);
+        _cupomPara(['codigo' => 'CRED', 'valor' => 1000], pacoteId: _pacote('plus')->id);
         $compra = app(IniciarCompraDeCreditos::class)->executar($this->usuario, _pacote('plus'), null, null, MeioPagamento::Pix, 'CRED');
 
         expect(_eventos(EventosCobranca::CHECKOUT_INICIADO))->toHaveCount(1)
@@ -125,7 +125,7 @@ describe('2 — contratação sem cobrança no funil, fora da taxa de falha', fu
     });
 
     it('a conversão conta a contratação sem cobrança e a taxa de falha de pagamento não se mexe', function () {
-        _cupomPara(['codigo' => 'TOTAL', 'valor' => 100]);
+        _cupomPara(['codigo' => 'TOTAL', 'valor' => 1000]);
         _contratar($this->usuario, 'TOTAL');
         $outro = _compradorConfirmado();
         $pago = _pagarAssinatura(app(IniciarAssinatura::class)->executar($outro, _plano(), CicloCobranca::Mensal, '203.0.113.7', 'PestAgent', MeioPagamento::Cartao));
@@ -178,7 +178,7 @@ describe('3 — reembolso e cupom', function () {
     });
 
     it('Invoice de valor zero não oferece reembolso: nem botão, nem painel, nem serviço', function () {
-        _cupomPara(['codigo' => 'TOTAL', 'valor' => 100]);
+        _cupomPara(['codigo' => 'TOTAL', 'valor' => 1000]);
         $zero = _contratar($this->usuario, 'TOTAL');
         $zero->forceFill(['reembolso_estado' => null])->save();
 

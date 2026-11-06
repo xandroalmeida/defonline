@@ -52,6 +52,8 @@ Os planos mantêm os valores atuais: Básico R$ 49,90/mês ou R$ 399/ano; Pro R$
 
 10. **Upgrade com cota proporcional (2026-11-05).** No upgrade, a cota extra do ciclo em curso é proporcional aos dias restantes; a cota cheia do plano novo vale a partir da renovação.
 11. **Validação em produção, com o sandbox atual (2026-11-05).** Como ainda não há clientes reais, a validação do pagamento roda em produção, ligada ao sandbox do Asaas que já temos, mesmo com a conta compartilhada com o projeto Serene. Só depois disso entram as chaves de produção do Asaas.
+12. **Sem alerta de trial por IP (2026-11-06).** IP dinâmico não identifica ninguém, então saem o alerta, o campo da tela e o registro do IP na ativação do trial. O controle de abuso fica no limite de um trial por CPF e por CNPJ. Outra medida contra abuso será tratada depois.
+13. **Cupom percentual com uma casa decimal (2026-11-06).** O desconto percentual aceita de 0,1% a 100%, como `12,5%`. O desconto em reais continua arredondado para o centavo mais próximo.
 
 ## Justificativa
 

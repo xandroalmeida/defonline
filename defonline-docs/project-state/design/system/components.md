@@ -16,6 +16,8 @@ Registrados aqui para que o DS reflita o que existe. Definição visual de cada 
 | 🟢 `button` | `primary` · `secondary` · `ghost`; tamanhos `md` · `sm`; `disabled`, `loading` | `min-height: 44px` já garantido |
 | 🟢 `input` | `default` · `focus` · `disabled` · `error` | **Borda mede 1,23:1** — dívida, ver `tokens.md` |
 | 🟢 `campo-monetario` | prefixo `R$`, alinhamento à direita, máscara BRL | `.input-affix`. Ganha estado `herdado` — §2.4 |
+| 🟢 `input-moeda` | prefixo `R$`, máscara a partir dos centavos | Obrigatório para todo dinheiro digitado (RNF-UI-01). `drm/campo-monetario` e `campo-brl` do quiz o usam por dentro |
+| 🟢 `input-percentual` | sufixo `%`, `decimais` 0 a 2, digitação natural | Obrigatório para todo percentual digitado (RNF-UI-01) |
 | 🟢 `label` | uppercase, `--text-label`, peso 600 | Nunca substituído por placeholder |
 | 🟢 `card` | superfície branca, borda, raio `lg`, sombra `sm` | |
 | 🟢 `link` | `default` · `hover` | Só sobre `--color-surface` (ver `tokens.md`) |

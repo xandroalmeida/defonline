@@ -37,7 +37,7 @@ beforeEach(function () {
 
 function _cupomGratis(string $codigo, array $planos, int $ciclos = 3): void
 {
-    $c = Cupom::query()->create(['codigo' => $codigo, 'tipo' => 'percentual', 'valor' => 100, 'vigencia_inicio' => now()->subDay(), 'vigencia_fim' => now()->addYear(), 'ativo' => true, 'ciclos_duracao' => $ciclos]);
+    $c = Cupom::query()->create(['codigo' => $codigo, 'tipo' => 'percentual', 'valor' => 1000, 'vigencia_inicio' => now()->subDay(), 'vigencia_fim' => now()->addYear(), 'ativo' => true, 'ciclos_duracao' => $ciclos]);
 
     foreach ($planos as $n) {
         CupomItem::query()->create(['cupom_id' => $c->id, 'plano_id' => _plano($n)->id, 'ciclo' => 'mensal']);

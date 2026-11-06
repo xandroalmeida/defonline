@@ -122,7 +122,7 @@ describe('pagamento sem efeito (088 × 092): um pagamento, um destino, um alerta
 describe('troca de plano em ciclo gratuito (090 × 083)', function () {
     function _contratarComCupomGratis(object $t): Assinatura
     {
-        $c = Cupom::query()->create(['codigo' => 'G100', 'tipo' => 'percentual', 'valor' => 100, 'vigencia_inicio' => now()->subDay(), 'vigencia_fim' => now()->addYear(), 'ativo' => true, 'ciclos_duracao' => 3]);
+        $c = Cupom::query()->create(['codigo' => 'G100', 'tipo' => 'percentual', 'valor' => 1000, 'vigencia_inicio' => now()->subDay(), 'vigencia_fim' => now()->addYear(), 'ativo' => true, 'ciclos_duracao' => 3]);
 
         foreach (['Pro', 'Básico'] as $n) {
             CupomItem::query()->create(['cupom_id' => $c->id, 'plano_id' => _plano($n)->id, 'ciclo' => 'mensal']);

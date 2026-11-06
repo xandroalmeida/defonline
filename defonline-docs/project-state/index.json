@@ -2739,6 +2739,25 @@
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-095-correcao-digitacao-e-achados-da-validacao-drm.md",
       "related_pdr": "PDR-003",
       "note": "Correção da rodada 1 da validação do DRM. D-1 é bloqueante. Portão completo verde em 0f048c5."
+    },
+    {
+      "type": "feature",
+      "target_role": "programador",
+      "status": "in_review",
+      "blocks": [],
+      "epic_id": "EPIC-004",
+      "sprint_id": null,
+      "owner_agent": "claude-opus-5-5",
+      "requires_design": false,
+      "created_at": "2026-11-06",
+      "updated_at": "2026-11-06",
+      "id": "STORY-096",
+      "slug": "mascaras-de-dinheiro-e-percentual",
+      "title": "Componentes de máscara para dinheiro e percentual em todo o sistema",
+      "estimated_session_size": "S",
+      "blocked_by": [],
+      "path": "epics/EPIC-004-app-shell-navegacao/stories/STORY-096-mascaras-de-dinheiro-e-percentual.md",
+      "note": "Requisito RNF-UI-01, pedido pelo PO em 2026-11-06."
     }
   ],
   "sprints": [

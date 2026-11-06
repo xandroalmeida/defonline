@@ -80,7 +80,7 @@ describe('upgrade com cupom que cobre os dois planos', function () {
     });
 
     it('o valor nunca fica negativo e uma troca coberta por desconto total é aplicada sem cobrança', function () {
-        $cupom = _cupomPara(['codigo' => 'TOTAL', 'valor' => 100], planoId: $this->basico->id);
+        $cupom = _cupomPara(['codigo' => 'TOTAL', 'valor' => 1000], planoId: $this->basico->id);
         $cupom->itens()->create(['plano_id' => $this->pro->id, 'ciclo' => 'mensal']);
         $invoice = app(IniciarAssinatura::class)->executar($this->usuario, $this->basico, CicloCobranca::Mensal, '203.0.113.7', 'PestAgent', MeioPagamento::Cartao, 'TOTAL');
         expect($invoice->valor_centavos)->toBe(0);

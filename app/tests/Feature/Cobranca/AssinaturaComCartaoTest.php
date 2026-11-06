@@ -87,7 +87,7 @@ describe('CA-2 ativação', function () {
             ->and($a->plano_id)->toBe($plano->id)
             ->and($a->ciclo)->toBe('mensal')
             ->and($a->cota_restante_ciclo)->toBe($plano->cota_mensal)
-            ->and($a->proximo_vencimento->toDateString())->toBe(now()->addMonthNoOverflow()->toDateString())
+            ->and(DataExibicao::dataHora($a->proximo_vencimento))->toBe(DataExibicao::agora()->addMonthsNoOverflow(1)->format('d/m/Y').' 23:59')
             ->and($a->proxima_cota_em)->toBeNull()
             ->and($a->id_externo)->toStartWith('fakesub_')
             ->and($a->cartao_bandeira)->toBe('VISA')

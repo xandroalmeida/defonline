@@ -176,7 +176,7 @@ Pacotes de créditos são comprados à vista (Pix ou cartão) e consumidos à me
 - Não exige cadastro de meio de pagamento.
 - Ao final do 7º dia, o acesso às funções pagas é bloqueado até o usuário assinar ou comprar créditos. O acesso ao histórico do diagnóstico realizado continua disponível durante a janela de retenção (ver seção 4.8).
 - O trial pode ser ativado uma única vez por CPF/CNPJ.
-- Abuso (múltiplos cadastros com variações de e-mail) será mitigado por verificação do documento (CPF/CNPJ já utilizado → bloqueia novo trial) e por verificação por IP (mitigação do risco R8 identificado no parecer CLAUDE).
+- Abuso (múltiplos cadastros com variações de e-mail) será mitigado por verificação do documento (CPF/CNPJ já utilizado → bloqueia novo trial), mitigação do risco R8 identificado no parecer CLAUDE. A verificação por IP foi retirada em 2026-11-06 (PDR-020, decisão 12).
 
 ### 2.4 Políticas Comerciais
 

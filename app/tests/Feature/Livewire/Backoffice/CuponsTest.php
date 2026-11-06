@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Cobranca\CupomRegras;
 use App\Domain\Cobranca\MotivoRecusaCupom;
 use App\Domain\Cobranca\TipoDesconto;
 use App\Livewire\Backoffice\Cupons;
@@ -48,7 +49,7 @@ beforeEach(function () {
     };
 
     $this->cupom = fn (array $attrs = []) => Cupom::create([
-        'codigo' => 'EXISTE', 'tipo' => TipoDesconto::Percentual, 'valor' => 10,
+        'codigo' => 'EXISTE', 'tipo' => TipoDesconto::Percentual, 'valor' => 100,
         'vigencia_inicio' => '2026-11-01', 'vigencia_fim' => '2026-12-31', 'ativo' => true, ...$attrs,
     ]);
     $this->auditorias = fn (string $acao) => AuditLog::where('action', $acao)->get();
@@ -90,6 +91,43 @@ describe('CA-1 permissão', function () {
     });
 });
 
+describe('máscara do valor', function () {
+    it('grava e reabre o percentual com uma casa decimal', function () {
+        ($this->preencher)(($this->tela)(), ['codigo' => 'MEIO', 'valor' => '12,5'])->call('salvarCupom')->assertHasNoErrors();
+        $cupom = Cupom::query()->where('codigo', 'MEIO')->sole();
+
+        expect($cupom->valor)->toBe(125);
+        ($this->tela)()->call('editarCupom', $cupom->id)->assertSet('cupom.valor', '12,5');
+    });
+
+    it('trocar o tipo de desconto limpa o valor digitado', function () {
+        ($this->tela)()->set('cupom.valor', '25')->set('cupom.tipo', 'valor_fixo')->assertSet('cupom.valor', '');
+    });
+});
+
+describe('gerar código', function () {
+    it('gera 8 caracteres sem símbolos confundíveis', function () {
+        foreach (range(1, 200) as $_) {
+            expect(CupomRegras::gerarCodigo())->toMatch('/^[A-HJKMNP-Z2-9]{8}$/');
+        }
+    });
+
+    it('preenche o campo, limpa o erro e o código gerado é aceito', function () {
+        $tela = ($this->tela)()->set('cupom.codigo', '!')->call('salvarCupom')->assertHasErrors('cupom.codigo');
+        $tela->call('gerarCodigo')->assertHasNoErrors('cupom.codigo');
+        $codigo = $tela->get('cupom.codigo');
+        expect($codigo)->toMatch('/^[A-HJKMNP-Z2-9]{8}$/');
+
+        ($this->preencher)($tela, ['codigo' => $codigo])->call('salvarCupom')->assertHasNoErrors();
+        expect(Cupom::query()->where('codigo', $codigo)->exists())->toBeTrue();
+    });
+
+    it('não oferece gerar ao editar um cupom existente', function () {
+        $tela = ($this->preencher)(($this->tela)(), ['codigo' => 'EDITAR1'])->call('salvarCupom');
+        $tela->assertSeeHtml('cupom-gerar-codigo')->call('editarCupom', Cupom::query()->where('codigo', 'EDITAR1')->sole()->id)->assertDontSeeHtml('cupom-gerar-codigo');
+    });
+});
+
 describe('CA-2 criação', function () {
     it('cria um cupom percentual com código normalizado, itens e auditoria', function () {
         $tela = ($this->preencher)(($this->tela)(), ['codigo' => '  beta25 ', 'limite_usos' => '100', 'itens' => [
@@ -99,7 +137,7 @@ describe('CA-2 criação', function () {
 
         $cupom = Cupom::where('codigo', 'BETA25')->firstOrFail();
         expect($cupom->tipo)->toBe(TipoDesconto::Percentual)
-            ->and($cupom->valor)->toBe(25)
+            ->and($cupom->valor)->toBe(250)
             ->and($cupom->limite_usos)->toBe(100)
             ->and($cupom->ciclos_duracao)->toBeNull()
             ->and($cupom->ativo)->toBeTrue()
@@ -122,7 +160,7 @@ describe('CA-2 criação', function () {
         ($this->preencher)(($this->tela)(), ['valor' => $valor, 'vigencia_inicio' => '2026-11-10', 'vigencia_fim' => '2026-11-10'])
             ->call('salvarCupom')->assertHasNoErrors();
 
-        expect(Cupom::where('codigo', 'BETA25')->value('valor'))->toBe((int) $valor);
+        expect(Cupom::where('codigo', 'BETA25')->value('valor'))->toBe((int) $valor * 10);
     })->with(['1', '100']);
 
     it('mostra o que o admin escolheu: lista com desconto, vigência e itens', function () {
@@ -158,11 +196,11 @@ describe('CA-3 validação por campo', function () {
     it('recusa percentual fora de 1 a 100 e não inteiro', function (string $valor, string $mensagem) {
         ($this->preencher)(($this->tela)(), ['valor' => $valor])->call('salvarCupom')->assertHasErrors(['cupom.valor' => $mensagem]);
     })->with([
-        'zero' => ['0', 'O percentual deve ficar entre 1 e 100.'],
-        '101' => ['101', 'O percentual deve ficar entre 1 e 100.'],
-        'negativo' => ['-10', 'O percentual deve ficar entre 1 e 100.'],
-        'decimal' => ['10,5', 'Informe o percentual como número inteiro, de 1 a 100.'],
-        'texto' => ['dez', 'Informe o percentual como número inteiro, de 1 a 100.'],
+        'zero' => ['0', 'O percentual deve ficar entre 0,1 e 100.'],
+        '101' => ['101', 'O percentual deve ficar entre 0,1 e 100.'],
+        'negativo' => ['-10', 'O percentual deve ficar entre 0,1 e 100.'],
+        'duas casas' => ['10,55', 'Informe o percentual com até uma casa decimal, de 0,1 a 100.'],
+        'texto' => ['dez', 'Informe o percentual com até uma casa decimal, de 0,1 a 100.'],
         'vazio' => ['', 'Informe o valor do desconto.'],
     ]);
 
@@ -232,7 +270,7 @@ describe('CA-3 validação por campo', function () {
         // Outro admin grava o mesmo código entre a validação e o INSERT.
         Cupom::creating(function (Cupom $c) {
             Cupom::flushEventListeners();
-            DB::table('cupons')->insert(['id' => (string) Str::uuid7(), 'codigo' => 'CORRIDA', 'tipo' => 'percentual', 'valor' => 5,
+            DB::table('cupons')->insert(['id' => (string) Str::uuid7(), 'codigo' => 'CORRIDA', 'tipo' => 'percentual', 'valor' => 50,
                 'vigencia_inicio' => '2026-11-01', 'vigencia_fim' => '2026-11-02', 'ativo' => true, 'created_at' => now(), 'updated_at' => now()]);
         });
 
@@ -253,10 +291,10 @@ describe('edição e CA-6 desativação', function () {
         $tela->set('cupom.valor', '30')->set('cupom.itens', ["pacote:{$this->pacote->id}"])->call('salvarCupom')->assertHasNoErrors()->assertSet('cupom.id', null);
 
         $cupom->refresh()->load('itens');
-        expect($cupom->valor)->toBe(30)->and($cupom->itens->map->chave()->all())->toBe(["pacote:{$this->pacote->id}"]);
+        expect($cupom->valor)->toBe(300)->and($cupom->itens->map->chave()->all())->toBe(["pacote:{$this->pacote->id}"]);
 
         $log = ($this->auditorias)('cupons.cupom_alterado')->first();
-        expect($log->subject_id)->toBe($cupom->id)->and($log->before['valor'])->toBe(10)->and($log->after['valor'])->toBe(30)
+        expect($log->subject_id)->toBe($cupom->id)->and($log->before['valor'])->toBe(100)->and($log->after['valor'])->toBe(300)
             ->and($log->before['itens'])->toBe(["plano:{$this->plano->id}:mensal"])->and($log->after['itens'])->toBe(["pacote:{$this->pacote->id}"])
             ->and($log->actor_id)->toBe($this->admin->id);
     });
@@ -568,7 +606,7 @@ describe('CA-8 auditoria', function () {
 
         $criado = ($this->auditorias)('cupons.cupom_criado')->first();
         expect($criado->subject_type)->toBe('Cupom')->and($criado->subject_id)->toBe($cupom->id)->and($criado->before)->toBeNull()
-            ->and($criado->after['codigo'])->toBe('AUDITA')->and($criado->after['tipo'])->toBe('percentual')->and($criado->after['valor'])->toBe(25)
+            ->and($criado->after['codigo'])->toBe('AUDITA')->and($criado->after['tipo'])->toBe('percentual')->and($criado->after['valor'])->toBe(250)
             ->and($criado->after['vigencia_fim'])->toBe('2026-12-31')->and($criado->after['itens'])->toBe(["plano:{$this->plano->id}:mensal"])
             ->and($criado->actor_id)->toBe($this->admin->id);
 
@@ -631,7 +669,7 @@ describe('itens cobertos e regra de uso para o checkout (STORY-083)', function (
     it('o banco recusa tipo, faixa e vigência inválidos mesmo fora da tela', function (array $attrs) {
         expect(fn () => ($this->cupom)($attrs))->toThrow(QueryException::class);
     })->with([
-        'percentual 101' => [['valor' => 101]],
+        'percentual 100,1' => [['valor' => 1001]],
         'valor zero' => [['valor' => 0]],
         'vigência invertida' => [['vigencia_inicio' => '2026-12-31', 'vigencia_fim' => '2026-12-30']],
     ]);

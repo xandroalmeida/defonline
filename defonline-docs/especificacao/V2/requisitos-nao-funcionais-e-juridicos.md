@@ -23,6 +23,7 @@
 8. [Termo de Adesão — Premissas para Revisão Jurídica](#8-termo-de-adesão--premissas-para-revisão-jurídica)
 9. [Gestão de Risco Técnico do Diagnóstico (TDD e E2E)](#9-gestão-de-risco-técnico-do-diagnóstico-tdd-e-e2e)
 10. [Critérios de Aceite para Kickoff](#10-critérios-de-aceite-para-kickoff)
+11. [Entrada de Dados](#11-entrada-de-dados)
 
 ---
 
@@ -401,3 +402,20 @@ A spec técnica de construção precisa fechar, **antes do início de implementa
 **Fim do documento — Requisitos Não-Funcionais e Jurídicos v2.0**
 
 *Próximos passos: nova rodada de arquitetura técnica de construção para fechar a lista da §10.2; em paralelo, a EBC mantém os trabalhos jurídicos, de DPO e de validação externa das faixas (§10.3).*
+
+---
+
+## 11. Entrada de Dados
+
+### RNF-UI-01 — Dinheiro e percentual sempre com máscara
+
+Decidido pelo PO em 2026-11-06. Vale para todo campo do sistema, inclusive a área administrativa.
+
+- **Dinheiro:** usa `<x-input-moeda>`, com prefixo `R$` e digitação a partir dos centavos (`150000` vira `1.500,00`).
+- **Percentual:** usa `<x-input-percentual>`, com sufixo `%` e digitação natural (`3,46` fica `3,46`; `100` fica `100`). A propriedade `decimais` define as casas: o cupom usa 1 (`12,5`) e o quiz usa 2.
+- **Sem caracteres inválidos nem zeros à esquerda:** letras não entram, `0000` vira `0` e casas a mais são ignoradas.
+- **O limite continua no servidor:** a máscara não corrige o número sozinha. Digitar `150` em um percentual mostra o erro de validação, em vez de virar `100` sem aviso.
+- **A unidade fica no campo:** o rótulo não repete `(R$)` nem `(%)`.
+- **O que foi exibido é o que foi gravado:** o valor enviado ao servidor é o valor mostrado, mesmo digitando devagar e com a rede lenta (IDR-034).
+
+**Verificação:** `tests/Feature/Regras/MascarasDeEntradaTest.php` reprova campo decimal, máscara própria ou rótulo com unidade fora dos componentes. Campo novo também precisa de teste Dusk que compare o valor gravado com o exibido.

@@ -52,7 +52,7 @@ final class Ativar extends Component
         $this->erroInesperado = false;
 
         try {
-            $assinatura = app(Trial::class)->ativar((string) auth()->id(), request()->ip());
+            $assinatura = app(Trial::class)->ativar((string) auth()->id());
             $this->ativadaId = $assinatura->id;
         } catch (TrialIndisponivel $e) {
             $this->motivo = $e->motivo->value;

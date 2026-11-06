@@ -19,8 +19,24 @@ final class CupomRegras
     }
 
     /**
+     * Código aleatório fácil de ler e ditar: sem caracteres confundíveis (0/O, 1/I/L). Com 31 símbolos
+     * e 8 posições há cerca de 850 bilhões de combinações. A unicidade é conferida por quem grava.
+     */
+    public static function gerarCodigo(): string
+    {
+        $alfabeto = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+        $codigo = '';
+
+        for ($i = 0; $i < 8; $i++) {
+            $codigo .= $alfabeto[random_int(0, strlen($alfabeto) - 1)];
+        }
+
+        return $codigo;
+    }
+
+    /**
      * Erros da definição por campo (`valor`, `vigencia_fim`). Vazio = definição válida.
-     * `valor` é o percentual inteiro ou os centavos, conforme o tipo.
+     * `valor` é o percentual em décimos ou os centavos, conforme o tipo.
      *
      * @return array<string, string>
      */
@@ -28,8 +44,8 @@ final class CupomRegras
     {
         $erros = [];
 
-        if ($tipo === TipoDesconto::Percentual && ($valor < 1 || $valor > 100)) {
-            $erros['valor'] = 'O percentual deve ficar entre 1 e 100.';
+        if ($tipo === TipoDesconto::Percentual && ($valor < 1 || $valor > 1000)) {
+            $erros['valor'] = 'O percentual deve ficar entre 0,1 e 100.';
         }
 
         if ($tipo === TipoDesconto::ValorFixo && $valor <= 0) {

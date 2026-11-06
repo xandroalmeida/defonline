@@ -95,7 +95,7 @@ afterEach(function () {
 });
 
 it('seis checkouts pagos disputam 2 vagas: só 2 levam o desconto e as reservas nunca passam do limite', function () {
-    $this->cupom = _cupomConcorrente('DISPUTA', 2, 20, PacoteCredito::query()->where('codigo', 'plus')->firstOrFail(), null);
+    $this->cupom = _cupomConcorrente('DISPUTA', 2, 200, PacoteCredito::query()->where('codigo', 'plus')->firstOrFail(), null);
 
     $resultados = _soltarContratacoes($this->usuarios->pluck('id')->all(), 'creditos', 'DISPUTA');
 
@@ -115,7 +115,7 @@ it('seis checkouts pagos disputam 2 vagas: só 2 levam o desconto e as reservas 
 });
 
 it('seis ativações sem cobrança disputam a última vaga: uma assinatura, um uso, cinco recusadas', function () {
-    $this->cupom = _cupomConcorrente('ULTIMA', 1, 100, null, Plano::query()->where('nome', 'Básico')->firstOrFail());
+    $this->cupom = _cupomConcorrente('ULTIMA', 1, 1000, null, Plano::query()->where('nome', 'Básico')->firstOrFail());
 
     $resultados = _soltarContratacoes($this->usuarios->pluck('id')->all(), 'assinatura', 'ULTIMA');
 

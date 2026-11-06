@@ -61,7 +61,7 @@ final class CupomCheckoutBrowserTest extends DuskTestCase
     private function cupomDoPlano(string $codigo, int $percentual, ?int $ciclos = 3): Cupom
     {
         $cupom = Cupom::query()->create([
-            'codigo' => $codigo, 'tipo' => TipoDesconto::Percentual, 'valor' => $percentual,
+            'codigo' => $codigo, 'tipo' => TipoDesconto::Percentual, 'valor' => $percentual * 10,
             'vigencia_inicio' => now()->subDay()->toDateString(), 'vigencia_fim' => now()->addMonth()->toDateString(),
             'ativo' => true, 'ciclos_duracao' => $ciclos,
         ]);
@@ -176,7 +176,7 @@ final class CupomCheckoutBrowserTest extends DuskTestCase
         $usuario = Usuario::factory()->create();
         $pacote = PacoteCredito::query()->where('codigo', 'plus')->firstOrFail();
         $cupom = Cupom::query()->create([
-            'codigo' => 'CRED20', 'tipo' => TipoDesconto::Percentual, 'valor' => 20,
+            'codigo' => 'CRED20', 'tipo' => TipoDesconto::Percentual, 'valor' => 200,
             'vigencia_inicio' => now()->subDay()->toDateString(), 'vigencia_fim' => now()->addMonth()->toDateString(), 'ativo' => true,
         ]);
         $cupom->itens()->create(['pacote_credito_id' => $pacote->id]);

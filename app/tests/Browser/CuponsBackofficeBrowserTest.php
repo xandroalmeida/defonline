@@ -25,6 +25,36 @@ final class CuponsBackofficeBrowserTest extends DuskTestCase
     /** @var list<string> */
     protected array $tablesToTruncate = ['usuarios', 'audit_logs', 'sessions', 'cache', 'cupons'];
 
+    public function test_mascaras_do_valor_gravam_o_que_a_tela_mostra(): void
+    {
+        $admin = Usuario::factory()->create();
+        $admin->forceFill(['permissoes_admin' => ['cupons.gerenciar']])->save();
+        $planoId = Plano::query()->orderBy('ordem')->value('id');
+        $definirData = fn (string $dusk, string $iso): string => "{ const f = document.querySelector('[dusk=\"{$dusk}\"]'); f.value = '{$iso}'; f.dispatchEvent(new Event('input', {bubbles: true})); f.dispatchEvent(new Event('change', {bubbles: true})); }";
+
+        $this->browse(function (Browser $browser) use ($admin, $planoId, $definirData) {
+            $browser->loginAs($admin)->visit('/backoffice/cupons')->waitFor('@cupom-valor');
+
+            foreach (['0000' => '0', 'abc' => '', '025' => '25', '10,5' => '10,5', '10,55' => '10,5', '1000' => '100'] as $digitado => $exibido) {
+                $browser->clear('@cupom-valor')->type('@cupom-valor', (string) $digitado)->assertInputValue('@cupom-valor', $exibido);
+            }
+
+            $browser->select('@cupom-tipo', 'valor_fixo')
+                ->waitUsing(5, 100, fn () => $browser->script("return document.querySelector('[dusk=cupom-valor]').getAttribute('inputmode') === 'decimal'")[0])
+                ->assertInputValue('@cupom-valor', '')
+                ->type('@cupom-valor', '5')->assertInputValue('@cupom-valor', '0,05')
+                ->clear('@cupom-valor')->type('@cupom-valor', '150000')->assertInputValue('@cupom-valor', '1.500,00')
+                ->type('@cupom-codigo', 'mascara')
+                ->script($definirData('cupom-inicio', '2026-12-01').$definirData('cupom-fim', '2027-01-01'));
+
+            $browser->check('@cupom-item-plano-'.$planoId.'-mensal')
+                ->press('@cupom-salvar')
+                ->waitForTextIn('@cupons-lista', 'MASCARA');
+        });
+
+        $this->assertSame(150000, Cupom::query()->where('codigo', 'MASCARA')->sole()->valor);
+    }
+
     public function test_admin_cria_cupom_concede_ao_beta_e_desativa(): void
     {
         $admin = Usuario::factory()->create();
@@ -52,7 +82,7 @@ final class CuponsBackofficeBrowserTest extends DuskTestCase
             $browser->pause(300)
                 ->press('@cupom-salvar')
                 ->waitFor('@erro-cupom-valor')
-                ->assertSeeIn('@erro-cupom-valor', 'O percentual deve ficar entre 1 e 100.')
+                ->assertSeeIn('@erro-cupom-valor', 'O percentual deve ficar entre 0,1 e 100.')
                 ->assertSeeIn('@erro-cupom-fim', 'O fim da vigência não pode ser anterior ao início.')
                 ->assertSeeIn('@erro-cupom-itens', 'Escolha ao menos um item coberto.')
                 // Corrige e cria.

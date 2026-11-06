@@ -8,7 +8,6 @@ use App\Models\Assinatura;
 use App\Models\TrialAtivacao;
 use App\Models\TrialConfig;
 use App\Models\Usuario;
-use App\Observabilidade\AlertaDaEquipe;
 use App\Observabilidade\EventosCobranca;
 use App\Support\DataExibicao;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -20,20 +19,17 @@ use Illuminate\Support\Facades\DB;
  * guarda cota e vencimento, então mudar a configuração depois não mexe em trial em andamento, CA-3).
  *
  * Uma ativação por CPF (índice único no HMAC do CPF: duas abas ao mesmo tempo também caem aqui).
- * O IP é só registrado: mais ativações do mesmo IP que o limite em 30 dias geram alerta, nunca
- * bloqueio, porque escritórios compartilham IP (CA-7). Não é `final` só para a tela poder ser testada
- * contra uma falha inesperada.
+ * Não é `final` só para a tela poder ser testada contra uma falha inesperada.
  */
 class Trial
 {
     public function __construct(
         private readonly Carteira $carteira,
         private readonly ElegibilidadeTrial $elegibilidade,
-        private readonly AlertaDaEquipe $alerter,
     ) {}
 
     /** @throws TrialIndisponivel */
-    public function ativar(string $usuarioId, ?string $ip): Assinatura
+    public function ativar(string $usuarioId): Assinatura
     {
         $motivo = $this->elegibilidade->motivo($usuarioId);
 
@@ -46,7 +42,7 @@ class Trial
         $agora = now();
 
         try {
-            $assinatura = DB::transaction(function () use ($usuario, $config, $ip, $agora): Assinatura {
+            $assinatura = DB::transaction(function () use ($usuario, $config, $agora): Assinatura {
                 // Conta anonimizada não tem CPF: só a regra por conta (assinatura com trial) vale.
                 $cpf = (string) $usuario->cpf;
 
@@ -54,7 +50,6 @@ class Trial
                     TrialAtivacao::query()->create([
                         'usuario_id' => $usuario->id,
                         'cpf_hash' => DocumentoHash::de($cpf),
-                        'ip' => $ip,
                         'ativado_em' => $agora,
                     ]);
                 }
@@ -69,28 +64,6 @@ class Trial
             throw new TrialIndisponivel(MotivoInelegivelTrial::CpfJaUsou);
         }
 
-        $this->alertarSeIpAcimaDoLimite($ip, $config->limite_ip_30d);
-
         return $assinatura;
-    }
-
-    private function alertarSeIpAcimaDoLimite(?string $ip, int $limite): void
-    {
-        if ($ip === null || $ip === '') {
-            return;
-        }
-
-        $total = TrialAtivacao::query()->where('ip', $ip)->where('ativado_em', '>=', now()->subDays(30))->count();
-
-        if ($total > $limite) {
-            // O alerta vai para um canal de mensagens: IP é dado pessoal, então só sai com o último trecho oculto.
-            $mascarado = AlertaDaEquipe::mascararIp($ip);
-
-            $this->alerter->enviar(
-                '[P2] Trials em excesso para um mesmo IP',
-                "Um IP ({$mascarado}) ativou {$total} trials em 30 dias (limite configurado: {$limite}). Nada foi bloqueado; confira em trial_ativacoes se é abuso ou um escritório compartilhando IP.",
-                ['ip_mascarado' => $mascarado, 'total_30d' => $total, 'limite' => $limite],
-            );
-        }
     }
 }

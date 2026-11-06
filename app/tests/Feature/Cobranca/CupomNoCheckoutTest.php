@@ -55,7 +55,7 @@ beforeEach(function () {
 function _cupomPara(array $attrs = [], ?string $planoId = null, string $ciclo = 'mensal', ?string $pacoteId = null): Cupom
 {
     $cupom = Cupom::query()->create([
-        'codigo' => 'BETA50', 'tipo' => TipoDesconto::Percentual, 'valor' => 50,
+        'codigo' => 'BETA50', 'tipo' => TipoDesconto::Percentual, 'valor' => 500,
         'vigencia_inicio' => now()->subDay()->toDateString(), 'vigencia_fim' => now()->addMonth()->toDateString(),
         'ativo' => true, 'ciclos_duracao' => 3, ...$attrs,
     ]);
@@ -119,7 +119,7 @@ describe('CA-1 preço cheio, desconto e valor a pagar antes de confirmar', funct
     });
 
     it('o pacote de créditos também mostra o desconto e o botão traz o novo valor', function () {
-        _cupomPara(['codigo' => 'PACOTE20', 'valor' => 20, 'ciclos_duracao' => null], pacoteId: _pacote('plus')->id);
+        _cupomPara(['codigo' => 'PACOTE20', 'valor' => 200, 'ciclos_duracao' => null], pacoteId: _pacote('plus')->id);
         $final = (int) round(_pacote('plus')->preco_centavos * 0.8);
 
         Livewire::actingAs($this->usuario)->test(ComprarCreditos::class, ['pacote' => _pacote('plus')->id])
@@ -161,7 +161,7 @@ describe('CA-1 preço cheio, desconto e valor a pagar antes de confirmar', funct
 
 describe('CA-2 cupom concedido à conta', function () {
     it('é aplicado sozinho, com o aviso, e a tela não oferece digitar outro', function () {
-        $cupom = _cupomPara(['codigo' => 'BETA100', 'valor' => 100]);
+        $cupom = _cupomPara(['codigo' => 'BETA100', 'valor' => 1000]);
         CupomConcessao::query()->create(['cupom_id' => $cupom->id, 'usuario_id' => $this->usuario->id, 'ciclos_restantes' => 3, 'concedida_em' => now()]);
 
         Livewire::actingAs($this->usuario)->test(AssinarPlano::class, ['plano' => _plano()->id, 'ciclo' => 'mensal'])
@@ -172,8 +172,8 @@ describe('CA-2 cupom concedido à conta', function () {
     });
 
     it('o concedido vence o digitado: cupons não acumulam', function () {
-        $beta = _cupomPara(['codigo' => 'BETA30', 'valor' => 30]);
-        _cupomPara(['codigo' => 'OUTRO90', 'valor' => 90]);
+        $beta = _cupomPara(['codigo' => 'BETA30', 'valor' => 300]);
+        _cupomPara(['codigo' => 'OUTRO90', 'valor' => 900]);
         CupomConcessao::query()->create(['cupom_id' => $beta->id, 'usuario_id' => $this->usuario->id, 'ciclos_restantes' => 3, 'concedida_em' => now()]);
 
         $invoice = _contratar($this->usuario, 'OUTRO90');
@@ -182,9 +182,9 @@ describe('CA-2 cupom concedido à conta', function () {
     });
 
     it('com dois concedidos vale o de maior desconto, e o concedido que não cobre o item é ignorado', function () {
-        $pequeno = _cupomPara(['codigo' => 'P10', 'valor' => 10]);
-        $grande = _cupomPara(['codigo' => 'G40', 'valor' => 40]);
-        $outroPlano = _cupomPara(['codigo' => 'ANUAL90', 'valor' => 90], _plano()->id, 'anual');
+        $pequeno = _cupomPara(['codigo' => 'P10', 'valor' => 100]);
+        $grande = _cupomPara(['codigo' => 'G40', 'valor' => 400]);
+        $outroPlano = _cupomPara(['codigo' => 'ANUAL90', 'valor' => 900], _plano()->id, 'anual');
         foreach ([$pequeno, $grande, $outroPlano] as $c) {
             CupomConcessao::query()->create(['cupom_id' => $c->id, 'usuario_id' => $this->usuario->id, 'ciclos_restantes' => 3, 'concedida_em' => now()]);
         }
@@ -387,7 +387,7 @@ describe('CA-6 desconto total: sem meio de pagamento e sem cobrança', function 
     });
 
     it('a assinatura fica ativa na hora, com Invoice de valor zero, uso e cota', function () {
-        $cupom = _cupomPara(['valor' => 100]);
+        $cupom = _cupomPara(['valor' => 1000]);
 
         $invoice = _contratar($this->usuario, 'BETA50');
         $a = Assinatura::query()->where('usuario_id', $this->usuario->id)->sole();
@@ -402,7 +402,7 @@ describe('CA-6 desconto total: sem meio de pagamento e sem cobrança', function 
     });
 
     it('os créditos são liberados na hora, com Invoice e uso', function () {
-        $cupom = _cupomPara(['codigo' => 'CRED100', 'valor' => 100, 'ciclos_duracao' => null], pacoteId: _pacote('plus')->id);
+        $cupom = _cupomPara(['codigo' => 'CRED100', 'valor' => 1000, 'ciclos_duracao' => null], pacoteId: _pacote('plus')->id);
 
         $invoice = _comprarCreditos($this->usuario, 'CRED100');
 
@@ -412,7 +412,7 @@ describe('CA-6 desconto total: sem meio de pagamento e sem cobrança', function 
     });
 
     it('o Pix anual com desconto total também ativa sem cobrança', function () {
-        _cupomPara(['valor' => 100], _plano()->id, 'anual');
+        _cupomPara(['valor' => 1000], _plano()->id, 'anual');
 
         $invoice = _contratar($this->usuario, 'BETA50', CicloCobranca::Anual, MeioPagamento::Pix);
 
@@ -421,7 +421,7 @@ describe('CA-6 desconto total: sem meio de pagamento e sem cobrança', function 
     });
 
     it('a tela vai direto à confirmação, sem página do provedor', function () {
-        _cupomPara(['valor' => 100]);
+        _cupomPara(['valor' => 1000]);
 
         $tela = Livewire::actingAs($this->usuario)->test(AssinarPlano::class, ['plano' => _plano()->id, 'ciclo' => 'mensal'])
             ->call('abrirCupom')->set('campoCupom', 'BETA50')->call('aplicarCupom')
@@ -432,7 +432,7 @@ describe('CA-6 desconto total: sem meio de pagamento e sem cobrança', function 
     });
 
     it('sem registro do uso a ativação não acontece: nada de assinatura sem Invoice e sem uso', function () {
-        _cupomPara(['valor' => 100]);
+        _cupomPara(['valor' => 1000]);
         // O índice único barra o segundo uso da mesma conta: a transação inteira desfaz.
         Cupom::query()->first()->usos()->create(['usuario_id' => $this->usuario->id, 'usado_em' => now(), 'desconto_centavos' => 1]);
 
@@ -508,7 +508,7 @@ describe('CA-7 desconto por N ciclos e volta ao preço vigente', function () {
     });
 
     it('desconto total por 2 ciclos: renova sem cobrança com Invoice zero e depois encerra sem cartão', function () {
-        $cupom = _cupomPara(['valor' => 100, 'ciclos_duracao' => 2]);
+        $cupom = _cupomPara(['valor' => 1000, 'ciclos_duracao' => 2]);
         _contratar($this->usuario, 'BETA50');
         $a = Assinatura::query()->sole();
         expect($a->preco_snapshot_centavos)->toBe(0);
@@ -538,7 +538,7 @@ describe('CA-7 desconto por N ciclos e volta ao preço vigente', function () {
 
 describe('CA-8 aviso 7 dias antes e regularização', function () {
     it('avisa uma vez, 7 dias antes do fim do desconto, e o mesmo aviso aparece em Meu plano', function () {
-        _cupomPara(['valor' => 100, 'ciclos_duracao' => 1]);
+        _cupomPara(['valor' => 1000, 'ciclos_duracao' => 1]);
         _contratar($this->usuario, 'BETA50');
         $a = Assinatura::query()->sole();
 
@@ -572,7 +572,7 @@ describe('CA-8 aviso 7 dias antes e regularização', function () {
     });
 
     it('cadastrar o cartão no meio do desconto marca a 1ª cobrança para o fim dele e a renovação segue pelo cartão', function () {
-        _cupomPara(['valor' => 100, 'ciclos_duracao' => 1]);
+        _cupomPara(['valor' => 1000, 'ciclos_duracao' => 1]);
         _contratar($this->usuario, 'BETA50');
         $a = Assinatura::query()->sole();
 
@@ -593,7 +593,7 @@ describe('CA-8 aviso 7 dias antes e regularização', function () {
     });
 
     it('depois do fim, sem cartão, o plano está encerrado e Meu plano leva a cadastrar o cartão', function () {
-        _cupomPara(['valor' => 100, 'ciclos_duracao' => 1]);
+        _cupomPara(['valor' => 1000, 'ciclos_duracao' => 1]);
         _contratar($this->usuario, 'BETA50');
         $a = Assinatura::query()->sole();
         $this->travelTo($a->proximo_vencimento->copy()->addMinute());
@@ -609,7 +609,7 @@ describe('CA-8 aviso 7 dias antes e regularização', function () {
     });
 
     it('contratar de novo logo no vencimento, antes da rotina, já encerra o plano gratuito e deixa assinar', function () {
-        _cupomPara(['valor' => 100, 'ciclos_duracao' => 1]);
+        _cupomPara(['valor' => 1000, 'ciclos_duracao' => 1]);
         _contratar($this->usuario, 'BETA50');
         $this->travelTo(Assinatura::query()->sole()->proximo_vencimento->copy()->addMinute());
 
@@ -624,7 +624,7 @@ describe('CA-9 desativar o cupom não altera descontos já aplicados', function 
         $a = Assinatura::query()->sole();
         $desconto = $a->desconto_centavos;
 
-        $cupom->update(['ativo' => false, 'valor' => 5, 'ciclos_duracao' => 1]);
+        $cupom->update(['ativo' => false, 'valor' => 50, 'ciclos_duracao' => 1]);
         _pagarRenovacao($invoice);
 
         $a = $a->fresh();
@@ -679,7 +679,7 @@ describe('Pix anual e renovação', function () {
 
     it('renovação Pix com desconto total é feita na hora, sem QR Code', function () {
         $pix = _assinaturaPixAtiva($this->usuario);
-        _cupomPara(['codigo' => 'RENOVA100', 'valor' => 100, 'ciclos_duracao' => 1, 'vigencia_fim' => now()->addYears(2)->toDateString()], _plano()->id, 'anual');
+        _cupomPara(['codigo' => 'RENOVA100', 'valor' => 1000, 'ciclos_duracao' => 1, 'vigencia_fim' => now()->addYears(2)->toDateString()], _plano()->id, 'anual');
         $this->travelTo($pix->proximo_vencimento->copy()->subDays(3));
 
         $invoice = app(IniciarRenovacaoPix::class)->executar($this->usuario, '203.0.113.7', 'PestAgent', 'RENOVA100');
@@ -692,7 +692,7 @@ describe('Pix anual e renovação', function () {
 
 describe('CA-10 interruptor de cobrança', function () {
     it('desligada, as telas não existem e as rotinas não fazem nada', function () {
-        _cupomPara(['valor' => 100, 'ciclos_duracao' => 1]);
+        _cupomPara(['valor' => 1000, 'ciclos_duracao' => 1]);
         _contratar($this->usuario, 'BETA50');
         $a = Assinatura::query()->sole();
         CobrancaConfig::atual()->update(['ativa' => false]);

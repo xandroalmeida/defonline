@@ -66,14 +66,8 @@ describe('CA-1 oferta e ativação', function () {
         ($this->tela)()->call('ativar')->assertSee('Fazer uma análise')->assertSee('Cadastrar uma empresa');
     });
 
-    it('registra o IP de quem ativou', function () {
-        ($this->tela)()->call('ativar');
-
-        expect(TrialAtivacao::query()->sole()->ip)->not->toBeNull();
-    });
-
     it('mostra o andamento a quem já está em teste, sem oferta', function () {
-        app(Trial::class)->ativar($this->usuario->id, null);
+        app(Trial::class)->ativar($this->usuario->id);
 
         ($this->tela)()->assertSee('Teste grátis: termina em')->assertDontSee('Começar teste grátis')->assertSee('Ver planos');
     });
@@ -98,7 +92,7 @@ describe('CA-1 oferta e ativação', function () {
 
 describe('CA-2 recusas', function () {
     it('explica que o CPF já usou o teste e oferece os planos', function () {
-        TrialAtivacao::query()->create(['usuario_id' => null, 'cpf_hash' => DocumentoHash::de($this->usuario->cpf), 'ip' => null, 'ativado_em' => now()->subMonth()]);
+        TrialAtivacao::query()->create(['usuario_id' => null, 'cpf_hash' => DocumentoHash::de($this->usuario->cpf), 'ativado_em' => now()->subMonth()]);
 
         ($this->tela)()->assertSee('Já existe um teste gratuito ativado com este CPF, então não conseguimos abrir outro.')
             ->assertSee('Ver planos e preços')->assertDontSee('Começar teste grátis')
@@ -107,7 +101,7 @@ describe('CA-2 recusas', function () {
 
     it('recusa ao tentar ativar por baixo dos panos quando o CPF foi usado entre abrir e clicar', function () {
         $tela = ($this->tela)();
-        TrialAtivacao::query()->create(['usuario_id' => null, 'cpf_hash' => DocumentoHash::de($this->usuario->cpf), 'ip' => null, 'ativado_em' => now()]);
+        TrialAtivacao::query()->create(['usuario_id' => null, 'cpf_hash' => DocumentoHash::de($this->usuario->cpf), 'ativado_em' => now()]);
 
         $tela->call('ativar')->assertSee('Já existe um teste gratuito ativado com este CPF');
 

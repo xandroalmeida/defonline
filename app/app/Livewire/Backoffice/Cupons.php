@@ -130,6 +130,25 @@ final class Cupons extends Component
         $this->limparCupom();
     }
 
+    /** 25 como percentual não é R$ 25: trocar o tipo limpa o valor, e a máscara do novo tipo recomeça. */
+    public function updatedCupom(mixed $valor, string $campo): void
+    {
+        if ($campo === 'tipo') {
+            $this->cupom['valor'] = '';
+            $this->resetValidation('cupom.valor');
+        }
+    }
+
+    public function gerarCodigo(): void
+    {
+        do {
+            $codigo = CupomRegras::gerarCodigo();
+        } while (Cupom::query()->where('codigo', $codigo)->exists());
+
+        $this->cupom['codigo'] = $codigo;
+        $this->resetValidation('cupom.codigo');
+    }
+
     public function editarCupom(string $id): void
     {
         $cupom = Cupom::query()->with('itens')->findOrFail($id);
@@ -139,7 +158,7 @@ final class Cupons extends Component
             'id' => $cupom->id,
             'codigo' => $cupom->codigo,
             'tipo' => $cupom->tipo->value,
-            'valor' => $cupom->tipo === TipoDesconto::Percentual ? (string) $cupom->valor : Planos::reais($cupom->valor),
+            'valor' => $cupom->tipo === TipoDesconto::Percentual ? TipoDesconto::percentualEmTexto($cupom->valor) : Planos::reais($cupom->valor),
             'vigencia_inicio' => $cupom->vigencia_inicio->toDateString(),
             'vigencia_fim' => $cupom->vigencia_fim->toDateString(),
             'limite_usos' => $cupom->limite_usos === null ? '' : (string) $cupom->limite_usos,
@@ -409,7 +428,7 @@ final class Cupons extends Component
             $inteiro = $this->valorEmInteiro();
 
             if ($inteiro === null) {
-                $falhar($this->cupom['tipo'] === 'percentual' ? 'Informe o percentual como número inteiro, de 1 a 100.' : 'Informe o valor em reais, por exemplo 50,00.');
+                $falhar($this->cupom['tipo'] === 'percentual' ? 'Informe o percentual com até uma casa decimal, de 0,1 a 100.' : 'Informe o valor em reais, por exemplo 50,00.');
 
                 return;
             }
@@ -474,13 +493,19 @@ final class Cupons extends Component
         return null;
     }
 
-    /** Percentual inteiro, ou centavos do valor fixo. Texto com "-" vira negativo para o domínio recusar. */
+    /** Percentual em décimos, ou centavos do valor fixo. Texto com "-" vira negativo para o domínio recusar. */
     private function valorEmInteiro(): ?int
     {
         $texto = trim($this->cupom['valor']);
 
         if ($this->cupom['tipo'] === 'percentual') {
-            return preg_match('/^-?\d{1,6}$/', $texto) === 1 ? (int) $texto : null;
+            if (preg_match('/^(-?)(\d{1,6})(?:,(\d))?$/', $texto, $partes) !== 1) {
+                return null;
+            }
+
+            $decimos = (int) $partes[2] * 10 + (int) ($partes[3] ?? 0);
+
+            return $partes[1] === '-' ? -$decimos : $decimos;
         }
 
         $negativo = str_starts_with($texto, '-');

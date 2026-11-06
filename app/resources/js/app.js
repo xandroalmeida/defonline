@@ -1,3 +1,5 @@
+import { registrarMascaras } from './mascaras';
+
 /*
  * Widget de seleção de CNAE (combobox com busca).
  *
@@ -35,6 +37,8 @@ function carregarCnaes(url) {
 }
 
 document.addEventListener('alpine:init', () => {
+    registrarMascaras(window.Alpine);
+
     window.Alpine.data('cnaeSelect', ({ valor, url, rotuloInicial = '' }) => ({
         valor,
         url,

@@ -47,13 +47,13 @@
                 {!! $erro('plano.cota_mensal', 'erro-plano-cota') !!}
             </div>
             <div>
-                <x-label for="plano-mensal">Preço mensal (R$)</x-label>
-                <x-input type="text" inputmode="decimal" id="plano-mensal" wire:model="plano.preco_mensal" dusk="plano-mensal" class="w-full"/>
+                <x-label for="plano-mensal">Preço mensal</x-label>
+                <x-input-moeda id="plano-mensal" wire:model="plano.preco_mensal" dusk="plano-mensal"/>
                 {!! $erro('plano.preco_mensal', 'erro-plano-mensal') !!}
             </div>
             <div>
-                <x-label for="plano-anual">Preço anual (R$)</x-label>
-                <x-input type="text" inputmode="decimal" id="plano-anual" wire:model="plano.preco_anual" dusk="plano-anual" class="w-full"/>
+                <x-label for="plano-anual">Preço anual</x-label>
+                <x-input-moeda id="plano-anual" wire:model="plano.preco_anual" dusk="plano-anual"/>
                 {!! $erro('plano.preco_anual', 'erro-plano-anual') !!}
             </div>
             <div>
@@ -120,8 +120,8 @@
                 {!! $erro('pacote.quantidade_creditos', 'erro-pacote-creditos') !!}
             </div>
             <div>
-                <x-label for="pacote-preco">Preço (R$)</x-label>
-                <x-input type="text" inputmode="decimal" id="pacote-preco" wire:model.live.debounce.400ms="pacote.preco" dusk="pacote-preco" class="w-full"/>
+                <x-label for="pacote-preco">Preço</x-label>
+                <x-input-moeda id="pacote-preco" wire:model.live.debounce.400ms="pacote.preco" dusk="pacote-preco"/>
                 {!! $erro('pacote.preco', 'erro-pacote-preco') !!}
             </div>
             <div>
@@ -193,8 +193,8 @@
     {{-- Trial --}}
     <h2 class="text-lg font-medium text-[color:var(--color-primary)] mt-0 mb-3">Trial</h2>
     <x-card>
-        <form wire:submit="salvarTrial" novalidate class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <label class="flex items-center gap-2 text-sm md:self-end md:pb-2">
+        <form wire:submit="salvarTrial" novalidate class="grid grid-cols-1 md:grid-cols-2 md:items-end gap-4">
+            <label class="md:col-span-2 flex items-center gap-2 text-sm">
                 <input type="checkbox" wire:model="trial.ativo" dusk="trial-ativo"> Trial ativo
             </label>
             <div>
@@ -207,12 +207,7 @@
                 <x-input type="text" inputmode="numeric" id="trial-analises" wire:model="trial.analises" dusk="trial-analises" class="w-full"/>
                 {!! $erro('trial.analises', 'erro-trial-analises') !!}
             </div>
-            <div>
-                <x-label for="trial-limite-ip">Alertar acima de (trials por IP em 30 dias)</x-label>
-                <x-input type="text" inputmode="numeric" id="trial-limite-ip" wire:model="trial.limite_ip_30d" dusk="trial-limite-ip" class="w-full"/>
-                {!! $erro('trial.limite_ip_30d', 'erro-trial-limite-ip') !!}
-            </div>
-            <div class="md:col-span-3 flex items-center gap-3">
+            <div class="md:col-span-2 flex items-center gap-3">
                 <x-button type="submit" variant="primary" dusk="trial-salvar">Salvar trial</x-button>
                 @if ($mensagemTrial)
                     <span class="text-sm text-[color:var(--color-secondary)]" role="status" dusk="trial-mensagem">{{ $mensagemTrial }}</span>

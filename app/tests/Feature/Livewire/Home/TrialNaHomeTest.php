@@ -35,20 +35,20 @@ it('não oferece com o trial desativado nem a quem já usou', function () {
     ($this->home)()->assertDontSee('Começar teste grátis');
 
     TrialConfig::atual()->update(['ativo' => true]);
-    app(Trial::class)->ativar($this->usuario->id, null);
+    app(Trial::class)->ativar($this->usuario->id);
     ($this->home)()->assertDontSee('Começar teste grátis');
 });
 
 it('mostra o aviso do teste em andamento, no lugar da oferta', function () {
     $this->travelTo(CarbonImmutable::parse('2026-11-05 15:00:00', 'UTC'));
-    app(Trial::class)->ativar($this->usuario->id, null);
+    app(Trial::class)->ativar($this->usuario->id);
 
     ($this->home)()->assertSee('Teste grátis: termina em 12/11/2026 · 1 análise restante.')->assertSee('Ver planos')->assertDontSee('Começar teste grátis');
 });
 
 it('avisa que o teste terminou depois do prazo, e os diagnósticos seguem', function () {
     $this->travelTo(CarbonImmutable::parse('2026-11-05 15:00:00', 'UTC'));
-    app(Trial::class)->ativar($this->usuario->id, null);
+    app(Trial::class)->ativar($this->usuario->id);
     $this->travelTo(CarbonImmutable::parse('2026-11-14 15:00:00', 'UTC'));
 
     ($this->home)()->assertSee('Seu teste terminou em 12/11/2026. Seus diagnósticos continuam disponíveis.')->assertSee('Ver planos');
@@ -56,7 +56,7 @@ it('avisa que o teste terminou depois do prazo, e os diagnósticos seguem', func
 
 it('não avisa o fim do teste a quem tem crédito válido', function () {
     $this->travelTo(CarbonImmutable::parse('2026-11-05 15:00:00', 'UTC'));
-    app(Trial::class)->ativar($this->usuario->id, null);
+    app(Trial::class)->ativar($this->usuario->id);
     app(Carteira::class)->concederCreditos($this->usuario->id, 1, CarbonImmutable::parse('2027-01-01', 'UTC'));
     $this->travelTo(CarbonImmutable::parse('2026-11-14 15:00:00', 'UTC'));
 
@@ -68,7 +68,7 @@ it('com a cobrança desligada não mostra oferta nem aviso (CA-9)', function () 
     ($this->home)()->assertDontSee('Teste grátis')->assertDontSee('Começar teste grátis');
 
     CobrancaConfig::atual()->update(['ativa' => true]);
-    app(Trial::class)->ativar($this->usuario->id, null);
+    app(Trial::class)->ativar($this->usuario->id);
     CobrancaConfig::atual()->update(['ativa' => false]);
     ($this->home)()->assertDontSee('Teste grátis');
 });

@@ -24,7 +24,6 @@ use App\Models\TrialAtivacao;
 use App\Models\TrialConfig;
 use App\Models\TrialEmpresa;
 use App\Models\Usuario;
-use App\Observabilidade\AlertaDaEquipe;
 use App\Support\DataExibicao;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -49,9 +48,6 @@ function _trial(): Trial
 }
 
 beforeEach(function () {
-    $this->alerter = Mockery::mock(AlertaDaEquipe::class);
-    $this->alerter->shouldReceive('enviar')->byDefault();
-    app()->instance(AlertaDaEquipe::class, $this->alerter);
     CobrancaConfig::atual()->update(['ativa' => true]);
     $this->usuario = Usuario::factory()->create();
 });
@@ -60,7 +56,7 @@ describe('CA-1 ativação', function () {
     it('dá os dias e as análises configurados, sem meio de pagamento', function () {
         $this->travelTo(CarbonImmutable::parse('2026-11-05 10:00:00', 'UTC'));
 
-        $a = _trial()->ativar($this->usuario->id, '203.0.113.9');
+        $a = _trial()->ativar($this->usuario->id);
 
         expect($a->trial)->toBeTrue()
             ->and($a->plano_id)->toBeNull()
@@ -72,13 +68,12 @@ describe('CA-1 ativação', function () {
 
         $registro = TrialAtivacao::query()->sole();
         expect($registro->usuario_id)->toBe($this->usuario->id)
-            ->and($registro->ip)->toBe('203.0.113.9')
             ->and($registro->cpf_hash)->toBe(DocumentoHash::de($this->usuario->cpf))
             ->and($registro->cpf_hash)->not->toContain($this->usuario->cpf);
     });
 
     it('permite ao Usuário fazer a análise do trial e debita a cota', function () {
-        _trial()->ativar($this->usuario->id, null);
+        _trial()->ativar($this->usuario->id);
         $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $this->usuario->id]);
 
         $d = app(CalcularDiagnostico::class)->execute($empresa, _payloadTrial());
@@ -93,7 +88,7 @@ describe('CA-1 ativação', function () {
         TrialConfig::atual()->update(['dias' => 14, 'analises' => 3]);
         $this->travelTo(CarbonImmutable::parse('2026-11-05 10:00:00', 'UTC'));
 
-        $a = _trial()->ativar($this->usuario->id, null);
+        $a = _trial()->ativar($this->usuario->id);
 
         expect($a->cota_snapshot)->toBe(3)->and($a->proximo_vencimento->toDateString())->toBe('2026-11-19');
     });
@@ -101,18 +96,18 @@ describe('CA-1 ativação', function () {
 
 describe('CA-2 elegibilidade por CPF', function () {
     it('recusa o segundo trial do mesmo Usuário', function () {
-        _trial()->ativar($this->usuario->id, null);
+        _trial()->ativar($this->usuario->id);
 
-        expect(fn () => _trial()->ativar($this->usuario->id, null))->toThrow(TrialIndisponivel::class, 'cpf_ja_usou');
+        expect(fn () => _trial()->ativar($this->usuario->id))->toThrow(TrialIndisponivel::class, 'cpf_ja_usou');
         expect(TrialAtivacao::query()->count())->toBe(1)->and(Assinatura::query()->count())->toBe(1);
     });
 
     it('recusa quem teve o trial vencido (já usou)', function () {
-        $a = _trial()->ativar($this->usuario->id, null);
+        $a = _trial()->ativar($this->usuario->id);
         $a->forceFill(['status' => StatusAssinatura::Expirada])->save();
 
         try {
-            _trial()->ativar($this->usuario->id, null);
+            _trial()->ativar($this->usuario->id);
             $this->fail('deveria recusar');
         } catch (TrialIndisponivel $e) {
             expect($e->motivo)->toBe(MotivoInelegivelTrial::CpfJaUsou);
@@ -120,10 +115,10 @@ describe('CA-2 elegibilidade por CPF', function () {
     });
 
     it('recusa quem já tem a ativação do CPF registrada (conta recriada com o mesmo CPF)', function () {
-        TrialAtivacao::query()->create(['usuario_id' => null, 'cpf_hash' => DocumentoHash::de($this->usuario->cpf), 'ip' => null, 'ativado_em' => now()->subMonths(3)]);
+        TrialAtivacao::query()->create(['usuario_id' => null, 'cpf_hash' => DocumentoHash::de($this->usuario->cpf), 'ativado_em' => now()->subMonths(3)]);
 
         try {
-            _trial()->ativar($this->usuario->id, null);
+            _trial()->ativar($this->usuario->id);
             $this->fail('deveria recusar');
         } catch (TrialIndisponivel $e) {
             expect($e->motivo)->toBe(MotivoInelegivelTrial::CpfJaUsou);
@@ -137,7 +132,7 @@ describe('CA-2 elegibilidade por CPF', function () {
         app(Carteira::class)->concederCota($this->usuario->id, 1, now(), now()->addMonth(), $plano->id, 'mensal');
 
         try {
-            _trial()->ativar($this->usuario->id, null);
+            _trial()->ativar($this->usuario->id);
             $this->fail('deveria recusar');
         } catch (TrialIndisponivel $e) {
             expect($e->motivo)->toBe(MotivoInelegivelTrial::JaTemAssinatura);
@@ -150,10 +145,10 @@ describe('CA-2 elegibilidade por CPF', function () {
         DB::table('trial_ativacoes')->insert(['id' => (string) Str::uuid7(), 'cpf_hash' => $hash, 'ativado_em' => now(), 'created_at' => now(), 'updated_at' => now()]);
         $elegibilidade = Mockery::mock(ElegibilidadeTrial::class);
         $elegibilidade->shouldReceive('motivo')->andReturn(null);
-        $trial = new Trial(app(Carteira::class), $elegibilidade, $this->alerter);
+        $trial = new Trial(app(Carteira::class), $elegibilidade);
 
         try {
-            $trial->ativar($this->usuario->id, null);
+            $trial->ativar($this->usuario->id);
             $this->fail('deveria recusar');
         } catch (TrialIndisponivel $e) {
             expect($e->motivo)->toBe(MotivoInelegivelTrial::CpfJaUsou);
@@ -165,16 +160,16 @@ describe('CA-2 elegibilidade por CPF', function () {
     it('trata a corrida pela assinatura vigente como "já usou" e desfaz o registro do CPF', function () {
         $elegibilidade = Mockery::mock(ElegibilidadeTrial::class);
         $elegibilidade->shouldReceive('motivo')->andReturn(null);
-        $trial = new Trial(app(Carteira::class), $elegibilidade, $this->alerter);
+        $trial = new Trial(app(Carteira::class), $elegibilidade);
         $plano = Plano::query()->firstOrFail();
         app(Carteira::class)->concederCota($this->usuario->id, 1, now(), now()->addMonth(), $plano->id, 'mensal');
 
-        expect(fn () => $trial->ativar($this->usuario->id, null))->toThrow(TrialIndisponivel::class);
+        expect(fn () => $trial->ativar($this->usuario->id))->toThrow(TrialIndisponivel::class);
         expect(TrialAtivacao::query()->count())->toBe(0);
     });
 
     it('registra o CNPJ ao gastar a análise do trial, só em HMAC', function () {
-        _trial()->ativar($this->usuario->id, null);
+        _trial()->ativar($this->usuario->id);
         $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $this->usuario->id]);
 
         app(CalcularDiagnostico::class)->execute($empresa, _payloadTrial());
@@ -186,11 +181,11 @@ describe('CA-2 elegibilidade por CPF', function () {
 
     it('barra a análise de trial do mesmo CNPJ em outra conta, sem cobrar nada', function () {
         $outro = Usuario::factory()->create();
-        _trial()->ativar($outro->id, null);
+        _trial()->ativar($outro->id);
         $primeira = EmpresaAnalisada::factory()->create(['usuario_id' => $outro->id, 'documento' => '11222333000181']);
         app(CalcularDiagnostico::class)->execute($primeira, _payloadTrial());
 
-        _trial()->ativar($this->usuario->id, null);
+        _trial()->ativar($this->usuario->id);
         $mesmaEmpresa = EmpresaAnalisada::factory()->create(['usuario_id' => $this->usuario->id, 'documento' => '11222333000181']);
 
         $decisao = app(Carteira::class)->verificar($this->usuario->id, $mesmaEmpresa->id);
@@ -214,7 +209,7 @@ describe('CA-2 elegibilidade por CPF', function () {
 
     it('barra na hora de gastar mesmo que a conferência da abertura tenha passado (corrida)', function () {
         $outro = Usuario::factory()->create();
-        _trial()->ativar($this->usuario->id, null);
+        _trial()->ativar($this->usuario->id);
         $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $this->usuario->id, 'documento' => '11222333000181']);
 
         // O outro registra o CNPJ depois que o quiz desta conta abriu.
@@ -226,7 +221,7 @@ describe('CA-2 elegibilidade por CPF', function () {
 
     it('desfaz a cobrança se outra conta registra o CNPJ entre a conferência e o débito (corrida)', function () {
         $outro = Usuario::factory()->create();
-        _trial()->ativar($this->usuario->id, null);
+        _trial()->ativar($this->usuario->id);
         $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $this->usuario->id, 'documento' => '11222333000181']);
         $hash = DocumentoHash::de('11222333000181');
         $feito = false;
@@ -253,7 +248,7 @@ describe('CA-2 elegibilidade por CPF', function () {
 
     it('deixa o mesmo Usuário reanalisar a própria empresa no trial', function () {
         TrialConfig::atual()->update(['analises' => 2]);
-        _trial()->ativar($this->usuario->id, null);
+        _trial()->ativar($this->usuario->id);
         $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $this->usuario->id]);
 
         app(CalcularDiagnostico::class)->execute($empresa, _payloadTrial());
@@ -265,7 +260,7 @@ describe('CA-2 elegibilidade por CPF', function () {
     it('usa crédito comprado quando o trial é barrado pelo CNPJ', function () {
         $outro = Usuario::factory()->create();
         TrialEmpresa::query()->create(['cnpj_hash' => DocumentoHash::de('11222333000181'), 'usuario_id' => $outro->id]);
-        _trial()->ativar($this->usuario->id, null);
+        _trial()->ativar($this->usuario->id);
         app(Carteira::class)->concederCreditos($this->usuario->id, 2, now()->addYear());
         $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $this->usuario->id, 'documento' => '11222333000181']);
 
@@ -289,7 +284,7 @@ describe('CA-2 elegibilidade por CPF', function () {
 
     it('trata a conta excluída que gastou o CNPJ como "outra conta"', function () {
         TrialEmpresa::query()->create(['cnpj_hash' => DocumentoHash::de('11222333000181'), 'usuario_id' => null]);
-        _trial()->ativar($this->usuario->id, null);
+        _trial()->ativar($this->usuario->id);
         $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $this->usuario->id, 'documento' => '11222333000181']);
 
         expect(app(Carteira::class)->verificar($this->usuario->id, $empresa->id)->bloqueio->motivo)->toBe(MotivoBloqueio::TesteEmpresaJaAnalisada);
@@ -299,7 +294,7 @@ describe('CA-2 elegibilidade por CPF', function () {
 describe('CA-3 configuração não altera trial em andamento', function () {
     it('mantém dias e análises de quem já ativou', function () {
         $this->travelTo(CarbonImmutable::parse('2026-11-05 10:00:00', 'UTC'));
-        $a = _trial()->ativar($this->usuario->id, null);
+        $a = _trial()->ativar($this->usuario->id);
 
         TrialConfig::atual()->update(['dias' => 30, 'analises' => 9]);
 
@@ -313,7 +308,7 @@ describe('CA-4 trial desativado', function () {
         TrialConfig::atual()->update(['ativo' => false]);
 
         try {
-            _trial()->ativar($this->usuario->id, null);
+            _trial()->ativar($this->usuario->id);
             $this->fail('deveria recusar');
         } catch (TrialIndisponivel $e) {
             expect($e->motivo)->toBe(MotivoInelegivelTrial::Desativado);
@@ -333,7 +328,7 @@ describe('CA-4 trial desativado', function () {
 describe('CA-5 fim do prazo', function () {
     it('bloqueia sem cobrar nada e os diagnósticos seguem visíveis', function () {
         $this->travelTo(CarbonImmutable::parse('2026-11-05 10:00:00', 'UTC'));
-        _trial()->ativar($this->usuario->id, null);
+        _trial()->ativar($this->usuario->id);
         $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $this->usuario->id]);
         $diagnostico = Diagnostico::factory()->create(['usuario_id' => $this->usuario->id, 'empresa_analisada_id' => $empresa->id]);
 
@@ -348,37 +343,9 @@ describe('CA-5 fim do prazo', function () {
     });
 });
 
-describe('CA-7 alerta por IP', function () {
-    it('alerta, sem bloquear, quando o IP passa do limite em 30 dias', function () {
-        TrialConfig::atual()->update(['limite_ip_30d' => 2]);
-        $this->alerter->shouldReceive('enviar')->once()->withArgs(fn (string $titulo, string $msg, array $ctx) => $ctx['ip_mascarado'] === '198.51.100.x' && $ctx['total_30d'] === 3 && $ctx['limite'] === 2 && str_contains($msg, '198.51.100.x') && ! str_contains($msg, '198.51.100.7') && ! array_key_exists('ip', $ctx));
-
-        foreach (range(1, 3) as $_) {
-            $a = _trial()->ativar(Usuario::factory()->create()->id, '198.51.100.7');
-            expect($a->status)->toBe(StatusAssinatura::Ativa);
-        }
-
-        expect(Assinatura::query()->where('trial', true)->count())->toBe(3);
-    });
-
-    it('não alerta no limite exato, com IP de outro dia ou sem IP', function () {
-        TrialConfig::atual()->update(['limite_ip_30d' => 2]);
-        $this->alerter->shouldNotReceive('enviar');
-        // Duas ativações antigas (fora da janela) do mesmo IP.
-        foreach (range(1, 2) as $i) {
-            TrialAtivacao::query()->create(['usuario_id' => null, 'cpf_hash' => hash('sha256', "antigo{$i}"), 'ip' => '198.51.100.7', 'ativado_em' => now()->subDays(45)]);
-        }
-
-        _trial()->ativar(Usuario::factory()->create()->id, '198.51.100.7');
-        _trial()->ativar(Usuario::factory()->create()->id, '198.51.100.7');
-        _trial()->ativar(Usuario::factory()->create()->id, null);
-        _trial()->ativar(Usuario::factory()->create()->id, '');
-    });
-});
-
 describe('CA-8 assinar durante o trial', function () {
     it('encerra o trial e a nova assinatura tem só a cota do plano', function () {
-        $trial = _trial()->ativar($this->usuario->id, null);
+        $trial = _trial()->ativar($this->usuario->id);
         $plano = Plano::query()->where('cota_mensal', 10)->firstOrFail();
 
         $pago = app(Carteira::class)->concederCota($this->usuario->id, $plano->cota_mensal, now(), now()->addMonth(), $plano->id, 'mensal');
@@ -390,7 +357,7 @@ describe('CA-8 assinar durante o trial', function () {
     });
 
     it('não soma a análise do trial que sobrou', function () {
-        _trial()->ativar($this->usuario->id, null);
+        _trial()->ativar($this->usuario->id);
         $plano = Plano::query()->where('cota_mensal', 1)->firstOrFail();
 
         $pago = app(Carteira::class)->concederCota($this->usuario->id, 1, now(), now()->addMonth(), $plano->id, 'mensal');

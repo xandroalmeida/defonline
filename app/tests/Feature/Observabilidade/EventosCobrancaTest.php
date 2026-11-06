@@ -83,7 +83,7 @@ function _evCob(string $nome, ?string $usuarioId = null): array
 
 describe('CA-1 trial ativado e encerrado', function () {
     it('emite trial_ativado na ativação, com dias e análises, uma vez', function () {
-        $a = app(Trial::class)->ativar($this->usuario->id, '203.0.113.9');
+        $a = app(Trial::class)->ativar($this->usuario->id);
 
         $eventos = _evCob('trial_ativado', $this->usuario->id);
         expect($eventos)->toHaveCount(1)
@@ -91,7 +91,7 @@ describe('CA-1 trial ativado e encerrado', function () {
     });
 
     it('emite trial_encerrado por prazo pela varredura, uma vez, sem mudar a assinatura', function () {
-        $a = app(Trial::class)->ativar($this->usuario->id, null);
+        $a = app(Trial::class)->ativar($this->usuario->id);
 
         $this->artisan('trial:registrar-encerramento')->assertSuccessful();
         expect(_evCob('trial_encerrado'))->toEqual([], 'trial vigente não encerrou');
@@ -105,7 +105,7 @@ describe('CA-1 trial ativado e encerrado', function () {
     });
 
     it('contratar um plano durante o teste encerra o trial com motivo contratou, e a varredura não repete', function () {
-        $a = app(Trial::class)->ativar($this->usuario->id, null);
+        $a = app(Trial::class)->ativar($this->usuario->id);
         $this->travelTo(now()->addDays(2));
 
         _pagarAssinatura(_assinaturaPendente($this->usuario));
@@ -118,7 +118,7 @@ describe('CA-1 trial ativado e encerrado', function () {
     });
 
     it('conta as análises usadas do trial no encerramento', function () {
-        $a = app(Trial::class)->ativar($this->usuario->id, null);
+        $a = app(Trial::class)->ativar($this->usuario->id);
         Assinatura::query()->whereKey($a->id)->update(['cota_restante_ciclo' => 0]);
         $this->travelTo($a->proximo_vencimento->copy()->addMinute());
 
@@ -128,16 +128,16 @@ describe('CA-1 trial ativado e encerrado', function () {
     });
 
     it('a ativação que falha não deixa evento', function () {
-        app(Trial::class)->ativar($this->usuario->id, null);
+        app(Trial::class)->ativar($this->usuario->id);
 
-        expect(fn () => app(Trial::class)->ativar($this->usuario->id, null))->toThrow(TrialIndisponivel::class)
+        expect(fn () => app(Trial::class)->ativar($this->usuario->id))->toThrow(TrialIndisponivel::class)
             ->and(_evCob('trial_ativado'))->toHaveCount(1);
     });
 });
 
 describe('CA-1 checkout iniciado e contratação concluída', function () {
     it('assinatura com cartão: checkout_iniciado ao abrir, contratacao_concluida ao confirmar o pagamento', function () {
-        app(Trial::class)->ativar($this->usuario->id, null);
+        app(Trial::class)->ativar($this->usuario->id);
         $plano = _plano();
         $invoice = _assinaturaPendente($this->usuario, $plano, CicloCobranca::Mensal);
         _assinaturaPendente($this->usuario, $plano, CicloCobranca::Mensal); // volta ao mesmo checkout: não conta de novo
@@ -407,7 +407,7 @@ describe('CA-1 bloqueio por falta de saldo', function () {
 describe('CA-3 as métricas saem dos eventos que o fluxo real grava', function () {
     it('trial → assinatura em 30 dias, conversão do checkout (Pix anual incluso) e churn do mês', function () {
         $this->travelTo(CarbonImmutable::parse('2026-08-01 12:00:00', 'UTC'));
-        app(Trial::class)->ativar($this->usuario->id, null);
+        app(Trial::class)->ativar($this->usuario->id);
         $cartao = _assinaturaPendente($this->usuario, null, CicloCobranca::Anual);
         $anual = Usuario::factory()->create(['email_confirmed_at' => now()]);
         $pix = _assinaturaPendente($anual, null, CicloCobranca::Anual, MeioPagamento::Pix);
@@ -449,7 +449,7 @@ describe('CA-2 canal oficial e sem dado pessoal', function () {
     });
 
     it('um fluxo completo (trial, assinatura, pagamento, cancelamento, bloqueio) não grava e-mail, CPF, IP nem dado de cartão', function () {
-        app(Trial::class)->ativar($this->usuario->id, '203.0.113.9');
+        app(Trial::class)->ativar($this->usuario->id);
         $invoice = _pagarAssinatura(_assinaturaPendente($this->usuario));
         $a = Assinatura::query()->where('trial', false)->sole();
         app(GerirRenovacao::class)->cancelar($this->usuario);
@@ -480,7 +480,7 @@ describe('CA-2 canal oficial e sem dado pessoal', function () {
     });
 
     it('os eventos levam o request_id do contexto (correlação ADR-004)', function () {
-        app(Trial::class)->ativar($this->usuario->id, null);
+        app(Trial::class)->ativar($this->usuario->id);
 
         expect(EventoProduto::query()->where('nome_evento', 'trial_ativado')->value('request_id'))->not->toBeEmpty();
     });

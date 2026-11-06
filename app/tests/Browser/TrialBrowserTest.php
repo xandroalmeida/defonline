@@ -73,7 +73,7 @@ final class TrialBrowserTest extends DuskTestCase
     {
         CobrancaConfig::atual()->update(['ativa' => true]);
         $usuario = Usuario::factory()->create();
-        TrialAtivacao::query()->create(['usuario_id' => null, 'cpf_hash' => DocumentoHash::de($usuario->cpf), 'ip' => null, 'ativado_em' => now()->subMonth()]);
+        TrialAtivacao::query()->create(['usuario_id' => null, 'cpf_hash' => DocumentoHash::de($usuario->cpf), 'ativado_em' => now()->subMonth()]);
 
         $this->browse(function (Browser $browser) use ($usuario) {
             $browser->loginAs($usuario)->visit('/teste-gratis')

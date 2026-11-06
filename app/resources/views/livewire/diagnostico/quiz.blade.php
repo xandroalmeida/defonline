@@ -36,37 +36,9 @@
         if ($el.value !== v) { $el.value = v; $el.dispatchEvent(new Event('input')); }
     JS;
 
-    // Máscara R$ inline (Alpine). Mantém vírgula brasileira; o submit canonicaliza.
-    $maskBrl = <<<'JS'
-        let v = '';
-        const raw = $el.value.replace(/\D/g, '');
-        if (raw !== '') {
-            const cents = raw.padStart(3, '0');
-            const inteiro = cents.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.').replace(/^0+(?=\d)/, '') || '0';
-            v = inteiro + ',' + cents.slice(-2);
-        }
-    JS."\n".$commitMask;
-
     // Máscara dias (só dígitos, máx 4 — 9999 cobre prazo absurdo + folga para warning).
     $maskDias = <<<'JS'
         const v = ($el.value.replace(/\D/g, '') || '').slice(0, 4);
-    JS."\n".$commitMask;
-
-    // Máscara % decimal natural BR (STORY-039): o usuário digita como pensa —
-    // "3,46" → "3,46", "100" → "100", "3,4" → "3,4". Parte inteira até 3 dígitos,
-    // 1 vírgula, até 2 decimais. (A máscara antiga era estilo "centavos" e
-    // transformava "100" em "1,00" — bug reportado pelo Edvan.) Validação de
-    // range [0,00 ; 100,00] continua rígida no servidor (regraPercentual).
-    $maskPct = <<<'JS'
-        let v = $el.value.replace(/\./g, ',').replace(/[^\d,]/g, '');
-        const i = v.indexOf(',');
-        if (i === -1) {
-            v = v.slice(0, 3);
-        } else {
-            const inteiro = v.slice(0, i).slice(0, 3);
-            const decimal = v.slice(i + 1).replace(/,/g, '').slice(0, 2);
-            v = inteiro + ',' + decimal;
-        }
     JS."\n".$commitMask;
 
     // Máscara CPF — 000.000.000-00.
@@ -166,27 +138,22 @@
                     @include('livewire.diagnostico.partials.campo-brl', [
                         'id' => 'Q08', 'label' => 'Compras (média mensal)',
                         'help' => 'Mercadorias, matéria-prima, insumos.',
-                        'mask' => $maskBrl,
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
                         'id' => 'Q09', 'label' => 'Vendas (média mensal)',
                         'help' => 'Receita operacional bruta.',
-                        'mask' => $maskBrl,
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
                         'id' => 'Q14', 'label' => 'Custos e despesas fixas',
                         'help' => 'Folha de Pagamento, Encargos sociais, contador, aluguel, condomínio, energia, água, telefone, internet, franquia, retirada de sócios, etc.',
-                        'mask' => $maskBrl,
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
                         'id' => 'Q15', 'label' => 'Custos e despesas variáveis',
                         'help' => 'Fretes, comissões, tributos, despesas de vendas, outras despesas variáveis, etc.',
-                        'mask' => $maskBrl,
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
                         'id' => 'Q16', 'label' => 'Despesas financeiras',
                         'help' => 'Juros pagos a bancos, antecipações de cartões e desconto de boletos.',
-                        'mask' => $maskBrl,
                     ])
                     @include('livewire.diagnostico.partials.campo-dias', [
                         'id' => 'Q10', 'label' => 'PMC — prazo médio de fornecedores',
@@ -206,7 +173,6 @@
                     @include('livewire.diagnostico.partials.campo-pct', [
                         'id' => 'Q13', 'label' => 'Inadimplência',
                         'help' => 'Percentual médio de atraso dos clientes.',
-                        'mask' => $maskPct,
                     ])
                 </div>
             @endif
@@ -222,32 +188,26 @@
                     @include('livewire.diagnostico.partials.campo-brl', [
                         'id' => 'Q02', 'label' => 'Recursos disponíveis',
                         'help' => 'Caixa + bancos + aplicações de liquidez imediata.',
-                        'mask' => $maskBrl,
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
                         'id' => 'Q03', 'label' => 'Contas a receber',
                         'help' => 'Vendas a prazo a clientes — cheques, boletos, cartão, fiado.',
-                        'mask' => $maskBrl,
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
                         'id' => 'Q04', 'label' => 'Estoque',
                         'help' => 'Produtos, mercadorias, matéria-prima, insumos.',
-                        'mask' => $maskBrl,
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
                         'id' => 'Q05', 'label' => 'Patrimônio (imobilizado)',
                         'help' => 'Imóveis, equipamentos e veículos livres de ônus – valor estimado para venda rápida',
-                        'mask' => $maskBrl,
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
                         'id' => 'Q06', 'label' => 'Dívidas financeiras',
                         'help' => 'Empréstimos, financiamentos, dívidas não operacionais.',
-                        'mask' => $maskBrl,
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
                         'id' => 'Q07', 'label' => 'Fornecedores a pagar',
                         'help' => 'Obrigações comerciais em aberto.',
-                        'mask' => $maskBrl,
                     ])
 
                     {{-- STORY-034 — validações cruzadas DRE × Balanço (§6.6). Banner inline,
@@ -311,12 +271,10 @@
                             @include('livewire.diagnostico.partials.campo-brl', [
                                 'id' => 'Q18', 'label' => 'Valor que precisa captar',
                                 'help' => 'Montante desejado.',
-                                'mask' => $maskBrl,
                             ])
                             @include('livewire.diagnostico.partials.campo-brl', [
                                 'id' => 'Q19', 'label' => 'Endividamento total no mercado',
                                 'help' => 'Bancos + particulares.',
-                                'mask' => $maskBrl,
                             ])
                             {{-- STORY-042 — `help` vazio de propósito: os 2 textos auxiliares do Q20
                                  saíram da UI a pedido do Edvan. O do multiplicador 3× vira regra
@@ -326,7 +284,6 @@
                             @include('livewire.diagnostico.partials.campo-brl', [
                                 'id' => 'Q20', 'label' => 'Venda mensal com cartão / duplicatas',
                                 'help' => '',
-                                'mask' => $maskBrl,
                             ])
                             @include('livewire.diagnostico.partials.socios-list', [
                                 'socios' => $socios,

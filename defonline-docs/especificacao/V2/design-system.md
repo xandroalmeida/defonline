@@ -161,6 +161,12 @@ Sombras sutis. Nunca sombras pretas saturadas.
 
 ---
 
+### input-moeda e input-percentual
+
+- Campos de `.input-affix`, com o símbolo dentro do campo e o texto alinhado à direita.
+- Obrigatórios para todo dinheiro e percentual digitados (RNF-UI-01).
+- Nunca escrever a máscara na tela nem repetir `(R$)` ou `(%)` no rótulo.
+
 ## Do's and Don'ts (consolidado)
 
 **Do:**

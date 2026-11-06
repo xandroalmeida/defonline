@@ -16,7 +16,7 @@ use Carbon\CarbonImmutable;
 /** STORY-083 CA-1, CA-5, CA-7, CA-8 — regras puras do desconto. */
 describe('PrecoComCupom', function () {
     it('mostra preço cheio, desconto e valor a pagar', function () {
-        $p = PrecoComCupom::calcular(4990, TipoDesconto::Percentual, 50, 500);
+        $p = PrecoComCupom::calcular(4990, TipoDesconto::Percentual, 500, 500);
 
         expect($p->cheio)->toBe(4990)->and($p->desconto)->toBe(2495)->and($p->final)->toBe(2495)
             ->and($p->semCobranca())->toBeFalse()->and($p->comDesconto())->toBeTrue();
@@ -36,7 +36,7 @@ describe('PrecoComCupom', function () {
     });
 
     it('desconto de 100% é sem cobrança', function () {
-        $p = PrecoComCupom::calcular(4990, TipoDesconto::Percentual, 100, 500);
+        $p = PrecoComCupom::calcular(4990, TipoDesconto::Percentual, 1000, 500);
 
         expect($p->semCobranca())->toBeTrue()->and($p->desconto)->toBe(4990);
     });

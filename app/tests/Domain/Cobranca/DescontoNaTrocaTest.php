@@ -20,7 +20,7 @@ describe('preço do ciclo em vigor (base do crédito)', function () {
 });
 
 describe('desconto sobre o plano novo', function () {
-    $sobre = fn (?DescontoDaAssinatura $atual, int $pagos = 1, bool $mesmo = true, bool $cobre = true, TipoDesconto $tipo = TipoDesconto::Percentual, int $valor = 50, int $novo = 20000) => DescontoNaTroca::sobreOPlanoNovo($atual, $pagos, $mesmo, $cobre, $tipo, $valor, $novo, 500);
+    $sobre = fn (?DescontoDaAssinatura $atual, int $pagos = 1, bool $mesmo = true, bool $cobre = true, TipoDesconto $tipo = TipoDesconto::Percentual, int $valor = 500, int $novo = 20000) => DescontoNaTroca::sobreOPlanoNovo($atual, $pagos, $mesmo, $cobre, $tipo, $valor, $novo, 500);
 
     it('continua recalculado sobre o preço novo, com os mesmos ciclos', function () use ($sobre) {
         $novo = $sobre(new DescontoDaAssinatura(10000, 5000, 3));

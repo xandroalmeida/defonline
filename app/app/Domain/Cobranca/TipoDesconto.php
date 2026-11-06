@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Cobranca;
 
 /**
- * STORY-072 / spec §2.5 — o desconto de um cupom é um percentual (1 a 100) ou um valor fixo em centavos.
+ * STORY-072 / spec §2.5 — o desconto de um cupom é um percentual em décimos (205 = 20,5%; de 1 a 1000) ou um valor fixo em centavos.
  */
 enum TipoDesconto: string
 {
@@ -20,7 +20,7 @@ enum TipoDesconto: string
     {
         $preco = max(0, $precoCentavos);
         $bruto = match ($this) {
-            self::Percentual => intdiv($preco * $valor + 50, 100),
+            self::Percentual => intdiv($preco * $valor + 500, 1000),
             self::ValorFixo => $valor,
         };
 
@@ -35,12 +35,20 @@ enum TipoDesconto: string
         };
     }
 
-    /** Legível: "20%" ou "R$ 50,00". */
+    /** Legível: "20%", "20,5%" ou "R$ 50,00". */
     public function formatar(int $valor): string
     {
         return match ($this) {
-            self::Percentual => $valor.'%',
+            self::Percentual => self::percentualEmTexto($valor).'%',
             self::ValorFixo => 'R$ '.number_format($valor / 100, 2, ',', '.'),
         };
+    }
+
+    /** Décimos para o texto do campo: 200 vira "20" e 205 vira "20,5". */
+    public static function percentualEmTexto(int $decimos): string
+    {
+        $resto = $decimos % 10;
+
+        return intdiv($decimos, 10).($resto === 0 ? '' : ','.$resto);
     }
 }

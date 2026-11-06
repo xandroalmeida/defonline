@@ -454,7 +454,7 @@ FKs: `(alterado_por_usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL`
 
 CHECKs:
 - `cupons_tipo_check`: `CHECK (((tipo)::text = ANY ((ARRAY['percentual'::character varying, 'valor_fixo'::character varying])::text[])))`
-- `cupons_valor_check`: `CHECK (((valor >= 1) AND (((tipo)::text <> 'percentual'::text) OR (valor <= 100))))`
+- `cupons_valor_check`: `CHECK (valor >= 1 AND (tipo <> 'percentual' OR valor <= 1000))`. Percentual em décimos (205 = 20,5%), valor fixo em centavos.
 - `cupons_vigencia_check`: `CHECK ((vigencia_fim >= vigencia_inicio))`
 
 Índices:
@@ -532,10 +532,6 @@ PK `id`.
 | `alterado_por_usuario_id` | uuid | sim |  |
 | `created_at` | timestamp with time zone | sim |  |
 | `updated_at` | timestamp with time zone | sim |  |
-| `limite_ip_30d` | smallint | não | `'3'::smallint` |
-
-CHECKs:
-- `trial_config_limite_ip_ck`: `CHECK ((limite_ip_30d >= 1))`
 
 ### `trial_ativacoes`
 PK `id`.
@@ -545,7 +541,6 @@ PK `id`.
 | `id` | uuid | não |  |
 | `usuario_id` | uuid | sim |  |
 | `cpf_hash` | character(64) | não |  |
-| `ip` | varchar(45) | sim |  |
 | `ativado_em` | timestamp with time zone | não |  |
 | `created_at` | timestamp with time zone | sim |  |
 | `updated_at` | timestamp with time zone | sim |  |
@@ -553,7 +548,6 @@ PK `id`.
 FKs: `(usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL`
 
 Índices:
-- `IDX trial_ativacoes_ip_ativado_em_index ON public.trial_ativacoes` (btree (ip, ativado_em))
 - `UNIQUE IDX trial_ativacoes_cpf_hash_unique ON public.trial_ativacoes` (btree (cpf_hash))
 
 ### `trial_empresas`

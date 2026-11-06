@@ -3,6 +3,7 @@
         ? '<p class="text-[color:var(--color-destructive)] text-sm mt-1 mb-0" dusk="'.$dusk.'">'.e($errors->first($campo)).'</p>'
         : '';
     $data = fn ($d) => \App\Support\DataExibicao::dia($d);
+
 @endphp
 
 <div>
@@ -18,20 +19,31 @@
         <form wire:submit="salvarCupom" novalidate class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
                 <x-label for="cupom-codigo">Código</x-label>
-                <x-input type="text" id="cupom-codigo" wire:model="cupom.codigo" maxlength="40" dusk="cupom-codigo" class="w-full"/>
+                <div class="flex items-center gap-2">
+                    <x-input type="text" id="cupom-codigo" wire:model="cupom.codigo" maxlength="40" dusk="cupom-codigo" class="w-full min-w-0"/>
+                    @unless ($cupom['id'])
+                        <x-button type="button" variant="secondary" wire:click="gerarCodigo" dusk="cupom-gerar-codigo" class="shrink-0">Gerar código</x-button>
+                    @endunless
+                </div>
                 {!! $erro('cupom.codigo', 'erro-cupom-codigo') !!}
             </div>
             <div>
                 <x-label for="cupom-tipo">Tipo de desconto</x-label>
                 <x-select id="cupom-tipo" wire:model.live="cupom.tipo" dusk="cupom-tipo" class="w-full">
-                    <option value="percentual">Percentual (1 a 100%)</option>
+                    <option value="percentual">Percentual (até 100%)</option>
                     <option value="valor_fixo">Valor fixo (R$)</option>
                 </x-select>
                 {!! $erro('cupom.tipo', 'erro-cupom-tipo') !!}
             </div>
             <div>
-                <x-label for="cupom-valor">{{ $cupom['tipo'] === 'percentual' ? 'Percentual (%)' : 'Valor (R$)' }}</x-label>
-                <x-input type="text" inputmode="decimal" id="cupom-valor" wire:model="cupom.valor" dusk="cupom-valor" class="w-full"/>
+                <x-label for="cupom-valor">{{ $cupom['tipo'] === 'percentual' ? 'Percentual' : 'Valor' }}</x-label>
+                <div wire:key="cupom-valor-{{ $cupom['tipo'] }}">
+                    @if ($cupom['tipo'] === 'percentual')
+                        <x-input-percentual id="cupom-valor" decimais="1" wire:model="cupom.valor" dusk="cupom-valor"/>
+                    @else
+                        <x-input-moeda id="cupom-valor" wire:model="cupom.valor" dusk="cupom-valor"/>
+                    @endif
+                </div>
                 {!! $erro('cupom.valor', 'erro-cupom-valor') !!}
             </div>
             <div>

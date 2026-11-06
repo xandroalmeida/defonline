@@ -1,23 +1,13 @@
 {{--
     Campo percentual com sufixo "%".
-    Vars: $id, $label, $help, $mask (JS).
+    Vars: $id, $label, $help.
 --}}
 <div>
     <div class="flex items-center gap-1.5 mb-1">
         <x-label :for="$id" class="mb-0">{{ $label }}</x-label>
         <x-help :id="$id" :text="config('quiz.help-industria.campos.'.$id)" :label="$label"/>
     </div>
-    <label class="input-affix" for="{{ $id }}">
-        <input type="text" id="{{ $id }}" name="{{ $id }}"
-               class="input-affix__input"
-               wire:model.live.debounce.300ms="{{ $id }}"
-               inputmode="decimal" autocomplete="off"
-               placeholder="0,00"
-               x-data
-               x-on:input="{!! $mask !!}"
-               dusk="quiz-{{ $id }}">
-        <span class="input-affix__symbol" aria-hidden="true">%</span>
-    </label>
+    <x-input-percentual :id="$id" :name="$id" wire:model.live.debounce.300ms="{{ $id }}" dusk="quiz-{{ $id }}"/>
     @if (! empty($help))
         <p class="text-xs text-[color:var(--color-secondary)] mt-1 mb-0">{{ $help }}</p>
     @endif

@@ -72,7 +72,7 @@ it('CA-2: Pix anual e trial também vencem no último segundo do dia, e a tela m
     expect(DataExibicao::dataHora($v))->toBe('05/11/2027 23:59')->and(DataExibicao::data($v))->toBe('05/11/2027');
 
     $this->travelTo($inicio);
-    $trial = app(Trial::class)->ativar($this->u->id, '203.0.113.7');
+    $trial = app(Trial::class)->ativar($this->u->id);
 
     expect(DataExibicao::dataHora($trial->proximo_vencimento))->toBe(DataExibicao::data($inicio->addDays(TrialConfig::atual()->dias)).' 23:59');
 });

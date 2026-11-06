@@ -18,15 +18,17 @@ describe('código', function () {
 });
 
 describe('desconto', function () {
-    it('calcula o percentual em inteiros, arredondando meio centavo para cima', function (int $valor, int $preco, int $esperado) {
+    it('calcula o percentual em décimos, arredondando meio centavo para cima', function (int $valor, int $preco, int $esperado) {
         expect(TipoDesconto::Percentual->desconto($valor, $preco))->toBe($esperado);
     })->with([
-        'metade' => [50, 4990, 2495],
-        'arredonda para cima' => [10, 4995, 500],
-        'arredonda para baixo' => [10, 4994, 499],
-        'um por cento' => [1, 4990, 50],
-        'total' => [100, 4990, 4990],
-        'preço zero' => [50, 0, 0],
+        'metade' => [500, 4990, 2495],
+        'arredonda para cima' => [100, 4995, 500],
+        'arredonda para baixo' => [100, 4994, 499],
+        'um por cento' => [10, 4990, 50],
+        'uma casa decimal' => [125, 10000, 1250],
+        'menor percentual' => [1, 10000, 10],
+        'total' => [1000, 4990, 4990],
+        'preço zero' => [500, 0, 0],
     ]);
 
     it('o valor fixo nunca passa do preço', function () {
@@ -41,7 +43,9 @@ describe('desconto', function () {
     });
 
     it('formata e rotula', function () {
-        expect(TipoDesconto::Percentual->formatar(20))->toBe('20%')
+        expect(TipoDesconto::Percentual->formatar(200))->toBe('20%')
+            ->and(TipoDesconto::Percentual->formatar(205))->toBe('20,5%')
+            ->and(TipoDesconto::Percentual->formatar(1))->toBe('0,1%')
             ->and(TipoDesconto::ValorFixo->formatar(123456))->toBe('R$ 1.234,56')
             ->and(TipoDesconto::Percentual->rotulo())->toBe('Percentual')
             ->and(TipoDesconto::ValorFixo->rotulo())->toBe('Valor fixo');
@@ -60,10 +64,10 @@ describe('definição', function () {
         'valor fixo alto, acima de 100' => [TipoDesconto::ValorFixo, 250000],
     ]);
 
-    it('recusa percentual fora de 1 a 100', function (int $valor) use ($d) {
+    it('recusa percentual fora de 0,1 a 100', function (int $valor) use ($d) {
         expect(CupomRegras::errosDaDefinicao(TipoDesconto::Percentual, $valor, $d('2026-11-01'), $d('2026-12-01')))
-            ->toBe(['valor' => 'O percentual deve ficar entre 1 e 100.']);
-    })->with([0, -5, 101, 1000]);
+            ->toBe(['valor' => 'O percentual deve ficar entre 0,1 e 100.']);
+    })->with([0, -5, 1001, 10000]);
 
     it('recusa valor fixo menor ou igual a zero', function (int $valor) use ($d) {
         expect(CupomRegras::errosDaDefinicao(TipoDesconto::ValorFixo, $valor, $d('2026-11-01'), $d('2026-12-01')))
@@ -72,7 +76,7 @@ describe('definição', function () {
 
     it('recusa a vigência invertida e acumula erros', function () use ($d) {
         expect(CupomRegras::errosDaDefinicao(TipoDesconto::Percentual, 0, $d('2026-12-02'), $d('2026-12-01')))
-            ->toBe(['valor' => 'O percentual deve ficar entre 1 e 100.', 'vigencia_fim' => 'O fim da vigência não pode ser anterior ao início.']);
+            ->toBe(['valor' => 'O percentual deve ficar entre 0,1 e 100.', 'vigencia_fim' => 'O fim da vigência não pode ser anterior ao início.']);
     });
 });
 
