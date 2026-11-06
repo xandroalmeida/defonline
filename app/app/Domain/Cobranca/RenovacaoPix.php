@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Cobranca;
 
+use App\Support\DataExibicao;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 
@@ -32,7 +33,7 @@ final class RenovacaoPix
     /** O novo fim: mais um ano contado do INÍCIO da assinatura (sem deriva nem perda de dias). */
     public static function novoVencimento(CarbonInterface $inicio, int $periodosPagos): CarbonImmutable
     {
-        return CicloCobranca::Anual->vencimento($inicio, $periodosPagos + 1);
+        return DataExibicao::fimDoDia(CicloCobranca::Anual->vencimento($inicio, $periodosPagos + 1));
     }
 
     /** O aviso deste ciclo ainda não saiu e a janela já abriu? */

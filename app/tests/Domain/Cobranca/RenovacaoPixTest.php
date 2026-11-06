@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Cobranca\RenovacaoPix;
+use App\Support\DataExibicao;
 use Carbon\CarbonImmutable;
 
 /** STORY-080 — as regras de tempo do plano anual pago com Pix, sem banco. */
@@ -21,14 +22,14 @@ it('a janela abre 7 dias antes do fim e fecha no fim', function () use ($fim) {
 it('o novo fim é um ano depois do fim atual, contado do início (sem deriva em 29/02 nem 31/01)', function () {
     $inicio = CarbonImmutable::parse('2026-11-05 15:30:00', 'UTC');
 
-    expect(RenovacaoPix::novoVencimento($inicio, 1)->toDateString())->toBe('2028-11-05')
-        ->and(RenovacaoPix::novoVencimento($inicio, 2)->toDateString())->toBe('2029-11-05');
+    expect(DataExibicao::converter(RenovacaoPix::novoVencimento($inicio, 1))->toDateString())->toBe('2028-11-05')
+        ->and(DataExibicao::converter(RenovacaoPix::novoVencimento($inicio, 2))->toDateString())->toBe('2029-11-05');
 
-    $bissexto = CarbonImmutable::parse('2027-02-28', 'UTC');
-    expect(RenovacaoPix::novoVencimento($bissexto, 1)->toDateString())->toBe('2029-02-28');
+    $bissexto = CarbonImmutable::parse('2027-02-28 12:00:00', 'UTC');
+    expect(DataExibicao::converter(RenovacaoPix::novoVencimento($bissexto, 1))->toDateString())->toBe('2029-02-28');
 
-    $fimDeMes = CarbonImmutable::parse('2024-02-29', 'UTC');
-    expect(RenovacaoPix::novoVencimento($fimDeMes, 1)->toDateString())->toBe('2026-02-28');
+    $fimDeMes = CarbonImmutable::parse('2024-02-29 12:00:00', 'UTC');
+    expect(DataExibicao::converter(RenovacaoPix::novoVencimento($fimDeMes, 1))->toDateString())->toBe('2026-02-28');
 });
 
 it('o aviso é devido uma vez por ciclo, só com a janela aberta', function () use ($fim) {

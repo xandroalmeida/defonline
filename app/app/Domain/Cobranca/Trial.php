@@ -10,6 +10,7 @@ use App\Models\TrialConfig;
 use App\Models\Usuario;
 use App\Observabilidade\AlertaDaEquipe;
 use App\Observabilidade\EventosCobranca;
+use App\Support\DataExibicao;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
@@ -58,7 +59,7 @@ class Trial
                     ]);
                 }
 
-                $trial = $this->carteira->concederCota($usuario->id, $config->analises, $agora, $agora->copy()->addDays($config->dias), trial: true);
+                $trial = $this->carteira->concederCota($usuario->id, $config->analises, $agora, DataExibicao::fimDoDia($agora->copy()->addDays($config->dias)), trial: true);
                 EventosCobranca::trialAtivado($trial);
 
                 return $trial;

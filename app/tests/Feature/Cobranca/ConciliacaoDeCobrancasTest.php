@@ -13,6 +13,7 @@ use App\Models\Assinatura;
 use App\Models\CobrancaConfig;
 use App\Models\Invoice;
 use App\Models\ProviderEvent;
+use App\Support\DataExibicao;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -218,6 +219,6 @@ describe('anual', function () {
 
         _conciliar('diaria');
 
-        expect($a->fresh()->periodos_pagos)->toBe(2)->and($a->fresh()->proximo_vencimento->toDateString())->toBe($a->data_inicio->addYears(2)->toDateString());
+        expect($a->fresh()->periodos_pagos)->toBe(2)->and(DataExibicao::converter($a->fresh()->proximo_vencimento)->toDateString())->toBe(DataExibicao::converter($a->data_inicio)->addYears(2)->toDateString());
     });
 });

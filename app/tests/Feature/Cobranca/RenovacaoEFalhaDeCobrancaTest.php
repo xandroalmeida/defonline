@@ -25,6 +25,7 @@ use App\Models\Invoice;
 use App\Models\ProviderEvent;
 use App\Services\Cobranca\CompraNaoPermitida;
 use App\Services\Cobranca\ExecutarReguaDeCobranca;
+use App\Support\DataExibicao;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -336,7 +337,7 @@ describe('CA-4 pagamento durante as retentativas', function () {
             ->and($a->atraso_cobranca_id)->toBeNull()
             ->and($a->proxima_tentativa_em)->toBeNull()
             ->and($a->tentativas_cobranca)->toBe(0)
-            ->and($a->proximo_vencimento->toDateString())->toBe($a->data_inicio->addMonthsNoOverflow(2)->toDateString())
+            ->and(DataExibicao::converter($a->proximo_vencimento)->toDateString())->toBe(DataExibicao::converter($a->data_inicio)->addMonthsNoOverflow(2)->toDateString())
             ->and(Invoice::query()->where('renovacao', true)->sole()->status)->toBe(EstadoCobranca::Paga)
             ->and(app(Carteira::class)->verificar($this->usuario->id)->bloqueio)->toBeNull();
 
@@ -391,7 +392,7 @@ describe('CA-4 pagamento durante as retentativas', function () {
         $a->refresh();
 
         expect($a->status)->toBe(StatusAssinatura::Ativa)
-            ->and($a->proximo_vencimento->toDateString())->toBe($a->data_inicio->addYears(2)->toDateString())
+            ->and(DataExibicao::converter($a->proximo_vencimento)->toDateString())->toBe(DataExibicao::converter($a->data_inicio)->addYears(2)->toDateString())
             ->and($a->proxima_cota_em)->not->toBeNull();
     });
 });

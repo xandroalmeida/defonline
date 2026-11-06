@@ -7,8 +7,8 @@ sprint_id: null
 type: bugfix
 target_role: programador
 requires_design: false
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: claude-sonnet-5-5
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: S
@@ -24,12 +24,18 @@ Defeitos: D-04. Leia o detalhe e a reprodução no relatório.
 
 ## Critérios de aceite
 
-- [ ] **CA-1:** Data só com o dia, vinda do provedor, é interpretada no fuso de negócio (`DataExibicao`), nunca como meia-noite UTC. Pagamento em 05/11 às 15:00 de Brasília vence em 05/12 e dá acesso durante todo o dia 05/12 até a cobrança (E7).
-- [ ] **CA-2:** O fim do acesso considera o dia do vencimento inteiro em Brasília, em assinatura com cartão, Pix anual e trial, e as telas mostram a mesma data que a regra usa.
-- [ ] **CA-3:** Dados já gravados não são reinterpretados de forma errada; não há migração de dados em produção porque a cobrança ainda não foi ligada.
+- [x] **CA-1:** Data só com o dia, vinda do provedor, é interpretada no fuso de negócio (`DataExibicao`), nunca como meia-noite UTC. Pagamento em 05/11 às 15:00 de Brasília vence em 05/12 e dá acesso durante todo o dia 05/12 até a cobrança (E7).
+- [x] **CA-2:** O fim do acesso considera o dia do vencimento inteiro em Brasília, em assinatura com cartão, Pix anual e trial, e as telas mostram a mesma data que a regra usa.
+- [x] **CA-3:** Dados já gravados não são reinterpretados de forma errada; não há migração de dados em produção porque a cobrança ainda não foi ligada.
 
 ## Padrões de qualidade
 
 TDD, 98% em `app/Domain`, sem dado de cartão, sem termo do provedor fora do adaptador, datas por `DataExibicao`, interruptor respeitado.
 
 ## Notas do agente
+
+- Data só com o dia: `DataExibicao::doProvedor` (meia-noite de Brasília); adaptador Asaas e Fake passam por ele. O Fake agora devolve `pago_em`/`vencimento` só com o dia, como o Asaas.
+- Fim do acesso: `DataExibicao::fimDoDia` (23:59:59 de Brasília) aplicado em `ConfirmarAssinatura` (ativação e renovação), `RenovacaoPix::novoVencimento` e `Trial`. `CicloCobranca::vencimento` não mudou (ciclos gratuitos e troca de plano seguem como estavam).
+- `CotaMensal`: aniversário no dia do vencimento pertence ao ciclo seguinte. `CalculoDeTroca`: a proporção usa o fim nominal (mesmo horário do início), então os valores da regra de upgrade (D-05, decisão do PO) não mudaram.
+- Testes: `tests/Feature/Cobranca/DataDoProvedorTest.php` (E7 incluído). Testes antigos que comparavam `toDateString()` em UTC ou o horário exato do trial foram ajustados para o dia de Brasília e o último segundo do dia; nenhuma asserção foi removida.
+- Rodado: Pest de `tests/Domain/Cobranca`, `tests/Feature/Cobranca`, `tests/Feature/Livewire`, `tests/Unit/Arch` (1645 passam), Pint e PHPStan limpos. Suíte completa, cobertura e Dusk ficam para a junção (instrução do PO).

@@ -18,6 +18,7 @@ use App\Models\Invoice;
 use App\Models\Plano;
 use App\Observabilidade\AuditLogger;
 use App\Observabilidade\EventosCobranca;
+use App\Support\DataExibicao;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -114,7 +115,7 @@ final class ConfirmarAssinatura
             'cartao_ultimos4' => $cobranca?->cartaoUltimos4,
         ])->save();
 
-        $vencimento = $ciclo->vencimento($pagoEm);
+        $vencimento = DataExibicao::fimDoDia($ciclo->vencimento($pagoEm));
 
         try {
             $assinatura = $this->carteira->concederCota(
@@ -344,7 +345,7 @@ final class ConfirmarAssinatura
         // Mudou o ciclo: o período novo nasce no fim do atual (a data de início é a âncora do vencimento).
         $inicio = $cicloMudou ? CarbonImmutable::instance($assinatura->proximo_vencimento) : CarbonImmutable::instance($assinatura->data_inicio);
         $periodos = $cicloMudou ? 1 : $assinatura->periodos_pagos + 1;
-        $vencimento = $ciclo->vencimento($inicio, $periodos);
+        $vencimento = DataExibicao::fimDoDia($ciclo->vencimento($inicio, $periodos));
         // Na renovação vale o catálogo de hoje para a cota (CA-5: o snapshot protege até aqui).
         $cota = $plano->cota_mensal;
 

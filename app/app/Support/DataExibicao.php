@@ -34,6 +34,26 @@ final class DataExibicao
         return $d->setTimezone(self::fuso());
     }
 
+    /**
+     * Data/hora que o provedor de pagamento devolve. Uma data só com o dia (`2026-11-05`, o formato do Asaas) é
+     * o dia do calendário de Brasília, nunca meia-noite UTC: lida assim ela cairia 3 h antes, no dia anterior.
+     */
+    public static function doProvedor(string $valor): CarbonImmutable
+    {
+        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $valor) === 1
+            ? CarbonImmutable::createFromFormat('!Y-m-d', $valor, self::fuso())
+            : CarbonImmutable::parse($valor);
+    }
+
+    /**
+     * O último segundo do dia de `$instante` em Brasília: o acesso pago vale durante todo o dia do vencimento,
+     * até a cobrança do ciclo seguinte, e as telas mostram o mesmo dia que esta regra usa.
+     */
+    public static function fimDoDia(DateTimeInterface $instante): CarbonImmutable
+    {
+        return CarbonImmutable::instance($instante)->setTimezone(self::fuso())->setTime(23, 59, 59);
+    }
+
     public static function agora(): CarbonImmutable
     {
         return CarbonImmutable::now(self::fuso());

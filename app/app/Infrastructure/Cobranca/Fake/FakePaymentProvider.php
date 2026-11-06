@@ -19,6 +19,7 @@ use App\Domain\Cobranca\SessaoCheckout;
 use App\Domain\Cobranca\TipoEvento;
 use App\Domain\Cobranca\WebhookBruto;
 use App\Domain\Cobranca\WebhookInvalido;
+use App\Support\DataExibicao;
 use DateTimeImmutable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -109,7 +110,7 @@ final class FakePaymentProvider implements PaymentProvider
             'estado' => EstadoCobranca::Pendente->value,
             'pago_em' => null,
             'assinatura' => $pedido->recorrencia === null ? null : 'fakesub_'.Str::after($id, 'fakechk_'),
-            'vencimento' => now()->toDateString(),
+            'vencimento' => DataExibicao::agora()->format('Y-m-d'),
             'cartao' => in_array(MeioPagamento::Cartao, $pedido->meios, true),
             // Troca de cartão no meio do ciclo (STORY-081): nada é cobrado agora, a 1ª cobrança é no vencimento.
             'cobra_agora' => $pedido->primeiraCobrancaEm === null || $pedido->primeiraCobrancaEm <= new DateTimeImmutable,
@@ -219,11 +220,11 @@ final class FakePaymentProvider implements PaymentProvider
             $c['valor'],
             $c['checkout'],
             $c['referencia'],
-            $c['pago_em'] === null ? null : new DateTimeImmutable($c['pago_em']),
+            $c['pago_em'] === null ? null : DataExibicao::doProvedor($c['pago_em'])->toDateTimeImmutable(),
             $c['assinatura'] ?? null,
             $comCartao && $c['estado'] === EstadoCobranca::Paga->value ? 'VISA' : null,
             $comCartao && $c['estado'] === EstadoCobranca::Paga->value ? '4242' : null,
-            isset($c['vencimento']) ? new DateTimeImmutable($c['vencimento']) : null,
+            isset($c['vencimento']) ? DataExibicao::doProvedor($c['vencimento'])->toDateTimeImmutable() : null,
         );
     }
 
@@ -455,9 +456,9 @@ final class FakePaymentProvider implements PaymentProvider
             // Depois de `changeSubscriptionValue` (STORY-082/083) o provedor cobra o valor novo.
             'valor' => $valorAtual ?? (is_array($origem) ? $origem['valor'] : 0),
             'estado' => $estado->value,
-            'pago_em' => $estado === EstadoCobranca::Paga ? now()->toIso8601String() : null,
+            'pago_em' => $estado === EstadoCobranca::Paga ? DataExibicao::agora()->format('Y-m-d') : null,
             'assinatura' => $assinatura,
-            'vencimento' => now()->toDateString(),
+            'vencimento' => DataExibicao::agora()->format('Y-m-d'),
         ], now()->addDays(self::TTL_DIAS));
         $this->indexarDaAssinatura(is_string($assinatura) ? $assinatura : null, $nova);
 
@@ -564,7 +565,7 @@ final class FakePaymentProvider implements PaymentProvider
         }
 
         $c['estado'] = $estado->value;
-        $c['pago_em'] = $estado === EstadoCobranca::Paga ? now()->toIso8601String() : $c['pago_em'];
+        $c['pago_em'] = $estado === EstadoCobranca::Paga ? DataExibicao::agora()->format('Y-m-d') : $c['pago_em'];
         Cache::put($chave, $c, now()->addDays(self::TTL_DIAS));
     }
 

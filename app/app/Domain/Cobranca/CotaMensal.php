@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Cobranca;
 
+use App\Support\DataExibicao;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 
@@ -25,6 +26,7 @@ final class CotaMensal
 
         $proxima = CarbonImmutable::instance($inicio)->addMonthsNoOverflow($n);
 
-        return $proxima->lessThan($fimDoPeriodo) ? $proxima : null;
+        // O período vai até o último segundo do dia do vencimento; o aniversário nesse dia já é do ciclo seguinte.
+        return $proxima->lessThan(DataExibicao::fimDoDia($fimDoPeriodo)->startOfDay()) ? $proxima : null;
     }
 }

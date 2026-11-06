@@ -303,11 +303,11 @@ final class AsaasPaymentProvider implements PaymentProvider
             is_numeric($valor) ? (int) round(((float) $valor) * 100) : 0,
             $this->texto($r['checkoutSession'] ?? null),
             $this->texto($r['externalReference'] ?? null),
-            is_string($pago) && $pago !== '' ? new DateTimeImmutable($pago) : null,
+            is_string($pago) && $pago !== '' ? DataExibicao::doProvedor($pago)->toDateTimeImmutable() : null,
             $this->texto($r['subscription'] ?? null),
             $this->bandeira($cartao['creditCardBrand'] ?? null),
             $this->ultimos4($cartao['creditCardNumber'] ?? null),
-            is_string($vence) && $vence !== '' ? new DateTimeImmutable($vence) : null,
+            is_string($vence) && $vence !== '' ? DataExibicao::doProvedor($vence)->toDateTimeImmutable() : null,
         );
     }
 

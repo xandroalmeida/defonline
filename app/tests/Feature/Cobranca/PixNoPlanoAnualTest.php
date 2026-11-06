@@ -21,6 +21,7 @@ use App\Models\Usuario;
 use App\Services\Cobranca\CompraNaoPermitida;
 use App\Services\Cobranca\IniciarAssinatura;
 use App\Services\Cobranca\IniciarRenovacaoPix;
+use App\Support\DataExibicao;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -103,7 +104,7 @@ describe('CA-2 ativa só depois da confirmação', function () {
             ->and($a->periodos_pagos)->toBe(1)
             ->and($a->cota_restante_ciclo)->toBe($a->cota_snapshot)
             ->and($a->cartao_ultimos4)->toBeNull()
-            ->and($a->proximo_vencimento->toDateString())->toBe($a->data_inicio->copy()->addYear()->toDateString())
+            ->and(DataExibicao::converter($a->proximo_vencimento)->toDateString())->toBe(DataExibicao::converter($a->data_inicio)->addYear()->toDateString())
             ->and($a->proxima_cota_em)->not->toBeNull();
     });
 
@@ -187,10 +188,10 @@ describe('CA-4 renovação e aviso', function () {
 
         $a = $a->fresh();
         expect($a->status)->toBe(StatusAssinatura::Ativa)
-            ->and($a->proximo_vencimento->toDateString())->toBe($fimAntigo->copy()->addYear()->toDateString())
+            ->and(DataExibicao::converter($a->proximo_vencimento)->toDateString())->toBe(DataExibicao::converter($fimAntigo)->addYear()->toDateString())
             ->and($a->periodos_pagos)->toBe(2)
             ->and($a->cota_restante_ciclo)->toBe(0)
-            ->and($a->proxima_cota_em->toDateString())->toBe($fimAntigo->toDateString())
+            ->and(DataExibicao::converter($a->proxima_cota_em)->toDateString())->toBe(DataExibicao::converter($fimAntigo)->toDateString())
             ->and($renov->fresh()->status)->toBe(EstadoCobranca::Paga)
             ->and(Assinatura::query()->count())->toBe(1);
     });

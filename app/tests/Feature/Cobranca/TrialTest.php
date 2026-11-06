@@ -25,6 +25,7 @@ use App\Models\TrialConfig;
 use App\Models\TrialEmpresa;
 use App\Models\Usuario;
 use App\Observabilidade\AlertaDaEquipe;
+use App\Support\DataExibicao;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -67,7 +68,7 @@ describe('CA-1 ativação', function () {
             ->and($a->cota_snapshot)->toBe(1)
             ->and($a->cota_restante_ciclo)->toBe(1)
             ->and($a->data_inicio->toDateTimeString())->toBe('2026-11-05 10:00:00')
-            ->and($a->proximo_vencimento->toDateTimeString())->toBe('2026-11-12 10:00:00');
+            ->and(DataExibicao::dataHora($a->proximo_vencimento))->toBe('12/11/2026 23:59');
 
         $registro = TrialAtivacao::query()->sole();
         expect($registro->usuario_id)->toBe($this->usuario->id)
@@ -303,7 +304,7 @@ describe('CA-3 configuração não altera trial em andamento', function () {
         TrialConfig::atual()->update(['dias' => 30, 'analises' => 9]);
 
         $a->refresh();
-        expect($a->cota_snapshot)->toBe(1)->and($a->cota_restante_ciclo)->toBe(1)->and($a->proximo_vencimento->toDateString())->toBe('2026-11-12');
+        expect($a->cota_snapshot)->toBe(1)->and($a->cota_restante_ciclo)->toBe(1)->and(DataExibicao::converter($a->proximo_vencimento)->toDateString())->toBe('2026-11-12');
     });
 });
 

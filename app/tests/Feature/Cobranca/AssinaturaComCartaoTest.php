@@ -18,6 +18,7 @@ use App\Models\TermAcceptance;
 use App\Models\Usuario;
 use App\Services\Cobranca\CompraNaoPermitida;
 use App\Services\Cobranca\IniciarAssinatura;
+use App\Support\DataExibicao;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -98,8 +99,8 @@ describe('CA-2 ativação', function () {
         _pagarAssinatura(_assinaturaPendente($this->usuario, null, CicloCobranca::Anual));
         $a = Assinatura::query()->sole();
 
-        expect($a->proximo_vencimento->toDateString())->toBe(now()->addYear()->toDateString())
-            ->and($a->proxima_cota_em?->toDateString())->toBe(now()->addMonthNoOverflow()->toDateString());
+        expect(DataExibicao::converter($a->proximo_vencimento)->toDateString())->toBe(DataExibicao::hoje()->addYear()->toDateString())
+            ->and(DataExibicao::converter($a->proxima_cota_em)->toDateString())->toBe(DataExibicao::hoje()->addMonthNoOverflow()->toDateString());
     });
 
     it('quem estava no teste passa à assinatura e o teste termina', function () {
@@ -196,7 +197,7 @@ describe('CA-6 renovação da cota', function () {
 
         expect($a->periodos_pagos)->toBe(2)
             ->and($a->cota_restante_ciclo)->toBe($a->cota_snapshot)
-            ->and($a->proximo_vencimento->toDateString())->toBe($a->data_inicio->addMonthsNoOverflow(2)->toDateString())
+            ->and(DataExibicao::converter($a->proximo_vencimento)->toDateString())->toBe(DataExibicao::converter($a->data_inicio)->addMonthsNoOverflow(2)->toDateString())
             ->and(Invoice::query()->where('renovacao', true)->sole()->status)->toBe(EstadoCobranca::Paga);
     });
 
@@ -272,7 +273,7 @@ describe('CA-6 renovação da cota', function () {
         $a->refresh();
 
         expect($a->periodos_pagos)->toBe(2)
-            ->and($a->proximo_vencimento->toDateString())->toBe($a->data_inicio->addYears(2)->toDateString())
+            ->and(DataExibicao::converter($a->proximo_vencimento)->toDateString())->toBe(DataExibicao::converter($a->data_inicio)->addYears(2)->toDateString())
             ->and($a->proxima_cota_em)->not->toBeNull();
     });
 });
