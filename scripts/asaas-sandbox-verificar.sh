@@ -138,7 +138,7 @@ res "desconto.total_100pct: http $(http "$R") $(body "$R" | jq -c '{id,value,dis
 
 passo "CA-4.7 webhook: contrato de criação (authToken sem sequência numérica, sendType); sem URL pública"
 R=$(api GET /webhooks); res "webhook.listagem: http $(http "$R")"
-R=$(api POST /webhooks '{"name":"spike069","url":"https://example.com/asaas","email":"sandbox@example.com","enabled":false,"interrupted":false,"apiVersion":3,"authToken":"k7Qw9Zp2Xv4Lm8Rt1Yb6Nc3Hd5Js0Fg2Ua","sendType":"SEQUENTIALLY","events":["PAYMENT_RECEIVED","PAYMENT_REFUNDED"]}')
+R=$(api POST /webhooks '{"name":"spike069","url":"https://example.com/asaas","email":"sandbox@example.com","enabled":false,"interrupted":false,"apiVersion":3,"authToken":"'"$(openssl rand -hex 24)"'","sendType":"SEQUENTIALLY","events":["PAYMENT_RECEIVED","PAYMENT_REFUNDED"]}')
 WI=$(body "$R" | jq -r '.id // empty'); res "webhook.criar_via_api: http $(http "$R") $(body "$R" | jq -c '{id,sendType,errors}')"
 [ -n "$WI" ] && api DELETE "/webhooks/$WI" >/dev/null
 
