@@ -23,9 +23,9 @@
             <x-link :href="route($avisoTrial['acao'])" dusk="screen-trial-aviso-acao">{{ $avisoTrial['rotulo'] }}</x-link>
         </x-drm.aviso-inline>
     @elseif ($ofertaTrial)
-        <x-card class="mb-6" dusk="screen-trial-oferta-home">
+        <x-card class="mb-4" dusk="screen-trial-oferta-home">
             <h2 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0 mb-1">Teste grátis</h2>
-            <p class="m-0 mb-1 text-[color:var(--color-primary)]">{{ $ofertaTrial->dias }} {{ $ofertaTrial->dias === 1 ? 'dia' : 'dias' }}, {{ \App\Support\Cobranca\TextoTrial::analises($ofertaTrial->analises) }} e o Raio X do Negócio. Sem cartão.</p>
+            <p class="m-0 mb-3 text-[color:var(--color-primary)]">{{ $ofertaTrial->dias }} {{ $ofertaTrial->dias === 1 ? 'dia' : 'dias' }}, {{ \App\Support\Cobranca\TextoTrial::analises($ofertaTrial->analises) }} e o Raio X do Negócio. Sem cartão.</p>
             <x-button :href="route('trial.iniciar')" variant="secondary" dusk="screen-trial-oferta-home-cta">Começar teste grátis</x-button>
         </x-card>
     @endif
@@ -56,8 +56,8 @@
             @foreach ($empresas as $empresa)
                 <li dusk="minhas-empresas-item-{{ $empresa->id }}">
                     <x-card as="article" class="h-full flex flex-col gap-3">
-                        <div class="flex items-start justify-between gap-3 flex-wrap">
-                            <div class="flex flex-col gap-1">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex flex-col gap-1 min-w-0">
                                 <h3 class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0"
                                     dusk="minhas-empresas-nome-{{ $empresa->id }}">
                                     {{ $empresa->nomeExibicao() }}
@@ -67,7 +67,7 @@
                                        dusk="minhas-empresas-razao-{{ $empresa->id }}">{{ $razaoSocial }}</p>
                                 @endif
                             </div>
-                            <span class="pill" dusk="minhas-empresas-fonte-{{ $empresa->id }}">
+                            <span class="pill shrink-0" dusk="minhas-empresas-fonte-{{ $empresa->id }}">
                                 {{ $empresa->fonteBadge() }}
                             </span>
                         </div>

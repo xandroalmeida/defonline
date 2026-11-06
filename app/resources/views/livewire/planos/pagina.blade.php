@@ -48,7 +48,7 @@
             @else
                 <fieldset class="m-0 mb-4 p-0 border-0 min-w-0" dusk="screen-planos-ciclo">
                     <legend class="sr-only">Ciclo de cobrança</legend>
-                    <div class="inline-grid grid-cols-2 gap-1 rounded-md bg-[color:var(--color-neutral)] p-1">
+                    <div class="inline-grid grid-cols-2 gap-1 rounded-md bg-[color:var(--color-neutral)]">
                         @foreach (['mensal' => 'Mensal', 'anual' => $economiaMax > 0 ? "Anual — economize {$economiaMax}%" : 'Anual'] as $valor => $rotulo)
                             <label class="relative block cursor-pointer">
                                 <input type="radio" class="peer sr-only" name="ciclo" value="{{ $valor }}" wire:model.live="ciclo" dusk="screen-planos-ciclo-{{ $valor }}">
@@ -79,7 +79,7 @@
                             @else
                                 <p class="m-0 text-[color:var(--color-primary)]" dusk="screen-planos-preco-{{ $plano->id }}"><span class="text-xl font-medium">{{ $brl($plano->preco_mensal_centavos) }}</span> por mês</p>
                             @endif
-                            <ul class="m-0 pl-5 text-[color:var(--color-secondary)]">
+                            <ul class="m-0 p-0 list-none text-[color:var(--color-secondary)]">
                                 <li>{{ $analises($plano->cota_mensal) }} por mês</li>
                                 <li>Empresas sem limite</li>
                                 <li>Raio X do Negócio incluído</li>

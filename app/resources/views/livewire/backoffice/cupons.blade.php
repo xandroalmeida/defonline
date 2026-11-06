@@ -140,7 +140,7 @@
     @endif
 
     {{-- Lista --}}
-    <div class="card p-0 overflow-x-auto mb-8">
+    <div class="card p-0 relative overflow-x-auto mb-8">
         <table class="w-full text-sm text-left" dusk="cupons-lista">
             <thead class="text-[color:var(--color-secondary)]">
                 <tr>
@@ -151,7 +151,7 @@
                     <th scope="col" class="px-3 py-2">Concessões</th>
                     <th scope="col" class="px-3 py-2">Usos</th>
                     <th scope="col" class="px-3 py-2">Situação</th>
-                    <th scope="col" class="px-3 py-2"><span class="sr-only">Ações</span></th>
+                    <th scope="col" class="px-3 py-2 text-right"><span class="sr-only">Ações</span></th>
                 </tr>
             </thead>
             <tbody>
@@ -171,7 +171,7 @@
                         <td class="px-3 py-2 align-top" dusk="cupom-concessoes-{{ $item->id }}">{{ $item->concessoes_count }}</td>
                         <td class="px-3 py-2 align-top" dusk="cupom-usos-{{ $item->id }}">{{ $item->usos_count }}{{ $item->limite_usos !== null ? ' / '.$item->limite_usos : '' }}</td>
                         <td class="px-3 py-2 align-top" dusk="cupom-situacao-{{ $item->id }}">{{ $item->ativo ? 'Ativo' : 'Inativo' }}</td>
-                        <td class="px-3 py-2 align-top text-right whitespace-nowrap">
+                        <td class="px-3 py-2 align-top text-right">
                             <x-button type="button" variant="secondary" size="sm" wire:click="editarCupom('{{ $item->id }}')" dusk="cupom-editar-{{ $item->id }}">Editar</x-button>
                             @if ($item->ativo)
                                 <x-button type="button" variant="secondary" size="sm" wire:click="abrirConcessao('{{ $item->id }}')" dusk="cupom-conceder-{{ $item->id }}">Conceder</x-button>

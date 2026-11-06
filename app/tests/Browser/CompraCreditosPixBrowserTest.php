@@ -14,6 +14,7 @@ use App\Models\Usuario;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Dusk\Browser;
+use Tests\Browser\Concerns\VerificaAlinhamento;
 use Tests\DuskTestCase;
 
 /**
@@ -24,7 +25,7 @@ use Tests\DuskTestCase;
  */
 final class CompraCreditosPixBrowserTest extends DuskTestCase
 {
-    use DatabaseTruncation;
+    use DatabaseTruncation, VerificaAlinhamento;
 
     /** @var list<string> */
     protected array $tablesToTruncate = [
@@ -65,8 +66,15 @@ final class CompraCreditosPixBrowserTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($usuario, $pacote) {
             $browser->loginAs($usuario)
                 ->visit('/creditos/comprar')
-                ->waitFor('@screen-checkout-pacotes')
-                ->click('@screen-checkout-comprar-plus')
+                ->waitFor('@screen-checkout-pacotes');
+            // RNF-UI-02: pacotes vizinhos com a mesma altura e o botão na mesma linha.
+            $this->assertAlinhados($browser, [
+                ['screen-checkout-pacote-mini', 'screen-checkout-pacote-plus'],
+                ['screen-checkout-pacote-plus', 'screen-checkout-pacote-max'],
+                ['screen-checkout-comprar-mini', 'screen-checkout-comprar-plus'],
+                ['screen-checkout-comprar-plus', 'screen-checkout-comprar-max'],
+            ]);
+            $browser->click('@screen-checkout-comprar-plus')
                 ->waitFor('@screen-checkout-resumo')
                 ->assertSeeIn('@screen-checkout-resumo-ciclo', 'Compra única, não renova')
                 ->assertSeeIn('@screen-checkout-resumo-desconto', 'Sem desconto')

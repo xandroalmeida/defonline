@@ -10,6 +10,7 @@ use App\Models\EmpresaAnalisada;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
+use Tests\Browser\Concerns\VerificaAlinhamento;
 use Tests\DuskTestCase;
 
 /**
@@ -21,7 +22,7 @@ use Tests\DuskTestCase;
  */
 final class DrmDemonstracaoBrowserTest extends DuskTestCase
 {
-    use DatabaseTruncation;
+    use DatabaseTruncation, VerificaAlinhamento;
 
     /** @var list<string> */
     protected array $tablesToTruncate = [
@@ -81,7 +82,13 @@ final class DrmDemonstracaoBrowserTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($usuario, $empresa) {
             $browser->resize(1280, 900)->loginAs($usuario)
                 ->visit(route('drm.mes', [$empresa, '2026-09']))
-                ->waitFor('@drm-demonstracao')
+                ->waitFor('@drm-demonstracao');
+            // RNF-UI-02: os três números lado a lado com o mesmo topo e a mesma base.
+            $this->assertAlinhados($browser, [
+                ['drm-destaque-L1', 'drm-destaque-L9'],
+                ['drm-destaque-L9', 'drm-destaque-L11'],
+            ]);
+            $browser
                 ->assertVisible('@drm-tabela')
                 ->assertMissing('@drm-cards');
             $this->semScrollHorizontal($browser);

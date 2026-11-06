@@ -24,7 +24,7 @@
     @if ($usuarios->isEmpty())
         <x-card dusk="backoffice-vazio">Nenhum usuário encontrado.</x-card>
     @else
-        <div class="card p-0 overflow-x-auto">
+        <div class="card p-0 relative overflow-x-auto">
             <table class="w-full text-sm text-left" dusk="backoffice-usuarios">
                 <thead class="text-[color:var(--color-secondary)]">
                     <tr>
@@ -36,7 +36,7 @@
                         <th scope="col" class="px-2 py-2">Último login</th>
                         <th scope="col" class="px-2 py-2 text-right">Empresas</th>
                         <th scope="col" class="px-2 py-2 text-right">Diagnósticos</th>
-                        <th scope="col" class="sticky right-0 bg-[color:var(--color-surface)] px-2 py-2"><span class="sr-only">Ações</span></th>
+                        <th scope="col" class="sticky right-0 bg-[color:var(--color-surface)] px-2 py-2 text-right"><span class="sr-only">Ações</span></th>
                     </tr>
                 </thead>
                 <tbody>

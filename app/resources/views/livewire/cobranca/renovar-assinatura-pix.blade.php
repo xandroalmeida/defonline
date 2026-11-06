@@ -50,11 +50,11 @@
             <p class="m-0">Seu plano anual termina em {{ \App\Support\DataExibicao::data($fim) }}. Ele não renova sozinho.</p>
         </x-drm.aviso-inline>
 
-        <div class="mt-4 flex flex-col gap-6 lg:grid lg:grid-cols-[3fr_2fr] lg:items-start lg:gap-8">
-            <section aria-labelledby="resumo-titulo" class="lg:order-2 lg:sticky lg:top-4">
+        <div class="mt-4 flex flex-col gap-6 lg:grid lg:grid-cols-[3fr_2fr] lg:gap-8">
+            <section aria-labelledby="resumo-titulo" class="lg:order-2 lg:self-start lg:sticky lg:top-4">
                 <x-card dusk="screen-checkout-resumo">
                     <h2 id="resumo-titulo" class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0 mb-3">Resumo do pedido</h2>
-                    <dl class="m-0 grid grid-cols-[1fr_auto] gap-x-4 gap-y-2 text-sm">
+                    <dl class="m-0 grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-x-4 gap-y-2 text-sm">
                         <dt class="text-[color:var(--color-secondary)]">Plano</dt>
                         <dd class="m-0 text-right" dusk="screen-checkout-resumo-plano">{{ $plano?->nome }} · anual</dd>
                         <dt class="text-[color:var(--color-secondary)]">Preço</dt>
@@ -62,7 +62,7 @@
                         <dt class="text-[color:var(--color-secondary)]">Desconto</dt>
                         <dd class="m-0 text-right" dusk="screen-checkout-resumo-desconto">{{ $descontoValor > 0 ? '− '.$reais($descontoValor).($aplicado ? ' ('.$aplicado->cupom->codigo.')' : '') : 'Sem desconto' }}</dd>
                         <dt class="font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2">A pagar hoje</dt>
-                        <dd class="m-0 text-right font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2" dusk="screen-checkout-resumo-a-pagar">{{ $reais($valor) }}</dd>
+                        <dd class="m-0 -ml-4 pl-4 text-right font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2" dusk="screen-checkout-resumo-a-pagar">{{ $reais($valor) }}</dd>
                         <dt class="text-[color:var(--color-secondary)]">Ciclo</dt>
                         <dd class="m-0 text-right" dusk="screen-checkout-resumo-ciclo">Anual, não renova sozinho — avisamos 7 dias antes</dd>
                         <dt class="text-[color:var(--color-secondary)]">Novo ciclo</dt>

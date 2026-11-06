@@ -10,6 +10,7 @@ use App\Models\Usuario;
 use Database\Factories\EmpresaAnalisadaFactory;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
+use Tests\Browser\Concerns\VerificaAlinhamento;
 use Tests\DuskTestCase;
 
 /**
@@ -26,7 +27,7 @@ use Tests\DuskTestCase;
  */
 final class MinhasEmpresasBrowserTest extends DuskTestCase
 {
-    use DatabaseTruncation;
+    use DatabaseTruncation, VerificaAlinhamento;
 
     /** @var list<string> */
     protected array $tablesToTruncate = [
@@ -96,5 +97,35 @@ final class MinhasEmpresasBrowserTest extends DuskTestCase
         $this->assertNotNull($evento, 'evento empresa_cadastrada deveria existir após o fluxo');
         $this->assertSame($usuario->id, $evento->usuario_id);
         $this->assertSame('rfb', ((array) $evento->propriedades)['fonte_enriquecimento']);
+    }
+
+    /** RNF-UI-02: cards vizinhos com conteúdo de alturas diferentes, nas duas telas que listam empresas. */
+    public function test_cards_de_empresa_ficam_alinhados_e_sem_rolagem_lateral_no_celular(): void
+    {
+        $usuario = Usuario::factory()->create();
+        $curta = EmpresaAnalisada::factory()->create(['usuario_id' => $usuario->id, 'nome_fantasia' => 'Padaria', 'razao_social' => 'Padaria Ltda']);
+        $longa = EmpresaAnalisada::factory()->create([
+            'usuario_id' => $usuario->id,
+            'nome_fantasia' => 'Indústria e Comércio de Alimentos do Nordeste',
+            'razao_social' => 'Indústria e Comércio de Alimentos do Nordeste Brasileiro Sociedade Limitada',
+        ]);
+
+        $this->browse(function (Browser $browser) use ($usuario, $curta, $longa) {
+            $browser->resize(1280, 900)->loginAs($usuario)->visit('/home')->waitFor('@minhas-empresas-lista');
+            $this->assertAlinhados($browser, [
+                ["minhas-empresas-item-{$curta->id}", "minhas-empresas-item-{$longa->id}"],
+                ["minhas-empresas-diagnostico-{$curta->id}", "minhas-empresas-diagnostico-{$longa->id}"],
+            ]);
+
+            $browser->visit('/diagnosticos/novo')->waitFor('@selecionar-empresa-lista');
+            $this->assertAlinhados($browser, [
+                ["selecionar-empresa-item-{$curta->id}", "selecionar-empresa-item-{$longa->id}"],
+                ["selecionar-empresa-cta-{$curta->id}", "selecionar-empresa-cta-{$longa->id}"],
+            ]);
+
+            $browser->resize(390, 1200)->visit('/home')->waitFor('@minhas-empresas-lista');
+            $this->assertFalse($browser->script('return document.documentElement.scrollWidth > window.innerWidth')[0], 'A tela não pode rolar para o lado no celular.');
+            $browser->resize(1920, 1080); // O navegador é o mesmo no teste seguinte, que usa o menu lateral.
+        });
     }
 }

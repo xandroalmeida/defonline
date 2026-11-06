@@ -47,7 +47,7 @@
 
             {{-- Nome --}}
             <div>
-                <x-label :for="'socio-'.$i.'-nome'" class="text-sm">Nome do sócio {{ $i + 1 }}</x-label>
+                <x-label :for="'socio-'.$i.'-nome'">Nome do sócio {{ $i + 1 }}</x-label>
                 <x-input type="text"
                          id="socio-{{ $i }}-nome"
                          wire:model.live.debounce.300ms="socios.{{ $i }}.nome"
@@ -65,7 +65,7 @@
 
             {{-- CPF --}}
             <div>
-                <x-label :for="'socio-'.$i.'-cpf'" class="text-sm">CPF do sócio {{ $i + 1 }}</x-label>
+                <x-label :for="'socio-'.$i.'-cpf'">CPF do sócio {{ $i + 1 }}</x-label>
                 <x-input type="text"
                          id="socio-{{ $i }}-cpf"
                          wire:model.live.debounce.300ms="socios.{{ $i }}.cpf"

@@ -53,7 +53,7 @@
             </x-empresa.ficha-rfb>
         @else
             @php($pf = $empresa->tipo_documento === \App\Domain\TipoDocumento::Cpf)
-            <dl class="grid grid-cols-1 sm:grid-cols-[max-content_1fr] gap-x-6 gap-y-2 m-0">
+            <dl class="grid grid-cols-1 sm:grid-cols-[11rem_1fr] gap-x-6 gap-y-2 m-0">
                 <dt class="text-xs uppercase tracking-wider font-semibold text-[color:var(--color-secondary)] sm:pt-0.5">Tipo do documento</dt>
                 <dd class="m-0 text-[color:var(--color-primary)]" dusk="empresa-show-tipo">{{ strtoupper($empresa->tipo_documento->value) }}</dd>
 

@@ -59,7 +59,7 @@
 
             <fieldset class="m-0 mb-4 p-0 border-0 min-w-0" dusk="screen-checkout-ciclo">
                 <legend class="sr-only">Ciclo de cobrança</legend>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-[640px]">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 lg:w-[calc((100%-2rem)*0.6)]">
                     @foreach ([CicloCobranca::Mensal, CicloCobranca::Anual] as $c)
                         @php $p = $c->precoDe($plano->preco_mensal_centavos, $plano->preco_anual_centavos); @endphp
                         <label class="relative block cursor-pointer">
@@ -76,11 +76,11 @@
                 </div>
             </fieldset>
 
-            <div class="flex flex-col gap-6 lg:grid lg:grid-cols-[3fr_2fr] lg:items-start lg:gap-8">
-                <section aria-labelledby="resumo-titulo" class="lg:order-2 lg:sticky lg:top-4">
+            <div class="flex flex-col gap-6 lg:grid lg:grid-cols-[3fr_2fr] lg:gap-8">
+                <section aria-labelledby="resumo-titulo" class="lg:order-2 lg:self-start lg:sticky lg:top-4">
                     <x-card dusk="screen-checkout-resumo">
                         <h2 id="resumo-titulo" class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0 mb-3">Resumo do pedido</h2>
-                        <dl class="m-0 grid grid-cols-[1fr_auto] gap-x-4 gap-y-2 text-sm">
+                        <dl class="m-0 grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-x-4 gap-y-2 text-sm">
                             <dt class="text-[color:var(--color-secondary)]">Plano</dt>
                             <dd class="m-0 text-right" dusk="screen-checkout-resumo-plano">{{ $plano->nome }} · {{ strtolower($cicloAtual->rotulo()) }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Preço</dt>
@@ -88,7 +88,7 @@
                             <dt class="text-[color:var(--color-secondary)]">Desconto</dt>
                             <dd class="m-0 text-right" dusk="screen-checkout-resumo-desconto">{{ $aplicado ? '− '.$reais($aplicado->preco->desconto).' ('.$aplicado->cupom->codigo.')' : 'Sem desconto' }}</dd>
                             <dt class="font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2">A pagar hoje</dt>
-                            <dd class="m-0 text-right font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2" dusk="screen-checkout-resumo-a-pagar">{{ $reais($aPagar) }}</dd>
+                            <dd class="m-0 -ml-4 pl-4 text-right font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2" dusk="screen-checkout-resumo-a-pagar">{{ $reais($aPagar) }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Ciclo</dt>
                             <dd class="m-0 text-right" dusk="screen-checkout-resumo-ciclo">{{ $cupomResumo ? $cupomResumo['ciclo'] : ($pix ? 'Anual, não renova sozinho — avisamos '.$avisoDias.' dias antes' : $cicloAtual->rotulo().', renova sozinho no cartão') }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Próxima cobrança</dt>

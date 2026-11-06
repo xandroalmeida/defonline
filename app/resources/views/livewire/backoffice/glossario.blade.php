@@ -36,13 +36,13 @@
     @if ($termos->isEmpty())
         <x-card dusk="glossario-vazio">O glossário está vazio e não aparece no relatório.</x-card>
     @else
-        <div class="card p-0 overflow-x-auto">
+        <div class="card p-0 relative overflow-x-auto">
             <table class="w-full text-sm text-left" dusk="glossario-lista">
                 <thead class="text-[color:var(--color-secondary)]">
                     <tr>
                         <th scope="col" class="px-3 py-2">Termo</th>
                         <th scope="col" class="px-3 py-2">Definição</th>
-                        <th scope="col" class="px-3 py-2"><span class="sr-only">Ações</span></th>
+                        <th scope="col" class="px-3 py-2 text-right"><span class="sr-only">Ações</span></th>
                     </tr>
                 </thead>
                 <tbody>

@@ -10,6 +10,7 @@ use App\Models\Usuario;
 use Facebook\WebDriver\WebDriverKeys;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
+use Tests\Browser\Concerns\VerificaAlinhamento;
 use Tests\DuskTestCase;
 
 /**
@@ -20,7 +21,7 @@ use Tests\DuskTestCase;
  */
 final class PermissoesAdminBrowserTest extends DuskTestCase
 {
-    use DatabaseTruncation;
+    use DatabaseTruncation, VerificaAlinhamento;
 
     /** @var list<string> */
     protected array $tablesToTruncate = ['usuarios', 'audit_logs', 'sessions', 'cache'];
@@ -138,6 +139,12 @@ final class PermissoesAdminBrowserTest extends DuskTestCase
                     ->click('@app-nav-backoffice-recomendacoes')
                     ->waitForLocation('/backoffice/recomendacoes')
                     ->waitFor('@recomendacao-industria-verde');
+
+                // RNF-UI-02: os três segmentos lado a lado com o mesmo topo e a mesma base.
+                $this->assertAlinhados($browser, [
+                    ['recomendacoes-setor-industria', 'recomendacoes-setor-comercio'],
+                    ['recomendacoes-setor-comercio', 'recomendacoes-setor-servicos'],
+                ]);
 
                 // A área de trabalho é toda usada, e os campos de uma mesma faixa têm a mesma altura.
                 $browser->resize(1600, 1000)->press('@recomendacoes-ir-margem_liquida')->waitForTextIn('@recomendacoes-titulo', 'Margem Líquida');

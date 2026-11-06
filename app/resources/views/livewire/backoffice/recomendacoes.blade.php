@@ -34,7 +34,7 @@
     <h2 class="text-lg font-medium text-[color:var(--color-primary)] mt-0 mb-4" dusk="recomendacoes-titulo">{{ $indicadores[$indicador] }}</h2>
 
     {{-- Um card por segmento. O subgrid mantém cada faixa na mesma linha entre os cards. --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-5">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         @foreach ($setores as $setor => $nomeSetor)
             <x-card as="section" aria-label="{{ $nomeSetor }}" wire:key="setor-{{ $setor }}"
                     class="grid gap-y-5 md:[grid-template-rows:subgrid] {{ $ncg ? 'md:[grid-row:span_3]' : 'md:[grid-row:span_4]' }}"

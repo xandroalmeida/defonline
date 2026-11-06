@@ -163,7 +163,7 @@
 
     {{-- Assinaturas --}}
     <h2 class="text-lg font-medium text-[color:var(--color-primary)] mt-0 mb-3">Assinaturas</h2>
-    <div class="card p-0 overflow-x-auto mb-2">
+    <div class="card p-0 relative overflow-x-auto mb-2">
         <table class="w-full text-sm text-left" dusk="financeiro-assinaturas">
             <thead class="text-[color:var(--color-secondary)]">
                 <tr>
@@ -197,7 +197,7 @@
 
     {{-- Cobranças --}}
     <h2 class="text-lg font-medium text-[color:var(--color-primary)] mt-0 mb-3">Cobranças</h2>
-    <div class="card p-0 overflow-x-auto mb-2">
+    <div class="card p-0 relative overflow-x-auto mb-2">
         <table class="w-full text-sm text-left" dusk="financeiro-cobrancas">
             <thead class="text-[color:var(--color-secondary)]">
                 <tr>
@@ -207,7 +207,7 @@
                     <th scope="col" class="px-3 py-2">Status</th>
                     <th scope="col" class="px-3 py-2">Arrependimento</th>
                     <th scope="col" class="px-3 py-2">Nota fiscal</th>
-                    <th scope="col" class="px-3 py-2"><span class="sr-only">Ações</span></th>
+                    <th scope="col" class="px-3 py-2 text-right"><span class="sr-only">Ações</span></th>
                 </tr>
             </thead>
             <tbody>
@@ -264,7 +264,7 @@
 
     {{-- Sem nota fiscal --}}
     <h2 class="text-lg font-medium text-[color:var(--color-primary)] mt-0 mb-3">Pagas sem nota fiscal</h2>
-    <div class="card p-0 overflow-x-auto mb-8">
+    <div class="card p-0 relative overflow-x-auto mb-8">
         <table class="w-full text-sm text-left" dusk="financeiro-sem-nota">
             <thead class="text-[color:var(--color-secondary)]">
                 <tr>
@@ -272,7 +272,7 @@
                     <th scope="col" class="px-3 py-2">Cobrança</th>
                     <th scope="col" class="px-3 py-2">Valor</th>
                     <th scope="col" class="px-3 py-2">Paga em</th>
-                    <th scope="col" class="px-3 py-2"><span class="sr-only">Ações</span></th>
+                    <th scope="col" class="px-3 py-2 text-right"><span class="sr-only">Ações</span></th>
                 </tr>
             </thead>
             <tbody>

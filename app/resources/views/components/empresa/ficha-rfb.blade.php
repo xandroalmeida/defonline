@@ -49,7 +49,7 @@
 
     <section aria-labelledby="ficha-identificacao">
         <h2 id="ficha-identificacao" class="text-base font-semibold m-0 mb-3 text-[color:var(--color-primary)]">Identificação</h2>
-        <dl class="grid grid-cols-1 sm:grid-cols-[max-content_1fr] gap-x-6 gap-y-2 m-0">
+        <dl class="grid grid-cols-1 sm:grid-cols-[11rem_1fr] gap-x-6 gap-y-2 m-0">
             <dt class="{{ $dt }}">CNPJ</dt>
             <dd class="{{ $dd }}" dusk="ficha-cnpj">{{ \App\Domain\Cnpj::formatar($cnpj) }}</dd>
             <dt class="{{ $dt }}">Razão social</dt>
@@ -71,7 +71,7 @@
 
     <section aria-labelledby="ficha-regime">
         <h2 id="ficha-regime" class="text-base font-semibold m-0 mb-3 text-[color:var(--color-primary)]">Regime tributário</h2>
-        <dl class="grid grid-cols-1 sm:grid-cols-[max-content_1fr] gap-x-6 gap-y-2 m-0">
+        <dl class="grid grid-cols-1 sm:grid-cols-[11rem_1fr] gap-x-6 gap-y-2 m-0">
             <dt class="{{ $dt }}">MEI (SIMEI)</dt>
             <dd class="{{ $dd }}" dusk="ficha-simei">{{ $rotuloRegime($ficha->simei) }}</dd>
             <dt class="{{ $dt }}">Simples Nacional</dt>
@@ -81,7 +81,7 @@
 
     <section aria-labelledby="ficha-atividades">
         <h2 id="ficha-atividades" class="text-base font-semibold m-0 mb-3 text-[color:var(--color-primary)]">Atividades (CNAE)</h2>
-        <dl class="grid grid-cols-1 sm:grid-cols-[max-content_1fr] gap-x-6 gap-y-2 m-0">
+        <dl class="grid grid-cols-1 sm:grid-cols-[11rem_1fr] gap-x-6 gap-y-2 m-0">
             <dt class="{{ $dt }}">Principal</dt>
             <dd class="{{ $dd }}" dusk="ficha-cnae-principal">
                 @if ($ficha->cnaePrincipal)
@@ -107,7 +107,7 @@
 
     <section aria-labelledby="ficha-endereco">
         <h2 id="ficha-endereco" class="text-base font-semibold m-0 mb-3 text-[color:var(--color-primary)]">Endereço</h2>
-        <dl class="grid grid-cols-1 sm:grid-cols-[max-content_1fr] gap-x-6 gap-y-2 m-0">
+        <dl class="grid grid-cols-1 sm:grid-cols-[11rem_1fr] gap-x-6 gap-y-2 m-0">
             <dt class="{{ $dt }}">Logradouro</dt>
             <dd class="{{ $dd }}" dusk="ficha-logradouro">{{ $linhaEndereco !== '' ? $linhaEndereco : $ni }}</dd>
             <dt class="{{ $dt }}">Bairro</dt>

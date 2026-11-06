@@ -88,12 +88,12 @@
                     <caption class="sr-only">Meses de {{ $grupo['ano'] }}: o lucro de cada mês e a comparação com o mês anterior e com a média.</caption>
                     <thead>
                         <tr class="text-left text-[length:var(--text-label)] uppercase tracking-wide {{ $textoSecundario }} bg-[color:var(--color-neutral)]">
-                            <th scope="col" class="px-4 py-2 font-semibold w-[17%]">{{ config('drm.serie.cabecalhos.mes') }}</th>
+                            <th scope="col" class="px-4 py-2 font-semibold w-[16%]">{{ config('drm.serie.cabecalhos.mes') }}</th>
                             <th scope="col" class="px-4 py-2 text-right font-semibold w-[14%]">{{ config('drm.serie.cabecalhos.vendeu') }}</th>
-                            <th scope="col" class="px-4 py-2 text-right font-semibold w-[16%]">{{ config('drm.serie.cabecalhos.lucro') }}</th>
-                            <th scope="col" class="px-4 py-2 font-semibold w-[20%]">{{ config('drm.serie.cabecalhos.anterior') }}</th>
-                            <th scope="col" class="px-4 py-2 font-semibold w-[20%]">{{ config('drm.serie.cabecalhos.media') }}</th>
-                            <th scope="col" class="px-4 py-2 font-semibold w-[13%]"><span class="sr-only">{{ config('drm.serie.cabecalhos.acao') }}</span></th>
+                            <th scope="col" class="px-4 py-2 text-right font-semibold w-[17%]">{{ config('drm.serie.cabecalhos.lucro') }}</th>
+                            <th scope="col" class="px-4 py-2 font-semibold w-[19%]">{{ config('drm.serie.cabecalhos.anterior') }}</th>
+                            <th scope="col" class="px-4 py-2 font-semibold w-[19%]">{{ config('drm.serie.cabecalhos.media') }}</th>
+                            <th scope="col" class="px-4 py-2 text-right font-semibold w-[15%]"><span class="sr-only">{{ config('drm.serie.cabecalhos.acao') }}</span></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -122,7 +122,7 @@
                                         <span class="block text-[length:var(--text-body-sm)] {{ $textoSecundario }}">
                                             @if ($l->percentual !== null){{ $l->percentual }}@else<span class="sr-only">{{ $l->percentualAusente }}</span>@endif
                                         </span>
-                                        @if ($l->prejuizo)<span class="pill">{{ config('drm.serie.pills.prejuizo') }}</span>@endif
+                                        @if ($l->prejuizo)<span class="pill whitespace-nowrap">{{ config('drm.serie.pills.prejuizo') }}</span>@endif
                                     </td>
                                     <td class="px-4 py-3 text-[length:var(--text-body-sm)] {{ $textoSecundario }}" dusk="drm-serie-tabela-vs-anterior-{{ $l->competencia }}">{{ $l->vsAnterior }}</td>
                                     <td class="px-4 py-3 text-[length:var(--text-body-sm)] {{ $textoSecundario }}" dusk="drm-serie-tabela-vs-media-{{ $l->competencia }}">{{ $l->vsMedia }}</td>

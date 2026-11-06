@@ -35,13 +35,13 @@
         </form>
     </x-card>
 
-    <div class="card p-0 overflow-x-auto">
+    <div class="card p-0 relative overflow-x-auto">
         <table class="w-full text-sm text-left" dusk="admin-lista">
             <thead class="text-[color:var(--color-secondary)]">
                 <tr>
                     <th scope="col" class="px-3 py-2">Nome e e-mail</th>
                     <th scope="col" class="px-3 py-2">Permissões</th>
-                    <th scope="col" class="px-3 py-2"><span class="sr-only">Ações</span></th>
+                    <th scope="col" class="px-3 py-2 text-right"><span class="sr-only">Ações</span></th>
                 </tr>
             </thead>
             <tbody>

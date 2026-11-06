@@ -73,7 +73,7 @@
         </form>
     </x-card>
 
-    <div class="card p-0 overflow-x-auto mb-8">
+    <div class="card p-0 relative overflow-x-auto mb-8">
         <table class="w-full text-sm text-left" dusk="planos-lista">
             <thead class="text-[color:var(--color-secondary)]">
                 <tr>
@@ -83,7 +83,7 @@
                     <th scope="col" class="px-3 py-2">Mensal</th>
                     <th scope="col" class="px-3 py-2">Anual</th>
                     <th scope="col" class="px-3 py-2">Situação</th>
-                    <th scope="col" class="px-3 py-2"><span class="sr-only">Ações</span></th>
+                    <th scope="col" class="px-3 py-2 text-right"><span class="sr-only">Ações</span></th>
                 </tr>
             </thead>
             <tbody>
@@ -151,7 +151,7 @@
         </form>
     </x-card>
 
-    <div class="card p-0 overflow-x-auto mb-8">
+    <div class="card p-0 relative overflow-x-auto mb-8">
         <table class="w-full text-sm text-left" dusk="pacotes-lista">
             <thead class="text-[color:var(--color-secondary)]">
                 <tr>
@@ -162,25 +162,25 @@
                     <th scope="col" class="px-3 py-2">Unitário</th>
                     <th scope="col" class="px-3 py-2">Validade</th>
                     <th scope="col" class="px-3 py-2">Situação</th>
-                    <th scope="col" class="px-3 py-2"><span class="sr-only">Ações</span></th>
+                    <th scope="col" class="px-3 py-2 text-right"><span class="sr-only">Ações</span></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($pacotes as $item)
                     <tr class="border-t border-[color:var(--color-border)]" wire:key="pacote-{{ $item->id }}" dusk="pacote-linha-{{ $item->id }}">
-                        <td class="px-3 py-2 align-top">{{ $item->ordem }}</td>
-                        <td class="px-3 py-2 align-top font-medium">{{ $item->nome }}</td>
-                        <td class="px-3 py-2 align-top">{{ $item->quantidade_creditos }}</td>
-                        <td class="px-3 py-2 align-top">{{ $reais($item->preco_centavos) }}</td>
-                        <td class="px-3 py-2 align-top">
+                        <td class="px-3 py-2 align-middle">{{ $item->ordem }}</td>
+                        <td class="px-3 py-2 align-middle font-medium">{{ $item->nome }}</td>
+                        <td class="px-3 py-2 align-middle">{{ $item->quantidade_creditos }}</td>
+                        <td class="px-3 py-2 align-middle">{{ $reais($item->preco_centavos) }}</td>
+                        <td class="px-3 py-2 align-middle">
                             {{ $reais((int) round($item->preco_centavos / $item->quantidade_creditos)) }}
                             @if ($avisos[$item->id] !== [])
                                 <p class="m-0 text-xs text-[color:var(--color-farol-amarelo-texto)]" dusk="pacote-aviso-{{ $item->id }}">Abaixo do unitário do plano {{ implode(', ', $avisos[$item->id]) }}.</p>
                             @endif
                         </td>
-                        <td class="px-3 py-2 align-top">{{ $item->validade_meses }} {{ $item->validade_meses === 1 ? 'mês' : 'meses' }}</td>
-                        <td class="px-3 py-2 align-top" dusk="pacote-situacao-{{ $item->id }}">{{ $item->ativo ? 'Ativo' : 'Inativo' }}</td>
-                        <td class="px-3 py-2 align-top text-right whitespace-nowrap">
+                        <td class="px-3 py-2 align-middle">{{ $item->validade_meses }} {{ $item->validade_meses === 1 ? 'mês' : 'meses' }}</td>
+                        <td class="px-3 py-2 align-middle" dusk="pacote-situacao-{{ $item->id }}">{{ $item->ativo ? 'Ativo' : 'Inativo' }}</td>
+                        <td class="px-3 py-2 align-middle text-right whitespace-nowrap">
                             <x-button type="button" variant="secondary" size="sm" wire:click="editarPacote('{{ $item->id }}')" dusk="pacote-editar-{{ $item->id }}">Editar</x-button>
                             <x-button type="button" variant="secondary" size="sm" wire:click="alternarPacote('{{ $item->id }}')" dusk="pacote-alternar-{{ $item->id }}">{{ $item->ativo ? 'Desativar' : 'Ativar' }}</x-button>
                         </td>

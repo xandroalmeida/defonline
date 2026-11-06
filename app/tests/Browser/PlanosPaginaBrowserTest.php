@@ -11,6 +11,7 @@ use App\Models\TrialConfig;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
+use Tests\Browser\Concerns\VerificaAlinhamento;
 use Tests\DuskTestCase;
 
 /**
@@ -21,7 +22,7 @@ use Tests\DuskTestCase;
  */
 final class PlanosPaginaBrowserTest extends DuskTestCase
 {
-    use DatabaseTruncation;
+    use DatabaseTruncation, VerificaAlinhamento;
 
     /** @var list<string> */
     protected array $tablesToTruncate = ['usuarios', 'assinaturas', 'audit_logs', 'sessions', 'cache'];
@@ -60,6 +61,33 @@ final class PlanosPaginaBrowserTest extends DuskTestCase
                 ->click('@screen-planos-assinar-'.$plano->id)
                 ->waitForLocation('/cadastro')
                 ->assertPathIs('/cadastro');
+        });
+    }
+
+    /** RNF-UI-02: planos e pacotes vizinhos com a mesma altura e as ações na mesma linha. */
+    public function test_cards_de_planos_e_pacotes_ficam_alinhados(): void
+    {
+        CobrancaConfig::atual()->update(['ativa' => true]);
+        $basico = Plano::query()->where('codigo', 'basico')->firstOrFail();
+        $pro = Plano::query()->firstOrCreate(['codigo' => 'pro'], ['nome' => 'Pro', 'cota_mensal' => 10, 'preco_mensal_centavos' => 19900, 'preco_anual_centavos' => 159900, 'ativo' => true, 'ordem' => 2]);
+        $plus = PacoteCredito::query()->where('codigo', 'plus')->firstOrFail();
+        $mini = PacoteCredito::query()->firstOrCreate(['codigo' => 'mini'], ['nome' => 'Mini', 'quantidade_creditos' => 1, 'preco_centavos' => 8990, 'validade_meses' => 12, 'ativo' => true, 'ordem' => 0]);
+        $max = PacoteCredito::query()->firstOrCreate(['codigo' => 'max'], ['nome' => 'Max', 'quantidade_creditos' => 10, 'preco_centavos' => 59990, 'validade_meses' => 12, 'ativo' => true, 'ordem' => 2]);
+
+        $this->browse(function (Browser $browser) use ($basico, $pro, $mini, $plus, $max) {
+            $browser->resize(1280, 900)->visit('/planos')->waitFor('@screen-planos');
+            $this->assertAlinhados($browser, [
+                ["screen-planos-plano-{$basico->id}", "screen-planos-plano-{$pro->id}"],
+                ["screen-planos-assinar-{$basico->id}", "screen-planos-assinar-{$pro->id}"],
+                ["screen-planos-pacote-{$mini->id}", "screen-planos-pacote-{$plus->id}"],
+                ["screen-planos-pacote-{$plus->id}", "screen-planos-pacote-{$max->id}"],
+                ["screen-planos-comprar-{$mini->id}", "screen-planos-comprar-{$plus->id}"],
+                ["screen-planos-comprar-{$plus->id}", "screen-planos-comprar-{$max->id}"],
+            ]);
+
+            $browser->resize(390, 1200)->visit('/planos')->waitFor('@screen-planos');
+            $this->assertFalse($browser->script('return document.documentElement.scrollWidth > window.innerWidth')[0], 'A tela não pode rolar para o lado no celular.');
+            $browser->resize(1920, 1080); // O navegador é o mesmo no teste seguinte, que usa o menu lateral.
         });
     }
 

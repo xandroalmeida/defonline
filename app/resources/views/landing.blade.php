@@ -76,7 +76,7 @@
 
     <footer data-testid="landing-footer"
             class="border-t border-[color:var(--color-border)] bg-[color:var(--color-surface)] px-4 sm:px-6 py-5">
-        <div class="max-w-[960px] mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm text-[color:var(--color-secondary)]">
+        <div class="max-w-[720px] mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm text-[color:var(--color-secondary)]">
             <span>© DEFOnline {{ \App\Support\DataExibicao::ano() }}</span>
             <x-footer-version/>
         </div>

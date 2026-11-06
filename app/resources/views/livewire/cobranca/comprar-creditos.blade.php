@@ -49,18 +49,18 @@
                 </div>
             </div>
         @else
-            <div class="flex flex-col gap-6 lg:grid lg:grid-cols-[3fr_2fr] lg:items-start lg:gap-8">
+            <div class="flex flex-col gap-6 lg:grid lg:grid-cols-[3fr_2fr] lg:gap-8">
                 {{-- Em mobile o resumo vem antes ("quanto?" antes de "como?"); em desktop fica à direita, fixo. --}}
-                <section aria-labelledby="resumo-titulo" class="lg:order-2 lg:sticky lg:top-4">
+                <section aria-labelledby="resumo-titulo" class="lg:order-2 lg:self-start lg:sticky lg:top-4">
                     <x-card dusk="screen-checkout-resumo">
                         <h2 id="resumo-titulo" class="text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)] m-0 mb-3">Resumo do pedido</h2>
-                        <dl class="m-0 grid grid-cols-[1fr_auto] gap-x-4 gap-y-2 text-sm">
+                        <dl class="m-0 grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-x-4 gap-y-2 text-sm">
                             <dt class="text-[color:var(--color-secondary)]">Preço</dt>
                             <dd class="m-0 text-right" dusk="screen-checkout-resumo-preco">{{ $reais($pacote->preco_centavos) }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Desconto</dt>
                             <dd class="m-0 text-right" dusk="screen-checkout-resumo-desconto">{{ $aplicado ? '− '.$reais($aplicado->preco->desconto).' ('.$aplicado->cupom->codigo.')' : 'Sem desconto' }}</dd>
                             <dt class="font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2">A pagar hoje</dt>
-                            <dd class="m-0 text-right font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2" dusk="screen-checkout-resumo-a-pagar">{{ $reais($aPagar) }}</dd>
+                            <dd class="m-0 -ml-4 pl-4 text-right font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2" dusk="screen-checkout-resumo-a-pagar">{{ $reais($aPagar) }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Ciclo</dt>
                             <dd class="m-0 text-right" dusk="screen-checkout-resumo-ciclo">Compra única, não renova</dd>
                             <dt class="text-[color:var(--color-secondary)]">Próxima cobrança</dt>

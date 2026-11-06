@@ -6,7 +6,7 @@
      */
     $recuo = [1 => '', 2 => 'pl-[var(--spacing-md)]', 3 => 'pl-[var(--spacing-lg)]'];
     $classeRotulo = fn ($l) => match (true) {
-        $l->nivel >= 2 => 'text-[length:var(--text-body-sm)] text-[color:var(--color-secondary)] '.($recuo[$l->nivel] ?? $recuo[3]),
+        $l->nivel >= 2 => 'font-normal text-[length:var(--text-body-sm)] text-[color:var(--color-secondary)] '.($recuo[$l->nivel] ?? $recuo[3]),
         $l->ehTotal() => 'font-medium text-[color:var(--color-primary)]',
         default => 'font-normal text-[color:var(--color-primary)]',
     };
@@ -27,9 +27,9 @@
 
     {{-- Os três números, antes da conta (CA-4). Sem destaque no snapshot, a seção não existe. --}}
     @if ($visao->destaques !== [])
-        <section aria-labelledby="drm-destaques-titulo" class="mb-6" dusk="drm-destaques">
+        <section aria-labelledby="drm-destaques-titulo" class="mb-4" dusk="drm-destaques">
             <h2 id="drm-destaques-titulo" class="sr-only">Os números principais do mês</h2>
-            <div class="grid gap-3 lg:grid-cols-[repeat(auto-fit,minmax(0,1fr))]">
+            <div class="grid gap-4 lg:grid-cols-[repeat(auto-fit,minmax(0,1fr))]">
                 @foreach ($visao->destaques as $d)
                     @php $l = $d['linha']; @endphp
                     <x-card dusk="drm-destaque-{{ $l->codigo }}">
@@ -64,7 +64,7 @@
     {{-- Leitura em linguagem simples (STORY-054): derivada na exibição, nunca gravada no snapshot (CA-8). --}}
     @if ($leitura !== null && $leitura->frases !== [])
         <x-card as="section" class="mb-6" aria-labelledby="drm-leitura-titulo" dusk="drm-leitura">
-            <h2 id="drm-leitura-titulo" class="m-0 mb-2 text-[length:var(--text-h2)] font-medium text-[color:var(--color-primary)]">{{ config('drm.leitura_frases.titulo') }}</h2>
+            <h2 id="drm-leitura-titulo" class="m-0 mb-2 text-[length:var(--text-h3)] font-medium text-[color:var(--color-primary)]">{{ config('drm.leitura_frases.titulo') }}</h2>
             <p class="m-0 text-[length:var(--text-body)] text-[color:var(--color-primary)]" dusk="drm-leitura-texto">{{ implode(' ', $leitura->frases) }}</p>
             <p class="m-0 mt-3 text-[length:var(--text-body-sm)] text-[color:var(--color-secondary)]" dusk="drm-leitura-rodape">{{ strtr((string) config('drm.leitura_frases.rodape'), [':versao' => (string) config('drm.conteudo_version')]) }}</p>
         </x-card>
@@ -115,7 +115,7 @@
             <tbody>
                 @foreach ($visao->linhas as $l)
                     <tr class="{{ $l->ehTotal() ? $alturaTotal : '' }}" dusk="drm-linha-{{ $l->codigo }}">
-                        <th scope="row" class="px-4 py-2 text-left {{ $classeRotulo($l) }}">
+                        <th scope="row" class="px-4 py-2 text-left {{ $classeRotulo($l) }} {{ $l->nivel >= 3 ? 'pl-12!' : ($l->nivel === 2 ? 'pl-8!' : '') }}">
                             {{ $marcador($l) }}{{ $l->prefixo }}{{ $l->rotulo }}
                             @if ($l->prejuizo)
                                 <span class="pill ml-2">{{ config('drm.tela.pill_prejuizo') }}</span>
