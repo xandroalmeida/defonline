@@ -50,6 +50,9 @@ Os planos mantêm os valores atuais: Básico R$ 49,90/mês ou R$ 399/ano; Pro R$
 8. **Cupons de desconto.** O admin cria cupons de desconto parcial ou total em tela (spec §2.5).
 9. **Usuários do beta recebem cupom.** Desconto e duração são definidos pelo admin ao criar o cupom. O cupom é concedido às contas do beta e aplicado automaticamente no checkout.
 
+10. **Upgrade com cota proporcional (2026-11-05).** No upgrade, a cota extra do ciclo em curso é proporcional aos dias restantes; a cota cheia do plano novo vale a partir da renovação.
+11. **Validação em produção, com o sandbox atual (2026-11-05).** Como ainda não há clientes reais, a validação do pagamento roda em produção, ligada ao sandbox do Asaas que já temos, mesmo com a conta compartilhada com o projeto Serene. Só depois disso entram as chaves de produção do Asaas.
+
 ## Justificativa
 
 O preço é hipótese e precisa mudar sem deploy; a mesma lógica vale para o provedor, que pode deixar de ser competitivo. Com os novos seeds, o unitário de todo pacote supera os R$ 49,90 do Básico. Antes, R$ 19,90 por crédito deixava 4 análises por ano muito abaixo dos R$ 399 do plano anual.
