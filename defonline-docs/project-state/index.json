@@ -2567,13 +2567,13 @@
     {
       "type": "bugfix",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-087"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2584,18 +2584,18 @@
       "blocked_by": [],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-088-correcao-recorrencia-e-referencia.md",
       "related_pdr": "PDR-020",
-      "note": "Correção da rodada 1 da validação: D-01, D-02, D-03, D-16"
+      "note": "Correção da rodada 1 da validação: D-01, D-02, D-03, D-16 Portão completo verde em 0f048c5."
     },
     {
       "type": "bugfix",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-087"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2606,18 +2606,18 @@
       "blocked_by": [],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-089-correcao-datas-do-provedor.md",
       "related_pdr": "PDR-020",
-      "note": "Correção da rodada 1 da validação: D-04"
+      "note": "Correção da rodada 1 da validação: D-04 Portão completo verde em 0f048c5."
     },
     {
       "type": "bugfix",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-087"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2628,18 +2628,18 @@
       "blocked_by": [],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-090-correcao-valor-no-provedor.md",
       "related_pdr": "PDR-020",
-      "note": "Correção da rodada 1 da validação: D-06, D-15, D-20"
+      "note": "Correção da rodada 1 da validação: D-06, D-15, D-20 Portão completo verde em 0f048c5."
     },
     {
       "type": "bugfix",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-087"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2650,18 +2650,18 @@
       "blocked_by": [],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-091-correcao-cota-e-upgrade.md",
       "related_pdr": "PDR-020",
-      "note": "Correção da rodada 1 da validação: D-05, D-07, D-19"
+      "note": "Correção da rodada 1 da validação: D-05, D-07, D-19 Portão completo verde em 0f048c5."
     },
     {
       "type": "bugfix",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-087"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2672,18 +2672,18 @@
       "blocked_by": [],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-092-correcao-pagamento-sem-efeito-e-estorno-pendente.md",
       "related_pdr": "PDR-020",
-      "note": "Correção da rodada 1 da validação: D-08, D-11a, D-12"
+      "note": "Correção da rodada 1 da validação: D-08, D-11a, D-12 Portão completo verde em 0f048c5."
     },
     {
       "type": "bugfix",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-087"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2694,18 +2694,18 @@
       "blocked_by": [],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-093-correcao-prontidao-para-deploy.md",
       "related_pdr": "PDR-020",
-      "note": "Correção da rodada 1 da validação: D-10, D-13, D-14, D-17, D-18, D-21"
+      "note": "Correção da rodada 1 da validação: D-10, D-13, D-14, D-17, D-18, D-21 Portão completo verde em 0f048c5."
     },
     {
       "type": "bugfix",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-087"
       ],
       "epic_id": "EPIC-005",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2716,18 +2716,18 @@
       "blocked_by": [],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-094-correcao-termos-e-arrependimento.md",
       "related_pdr": "PDR-020",
-      "note": "Correção da rodada 1 da validação: D-11"
+      "note": "Correção da rodada 1 da validação: D-11 Portão completo verde em 0f048c5."
     },
     {
       "type": "bugfix",
       "target_role": "programador",
-      "status": "ready",
+      "status": "done",
       "blocks": [
         "STORY-057"
       ],
       "epic_id": "EPIC-010",
       "sprint_id": null,
-      "owner_agent": null,
+      "owner_agent": "programador (claude-sonnet-5-5)",
       "requires_design": false,
       "created_at": "2026-11-05",
       "updated_at": "2026-11-05",
@@ -2738,7 +2738,7 @@
       "blocked_by": [],
       "path": "epics/EPIC-010-drm-demonstracao-resultado-mensal/stories/STORY-095-correcao-digitacao-e-achados-da-validacao-drm.md",
       "related_pdr": "PDR-003",
-      "note": "Correção da rodada 1 da validação do DRM. D-1 é bloqueante."
+      "note": "Correção da rodada 1 da validação do DRM. D-1 é bloqueante. Portão completo verde em 0f048c5."
     }
   ],
   "sprints": [
@@ -4252,6 +4252,27 @@
         "title": "IDR-029 — Cupom no checkout",
         "status": "accepted",
         "path": "decisions/idr/IDR-029-cupom-no-checkout-reserva-de-vaga-e-ciclos-sem-cobranca.md",
+        "decided_at": "2026-11-05"
+      },
+      {
+        "id": "IDR-030",
+        "title": "IDR-030 — Correlação pela própria cobrança e recorrência excedente",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-030-correlacao-pela-propria-cobranca-e-recorrencia-excedente.md",
+        "decided_at": "2026-11-05"
+      },
+      {
+        "id": "IDR-032",
+        "title": "IDR-032 — Correções da rodada 1 de validação (STORY-092)",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-032-correcoes-de-pagamento-sem-efeito-atraso-e-prontidao.md",
+        "decided_at": "2026-11-05"
+      },
+      {
+        "id": "IDR-034",
+        "title": "IDR-034 — Livewire 4.4 apaga teclas digitadas: pré-popular o array e copiar o payload",
+        "status": "accepted",
+        "path": "decisions/idr/IDR-034-livewire-perde-teclas-em-campo-com-mascara.md",
         "decided_at": "2026-11-05"
       }
     ],

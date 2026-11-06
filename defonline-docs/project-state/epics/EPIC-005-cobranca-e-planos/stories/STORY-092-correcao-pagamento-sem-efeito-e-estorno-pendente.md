@@ -7,7 +7,7 @@ sprint_id: null
 type: bugfix
 target_role: programador
 requires_design: false
-status: in_review
+status: done
 owner_agent: claude-sonnet-5-5 (programador)
 created_at: 2026-11-05
 updated_at: 2026-11-05
