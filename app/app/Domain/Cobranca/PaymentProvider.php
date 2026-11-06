@@ -117,4 +117,18 @@ interface PaymentProvider
      * @throws WebhookInvalido se a autenticação falhar ou o corpo não for legível
      */
     public function parseWebhook(WebhookBruto $requisicao): EventoDoProvedor;
+
+    /**
+     * Situação do cadastro do webhook com esta URL no provedor, ou `null` se não há cadastro com ela.
+     *
+     * @throws ProvedorIndisponivel se o provedor não respondeu
+     */
+    public function situacaoDoWebhook(string $url): ?SituacaoDoWebhook;
+
+    /**
+     * Retoma a fila de um webhook pausado. O provedor entrega de novo o que ficou guardado.
+     *
+     * @throws ProvedorIndisponivel se o provedor não respondeu ou recusou
+     */
+    public function retomarWebhook(string $id): void;
 }

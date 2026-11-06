@@ -10,7 +10,7 @@
     // Pago há mais de 2 minutos e a troca não valeu: o ciclo mudou no meio do caminho (alerta para a equipe).
     $semEfeito = $paga && ! $aplicada && $invoice->pago_em !== null && $invoice->pago_em->lt(now()->subMinutes(2));
 @endphp
-<div @if ($aguardando || ($paga && ! $aplicada && ! $semEfeito)) wire:poll.3s @endif x-data x-init="$nextTick(() => $refs.titulo?.focus())">
+<div @if ($aguardando || ($paga && ! $aplicada && ! $semEfeito)) wire:poll.3s="conferir" @endif x-data x-init="$nextTick(() => $refs.titulo?.focus())">
     @if ($paga && $aplicada)
         <section class="max-w-[640px] flex flex-col gap-4" role="status" dusk="screen-troca-aplicada">
             <h1 x-ref="titulo" tabindex="-1" class="{{ $h1 }}">Plano trocado</h1>

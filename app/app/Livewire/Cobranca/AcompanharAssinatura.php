@@ -9,6 +9,7 @@ use App\Models\Assinatura;
 use App\Models\CobrancaConfig;
 use App\Models\Invoice;
 use App\Models\Plano;
+use App\Services\Cobranca\ConferirPagamentoAtrasado;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,12 @@ final class AcompanharAssinatura extends Component
 
         // Compra de outro usuário (ou inexistente): 404, como o resto do produto (IDR-009).
         $this->invoiceId = $this->invoice($invoice)->id;
+    }
+
+    /** STORY-101 — a cada ciclo do polling: se o aviso do provedor atrasou, confere direto com ele. */
+    public function conferir(ConferirPagamentoAtrasado $conferir): void
+    {
+        $conferir->executar($this->invoice($this->invoiceId));
     }
 
     public function render(): View

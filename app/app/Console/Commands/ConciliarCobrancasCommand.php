@@ -8,6 +8,7 @@ use App\Console\Concerns\RelataProgresso;
 use App\Console\Concerns\SemProvedorNaoAge;
 use App\Services\Cobranca\ConciliarCobrancas;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 /**
  * STORY-079 CA-6 / ADR-010 §3 — conciliação com o provedor. `--modo=horaria` confere o que está
@@ -49,6 +50,11 @@ final class ConciliarCobrancasCommand extends Command
             'Concluído (%s): %d verificadas, %d corrigidas, %d com provedor indisponível, %d erros%s.',
             $modo, $c['verificadas'], $c['corrigidas'], $c['indisponivel'], $c['erros'], $c['abortada'] ? ', rodada abortada por falhas seguidas do provedor' : '',
         ));
+
+        // Se a conciliação corrigiu algo, um aviso do provedor não chegou: a equipe precisa saber (STORY-101).
+        if ($c['corrigidas'] > 0) {
+            Log::error('cobranca.conciliacao_corrigiu', ['module' => 'cobranca', 'action' => 'conciliar', 'modo' => $modo, 'status' => (string) $c['corrigidas']]);
+        }
 
         return $c['indisponivel'] > 0 || $c['erros'] > 0 ? self::FAILURE : self::SUCCESS;
     }

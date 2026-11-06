@@ -11,6 +11,7 @@ use App\Domain\Cobranca\PedidoCheckout;
 use App\Domain\Cobranca\ReembolsoNoProvedor;
 use App\Domain\Cobranca\ReferenciaProvedor;
 use App\Domain\Cobranca\SessaoCheckout;
+use App\Domain\Cobranca\SituacaoDoWebhook;
 use App\Domain\Cobranca\WebhookBruto;
 use App\Infrastructure\Cobranca\Fake\FakePaymentProvider;
 use App\Models\Assinatura;
@@ -335,6 +336,17 @@ function _provedorQueFalha(array $falhas): PaymentProvider
         public function parseWebhook(WebhookBruto $requisicao): EventoDoProvedor
         {
             return $this->real->parseWebhook($requisicao);
+        }
+
+        public function situacaoDoWebhook(string $url): ?SituacaoDoWebhook
+        {
+            return $this->real->situacaoDoWebhook($url);
+        }
+
+        public function retomarWebhook(string $id): void
+        {
+            $this->checar('retomarWebhook', $id);
+            $this->real->retomarWebhook($id);
         }
     };
 }

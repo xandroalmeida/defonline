@@ -13,6 +13,7 @@ use App\Domain\Cobranca\ProvedorIndisponivel;
 use App\Domain\Cobranca\ReembolsoNoProvedor;
 use App\Domain\Cobranca\ReferenciaProvedor;
 use App\Domain\Cobranca\SessaoCheckout;
+use App\Domain\Cobranca\SituacaoDoWebhook;
 use App\Domain\Cobranca\WebhookBruto;
 use App\Domain\Cobranca\WebhookInvalido;
 use DateTimeImmutable;
@@ -113,6 +114,16 @@ final class ProvedorNaoConfigurado implements PaymentProvider
     }
 
     /** Sem provedor não há como autenticar o aviso: é rejeitado (401), nunca gravado. */
+    public function situacaoDoWebhook(string $url): ?SituacaoDoWebhook
+    {
+        throw new ProvedorIndisponivel($this->motivo);
+    }
+
+    public function retomarWebhook(string $id): void
+    {
+        throw new ProvedorIndisponivel($this->motivo);
+    }
+
     public function parseWebhook(WebhookBruto $requisicao): EventoDoProvedor
     {
         throw new WebhookInvalido('Provedor de pagamento não configurado.');

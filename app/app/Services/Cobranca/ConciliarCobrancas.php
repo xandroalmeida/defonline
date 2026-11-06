@@ -144,7 +144,7 @@ final class ConciliarCobrancas
         return $q->orderBy('proximo_vencimento')->get();
     }
 
-    private function conciliarInvoice(Invoice $invoice): int
+    public function conciliarInvoice(Invoice $invoice): int
     {
         $sessao = new ReferenciaProvedor($invoice->provedor, (string) $invoice->checkout_id_externo);
         $cobrancas = $this->provedor->listCheckoutCharges($sessao);

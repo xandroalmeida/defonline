@@ -16,6 +16,7 @@ use App\Domain\Cobranca\ReembolsoNoProvedor;
 use App\Domain\Cobranca\ReferenciaProvedor;
 use App\Domain\Cobranca\ResultadoReembolso;
 use App\Domain\Cobranca\SessaoCheckout;
+use App\Domain\Cobranca\SituacaoDoWebhook;
 use App\Domain\Cobranca\TentativaNaoRealizada;
 use App\Domain\Cobranca\TipoEvento;
 use App\Domain\Cobranca\WebhookBruto;
@@ -322,6 +323,30 @@ final class AsaasPaymentProvider implements PaymentProvider
             $this->ultimos4($cartao['creditCardNumber'] ?? null),
             is_string($vence) && $vence !== '' ? DataExibicao::doProvedor($vence)->toDateTimeImmutable() : null,
         );
+    }
+
+    public function situacaoDoWebhook(string $url): ?SituacaoDoWebhook
+    {
+        $offset = 0;
+
+        do {
+            $r = $this->enviar('get', '/webhooks', ['limit' => self::PAGINA, 'offset' => $offset]);
+
+            foreach ((array) $r->json('data') as $w) {
+                if (is_array($w) && ($w['url'] ?? null) === $url && is_string($w['id'] ?? null)) {
+                    return new SituacaoDoWebhook($w['id'], ($w['enabled'] ?? false) === true, ($w['interrupted'] ?? false) === true, ($w['penalizedAt'] ?? null) !== null);
+                }
+            }
+
+            $offset += self::PAGINA;
+        } while ($r->json('hasMore') === true && $offset < self::PAGINA * 10);
+
+        return null;
+    }
+
+    public function retomarWebhook(string $id): void
+    {
+        $this->enviar('put', '/webhooks/'.rawurlencode($id), ['interrupted' => false]);
     }
 
     public function parseWebhook(WebhookBruto $requisicao): EventoDoProvedor

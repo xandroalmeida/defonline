@@ -8,7 +8,7 @@
     $pendente = $estado === \App\Domain\Cobranca\EstadoCobranca::Pendente && ! $invoice->expirada();
 @endphp
 {{-- O polling só roda enquanto há o que esperar; confirmado, expirado ou cancelado, para. --}}
-<div @if ($pendente) wire:poll.3s @endif x-data x-init="$nextTick(() => $refs.titulo?.focus())">
+<div @if ($pendente) wire:poll.3s="conferir" @endif x-data x-init="$nextTick(() => $refs.titulo?.focus())">
     @if ($paga)
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-confirmacao" role="status">
             <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Pagamento confirmado</h1>

@@ -34,6 +34,16 @@ Schedule::command('assinaturas:renovar-cota')
     ->onOneServer()
     ->withoutOverlapping(30);
 
+// STORY-101 — batimento do agendador, conferido pelo /health, e fila do webhook no provedor.
+Schedule::command('agendador:batimento')
+    ->everyMinute()
+    ->onOneServer();
+
+Schedule::command('cobranca:conferir-webhook')
+    ->everyFiveMinutes()
+    ->onOneServer()
+    ->withoutOverlapping(10);
+
 // STORY-099 — aviso para renovar o diagnóstico: uma vez por dia, às 9h de Brasília.
 Schedule::command('diagnosticos:avisar-renovacao')
     ->dailyAt('12:00')

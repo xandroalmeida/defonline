@@ -102,6 +102,8 @@ return [
     | - `webhook_token`: segredo do cabeçalho `asaas-access-token` (32-255 caracteres, diferente da chave).
     */
     'payments' => [
+        // URL do webhook cadastrada no provedor. Sem valor, é a do próprio app (produção).
+        'webhook_url' => env('PAYMENTS_WEBHOOK_URL'),
         // Sem valor: `fake` fora de produção; em produção, nenhum provedor (a cobrança fica desligada, STORY-093).
         'provider' => env('PAYMENTS_PROVIDER'),
         'pix_expiracao_minutos' => (int) env('PIX_EXPIRACAO_MINUTOS', 30),

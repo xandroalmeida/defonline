@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Observabilidade\MonitorDoAgendador;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
@@ -22,6 +23,9 @@ final class HealthController
 {
     public function health(): JsonResponse
     {
+        // Roda depois da resposta, então a liveness continua rápida e sem depender do banco.
+        app()->terminating(fn () => app(MonitorDoAgendador::class)->conferir());
+
         return new JsonResponse([
             'status' => 'ok',
             'service' => Config::get('app.name'),

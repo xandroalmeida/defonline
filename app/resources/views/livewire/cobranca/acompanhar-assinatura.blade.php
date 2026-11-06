@@ -9,7 +9,7 @@
     $cartao = $assinatura?->cartao_ultimos4 ? ($assinatura->cartao_bandeira ? ucfirst(strtolower($assinatura->cartao_bandeira)).' ' : '').'final '.$assinatura->cartao_ultimos4 : null;
 @endphp
 {{-- O polling só roda enquanto há o que esperar; confirmado, recusado ou vencido, para. --}}
-<div @if ($aguardando || ($paga && ! $assinatura)) wire:poll.3s @endif x-data x-init="$nextTick(() => $refs.titulo?.focus())">
+<div @if ($aguardando || ($paga && ! $assinatura)) wire:poll.3s="conferir" @endif x-data x-init="$nextTick(() => $refs.titulo?.focus())">
     @if ($paga && $assinatura)
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-confirmacao" role="status">
             @if ($pix)

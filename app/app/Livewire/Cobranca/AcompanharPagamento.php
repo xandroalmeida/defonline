@@ -15,6 +15,7 @@ use App\Models\LoteCredito;
 use App\Models\QuizRascunho;
 use App\Models\Usuario;
 use App\Observabilidade\EventosCobranca;
+use App\Services\Cobranca\ConferirPagamentoAtrasado;
 use App\Support\Personificacao;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -94,6 +95,12 @@ final class AcompanharPagamento extends Component
         session()->flash('aceite_previo', true);
 
         return $this->redirectRoute('creditos.comprar', ['pacote' => $invoice->pacote_credito_id, 'meio' => MeioPagamento::Pix->value]);
+    }
+
+    /** STORY-101 — a cada ciclo do polling: se o aviso do provedor atrasou, confere direto com ele. */
+    public function conferir(ConferirPagamentoAtrasado $conferir): void
+    {
+        $conferir->executar($this->invoice($this->invoiceId));
     }
 
     public function render(): View

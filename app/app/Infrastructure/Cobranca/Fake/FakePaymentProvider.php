@@ -16,6 +16,7 @@ use App\Domain\Cobranca\ReembolsoNoProvedor;
 use App\Domain\Cobranca\ReferenciaProvedor;
 use App\Domain\Cobranca\ResultadoReembolso;
 use App\Domain\Cobranca\SessaoCheckout;
+use App\Domain\Cobranca\SituacaoDoWebhook;
 use App\Domain\Cobranca\TipoEvento;
 use App\Domain\Cobranca\WebhookBruto;
 use App\Domain\Cobranca\WebhookInvalido;
@@ -410,6 +411,29 @@ final class FakePaymentProvider implements PaymentProvider
         $ids = Cache::get($chave, []);
         $ids[] = $cobrancaId;
         Cache::put($chave, array_values(array_unique($ids)), now()->addDays(self::TTL_DIAS));
+    }
+
+    /** Situação que o teste quer ver no provedor; `null` = não cadastrado. */
+    public static function simularWebhook(?SituacaoDoWebhook $situacao): void
+    {
+        Cache::forever('pagamento-fake:webhook', $situacao === null ? 'nao-cadastrado' : [$situacao->id, $situacao->ativo, $situacao->filaPausada, $situacao->penalizado]);
+    }
+
+    public static function webhookRetomado(): bool
+    {
+        return Cache::get('pagamento-fake:webhook-retomado', false) === true;
+    }
+
+    public function situacaoDoWebhook(string $url): ?SituacaoDoWebhook
+    {
+        $situacao = Cache::get('pagamento-fake:webhook', ['webhook-fake', true, false, false]);
+
+        return is_array($situacao) ? new SituacaoDoWebhook(...$situacao) : null;
+    }
+
+    public function retomarWebhook(string $id): void
+    {
+        Cache::forever('pagamento-fake:webhook-retomado', true);
     }
 
     public function parseWebhook(WebhookBruto $requisicao): EventoDoProvedor
