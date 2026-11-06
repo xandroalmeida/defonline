@@ -63,7 +63,6 @@
                             <dd class="m-0 mt-0.5 text-[color:var(--color-primary)]" dusk="screen-conta-cpf">{{ $usuario->cpfMascarado() }}</dd>
                         </div>
                     </dl>
-                    <p class="m-0 {{ $sutil }}">Para alterar o e-mail ou o CPF, escreva para eb@ebparcerias.com.</p>
 
                     <label class="flex gap-2.5 items-start text-sm font-normal cursor-pointer">
                         <input type="checkbox" wire:model.live="receberAvisoRenovacao" @disabled($personificando) dusk="screen-conta-aviso-renovacao"

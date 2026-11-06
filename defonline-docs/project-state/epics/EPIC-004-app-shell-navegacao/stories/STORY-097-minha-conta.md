@@ -31,7 +31,7 @@ Origem: pedido do PO em 2026-11-06. Materializa a página `/conta` prevista no E
 
 ## Fora de escopo
 
-- Alterar e-mail ou CPF pelo próprio usuário: o EPIC-004 limita a edição a nome, senha e telefone.
+- Alterar e-mail ou CPF: decisão do PO em 2026-11-06. A tela não oferece esse caminho, nem por contato com a equipe.
 - Recuperação de senha, que continua sem tela.
 - Contratar, cancelar e trocar cartão, que seguem em Meu plano.
 - Exclusão de conta.
