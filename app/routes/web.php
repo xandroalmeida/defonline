@@ -29,6 +29,7 @@ use App\Livewire\Cobranca\ComprarCreditos;
 use App\Livewire\Cobranca\MeuPlano;
 use App\Livewire\Cobranca\RenovarAssinaturaPix;
 use App\Livewire\Cobranca\TrocarPlano;
+use App\Livewire\Conta\MinhaConta;
 use App\Livewire\Diagnostico\Quiz as QuizDiagnostico;
 use App\Livewire\Diagnostico\SelecionarEmpresa as SelecionarEmpresaDiagnostico;
 use App\Livewire\Drm\Demonstracao as DemonstracaoDrm;
@@ -129,6 +130,8 @@ Route::middleware('auth')->group(function () {
     // STORY-082 — troca de plano (upgrade imediato, downgrade agendado). Desligada = 404.
     Route::get('/planos/trocar/retorno/{invoice}', AcompanharTroca::class)->whereUuid('invoice')->name('plano.trocar.retorno');
     Route::get('/planos/trocar/{plano}/{ciclo}', TrocarPlano::class)->whereUuid('plano')->whereIn('ciclo', ['mensal', 'anual'])->name('plano.trocar');
+    // STORY-097 — Minha conta: dados, senha e resumo da cobrança.
+    Route::get('/conta', MinhaConta::class)->name('conta');
     // STORY-081 — Meu plano: plano, cota, créditos, cobranças, troca de cartão e cancelamento. Desligada = 404.
     Route::get('/meu-plano', MeuPlano::class)->name('meu-plano');
     // "Página do provedor" do adaptador fake (dev/E2E): 404 fora do provedor fake.

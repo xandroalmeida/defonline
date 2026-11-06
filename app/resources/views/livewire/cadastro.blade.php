@@ -61,20 +61,7 @@
 
             <div>
                 <x-label for="telefone">Telefone WhatsApp <span class="normal-case font-normal tracking-normal text-[color:var(--color-secondary)]">(DDD + número)</span></x-label>
-                <x-input type="text" id="telefone" wire:model="telefone"
-                         inputmode="tel" autocomplete="tel"
-                         maxlength="16" placeholder="(11) 98888-7777"
-                         x-data
-                         x-on:input="
-                             const d = $el.value.replace(/\D/g, '').slice(0, 11);
-                             let m = d;
-                             if (d.length > 10)      m = '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7);
-                             else if (d.length > 6)  m = '('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6);
-                             else if (d.length > 2)  m = '('+d.slice(0,2)+') '+d.slice(2);
-                             else if (d.length > 0)  m = '('+d;
-                             $el.value = m;
-                         "
-                         dusk="cadastro-telefone"/>
+                <x-input-telefone id="telefone" wire:model="telefone" dusk="cadastro-telefone"/>
                 @error('telefone')
                     <p class="text-[color:var(--color-destructive)] text-sm mt-1 mb-0">{{ $message }}</p>
                 @enderror

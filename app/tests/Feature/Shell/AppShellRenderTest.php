@@ -99,11 +99,11 @@ it('CA-3 — sidebar mantém "Minhas Empresas" ativo em /empresas/{id}', functio
     );
 });
 
-it('CA-3 — itens Diagnósticos, Histórico e Conta aparecem desabilitados com tooltip', function () {
+it('CA-3 — item Histórico aparece desabilitado com tooltip', function () {
     $response = $this->actingAs($this->usuario)->get('/home');
     $html = $response->getContent();
 
-    foreach (['app-nav-diagnosticos', 'app-nav-historico', 'app-nav-conta'] as $dusk) {
+    foreach (['app-nav-historico'] as $dusk) {
         // Extrai o bloco do span que tem este dusk (até o próximo `>` do mesmo span)
         // e checa que tem aria-disabled e o tooltip.
         expect($html)->toMatch("/dusk=\"{$dusk}\"/", "Item {$dusk} deveria existir");

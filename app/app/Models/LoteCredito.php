@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Domain\Cobranca\StatusLote;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -32,6 +33,19 @@ final class LoteCredito extends Model
     protected $dateFormat = 'Y-m-d H:i:sP';
 
     protected $table = 'lotes_credito';
+
+    /**
+     * Crédito utilizável: ativo, com saldo, sem estorno em curso e dentro da validade.
+     *
+     * @param  Builder<LoteCredito>  $query
+     */
+    public function scopeDisponiveis(Builder $query, CarbonInterface $agora): void
+    {
+        $query->where('status', StatusLote::Ativo->value)
+            ->where('quantidade_restante', '>', 0)
+            ->where('data_expiracao', '>', $agora);
+        $this->scopeSemEstornoEmCurso($query);
+    }
 
     /**
      * STORY-092 (D-12) — o lote cuja compra tem estorno pedido e ainda não concluído (em andamento ou aguardando a

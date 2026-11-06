@@ -13,7 +13,6 @@ use App\Domain\Cobranca\ProvedorIndisponivel;
 use App\Domain\Cobranca\RenovacaoPix;
 use App\Domain\Cobranca\SituacaoDoPlano;
 use App\Domain\Cobranca\StatusAssinatura;
-use App\Domain\Cobranca\StatusLote;
 use App\Models\Assinatura;
 use App\Models\CobrancaConfig;
 use App\Models\ConsumoAnalise;
@@ -261,10 +260,7 @@ final class MeuPlano extends Component
     {
         return LoteCredito::query()
             ->where('usuario_id', $usuarioId)
-            ->where('status', StatusLote::Ativo->value)
-            ->where('quantidade_restante', '>', 0)
-            ->semEstornoEmCurso()
-            ->where('data_expiracao', '>', $agora)
+            ->disponiveis($agora)
             ->orderBy('data_expiracao')
             ->get()
             ->map(function (LoteCredito $l) use ($agora, $limiar): array {

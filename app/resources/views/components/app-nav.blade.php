@@ -1,8 +1,8 @@
 @php
     /*
      * Itens do menu principal. Decisões PO consolidadas em ux-specs §1 e §6:
-     *   - Minhas Empresas, Adicionar Empresa: ativos.
-     *   - Diagnósticos, Histórico, Conta: disabled, tooltip "Em breve — Onda 2".
+     *   - Minhas Empresas, Adicionar Empresa, Diagnósticos, Conta: ativos.
+     *   - Histórico: disabled, tooltip "Em breve — Onda 2".
      *   - /empresas/{id}/show mantém "Minhas Empresas" ativo (mesmo ramo do menu).
      */
     $items = [
@@ -42,10 +42,9 @@
         [
             'label' => 'Conta',
             'icon' => 'user',
-            'href' => '#',
-            'active' => false,
-            'disabled' => true,
-            'tooltip' => 'Em breve — Onda 2',
+            'href' => route('conta'),
+            'active' => request()->routeIs('conta'),
+            'disabled' => false,
             'dusk' => 'app-nav-conta',
         ],
     ];

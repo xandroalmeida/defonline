@@ -89,15 +89,12 @@
                  role="menu"
                  class="absolute right-0 mt-2 w-56 bg-[color:var(--color-surface)] border border-[color:var(--color-border)] rounded-lg shadow-md py-1 overflow-hidden"
                  dusk="app-header-conta-menu">
-                <button type="button"
-                        role="menuitem"
-                        disabled
-                        aria-disabled="true"
-                        title="Em breve — Onda 2"
-                        class="w-full text-left px-4 py-2.5 text-sm text-[color:var(--color-secondary)] cursor-not-allowed opacity-60"
-                        dusk="app-header-conta-editar">
+                <a href="{{ route('conta') }}"
+                   role="menuitem"
+                   class="block w-full text-left px-4 py-2.5 text-sm text-[color:var(--color-primary)] no-underline hover:bg-[color:var(--color-neutral)]"
+                   dusk="app-header-conta-editar">
                     Editar perfil
-                </button>
+                </a>
                 <form method="POST" action="{{ route('logout') }}" class="m-0" dusk="app-header-conta-sair-form">
                     @csrf
                     <button type="submit"
