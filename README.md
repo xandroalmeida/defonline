@@ -142,6 +142,32 @@ docker compose exec web php artisan pennant:list-overdue --fail-on-overdue
 
 Deploy: push de tag `vX.Y.Z-rc.N` ou `vX.Y.Z` dispara `zalk-deploy.yml`. Rollback sem rebuild: `ssh defonline-prod@<host>` e `zalk-deploy --rollback`. Backup do Postgres é da plataforma (pgBackRest + `pg_dump` diário em S3 e R2); restauração é pedida ao administrador do ZalkVPS.
 
+## Cobrança: variáveis e webhook
+
+A cobrança (planos, créditos, Asaas) nasce **desligada**: o interruptor fica em `/backoffice/planos` e o diagnóstico funciona como antes. Variáveis (modelo em `app/.env.example`; em produção entram no `.env.prod`, cifrado por `scripts/segredos.sh push`):
+
+| Variável | Para quê |
+|---|---|
+| `PAYMENTS_PROVIDER` | `asaas` em produção. Vazio ou `fake` em produção = **sem provedor**: o beta roda normalmente, os agendadores de cobrança saem com sucesso sem agir, o webhook responde 401 e o interruptor se recusa a ligar (explicando o que falta). `fake` só fora de produção. |
+| `ASAAS_BASE_URL` | `https://api.asaas.com/v3` (produção) ou `https://api-sandbox.asaas.com/v3`. Sem padrão. |
+| `ASAAS_API_KEY` | Chave de produção (`$aact_prod_...`). Tem que combinar com o host, senão o adaptador recusa subir. O sandbox usa `ASAAS_SANDBOX_API_KEY` (`$aact_hmlg_...`). |
+| `ASAAS_WEBHOOK_TOKEN` | Segredo do cabeçalho `asaas-access-token`: 32 a 255 caracteres aleatórios, diferente da chave. |
+| `ASAAS_TIMEOUT` | Segundos de espera pelo Asaas (padrão 30). |
+| `PIX_EXPIRACAO_MINUTOS`, `CARTAO_EXPIRACAO_MINUTOS` | Validade do QR Code (30) e do link do checkout com cartão (60; o Asaas aceita 10 a 1440). |
+| `PAGAMENTO_VALOR_MINIMO_CENTAVOS` | Menor cobrança aceita pelo Asaas (500). Abaixo, a contratação ativa sem cobrança. |
+| `LOTE_PERTO_DE_VENCER_DIAS` | Dias para o alerta de crédito perto de vencer (30). |
+| `PAYMENTS_WEBHOOK_TOKEN` | Só do provedor fake (local/testes). |
+| `APP_DISPLAY_TIMEZONE` | Fuso das telas (`America/Sao_Paulo`); o armazenamento é UTC. |
+
+**Cadastrar o webhook** (painel do Asaas, Integrações, Webhooks; a conta de produção da EB Parcerias, nunca a de sandbox compartilhada):
+
+1. URL: `https://defonline.zalk.com.br/webhooks/pagamentos` (POST, sem sessão nem CSRF).
+2. Token de autenticação: o mesmo valor de `ASAAS_WEBHOOK_TOKEN` do `.env.prod`.
+3. Eventos: `PAYMENT_CREATED`, `PAYMENT_CONFIRMED`, `PAYMENT_RECEIVED`, `PAYMENT_OVERDUE`, `PAYMENT_REFUNDED`, `PAYMENT_PARTIALLY_REFUNDED`, `PAYMENT_REFUND_DENIED`, `PAYMENT_DELETED`, `PAYMENT_RESTORED`, `PAYMENT_CHARGEBACK_REQUESTED`, `PAYMENT_CHARGEBACK_DISPUTE`, `PAYMENT_AWAITING_CHARGEBACK_REVERSAL`, `PAYMENT_CHARGEBACK_REVERSED`, `PAYMENT_CREDIT_CARD_CAPTURE_REFUSED`, `PAYMENT_REPROVED_BY_RISK_ANALYSIS`, `CHECKOUT_PAID`, `CHECKOUT_EXPIRED`, `CHECKOUT_CANCELED`. Evento fora dessa lista é guardado como `outro` e ignorado.
+4. Fila de envio ativa. Se o Asaas pausar a fila por falhas, o endpoint volta a receber ao reativar, e a conciliação (`cobranca:conciliar`) recupera o que se perdeu.
+
+Ordem para ligar: configurar as variáveis e publicar; conferir `POST /webhooks/pagamentos` sem token (401) e com o token; só então ligar o interruptor. Detalhes e decisões: ADR-010 e IDR-018 a 021.
+
 ## Segredos versionados
 
 O `.env.prod` (segredos do `defonline-prod` na ZalkVPS, vira o secret `APP_ENV_FILE`) e o `app/.env`

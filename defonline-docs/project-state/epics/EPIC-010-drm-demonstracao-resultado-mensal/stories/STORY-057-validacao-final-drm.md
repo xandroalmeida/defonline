@@ -6,7 +6,7 @@ epic_id: EPIC-010
 type: validation
 target_role: validador
 requires_design: false
-status: ready
+status: blocked
 owner_agent: null
 created_at: 2026-08-04
 updated_at: 2026-08-04

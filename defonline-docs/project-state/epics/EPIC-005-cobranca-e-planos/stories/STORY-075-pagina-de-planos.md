@@ -7,7 +7,7 @@ sprint_id: null
 type: implementation
 target_role: programador
 requires_design: true
-status: in_review
+status: done
 owner_agent: programador (pista B)
 created_at: 2026-11-05
 updated_at: 2026-11-05

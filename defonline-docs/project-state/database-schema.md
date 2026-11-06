@@ -7,7 +7,7 @@
 > - **SGBD:** PostgreSQL 18 (ADR-001/002/003 — Postgres-first, fonte única de estado)
 > - **Timezone do servidor:** `America/Sao_Paulo`
 > - **Bancos:** `defonline` (app) · `defonline_test` (Pest/Dusk, isolado — [[project-banco-test-isolado]])
-> - **Última sincronização:** 2026-08-04 · **migrations aplicadas:** 14 · **tabelas:** 21
+> - **Última sincronização:** 2026-11-05 (banco local `defonline`, após `migrate`) · **migrations aplicadas:** 46 · **tabelas:** 42
 > - **Extensões:** `citext` (email case-insensitive), `pgcrypto`, `pg_trgm`, `pg_stat_statements` — instaladas no Postgres **local** pelo initdb; no ZalkVPS (ADR-009) não há `pg_stat_statements`
 
 ---
@@ -119,6 +119,555 @@ PK `id uuid`. FK `usuario_id → usuarios` **CASCADE**. Índice `(usuario_id, te
 | `versao` / `conteudo_hash` | varchar | versão do termo + hash do conteúdo aceito |
 | `ip` | **inet** / `user_agent` text | evidência de consentimento |
 | `aceito_at` | timestamptz | default now |
+
+---
+
+## Cobrança, planos e DRM (EPIC-005 e EPIC-010)
+
+> Gerado do catálogo do banco **local** em 2026-11-05 (o servidor não foi consultado). Regras de negócio: ADR-010, IDR-018 a 021 e as estórias 069 a 086. Valores em **centavos**; datas em UTC (exibição em Brasília, IDR-025). `invoices.provedor` e `provider_events.provedor` guardam `asaas`, `fake` ou `interno` (ciclo gratuito). `invoices.devolucao_motivo` marca o pagamento que entrou e não concedeu nada (lista "a devolver" do Financeiro).
+
+Relacionamentos principais: `usuarios` 1—N `assinaturas`, `invoices`, `lotes_credito`, `consumos_analise`; `assinaturas` 1—N `invoices` e `trocas_de_cartao`; `invoices` 1—N `lotes_credito`; `cupons` 1—N `cupom_itens`, `cupom_usos`, `cupom_concessoes`; `provider_events` aponta para `invoices`.
+
+### `planos`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `codigo` | varchar(60) | não |  |
+| `nome` | varchar(60) | não |  |
+| `cota_mensal` | integer | não |  |
+| `preco_mensal_centavos` | integer | não |  |
+| `preco_anual_centavos` | integer | não |  |
+| `ativo` | boolean | não | `true` |
+| `ordem` | integer | não |  |
+| `alterado_por_usuario_id` | uuid | sim |  |
+| `created_at` | timestamp with time zone | sim |  |
+| `updated_at` | timestamp with time zone | sim |  |
+
+Índices:
+- `IDX planos_ativo_ordem_index ON public.planos` (btree (ativo, ordem))
+- `UNIQUE IDX planos_codigo_unique ON public.planos` (btree (codigo))
+
+### `pacotes_credito`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `codigo` | varchar(60) | não |  |
+| `nome` | varchar(60) | não |  |
+| `quantidade_creditos` | integer | não |  |
+| `preco_centavos` | integer | não |  |
+| `validade_meses` | integer | não |  |
+| `ativo` | boolean | não | `true` |
+| `ordem` | integer | não |  |
+| `alterado_por_usuario_id` | uuid | sim |  |
+| `created_at` | timestamp with time zone | sim |  |
+| `updated_at` | timestamp with time zone | sim |  |
+
+Índices:
+- `IDX pacotes_credito_ativo_ordem_index ON public.pacotes_credito` (btree (ativo, ordem))
+- `UNIQUE IDX pacotes_credito_codigo_unique ON public.pacotes_credito` (btree (codigo))
+
+### `cobranca_config`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `ativa` | boolean | não | `false` |
+| `alterado_por_usuario_id` | uuid | sim |  |
+| `created_at` | timestamp with time zone | sim |  |
+| `updated_at` | timestamp with time zone | sim |  |
+
+### `assinaturas`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `usuario_id` | uuid | não |  |
+| `plano_id` | uuid | sim |  |
+| `trial` | boolean | não | `false` |
+| `status` | varchar(20) | não |  |
+| `ciclo` | varchar(10) | sim |  |
+| `data_inicio` | timestamp with time zone | não |  |
+| `proximo_vencimento` | timestamp with time zone | não |  |
+| `data_cancelamento` | timestamp with time zone | sim |  |
+| `cota_snapshot` | integer | não |  |
+| `cota_restante_ciclo` | integer | não |  |
+| `created_at` | timestamp with time zone | sim |  |
+| `updated_at` | timestamp with time zone | sim |  |
+| `aviso_d2_em` | timestamp with time zone | sim |  |
+| `aviso_d0_em` | timestamp with time zone | sim |  |
+| `provedor` | varchar(20) | sim |  |
+| `id_externo` | varchar(120) | sim |  |
+| `preco_snapshot_centavos` | integer | sim |  |
+| `periodos_pagos` | smallint | não | `'1'::smallint` |
+| `proxima_cota_em` | timestamp with time zone | sim |  |
+| `cartao_bandeira` | varchar(20) | sim |  |
+| `cartao_ultimos4` | varchar(4) | sim |  |
+| `aviso_renovacao_periodo` | smallint | sim |  |
+| `atraso_desde` | timestamp with time zone | sim |  |
+| `atraso_cobranca_id` | varchar(120) | sim |  |
+| `tentativas_cobranca` | smallint | não | `'0'::smallint` |
+| `proxima_tentativa_em` | timestamp with time zone | sim |  |
+| `atraso_aviso_em` | timestamp with time zone | sim |  |
+| `encerramento_pendente_no_provedor` | boolean | não | `false` |
+| `encerrada_em` | timestamp with time zone | sim |  |
+| `meio_pagamento` | varchar(10) | não | `'cartao'::character varying` |
+| `aviso_renovacao_pix_para` | timestamp with time zone | sim |  |
+| `troca_plano_id` | uuid | sim |  |
+| `troca_ciclo` | varchar(10) | sim |  |
+| `troca_preco_centavos` | integer | sim |  |
+| `troca_agendada_em` | timestamp with time zone | sim |  |
+| `ajuste_provedor_pendente` | boolean | não | `false` |
+| `cupom_id` | uuid | sim |  |
+| `preco_cheio_centavos` | integer | sim |  |
+| `desconto_centavos` | integer | não | `0` |
+| `desconto_periodos` | smallint | sim |  |
+| `desconto_aviso_em` | timestamp with time zone | sim |  |
+| `valor_pendente_no_provedor` | boolean | não | `false` |
+| `troca_preco_cheio_centavos` | integer | sim |  |
+| `troca_desconto_centavos` | integer | sim |  |
+
+FKs: `(usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT`; `(plano_id) REFERENCES planos(id) ON DELETE RESTRICT`; `(cupom_id) REFERENCES cupons(id) ON DELETE SET NULL`
+
+CHECKs:
+- `assinaturas_status_ck`: `CHECK (((status)::text = ANY ((ARRAY['ativa'::character varying, 'em_atraso'::character varying, 'cancelada'::character varying, 'expirada'::character varying])::text[])))`
+- `assinaturas_cota_ck`: `CHECK (((cota_restante_ciclo >= 0) AND (cota_restante_ciclo <= cota_snapshot)))`
+- `assinaturas_troca_ck`: `CHECK ((((troca_plano_id IS NULL) = (troca_ciclo IS NULL)) AND ((troca_plano_id IS NULL) = (troca_preco_centavos IS NULL))))`
+- `assinaturas_meio_pagamento_ck`: `CHECK (((meio_pagamento)::text = ANY ((ARRAY['cartao'::character varying, 'pix'::character varying, 'nenhum'::character varying])::text[])))`
+
+Índices:
+- `IDX assinaturas_usuario_id_data_inicio_index ON public.assinaturas` (btree (usuario_id, data_inicio))
+- `UNIQUE IDX assinaturas_vigente_unica ON public.assinaturas` (btree (usuario_id) WHERE ((status)::text = ANY ((ARRAY['ativa'::character varying, 'em_atraso'::character varying])::text[])))
+- `UNIQUE IDX assinaturas_id_externo_unico ON public.assinaturas` (btree (provedor, id_externo) WHERE (id_externo IS NOT NULL))
+- `IDX assinaturas_regua_idx ON public.assinaturas` (btree (proxima_tentativa_em) WHERE ((status)::text = 'em_atraso'::text))
+- `IDX assinaturas_encerramento_pendente_idx ON public.assinaturas` (btree (id) WHERE encerramento_pendente_no_provedor)
+
+### `invoices`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `usuario_id` | uuid | não |  |
+| `tipo` | varchar(20) | não |  |
+| `pacote_credito_id` | uuid | sim |  |
+| `descricao` | varchar(120) | não |  |
+| `quantidade_creditos` | integer | sim |  |
+| `validade_meses` | integer | sim |  |
+| `valor_centavos` | integer | não |  |
+| `status` | varchar(20) | não |  |
+| `meio` | varchar(10) | não |  |
+| `provedor` | varchar(20) | não |  |
+| `checkout_id_externo` | varchar(120) | sim |  |
+| `checkout_url` | text | sim |  |
+| `checkout_expira_em` | timestamp with time zone | sim |  |
+| `id_externo` | varchar(120) | sim |  |
+| `pago_em` | timestamp with time zone | sim |  |
+| `motivo_encerramento` | varchar(40) | sim |  |
+| `falha_motivo` | varchar(200) | sim |  |
+| `aceite_termo_id` | uuid | sim |  |
+| `created_at` | timestamp with time zone | sim |  |
+| `updated_at` | timestamp with time zone | sim |  |
+| `plano_id` | uuid | sim |  |
+| `ciclo` | varchar(10) | sim |  |
+| `cota_snapshot` | integer | sim |  |
+| `assinatura_id` | uuid | sim |  |
+| `renovacao` | boolean | não | `false` |
+| `cartao_bandeira` | varchar(20) | sim |  |
+| `cartao_ultimos4` | varchar(4) | sim |  |
+| `periodo_base` | smallint | sim |  |
+| `reembolso_estado` | varchar(24) | sim |  |
+| `reembolso_motivo` | text | sim |  |
+| `reembolso_por_id` | uuid | sim |  |
+| `reembolso_solicitado_em` | timestamp with time zone | sim |  |
+| `reembolsado_em` | timestamp with time zone | sim |  |
+| `devolucao_motivo` | varchar(30) | sim |  |
+| `nf_emitida_em` | timestamp with time zone | sim |  |
+| `nf_emitida_por_id` | uuid | sim |  |
+| `nf_numero` | varchar(40) | sim |  |
+| `cupom_id` | uuid | sim |  |
+| `cupom_ciclos` | integer | sim |  |
+| `preco_cheio_centavos` | integer | sim |  |
+| `desconto_centavos` | integer | não | `0` |
+| `troca_anterior` | jsonb | sim |  |
+| `plano_origem_id` | uuid | sim |  |
+| `ciclo_origem` | varchar(10) | sim |  |
+| `assinatura_id_externo` | varchar(100) | sim |  |
+| `reembolsado_parcial_centavos` | integer | sim |  |
+| `valor_esperado_centavos` | integer | sim |  |
+| `cota_extra_troca` | smallint | sim |  |
+
+FKs: `(cupom_id) REFERENCES cupons(id) ON DELETE SET NULL`; `(usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT`
+
+CHECKs:
+- `invoices_devolucao_motivo_ck`: `CHECK (((devolucao_motivo IS NULL) OR ((devolucao_motivo)::text = ANY ((ARRAY['assinatura_cancelada'::character varying, 'assinatura_antiga'::character varying, 'assinatura_duplicada'::character varying, 'checkout_encerrado'::character varying, 'troca_sem_efeito'::character varying, 'renovacao_repetida'::character varying, 'checkout_cancelado'::character varying])::text[]))))`
+- `invoices_reembolso_estado_ck`: `CHECK (((reembolso_estado IS NULL) OR ((reembolso_estado)::text = ANY ((ARRAY['em_andamento'::character varying, 'aguardando_autorizacao'::character varying, 'concluido'::character varying])::text[]))))`
+- `invoices_status_ck`: `CHECK (((status)::text = ANY ((ARRAY['pendente'::character varying, 'paga'::character varying, 'vencida'::character varying, 'falhou'::character varying, 'estornada'::character varying, 'estornada_parcial'::character varying, 'contestada'::character varying, 'cancelada'::character varying])::text[])))`
+- `invoices_tipo_ck`: `CHECK (((tipo)::text = ANY ((ARRAY['credito'::character varying, 'assinatura'::character varying, 'troca_de_plano'::character varying])::text[])))`
+- `invoices_valor_ck`: `CHECK (((valor_centavos > 0) OR ((valor_centavos = 0) AND ((meio)::text = 'nenhum'::text) AND (desconto_centavos > 0))))`
+
+Índices:
+- `IDX invoices_usuario_id_created_at_index ON public.invoices` (btree (usuario_id, created_at))
+- `UNIQUE IDX invoices_id_externo_unico ON public.invoices` (btree (provedor, id_externo) WHERE (id_externo IS NOT NULL))
+- `UNIQUE IDX invoices_checkout_externo_unico ON public.invoices` (btree (provedor, checkout_id_externo) WHERE (checkout_id_externo IS NOT NULL))
+- `IDX invoices_status_pago_em ON public.invoices` (btree (status, pago_em))
+- `IDX invoices_cupom_id_status_index ON public.invoices` (btree (cupom_id, status))
+- `IDX invoices_provedor_assinatura_externa ON public.invoices` (btree (provedor, assinatura_id_externo))
+
+### `lotes_credito`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `usuario_id` | uuid | não |  |
+| `invoice_id` | uuid | sim |  |
+| `quantidade_comprada` | integer | não |  |
+| `quantidade_restante` | integer | não |  |
+| `status` | varchar(10) | não |  |
+| `data_compra` | timestamp with time zone | não |  |
+| `data_expiracao` | timestamp with time zone | não |  |
+| `created_at` | timestamp with time zone | sim |  |
+| `updated_at` | timestamp with time zone | sim |  |
+
+FKs: `(usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT`
+
+CHECKs:
+- `lotes_credito_quantidade_ck`: `CHECK (((quantidade_comprada > 0) AND (quantidade_restante >= 0) AND (quantidade_restante <= quantidade_comprada)))`
+- `lotes_credito_status_ck`: `CHECK (((status)::text = ANY ((ARRAY['ativo'::character varying, 'esgotado'::character varying, 'expirado'::character varying, 'estornado'::character varying])::text[])))`
+
+Índices:
+- `IDX lotes_credito_usuario_id_status_data_expiracao_index ON public.lotes_credito` (btree (usuario_id, status, data_expiracao))
+- `UNIQUE IDX lotes_credito_invoice_unico ON public.lotes_credito` (btree (invoice_id) WHERE (invoice_id IS NOT NULL))
+
+### `consumos_analise`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `usuario_id` | uuid | não |  |
+| `diagnostico_id` | uuid | sim |  |
+| `empresa_analisada_id` | uuid | sim |  |
+| `origem` | varchar(10) | não |  |
+| `assinatura_id` | uuid | sim |  |
+| `lote_credito_id` | uuid | sim |  |
+| `quiz_id` | uuid | sim |  |
+| `consumido_em` | timestamp with time zone | não |  |
+| `created_at` | timestamp with time zone | sim |  |
+| `updated_at` | timestamp with time zone | sim |  |
+
+FKs: `(usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT`; `(diagnostico_id) REFERENCES diagnosticos(id) ON DELETE SET NULL`; `(empresa_analisada_id) REFERENCES empresas_analisadas(id) ON DELETE SET NULL`; `(assinatura_id) REFERENCES assinaturas(id) ON DELETE RESTRICT`; `(lote_credito_id) REFERENCES lotes_credito(id) ON DELETE RESTRICT`
+
+CHECKs:
+- `consumos_analise_origem_ck`: `CHECK (((((origem)::text = 'cota'::text) AND (assinatura_id IS NOT NULL) AND (lote_credito_id IS NULL)) OR (((origem)::text = 'credito'::text) AND (lote_credito_id IS NOT NULL) AND (assinatura_id IS NULL))))`
+
+Índices:
+- `IDX consumos_analise_usuario_id_consumido_em_index ON public.consumos_analise` (btree (usuario_id, consumido_em))
+- `UNIQUE IDX consumos_analise_diagnostico_id_unique ON public.consumos_analise` (btree (diagnostico_id))
+- `UNIQUE IDX consumos_analise_quiz_id_unique ON public.consumos_analise` (btree (quiz_id))
+
+### `provider_events`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `provedor` | varchar(20) | não |  |
+| `evento_id` | varchar(200) | não |  |
+| `tipo` | varchar(40) | não |  |
+| `cobranca_id_externo` | varchar(120) | sim |  |
+| `checkout_id_externo` | varchar(120) | sim |  |
+| `referencia_externa` | varchar(120) | sim |  |
+| `invoice_id` | uuid | sim |  |
+| `payload` | jsonb | não |  |
+| `status` | varchar(12) | não |  |
+| `erro` | text | sim |  |
+| `recebido_em` | timestamp with time zone | não |  |
+| `processado_em` | timestamp with time zone | sim |  |
+| `assinatura_id_externo` | varchar(120) | sim |  |
+| `valor_estornado_centavos` | integer | sim |  |
+
+CHECKs:
+- `provider_events_status_ck`: `CHECK (((status)::text = ANY ((ARRAY['recebido'::character varying, 'processado'::character varying, 'ignorado'::character varying, 'erro'::character varying])::text[])))`
+
+Índices:
+- `UNIQUE IDX provider_events_provedor_evento_id_unique ON public.provider_events` (btree (provedor, evento_id))
+- `IDX provider_events_status_recebido_em_index ON public.provider_events` (btree (status, recebido_em))
+
+### `trocas_de_cartao`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `usuario_id` | uuid | não |  |
+| `assinatura_id` | uuid | não |  |
+| `provedor` | varchar(20) | não |  |
+| `status` | varchar(12) | não |  |
+| `checkout_id_externo` | varchar(120) | sim |  |
+| `checkout_url` | text | sim |  |
+| `checkout_expira_em` | timestamp with time zone | sim |  |
+| `cobra_agora` | boolean | não | `false` |
+| `antiga_id_externo` | varchar(120) | sim |  |
+| `nova_id_externo` | varchar(120) | sim |  |
+| `concluida_em` | timestamp with time zone | sim |  |
+| `antiga_cancelada_em` | timestamp with time zone | sim |  |
+| `created_at` | timestamp with time zone | sim |  |
+| `updated_at` | timestamp with time zone | sim |  |
+| `valor_centavos` | integer | sim |  |
+| `ciclo` | varchar(10) | sim |  |
+
+FKs: `(assinatura_id) REFERENCES assinaturas(id) ON DELETE RESTRICT`; `(usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT`
+
+CHECKs:
+- `trocas_de_cartao_status_ck`: `CHECK (((status)::text = ANY ((ARRAY['pendente'::character varying, 'concluida'::character varying, 'expirada'::character varying, 'cancelada'::character varying, 'falhou'::character varying])::text[])))`
+
+Índices:
+- `IDX trocas_de_cartao_assinatura_id_status_index ON public.trocas_de_cartao` (btree (assinatura_id, status))
+- `UNIQUE IDX trocas_de_cartao_checkout_unico ON public.trocas_de_cartao` (btree (provedor, checkout_id_externo) WHERE (checkout_id_externo IS NOT NULL))
+
+### `cupons`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `codigo` | varchar(40) | não |  |
+| `tipo` | varchar(20) | não |  |
+| `valor` | integer | não |  |
+| `vigencia_inicio` | date | não |  |
+| `vigencia_fim` | date | não |  |
+| `limite_usos` | integer | sim |  |
+| `ciclos_duracao` | integer | sim |  |
+| `ativo` | boolean | não | `true` |
+| `alterado_por_usuario_id` | uuid | sim |  |
+| `created_at` | timestamp with time zone | sim |  |
+| `updated_at` | timestamp with time zone | sim |  |
+
+FKs: `(alterado_por_usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL`
+
+CHECKs:
+- `cupons_tipo_check`: `CHECK (((tipo)::text = ANY ((ARRAY['percentual'::character varying, 'valor_fixo'::character varying])::text[])))`
+- `cupons_valor_check`: `CHECK (((valor >= 1) AND (((tipo)::text <> 'percentual'::text) OR (valor <= 100))))`
+- `cupons_vigencia_check`: `CHECK ((vigencia_fim >= vigencia_inicio))`
+
+Índices:
+- `UNIQUE IDX cupons_codigo_unique ON public.cupons` (btree (codigo))
+
+### `cupom_itens`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `cupom_id` | uuid | não |  |
+| `plano_id` | uuid | sim |  |
+| `ciclo` | varchar(10) | sim |  |
+| `pacote_credito_id` | uuid | sim |  |
+| `created_at` | timestamp with time zone | sim |  |
+
+FKs: `(cupom_id) REFERENCES cupons(id) ON DELETE CASCADE`; `(plano_id) REFERENCES planos(id) ON DELETE RESTRICT`; `(pacote_credito_id) REFERENCES pacotes_credito(id) ON DELETE RESTRICT`
+
+CHECKs:
+- `cupom_itens_forma_check`: `CHECK ((((plano_id IS NOT NULL) AND ((ciclo)::text = ANY ((ARRAY['mensal'::character varying, 'anual'::character varying])::text[])) AND (pacote_credito_id IS NULL)) OR ((plano_id IS NULL) AND (ciclo IS NULL) AND (pacote_credito_id IS NOT NULL))))`
+
+Índices:
+- `IDX cupom_itens_cupom_id_index ON public.cupom_itens` (btree (cupom_id))
+- `UNIQUE IDX cupom_itens_plano_unico ON public.cupom_itens` (btree (cupom_id, plano_id, ciclo) WHERE (plano_id IS NOT NULL))
+- `UNIQUE IDX cupom_itens_pacote_unico ON public.cupom_itens` (btree (cupom_id, pacote_credito_id) WHERE (pacote_credito_id IS NOT NULL))
+
+### `cupom_usos`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `cupom_id` | uuid | não |  |
+| `usuario_id` | uuid | não |  |
+| `desconto_centavos` | integer | não | `0` |
+| `ciclos_restantes` | integer | sim |  |
+| `usado_em` | timestamp with time zone | não |  |
+| `invoice_id` | uuid | sim |  |
+
+FKs: `(cupom_id) REFERENCES cupons(id) ON DELETE CASCADE`; `(usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE`; `(invoice_id) REFERENCES invoices(id) ON DELETE SET NULL`
+
+Índices:
+- `UNIQUE IDX cupom_usos_cupom_id_usuario_id_unique ON public.cupom_usos` (btree (cupom_id, usuario_id))
+- `IDX cupom_usos_usuario_id_index ON public.cupom_usos` (btree (usuario_id))
+- `UNIQUE IDX cupom_usos_invoice_unico ON public.cupom_usos` (btree (invoice_id) WHERE (invoice_id IS NOT NULL))
+
+### `cupom_concessoes`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `cupom_id` | uuid | não |  |
+| `usuario_id` | uuid | não |  |
+| `ciclos_restantes` | integer | sim |  |
+| `concedida_por_usuario_id` | uuid | sim |  |
+| `concedida_em` | timestamp with time zone | não |  |
+
+FKs: `(cupom_id) REFERENCES cupons(id) ON DELETE CASCADE`; `(usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE`; `(concedida_por_usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL`
+
+Índices:
+- `UNIQUE IDX cupom_concessoes_cupom_id_usuario_id_unique ON public.cupom_concessoes` (btree (cupom_id, usuario_id))
+- `IDX cupom_concessoes_usuario_id_index ON public.cupom_concessoes` (btree (usuario_id))
+
+### `trial_config`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `ativo` | boolean | não | `true` |
+| `dias` | integer | não |  |
+| `analises` | integer | não |  |
+| `alterado_por_usuario_id` | uuid | sim |  |
+| `created_at` | timestamp with time zone | sim |  |
+| `updated_at` | timestamp with time zone | sim |  |
+| `limite_ip_30d` | smallint | não | `'3'::smallint` |
+
+CHECKs:
+- `trial_config_limite_ip_ck`: `CHECK ((limite_ip_30d >= 1))`
+
+### `trial_ativacoes`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `usuario_id` | uuid | sim |  |
+| `cpf_hash` | character(64) | não |  |
+| `ip` | varchar(45) | sim |  |
+| `ativado_em` | timestamp with time zone | não |  |
+| `created_at` | timestamp with time zone | sim |  |
+| `updated_at` | timestamp with time zone | sim |  |
+
+FKs: `(usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL`
+
+Índices:
+- `IDX trial_ativacoes_ip_ativado_em_index ON public.trial_ativacoes` (btree (ip, ativado_em))
+- `UNIQUE IDX trial_ativacoes_cpf_hash_unique ON public.trial_ativacoes` (btree (cpf_hash))
+
+### `trial_empresas`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `cnpj_hash` | character(64) | não |  |
+| `usuario_id` | uuid | sim |  |
+| `created_at` | timestamp with time zone | sim |  |
+| `updated_at` | timestamp with time zone | sim |  |
+
+FKs: `(usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL`
+
+Índices:
+- `UNIQUE IDX trial_empresas_cnpj_hash_unique ON public.trial_empresas` (btree (cnpj_hash))
+
+### `drm_lancamentos`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `usuario_id` | uuid | não |  |
+| `empresa_analisada_id` | uuid | não |  |
+| `competencia` | date | não |  |
+| `versao` | integer | não |  |
+| `substituido_por_id` | uuid | sim |  |
+| `setor` | varchar(16) | não |  |
+| `lancamento_payload` | jsonb | não |  |
+| `payload_hash` | varchar(64) | não |  |
+| `demonstracao` | jsonb | não |  |
+| `alertas_aceitos` | jsonb | não | `'[]'::jsonb` |
+| `motor_drm_version` | varchar(16) | não |  |
+| `gerado_em` | timestamp with time zone | não |  |
+| `personificado_por_id` | uuid | sim |  |
+| `created_at` | timestamp with time zone | sim |  |
+| `updated_at` | timestamp with time zone | sim |  |
+| `deleted_at` | timestamp with time zone | sim |  |
+
+FKs: `(usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT`; `(empresa_analisada_id) REFERENCES empresas_analisadas(id) ON DELETE RESTRICT`; `(personificado_por_id) REFERENCES usuarios(id) ON DELETE RESTRICT`; `(substituido_por_id) REFERENCES drm_lancamentos(id) ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED`
+
+CHECKs:
+- `drm_lancamentos_dia01_check`: `CHECK ((EXTRACT(day FROM competencia) = (1)::numeric))`
+- `drm_lancamentos_versao_check`: `CHECK ((versao >= 1))`
+- `drm_lancamentos_setor_check`: `CHECK (((setor)::text = ANY ((ARRAY['industria'::character varying, 'comercio'::character varying, 'servicos'::character varying])::text[])))`
+- `drm_lancamentos_hash_check`: `CHECK (((payload_hash)::text ~ '^[0-9a-f]{64}$'::text))`
+- `drm_lancamentos_motor_check`: `CHECK (((motor_drm_version)::text ~ '^\d+\.\d+\.\d+$'::text))`
+- `drm_lancamentos_demonstracao_check`: `CHECK (COALESCE(((jsonb_typeof(((demonstracao -> 'linhas'::text) -> 'fora'::text)) = 'array'::text) AND (jsonb_typeof(((demonstracao -> 'linhas'::text) -> 'dentro'::text)) = 'array'::text) AND ((demonstracao ->> 'motor_drm_version'::text) = (motor_drm_version)::text)), false))`
+
+Índices:
+- `IDX drm_lancamentos_usuario_idx ON public.drm_lancamentos` (btree (usuario_id))
+- `IDX drm_lancamentos_motor_idx ON public.drm_lancamentos` (btree (motor_drm_version))
+- `UNIQUE IDX drm_lancamentos_vigente_unique ON public.drm_lancamentos` (btree (empresa_analisada_id, competencia) WHERE ((substituido_por_id IS NULL) AND (deleted_at IS NULL)))
+- `UNIQUE IDX drm_lancamentos_versao_unique ON public.drm_lancamentos` (btree (empresa_analisada_id, competencia, versao) WHERE (deleted_at IS NULL))
+
+### `drm_rascunhos`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `usuario_id` | uuid | não |  |
+| `empresa_analisada_id` | uuid | não |  |
+| `competencia` | date | não |  |
+| `origem` | varchar(16) | não | `'inicial'::character varying` |
+| `base_versao` | integer | sim |  |
+| `rascunho_payload` | jsonb | não |  |
+| `expires_at` | timestamp with time zone | não |  |
+| `personificado_por_id` | uuid | sim |  |
+| `created_at` | timestamp with time zone | sim |  |
+| `updated_at` | timestamp with time zone | sim |  |
+| `deleted_at` | timestamp with time zone | sim |  |
+
+FKs: `(usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT`; `(empresa_analisada_id) REFERENCES empresas_analisadas(id) ON DELETE RESTRICT`; `(personificado_por_id) REFERENCES usuarios(id) ON DELETE RESTRICT`
+
+CHECKs:
+- `drm_rascunhos_base_versao_check`: `CHECK ((((origem)::text = 'retificacao'::text) = (base_versao IS NOT NULL)))`
+- `drm_rascunhos_dia01_check`: `CHECK ((EXTRACT(day FROM competencia) = (1)::numeric))`
+- `drm_rascunhos_origem_check`: `CHECK (((origem)::text = ANY ((ARRAY['inicial'::character varying, 'retificacao'::character varying])::text[])))`
+
+Índices:
+- `IDX drm_rascunhos_usuario_expires_idx ON public.drm_rascunhos` (btree (usuario_id, expires_at))
+- `UNIQUE IDX drm_rascunhos_usuario_empresa_competencia_unique ON public.drm_rascunhos` (btree (usuario_id, empresa_analisada_id, competencia) WHERE (deleted_at IS NULL))
+
+### `drm_preferencias`
+PK `id`.
+
+| coluna | tipo | nulo | default |
+|---|---|---|---|
+| `id` | uuid | não |  |
+| `usuario_id` | uuid | não |  |
+| `empresa_analisada_id` | uuid | não |  |
+| `posicao_prolabore` | varchar(8) | não | `'fora'::character varying` |
+| `modo_custo` | varchar(16) | não | `'detalhado'::character varying` |
+| `modo_vendas` | varchar(16) | não | `'detalhado'::character varying` |
+| `modo_administrativas` | varchar(16) | não | `'detalhado'::character varying` |
+| `modo_financeiras` | varchar(16) | não | `'detalhado'::character varying` |
+| `personificado_por_id` | uuid | sim |  |
+| `created_at` | timestamp with time zone | sim |  |
+| `updated_at` | timestamp with time zone | sim |  |
+
+FKs: `(usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT`; `(empresa_analisada_id) REFERENCES empresas_analisadas(id) ON DELETE RESTRICT`; `(personificado_por_id) REFERENCES usuarios(id) ON DELETE RESTRICT`
+
+CHECKs:
+- `drm_preferencias_prolabore_check`: `CHECK (((posicao_prolabore)::text = ANY ((ARRAY['fora'::character varying, 'dentro'::character varying])::text[])))`
+- `drm_preferencias_modo_custo_check`: `CHECK (((modo_custo)::text = ANY ((ARRAY['agregado'::character varying, 'detalhado'::character varying])::text[])))`
+- `drm_preferencias_modo_vendas_check`: `CHECK (((modo_vendas)::text = ANY ((ARRAY['agregado'::character varying, 'detalhado'::character varying])::text[])))`
+- `drm_preferencias_modo_administrativas_check`: `CHECK (((modo_administrativas)::text = ANY ((ARRAY['agregado'::character varying, 'detalhado'::character varying])::text[])))`
+- `drm_preferencias_modo_financeiras_check`: `CHECK (((modo_financeiras)::text = ANY ((ARRAY['agregado'::character varying, 'detalhado'::character varying])::text[])))`
+
+Índices:
+- `UNIQUE IDX drm_preferencias_empresa_analisada_id_unique ON public.drm_preferencias` (btree (empresa_analisada_id))
 
 ---
 

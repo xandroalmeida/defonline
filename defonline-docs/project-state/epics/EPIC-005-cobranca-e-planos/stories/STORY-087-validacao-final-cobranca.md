@@ -7,7 +7,7 @@ sprint_id: null
 type: validation
 target_role: validador
 requires_design: false
-status: ready
+status: blocked
 owner_agent: null
 created_at: 2026-11-05
 updated_at: 2026-11-05
