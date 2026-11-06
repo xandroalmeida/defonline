@@ -179,7 +179,8 @@ final class TrocarDePlano
 
     /**
      * O provedor confirmou a diferença: o plano novo vale agora. Chamado só por {@see ConfirmarAssinatura},
-     * dentro da transação e com o estado atual já conferido no provedor.
+     * dentro da transação e com o estado atual já conferido no provedor. O ajuste de valor no provedor NÃO acontece
+     * aqui (rede dentro de transação, STORY-093 CA-6): fica marcado, e o `ProcessarEvento` o faz depois do commit.
      *
      * @return array{0: 'processado'|'ignorado', 1: string|null}
      */
@@ -445,6 +446,9 @@ final class TrocarDePlano
             );
         });
 
+        // Fora da transação (STORY-093 CA-6): o provedor passa a cobrar o valor, o ciclo e a data do plano novo.
+        $this->ajustarNoProvedor(Assinatura::query()->findOrFail($assinatura->id));
+
         return new ResultadoDaTroca('aplicada', $previa);
     }
 
@@ -492,8 +496,14 @@ final class TrocarDePlano
             ];
         }
 
+        // STORY-093 CA-6: aqui a linha está travada, dentro de uma transação: nada de rede. O ajuste no provedor fica
+        // MARCADO como pendente (gravado junto com a troca) e quem chamou o executa depois do commit
+        // ({@see ajustarNoProvedor()}); se o processo cair antes, a rotina horária termina o serviço.
+        if ($a->id_externo !== null) {
+            $campos['ajuste_provedor_pendente'] = true;
+        }
+
         $a->forceFill($campos)->save();
-        $this->ajustarNoProvedor($a);
     }
 
     /** @throws ProvedorIndisponivel */

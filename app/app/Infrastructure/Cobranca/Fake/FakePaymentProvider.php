@@ -24,6 +24,7 @@ use DateTimeImmutable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use LogicException;
 
 /**
  * ADR-010 §6 — provedor de mentira para desenvolvimento e testes: sem rede, determinístico e com
@@ -92,6 +93,7 @@ final class FakePaymentProvider implements PaymentProvider
 
     public function startCheckout(PedidoCheckout $pedido): SessaoCheckout
     {
+        $this->foraDeTransacao();
         if (Cache::pull(self::PREFIXO.'falhar') === true) {
             throw new ProvedorIndisponivel('Falha simulada do provedor fake.');
         }
@@ -136,21 +138,25 @@ final class FakePaymentProvider implements PaymentProvider
 
     public function cancelCheckout(ReferenciaProvedor $sessao): void
     {
+        $this->foraDeTransacao();
         $this->mudarEstado($sessao->id, EstadoCobranca::Cancelada);
     }
 
     public function suspendSubscription(ReferenciaProvedor $assinatura): void
     {
+        $this->foraDeTransacao();
         $this->mudarAssinatura($assinatura, 'suspensa');
     }
 
     public function resumeSubscription(ReferenciaProvedor $assinatura): void
     {
+        $this->foraDeTransacao();
         $this->mudarAssinatura($assinatura, 'ativa');
     }
 
     public function changeSubscriptionValue(ReferenciaProvedor $assinatura, int $valorCentavos, CicloCobranca $ciclo, DateTimeImmutable $proximaCobrancaEm): void
     {
+        $this->foraDeTransacao();
         $this->exigirDisponivel();
 
         if (Cache::pull(self::PREFIXO.'falhar-assinatura') === true) {
@@ -189,6 +195,7 @@ final class FakePaymentProvider implements PaymentProvider
 
     public function getCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
     {
+        $this->foraDeTransacao();
         $this->exigirDisponivel();
 
         return $this->retrato($cobranca->id);
@@ -234,6 +241,7 @@ final class FakePaymentProvider implements PaymentProvider
      */
     public function retryCharge(ReferenciaProvedor $cobranca): CobrancaNoProvedor
     {
+        $this->foraDeTransacao();
         $this->exigirDisponivel();
         $c = $this->cobrancaGravada($cobranca->id);
 
@@ -253,6 +261,7 @@ final class FakePaymentProvider implements PaymentProvider
      */
     public function refund(ReferenciaProvedor $cobranca, ?int $valorCentavos = null, string $motivo = ''): ReembolsoNoProvedor
     {
+        $this->foraDeTransacao();
         $this->exigirDisponivel();
         $c = $this->cobrancaGravada($cobranca->id);
 
@@ -300,12 +309,14 @@ final class FakePaymentProvider implements PaymentProvider
 
     public function cancelSubscription(ReferenciaProvedor $assinatura): void
     {
+        $this->foraDeTransacao();
         $this->mudarAssinatura($assinatura, 'cancelada');
         Cache::put(self::PREFIXO."sub-cancelada:{$assinatura->id}", true, now()->addDays(self::TTL_DIAS));
     }
 
     public function listSubscriptionCharges(ReferenciaProvedor $assinatura, DateTimeImmutable $desde): array
     {
+        $this->foraDeTransacao();
         $this->exigirDisponivel();
 
         /** @var list<string> $ids */
@@ -316,6 +327,7 @@ final class FakePaymentProvider implements PaymentProvider
 
     public function listCheckoutCharges(ReferenciaProvedor $sessao): array
     {
+        $this->foraDeTransacao();
         $this->exigirDisponivel();
         $id = $this->cobrancaDe($sessao->id);
         $c = Cache::get(self::PREFIXO."pay:{$id}");
@@ -359,6 +371,25 @@ final class FakePaymentProvider implements PaymentProvider
     public static function assinaturaCancelada(string $assinaturaId): bool
     {
         return Cache::get(self::PREFIXO."sub-cancelada:{$assinaturaId}") === true;
+    }
+
+    /** Nível de transação do banco que é "fora de transação" (ligado só nos testes); `null` = sem conferência. */
+    public static ?int $nivelForaDeTransacao = null;
+
+    /**
+     * STORY-093 CA-6 — o provedor real é rede: chamá-lo com uma transação aberta segura a linha travada durante a
+     * espera (e uma falha no meio deixaria o estado local sem reflexo do que o provedor fez). O fake, que deve ser
+     * tão exigente quanto o real, recusa a chamada feita dentro de transação quando a conferência está ligada.
+     */
+    private function foraDeTransacao(): void
+    {
+        if (self::$nivelForaDeTransacao !== null && DB::transactionLevel() > self::$nivelForaDeTransacao) {
+            $quem = collect(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 12))
+                ->filter(fn (array $f): bool => isset($f['class']) && str_starts_with($f['class'], 'App\\Services\\'))
+                ->map(fn (array $f): string => class_basename($f['class']).'::'.$f['function'])->take(3)->implode(' < ');
+
+            throw new LogicException('Chamada ao provedor de pagamento dentro de uma transação do banco (STORY-093 CA-6): '.$quem);
+        }
     }
 
     private function exigirDisponivel(): void

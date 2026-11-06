@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Domain\Motor\FonteRecomendacoes;
+use App\Infrastructure\Cobranca\Fake\FakePaymentProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Support\RecomendacoesCongeladas;
 use Tests\TestCase;
 
@@ -16,7 +18,10 @@ use Tests\TestCase;
 | Unit tests rodam só com PHPUnit base — rápidos, sem DB.
 */
 
-pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Feature');
+pest()->extend(TestCase::class)->use(RefreshDatabase::class)->beforeEach(function () {
+    // STORY-093 CA-6: o provedor fake recusa chamada feita dentro de transação (o nível de agora é o do teste).
+    FakePaymentProvider::$nivelForaDeTransacao = DB::transactionLevel();
+})->in('Feature');
 
 // Domain: testes do núcleo de regras de negócio (app/Domain). Boot do Laravel
 // é necessário para `config(...)` e service container, mas NÃO usa banco: a matriz

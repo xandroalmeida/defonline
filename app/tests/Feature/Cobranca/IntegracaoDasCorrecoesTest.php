@@ -6,6 +6,8 @@ use App\Domain\Cobranca\Carteira;
 use App\Domain\Cobranca\CicloCobranca;
 use App\Domain\Cobranca\EstadoCobranca;
 use App\Domain\Cobranca\MeioPagamento;
+use App\Domain\Cobranca\PaymentProvider;
+use App\Domain\Cobranca\ReferenciaProvedor;
 use App\Domain\Cobranca\TipoEvento;
 use App\Infrastructure\Cobranca\Fake\FakePaymentProvider;
 use App\Models\Assinatura;
@@ -14,10 +16,14 @@ use App\Models\Cupom;
 use App\Models\CupomItem;
 use App\Models\Invoice;
 use App\Models\ProviderEvent;
+use App\Services\Cobranca\GerirRenovacao;
+use App\Services\Cobranca\GestaoNegada;
 use App\Services\Cobranca\IniciarAssinatura;
 use App\Services\Cobranca\ReembolsarCobranca;
 use App\Services\Cobranca\TrocarCartao;
 use App\Services\Cobranca\TrocarDePlano;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -163,5 +169,62 @@ describe('troca de plano em ciclo gratuito (090 × 083)', function () {
 
         expect($t->tipo)->toBe('agendada')
             ->and(FakePaymentProvider::valorDaAssinatura($a->fresh()->id_externo)['proxima'])->toBe($a->fresh()->proximo_vencimento->format('Y-m-d H:i:s'));
+    });
+});
+
+describe('STORY-093 CA-6 — rede nunca dentro de transação com linha travada', function () {
+    it('o fake recusa chamada ao provedor feita dentro de uma transação (e a aceita fora dela)', function () {
+        $ref = new ReferenciaProvedor('fake', 'fakesub_x');
+
+        expect(fn () => DB::transaction(fn () => _fake()->suspendSubscription($ref)))->toThrow(LogicException::class, 'dentro de uma transação');
+        _fake()->suspendSubscription($ref);
+        expect(FakePaymentProvider::situacaoDaAssinatura('fakesub_x'))->not->toBeNull();
+    });
+
+    it('troca de plano sem cobrança: a carteira muda, o provedor é avisado depois do commit e, se falhar, fica marcado e a rotina horária repete', function () {
+        [$a] = _assinaturaAtivaNoFake($this->u);
+        $this->travelTo($a->proximo_vencimento->copy()->subHours(1));
+        $a = $a->fresh();
+        FakePaymentProvider::falharProximaOperacaoDeAssinatura();
+
+        $t = app(TrocarDePlano::class)->confirmar($this->u, _plano('Pro'), CicloCobranca::Mensal);
+
+        $a = $a->fresh();
+        expect($t->tipo)->toBe('aplicada')->and($a->plano_id)->toBe(_plano('Pro')->id)
+            ->and($a->ajuste_provedor_pendente)->toBeTrue()
+            ->and(FakePaymentProvider::valorCobradoDaAssinatura($a->id_externo))->not->toBe(_plano('Pro')->preco_mensal_centavos);
+
+        Artisan::call('assinaturas:ajustar-no-provedor');
+
+        expect($a->fresh()->ajuste_provedor_pendente)->toBeFalse()
+            ->and(FakePaymentProvider::valorCobradoDaAssinatura($a->id_externo))->toBe(_plano('Pro')->preco_mensal_centavos);
+    });
+
+    it('troca de plano paga: o ajuste vai ao provedor depois do commit do pagamento', function () {
+        [$a] = _assinaturaAtivaNoFake($this->u);
+        $this->travelTo($a->proximo_vencimento->copy()->subDays(10));
+        $t = app(TrocarDePlano::class)->confirmar($this->u, _plano('Pro'), CicloCobranca::Mensal);
+
+        _pagarAssinatura($t->invoice);
+
+        $a = $a->fresh();
+        expect($a->plano_id)->toBe(_plano('Pro')->id)->and($a->ajuste_provedor_pendente)->toBeFalse()
+            ->and(FakePaymentProvider::valorCobradoDaAssinatura($a->id_externo))->toBe(_plano('Pro')->preco_mensal_centavos);
+    });
+
+    it('cancelar a renovação: se a assinatura muda enquanto o provedor responde, o pedido é desfeito no provedor e a ação é negada', function () {
+        [$a] = _assinaturaAtivaNoFake($this->u);
+        $id = (string) $a->id_externo;
+        app()->instance(PaymentProvider::class, _provedorQueFalha([
+            // A régua (ou um pagamento) mexe na assinatura no meio do pedido.
+            'suspendSubscription' => function () use ($a) {
+                Assinatura::query()->whereKey($a->id)->update(['status' => 'em_atraso']);
+            },
+        ]));
+
+        expect(fn () => app(GerirRenovacao::class)->cancelar($this->u))->toThrow(GestaoNegada::class);
+
+        expect(FakePaymentProvider::situacaoDaAssinatura($id))->toBe('ativa')
+            ->and($a->fresh()->status->value)->toBe('em_atraso');
     });
 });

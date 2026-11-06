@@ -153,6 +153,16 @@ final class ProcessarEvento
         if ($cobranca->assinaturaId !== null || in_array($invoice->tipo, ['assinatura', 'troca_de_plano'], true)) {
             $resultado = $this->assinaturas->aplicar($invoice, $cobranca, $evento->provedor);
 
+            // STORY-093 CA-6: a troca de plano pagou; o valor novo vai ao provedor já fora da transação (se falhar, a
+            // marca fica e a rotina horária repete).
+            if ($resultado[0] === 'processado' && $invoice?->tipo === 'troca_de_plano' && $invoice->assinatura_id !== null) {
+                $assinatura = Assinatura::query()->find($invoice->assinatura_id);
+
+                if ($assinatura?->ajuste_provedor_pendente === true) {
+                    app(TrocarDePlano::class)->ajustarNoProvedor($assinatura);
+                }
+            }
+
             // STORY-083 CA-7: o último ciclo com desconto foi pago, o valor no provedor volta ao cheio (fora da transação).
             if ($resultado[0] === 'processado' && $cobranca->assinaturaId !== null) {
                 $this->ajustarValor($evento->provedor, $cobranca->assinaturaId);
