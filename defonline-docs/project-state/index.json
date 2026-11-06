@@ -382,7 +382,7 @@
       "slug": "cobranca-e-planos",
       "title": "Cobrança e planos — trial, assinatura, créditos e cupons com catálogo configurável",
       "wave": "WAVE-2026-02",
-      "status": "in_progress",
+      "status": "in_review",
       "path": "epics/EPIC-005-cobranca-e-planos/epic.md",
       "story_ids": [
         "STORY-069",
@@ -403,7 +403,14 @@
         "STORY-084",
         "STORY-085",
         "STORY-086",
-        "STORY-087"
+        "STORY-087",
+        "STORY-088",
+        "STORY-089",
+        "STORY-090",
+        "STORY-091",
+        "STORY-092",
+        "STORY-093",
+        "STORY-094"
       ],
       "validation_report": null,
       "blocked_by_epics": [],
@@ -2512,7 +2519,7 @@
     {
       "type": "validation",
       "target_role": "validador",
-      "status": "ready",
+      "status": "blocked",
       "blocks": [],
       "epic_id": "EPIC-005",
       "sprint_id": null,
@@ -2542,10 +2549,172 @@
         "STORY-083",
         "STORY-084",
         "STORY-085",
-        "STORY-086"
+        "STORY-086",
+        "STORY-088",
+        "STORY-089",
+        "STORY-090",
+        "STORY-091",
+        "STORY-092",
+        "STORY-093",
+        "STORY-094"
       ],
       "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-087-validacao-final-cobranca.md",
-      "related_pdr": "PDR-020"
+      "related_pdr": "PDR-020",
+      "note": "Rodada 1 reprovada (7a3150b): 21 defeitos. Repetir após as correções e o sandbox próprio."
+    },
+    {
+      "type": "bugfix",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-088",
+      "slug": "correcao-recorrencia-e-referencia",
+      "title": "Correção — recorrência duplicada e cobrança na Invoice certa",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-088-correcao-recorrencia-e-referencia.md",
+      "related_pdr": "PDR-020",
+      "note": "Correção da rodada 1 da validação: D-01, D-02, D-03, D-16"
+    },
+    {
+      "type": "bugfix",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-089",
+      "slug": "correcao-datas-do-provedor",
+      "title": "Correção — data do provedor sem deslocar o ciclo",
+      "estimated_session_size": "S",
+      "blocked_by": [],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-089-correcao-datas-do-provedor.md",
+      "related_pdr": "PDR-020",
+      "note": "Correção da rodada 1 da validação: D-04"
+    },
+    {
+      "type": "bugfix",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-090",
+      "slug": "correcao-valor-no-provedor",
+      "title": "Correção — valor da recorrência após troca de plano, cartão e cupom",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-090-correcao-valor-no-provedor.md",
+      "related_pdr": "PDR-020",
+      "note": "Correção da rodada 1 da validação: D-06, D-15, D-20"
+    },
+    {
+      "type": "bugfix",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-091",
+      "slug": "correcao-cota-e-upgrade",
+      "title": "Correção — cota do anual cancelado, cota contratada e upgrade proporcional",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-091-correcao-cota-e-upgrade.md",
+      "related_pdr": "PDR-020",
+      "note": "Correção da rodada 1 da validação: D-05, D-07, D-19"
+    },
+    {
+      "type": "bugfix",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-092",
+      "slug": "correcao-pagamento-sem-efeito-e-estorno-pendente",
+      "title": "Correção — pagamento sem efeito, estorno pendente e acesso em atraso",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-092-correcao-pagamento-sem-efeito-e-estorno-pendente.md",
+      "related_pdr": "PDR-020",
+      "note": "Correção da rodada 1 da validação: D-08, D-11a, D-12"
+    },
+    {
+      "type": "bugfix",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-093",
+      "slug": "correcao-prontidao-para-deploy",
+      "title": "Correção — prontidão para deploy",
+      "estimated_session_size": "M",
+      "blocked_by": [],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-093-correcao-prontidao-para-deploy.md",
+      "related_pdr": "PDR-020",
+      "note": "Correção da rodada 1 da validação: D-10, D-13, D-14, D-17, D-18, D-21"
+    },
+    {
+      "type": "bugfix",
+      "target_role": "programador",
+      "status": "ready",
+      "blocks": [
+        "STORY-087"
+      ],
+      "epic_id": "EPIC-005",
+      "sprint_id": null,
+      "owner_agent": null,
+      "requires_design": false,
+      "created_at": "2026-11-05",
+      "updated_at": "2026-11-05",
+      "id": "STORY-094",
+      "slug": "correcao-termos-e-arrependimento",
+      "title": "Correção — Termos v2 alinhados ao sistema",
+      "estimated_session_size": "S",
+      "blocked_by": [],
+      "path": "epics/EPIC-005-cobranca-e-planos/stories/STORY-094-correcao-termos-e-arrependimento.md",
+      "related_pdr": "PDR-020",
+      "note": "Correção da rodada 1 da validação: D-11"
     }
   ],
   "sprints": [

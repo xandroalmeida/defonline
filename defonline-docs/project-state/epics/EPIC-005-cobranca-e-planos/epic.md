@@ -95,6 +95,14 @@ Ao fim deste épico, Roberto experimenta o produto no trial, assina um plano ou 
 - [ ] STORY-086 — Eventos e alertas de cobrança
 - [ ] STORY-087 — Validação final do EPIC-005
 
+- [ ] STORY-088 — Correção — recorrência duplicada e cobrança na Invoice certa
+- [ ] STORY-089 — Correção — data do provedor sem deslocar o ciclo
+- [ ] STORY-090 — Correção — valor da recorrência após troca de plano, cartão e cupom
+- [ ] STORY-091 — Correção — cota do anual cancelado, cota contratada e upgrade proporcional
+- [ ] STORY-092 — Correção — pagamento sem efeito, estorno pendente e acesso em atraso
+- [ ] STORY-093 — Correção — prontidão para deploy
+- [ ] STORY-094 — Correção — Termos v2 alinhados ao sistema
+
 ## Validação final
 
 Critérios em `validation/checklist.md`. Relatório do validador em `validation/report.md`.
@@ -104,3 +112,4 @@ Critérios em `validation/checklist.md`. Relatório do validador em `validation/
 ## Histórico
 
 - 2026-11-05 — criado e detalhado pelo PO a partir do PDR-020.
+- 2026-11-05 — validação reprovada na rodada 1 (21 defeitos); estórias de correção STORY-088 a 094.
