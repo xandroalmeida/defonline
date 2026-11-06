@@ -36,6 +36,12 @@ afterEach(function () {
     Carbon::setTestNow();
 });
 
+/** Os campos com texto: `valores` carrega todos os D01..D42, vazios inclusive (ver `Lancamento::dehydrate`). */
+function preenchidos(array $valores): array
+{
+    return array_filter($valores, fn (?string $v): bool => trim((string) $v) !== '');
+}
+
 function empresaDoSetor(string $setor, Usuario $usuario): EmpresaAnalisada
 {
     $cnae = ['industria' => '1091101', 'comercio' => '4711301', 'servicos' => '6920601'][$setor];
@@ -343,7 +349,7 @@ describe('CA-5 — pré-preenchimento', function () {
 
     it('sem competência anterior os campos vêm vazios, sem marca, e mostra a orientação de primeira vez', function () {
         lancador($this->empresa)
-            ->assertSet('valores', [])
+            ->assertSet('valores', fn (array $v): bool => preenchidos($v) === [])
             ->assertSet('repetidos', [])
             ->assertSeeHtml('dusk="drm-lancamento-primeira-vez"')
             ->assertSee('Este é o primeiro mês desta empresa.')
@@ -433,7 +439,7 @@ describe('CA-5 — pré-preenchimento', function () {
         lancamentoDeSetembro($this);
         $c = lancador($this->empresa, '2026-08');
 
-        $c->assertSet('valores', [])->assertSet('mes_origem', '');
+        $c->assertSet('valores', fn (array $v): bool => preenchidos($v) === [])->assertSet('mes_origem', '');
     });
 });
 
@@ -468,7 +474,7 @@ describe('CA-6 — rascunho', function () {
         DrmRascunho::query()->update(['expires_at' => now()->subDay()]);
 
         lancador($this->empresa)->assertSet('bloco_atual', 1)
-            ->assertSet('valores', [])
+            ->assertSet('valores', fn (array $v): bool => preenchidos($v) === [])
             ->assertSee('Seu rascunho expirou. Vamos começar do início.');
     });
 
@@ -687,6 +693,40 @@ describe('CA-9 — alertas com aceite', function () {
 
         expect(DrmLancamento::query()->count())->toBe(0);
         $c->assertSeeHtml('dusk="drm-lancamento-aceitar-alertas"');
+    });
+});
+
+describe('STORY-095 — D-1: todo campo existe em `valores` desde o início', function () {
+    it('lista D01..D42 vazios no primeiro estado, para a chave nunca ser nova no cliente', function () {
+        $c = lancador($this->empresa);
+
+        $c->assertSet('valores', fn (array $v): bool => array_keys($v) === App\Domain\Drm\Lancamento::todosOsCampos()
+            && preenchidos($v) === []);
+    });
+
+    it('digitar um campo não perde nenhuma chave, e o vazio continua valendo como ausente no domínio', function () {
+        $c = lancador($this->empresa);
+        $c->set('valores.D01', '10.000,00')->set('valores.D02', '600,00')->call('proximo');
+
+        $c->assertSet('valores', fn (array $v): bool => count($v) === 42 && $v['D01'] === '10.000,00' && $v['D03'] === '');
+        expect(DrmRascunho::query()->firstOrFail()->rascunho_payload['valores'])
+            ->toBe(['D01' => '10.000,00', 'D02' => '600,00']);   // o rascunho não grava os vazios
+    });
+
+    it('detalhar um grupo devolve os itens vazios sem apagar as chaves', function () {
+        $c = lancador($this->empresa);
+        $c->call('alternarModo', 'custo', 'agregado')->set('valores.D03', '500,00')
+            ->call('alternarModo', 'custo', 'detalhado')->call('confirmarDetalhar');
+
+        $c->assertSet('valores', fn (array $v): bool => array_key_exists('D04', $v) && $v['D04'] === '' && $v['D03'] === '');
+    });
+
+    it('os arquivos de rascunho antigos, sem as chaves vazias, hidratam normalmente', function () {
+        $c = lancador($this->empresa);
+        $c->set('valores.D01', '100')->set('valores.D02', '10')->call('proximo');
+        DrmRascunho::query()->update(['rascunho_payload' => ['valores' => ['D01' => '100', 'D02' => '10'], 'bloco' => 2, 'modos' => []]]);
+
+        lancador($this->empresa)->assertSet('valores.D01', '100')->assertSet('valores', fn (array $v): bool => count($v) === 42);
     });
 });
 

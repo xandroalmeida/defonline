@@ -148,3 +148,20 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 });
+
+/*
+ * Livewire 4.4: o `updates` de uma requisição é montado com REFERÊNCIAS ao estado reativo quando o
+ * diff é consolidado no pai (linha inteira de uma lista, `valores` inteiro). Quem digita depois do envio
+ * muda esse objeto, a resposta é conciliada contra o texto novo em vez do que o servidor recebeu, e o
+ * Livewire regrava o <input> com o valor antigo: teclas somem (STORY-095, D-1 e o CPF do sócio).
+ * Copiar o payload no momento do envio mantém "o que foi enviado" imutável.
+ */
+document.addEventListener('livewire:init', () => {
+    window.Livewire.interceptMessage(({ message }) => {
+        const copia = JSON.parse(JSON.stringify(message.updates ?? {}));
+        message.updates = copia;
+        if (message.payload) {
+            message.payload.updates = copia;
+        }
+    });
+});

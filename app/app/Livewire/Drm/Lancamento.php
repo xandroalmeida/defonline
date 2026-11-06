@@ -439,6 +439,20 @@ final class Lancamento extends Component
 
     // ------------------------------------------------------------------ render
 
+    /**
+     * Todo campo existe em `valores` (vazio), desde a primeira renderização (STORY-095, D-1).
+     *
+     * Chave AUSENTE vira, no cliente, uma atualização do array INTEIRO (`valores`), e a resposta
+     * a substitui por completo: o Livewire reescreve o <input> com o valor que a requisição levou
+     * e apaga as teclas digitadas enquanto ela voava. Com a chave já presente, a atualização é só
+     * a da folha (`valores.D01`) e o que foi digitado depois fica. Texto vazio e chave ausente
+     * significam o mesmo para o domínio (`Dinheiro::interpretar`), então isto não muda nenhum valor.
+     */
+    public function dehydrate(): void
+    {
+        $this->valores = [...array_fill_keys(LancamentoDrm::todosOsCampos(), ''), ...$this->valores];
+    }
+
     public function render(): View
     {
         $conteudo = app(ConteudoDrm::class);
@@ -645,7 +659,7 @@ final class Lancamento extends Component
                     'origem' => $this->retificando ? 'retificacao' : 'inicial',
                     'base_versao' => $this->retificando ? $this->base_versao : null,
                     'rascunho_payload' => [
-                        'valores' => $this->valores,
+                        'valores' => array_filter($this->valores, fn (?string $v): bool => trim((string) $v) !== ''), // vazio = ausente (ver dehydrate).
                         'modos' => $this->modos,
                         'repetidos' => $this->repetidos,
                         'somados' => $this->somados,
