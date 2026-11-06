@@ -7,8 +7,8 @@ namespace App\Domain\Cobranca;
 use Carbon\CarbonInterface;
 
 /**
- * STORY-091 CA-3 — a regra do upgrade para a cota do ciclo em curso. **Decisão provisória do orquestrador,
- * aguardando o PO (D-05):** este é o ÚNICO ponto que a implementa; trocar a regra é trocar este método.
+ * STORY-091 CA-3 — a regra do upgrade para a cota do ciclo em curso. **Decisão do PO em 2026-11-05 (D-05)**
+ * (antes provisória). Este é o ÚNICO ponto que a implementa; trocar a regra é trocar este método.
  *
  * No upgrade, a cota extra do ciclo em curso é proporcional ao tempo que falta para a cota voltar cheia,
  * com arredondamento para baixo. Nunca é negativa, então a cota já disponível no plano antigo nunca diminui.
