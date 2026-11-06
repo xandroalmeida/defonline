@@ -163,8 +163,10 @@ A cobrança (planos, créditos, Asaas) nasce **desligada**: o interruptor fica e
 
 1. URL: `https://defonline.zalk.com.br/webhooks/pagamentos` (POST, sem sessão nem CSRF).
 2. Token de autenticação: o mesmo valor de `ASAAS_WEBHOOK_TOKEN` do `.env.prod`.
-3. Eventos: `PAYMENT_CREATED`, `PAYMENT_CONFIRMED`, `PAYMENT_RECEIVED`, `PAYMENT_OVERDUE`, `PAYMENT_REFUNDED`, `PAYMENT_PARTIALLY_REFUNDED`, `PAYMENT_REFUND_DENIED`, `PAYMENT_DELETED`, `PAYMENT_RESTORED`, `PAYMENT_CHARGEBACK_REQUESTED`, `PAYMENT_CHARGEBACK_DISPUTE`, `PAYMENT_AWAITING_CHARGEBACK_REVERSAL`, `PAYMENT_CHARGEBACK_REVERSED`, `PAYMENT_CREDIT_CARD_CAPTURE_REFUSED`, `PAYMENT_REPROVED_BY_RISK_ANALYSIS`, `CHECKOUT_PAID`, `CHECKOUT_EXPIRED`, `CHECKOUT_CANCELED`. Evento fora dessa lista é guardado como `outro` e ignorado.
+3. Eventos: `PAYMENT_CREATED`, `PAYMENT_CONFIRMED`, `PAYMENT_RECEIVED`, `PAYMENT_OVERDUE`, `PAYMENT_REFUNDED`, `PAYMENT_PARTIALLY_REFUNDED`, `PAYMENT_REFUND_DENIED`, `PAYMENT_DELETED`, `PAYMENT_RESTORED`, `PAYMENT_CHARGEBACK_REQUESTED`, `PAYMENT_CHARGEBACK_DISPUTE`, `PAYMENT_AWAITING_CHARGEBACK_REVERSAL`, `PAYMENT_CREDIT_CARD_CAPTURE_REFUSED`, `PAYMENT_REPROVED_BY_RISK_ANALYSIS`, `CHECKOUT_PAID`, `CHECKOUT_EXPIRED`, `CHECKOUT_CANCELED`. Evento fora dessa lista é guardado como `outro` e ignorado. O Asaas recusa cadastrar `PAYMENT_CHARGEBACK_REVERSED` (sandbox, 2026-11-06), embora o adaptador saiba tratá-lo.
 4. Fila de envio ativa. Se o Asaas pausar a fila por falhas, o endpoint volta a receber ao reativar, e a conciliação (`cobranca:conciliar`) recupera o que se perdeu.
+
+**Local com o sandbox:** `scripts/tunel-webhook.sh up` abre um túnel Cloudflare e cadastra o webhook `DEFOnline Local` na conta de sandbox (`down` apaga os dois). Pelo túnel só passa `POST /webhooks/pagamentos`; o resto responde 404. Use o app em `http://defonline.127.0.0.1.nip.io:8090`, não em `localhost`: o Asaas recusa URL de retorno em `localhost`, e a URL é montada a partir do endereço aberto no navegador.
 
 Ordem para ligar: configurar as variáveis e publicar; conferir `POST /webhooks/pagamentos` sem token (401) e com o token; só então ligar o interruptor. Detalhes e decisões: ADR-010 e IDR-018 a 021.
 
