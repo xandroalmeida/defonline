@@ -127,11 +127,11 @@
                                 Li e aceito o
                                 <a href="{{ route('termos.termo-adesao') }}" target="_blank" rel="noopener" class="link">Termo de Adesão</a> (v2) e a
                                 <a href="{{ route('termos.politica-privacidade') }}" target="_blank" rel="noopener" class="link">Política de Privacidade</a>.
+                                @error('aceito')
+                                    <span id="aceite-erro" class="block mt-1 text-[color:var(--color-destructive)]" dusk="screen-checkout-error-aceite">{{ $message }}</span>
+                                @enderror
                             </span>
                         </label>
-                        @error('aceito')
-                            <p id="aceite-erro" class="text-[color:var(--color-destructive)] text-sm m-0" dusk="screen-checkout-error-aceite">{{ $message }}</p>
-                        @enderror
 
                         <x-button type="submit" variant="primary" :disabled="$personificando"
                                   wire:loading.attr="disabled" wire:target="gerar"
