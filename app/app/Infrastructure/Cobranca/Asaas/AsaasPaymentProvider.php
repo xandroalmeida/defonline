@@ -67,7 +67,16 @@ final class AsaasPaymentProvider implements PaymentProvider
         'CHECKOUT_CANCELED' => TipoEvento::CheckoutCancelado,
     ];
 
-    private const CHAVES_DE_CARTAO = ['creditCard', 'creditCardToken', 'creditCardNumber', 'creditCardBrand'];
+    /**
+     * O que nunca vai para `provider_events.payload` (STORY-093 CA-5, E14): cartão e qualquer dado do titular
+     * (`creditCardHolderInfo` e os campos soltos de nome, documento, contato, endereço e IP). O checkout não envia
+     * dado pessoal, mas se o provedor devolver, não guardamos.
+     */
+    private const CHAVES_DE_CARTAO = [
+        'creditCard', 'creditCardToken', 'creditCardNumber', 'creditCardBrand', 'ccv',
+        'creditCardHolderInfo', 'customerData', 'holderName', 'cpfCnpj', 'email', 'phone', 'mobilePhone',
+        'postalCode', 'address', 'addressNumber', 'addressComplement', 'province', 'remoteIp',
+    ];
 
     private const PAGINA = 100;
 

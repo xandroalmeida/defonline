@@ -179,6 +179,23 @@ it('traduz os eventos do Asaas para os canônicos e guarda o desconhecido como o
     ['EVENTO_NOVO_DO_FUTURO', TipoEvento::Outro],
 ]);
 
+it('STORY-093 CA-5 (E14): o payload guardado não traz o titular do cartão nem dado pessoal', function () {
+    $e = _asaas()->parseWebhook(_webhookAsaas([
+        'id' => 'evt_t', 'event' => 'PAYMENT_CONFIRMED',
+        'payment' => [
+            'id' => 'pay_t', 'value' => 49.9, 'status' => 'CONFIRMED',
+            'creditCardHolderInfo' => ['name' => 'Fulano de Tal', 'email' => 'fulano@example.com', 'cpfCnpj' => '24971563792', 'postalCode' => '89223005', 'addressNumber' => '277', 'phone' => '4738010919'],
+            'customerData' => ['name' => 'Fulana', 'cpfCnpj' => '11144477735'],
+            'remoteIp' => '203.0.113.7',
+        ],
+    ]));
+    $json = json_encode($e->payload);
+
+    expect($e->cobrancaId)->toBe('pay_t')->and($e->payload['payment']['value'])->toBe(49.9)
+        ->and($json)->not->toContain('Fulano')->not->toContain('24971563792')->not->toContain('fulano@example.com')
+        ->not->toContain('89223005')->not->toContain('4738010919')->not->toContain('203.0.113.7')->not->toContain('11144477735');
+});
+
 it('extrai as referências do pagamento e do checkout e descarta dado de cartão do payload', function () {
     $e = _asaas()->parseWebhook(_webhookAsaas([
         'id' => 'evt_1', 'event' => 'PAYMENT_RECEIVED',
