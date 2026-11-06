@@ -29,18 +29,21 @@ Origem: pedido do PO em 2026-11-06. O requisito está em `especificacao/V2/espec
 - [ ] **CA-7:** Conta excluída, anonimizada ou com e-mail não confirmado não recebe e-mail.
 - [ ] **CA-8:** O Usuário nunca vê alerta nem recebe aviso de Empresa de outra conta, e o "Logar como" não altera prazo, dispensa nem descadastro.
 - [ ] **CA-9:** O alerta e a escolha do prazo seguem o RNF-UI-02.
+- [ ] **CA-10:** Quem já estiver com o prazo vencido no lançamento recebe um único e-mail, sem o lembrete de 30 dias, em cada Empresa.
+- [ ] **CA-11:** Cada Empresa gera o próprio e-mail, sem agrupar Empresas, mesmo que os prazos vençam no mesmo dia.
 
 ## Pendências antes de produção
 
 - **Jurídico:** validar o envio como legítimo interesse com descadastro. A especificação exige opt-in para marketing, e este e-mail convida a uma ação que pode consumir crédito.
 - **Designer:** definir onde ficam a escolha do prazo e o alerta.
-- **PO:** definir quantos avisos recebe quem já tem o prazo vencido no lançamento, e se o e-mail de várias Empresas sai agrupado.
 
 ## Decisões do PO (2026-11-06)
 
 - O Usuário escolhe o prazo por Empresa, em vez de avisos fixos nos quatro marcos ou de um prazo único definido pelo admin.
 - Todos recebem o e-mail, com descadastro.
 - São dois e-mails por ciclo: o aviso e um lembrete 30 dias depois.
+- No lançamento, prazo já vencido gera um único aviso.
+- O e-mail é por Empresa, sem agrupamento.
 
 ## Fora de escopo
 

@@ -587,7 +587,8 @@ Decidido pelo PO em 2026-11-06.
 
 - **Prazo:** o Usuário escolhe, para cada Empresa Analisada, 3, 6, 9 ou 12 meses desde o último diagnóstico concluído. O padrão é 6 meses, o check-up semestral do §IV.3 do resumo de recomendações.
 - **Na plataforma:** com o prazo vencido, a Empresa mostra um alerta com a ação de fazer um novo diagnóstico. O alerta some com um novo diagnóstico ou quando o Usuário o dispensa.
-- **Por e-mail:** um aviso quando o prazo vence e um lembrete 30 dias depois, sem outras repetições.
+- **Por e-mail:** um aviso por Empresa quando o prazo vence e um lembrete 30 dias depois, sem outras repetições. Empresas não são agrupadas no mesmo e-mail.
+- **No lançamento:** Empresa com o prazo já vencido gera um único aviso, sem o lembrete.
 - **Descadastro:** todo aviso traz um link para parar de receber esses e-mails, sem exigir login. O alerta na plataforma continua.
 - **Novo ciclo:** um novo diagnóstico da Empresa encerra os avisos pendentes e reinicia a contagem.
 
