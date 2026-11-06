@@ -195,6 +195,7 @@ final class MeuPlano extends Component
             'creditosTotal' => array_sum(array_column($lotes, 'restante')),
             'temLotePerto' => in_array(true, array_column($lotes, 'perto'), true),
             'desconto' => $desconto,
+            'semCartaoSemDesconto' => $this->semCartaoSemDesconto($assinatura, $desconto),
             'cobrancas' => $cobrancas,
             'cobrancasFalharam' => $cobrancasFalharam,
             'personificando' => $personificando,
@@ -324,6 +325,33 @@ final class MeuPlano extends Component
             'restantes' => $restantes,
             'urlRecontratar' => $encerrada && $semCartao && $assinatura->plano_id !== null
                 ? RotasCobranca::url(RotasCobranca::ASSINAR, ['plano' => $assinatura->plano_id, 'ciclo' => $ciclo->value])
+                : null,
+        ];
+    }
+
+    /**
+     * STORY-090 CA-3 — plano que veio de um cupom gratuito e perdeu o desconto numa troca de plano: não há cartão
+     * no provedor, então o ciclo pago é o último. Sem isto a tela não diria que o plano termina nem ofereceria o cartão.
+     *
+     * @param  array<string, mixed>|null  $desconto
+     * @return array{fim: CarbonImmutable, urlRecontratar: string|null}|null
+     */
+    private function semCartaoSemDesconto(?Assinatura $assinatura, ?array $desconto): ?array
+    {
+        if ($assinatura === null || $assinatura->trial || $desconto !== null || $assinatura->id_externo !== null || ! $assinatura->semMeioDePagamento()) {
+            return null;
+        }
+
+        $encerrada = $assinatura->status === StatusAssinatura::Expirada;
+
+        if (! $encerrada && $assinatura->status !== StatusAssinatura::Ativa) {
+            return null;
+        }
+
+        return [
+            'fim' => CarbonImmutable::instance($assinatura->proximo_vencimento),
+            'urlRecontratar' => $encerrada && $assinatura->plano_id !== null
+                ? RotasCobranca::url(RotasCobranca::ASSINAR, ['plano' => $assinatura->plano_id, 'ciclo' => $assinatura->ciclo])
                 : null,
         ];
     }

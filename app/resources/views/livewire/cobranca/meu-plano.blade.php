@@ -14,6 +14,7 @@
     // Um aviso de cobrança por vez (DDR-009 item 4): o de maior severidade.
     $reaisCiclo = fn (int $c): string => $reais($c).' '.($ciclo?->porExtenso() ?? '');
     $avisoDeCobranca = match (true) {
+        $semCartaoSemDesconto !== null && $situacao === S::Ativo => ['alerta', 'Você ainda não cadastrou um cartão. Seu plano termina em '.$dia($semCartaoSemDesconto['fim']).'. Cadastre um cartão antes disso para ele renovar sozinho; sem ele, as funções pagas serão bloqueadas depois dessa data.'],
         $desconto !== null && $desconto['perto'] && $desconto['semCartao'] => ['alerta', 'Seu desconto termina em '.$dia($desconto['fim']).'. Sem um cartão cadastrado, as funções pagas serão bloqueadas depois dessa data.'],
         $desconto !== null && $desconto['perto'] => ['info', 'Seu desconto termina em '.$dia($desconto['fim']).'. A partir daí o plano custa '.$reaisCiclo($desconto['cheio']).'.'],
         $pix && $janelaPix && $situacao === S::Ativo => ['info', 'Seu plano anual termina em '.$dia($vencimento).'. Pague a renovação com Pix para não perder o acesso.'],
@@ -119,6 +120,7 @@
                             @case(S::Encerrado)
                                 <p class="m-0 mb-1 text-sm text-[color:var(--color-primary)]" dusk="screen-meuplano-encerrado">Seu {{ $assinatura->trial ? 'teste' : 'plano' }} terminou em {{ $dia($vencimento) }}. Seus diagnósticos continuam disponíveis.</p>
                                 @if ($desconto !== null && $desconto['urlRecontratar'])<p class="m-0 mb-1 text-sm text-[color:var(--color-secondary)]" dusk="screen-meuplano-desconto-acabou">O desconto terminou e não há cartão cadastrado, então as funções pagas estão bloqueadas. Cadastre um cartão para continuar.</p>@endif
+                                @if ($semCartaoSemDesconto !== null && $semCartaoSemDesconto['urlRecontratar'])<p class="m-0 mb-1 text-sm text-[color:var(--color-secondary)]" dusk="screen-meuplano-sem-cartao-acabou">Seu plano terminou porque não havia cartão cadastrado, então as funções pagas estão bloqueadas. Cadastre um cartão para continuar.</p>@endif
                                 @if ($pix && $urlRenovar)<p class="m-0 mb-1 text-sm text-[color:var(--color-secondary)]">Plano anual com Pix: para voltar, pague a renovação com um novo QR Code.</p>@endif
                                 @break
                             @case(S::EmAtraso)
@@ -131,6 +133,8 @@
                                     </p>
                                 @elseif ($desconto !== null && $desconto['semCartao'])
                                     <p class="m-0 mb-1 text-sm text-[color:var(--color-primary)]" dusk="screen-meuplano-acesso-ate">Sem cobrança por enquanto. O ciclo atual vai até {{ $dia($vencimento) }}.</p>
+                                @elseif ($semCartaoSemDesconto !== null)
+                                    <p class="m-0 mb-1 text-sm text-[color:var(--color-primary)]" dusk="screen-meuplano-acesso-ate">O ciclo atual está pago e vai até {{ $dia($vencimento) }}. Sem um cartão cadastrado, o plano não renova.</p>
                                 @else
                                     <p class="m-0 mb-1 text-sm text-[color:var(--color-primary)]" dusk="screen-meuplano-acesso-ate">Este plano não renova sozinho. Termina em {{ $dia($vencimento) }}.</p>
                                 @endif
@@ -161,11 +165,13 @@
                         @endif
 
                         <div class="flex flex-wrap gap-3 mt-3">
-                            @if ($desconto !== null && $desconto['semCartao'] && $situacao === S::Ativo && $desconto['fim'] !== null)
+                            @if (($desconto !== null && $desconto['semCartao'] && $situacao === S::Ativo && $desconto['fim'] !== null) || ($semCartaoSemDesconto !== null && $situacao === S::Ativo))
                                 <x-button type="button" variant="primary" wire:click="trocarCartao" :disabled="$acaoBloqueada" dusk="screen-meuplano-cadastrar-cartao">Cadastrar cartão</x-button>
                             @endif
                             @if ($desconto !== null && $desconto['urlRecontratar'])
                                 <x-button :href="$desconto['urlRecontratar']" variant="primary" dusk="screen-meuplano-cadastrar-cartao-encerrado">Cadastrar cartão</x-button>
+                            @elseif ($semCartaoSemDesconto !== null && $semCartaoSemDesconto['urlRecontratar'])
+                                <x-button :href="$semCartaoSemDesconto['urlRecontratar']" variant="primary" dusk="screen-meuplano-cadastrar-cartao-encerrado">Cadastrar cartão</x-button>
                             @endif
                             @if ($situacao === S::Ativo && $renovaSozinha)
                                 @if ($urlTrocarPlano)

@@ -10,6 +10,9 @@
     $upgrade = $previa?->imediata ?? false;
     $cobra = $upgrade && ! $previa->semCobranca;
     $nomeCiclo = strtolower($cicloNovo->rotulo());
+    // STORY-090 CA-3: plano que veio de cupom gratuito não tem cartão no provedor; a tela diz o que acontece de fato.
+    $semCartao = $assinatura !== null && $assinatura->id_externo === null && $assinatura->semMeioDePagamento();
+    $prazoDoCartao = $previa === null ? null : ($previa->descontoNovo?->fim($cicloNovo, $assinatura->data_inicio) ?? $previa->proximaCobranca);
     $valorHoje = $reais($cobra ? $previa->aPagarCentavos : 0);
     $rotuloBotao = $upgrade ? 'Trocar para o '.$destino?->nome.' · '.$valorHoje : 'Agendar troca para o '.$destino?->nome;
     $nomeBotao = $upgrade ? 'Trocar para o plano '.$destino?->nome.' por '.$valorHoje : 'Agendar troca para o plano '.$destino?->nome;
@@ -109,13 +112,16 @@
                             <dt class="font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2">A pagar hoje</dt>
                             <dd class="m-0 text-right font-medium text-[color:var(--color-primary)] border-t border-[color:var(--color-border)] pt-2" dusk="screen-troca-resumo-a-pagar">{{ $reais($cobra ? $previa->aPagarCentavos : 0) }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Ciclo</dt>
-                            <dd class="m-0 text-right">{{ $pix ? 'Anual, não renova sozinho' : $cicloNovo->rotulo().', renova sozinho no cartão' }}</dd>
+                            <dd class="m-0 text-right">{{ $pix ? 'Anual, não renova sozinho' : ($semCartao ? $cicloNovo->rotulo().', sem cartão cadastrado' : $cicloNovo->rotulo().', renova sozinho no cartão') }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Próxima cobrança</dt>
-                            <dd class="m-0 text-right" dusk="screen-troca-resumo-proxima">{{ $pix ? 'Renovação em '.$dia($previa->proximaCobranca) : $dia($previa->proximaCobranca).' · '.$reais($previa->proximoValorCentavos) }}</dd>
+                            <dd class="m-0 text-right" dusk="screen-troca-resumo-proxima">{{ $pix ? 'Renovação em '.$dia($previa->proximaCobranca) : ($semCartao ? 'Nenhuma, até você cadastrar um cartão' : $dia($previa->proximaCobranca).' · '.$reais($previa->proximoValorCentavos)) }}</dd>
                             <dt class="text-[color:var(--color-secondary)]">Depois</dt>
                             <dd class="m-0 text-right">{{ $pix ? $reais($previa->precoNovoCheioCentavos).' por ano, por um novo QR Code' : $reais($previa->precoNovoCheioCentavos).' '.$cicloNovo->porExtenso() }}</dd>
                         </dl>
                     </x-card>
+                    @if ($semCartao)
+                        <x-drm.aviso-inline variant="alerta" dusk="screen-troca-sem-cartao">Você não tem cartão cadastrado, então nada será cobrado automaticamente. Depois da troca, cadastre um cartão em Meu plano até {{ $dia($prazoDoCartao) }}: sem ele, o plano termina nessa data e as funções pagas são bloqueadas.</x-drm.aviso-inline>
+                    @endif
                     @if ($previa->descontoTermina)
                         <x-drm.aviso-inline variant="alerta" dusk="screen-troca-desconto-termina">Seu desconto de cupom não vale para o {{ $destino->nome }} {{ $nomeCiclo }}: ele termina nesta troca e o preço passa a ser o cheio.</x-drm.aviso-inline>
                     @elseif ($previa->descontoNovo !== null)

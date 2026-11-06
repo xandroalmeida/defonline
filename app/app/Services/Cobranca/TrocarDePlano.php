@@ -262,6 +262,30 @@ final class TrocarDePlano
         return $feitos;
     }
 
+    /**
+     * O que o provedor deve cobrar da assinatura na próxima vez: valor, ciclo e quando. O downgrade agendado já vale
+     * (o provedor cobra o plano novo). Se o próximo ciclo é gratuito (desconto total, renovação nossa), o valor é o
+     * cheio e a data é o fim do desconto: o provedor não pode cobrar antes (STORY-090).
+     *
+     * @return array{0: int, 1: CicloCobranca, 2: CarbonImmutable}
+     */
+    public static function alvoNoProvedor(Assinatura $a): array
+    {
+        $ciclo = CicloCobranca::from((string) ($a->troca_ciclo ?? $a->ciclo));
+        $desconto = $a->descontoDaProximaCobranca();
+        $proximo = $a->periodos_pagos + 1;
+        $semCobranca = $desconto !== null && $desconto->vale($proximo) && $desconto->valorDoPeriodo($proximo) < (int) config('services.payments.valor_minimo_centavos', 500);
+
+        if ($semCobranca) {
+            return [$desconto->cheio, $ciclo, $desconto->fim(CicloCobranca::from((string) $a->ciclo), $a->data_inicio) ?? CarbonImmutable::instance($a->proximo_vencimento)];
+        }
+
+        $valor = $a->troca_preco_centavos ?? $a->preco_snapshot_centavos
+            ?? IniciarAssinatura::precoDe(Plano::query()->findOrFail($a->troca_plano_id ?? $a->plano_id), $ciclo);
+
+        return [(int) $valor, $ciclo, CarbonImmutable::instance($a->proximo_vencimento)];
+    }
+
     /** O valor, o ciclo e a próxima cobrança do provedor passam a ser os da assinatura. Falhou = marcado para repetir. */
     public function ajustarNoProvedor(Assinatura $assinatura): bool
     {
@@ -270,7 +294,8 @@ final class TrocarDePlano
         }
 
         try {
-            $this->empurrarAoProvedor($assinatura, (int) $assinatura->preco_snapshot_centavos, CicloCobranca::from((string) $assinatura->ciclo));
+            [$valor, $ciclo, $quando] = self::alvoNoProvedor($assinatura);
+            $this->empurrarAoProvedor($assinatura, $valor, $ciclo, $quando);
         } catch (ProvedorIndisponivel $e) {
             $assinatura->forceFill(['ajuste_provedor_pendente' => true])->save();
 
@@ -463,7 +488,7 @@ final class TrocarDePlano
     }
 
     /** @throws ProvedorIndisponivel */
-    private function empurrarAoProvedor(Assinatura $assinatura, int $valorCentavos, CicloCobranca $ciclo): void
+    private function empurrarAoProvedor(Assinatura $assinatura, int $valorCentavos, CicloCobranca $ciclo, ?CarbonImmutable $quando = null): void
     {
         if ($assinatura->id_externo === null) {
             return;
@@ -473,7 +498,7 @@ final class TrocarDePlano
             new ReferenciaProvedor((string) $assinatura->provedor, $assinatura->id_externo),
             $valorCentavos,
             $ciclo,
-            $assinatura->proximo_vencimento->toDateTimeImmutable(),
+            ($quando ?? $assinatura->proximo_vencimento)->toDateTimeImmutable(),
         );
     }
 

@@ -23,6 +23,8 @@ use Illuminate\Support\Carbon;
  * @property bool $cobra_agora
  * @property string|null $antiga_id_externo
  * @property string|null $nova_id_externo
+ * @property int|null $valor_centavos
+ * @property string|null $ciclo
  * @property Carbon|null $concluida_em
  * @property Carbon|null $antiga_cancelada_em
  */

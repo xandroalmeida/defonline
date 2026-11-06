@@ -380,7 +380,7 @@ describe('renovação de assinatura que não é nossa ou não está em dia', fun
         Log::shouldHaveReceived('error')->withArgs(fn (string $m) => $m === 'cobranca.renovacao_de_assinatura_inativa')->once();
     })->with([StatusAssinatura::Cancelada, StatusAssinatura::Expirada]);
 
-    it('registra aviso quando o valor da renovação mudou, e passa a valer o cobrado', function () {
+    it('alerta a equipe quando o valor da renovação mudou, marca a Invoice e passa a valer o cobrado (STORY-090 CA-2)', function () {
         Log::spy();
         $invoice = _pagarAssinatura(_assinaturaPendente($this->usuario));
         $webhook = _fake()->simularRenovacao((string) $invoice->checkout_id_externo);
@@ -392,7 +392,9 @@ describe('renovação de assinatura que não é nossa ou não está em dia', fun
         _entregar($webhook);
 
         expect(Assinatura::query()->sole()->preco_snapshot_centavos)->toBe(3990);
-        Log::shouldHaveReceived('warning')->withArgs(fn (string $m) => $m === 'cobranca.valor_da_renovacao_mudou')->once();
+        Log::shouldHaveReceived('error')->withArgs(fn (string $m, array $c) => $m === 'cobranca.valor_da_renovacao_divergente' && $c['module'] === 'cobranca' && $c['esperado_centavos'] === $invoice->valor_centavos && $c['recebido_centavos'] === 3990)->once();
+        expect(Invoice::query()->where('renovacao', true)->sole()->valor_esperado_centavos)->toBe($invoice->valor_centavos)
+            ->and($invoice->fresh()->valor_esperado_centavos)->toBeNull();
     });
 });
 

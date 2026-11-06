@@ -228,6 +228,8 @@ final class Financeiro extends Component
             'cobrancas' => $cobrancas,
             'sinais' => $this->sinaisDeArrependimento($cobrancas->getCollection()),
             'devolver' => $this->devolver(),
+            // STORY-090 CA-2: renovações cobradas por valor diferente do contratado.
+            'divergentes' => Invoice::query()->with('usuario')->whereNotNull('valor_esperado_centavos')->orderByDesc('pago_em')->limit(self::LISTA_ATENCAO)->get(),
             'contestadas' => Invoice::query()->with('usuario')->where('status', EstadoCobranca::Contestada->value)->latest('pago_em')->limit(self::LISTA_ATENCAO)->get(),
             'semNota' => Invoice::query()->with('usuario')->where('status', EstadoCobranca::Paga->value)
                 ->where('valor_centavos', '>', 0)->whereNull('nf_emitida_em')->whereNull('devolucao_motivo')->whereNull('reembolso_estado')

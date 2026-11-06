@@ -59,9 +59,12 @@ final class CiclosGratuitos
             return 0;
         }
 
-        $proximo = $a->periodos_pagos + 1;
+        // STORY-090 CA-4: o downgrade agendado vale nesta renovação, como na paga: o desconto que conta é o do plano
+        // novo, e uma troca de ciclo começa o período 1.
+        $cicloMudou = $a->troca_plano_id !== null && ($a->troca_ciclo ?? $a->ciclo) !== $a->ciclo;
+        $proximo = $cicloMudou ? 1 : $a->periodos_pagos + 1;
 
-        if ($a->desconto()?->gratuito($proximo) === true) {
+        if ($a->descontoDaProximaCobranca()?->gratuito($proximo) === true) {
             $this->renovarGratis($a, $proximo);
 
             return 1;
@@ -88,13 +91,18 @@ final class CiclosGratuitos
 
     private function renovarGratis(Assinatura $a, int $periodo): void
     {
-        $plano = Plano::query()->findOrFail($a->plano_id);
-        $ciclo = CicloCobranca::from((string) $a->ciclo);
+        $plano = Plano::query()->findOrFail($a->troca_plano_id ?? $a->plano_id);
+        $ciclo = CicloCobranca::from((string) ($a->troca_ciclo ?? $a->ciclo));
+        $cicloMudou = $ciclo->value !== $a->ciclo;
         $agora = CarbonImmutable::now();
         $cota = CotaContratada::naRenovacao($a->cota_snapshot, (string) $a->plano_id, $plano->id, $plano->cota_mensal);
+        // Mudou o ciclo: o período novo nasce no fim do atual (a data de início é a âncora do vencimento).
+        $inicio = $cicloMudou ? CarbonImmutable::instance($a->proximo_vencimento) : CarbonImmutable::instance($a->data_inicio);
+        $proximoPreco = (int) ($a->troca_preco_centavos ?? $a->preco_snapshot_centavos);
+        $a->aplicarRetratoDaTroca();
         $desconto = $a->desconto();
         // Pix anual conta o ano a partir do início (RenovacaoPix); os demais, pelo ciclo.
-        $vencimento = $a->pagoComPix() ? RenovacaoPix::novoVencimento($a->data_inicio, $a->periodos_pagos) : $ciclo->vencimento($a->data_inicio, $periodo);
+        $vencimento = $a->pagoComPix() ? RenovacaoPix::novoVencimento($a->data_inicio, $a->periodos_pagos) : $ciclo->vencimento($inicio, $periodo);
 
         $invoice = Invoice::query()->create([
             'usuario_id' => $a->usuario_id,
@@ -118,9 +126,14 @@ final class CiclosGratuitos
         app(Carteira::class)->renovarCota($a->id, $cota, $vencimento);
 
         $a->refresh()->forceFill([
+            'plano_id' => $plano->id,
+            'ciclo' => $ciclo->value,
+            'data_inicio' => $inicio,
             'periodos_pagos' => $periodo,
-            'preco_snapshot_centavos' => $desconto?->valorDoPeriodo($periodo + 1),
-            'proxima_cota_em' => $ciclo === CicloCobranca::Anual ? CotaMensal::proxima($a->data_inicio, $agora, $vencimento) : null,
+            'preco_snapshot_centavos' => $desconto?->valorDoPeriodo($periodo + 1) ?? $proximoPreco,
+            'proxima_cota_em' => $ciclo === CicloCobranca::Anual ? CotaMensal::proxima($inicio, $agora, $vencimento) : null,
+            ...ConfirmarAssinatura::LIMPA_TROCA,
+            ...($cicloMudou ? ['aviso_renovacao_periodo' => null] : []),
         ])->save();
 
         AuditLogger::log(
