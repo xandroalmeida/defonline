@@ -725,3 +725,46 @@ describe('Histórico em Meu plano', function () {
         Livewire::actingAs($this->usuario)->test(MeuPlano::class)->assertSee('—');
     });
 });
+
+describe('STORY-093 CA-4 (D-17) — limite de tentativas de cupom', function () {
+    it('depois de 10 códigos errados a conta é barrada, inclusive com o código certo, e outra conta do mesmo IP segue livre', function () {
+        _cupomPara(['codigo' => 'BETA50']);
+        $tela = Livewire::actingAs($this->usuario)->test(AssinarPlano::class, ['plano' => _plano()->id, 'ciclo' => 'mensal'])->call('abrirCupom');
+
+        for ($i = 0; $i < 10; $i++) {
+            $tela->set('campoCupom', "CHUTE{$i}")->call('aplicarCupom')->assertSet('erroCupom', 'Não encontramos esse cupom. Confira o código.');
+        }
+
+        $tela->set('campoCupom', 'BETA50')->call('aplicarCupom')->assertSet('codigoCupom', null);
+        expect($tela->get('erroCupom'))->toContain('Muitas tentativas');
+    });
+
+    it('acertar não gasta a cota de tentativas', function () {
+        _cupomPara(['codigo' => 'BETA50']);
+        $tela = Livewire::actingAs($this->usuario)->test(AssinarPlano::class, ['plano' => _plano()->id, 'ciclo' => 'mensal'])->call('abrirCupom');
+
+        for ($i = 0; $i < 15; $i++) {
+            $tela->set('campoCupom', 'BETA50')->call('aplicarCupom')->assertSet('codigoCupom', 'BETA50')->assertSet('erroCupom', null);
+        }
+    });
+
+    it('o limite por IP vale entre contas diferentes (30 erros) e a janela libera depois de uma hora', function () {
+        $outras = Usuario::factory()->count(4)->create(['email_confirmed_at' => now()]);
+
+        foreach ($outras as $n => $u) {
+            $t = Livewire::actingAs($u)->test(AssinarPlano::class, ['plano' => _plano()->id, 'ciclo' => 'mensal'])->call('abrirCupom');
+
+            for ($i = 0; $i < ($n < 3 ? 10 : 1); $i++) {
+                $t->set('campoCupom', "X{$n}{$i}")->call('aplicarCupom');
+            }
+        }
+
+        $livre = Livewire::actingAs($this->usuario)->test(AssinarPlano::class, ['plano' => _plano()->id, 'ciclo' => 'mensal'])->call('abrirCupom')
+            ->set('campoCupom', 'OUTRO')->call('aplicarCupom');
+        expect($livre->get('erroCupom'))->toContain('Muitas tentativas');
+
+        $this->travelTo(now()->addMinutes(61));
+        $livre->set('campoCupom', 'OUTRO')->call('aplicarCupom');
+        expect($livre->get('erroCupom'))->toBe('Não encontramos esse cupom. Confira o código.');
+    });
+});

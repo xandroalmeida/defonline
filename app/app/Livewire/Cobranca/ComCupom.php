@@ -12,6 +12,7 @@ use App\Services\Cobranca\CupomRecusado;
 use App\Services\Cobranca\ItemDeCompra;
 use App\Support\Cobranca\TextoCupom;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 
 /**
  * STORY-083 CA-1 a CA-3 — o campo de cupom dos checkouts (spec STORY-070-cupom-no-checkout): colapsado, com
@@ -20,6 +21,13 @@ use Illuminate\Support\Facades\Auth;
  */
 trait ComCupom
 {
+    /** Tentativas erradas de digitar cupom na janela (STORY-093 CA-4). */
+    private const TENTATIVAS_POR_CONTA = 10;
+
+    private const TENTATIVAS_POR_IP = 30;
+
+    private const JANELA_TENTATIVAS_SEGUNDOS = 3600;
+
     public string $campoCupom = '';
 
     /** O código que o usuário aplicou; o concedido não passa por aqui. */
@@ -56,9 +64,25 @@ trait ComCupom
             return;
         }
 
+        // STORY-093 CA-4 (D-17): chutar código de cupom tem limite, por conta e por IP. Só a tentativa que erra conta.
+        [$porConta, $porIp] = [self::TENTATIVAS_POR_CONTA, self::TENTATIVAS_POR_IP];
+        $chaves = ['cupom-conta:'.$usuario->id => $porConta, 'cupom-ip:'.request()->ip() => $porIp];
+
+        foreach ($chaves as $chave => $limite) {
+            if (RateLimiter::tooManyAttempts($chave, $limite)) {
+                $this->erroCupom = 'Muitas tentativas com código inválido. Tente de novo em '.max(1, (int) ceil(RateLimiter::availableIn($chave) / 60)).' minutos.';
+
+                return;
+            }
+        }
+
         try {
             $aplicado = app(CupomDoCheckout::class)->digitado($usuario, $this->campoCupom, $item);
         } catch (CupomRecusado $e) {
+            foreach (array_keys($chaves) as $chave) {
+                RateLimiter::hit($chave, self::JANELA_TENTATIVAS_SEGUNDOS);
+            }
+
             $this->erroCupom = TextoCupom::recusa($e, $item);
             $this->codigoCupom = null;
 
