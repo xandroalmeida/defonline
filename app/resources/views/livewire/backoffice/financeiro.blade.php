@@ -9,6 +9,7 @@
         'assinatura_cancelada' => 'Pago depois do cancelamento da assinatura',
         'assinatura_antiga' => 'Pago na assinatura antiga, trocada por outro cartão',
         'assinatura_duplicada' => 'Pago com assinatura já existente',
+        'checkout_encerrado' => 'Pago depois de o checkout ser cancelado',
     ];
     $alerta = 'border-[color:var(--color-destructive)] border-2';
 @endphp

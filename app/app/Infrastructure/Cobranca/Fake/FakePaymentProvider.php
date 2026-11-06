@@ -350,6 +350,12 @@ final class FakePaymentProvider implements PaymentProvider
         return $ids;
     }
 
+    /** Liga (ou desliga) o provedor que repassa a referência da 1ª cobrança às cobranças de renovação. */
+    public static function herdarReferenciaNasRenovacoes(bool $liga = true): void
+    {
+        $liga ? Cache::put(self::PREFIXO.'herdar-referencia', true, now()->addDays(self::TTL_DIAS)) : Cache::forget(self::PREFIXO.'herdar-referencia');
+    }
+
     public static function assinaturaCancelada(string $assinaturaId): bool
     {
         return Cache::get(self::PREFIXO."sub-cancelada:{$assinaturaId}") === true;
@@ -452,7 +458,8 @@ final class FakePaymentProvider implements PaymentProvider
 
         Cache::put(self::PREFIXO."pay:{$nova}", [
             'checkout' => null,
-            'referencia' => null,
+            // O Asaas pode repassar a referência da 1ª cobrança às seguintes (STORY-088): {@see herdarReferenciaNasRenovacoes()}.
+            'referencia' => Cache::get(self::PREFIXO.'herdar-referencia') === true && is_array($origem) ? $origem['referencia'] : null,
             // Depois de `changeSubscriptionValue` (STORY-082/083) o provedor cobra o valor novo.
             'valor' => $valorAtual ?? (is_array($origem) ? $origem['valor'] : 0),
             'estado' => $estado->value,
@@ -485,6 +492,7 @@ final class FakePaymentProvider implements PaymentProvider
                 'tipo' => $tipo->value,
                 'cobranca_id' => $cobrancaId,
                 'assinatura_id' => $c['assinatura'] ?? null,
+                'referencia_externa' => $c['referencia'] ?? null,
             ]),
         );
     }

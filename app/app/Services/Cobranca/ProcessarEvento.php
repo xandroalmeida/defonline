@@ -111,6 +111,12 @@ final class ProcessarEvento
             TipoEvento::CobrancaFalhou, TipoEvento::CobrancaVencida => $this->aplicarFalha($evento),
             TipoEvento::CobrancaEstornada => $this->aplicarEstorno($evento),
             TipoEvento::CobrancaContestada => $this->aplicarContestacao($evento),
+            TipoEvento::ContestacaoRevertida => $this->aplicarContestacaoRevertida($evento),
+            TipoEvento::EstornoParcial => $this->aplicarEstornoParcial($evento),
+            TipoEvento::EstornoNegado => $this->aplicarEstornoNegado($evento),
+            // Remover uma cobrança no provedor nunca mexe na Invoice (ver `cobranca.cancelada`, ignorado de propósito):
+            // restaurar também não tem o que desfazer. Fica explícito para o evento não cair no "outro" por esquecimento.
+            TipoEvento::CobrancaRestaurada => ['ignorado', null],
             default => ['ignorado', null],
         };
     }
@@ -151,6 +157,8 @@ final class ProcessarEvento
             if ($resultado[0] === 'processado' && $cobranca->assinaturaId !== null) {
                 $this->ajustarValor($evento->provedor, $cobranca->assinaturaId);
             }
+
+            $this->cancelarRecorrenciaExcedente($evento->provedor, $cobranca, $resultado[1]);
 
             // A cobrança "de hoje" do cartão novo foi paga: a partir daqui o atraso não é mais dela.
             if ($troca !== null && $resultado[0] === 'processado') {
@@ -310,6 +318,173 @@ final class ProcessarEvento
         });
     }
 
+    /**
+     * STORY-088 CA-4 — contestação revertida a nosso favor: a Invoice contestada volta a paga. O provedor é
+     * conferido: só volta se a cobrança está paga lá. O acesso nunca foi retirado pela contestação.
+     *
+     * @return array{0: 'processado'|'ignorado', 1: string|null}
+     */
+    private function aplicarContestacaoRevertida(ProviderEvent $evento): array
+    {
+        [$invoice, $cobranca] = $this->invoiceDaCobranca($evento, 'contestação revertida');
+
+        if ($invoice === null || $cobranca === null) {
+            return ['ignorado', $invoice?->id];
+        }
+
+        if ($cobranca->estado !== EstadoCobranca::Paga) {
+            return ['ignorado', $invoice->id];
+        }
+
+        return DB::transaction(function () use ($invoice): array {
+            $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
+
+            // `Contestada` é final para todo evento comum; só a reversão da própria contestação a reabre.
+            if ($invoice->status !== EstadoCobranca::Contestada) {
+                return ['ignorado', $invoice->id];
+            }
+
+            $invoice->forceFill(['status' => EstadoCobranca::Paga])->save();
+
+            Log::warning('cobranca.contestacao_revertida', [
+                'module' => 'cobranca',
+                'action' => 'processar_evento',
+                'invoice_id' => $invoice->id,
+            ]);
+
+            AuditLogger::log(
+                action: 'cobranca.contestacao_revertida',
+                subjectType: 'Invoice',
+                subjectId: $invoice->id,
+                actorType: 'system',
+                usuarioId: $invoice->usuario_id,
+                after: ['valor_centavos' => $invoice->valor_centavos, 'provedor' => $invoice->provedor],
+            );
+
+            return ['processado', $invoice->id];
+        });
+    }
+
+    /**
+     * STORY-088 CA-4 — estorno parcial: registra o valor devolvido e alerta; a cobrança segue paga e o acesso
+     * não é retirado (a equipe decide, na tela, se há algo a ajustar).
+     *
+     * @return array{0: 'processado'|'ignorado', 1: string|null}
+     */
+    private function aplicarEstornoParcial(ProviderEvent $evento): array
+    {
+        [$invoice] = $this->invoiceDaCobranca($evento, 'estorno parcial');
+
+        if ($invoice === null) {
+            return ['ignorado', null];
+        }
+
+        return DB::transaction(function () use ($invoice, $evento): array {
+            $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
+
+            if ($invoice->status !== EstadoCobranca::Paga) {
+                return ['ignorado', $invoice->id];
+            }
+
+            // O provedor repete a soma de tudo que devolveu: o último valor informado vale.
+            $invoice->forceFill(['reembolsado_parcial_centavos' => $evento->valor_estornado_centavos ?? $invoice->reembolsado_parcial_centavos])->save();
+
+            Log::error('cobranca.estorno_parcial', [
+                'module' => 'cobranca',
+                'action' => 'processar_evento',
+                'invoice_id' => $invoice->id,
+                'valor_estornado_centavos' => $evento->valor_estornado_centavos,
+            ]);
+
+            AuditLogger::log(
+                action: 'cobranca.estorno_parcial',
+                subjectType: 'Invoice',
+                subjectId: $invoice->id,
+                actorType: 'system',
+                usuarioId: $invoice->usuario_id,
+                after: ['valor_centavos' => $invoice->valor_centavos, 'valor_estornado_centavos' => $evento->valor_estornado_centavos],
+            );
+
+            return ['processado', $invoice->id];
+        });
+    }
+
+    /**
+     * STORY-088 CA-4 — o estorno pedido foi negado (o admin recusou a autorização do Pix no painel do provedor):
+     * a cobrança continua paga e o admin é alertado. ÚNICO PONTO de tratamento do estorno negado.
+     *
+     * LIGAÇÃO COM A PISTA C: é aqui que entra a chamada a `ReembolsarCobranca::negar($invoice->id)`, que devolve
+     * ao cliente o crédito travado durante o estorno pendente (E12/D-12). Depois da junção, chamar `negar()`
+     * dentro de `negarEstorno()` (STORY-092). Hoje `negarEstorno()` só libera a trava `reembolso_estado`.
+     *
+     * @return array{0: 'processado'|'ignorado', 1: string|null}
+     */
+    private function aplicarEstornoNegado(ProviderEvent $evento): array
+    {
+        [$invoice, $cobranca] = $this->invoiceDaCobranca($evento, 'estorno negado');
+
+        if ($invoice === null || $cobranca === null || $cobranca->estado !== EstadoCobranca::Paga) {
+            return ['ignorado', $invoice?->id];
+        }
+
+        return $this->negarEstorno($invoice->id);
+    }
+
+    /** @return array{0: 'processado'|'ignorado', 1: string|null} */
+    private function negarEstorno(string $invoiceId): array
+    {
+        return DB::transaction(function () use ($invoiceId): array {
+            $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoiceId);
+
+            if ($invoice->status !== EstadoCobranca::Paga || $invoice->reembolso_estado === null || $invoice->reembolso_estado === 'concluido') {
+                return ['ignorado', $invoice->id];
+            }
+
+            $invoice->forceFill(['reembolso_estado' => null])->save();
+
+            Log::error('cobranca.estorno_negado', [
+                'module' => 'cobranca',
+                'action' => 'processar_evento',
+                'invoice_id' => $invoice->id,
+            ]);
+
+            AuditLogger::log(
+                action: 'cobranca.estorno_negado',
+                subjectType: 'Invoice',
+                subjectId: $invoice->id,
+                actorType: 'system',
+                usuarioId: $invoice->usuario_id,
+                after: ['valor_centavos' => $invoice->valor_centavos, 'provedor' => $invoice->provedor],
+            );
+
+            return ['processado', $invoice->id];
+        });
+    }
+
+    /**
+     * A Invoice e o estado atual da cobrança citada pelo evento. Sem Invoice, o dinheiro não casa com nenhuma compra
+     * e vira alerta.
+     *
+     * @return array{0: Invoice|null, 1: CobrancaNoProvedor|null}
+     */
+    private function invoiceDaCobranca(ProviderEvent $evento, string $rotulo): array
+    {
+        if ($evento->cobranca_id_externo === null) {
+            $this->semInvoice($evento, "{$rotulo} sem id de cobrança");
+
+            return [null, null];
+        }
+
+        $cobranca = $this->provedor->getCharge(new ReferenciaProvedor($evento->provedor, $evento->cobranca_id_externo));
+        $invoice = $this->localizar($evento, $cobranca);
+
+        if ($invoice === null) {
+            $this->semInvoice($evento, "{$rotulo} sem invoice correspondente");
+        }
+
+        return [$invoice, $cobranca];
+    }
+
     /** @return array{0: 'processado'|'ignorado', 1: string|null} */
     private function concluirTroca(ProviderEvent $evento): array
     {
@@ -371,31 +546,47 @@ final class ProcessarEvento
         });
     }
 
+    /**
+     * A Invoice do evento. A correlação é pela PRÓPRIA cobrança (`id_externo`); referência e checkout só valem
+     * para uma Invoice que ainda não tem cobrança ou que tem esta mesma. Numa recorrência o provedor pode repassar
+     * a nossa referência e o checkout da 1ª cobrança às seguintes: sem essa guarda a renovação paga seria
+     * descartada e o estorno do mês 2 cairia na Invoice do mês 1 (STORY-088 CA-2).
+     */
     private function localizar(ProviderEvent $evento, ?CobrancaNoProvedor $cobranca): ?Invoice
     {
+        $cobrancaId = $evento->cobranca_id_externo;
+
+        if ($cobrancaId !== null) {
+            $propria = Invoice::query()->where('provedor', $evento->provedor)->where('id_externo', $cobrancaId)->first();
+
+            if ($propria !== null) {
+                return $propria;
+            }
+        }
+
+        $deEstaCobranca = fn (?Invoice $i): bool => $i !== null && ($cobrancaId === null || $i->id_externo === null || $i->id_externo === $cobrancaId);
+
         $referencia = $cobranca->referenciaInterna ?? $evento->referencia_externa;
-        $checkout = $cobranca->checkoutId ?? $evento->checkout_id_externo;
 
         if ($referencia !== null && Str::isUuid($referencia)) {
             $porId = Invoice::query()->where('provedor', $evento->provedor)->find($referencia);
 
-            if ($porId !== null) {
+            if ($deEstaCobranca($porId)) {
                 return $porId;
             }
         }
 
+        $checkout = $cobranca->checkoutId ?? $evento->checkout_id_externo;
+
         if ($checkout !== null) {
             $porCheckout = Invoice::query()->where('provedor', $evento->provedor)->where('checkout_id_externo', $checkout)->first();
 
-            if ($porCheckout !== null) {
+            if ($deEstaCobranca($porCheckout)) {
                 return $porCheckout;
             }
         }
 
-        return $evento->cobranca_id_externo === null ? null : Invoice::query()
-            ->where('provedor', $evento->provedor)
-            ->where('id_externo', $evento->cobranca_id_externo)
-            ->first();
+        return null;
     }
 
     /** A troca de cartão a que o evento (ou a cobrança) se refere, pela referência, pelo checkout ou pela assinatura nova. */
@@ -426,6 +617,30 @@ final class ProcessarEvento
             ->where('nova_id_externo', $assinatura)
             ->latest('concluida_em')
             ->first();
+    }
+
+    /**
+     * STORY-088 CA-1 — pagamento duplicado de assinatura: a recorrência que não é a nossa continuaria cobrando
+     * todo mês. Cancela no provedor, fora da transação. Se o provedor falhar o evento vai para `erro` e a nova
+     * tentativa chega aqui de novo (a Invoice marcada já existe), então o cancelamento é repetido até dar certo.
+     */
+    private function cancelarRecorrenciaExcedente(string $provedor, CobrancaNoProvedor $cobranca, ?string $invoiceId): void
+    {
+        if ($invoiceId === null || $cobranca->assinaturaId === null) {
+            return;
+        }
+
+        $motivo = Invoice::query()->whereKey($invoiceId)->value('devolucao_motivo');
+
+        if (! in_array($motivo, ['assinatura_duplicada', 'checkout_encerrado'], true)) {
+            return;
+        }
+
+        if (Assinatura::query()->where('provedor', $provedor)->where('id_externo', $cobranca->assinaturaId)->exists()) {
+            return;
+        }
+
+        $this->provedor->cancelSubscription(new ReferenciaProvedor($provedor, $cobranca->assinaturaId));
     }
 
     private function ajustarValor(string $provedor, string $assinaturaIdExterno): void

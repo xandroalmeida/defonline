@@ -17,5 +17,13 @@ enum TipoEvento: string
     case CobrancaEstornada = 'cobranca.estornada';
     case CobrancaContestada = 'cobranca.contestada';
     case CobrancaCancelada = 'cobranca.cancelada';
+    /** STORY-088: a contestação (chargeback) foi revertida a favor do DEFOnline. */
+    case ContestacaoRevertida = 'cobranca.contestacao_revertida';
+    /** STORY-088: cobrança removida no provedor e restaurada. */
+    case CobrancaRestaurada = 'cobranca.restaurada';
+    /** STORY-088: estorno parcial; a cobrança segue paga. */
+    case EstornoParcial = 'cobranca.estorno_parcial';
+    /** STORY-088: o estorno pedido foi negado (Pix recusado no painel). */
+    case EstornoNegado = 'cobranca.estorno_negado';
     case Outro = 'outro';
 }

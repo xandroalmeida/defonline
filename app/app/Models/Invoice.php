@@ -52,6 +52,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $reembolso_solicitado_em
  * @property Carbon|null $reembolsado_em
  * @property string|null $devolucao_motivo
+ * @property string|null $assinatura_id_externo
+ * @property int|null $reembolsado_parcial_centavos
  * @property Carbon|null $nf_emitida_em
  * @property string|null $nf_emitida_por_id
  * @property string|null $nf_numero

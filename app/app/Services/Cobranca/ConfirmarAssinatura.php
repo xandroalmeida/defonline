@@ -73,10 +73,25 @@ final class ConfirmarAssinatura
                     return $invoice->renovacao ? $this->renovarPorPix($invoice, $cobranca) : $this->ativar($invoice, $cobranca);
                 }
 
-                // A Invoice já está paga: o mesmo pagamento de novo, ou a cobrança do mês seguinte
-                // herdando a nossa referência.
-                if ($invoice->status !== EstadoCobranca::Paga || $invoice->id_externo === $cobranca->referencia->id) {
+                // Já é o pagamento desta Invoice (o aviso repetido): nada a fazer.
+                if ($invoice->id_externo === $cobranca->referencia->id) {
                     return ['ignorado', $invoice->id];
+                }
+
+                // A cobrança não é a desta Invoice (o ProcessarEvento só entrega aqui uma Invoice sem cobrança
+                // ou com a mesma, STORY-088 CA-2). Paga sem cobrança própria (cupom total) é renovação.
+                if ($invoice->status !== EstadoCobranca::Paga) {
+                    // CA-3: dinheiro confirmado para um checkout já cancelado/estornado/contestado nunca some em silêncio.
+                    $devolver = $this->registrarPagamentoSemDestino($cobranca, $provedor, $invoice->usuario_id, $invoice->assinatura_id, 'checkout_encerrado');
+
+                    Log::error('cobranca.pagamento_de_checkout_encerrado', [
+                        'module' => 'cobranca',
+                        'action' => 'processar_evento',
+                        'invoice_id' => $invoice->id,
+                        'status' => $invoice->status->value,
+                    ]);
+
+                    return ['ignorado', $devolver->id];
                 }
             }
 
@@ -135,7 +150,7 @@ final class ConfirmarAssinatura
             // O dinheiro entrou, mas o Usuário já tinha assinatura (duas abas, dois checkouts). Não dá
             // para desfazer sozinho: fica registrado como pago e vira alerta para estorno manual. A tela do
             // backoffice (STORY-085) o destaca para o admin devolver.
-            $invoice->forceFill(['devolucao_motivo' => 'assinatura_duplicada'])->save();
+            $invoice->forceFill(['devolucao_motivo' => 'assinatura_duplicada', 'assinatura_id_externo' => $cobranca->assinaturaId])->save();
 
             Log::error('cobranca.assinatura_duplicada', [
                 'module' => 'cobranca',
@@ -289,6 +304,28 @@ final class ConfirmarAssinatura
             ->first();
 
         if ($assinatura === null) {
+            // STORY-088 CA-1: a cobrança do mês seguinte de uma recorrência duplicada (cancelada no provedor, mas
+            // com cobrança já gerada, ou cancelamento que falhou) não renova nada: é dinheiro a devolver.
+            $duplicada = $cobranca->assinaturaId === null ? null : Invoice::query()
+                ->where('provedor', $provedor)
+                ->where('assinatura_id_externo', $cobranca->assinaturaId)
+                ->whereNotNull('devolucao_motivo')
+                ->oldest('created_at')
+                ->first();
+
+            if ($duplicada !== null) {
+                $devolver = $this->registrarPagamentoSemDestino($cobranca, $provedor, $duplicada->usuario_id, $duplicada->assinatura_id, (string) $duplicada->devolucao_motivo);
+
+                Log::error('cobranca.pagamento_de_recorrencia_duplicada', [
+                    'module' => 'cobranca',
+                    'action' => 'processar_evento',
+                    'cobranca' => $cobranca->referencia->id,
+                    'invoice_origem' => $duplicada->id,
+                ]);
+
+                return ['ignorado', $devolver->id];
+            }
+
             // Pagamento da cobrança da assinatura ANTIGA de uma troca de cartão já concluída (a retentativa
             // da régua estava em voo quando o cartão novo foi confirmado): o ciclo vai ser cobrado de novo
             // pelo cartão novo, então pede devolução manual: vira Invoice marcada, e a tela do backoffice (STORY-085) a destaca.
@@ -435,7 +472,7 @@ final class ConfirmarAssinatura
      * de uma troca de cartão). Registra a cobrança como paga e marcada para devolução, sem conceder nada; o
      * `UNIQUE (provedor, id_externo)` faz o mesmo aviso repetido registrar uma vez só.
      */
-    private function registrarPagamentoSemDestino(CobrancaNoProvedor $cobranca, string $provedor, string $usuarioId, string $assinaturaId, string $motivo): Invoice
+    private function registrarPagamentoSemDestino(CobrancaNoProvedor $cobranca, string $provedor, string $usuarioId, ?string $assinaturaId, string $motivo): Invoice
     {
         $existente = Invoice::query()->where('provedor', $provedor)->where('id_externo', $cobranca->referencia->id)->first();
 
@@ -458,6 +495,7 @@ final class ConfirmarAssinatura
             'assinatura_id' => $assinaturaId,
             'renovacao' => false, // não renovou nada: renovação é só o que estende o ciclo
             'devolucao_motivo' => $motivo,
+            'assinatura_id_externo' => $cobranca->assinaturaId,
             'cartao_bandeira' => $cobranca->cartaoBandeira,
             'cartao_ultimos4' => $cobranca->cartaoUltimos4,
         ]);

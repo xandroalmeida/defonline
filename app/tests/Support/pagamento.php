@@ -71,12 +71,16 @@ final class AsaasSimulado
     public static array $cobrancas = [];
 
     public static int $checkouts = 0;
+
+    /** @var list<string> Assinaturas (recorrências) que o DEFOnline cancelou no provedor. */
+    public static array $assinaturasCanceladas = [];
 }
 
 function _asaasSimulado(): void
 {
     AsaasSimulado::$cobrancas = [];
     AsaasSimulado::$checkouts = 0;
+    AsaasSimulado::$assinaturasCanceladas = [];
     _configAsaasDeTeste();
     Mail::fake();
 
@@ -90,6 +94,12 @@ function _asaasSimulado(): void
 
         if ($r->method() === 'POST' && str_contains($r->url(), '/cancel')) {
             return Http::response(['status' => 'CANCELED'], 200);
+        }
+
+        if ($r->method() === 'DELETE' && preg_match('#/subscriptions/([^/]+)$#', $r->url(), $m) === 1) {
+            AsaasSimulado::$assinaturasCanceladas[] = $m[1];
+
+            return Http::response(['deleted' => true, 'id' => $m[1]], 200);
         }
 
         if ($r->method() === 'GET' && preg_match('#/payments/([^/]+)$#', $r->url(), $m) === 1) {

@@ -45,6 +45,7 @@ final class ReceberWebhook
             'referencia_externa' => $evento->referenciaInterna,
             'assinatura_id_externo' => $evento->assinaturaId,
             'payload' => json_encode($evento->payload, JSON_THROW_ON_ERROR),
+            'valor_estornado_centavos' => $evento->valorEstornadoCentavos,
             'status' => 'recebido',
             'recebido_em' => now()->format('Y-m-d H:i:sP'),
         ]);

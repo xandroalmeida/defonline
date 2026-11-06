@@ -56,6 +56,10 @@ final class AsaasPaymentProvider implements PaymentProvider
         'PAYMENT_CHARGEBACK_DISPUTE' => TipoEvento::CobrancaContestada,
         'PAYMENT_AWAITING_CHARGEBACK_REVERSAL' => TipoEvento::CobrancaContestada,
         'PAYMENT_DELETED' => TipoEvento::CobrancaCancelada,
+        'PAYMENT_CHARGEBACK_REVERSED' => TipoEvento::ContestacaoRevertida,
+        'PAYMENT_RESTORED' => TipoEvento::CobrancaRestaurada,
+        'PAYMENT_PARTIALLY_REFUNDED' => TipoEvento::EstornoParcial,
+        'PAYMENT_REFUND_DENIED' => TipoEvento::EstornoNegado,
         'PAYMENT_CREDIT_CARD_CAPTURE_REFUSED' => TipoEvento::CobrancaFalhou,
         'PAYMENT_REPROVED_BY_RISK_ANALYSIS' => TipoEvento::CobrancaFalhou,
         'CHECKOUT_PAID' => TipoEvento::CheckoutConcluido,
@@ -339,7 +343,31 @@ final class AsaasPaymentProvider implements PaymentProvider
             // (PENDENTE DE CONFIRMAÇÃO NO SANDBOX, ADR-010 pendência 6): sem ela a troca de cartão fica pendente.
             assinaturaId: $this->texto($pagamento['subscription'] ?? ($checkout['subscription'] ?? null)),
             payload: $this->semDadosDeCartao($dados),
+            valorEstornadoCentavos: $dados['event'] === 'PAYMENT_PARTIALLY_REFUNDED' ? $this->valorEstornado($pagamento) : null,
         );
+    }
+
+    /**
+     * O que o Asaas devolveu num estorno parcial: a soma de `refunds[].value`. NÃO CONFIRMADO NO SANDBOX o formato
+     * real do evento (ADR-010): sem a lista, o valor fica desconhecido e o estorno é só registrado e alertado.
+     *
+     * @param  array<array-key, mixed>  $pagamento
+     */
+    private function valorEstornado(array $pagamento): ?int
+    {
+        $lista = $pagamento['refunds'] ?? null;
+
+        if (! is_array($lista)) {
+            return null;
+        }
+
+        $total = 0.0;
+
+        foreach ($lista as $estorno) {
+            $total += is_array($estorno) && is_numeric($estorno['value'] ?? null) ? (float) $estorno['value'] : 0.0;
+        }
+
+        return $total > 0 ? (int) round($total * 100) : null;
     }
 
     private function estado(string $status, bool $removida): EstadoCobranca

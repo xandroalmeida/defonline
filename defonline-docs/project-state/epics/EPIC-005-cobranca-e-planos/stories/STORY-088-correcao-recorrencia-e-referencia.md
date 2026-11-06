@@ -7,8 +7,8 @@ sprint_id: null
 type: bugfix
 target_role: programador
 requires_design: false
-status: ready
-owner_agent: null
+status: in_review
+owner_agent: claude-sonnet-5-5
 created_at: 2026-11-05
 updated_at: 2026-11-05
 estimated_session_size: M
@@ -24,13 +24,23 @@ Defeitos: D-01, D-02, D-03, D-16. Leia o detalhe e a reprodução no relatório.
 
 ## Critérios de aceite
 
-- [ ] **CA-1:** Pagamento duplicado de assinatura (E1, E1b) cancela no provedor a recorrência excedente, registra a cobrança para devolução na lista da STORY-085, e o mês seguinte não volta a cobrar.
-- [ ] **CA-2:** A correlação de cobrança com Invoice é pelo identificador da própria cobrança. Referência herdada da 1ª cobrança nunca faz a renovação paga ser ignorada, nem o estorno ou a contestação do mês 2 cair na Invoice do mês 1 (E2, E3, E3b). Vale nas duas hipóteses: o provedor repassa ou não `externalReference`.
-- [ ] **CA-3:** Nenhum pagamento confirmado termina em `ignorado` sem Invoice e sem alerta. Se não houver destino, ele vai para a lista de devolução.
-- [ ] **CA-4:** Os eventos `PAYMENT_CHARGEBACK_REVERSED`, `PAYMENT_RESTORED`, `PAYMENT_PARTIALLY_REFUNDED` e `PAYMENT_REFUND_DENIED`, conferidos na documentação oficial, têm tratamento: contestação revertida volta a paga; estorno negado volta a paga e alerta o admin; estorno parcial registra o valor, sem retirar o acesso.
+- [x] **CA-1:** Pagamento duplicado de assinatura (E1, E1b) cancela no provedor a recorrência excedente, registra a cobrança para devolução na lista da STORY-085, e o mês seguinte não volta a cobrar.
+- [x] **CA-2:** A correlação de cobrança com Invoice é pelo identificador da própria cobrança. Referência herdada da 1ª cobrança nunca faz a renovação paga ser ignorada, nem o estorno ou a contestação do mês 2 cair na Invoice do mês 1 (E2, E3, E3b). Vale nas duas hipóteses: o provedor repassa ou não `externalReference`.
+- [x] **CA-3:** Nenhum pagamento confirmado termina em `ignorado` sem Invoice e sem alerta. Se não houver destino, ele vai para a lista de devolução.
+- [x] **CA-4:** Os eventos `PAYMENT_CHARGEBACK_REVERSED`, `PAYMENT_RESTORED`, `PAYMENT_PARTIALLY_REFUNDED` e `PAYMENT_REFUND_DENIED`, conferidos na documentação oficial, têm tratamento: contestação revertida volta a paga; estorno negado volta a paga e alerta o admin; estorno parcial registra o valor, sem retirar o acesso.
 
 ## Padrões de qualidade
 
 TDD, 98% em `app/Domain`, sem dado de cartão, sem termo do provedor fora do adaptador, datas por `DataExibicao`, interruptor respeitado.
 
 ## Notas do agente
+
+Decisões em [IDR-030](../../../decisions/idr/IDR-030-correlacao-pela-propria-cobranca-e-recorrencia-excedente.md). Teste: `tests/Feature/Cobranca/RecorrenciaEReferenciaTest.php`.
+
+- CA-1: E1, E1b e a falha do cancelamento no provedor (evento em `erro`, repetição cancela).
+- CA-2: E2, E3 e E3b, cada um com e sem repasse de `externalReference` (Fake com `herdarReferenciaNasRenovacoes` e Asaas simulado).
+- CA-3: pagamento de checkout cancelado vai para a devolução com alerta; pagamento de assinatura desconhecida e sem dono continua só em alerta (sem usuário não há Invoice a criar).
+- CA-4: um teste por evento (E15) mais o mapeamento do adaptador. `PAYMENT_RESTORED` ficou como "ignorado de propósito": remover cobrança no provedor nunca altera a Invoice.
+- Ponto único do estorno negado: `ProcessarEvento::aplicarEstornoNegado` -> `negarEstorno`. Depois da junção, chamar `ReembolsarCobranca::negar($invoice->id)` ali (comentário no código).
+- Os nomes dos eventos e o formato de `refunds[]` não foram vistos no sandbox (sem escrita lá, por regra).
+- Rodado: Pest de `tests/Domain`, `tests/Feature/Cobranca`, `tests/Feature/Livewire`, `tests/Unit/Arch` (2432 passam); Pint e PHPStan limpos; Dusk `FinanceiroBackofficeBrowserTest`. Suíte completa, cobertura e Dusk inteiro ficam para a junção (instrução do PO).

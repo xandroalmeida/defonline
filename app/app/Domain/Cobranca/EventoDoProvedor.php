@@ -20,5 +20,7 @@ final readonly class EventoDoProvedor
         public ?string $referenciaInterna = null,
         public ?string $assinaturaId = null,
         public array $payload = [],
+        /** Estorno parcial: o valor devolvido que o provedor informou, ou nulo se não informou. */
+        public ?int $valorEstornadoCentavos = null,
     ) {}
 }

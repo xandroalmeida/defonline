@@ -22,6 +22,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $assinatura_id_externo
  * @property string|null $invoice_id
  * @property array<string, mixed> $payload
+ * @property int|null $valor_estornado_centavos
  * @property string $status recebido|processado|ignorado|erro
  * @property string|null $erro
  * @property Carbon $recebido_em
