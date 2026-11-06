@@ -78,7 +78,7 @@ step "Pint (lint)"  docker compose exec -T web ./vendor/bin/pint --test
 step "Larastan"     docker compose exec -T web ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M
 # Pest SEM cobertura: exit code confiável (o swallow do exit code era só com o plugin
 # de cobertura do Pest 4.7 + --min). A cobertura ≥80/≥98 é enforced no CI (pr.yml).
-step "Pest (All, sem cobertura)"  docker compose exec -T web php artisan test --testsuite=All
+step "Pest (All, sem cobertura)"  docker compose exec -T web php -d memory_limit=-1 ./vendor/bin/pest --testsuite=All
 step "Pennant overdue"  docker compose exec -T web php artisan pennant:list-overdue --fail-on-overdue
 
 bold "✔ pre-push verde — pode dar push."
