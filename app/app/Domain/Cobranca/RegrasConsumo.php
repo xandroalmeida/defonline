@@ -39,10 +39,6 @@ final class RegrasConsumo
             return new Bloqueio(MotivoBloqueio::SemNada, trialElegivel: $carteira->trialElegivel);
         }
 
-        if ($assinatura->status === StatusAssinatura::EmAtraso) {
-            return new Bloqueio(MotivoBloqueio::EmAtraso, $assinatura->vencimento);
-        }
-
         if (self::daAcesso($assinatura, $carteira)) {
             return null;
         }
@@ -68,11 +64,16 @@ final class RegrasConsumo
         return $assinatura->trial && $carteira->empresaJaEmTesteDeOutraConta;
     }
 
-    /** Ativa e cancelada dão acesso até o fim do ciclo pago; atraso e encerrada, não. */
+    /**
+     * Ativa e cancelada dão acesso até o fim do ciclo pago. Em atraso o acesso segue durante as retentativas
+     * (espec §3.7, Termo cl. 7): o bloqueio só vem quando a régua encerra o ciclo e a assinatura deixa de ser
+     * vigente (STORY-092 CA-4). Encerrada, não.
+     */
     private static function daAcesso(AssinaturaVista $assinatura, SnapshotCarteira $carteira): bool
     {
-        return ($assinatura->status === StatusAssinatura::Ativa || $assinatura->status === StatusAssinatura::Cancelada)
-            && $assinatura->vencimento->greaterThan($carteira->agora);
+        return $assinatura->status === StatusAssinatura::EmAtraso
+            || (($assinatura->status === StatusAssinatura::Ativa || $assinatura->status === StatusAssinatura::Cancelada)
+                && $assinatura->vencimento->greaterThan($carteira->agora));
     }
 
     /** Vencido não se consome, mesmo que o lote ainda esteja marcado como ativo (CA-4). */
@@ -112,6 +113,7 @@ final class RegrasConsumo
 
     private static function motivoDaAssinatura(AssinaturaVista $assinatura, SnapshotCarteira $carteira): Bloqueio
     {
+        // Em atraso só chega aqui sem cota: não há renovação a esperar, o que destrava é o cartão (o aviso, com cota, é {@see AvisoDeAtraso}).
         if ($assinatura->status === StatusAssinatura::EmAtraso) {
             return new Bloqueio(MotivoBloqueio::EmAtraso, $assinatura->vencimento);
         }

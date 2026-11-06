@@ -120,6 +120,8 @@ final class IniciarRenovacaoPix
                 'provedor' => $semCobranca ? 'interno' : $this->provedor->nome(),
                 'assinatura_id' => $assinatura->id,
                 'renovacao' => true,
+                // STORY-092: o período em que este QR Code nasceu; pago depois de o ano já ter avançado, é devolvido.
+                'periodo_base' => $assinatura->periodos_pagos,
                 'aceite_termo_id' => $aceiteId,
             ] + ($continua
                 ? ['preco_cheio_centavos' => $emCurso->cheio, 'desconto_centavos' => $emCurso->desconto]

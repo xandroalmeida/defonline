@@ -193,6 +193,15 @@ final class TrocarDePlano
             throw new UnexpectedValueException('Valor pago diferente do valor da invoice.');
         }
 
+        $assinatura = Assinatura::query()->lockForUpdate()->find($invoice->assinatura_id);
+        $plano = $invoice->plano_id === null ? null : Plano::query()->find($invoice->plano_id);
+
+        // O dinheiro entrou, mas a base mudou (renovou, foi cancelada, já trocou de plano ou de ciclo): não dá para
+        // aplicar a diferença sobre outra base. Fica na lista de devolução, com alerta (STORY-092 CA-1).
+        if ($assinatura === null || $plano === null || $assinatura->status !== StatusAssinatura::Ativa || $assinatura->periodos_pagos !== $invoice->periodo_base || ! self::mesmaBase($assinatura, $invoice)) {
+            return PagamentoSemEfeito::registrar($invoice, $cobranca, PagamentoSemEfeito::TROCA_SEM_EFEITO);
+        }
+
         $pagoEm = $cobranca->pagoEm !== null ? CarbonImmutable::instance($cobranca->pagoEm) : CarbonImmutable::now();
 
         $invoice->forceFill([
@@ -203,22 +212,6 @@ final class TrocarDePlano
             'cartao_bandeira' => $cobranca->cartaoBandeira,
             'cartao_ultimos4' => $cobranca->cartaoUltimos4,
         ])->save();
-
-        $assinatura = Assinatura::query()->lockForUpdate()->find($invoice->assinatura_id);
-        $plano = $invoice->plano_id === null ? null : Plano::query()->find($invoice->plano_id);
-
-        // O dinheiro entrou, mas o ciclo seguiu em frente (renovou, foi cancelado ou já trocou): não dá para
-        // aplicar a troca sobre uma base que mudou. Vira alerta para devolução manual (STORY-087).
-        if ($assinatura === null || $plano === null || $assinatura->status !== StatusAssinatura::Ativa || $assinatura->periodos_pagos !== $invoice->periodo_base) {
-            Log::error('cobranca.troca_paga_sem_efeito', [
-                'module' => 'cobranca',
-                'action' => 'processar_evento',
-                'invoice_id' => $invoice->id,
-                'assinatura_id' => $invoice->assinatura_id,
-            ]);
-
-            return ['processado', $invoice->id];
-        }
 
         $cicloNovo = CicloCobranca::from((string) $invoice->ciclo);
         $cheioNovo = IniciarAssinatura::precoDe($plano, $cicloNovo);
@@ -244,6 +237,13 @@ final class TrocarDePlano
         );
 
         return ['processado', $invoice->id];
+    }
+
+    /** A diferença foi calculada sobre o plano e o ciclo que a assinatura tem agora? (Invoice antiga, sem o retrato, vale.) */
+    private static function mesmaBase(Assinatura $assinatura, Invoice $invoice): bool
+    {
+        return ($invoice->plano_origem_id === null || $invoice->plano_origem_id === $assinatura->plano_id)
+            && ($invoice->ciclo_origem === null || $invoice->ciclo_origem === $assinatura->ciclo);
     }
 
     /** Rotina horária: o ajuste de valor que o provedor não aceitou na hora. @return int quantos foram ajustados */
@@ -541,6 +541,8 @@ final class TrocarDePlano
             'assinatura_id' => $assinatura->id,
             'periodo_base' => $assinatura->periodos_pagos,
             'cota_extra_troca' => $previa->mesmoCiclo ? $previa->cotaExtraAgora : null,
+            'plano_origem_id' => $assinatura->plano_id,
+            'ciclo_origem' => $assinatura->ciclo,
         ]);
 
         $pix = $meio === MeioPagamento::Pix;

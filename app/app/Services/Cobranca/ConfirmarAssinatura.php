@@ -63,6 +63,11 @@ final class ConfirmarAssinatura
             if ($invoice !== null) {
                 $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
 
+                // STORY-092: o checkout já tinha sido cancelado e o provedor mesmo assim confirma o pagamento.
+                if ($invoice->status === EstadoCobranca::Cancelada) {
+                    return PagamentoSemEfeito::registrar($invoice, $cobranca, PagamentoSemEfeito::CHECKOUT_CANCELADO);
+                }
+
                 // STORY-082: a diferença de um upgrade, paga por checkout avulso, aplica a troca; não ativa nem renova.
                 if ($invoice->tipo === 'troca_de_plano') {
                     return in_array($invoice->status, [EstadoCobranca::Pendente, EstadoCobranca::Vencida, EstadoCobranca::Falhou], true)
@@ -210,6 +215,12 @@ final class ConfirmarAssinatura
         }
 
         $this->conferirValor($invoice, $cobranca);
+
+        // STORY-092 (E13): dois QR Codes da mesma renovação pagos. O ano só avança uma vez por período pago:
+        // se a assinatura já está além do período em que este QR Code nasceu, o segundo pagamento é devolvido.
+        if ($invoice->periodo_base !== null && $invoice->periodo_base !== $assinatura->periodos_pagos) {
+            return PagamentoSemEfeito::registrar($invoice, $cobranca, PagamentoSemEfeito::RENOVACAO_REPETIDA);
+        }
 
         $pagoEm = $cobranca->pagoEm !== null ? CarbonImmutable::instance($cobranca->pagoEm) : CarbonImmutable::now();
 

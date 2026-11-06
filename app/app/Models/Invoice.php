@@ -44,6 +44,8 @@ use Illuminate\Support\Carbon;
  * @property int|null $periodo_base
  * @property int|null $cota_extra_troca
  * @property int|null $valor_esperado_centavos
+ * @property string|null $plano_origem_id
+ * @property string|null $ciclo_origem
  * @property string|null $cupom_id
  * @property int|null $cupom_ciclos
  * @property int|null $preco_cheio_centavos

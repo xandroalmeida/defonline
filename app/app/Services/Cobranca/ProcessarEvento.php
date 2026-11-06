@@ -171,6 +171,11 @@ final class ProcessarEvento
         return DB::transaction(function () use ($invoice, $cobranca): array {
             $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
 
+            // STORY-092: checkout cancelado que o provedor confirma como pago: o dinheiro entrou, vai para a devolução.
+            if ($invoice->status === EstadoCobranca::Cancelada) {
+                return PagamentoSemEfeito::registrar($invoice, $cobranca, PagamentoSemEfeito::CHECKOUT_CANCELADO);
+            }
+
             if (! in_array($invoice->status, [EstadoCobranca::Pendente, EstadoCobranca::Vencida, EstadoCobranca::Falhou], true)) {
                 return ['ignorado', $invoice->id];
             }

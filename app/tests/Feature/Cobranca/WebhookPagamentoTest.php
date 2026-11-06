@@ -118,12 +118,15 @@ it('Pix expirado não credita e fica vencido; o banco confirmando depois do praz
     expect($this->invoice->fresh()->status)->toBe(EstadoCobranca::Paga)->and(LoteCredito::query()->count())->toBe(1);
 });
 
-it('compra cancelada é estado final: pagamento tardio não credita', function () {
+it('compra cancelada é estado final: pagamento tardio não credita, mas o dinheiro vai para a lista de devolução', function () {
     _postarWebhookAsaas($this, 'CHECKOUT_CANCELED', 'evt_j1', ['checkout' => ['id' => $this->invoice->checkout_id_externo]])->assertOk();
     _asaasCobranca('pay_1', $this->invoice);
     _postarWebhookAsaas($this, 'PAYMENT_RECEIVED', 'evt_j2', _pagamento($this->invoice))->assertOk();
 
-    expect($this->invoice->fresh()->status)->toBe(EstadoCobranca::Cancelada)->and(LoteCredito::query()->count())->toBe(0);
+    // STORY-092 CA-1: o provedor confirma o pagamento; sem destino, o admin vê "a devolver" (não some em silêncio).
+    expect($this->invoice->fresh()->status)->toBe(EstadoCobranca::Paga)
+        ->and($this->invoice->fresh()->devolucao_motivo)->toBe('checkout_cancelado')
+        ->and(LoteCredito::query()->count())->toBe(0);
 });
 
 it('expiração que chega depois do pagamento não desfaz a compra paga (fora de ordem)', function () {
