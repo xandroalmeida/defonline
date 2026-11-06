@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\CnaeController;
+use App\Http\Controllers\DescadastroAvisoRenovacaoController;
 use App\Http\Controllers\DiagnosticoController;
 use App\Http\Controllers\DrmExportacaoController;
 use App\Http\Controllers\EmailConfirmacaoController;
@@ -72,6 +73,15 @@ Route::view('/termos/politica-privacidade', 'legal.politica-privacidade-v2')->na
 Route::get('/email/confirmar/{usuario}', [EmailConfirmacaoController::class, 'confirmar'])
     ->middleware('signed')
     ->name('email.confirmar');
+// STORY-099 — descadastro do aviso para renovar o diagnóstico, sem login: o link assinado identifica o usuário.
+Route::get('/avisos/renovacao-diagnostico/{usuario}/descadastro', [DescadastroAvisoRenovacaoController::class, 'mostrar'])
+    ->whereUuid('usuario')
+    ->middleware('signed')
+    ->name('avisos.renovacao.descadastro');
+Route::post('/avisos/renovacao-diagnostico/{usuario}/descadastro', [DescadastroAvisoRenovacaoController::class, 'descadastrar'])
+    ->whereUuid('usuario')
+    ->middleware('signed');
+
 Route::view('/email/confirmado', 'email.confirmado')->name('email.confirmado');
 Route::view('/email/confirmar-erro', 'email.confirmar-erro')->name('email.confirmar-erro');
 Route::post('/email/reenviar-confirmacao', [EmailConfirmacaoController::class, 'reenviar'])

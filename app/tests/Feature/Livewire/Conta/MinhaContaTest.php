@@ -113,6 +113,32 @@ describe('dados pessoais', function () {
     });
 });
 
+describe('avisos para renovar o diagnóstico', function () {
+    it('quem se descadastrou volta a receber, e pode parar de novo', function () {
+        $u = _usuarioDaConta(['aviso_renovacao_descadastrado_em' => now()]);
+
+        $tela = Livewire::actingAs($u)->test(MinhaConta::class)
+            ->assertSet('receberAvisoRenovacao', false)
+            ->set('receberAvisoRenovacao', true);
+        expect($u->fresh()->aviso_renovacao_descadastrado_em)->toBeNull();
+
+        $tela->set('receberAvisoRenovacao', false);
+        expect($u->fresh()->aviso_renovacao_descadastrado_em)->not->toBeNull();
+    });
+
+    it('o Logar como não muda a preferência', function () {
+        $u = _usuarioDaConta();
+        _personificar(_adminDaEquipe(), $u);
+
+        $tela = new MinhaConta;
+        $tela->receberAvisoRenovacao = false;
+        $tela->updatedReceberAvisoRenovacao();
+
+        expect($u->fresh()->aviso_renovacao_descadastrado_em)->toBeNull()
+            ->and($tela->receberAvisoRenovacao)->toBeTrue();
+    });
+});
+
 describe('senha', function () {
     it('troca a senha e encerra as outras sessões', function () {
         config(['session.driver' => 'database']);

@@ -34,6 +34,12 @@ Schedule::command('assinaturas:renovar-cota')
     ->onOneServer()
     ->withoutOverlapping(30);
 
+// STORY-099 — aviso para renovar o diagnóstico: uma vez por dia, às 9h de Brasília.
+Schedule::command('diagnosticos:avisar-renovacao')
+    ->dailyAt('12:00')
+    ->onOneServer()
+    ->withoutOverlapping(120);
+
 // STORY-079 CA-1 — lembrete de renovação a 7 dias do fim do ciclo (um por ciclo).
 Schedule::command('assinaturas:avisar-renovacao')
     ->hourly()

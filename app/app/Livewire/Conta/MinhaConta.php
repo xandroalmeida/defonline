@@ -57,11 +57,28 @@ final class MinhaConta extends Component
 
     public bool $senhaAlterada = false;
 
+    /** STORY-099 — e-mails para renovar o diagnóstico: é aqui que quem se descadastrou volta a receber. */
+    public bool $receberAvisoRenovacao = true;
+
     public function mount(): void
     {
         $usuario = $this->usuario();
         $this->nome = $usuario->nome;
         $this->telefone = $this->telefoneFormatado($usuario->telefone);
+        $this->receberAvisoRenovacao = $usuario->aviso_renovacao_descadastrado_em === null;
+    }
+
+    public function updatedReceberAvisoRenovacao(): void
+    {
+        $usuario = $this->usuario();
+
+        if (Personificacao::ativa() !== null) {
+            $this->receberAvisoRenovacao = $usuario->aviso_renovacao_descadastrado_em === null;
+
+            return;
+        }
+
+        $usuario->forceFill(['aviso_renovacao_descadastrado_em' => $this->receberAvisoRenovacao ? null : now()])->save();
     }
 
     public function salvarDados(): mixed

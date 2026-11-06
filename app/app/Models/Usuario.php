@@ -34,6 +34,7 @@ use Illuminate\Support\Carbon;
  * @property string $telefone
  * @property Carbon|null $email_confirmed_at
  * @property Carbon|null $anonimizado_at
+ * @property Carbon|null $aviso_renovacao_descadastrado_em
  * @property list<string>|null $permissoes_admin
  * @property Carbon|null $deleted_at
  */
@@ -51,6 +52,7 @@ final class Usuario extends Authenticatable
         'anonimizado_at' => 'datetime',
         'permissoes_admin' => 'array',
         'email_confirmed_at' => 'datetime',
+        'aviso_renovacao_descadastrado_em' => 'datetime',
         'senha_hash' => 'hashed',
     ];
 

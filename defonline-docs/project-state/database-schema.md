@@ -84,6 +84,9 @@ PK `id uuid`. FK `usuario_id → usuarios` (RESTRICT). **UNIQUE parcial** `(usua
 | `telefone` | varchar(11) | nullable — telefone/WhatsApp da empresa, só dígitos (PDR-019) |
 | `personificado_por_id` | uuid | nullable, FK `usuarios` (RESTRICT) — admin da última gravação pelo "Logar como" (STORY-066); null se o próprio usuário gravou por último |
 
+### `avisos_renovacao_diagnostico` — estado do aviso para renovar o diagnóstico (STORY-099)
+PK `id uuid`. FK `diagnostico_id → diagnosticos` **CASCADE**, único: uma linha por diagnóstico. Colunas: `aviso_em`, `lembrete_em`, `sem_lembrete`, `alerta_dispensado_em`. `empresas_analisadas.renovacao_diagnostico_meses` guarda o prazo (3, 6, 9 ou 12; padrão 6) e `usuarios.aviso_renovacao_descadastrado_em`, o descadastro.
+
 ### `quiz_rascunhos` — rascunhos do quiz (23 campos, Anexo A)
 PK `id uuid`. FKs `usuario_id`, `empresa_analisada_id` (RESTRICT). **UNIQUE parcial** `(usuario_id, empresa_analisada_id) WHERE deleted_at IS NULL`.
 

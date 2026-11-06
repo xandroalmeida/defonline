@@ -65,6 +65,12 @@
                     </dl>
                     <p class="m-0 {{ $sutil }}">Para alterar o e-mail ou o CPF, escreva para eb@ebparcerias.com.</p>
 
+                    <label class="flex gap-2.5 items-start text-sm font-normal cursor-pointer">
+                        <input type="checkbox" wire:model.live="receberAvisoRenovacao" @disabled($personificando) dusk="screen-conta-aviso-renovacao"
+                               class="mt-1 accent-[color:var(--color-tertiary)]">
+                        <span class="text-[color:var(--color-primary)]">Receber por e-mail os avisos para renovar o diagnóstico</span>
+                    </label>
+
                     @unless ($personificando)
                         <div class="mt-auto">
                             <x-button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="salvarDados" dusk="screen-conta-salvar-dados">Salvar dados</x-button>

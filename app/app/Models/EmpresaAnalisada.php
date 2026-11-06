@@ -52,9 +52,11 @@ use Illuminate\Support\Carbon;
  * @property string|null $observacoes
  * @property string|null $email
  * @property string|null $telefone
+ * @property int $renovacao_diagnostico_meses
  * @property Carbon|null $deleted_at
  */
 #[Fillable([
+    'renovacao_diagnostico_meses',
     'usuario_id',
     'tipo_documento',
     'documento',

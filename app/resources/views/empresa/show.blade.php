@@ -11,14 +11,14 @@
 
     <x-page-header :title="$nomeExibicao">
         <x-slot:actions>
-            <x-button variant="primary" type="button"
-                      :disabled="true"
-                      title="Em breve — Onda 2"
+            <x-button :href="route('diagnosticos.novo', $empresa)" variant="primary"
                       dusk="empresa-show-iniciar-diagnostico">
-                Iniciar diagnóstico
+                {{ $empresa->diagnosticos()->exists() ? 'Refazer diagnóstico' : 'Iniciar diagnóstico' }}
             </x-button>
         </x-slot:actions>
     </x-page-header>
+
+    <livewire:empresa.alerta-renovacao-diagnostico :empresa="$empresa" :com-margem="true"/>
 
     <x-personificacao-marca :registro="$empresa" class="mb-4"/>
 
@@ -97,6 +97,10 @@
             <x-button :href="route('drm.lancar', $empresa)" variant="primary" dusk="empresa-show-lancar-mes">Lançar o mês</x-button>
             <x-button :href="route('drm.serie', $empresa)" variant="secondary" dusk="empresa-show-ver-meses">Ver todos os meses</x-button>
         </div>
+    </x-card>
+
+    <x-card class="mt-6">
+        <livewire:empresa.prazo-renovacao-diagnostico :empresa="$empresa"/>
     </x-card>
 
     <x-card class="mt-6">

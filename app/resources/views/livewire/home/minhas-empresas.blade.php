@@ -79,6 +79,7 @@
                                 {{ $empresa->municipio }} / {{ $empresa->uf }}
                             </span>
                         </div>
+                        <livewire:empresa.alerta-renovacao-diagnostico :empresa="$empresa" :key="'renovacao-'.$empresa->id"/>
                         <div class="flex flex-wrap gap-2 mt-auto pt-2">
                             <x-button :href="route('empresas.show', $empresa)" variant="secondary" size="sm"
                                       dusk="minhas-empresas-ver-{{ $empresa->id }}">
