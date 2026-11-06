@@ -104,7 +104,7 @@ final class RenovacaoFalhaCobrancaBrowserTest extends DuskTestCase
         return (string) Assinatura::query()->sole()->atraso_cobranca_id;
     }
 
-    public function test_renovacao_recusada_bloqueia_o_quiz_e_o_pagamento_libera_em_mobile(): void
+    public function test_renovacao_recusada_avisa_sem_bloquear_e_o_pagamento_restabelece_em_mobile(): void
     {
         $usuario = Usuario::factory()->create();
         $empresa = EmpresaAnalisada::factory()->create(['usuario_id' => $usuario->id]);
@@ -119,11 +119,13 @@ final class RenovacaoFalhaCobrancaBrowserTest extends DuskTestCase
             $cobranca = $this->recusarRenovacao($primeira);
             $this->assertSame(StatusAssinatura::EmAtraso, Assinatura::query()->sole()->status);
 
+            // STORY-092 CA-4: em atraso o acesso segue durante as retentativas; a Home avisa.
             $browser->visit('/empresas/'.$empresa->id.'/diagnosticos/novo')
-                ->waitFor('@screen-bloqueio')
-                ->assertSeeIn('@screen-bloqueio-titulo', 'Sua assinatura está em atraso')
-                ->assertSeeIn('@screen-bloqueio-causa', 'Atualize o cartão')
-                ->assertMissing('@quiz-bloco-1');
+                ->waitFor('@quiz-bloco-1')
+                ->assertMissing('@screen-bloqueio')
+                ->visit('/home')
+                ->waitFor('@screen-trial-aviso')
+                ->assertSeeIn('@screen-trial-aviso', 'Sua assinatura está em atraso');
 
             // O cartão passa na retentativa: o banco confirma a mesma cobrança e o quiz volta.
             app(ReceberWebhook::class)->tratar($this->fake()->simularPagamentoDaCobranca($cobranca));

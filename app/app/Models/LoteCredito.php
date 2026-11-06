@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Domain\Cobranca\StatusLote;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -31,6 +32,20 @@ final class LoteCredito extends Model
     protected $dateFormat = 'Y-m-d H:i:sP';
 
     protected $table = 'lotes_credito';
+
+    /**
+     * STORY-092 (D-12) — o lote cuja compra tem estorno pedido e ainda não concluído (em andamento ou aguardando a
+     * autorização do admin no provedor) não se consome: o dinheiro está sendo devolvido. Se o estorno for negado,
+     * a marca na cobrança volta a nulo e o lote reaparece.
+     *
+     * @param  Builder<LoteCredito>  $query
+     */
+    public function scopeSemEstornoEmCurso(Builder $query): void
+    {
+        $query->where(fn (Builder $q) => $q
+            ->whereNull('invoice_id')
+            ->orWhereNotIn('invoice_id', Invoice::query()->select('id')->whereIn('reembolso_estado', ['em_andamento', 'aguardando_autorizacao'])));
+    }
 
     protected function casts(): array
     {

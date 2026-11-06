@@ -43,7 +43,7 @@ final class MinhasEmpresas extends Component
         }
 
         $carteira = app(Carteira::class);
-        $aviso = $carteira->avisoDoTeste($usuario->id);
+        $aviso = $carteira->avisoDoTeste($usuario->id) ?? $carteira->avisoDeAtraso($usuario->id);
 
         return [
             'avisoTrial' => $aviso,

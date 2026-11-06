@@ -117,11 +117,18 @@ describe('CA-2: quem não tem acesso', function () {
             ->assertSee('Os meses já lançados continuam visíveis.');
         expect(AcessoDrm::bloqueioPara($this->usuario->id)->motivo)->toBe($motivo);
     })->with([
-        'em atraso' => [false, StatusAssinatura::EmAtraso, '+5 days', MotivoBloqueio::EmAtraso, 'Não conseguimos cobrar'],
         'plano encerrado' => [false, null, '-1 day', MotivoBloqueio::PlanoEncerrado, 'Seu plano terminou em'],
         'cancelado e vencido' => [false, StatusAssinatura::Cancelada, '-1 day', MotivoBloqueio::PlanoEncerrado, 'Seu plano terminou em'],
         'teste encerrado' => [true, null, '-1 day', MotivoBloqueio::TesteEncerrado, 'Seu teste terminou em'],
     ]);
+
+    it('em atraso o lançamento segue liberado durante as retentativas (STORY-092 CA-4)', function () {
+        _ligarCobrancaDrm();
+        _assinar($this->usuario, false, StatusAssinatura::EmAtraso, '-1 day');
+
+        $this->get(route('drm.lancar', $this->empresa))->assertOk()->assertDontSee('O lançamento do Raio X está pausado');
+        expect(AcessoDrm::bloqueioPara($this->usuario->id))->toBeNull();
+    });
 
     it('o servidor recusa fechar mesmo com a página aberta de antes', function () {
         $c = Livewire::test(Lancamento::class, ['empresa' => $this->empresa]);

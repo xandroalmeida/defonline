@@ -259,6 +259,7 @@ final class MeuPlano extends Component
             ->where('usuario_id', $usuarioId)
             ->where('status', StatusLote::Ativo->value)
             ->where('quantidade_restante', '>', 0)
+            ->semEstornoEmCurso()
             ->where('data_expiracao', '>', $agora)
             ->orderBy('data_expiracao')
             ->get()

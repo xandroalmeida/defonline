@@ -20,6 +20,7 @@ use App\Observabilidade\AuditLogger;
 use App\Observabilidade\EventosCobranca;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * STORY-085 CA-4, CA-5, CA-7 e ajustes do ADR-010 — reembolso total de uma cobrança paga, pedido pelo admin.
@@ -119,6 +120,47 @@ final class ReembolsarCobranca
 
             return true;
         });
+    }
+
+    /**
+     * STORY-092 CA-3 (D-12) — o admin do provedor NEGOU a autorização do estorno Pix: a cobrança continua paga, a
+     * marca de "aguardando" sai e os créditos voltam a ser consumíveis (enquanto aguardava, o lote ficou
+     * indisponível). A equipe é alertada. Idempotente.
+     *
+     * @return bool `true` se desfez agora; `false` se a cobrança não estava aguardando autorização
+     */
+    public function negar(string $invoiceId): bool
+    {
+        $invoice = DB::transaction(function () use ($invoiceId): ?Invoice {
+            $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoiceId);
+
+            if ($invoice->reembolso_estado !== 'aguardando_autorizacao') {
+                return null;
+            }
+
+            $invoice->forceFill([
+                'reembolso_estado' => null,
+                'reembolso_motivo' => null,
+                'reembolso_por_id' => null,
+                'reembolso_solicitado_em' => null,
+            ])->save();
+
+            $this->registrar('cobranca.reembolso_negado_pelo_provedor', $invoice, null, []);
+
+            return $invoice;
+        });
+
+        if ($invoice === null) {
+            return false;
+        }
+
+        Log::error('cobranca.reembolso_negado', [
+            'module' => 'cobranca',
+            'action' => 'processar_evento',
+            'invoice_id' => $invoice->id,
+        ]);
+
+        return true;
     }
 
     private function reservar(string $invoiceId, Usuario $admin, string $motivo): Invoice

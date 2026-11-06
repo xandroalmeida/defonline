@@ -96,8 +96,14 @@ it('não consome lote vencido nem esgotado, mesmo marcado como ativo', function 
     expect($d->loteId)->toBe('bom');
 });
 
-it('usa crédito quando a assinatura está em atraso e ainda há lote válido', function () {
+it('em atraso, usa a cota que sobrou antes do crédito (STORY-092 CA-4)', function () {
     $d = RegrasConsumo::decidir(_snapCarteira(_snapAssinatura(StatusAssinatura::EmAtraso), [_snapLote('l1', 1, '2027-01-01')]));
+
+    expect($d->origem)->toBe(Origem::Cota);
+});
+
+it('usa crédito quando a assinatura está em atraso, sem cota, e ainda há lote válido', function () {
+    $d = RegrasConsumo::decidir(_snapCarteira(_snapAssinatura(StatusAssinatura::EmAtraso, restante: 0), [_snapLote('l1', 1, '2027-01-01')]));
 
     expect($d->origem)->toBe(Origem::Credito);
 });
@@ -151,10 +157,23 @@ it('avisa que a cota não volta quando o plano está cancelado', function () {
     expect($b->motivo)->toBe(MotivoBloqueio::CotaEsgotada)->and($b->renova)->toBeFalse();
 });
 
-it('bloqueia a assinatura em atraso com cota sobrando', function () {
-    $b = RegrasConsumo::decidir(_snapCarteira(_snapAssinatura(StatusAssinatura::EmAtraso, restante: 5)))->bloqueio;
+it('mantém o acesso da assinatura em atraso com cota sobrando, mesmo com o vencimento já passado (STORY-092 CA-4)', function () {
+    $d = RegrasConsumo::decidir(_snapCarteira(_snapAssinatura(StatusAssinatura::EmAtraso, restante: 5, vence: '2026-11-09 00:00:00')));
+
+    expect($d->bloqueio)->toBeNull()->and($d->origem)->toBe(Origem::Cota);
+});
+
+it('bloqueia a assinatura em atraso sem cota: o que destrava é o cartão', function () {
+    $b = RegrasConsumo::decidir(_snapCarteira(_snapAssinatura(StatusAssinatura::EmAtraso, restante: 0)))->bloqueio;
 
     expect($b->motivo)->toBe(MotivoBloqueio::EmAtraso);
+});
+
+it('o Raio X do Negócio segue liberado em atraso (não gasta cota) e bloqueia só depois de encerrado', function () {
+    $emAtraso = RegrasConsumo::bloqueioDoDrm(_snapCarteira(_snapAssinatura(StatusAssinatura::EmAtraso, restante: 0)));
+    $encerrada = RegrasConsumo::bloqueioDoDrm(_snapCarteira(_snapAssinatura(StatusAssinatura::Expirada)));
+
+    expect($emAtraso)->toBeNull()->and($encerrada->motivo)->toBe(MotivoBloqueio::PlanoEncerrado);
 });
 
 it('bloqueia o plano encerrado: expirada, ou ciclo vencido sem renovação', function (StatusAssinatura $status, string $vence) {

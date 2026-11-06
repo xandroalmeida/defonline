@@ -9,7 +9,7 @@
         'assinatura_cancelada' => 'Pago depois do cancelamento da assinatura',
         'assinatura_antiga' => 'Pago na assinatura antiga, trocada por outro cartão',
         'assinatura_duplicada' => 'Pago com assinatura já existente',
-    ];
+    ] + \App\Services\Cobranca\PagamentoSemEfeito::ROTULOS;
     $alerta = 'border-[color:var(--color-destructive)] border-2';
 @endphp
 

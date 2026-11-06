@@ -71,6 +71,19 @@ final class Carteira
     }
 
     /**
+     * STORY-092 — o aviso de atraso para a Home: a cobrança da renovação falhou, o acesso segue durante as
+     * retentativas e a ação é atualizar o cartão. Nulo se a assinatura não está em atraso.
+     *
+     * @return array{severidade: 'info'|'bloqueio', texto: string, acao: string, rotulo: string}|null
+     */
+    public function avisoDeAtraso(string $usuarioId): ?array
+    {
+        $foto = $this->snapshot($usuarioId, $this->agora());
+
+        return $foto->assinatura === null ? null : AvisoDeAtraso::para($foto->assinatura);
+    }
+
+    /**
      * @template T of Model
      *
      * @param  Closure(): T  $emitir  cria o Diagnóstico; só roda com saldo garantido
@@ -144,9 +157,13 @@ final class Carteira
 
         try {
             return DB::transaction(function () use ($usuarioId, $cota, $inicio, $vencimento, $planoId, $ciclo, $trial): Assinatura {
+                // A renovação cancelada, com o ciclo pago por correr, também é vigente (STORY-092, E21): o acesso
+                // ainda é dela, e outra assinatura em cima seria pagar duas vezes pelo mesmo período.
                 $vigente = Assinatura::query()
                     ->where('usuario_id', $usuarioId)
-                    ->whereIn('status', [StatusAssinatura::Ativa->value, StatusAssinatura::EmAtraso->value])
+                    ->where(fn ($q) => $q
+                        ->whereIn('status', [StatusAssinatura::Ativa->value, StatusAssinatura::EmAtraso->value])
+                        ->orWhere(fn ($c) => $c->where('status', StatusAssinatura::Cancelada->value)->where('proximo_vencimento', '>', DB::raw('now()'))))
                     ->lockForUpdate()
                     ->first();
 
@@ -347,6 +364,7 @@ final class Carteira
         $lotes = LoteCredito::query()
             ->where('usuario_id', $usuarioId)
             ->where('quantidade_restante', '>', 0)
+            ->semEstornoEmCurso()
             ->get()
             ->map(fn (LoteCredito $l): LoteVisto => new LoteVisto(
                 $l->id,

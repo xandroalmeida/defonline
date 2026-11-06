@@ -343,10 +343,15 @@ it('cancelar registra a data e mantém a cota até o vencimento', function () {
         ->and($assinatura->fresh()->cota_restante_ciclo)->toBe(1);
 });
 
-it('assinatura em atraso bloqueia mesmo com cota sobrando', function () {
+it('assinatura em atraso mantém a análise enquanto há cota (STORY-092 CA-4) e bloqueia quando ela acaba', function () {
     _ligarCobranca();
     $assinatura = _carteira()->concederCota($this->usuario->id, 2, now()->subDay(), now()->addMonth());
     _carteira()->mudarStatus($assinatura->id, StatusAssinatura::EmAtraso);
+
+    _analisar($this->empresa);
+    expect($assinatura->fresh()->cota_restante_ciclo)->toBe(1);
+
+    $assinatura->forceFill(['cota_restante_ciclo' => 0])->save();
 
     try {
         _analisar($this->empresa);

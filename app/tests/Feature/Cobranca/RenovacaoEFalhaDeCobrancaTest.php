@@ -163,7 +163,8 @@ describe('CA-3 cobrança recusada', function () {
             && $m->valor === 'R$ 49,90'
             && $m->proximaTentativa === now()->addHours(48)->setTimezone('America/Sao_Paulo')->format('d/m/Y')
             && $m->ultimaTentativa === now()->addHours(144)->setTimezone('America/Sao_Paulo')->format('d/m/Y'));
-        expect(app(Carteira::class)->verificar($this->usuario->id)->bloqueio?->motivo)->toBe(MotivoBloqueio::EmAtraso);
+        // STORY-092 CA-4: em atraso o acesso segue durante as retentativas; o bloqueio vem só ao encerrar o ciclo.
+        expect(app(Carteira::class)->verificar($this->usuario->id)->bloqueio)->toBeNull();
     });
 
     it('a recusa e o vencimento da mesma cobrança, e o evento repetido, avisam uma vez e não reiniciam a régua', function () {
