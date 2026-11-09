@@ -1,73 +1,112 @@
 #!/usr/bin/env bash
-# Portão local: os mesmos checks do .github/workflows/pr.yml, rodados na máquina local
-# (o CI não roda mais em push na main; o /release roda `verificar.sh tudo` antes da tag).
+# Testes locais. No dia a dia, rode o mínimo; a suíte longa é só para o /release.
 #
-#   verificar.sh            detecta pelo diff contra a origin/main (commits e árvore de trabalho)
-#   verificar.sh php        Pint, Larastan, Pest com cobertura (≥80; ≥98 em app/Domain), Pennant, composer audit
-#   verificar.sh dusk       build do front + Dusk E2E (Chromium do container web)
-#   verificar.sh seguranca  sem pgAdmin no deploy, Gitleaks e Trivy (via docker)
-#   verificar.sh tudo       os três (o que o /release exige)
+#   verificar.sh                 Pint, Larastan e os testes ligados ao que mudou (segundos)
+#   verificar.sh area <caminho>  Pint, Larastan e os testes indicados (tests/Feature/Cobranca ...)
+#   verificar.sh pest            Pint, Larastan e todo o Pest, sem cobertura (cerca de 3 min)
+#   verificar.sh dusk [arquivo]  build + Dusk, sem o grupo `lento` (a digitação tecla a tecla)
+#   verificar.sh seguranca       sem pgAdmin no deploy, Gitleaks e Trivy
+#   verificar.sh tudo            portão do /release: cobertura (≥80; ≥98 em app/Domain), Pennant,
+#                                composer audit, Dusk completo e segurança (cerca de 12 min)
 #
+# Rode o Dusk ou `tudo` só quando a tela mudou de forma que os testes de feature não pegam,
+# ou no release. O Dusk roda no web-test: o servidor local segue usável durante os testes.
 # Precisa da stack local de pé (./up.sh): containers web, web-test, db e mailpit.
 set -euo pipefail
 ROOT=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
 cd "$ROOT"
 
-php=0; dusk=0; seg=0
-case "${1:-auto}" in
-  php) php=1 ;;
-  dusk) dusk=1 ;;
-  seguranca) seg=1 ;;
-  tudo) php=1; dusk=1; seg=1 ;;
-  auto)
-    base=$(git merge-base origin/main HEAD 2>/dev/null || git rev-parse HEAD)
-    mudou=$( { git diff --name-only "$base"; git ls-files --others --exclude-standard; } | sort -u)
-    grep -qE '^app/' <<<"$mudou" && { php=1; dusk=1; }
-    grep -qvE '^(defonline-docs/|docs/)|\.md$' <<<"$mudou" && seg=1
-    ;;
-  *) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
-esac
+modo=${1:-rapido}
+[ $# -gt 0 ] && shift
 
-if [ "$php$dusk$seg" = 000 ]; then
-  echo "verificar: só docs alteradas; nada a rodar"; exit 0
+# O Mac em repouso congela o Docker: um portão de 12 min já levou 50.
+if [ "$modo" = tudo ] && [ -z "${VERIFICAR_ACORDADO:-}" ] && command -v caffeinate >/dev/null; then
+  VERIFICAR_ACORDADO=1 exec caffeinate -i "$0" "$modo" "$@"
 fi
+
+case "$modo" in
+  rapido|area|pest|dusk|seguranca|tudo) ;;
+  *) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+esac
 
 inicio=$SECONDS
 etapa() { echo "== [$((SECONDS - inicio))s] $*"; }
 falhas=()
 roda() { local nome=$1; shift; etapa "$nome"; "$@" || { echo "✖ $nome FALHOU"; falhas+=("$nome"); }; }
 
-if [ "$php$dusk" != 00 ]; then
-  for s in web web-test db mailpit; do
-    docker compose ps --status running --services 2>/dev/null | grep -qx "$s" \
-      || { echo "✖ container '$s' fora do ar — rode ./up.sh"; exit 1; }
+if [ "$modo" != seguranca ]; then
+  for c in web web-test db mailpit; do
+    docker compose ps --status running --services 2>/dev/null | grep -qx "$c" \
+      || { echo "✖ container '$c' fora do ar — rode ./up.sh"; exit 1; }
   done
 fi
 
 ex()  { docker compose exec -T web "$@"; }
 ext() { docker compose exec -T web-test "$@"; }
 
-if [ "$php" = 1 ]; then
-  roda "pint"       ex ./vendor/bin/pint --test
-  roda "larastan"   ex ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M
-  # pest direto (não artisan test): o wrapper engole o exit code do --min. Cobertura da suíte All
-  # estoura os 128M padrão do container.
-  roda "pest + cobertura ≥80" ext php -d memory_limit=-1 ./vendor/bin/pest --testsuite=All --coverage --min=80
-  if [ -n "$(find app/app/Domain -name '*.php' 2>/dev/null | head -1)" ]; then
-    roda "pest app/Domain ≥98" ext php -d memory_limit=-1 ./vendor/bin/pest --configuration=phpunit-domain.xml --coverage --min=98
-  fi
-  roda "pennant overdue" ex php artisan pennant:list-overdue --fail-on-overdue
-  roda "composer audit"  ex composer audit --locked
-fi
+# Testes alterados e testes que citam uma classe alterada, olhando o que ainda não foi commitado.
+testes_afetados() {
+  git status --porcelain --untracked-files=all | awk '{print $NF}' | grep -E '^app/.*\.php$' | while read -r f; do
+    [ -f "$f" ] || continue
+    case "$f" in
+      app/tests/Browser/*) ;;
+      app/tests/*Test.php) echo "$f" ;;
+      app/app/*) grep -rlw --include='*Test.php' --exclude-dir=Browser "$(basename "$f" .php)" app/tests || true ;;
+    esac
+  done | sort -u | sed 's#^app/##'
+}
 
-if [ "$dusk" = 1 ]; then
+estaticos() {
+  roda "pint"     ex ./vendor/bin/pint --test
+  roda "larastan" ex ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M
+}
+
+# Uma rodada só mede as duas coberturas: a geral aqui e a de app/Domain lendo o mesmo relatório.
+cobertura() {
+  roda "pest + cobertura ≥80" ext php -d memory_limit=-1 ./vendor/bin/pest --testsuite=All --coverage --min=80 --coverage-clover=/tmp/clover.xml
+  roda "cobertura app/Domain ≥98" ext php scripts/cobertura-dominio.php /tmp/clover.xml 98
+}
+
+dusk() { # dusk [argumentos do artisan dusk]
   roda "npm build" ex sh -c 'npm run build >/dev/null'
-  ex sh -c 'pgrep -x chromedriver >/dev/null || (chromedriver --port=9515 --whitelisted-ips="" >/tmp/chromedriver.log 2>&1 &)'
+  ext sh -c 'pgrep -x chromedriver >/dev/null || (chromedriver --port=9515 --whitelisted-ips="" >/tmp/chromedriver.log 2>&1 &)'
   sleep 2
-  roda "dusk" ex php artisan dusk
-fi
+  roda "dusk" ext env APP_URL=http://localhost:8000 DUSK_DRIVER_URL=http://localhost:9515 php artisan dusk "$@"
+}
 
-if [ "$seg" = 1 ]; then
+case "$modo" in
+  rapido)
+    estaticos
+    alvos=$(testes_afetados)
+    if [ -n "$alvos" ]; then
+      # shellcheck disable=SC2086
+      roda "pest ($(wc -w <<<"$alvos" | tr -d ' ') arquivos afetados)" ext ./vendor/bin/pest $alvos
+    else
+      echo "nenhum teste ligado às alterações; use 'verificar.sh area <caminho>' se precisar"
+    fi
+    ;;
+  area)
+    [ $# -gt 0 ] || { echo "informe o caminho: verificar.sh area tests/Feature/Cobranca"; exit 2; }
+    estaticos
+    roda "pest ($*)" ext ./vendor/bin/pest "$@"
+    ;;
+  pest)
+    estaticos
+    roda "pest" ext php -d memory_limit=-1 ./vendor/bin/pest --testsuite=All
+    ;;
+  dusk)
+    dusk --exclude-group=lento "$@"
+    ;;
+  tudo)
+    estaticos
+    cobertura
+    roda "pennant overdue" ex php artisan pennant:list-overdue --fail-on-overdue
+    roda "composer audit"  ex composer audit --locked
+    dusk
+    ;;
+esac
+
+if [ "$modo" = seguranca ] || [ "$modo" = tudo ]; then
   roda "sem pgAdmin no deploy" ./scripts/check-no-pgadmin-in-deploy.sh
   roda "gitleaks" docker run --rm -v "$ROOT:/repo" -w /repo zricethezav/gitleaks:latest \
     git --no-banner --redact --config .gitleaks.toml .

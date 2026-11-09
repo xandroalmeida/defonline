@@ -17,6 +17,7 @@ use App\Models\Usuario;
 use Facebook\WebDriver\Chrome\ChromeDevToolsDriver;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\DuskTestCase;
 
 /**
@@ -29,6 +30,7 @@ use Tests\DuskTestCase;
  * tela mostra. Causa: chave ausente em `valores` vira atualização do array inteiro, e a
  * resposta reescreve o <input> com o valor que a requisição levou (ver `Lancamento::dehydrate`).
  */
+#[Group('lento')]
 final class DrmDigitacaoTeclaATeclaBrowserTest extends DuskTestCase
 {
     use DatabaseTruncation;

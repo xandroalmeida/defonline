@@ -10,6 +10,7 @@ use App\Models\Usuario;
 use Facebook\WebDriver\Chrome\ChromeDevToolsDriver;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\DuskTestCase;
 
 /**
@@ -18,6 +19,7 @@ use Tests\DuskTestCase;
  * de `wire:model.live`; no quiz as propriedades são escalares, e este teste prova que o mesmo ritmo
  * não perde dígitos aqui. O que vale é o valor PERSISTIDO no rascunho.
  */
+#[Group('lento')]
 final class DiagnosticoDigitacaoTeclaATeclaBrowserTest extends DuskTestCase
 {
     use DatabaseTruncation;

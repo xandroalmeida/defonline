@@ -30,7 +30,7 @@ Plataforma SaaS de Diagnóstico Econômico-Financeiro para Micro e Pequenas Empr
 │   └── zalk/docker-compose.yml         compose do servidor ZalkVPS (ADR-009)
 │
 ├── scripts/
-│   ├── verificar.sh                    portão local = checks do pr.yml (o /release roda `tudo`)
+│   ├── verificar.sh                    testes locais: rápido no dia a dia; o /release roda `tudo`
 │   ├── git-hooks/pre-push.sh           gate rápido (Pint + Larastan + Pest + Pennant) — ADR-006 §4
 │   ├── install-hooks.sh                instala pre-push (rodado por up.sh)
 │   ├── check-no-pgadmin-in-deploy.sh   STORY-009 CA-10 — pgAdmin nunca no compose do servidor
@@ -98,8 +98,11 @@ docker compose exec web php artisan dusk
 ./scripts/git-hooks/pre-push.sh
 
 # Portão completo = checks do pr.yml (cobertura, Dusk, Gitleaks, Trivy); o /release exige `tudo` verde
-./scripts/verificar.sh          # só o que o diff contra a origin/main tocou
-./scripts/verificar.sh tudo
+./scripts/verificar.sh                            # segundos: Pint, Larastan e testes ligados ao que mudou
+./scripts/verificar.sh area tests/Feature/Cobranca # testes de uma área
+./scripts/verificar.sh pest                       # todo o Pest, sem cobertura (cerca de 3 min)
+./scripts/verificar.sh dusk [arquivo]             # navegador, sem o grupo `lento`
+./scripts/verificar.sh tudo                       # só no /release (cerca de 12 min)
 ```
 
 O hook **roda automaticamente** antes de cada `git push` (instalado por `./up.sh`).
