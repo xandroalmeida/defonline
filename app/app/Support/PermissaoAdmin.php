@@ -19,6 +19,7 @@ enum PermissaoAdmin: string
     case GerenciarCupons = 'cupons.gerenciar';
     case GerenciarFinanceiro = 'financeiro.gerenciar';
     case GerenciarCaptacao = 'captacao.gerenciar';
+    case VerRespostasQuiz = 'quiz.ver_respostas';
 
     public function rotulo(): string
     {
@@ -32,6 +33,7 @@ enum PermissaoAdmin: string
             self::GerenciarCupons => 'Gerenciar cupons',
             self::GerenciarFinanceiro => 'Gerenciar assinaturas, reembolsos e notas fiscais',
             self::GerenciarCaptacao => 'Ver demandas de captação e o e-mail que as recebe',
+            self::VerRespostasQuiz => 'Ver respostas do quiz e onde os clientes travam',
         };
     }
 }

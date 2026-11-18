@@ -1,5 +1,8 @@
 {{-- STORY-104 — diagnósticos na ficha do usuário e da empresa. --}}
-@php $veCaptacao = auth()->user()?->podeUsarBackoffice(\App\Support\PermissaoAdmin::GerenciarCaptacao); @endphp
+@php
+    $veCaptacao = auth()->user()?->podeUsarBackoffice(\App\Support\PermissaoAdmin::GerenciarCaptacao);
+    $veRespostas = auth()->user()?->podeUsarBackoffice(\App\Support\PermissaoAdmin::VerRespostasQuiz);
+@endphp
 @if ($diagnosticos->isEmpty())
     <x-card>Nenhum diagnóstico.</x-card>
 @else
@@ -18,7 +21,13 @@
             <tbody>
                 @foreach ($diagnosticos as $d)
                     <tr class="border-t border-[color:var(--color-border)]" wire:key="d-{{ $d->id }}" dusk="ficha-diagnostico-{{ $d->id }}">
-                        <td class="px-2 py-2 whitespace-nowrap">{{ \App\Support\DataExibicao::dataHora($d->gerado_em) }}</td>
+                        <td class="px-2 py-2 whitespace-nowrap">
+                            @if ($veRespostas)
+                                <a class="link" href="{{ route('backoffice.diagnosticos.respostas', $d->id) }}" dusk="ficha-respostas-{{ $d->id }}">{{ \App\Support\DataExibicao::dataHora($d->gerado_em) }}</a>
+                            @else
+                                {{ \App\Support\DataExibicao::dataHora($d->gerado_em) }}
+                            @endif
+                        </td>
                         @if ($mostrarEmpresa)
                             <td class="px-2 py-2">{{ $d->empresa?->nomeExibicao() ?? '—' }}</td>
                         @endif

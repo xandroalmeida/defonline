@@ -20,6 +20,7 @@ use App\Models\EmpresaAnalisada;
 use App\Models\QuizRascunho;
 use App\Observabilidade\EventLogger;
 use App\Observabilidade\EventosCobranca;
+use App\Observabilidade\EventosQuiz;
 use App\Support\Cobranca\TextoBloqueio;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +28,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Throwable;
@@ -254,7 +256,7 @@ final class Quiz extends Component
 
     public function proximoBloco(): void
     {
-        $this->validate($this->regrasDoBloco($this->bloco_atual));
+        $this->validarRegistrandoTravamentos($this->regrasDoBloco($this->bloco_atual), $this->bloco_atual);
 
         // CA-5: ao sair do Bloco 3 (Balanço), checa inconsistências entre blocos.
         // Se houver alerta ainda não aceito, segura o avanço e mostra o banner inline.
@@ -263,12 +265,44 @@ final class Quiz extends Component
             $alertas = $this->avaliarValidacoesCruzadas(ValidacoesCruzadas::SEVERIDADE_AVISO);
             if ($alertas !== [] && ! $this->todosAlertasJaAceitos($alertas)) {
                 $this->alertas_cruzados = $alertas;
+                $this->registrarTravamentos(EventosQuiz::TIPO_AVISO, array_column($alertas, 'regra'), 3);
 
                 return;
             }
         }
 
         $this->avancarBloco();
+    }
+
+    /**
+     * STORY-105 — valida como `validate()`, e antes de devolver o erro registra quais campos travaram.
+     *
+     * @param  array<string, mixed>  $regras
+     */
+    private function validarRegistrandoTravamentos(array $regras, int $bloco): void
+    {
+        try {
+            $this->validate($regras);
+        } catch (ValidationException $e) {
+            $campos = array_map(fn (string $chave): string => explode('.', $chave)[0], array_keys($e->errors()));
+            $this->registrarTravamentos(EventosQuiz::TIPO_CAMPO, $campos, $bloco);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Registrar o travamento nunca pode atrapalhar o quiz.
+     *
+     * @param  list<string>  $chaves
+     */
+    private function registrarTravamentos(string $tipo, array $chaves, int $bloco): void
+    {
+        try {
+            EventosQuiz::travamentos($tipo, $chaves, $bloco, QuizRascunho::paraEmpresa($this->empresa)?->id, (string) Auth::id(), $this->empresa->id);
+        } catch (Throwable $e) {
+            Log::warning('quiz.travamento.nao_registrado', ['exception' => $e::class, 'message' => $e->getMessage()]);
+        }
     }
 
     public function blocoAnterior(): void
@@ -491,13 +525,15 @@ final class Quiz extends Component
 
     public function submeter(CalcularDiagnostico $calcular): mixed
     {
-        $this->validate($this->regrasDoBloco(4));
+        $this->validarRegistrandoTravamentos($this->regrasDoBloco(4), 4);
 
         // STORY-043: bloqueios de consistência entre blocos. Reavaliados a cada
         // tentativa — corrigir o valor e reenviar limpa a lista sozinho. Segura o
         // submit sem escape (diferente do banner não-bloqueante do Bloco 3).
         $this->alertas_bloqueantes = $this->avaliarValidacoesCruzadas(ValidacoesCruzadas::SEVERIDADE_BLOQUEIO);
         if ($this->alertas_bloqueantes !== []) {
+            $this->registrarTravamentos(EventosQuiz::TIPO_BLOQUEIO, array_column($this->alertas_bloqueantes, 'regra'), 4);
+
             return null;
         }
 
@@ -510,6 +546,7 @@ final class Quiz extends Component
                 foreach ($errosSocios as $chave => $mensagem) {
                     $this->addError($chave, $mensagem);
                 }
+                $this->registrarTravamentos(EventosQuiz::TIPO_CAMPO, ['socios'], 4);
 
                 return null;
             }

@@ -25,6 +25,8 @@ use App\Livewire\Backoffice\Financeiro as BackofficeFinanceiro;
 use App\Livewire\Backoffice\Glossario as BackofficeGlossario;
 use App\Livewire\Backoffice\Planos as BackofficePlanos;
 use App\Livewire\Backoffice\Recomendacoes as BackofficeRecomendacoes;
+use App\Livewire\Backoffice\RespostasDiagnostico as BackofficeRespostasDiagnostico;
+use App\Livewire\Backoffice\TravamentosQuiz as BackofficeTravamentosQuiz;
 use App\Livewire\Backoffice\Usuarios as BackofficeUsuarios;
 use App\Livewire\Cadastro;
 use App\Livewire\Cobranca\AcompanharAssinatura;
@@ -197,6 +199,9 @@ Route::middleware('auth')->prefix('backoffice')->name('backoffice.')->group(func
     // STORY-104 — consulta de clientes: fichas do usuário e da empresa, e a lista de empresas.
     Route::get('/usuarios/{usuario}', BackofficeFichaUsuario::class)->whereUuid('usuario')->middleware('backoffice:usuarios.ver')->name('usuarios.ficha');
     Route::get('/empresas', BackofficeEmpresas::class)->middleware('backoffice:usuarios.ver')->name('empresas');
+    // STORY-105 — respostas do quiz e onde os clientes travam.
+    Route::get('/diagnosticos/{diagnostico}', BackofficeRespostasDiagnostico::class)->whereUuid('diagnostico')->middleware('backoffice:quiz.ver_respostas')->name('diagnosticos.respostas');
+    Route::get('/quiz/travamentos', BackofficeTravamentosQuiz::class)->middleware('backoffice:quiz.ver_respostas')->name('quiz.travamentos');
     Route::get('/empresas/{empresa}', BackofficeFichaEmpresa::class)->whereUuid('empresa')->middleware('backoffice:usuarios.ver')->name('empresas.ficha');
     Route::post('/usuarios/{usuario}/logar-como', [PersonificacaoController::class, 'iniciar'])
         ->middleware('backoffice:usuarios.logar_como')

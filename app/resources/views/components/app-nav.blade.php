@@ -128,6 +128,15 @@
                 'dusk' => 'app-nav-backoffice-recomendacoes',
             ],
             [
+                'permissao' => \App\Support\PermissaoAdmin::VerRespostasQuiz,
+                'label' => 'Travamentos do quiz',
+                'icon' => 'chart',
+                'href' => route('backoffice.quiz.travamentos'),
+                'active' => request()->routeIs('backoffice.quiz.travamentos'),
+                'disabled' => false,
+                'dusk' => 'app-nav-backoffice-travamentos',
+            ],
+            [
                 'permissao' => \App\Support\PermissaoAdmin::GerenciarPlanos,
                 'label' => 'Planos e pacotes',
                 'icon' => 'tag',
