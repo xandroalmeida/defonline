@@ -605,6 +605,11 @@
     .raia--respondida { --raia-cor: var(--color-farol-verde); --raia-texto: var(--color-farol-verde-texto); }
     .raia--encerrada { --raia-cor: var(--color-farol-cinza); --raia-texto: var(--color-farol-cinza-texto); }
     .raia__titulo { color: var(--raia-texto); }
+    /* Cartão com o prazo vencido: borda e fundo avermelhados (opacos, sobre surface). */
+    .cartao--atrasado {
+        background: color-mix(in srgb, var(--color-destructive) 8%, var(--color-surface));
+        border-color: var(--color-destructive);
+    }
     .raia__total {
         min-width: 1.5rem;
         padding: 0 8px;

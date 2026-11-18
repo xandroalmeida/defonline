@@ -92,7 +92,7 @@
                             draggable="true"
                             x-on:dragstart="arrastando = '{{ $demanda->id }}'; $event.dataTransfer.effectAllowed = 'move'"
                             x-on:dragend="arrastando = null; sobre = null"
-                            class="card p-3 cursor-grab active:cursor-grabbing {{ $atrasada ? 'border-[color:var(--color-destructive)]' : '' }}"
+                            class="card p-3 cursor-grab active:cursor-grabbing {{ $atrasada ? 'cartao--atrasado' : '' }}"
                             dusk="captacao-cartao-{{ $demanda->id }}">
                             <button type="button" wire:click="abrir('{{ $demanda->id }}')"
                                     class="block w-full text-left bg-transparent border-0 p-0 cursor-pointer"
@@ -104,7 +104,7 @@
                                 @if (! $demanda->autoriza_contato)
                                     <span class="pill" dusk="captacao-sem-autorizacao-{{ $demanda->id }}">Sem autorização</span>
                                 @elseif ($status->emAberto() && $atrasada)
-                                    <span class="font-semibold text-[color:var(--color-destructive)]" dusk="captacao-atrasada-{{ $demanda->id }}">Atrasada · era até {{ DataExibicao::dia($demanda->prazoRetorno()) }}</span>
+                                    <span class="font-semibold text-[color:var(--color-destructive-hover)]" dusk="captacao-atrasada-{{ $demanda->id }}">Atrasada · era até {{ DataExibicao::dia($demanda->prazoRetorno()) }}</span>
                                 @elseif ($status->emAberto())
                                     <span>Até {{ DataExibicao::dia($demanda->prazoRetorno()) }}</span>
                                 @endif
