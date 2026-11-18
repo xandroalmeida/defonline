@@ -60,9 +60,9 @@ final class BackofficeConsultaQuizBrowserTest extends DuskTestCase
                 ->assertSeeIn('@resposta-Q13', '2,50%');
 
             $browser->visit(route('backoffice.quiz.textos'))
-                ->waitFor('@texto-Q09')
+                ->waitFor('@textos-lista')
                 ->click('@texto-editar-Q09')
-                ->waitFor('@texto-rotulo')
+                ->waitFor('@texto-Q09')
                 ->clear('@texto-rotulo')
                 ->type('@texto-rotulo', 'Quanto você vende por mês?')
                 // O rótulo sai em maiúsculas pelo CSS: compara sem diferenciar a caixa.
