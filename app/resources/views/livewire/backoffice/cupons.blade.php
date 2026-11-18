@@ -177,6 +177,7 @@
                                 <x-button type="button" variant="secondary" size="sm" wire:click="abrirConcessao('{{ $item->id }}')" dusk="cupom-conceder-{{ $item->id }}">Conceder</x-button>
                             @endif
                             <x-button type="button" variant="secondary" size="sm" wire:click="detalhar('{{ $item->id }}')" dusk="cupom-detalhes-{{ $item->id }}">Detalhes</x-button>
+                            <x-button :href="route('backoffice.cupons.clientes', $item->id)" variant="secondary" size="sm" dusk="cupom-clientes-{{ $item->id }}">Clientes</x-button>
                             <x-button type="button" variant="secondary" size="sm" wire:click="alternarCupom('{{ $item->id }}')" dusk="cupom-alternar-{{ $item->id }}">{{ $item->ativo ? 'Desativar' : 'Ativar' }}</x-button>
                         </td>
                     </tr>

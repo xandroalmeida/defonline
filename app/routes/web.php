@@ -9,6 +9,7 @@ use App\Http\Controllers\DiagnosticoController;
 use App\Http\Controllers\DrmExportacaoController;
 use App\Http\Controllers\EmailConfirmacaoController;
 use App\Http\Controllers\EmpresaController;
+use App\Http\Controllers\ExportarClientesDoCupomController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PagamentoFakeController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\WebhookPagamentoController;
 use App\Http\Middleware\AuditarPersonificacao;
 use App\Livewire\Backoffice\Administradores as BackofficeAdministradores;
 use App\Livewire\Backoffice\Captacao as BackofficeCaptacao;
+use App\Livewire\Backoffice\ClientesDoCupom as BackofficeClientesDoCupom;
 use App\Livewire\Backoffice\Cupons as BackofficeCupons;
 use App\Livewire\Backoffice\EditarTextosQuiz as BackofficeEditarTextosQuiz;
 use App\Livewire\Backoffice\Empresas as BackofficeEmpresas;
@@ -214,6 +216,9 @@ Route::middleware('auth')->prefix('backoffice')->name('backoffice.')->group(func
     Route::get('/recomendacoes', BackofficeRecomendacoes::class)->middleware('backoffice:recomendacoes.editar')->name('recomendacoes');
     Route::get('/planos', BackofficePlanos::class)->middleware('backoffice:planos.gerenciar')->name('planos');
     Route::get('/cupons', BackofficeCupons::class)->middleware('backoffice:cupons.gerenciar')->name('cupons');
+    // Clientes que vieram por um cupom (acompanhamento de parceria) e a planilha para o parceiro.
+    Route::get('/cupons/{cupom}/clientes', BackofficeClientesDoCupom::class)->whereUuid('cupom')->middleware('backoffice:cupons.gerenciar')->name('cupons.clientes');
+    Route::get('/cupons/{cupom}/clientes/exportar', ExportarClientesDoCupomController::class)->whereUuid('cupom')->middleware('backoffice:cupons.gerenciar')->name('cupons.clientes.exportar');
     // STORY-085 — assinaturas, cobranças, reembolso e nota fiscal.
     Route::get('/captacao', BackofficeCaptacao::class)->middleware('backoffice:captacao.gerenciar')->name('captacao');
     Route::get('/financeiro', BackofficeFinanceiro::class)->middleware('backoffice:financeiro.gerenciar')->name('financeiro');
