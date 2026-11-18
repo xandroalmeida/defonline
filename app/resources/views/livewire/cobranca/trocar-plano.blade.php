@@ -5,7 +5,6 @@
     $reais = fn (int $centavos): string => 'R$ '.number_format($centavos / 100, 2, ',', '.');
     $analises = fn (int $n): string => $n.' '.($n === 1 ? 'análise' : 'análises');
     $dia = fn ($d): string => \App\Support\DataExibicao::data($d);
-    $h1 = 'text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-4';
     $pix = $assinatura?->pagoComPix() ?? false;
     $upgrade = $previa?->imediata ?? false;
     $cobra = $upgrade && ! $previa->semCobranca;
@@ -30,7 +29,7 @@
     <x-breadcrumb :items="[['label' => 'Planos e preços', 'url' => route('planos')], ['label' => 'Trocar plano']]"/>
 
     @if ($destino === null)
-        <h1 x-ref="titulo" tabindex="-1" class="{{ $h1 }}">Trocar plano</h1>
+        <x-page-header>Trocar plano</x-page-header>
         <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4 max-w-[640px] flex flex-col gap-3" role="alert" dusk="screen-troca-indisponivel">
             <p class="m-0 text-[color:var(--color-primary)]">Este plano não está mais disponível.</p>
             <div><x-button :href="route('planos')" variant="secondary">Ver os planos</x-button></div>
@@ -38,10 +37,10 @@
     @elseif ($resultado !== null)
         <section class="max-w-[640px] flex flex-col gap-4" role="status" aria-live="polite" dusk="screen-troca-{{ $resultado === 'agendada' ? 'agendado' : 'aplicada' }}">
             @if ($resultado === 'agendada')
-                <h1 x-ref="titulo" tabindex="-1" class="{{ $h1 }}">Troca agendada</h1>
+                <x-page-header>Troca agendada</x-page-header>
                 <p class="m-0 text-[color:var(--color-primary)]">Troca agendada para {{ $dia($previa?->vigenteAte ?? $assinatura?->proximo_vencimento) }}. Dá para desfazer até lá, em Meu plano.</p>
             @else
-                <h1 x-ref="titulo" tabindex="-1" class="{{ $h1 }}">Plano trocado</h1>
+                <x-page-header>Plano trocado</x-page-header>
                 @if ($assinatura !== null && $assinatura->cota_restante_ciclo < $assinatura->cota_snapshot)
                     <p class="m-0 text-[color:var(--color-primary)]" dusk="screen-troca-aplicada-cota">Você agora está no plano {{ $destino->nome }}. Neste ciclo você tem {{ $assinatura->cota_restante_ciclo }} {{ $assinatura->cota_restante_ciclo === 1 ? 'análise' : 'análises' }}, e sua cota de {{ $analises($destino->cota_mensal) }} por mês vale a partir de {{ $dia($assinatura->proxima_cota_em ?? $assinatura->proximo_vencimento) }}.</p>
                 @else
@@ -53,7 +52,7 @@
             </div>
         </section>
     @elseif ($negada !== null)
-        <h1 x-ref="titulo" tabindex="-1" class="{{ $h1 }}">Trocar para o plano {{ $destino->nome }}</h1>
+        <x-page-header>Trocar para o plano {{ $destino->nome }}</x-page-header>
         <x-drm.aviso-inline :variant="$negada === N::EM_ATRASO ? 'alerta' : 'info'" dusk="screen-troca-negada">
             {{ $textoNegada }}
         </x-drm.aviso-inline>
@@ -61,7 +60,7 @@
             <x-button :href="route('meu-plano')" variant="secondary">Voltar para Meu plano</x-button>
         </div>
     @else
-        <h1 x-ref="titulo" tabindex="-1" dusk="screen-troca-titulo" class="{{ $h1 }}">Trocar para o plano {{ $destino->nome }}</h1>
+        <x-page-header titulo-dusk="screen-troca-titulo">Trocar para o plano {{ $destino->nome }}</x-page-header>
 
         @if ($personificando)
             <x-drm.aviso-inline variant="info" dusk="screen-troca-admin">Você está acessando como administrador. Aqui é só leitura.</x-drm.aviso-inline>

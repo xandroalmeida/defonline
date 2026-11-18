@@ -5,14 +5,14 @@
     <x-breadcrumb :items="[['label' => 'Planos e preços', 'url' => route('planos')], ['label' => 'Renovar plano']]"/>
 
     @if ($assinatura === null)
-        <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-4">Renovar plano</h1>
+        <x-page-header>Renovar plano</x-page-header>
         <x-drm.aviso-inline variant="info" dusk="screen-meuplano-sem-pix">
             <p class="m-0 mb-2">Você não tem um plano anual pago com Pix para renovar.</p>
             <x-button :href="route('planos')" variant="secondary">Ver os planos</x-button>
         </x-drm.aviso-inline>
     @elseif (! $vigente)
         {{-- Sem pagamento até o fim: encerrado, sem "em atraso", porque nada falhou (CA-5). --}}
-        <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-4">Plano encerrado</h1>
+        <x-page-header>Plano encerrado</x-page-header>
         <x-drm.aviso-inline variant="info" dusk="screen-meuplano-encerrado">
             <p class="m-0 mb-2">Seu plano terminou em {{ \App\Support\DataExibicao::data($fim) }}. Seus diagnósticos continuam disponíveis.</p>
             <div class="flex flex-wrap gap-3">
@@ -25,7 +25,7 @@
             </div>
         </x-drm.aviso-inline>
     @elseif (! $emailConfirmado)
-        <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-4">Renovar plano {{ $plano?->nome }}</h1>
+        <x-page-header>Renovar plano {{ $plano?->nome }}</x-page-header>
         <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4 max-w-[640px] flex flex-col gap-3"
              role="alert" dusk="screen-checkout-email-nao-confirmado">
             <p class="m-0 font-medium text-[color:var(--color-primary)]">Confirme seu e-mail para renovar.</p>
@@ -36,15 +36,12 @@
             <div><x-button type="button" variant="primary" wire:click="reenviarConfirmacao" dusk="screen-checkout-reenviar">Reenviar e-mail de confirmação</x-button></div>
         </div>
     @elseif (! $janelaAberta)
-        <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-4">Renovar plano {{ $plano?->nome }}</h1>
+        <x-page-header>Renovar plano {{ $plano?->nome }}</x-page-header>
         <x-drm.aviso-inline variant="info" dusk="screen-meuplano-renovacao-fechada">
             <p class="m-0">Este plano não renova sozinho. Termina em {{ \App\Support\DataExibicao::data($fim) }}. Você poderá pagar a renovação a partir de {{ \App\Support\DataExibicao::data($abreEm) }}, e avisaremos por e-mail.</p>
         </x-drm.aviso-inline>
     @else
-        <h1 x-ref="titulo" tabindex="-1" dusk="screen-checkout-titulo"
-            class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-4">
-            Renovar plano {{ $plano?->nome }}
-        </h1>
+        <x-page-header titulo-dusk="screen-checkout-titulo">Renovar plano {{ $plano?->nome }}</x-page-header>
 
         <x-drm.aviso-inline variant="info" dusk="screen-meuplano-aviso-renovacao">
             <p class="m-0">Seu plano anual termina em {{ \App\Support\DataExibicao::data($fim) }}. Ele não renova sozinho.</p>

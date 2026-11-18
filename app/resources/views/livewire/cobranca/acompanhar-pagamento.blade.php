@@ -11,7 +11,7 @@
 <div @if ($pendente) wire:poll.3s="conferir" @endif x-data x-init="$nextTick(() => $refs.titulo?.focus())">
     @if ($paga)
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-confirmacao" role="status">
-            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Pagamento confirmado</h1>
+            <x-page-header>Pagamento confirmado</x-page-header>
             <p class="m-0 text-[color:var(--color-primary)]">
                 @if ($invoice->meio === 'nenhum')
                     Compra confirmada sem cobrança, com o desconto do cupom.
@@ -38,13 +38,13 @@
         </section>
     @elseif ($estado === \App\Domain\Cobranca\EstadoCobranca::Cancelada)
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-cancelada">
-            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Compra cancelada</h1>
+            <x-page-header>Compra cancelada</x-page-header>
             <p class="m-0 text-[color:var(--color-primary)]">Nada foi cobrado.</p>
             <div><x-button :href="route('creditos.comprar')" variant="secondary">Ver os pacotes</x-button></div>
         </section>
     @elseif ($recusado)
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-recusa">
-            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Comprar créditos</h1>
+            <x-page-header>Comprar créditos</x-page-header>
             <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4" role="alert">
                 <p class="m-0 font-medium text-[color:var(--color-primary)]">Cartão recusado</p>
                 <p class="m-0 text-sm text-[color:var(--color-primary)]">O banco não autorizou o pagamento. Nada foi cobrado e nenhum crédito foi liberado.</p>
@@ -57,7 +57,7 @@
         </section>
     @elseif ($estado === \App\Domain\Cobranca\EstadoCobranca::Falhou)
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-falhou">
-            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">{{ $titulo }}</h1>
+            <x-page-header>{{ $titulo }}</x-page-header>
             <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4" role="alert">
                 <p class="m-0 text-[color:var(--color-primary)]">{{ $cartao ? 'Não conseguimos abrir o pagamento agora.' : 'Não conseguimos gerar o QR Code agora.' }} Nada foi cobrado.</p>
             </div>
@@ -65,7 +65,7 @@
         </section>
     @elseif ($invoice->expirada())
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-expirado">
-            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">{{ $titulo }}</h1>
+            <x-page-header>{{ $titulo }}</x-page-header>
             <div class="rounded-md border border-[color:var(--color-tertiary)]/30 bg-[color:var(--color-tertiary)]/5 p-4" role="status">
                 <p class="m-0 font-medium text-[color:var(--color-primary)]">{{ $cartao ? 'O pagamento não foi concluído e nada foi cobrado.' : 'O QR Code expirou e nada foi cobrado.' }}</p>
                 <p class="m-0 text-sm text-[color:var(--color-primary)]">{{ $cartao ? 'Tente de novo quando quiser.' : 'Gere outro para pagar.' }}</p>
@@ -77,7 +77,7 @@
     @else
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-aguardando">
             <div>
-                <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">{{ $titulo }}</h1>
+                <x-page-header>{{ $titulo }}</x-page-header>
                 <p class="m-0 text-sm text-[color:var(--color-secondary)]">{{ $invoice->descricao }} · {{ $reais }}</p>
             </div>
 

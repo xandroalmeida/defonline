@@ -13,6 +13,8 @@
 @layer base {
     html {
         color-scheme: light;
+        /* Header sticky de 64px: rolagem para âncora/foco não esconde o alvo atrás dele. */
+        scroll-padding-top: 5rem;
     }
 
     body {
@@ -659,4 +661,11 @@
     main {
         padding: 0;
     }
+}
+
+/* Abaixo de lg o header só cabe hambúrguer + título + conta: com título na página,
+   o logo sai (a navegação continua no menu). Fora de @layer para vencer o `flex`
+   utilitário do link. */
+@media (max-width: 1023.98px) {
+    .app-header:has(#app-titulo > *) .app-header__logo { display: none; }
 }

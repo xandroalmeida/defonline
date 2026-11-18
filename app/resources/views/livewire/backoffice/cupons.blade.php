@@ -162,7 +162,7 @@
                             {{ $item->tipo->formatar($item->valor) }}
                             <span class="block text-xs text-[color:var(--color-secondary)]">{{ $item->ciclos_duracao === null ? 'toda a assinatura' : $item->ciclos_duracao.' '.($item->ciclos_duracao === 1 ? 'ciclo' : 'ciclos') }}</span>
                         </td>
-                        <td class="px-3 py-2 align-top whitespace-nowrap">{{ $data($item->vigencia_inicio) }} a {{ $data($item->vigencia_fim) }}</td>
+                        <td class="px-3 py-2 align-top">{{ $data($item->vigencia_inicio) }} a {{ $data($item->vigencia_fim) }}</td>
                         <td class="px-3 py-2 align-top text-xs">
                             @foreach ($item->itens as $coberto)
                                 <span class="block">{{ $coberto->plano ? $coberto->plano->nome.' ('.$coberto->ciclo.')' : 'Pacote '.$coberto->pacote?->nome }}</span>
@@ -171,14 +171,20 @@
                         <td class="px-3 py-2 align-top" dusk="cupom-concessoes-{{ $item->id }}">{{ $item->concessoes_count }}</td>
                         <td class="px-3 py-2 align-top" dusk="cupom-usos-{{ $item->id }}">{{ $item->usos_count }}{{ $item->limite_usos !== null ? ' / '.$item->limite_usos : '' }}</td>
                         <td class="px-3 py-2 align-top" dusk="cupom-situacao-{{ $item->id }}">{{ $item->ativo ? 'Ativo' : 'Inativo' }}</td>
-                        <td class="px-3 py-2 align-top text-right">
-                            <x-button type="button" variant="secondary" size="sm" wire:click="editarCupom('{{ $item->id }}')" dusk="cupom-editar-{{ $item->id }}">Editar</x-button>
-                            @if ($item->ativo)
-                                <x-button type="button" variant="secondary" size="sm" wire:click="abrirConcessao('{{ $item->id }}')" dusk="cupom-conceder-{{ $item->id }}">Conceder</x-button>
-                            @endif
-                            <x-button type="button" variant="secondary" size="sm" wire:click="detalhar('{{ $item->id }}')" dusk="cupom-detalhes-{{ $item->id }}">Detalhes</x-button>
-                            <x-button :href="route('backoffice.cupons.clientes', $item->id)" variant="secondary" size="sm" dusk="cupom-clientes-{{ $item->id }}">Clientes</x-button>
-                            <x-button type="button" variant="secondary" size="sm" wire:click="alternarCupom('{{ $item->id }}')" dusk="cupom-alternar-{{ $item->id }}">{{ $item->ativo ? 'Desativar' : 'Ativar' }}</x-button>
+                        <td class="px-3 py-2 align-top">
+                            {{-- Editar fica à mão; o resto vai para o menu "⋯", para a linha não estourar a largura. --}}
+                            <div class="flex justify-end gap-2 whitespace-nowrap -my-2">
+                                <x-button type="button" variant="secondary" size="sm" wire:click="editarCupom('{{ $item->id }}')" dusk="cupom-editar-{{ $item->id }}">Editar</x-button>
+                                <x-menu-acoes :rotulo="'Mais ações do cupom '.$item->codigo" dusk="cupom-mais-{{ $item->id }}">
+                                    @if ($item->ativo)
+                                        <x-menu-acoes.item wire:click="abrirConcessao('{{ $item->id }}')" dusk="cupom-conceder-{{ $item->id }}">Conceder</x-menu-acoes.item>
+                                    @endif
+                                    <x-menu-acoes.item wire:click="detalhar('{{ $item->id }}')" dusk="cupom-detalhes-{{ $item->id }}">Detalhes</x-menu-acoes.item>
+                                    <x-menu-acoes.item :href="route('backoffice.cupons.clientes', $item->id)" dusk="cupom-clientes-{{ $item->id }}">Clientes</x-menu-acoes.item>
+                                    <div class="my-1 border-t border-[color:var(--color-border)]" role="separator"></div>
+                                    <x-menu-acoes.item wire:click="alternarCupom('{{ $item->id }}')" :perigo="$item->ativo" dusk="cupom-alternar-{{ $item->id }}">{{ $item->ativo ? 'Desativar' : 'Ativar' }}</x-menu-acoes.item>
+                                </x-menu-acoes>
+                            </div>
                         </td>
                     </tr>
                 @empty

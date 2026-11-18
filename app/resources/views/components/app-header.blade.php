@@ -15,9 +15,9 @@
 @endphp
 
 <header data-testid="app-header"
-        class="print:hidden sticky top-0 z-30 flex items-center justify-between gap-3 h-16 px-4 sm:px-6 bg-[color:var(--color-surface)] border-b border-[color:var(--color-border)]">
+        class="app-header print:hidden sticky top-0 z-30 flex items-center justify-between gap-3 h-16 px-4 sm:px-6 bg-[color:var(--color-surface)] border-b border-[color:var(--color-border)]">
 
-    <div class="flex items-center gap-3 min-w-0">
+    <div class="flex flex-1 items-center gap-3 min-w-0">
         {{-- Hamburger só aparece em < 1024px (controlado pelo Alpine root do shell). --}}
         <button type="button"
                 class="inline-flex items-center justify-center w-11 h-11 lg:hidden rounded-md text-[color:var(--color-primary)] hover:bg-[color:var(--color-neutral)]"
@@ -34,18 +34,24 @@
             </svg>
         </button>
 
-        <a href="{{ route('home') }}" class="flex items-center gap-2 text-[color:var(--color-primary)] no-underline"
-           dusk="app-header-logo">
-            <x-logo :size="32" :wordmark="'mobile'"/>
-        </a>
+        {{-- Em lg+ a marca ocupa a largura da sidebar, para o título começar alinhado ao conteúdo. --}}
+        <div class="flex shrink-0 items-center gap-3 lg:w-[14.25rem]">
+            <a href="{{ route('home') }}" class="app-header__logo flex items-center gap-2 text-[color:var(--color-primary)] no-underline"
+               dusk="app-header-logo">
+                <x-logo :size="32" :wordmark="'mobile'"/>
+            </a>
 
-        @if ($showEnvPill)
-            <span class="pill" data-testid="env-pill" dusk="env-pill">{{ $envPillLabel }}</span>
-        @endif
+            @if ($showEnvPill)
+                <span class="pill" data-testid="env-pill" dusk="env-pill">{{ $envPillLabel }}</span>
+            @endif
+        </div>
+
+        {{-- Título da página: o x-page-header leva o <h1> para cá (x-teleport). --}}
+        <div id="app-titulo" class="flex flex-1 items-center min-w-0" data-testid="app-titulo"></div>
     </div>
 
     @if ($usuario)
-        <div class="relative" x-data="{ open: false }"
+        <div class="relative shrink-0" x-data="{ open: false }"
              @keydown.escape.window="open = false"
              @click.outside="open = false">
             {{--

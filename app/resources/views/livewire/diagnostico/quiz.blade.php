@@ -61,9 +61,7 @@
                               :acoes="\App\Support\Cobranca\TextoBloqueio::disponiveis($bloqueio_saldo['acoes'])"/>
 @elseif ($erro_carteira)
     <div class="max-w-[640px] flex flex-col gap-4" dusk="screen-bloqueio-erro">
-        <h1 class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">
-            Não conseguimos conferir seu saldo
-        </h1>
+        <x-page-header>Não conseguimos conferir seu saldo</x-page-header>
         <p class="m-0 text-[color:var(--color-primary)]" role="alert">Não conseguimos conferir seu saldo agora. Tente de novo em instantes.</p>
         <div>
             <x-button type="button" variant="primary" wire:click="conferirSaldo" dusk="screen-bloqueio-tentar-de-novo">Tentar de novo</x-button>
@@ -71,9 +69,7 @@
     </div>
 @elseif ($diagnostico_ja_concluido !== null)
     <div class="max-w-[640px] flex flex-col gap-4" dusk="screen-analise-ja-concluida">
-        <h1 class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">
-            Esta análise já foi concluída.
-        </h1>
+        <x-page-header>Esta análise já foi concluída.</x-page-header>
         <div>
             <x-button :href="$diagnostico_ja_concluido === '' ? route('home') : route('diagnosticos.show', $diagnostico_ja_concluido)" variant="primary" dusk="screen-analise-ver-diagnostico">Ver diagnóstico</x-button>
         </div>

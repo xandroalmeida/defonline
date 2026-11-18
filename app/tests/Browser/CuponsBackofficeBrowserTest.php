@@ -97,6 +97,8 @@ final class CuponsBackofficeBrowserTest extends DuskTestCase
             $cupom = Cupom::query()->where('codigo', 'BETA')->firstOrFail();
 
             $browser->assertSeeIn('@cupom-linha-'.$cupom->id, '100%')
+                ->click('@cupom-mais-'.$cupom->id)
+                ->waitFor('@cupom-conceder-'.$cupom->id)
                 ->press('@cupom-conceder-'.$cupom->id)
                 ->waitFor('@concessao-modo-todas')
                 ->click('@concessao-modo-todas')
@@ -112,6 +114,8 @@ final class CuponsBackofficeBrowserTest extends DuskTestCase
                 ->waitFor('@cupom-mensagem')
                 ->assertSeeIn('@cupom-mensagem', '3 contas receberam o cupom BETA.')
                 ->assertSeeIn('@cupom-concessoes-'.$cupom->id, '3')
+                ->click('@cupom-mais-'.$cupom->id)
+                ->waitFor('@cupom-alternar-'.$cupom->id)
                 ->press('@cupom-alternar-'.$cupom->id)
                 ->waitForTextIn('@cupom-situacao-'.$cupom->id, 'Inativo')
                 ->assertMissing('@cupom-conceder-'.$cupom->id);

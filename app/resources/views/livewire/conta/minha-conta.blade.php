@@ -14,8 +14,7 @@
         : $reais($c->valor).' de desconto';
 @endphp
 <div class="max-w-[1100px]" x-data x-init="$nextTick(() => $refs.titulo?.focus())">
-    <h1 x-ref="titulo" tabindex="-1" dusk="screen-conta-titulo"
-        class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-4">Minha conta</h1>
+    <x-page-header titulo-dusk="screen-conta-titulo">Minha conta</x-page-header>
 
     @if ($personificando)
         <x-drm.aviso-inline variant="info" dusk="screen-conta-admin">Você está acessando como administrador. Aqui é só leitura.</x-drm.aviso-inline>

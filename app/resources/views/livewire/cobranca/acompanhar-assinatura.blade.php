@@ -13,21 +13,21 @@
     @if ($paga && $assinatura)
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-confirmacao" role="status">
             @if ($pix)
-                <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">{{ $invoice->renovacao ? 'Plano renovado' : 'Plano anual ativo' }}</h1>
+                <x-page-header>{{ $invoice->renovacao ? 'Plano renovado' : 'Plano anual ativo' }}</x-page-header>
                 <p class="m-0 text-[color:var(--color-primary)]">
                     Plano {{ $plano?->nome }} · anual, até {{ $fim }}.
                     Esta assinatura não renova sozinha: avisaremos {{ \App\Domain\Cobranca\RenovacaoPix::AVISO_DIAS }} dias antes.
                     Você tem {{ $assinatura->cota_restante_ciclo }} {{ $assinatura->cota_restante_ciclo === 1 ? 'análise disponível' : 'análises disponíveis' }} agora.
                 </p>
             @elseif ($invoice->meio === 'nenhum')
-                <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Assinatura ativa</h1>
+                <x-page-header>Assinatura ativa</x-page-header>
                 <p class="m-0 text-[color:var(--color-primary)]" dusk="screen-checkout-sem-cobranca">
                     Plano {{ $plano?->nome }} · {{ $invoice->ciclo }}, ativado sem cobrança com o desconto do cupom.
                     Você tem {{ $assinatura->cota_restante_ciclo }} {{ $assinatura->cota_restante_ciclo === 1 ? 'análise disponível' : 'análises disponíveis' }} agora.
                     O ciclo atual vai até {{ $fim }}. Quando o desconto acabar, cadastre um cartão em Meu plano para continuar.
                 </p>
             @else
-                <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Assinatura ativa</h1>
+                <x-page-header>Assinatura ativa</x-page-header>
                 <p class="m-0 text-[color:var(--color-primary)]">
                     Plano {{ $plano?->nome }} · {{ $invoice->ciclo }}.
                     Você tem {{ $assinatura->cota_restante_ciclo }} {{ $assinatura->cota_restante_ciclo === 1 ? 'análise disponível' : 'análises disponíveis' }} agora.
@@ -44,12 +44,12 @@
     @elseif ($paga)
         {{-- Pago, mas a assinatura não pôde ser criada (já havia outra): a equipe é avisada por alerta. --}}
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-duplicada" role="alert">
-            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Recebemos o pagamento</h1>
+            <x-page-header>Recebemos o pagamento</x-page-header>
             <p class="m-0 text-[color:var(--color-primary)]">Você já tem uma assinatura ativa, então não abrimos outra. Vamos conferir esta cobrança e devolver o valor, se for o caso. Dúvidas: eb@ebparcerias.com.</p>
         </section>
     @elseif ($estado === EstadoCobranca::Falhou && $invoice->motivo_encerramento !== 'provedor')
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-recusa">
-            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Assinar plano {{ $plano?->nome }}</h1>
+            <x-page-header>Assinar plano {{ $plano?->nome }}</x-page-header>
             <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4" role="alert">
                 <p class="m-0 font-medium text-[color:var(--color-primary)]">Cartão recusado</p>
                 <p class="m-0 text-sm text-[color:var(--color-primary)]">O banco não autorizou o pagamento. Tente outro cartão.</p>
@@ -59,7 +59,7 @@
         </section>
     @elseif ($estado === EstadoCobranca::Cancelada || $estado === EstadoCobranca::Falhou)
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-cancelada">
-            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Assinatura não concluída</h1>
+            <x-page-header>Assinatura não concluída</x-page-header>
             <p class="m-0 text-[color:var(--color-primary)]">Nada foi cobrado.</p>
             <div class="flex flex-wrap gap-3">
                 <x-button :href="$urlDeNovo" variant="primary">Tentar de novo</x-button>
@@ -68,7 +68,7 @@
         </section>
     @elseif ($invoice->expirada())
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-expirado">
-            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">{{ $pix ? 'Pague o plano anual' : 'Assinar plano '.$plano?->nome }}</h1>
+            <x-page-header>{{ $pix ? 'Pague o plano anual' : 'Assinar plano '.$plano?->nome }}</x-page-header>
             <div class="rounded-md border border-[color:var(--color-tertiary)]/30 bg-[color:var(--color-tertiary)]/5 p-4" role="status">
                 @if ($pix)
                     <p class="m-0 font-medium text-[color:var(--color-primary)]">O QR Code expirou e nada foi cobrado.</p>
@@ -83,7 +83,7 @@
     @elseif ($pix)
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-aguardando">
             <div>
-                <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Pague o plano anual</h1>
+                <x-page-header>Pague o plano anual</x-page-header>
                 <p class="m-0 text-sm text-[color:var(--color-secondary)]">{{ $invoice->descricao }} · {{ $reais($invoice->valor_centavos) }}</p>
             </div>
             <p class="m-0 text-[color:var(--color-primary)]">
@@ -101,7 +101,7 @@
         </section>
     @else
         <section class="max-w-[640px] flex flex-col gap-4" dusk="screen-checkout-aguardando">
-            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Estamos confirmando seu pagamento</h1>
+            <x-page-header>Estamos confirmando seu pagamento</x-page-header>
             <div class="rounded-md border border-[color:var(--color-tertiary)]/30 bg-[color:var(--color-tertiary)]/5 p-4" role="status" dusk="screen-checkout-aguardando-aviso">
                 <p class="m-0 font-medium text-[color:var(--color-primary)]">Aguardando a confirmação do processador…</p>
                 <p class="m-0 text-sm text-[color:var(--color-primary)]">{{ $invoice->descricao }} · {{ $reais($invoice->valor_centavos) }}. Esta tela se atualiza sozinha. Não pague de novo.</p>

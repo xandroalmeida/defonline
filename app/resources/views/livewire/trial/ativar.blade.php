@@ -7,7 +7,7 @@
     @if ($recemAtivado && $trial)
         <section class="flex flex-col gap-4" dusk="screen-trial-confirmacao"
                  x-data x-init="$nextTick(() => $refs.titulo.focus())">
-            <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">Seu teste começou</h1>
+            <x-page-header>Seu teste começou</x-page-header>
             <p class="m-0 text-[color:var(--color-primary)]">
                 Você tem até {{ \App\Support\DataExibicao::data($trial->proximo_vencimento) }} para fazer {{ TextoTrial::analises($trial->cota_snapshot) }} e lançar no Raio X do Negócio.
             </p>

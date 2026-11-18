@@ -93,6 +93,7 @@ final class SociosListaBrowserTest extends DuskTestCase
                 ->type('@quiz-socio-3-nome', 'Dudu')->type('@quiz-socio-3-cpf', '98765432100')
                 ->pause(600)
                 // Remove a 2ª linha (índice 1 = Ana) → confirma → sobram 3, renumeradas.
+                ->scrollIntoView('@quiz-socio-remover-1')
                 ->click('@quiz-socio-remover-1')
                 ->acceptDialog()
                 ->waitUntilMissing('@quiz-socio-3-cpf')

@@ -36,8 +36,63 @@ function carregarCnaes(url) {
     return cnaeCache;
 }
 
+/*
+ * Menu de ações de linha (x-menu-acoes). O painel fica no <body> com posição fixa,
+ * alinhado à direita do botão; abre para cima quando não cabe abaixo.
+ */
+function menuAcoes() {
+    return {
+        aberto: false,
+        estilo: '',
+
+        alternar() {
+            this.aberto ? this.fechar() : this.abrir();
+        },
+
+        abrir() {
+            this.aberto = true;
+            this.posicionar();
+            this.$nextTick(() => {
+                this.posicionar();
+                this.itens()[0]?.focus();
+            });
+            this._fechar = () => this.fechar();
+            window.addEventListener('scroll', this._fechar, { capture: true, passive: true });
+            window.addEventListener('resize', this._fechar);
+        },
+
+        fechar(devolverFoco = false) {
+            if (!this.aberto) return;
+            this.aberto = false;
+            window.removeEventListener('scroll', this._fechar, { capture: true });
+            window.removeEventListener('resize', this._fechar);
+            if (devolverFoco) this.$refs.gatilho.focus();
+        },
+
+        posicionar() {
+            const r = this.$refs.gatilho.getBoundingClientRect();
+            const altura = this.$refs.painel?.offsetHeight ?? 0;
+            const abaixo = r.bottom + 4 + altura <= window.innerHeight;
+            const topo = abaixo ? r.bottom + 4 : Math.max(8, r.top - 4 - altura);
+            this.estilo = `top:${topo}px;right:${Math.max(8, window.innerWidth - r.right)}px`;
+        },
+
+        itens() {
+            return [...(this.$refs.painel?.querySelectorAll('[role=menuitem]:not([disabled])') ?? [])];
+        },
+
+        mover(passo) {
+            const itens = this.itens();
+            if (!itens.length) return;
+            const i = itens.indexOf(document.activeElement);
+            itens[(i + passo + itens.length) % itens.length].focus();
+        },
+    };
+}
+
 document.addEventListener('alpine:init', () => {
     registrarMascaras(window.Alpine);
+    window.Alpine.data('menuAcoes', menuAcoes);
 
     window.Alpine.data('cnaeSelect', ({ valor, url, rotuloInicial = '' }) => ({
         valor,

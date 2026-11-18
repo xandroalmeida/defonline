@@ -15,10 +15,7 @@
 
 <section class="max-w-[640px] flex flex-col gap-4" dusk="{{ $prefixo }}"
          x-data x-init="$nextTick(() => $refs.titulo.focus())">
-    <h1 x-ref="titulo" tabindex="-1" dusk="{{ $prefixo }}-titulo"
-        class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0">
-        {{ $titulo }}
-    </h1>
+    <x-page-header titulo-dusk="{{ $prefixo }}-titulo">{{ $titulo }}</x-page-header>
 
     <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4"
          role="alert" dusk="{{ $prefixo }}-causa">

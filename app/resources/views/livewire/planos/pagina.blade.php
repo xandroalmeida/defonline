@@ -9,7 +9,8 @@
 @endphp
 
 <div class="w-full max-w-[960px] mx-auto" dusk="screen-planos">
-    <x-page-header :title="'Planos e preços'" :subtitle="'Escolha como quer usar o DEFOnline.'"/>
+    {{-- Visitante vê a página no layout auth, sem o header do app: o título fica no conteúdo. --}}
+    <x-page-header :title="'Planos e preços'" :subtitle="'Escolha como quer usar o DEFOnline.'" :na-pagina="! auth()->check()"/>
 
     @if ($erro)
         <x-drm.aviso-inline variant="bloqueio" dusk="screen-planos-erro">

@@ -4,10 +4,7 @@
 <div x-data x-init="$nextTick(() => $refs.titulo?.focus())">
     <x-breadcrumb :items="[['label' => 'Início', 'url' => route('home')], ['label' => 'Comprar créditos']]"/>
 
-    <h1 x-ref="titulo" tabindex="-1" dusk="screen-checkout-titulo"
-        class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-1">
-        Comprar créditos
-    </h1>
+    <x-page-header titulo-dusk="screen-checkout-titulo">Comprar créditos</x-page-header>
 
     @if ($pacoteId === null)
         {{-- Sem pacote escolhido: lista simples, até a página de planos (STORY-075) ser a entrada. --}}

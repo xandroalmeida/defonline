@@ -10,14 +10,14 @@
     <x-breadcrumb :items="[['label' => 'Planos e preços', 'url' => route('planos')], ['label' => 'Assinar']]"/>
 
     @if ($plano === null)
-        <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-4">Assinar plano</h1>
+        <x-page-header>Assinar plano</x-page-header>
         <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4 max-w-[640px] flex flex-col gap-3"
              role="alert" dusk="screen-checkout-indisponivel">
             <p class="m-0 text-[color:var(--color-primary)]">Este plano não está mais disponível.</p>
             <div><x-button :href="route('planos')" variant="secondary">Ver os planos</x-button></div>
         </div>
     @elseif ($vigente)
-        <h1 x-ref="titulo" tabindex="-1" class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-4">Assinar plano {{ $plano->nome }}</h1>
+        <x-page-header>Assinar plano {{ $plano->nome }}</x-page-header>
         <x-drm.aviso-inline variant="info" dusk="screen-checkout-ja-assinante">
             @if ($vigente->pagoComPix())
                 <p class="m-0 mb-2">Você já tem o plano {{ $planoVigente?->nome }}, que termina em {{ \App\Support\DataExibicao::data($vigente->proximo_vencimento) }} e não renova sozinho.</p>
@@ -32,10 +32,7 @@
             </div>
         </x-drm.aviso-inline>
     @else
-        <h1 x-ref="titulo" tabindex="-1" dusk="screen-checkout-titulo"
-            class="text-[length:var(--text-h1)] font-medium leading-tight tracking-tight text-[color:var(--color-primary)] m-0 mb-4">
-            Assinar plano {{ $plano->nome }}
-        </h1>
+        <x-page-header titulo-dusk="screen-checkout-titulo">Assinar plano {{ $plano->nome }}</x-page-header>
 
         @if (! $emailConfirmado)
             <div class="rounded-md border border-[color:var(--color-destructive)]/40 bg-[color:var(--color-destructive)]/5 p-4 max-w-[640px] flex flex-col gap-3"
