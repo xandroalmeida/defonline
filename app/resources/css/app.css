@@ -587,6 +587,33 @@
             box-shadow: var(--shadow-md);
         }
     }
+
+    /*
+     * Raias do quadro de captação (STORY-103). Cada etapa tem a sua cor: faixa no topo, fundo
+     * tingido (opaco, via color-mix com surface: o cartão branco se destaca sobre ele) e contador
+     * em pill. As cores saem dos tokens que já existem: tertiary e os faróis.
+     */
+    .raia {
+        --raia-cor: var(--color-farol-cinza);
+        --raia-texto: var(--color-farol-cinza-texto);
+        background: color-mix(in srgb, var(--raia-cor) 9%, var(--color-surface));
+        border: 1px solid color-mix(in srgb, var(--raia-cor) 35%, var(--color-surface));
+        border-top: 4px solid var(--raia-cor);
+    }
+    .raia--nova { --raia-cor: var(--color-tertiary); --raia-texto: var(--color-tertiary-hover); }
+    .raia--em_analise { --raia-cor: var(--color-farol-amarelo); --raia-texto: var(--color-farol-amarelo-texto); }
+    .raia--respondida { --raia-cor: var(--color-farol-verde); --raia-texto: var(--color-farol-verde-texto); }
+    .raia--encerrada { --raia-cor: var(--color-farol-cinza); --raia-texto: var(--color-farol-cinza-texto); }
+    .raia__titulo { color: var(--raia-texto); }
+    .raia__total {
+        min-width: 1.5rem;
+        padding: 0 8px;
+        border-radius: var(--radius-full);
+        background: color-mix(in srgb, var(--raia-cor) 20%, var(--color-surface));
+        color: var(--raia-texto);
+        font-weight: var(--font-weight-semibold);
+        text-align: center;
+    }
 }
 
 /* Alpine: esconde elementos até o Alpine inicializar. */

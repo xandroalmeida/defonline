@@ -74,16 +74,16 @@
     <div class="flex gap-3 overflow-x-auto pb-2 lg:grid lg:grid-cols-4 lg:overflow-visible" dusk="captacao-quadro">
         @foreach ($colunas as $valor => $coluna)
             @php /** @var StatusDemanda $status */ $status = $coluna['status']; @endphp
-            <section class="min-w-[16rem] lg:min-w-0 flex-1 flex flex-col rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-neutral)] p-2 transition-shadow"
+            <section class="raia raia--{{ $valor }} min-w-[16rem] lg:min-w-0 flex-1 flex flex-col rounded-lg p-2 transition-shadow"
                      :class="sobre === '{{ $valor }}' && 'ring-2 ring-[color:var(--color-tertiary)]'"
                      aria-labelledby="coluna-{{ $valor }}"
                      x-on:dragover.prevent="sobre = '{{ $valor }}'"
                      x-on:dragleave="sobre = null"
                      x-on:drop.prevent="if (arrastando) { $wire.mover(arrastando, '{{ $valor }}') } arrastando = null; sobre = null"
                      dusk="captacao-coluna-{{ $valor }}">
-                <h2 id="coluna-{{ $valor }}" class="m-0 mb-2 px-1 flex justify-between text-sm font-semibold text-[color:var(--color-primary)]">
+                <h2 id="coluna-{{ $valor }}" class="raia__titulo m-0 mb-2 px-1 flex justify-between items-center text-sm font-semibold uppercase tracking-wide">
                     <span>{{ $status->rotulo() }}</span>
-                    <span class="text-[color:var(--color-secondary)] font-normal" dusk="captacao-total-{{ $valor }}">{{ $coluna['total'] }}</span>
+                    <span class="raia__total text-xs normal-case" dusk="captacao-total-{{ $valor }}">{{ $coluna['total'] }}</span>
                 </h2>
                 <ul class="list-none m-0 p-0 flex flex-col gap-2 min-h-16">
                     @forelse ($coluna['demandas'] as $demanda)
