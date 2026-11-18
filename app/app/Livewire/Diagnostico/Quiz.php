@@ -12,7 +12,10 @@ use App\Domain\Cobranca\SaldoInsuficiente;
 use App\Domain\Quiz\Alerta;
 use App\Domain\Quiz\ValidacoesCruzadas;
 use App\Domain\Quiz\ValidaSocios;
+use App\Jobs\AvisarDemandaCaptacao;
 use App\Models\CobrancaConfig;
+use App\Models\DemandaCaptacao;
+use App\Models\Diagnostico;
 use App\Models\EmpresaAnalisada;
 use App\Models\QuizRascunho;
 use App\Observabilidade\EventLogger;
@@ -159,6 +162,12 @@ final class Quiz extends Component
      * @var list<array{cpf: string, nome: string}>
      */
     public array $socios = [['cpf' => '', 'nome' => '']];
+
+    /**
+     * STORY-102 / PDR-021 — com captação, o cliente autoriza a equipe a analisar a demanda e a
+     * entrar em contato. Opt-out: vem marcado. Fica fora do payload do motor (não muda o hash).
+     */
+    public bool $autoriza_contato_captacao = true;
 
     public function mount(EmpresaAnalisada $empresa): void
     {
@@ -552,12 +561,46 @@ final class Quiz extends Component
             return null;
         }
 
+        if ($this->Q17 === 'sim') {
+            $this->registrarDemandaCaptacao($diagnostico);
+        }
+
         // CA-6: rascunho cumpriu sua função — soft delete preserva trilha de auditoria.
         QuizRascunho::query()
             ->where('empresa_analisada_id', $this->empresa->id)
             ->delete();
 
         return $this->redirect(route('diagnosticos.show', $diagnostico), navigate: false);
+    }
+
+    /**
+     * STORY-102 / PDR-021 — registra a demanda de captação do diagnóstico recém-gerado e, se o cliente
+     * autorizou o contato, agenda os avisos (equipe e cliente) depois do commit. Uma falha aqui não
+     * desfaz o diagnóstico: o cliente já tem o resultado, e o erro fica no log para a equipe.
+     */
+    private function registrarDemandaCaptacao(Diagnostico $diagnostico): void
+    {
+        try {
+            $demanda = DemandaCaptacao::query()->firstOrCreate(
+                ['diagnostico_id' => $diagnostico->id],
+                [
+                    'usuario_id' => $diagnostico->usuario_id,
+                    'empresa_analisada_id' => $diagnostico->empresa_analisada_id,
+                    'valor_captar' => self::strFloat($this->Q18),
+                    'autoriza_contato' => $this->autoriza_contato_captacao,
+                ],
+            );
+
+            if ($demanda->wasRecentlyCreated && $demanda->autoriza_contato) {
+                AvisarDemandaCaptacao::dispatch($demanda->id)->afterCommit();
+            }
+        } catch (Throwable $e) {
+            Log::error('quiz.demanda_captacao.falha', [
+                'diagnostico_id' => $diagnostico->id,
+                'exception' => $e::class,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function render(): View
@@ -740,6 +783,7 @@ final class Quiz extends Component
             // Sócios são guardados como digitados (ordem preservada) para que a
             // retomada do rascunho devolva a mesma lista na mesma ordem (CA-8).
             'socios' => $this->socios,
+            'autoriza_contato_captacao' => $this->autoriza_contato_captacao,
             'alertas_aceitos' => $this->alertas_aceitos,
         ];
     }

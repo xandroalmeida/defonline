@@ -87,6 +87,21 @@ PK `id uuid`. FK `usuario_id → usuarios` (RESTRICT). **UNIQUE parcial** `(usua
 ### `avisos_renovacao_diagnostico` — estado do aviso para renovar o diagnóstico (STORY-099)
 PK `id uuid`. FK `diagnostico_id → diagnosticos` **CASCADE**, único: uma linha por diagnóstico. Colunas: `aviso_em`, `lembrete_em`, `sem_lembrete`, `alerta_dispensado_em`. `empresas_analisadas.renovacao_diagnostico_meses` guarda o prazo (3, 6, 9 ou 12; padrão 6) e `usuarios.aviso_renovacao_descadastrado_em`, o descadastro.
 
+### `demandas_captacao` — demanda de captação do bloco 4 (STORY-102, PDR-021)
+PK `id uuid`. FKs `diagnostico_id` (**UNIQUE**, CASCADE), `usuario_id` e `empresa_analisada_id` (RESTRICT). Índice `created_at`.
+
+| coluna | tipo | notas |
+|---|---|---|
+| `valor_captar` | numeric(15,2) | nullable — Q18 |
+| `autoriza_contato` | boolean | NOT NULL — opt-out no bloco 4; false = ninguém é avisado |
+| `equipe_avisada_em` / `cliente_avisado_em` | timestamptz | nullable — hora do aviso (evita reenvio no retry) |
+
+### `captacao_config` — e-mail da equipe que recebe as demandas (linha única)
+| coluna | tipo | notas |
+|---|---|---|
+| `email` | varchar(255) | nullable — vazio = nenhum e-mail sai para a equipe |
+| `alterado_por_usuario_id` | uuid | nullable |
+
 ### `quiz_rascunhos` — rascunhos do quiz (23 campos, Anexo A)
 PK `id uuid`. FKs `usuario_id`, `empresa_analisada_id` (RESTRICT). **UNIQUE parcial** `(usuario_id, empresa_analisada_id) WHERE deleted_at IS NULL`.
 

@@ -41,6 +41,8 @@ $exclusoes = [
     'resources/views/mail/renovacao-pix.blade.php',
     'resources/views/mail/fim-do-desconto.blade.php',
     'resources/views/mail/renovacao-diagnostico.blade.php',
+    'resources/views/mail/demanda-captacao-recebida.blade.php',
+    'resources/views/mail/demanda-captacao-equipe.blade.php',
     'resources/views/mail/redefinicao-senha.blade.php',
 ];
 

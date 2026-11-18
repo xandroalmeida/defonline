@@ -37,6 +37,12 @@
 
     // Glossário — só na tela; mantido no backoffice (STORY-067).
     $glossario = GlossarioTermo::query()->orderBy('ordem')->get();
+
+    // STORY-102 / PDR-021 — demanda de captação com contato autorizado: confirma o prazo de retorno.
+    $demandaCaptacao = \App\Models\DemandaCaptacao::query()
+        ->where('diagnostico_id', $diagnostico->id)
+        ->where('autoriza_contato', true)
+        ->exists();
 @endphp
 
 <x-layouts.app :title="$tituloPagina"
@@ -69,6 +75,15 @@
     </x-page-header>
 
     <x-personificacao-marca :registro="$diagnostico" class="mb-4"/>
+
+    @if ($demandaCaptacao)
+        <x-card class="mb-6" role="status" dusk="diagnostico-demanda-captacao">
+            <p class="m-0 font-semibold text-[color:var(--color-primary)]">Recebemos sua demanda de captação.</p>
+            <p class="m-0 mt-1 text-sm text-[color:var(--color-secondary)]">
+                Nossa equipe retornará com a análise em até {{ \App\Domain\Captacao\PrazoRetorno::DIAS_UTEIS }} dias úteis pelo e-mail ou WhatsApp cadastrado.
+            </p>
+        </x-card>
+    @endif
 
     {{-- 13 indicadores essenciais com farol (motor V2 = 1.1.0, Anexo D §4.5).
          Renderiza dois layouts: tabela densa em ≥ md, stack de cards em < md.

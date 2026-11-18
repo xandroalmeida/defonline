@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-11-05",
+  "generated_at": "2026-11-18",
   "project": {
     "name": "DEFOnline",
     "current_wave": "WAVE-2026-02",
@@ -2844,6 +2844,23 @@
       "title": "Pagamento com o webhook fora: conferência na tela e alertas",
       "estimated_session_size": "M",
       "note": "Pedido do PO em 2026-11-06."
+    },
+    {
+      "type": "feature",
+      "target_role": "programador",
+      "status": "in_review",
+      "blocks": [],
+      "epic_id": "EPIC-002",
+      "sprint_id": null,
+      "owner_agent": "claude-opus-5-5",
+      "requires_design": false,
+      "created_at": "2026-11-18",
+      "updated_at": "2026-11-18",
+      "id": "STORY-102",
+      "slug": "demanda-de-captacao",
+      "title": "Demanda de captação: avisos à equipe e ao cliente, prazo de 5 dias úteis",
+      "estimated_session_size": "M",
+      "note": "Pedido do PO em 2026-11-18. PDR-021."
     }
   ],
   "sprints": [
@@ -3641,6 +3658,22 @@
         "related_adrs": [],
         "related_idrs": [],
         "note": "Altera a condição de medição do PDR-003. DRM em todos os planos pagos e no trial; cupons para o beta; Termos v2. Adiados pelo PO: revisão por advogado e novo aceite das contas existentes."
+      },
+      {
+        "id": "PDR-021",
+        "slug": "demanda-de-captacao",
+        "title": "Demanda de captação avisa a equipe e promete retorno em 5 dias úteis",
+        "status": "accepted",
+        "path": "decisions/pdr/PDR-021-demanda-de-captacao.md",
+        "decided_at": "2026-11-18",
+        "decided_by": "PO (Alexandro / Claude)",
+        "related_epics": [
+          "EPIC-002",
+          "EPIC-011"
+        ],
+        "related_adrs": [],
+        "related_idrs": [],
+        "note": "Consentimento opt-out; e-mail da equipe configurável no backoffice (vazio = não envia); sem comissão."
       }
     ],
     "adr": [

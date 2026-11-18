@@ -18,6 +18,7 @@ enum PermissaoAdmin: string
     case GerenciarPlanos = 'planos.gerenciar';
     case GerenciarCupons = 'cupons.gerenciar';
     case GerenciarFinanceiro = 'financeiro.gerenciar';
+    case GerenciarCaptacao = 'captacao.gerenciar';
 
     public function rotulo(): string
     {
@@ -30,6 +31,7 @@ enum PermissaoAdmin: string
             self::GerenciarPlanos => 'Gerenciar planos e pacotes',
             self::GerenciarCupons => 'Gerenciar cupons',
             self::GerenciarFinanceiro => 'Gerenciar assinaturas, reembolsos e notas fiscais',
+            self::GerenciarCaptacao => 'Ver demandas de captação e o e-mail que as recebe',
         };
     }
 }

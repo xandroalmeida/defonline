@@ -289,6 +289,24 @@
                                 'socios' => $socios,
                                 'maskCpf' => $maskCpf,
                             ])
+
+                            {{-- STORY-102 / PDR-021 — opt-out: vem marcado. Desmarcado, a demanda fica
+                                 registrada, mas a equipe não é avisada e ninguém entra em contato. --}}
+                            <div class="flex flex-col gap-2 rounded-md border border-[color:var(--color-border)] p-3" dusk="quiz-captacao-contato">
+                                <label class="flex gap-2.5 items-start text-sm font-normal cursor-pointer">
+                                    <input type="checkbox" wire:model.live="autoriza_contato_captacao"
+                                           dusk="quiz-captacao-autoriza"
+                                           class="mt-1 accent-[color:var(--color-tertiary)]">
+                                    <span class="text-[color:var(--color-primary)]">
+                                        Autorizo a equipe DEFOnline a analisar esta demanda de captação e a entrar em contato pelo e-mail ou WhatsApp cadastrado.
+                                    </span>
+                                </label>
+                                @if ($autoriza_contato_captacao)
+                                    <p class="text-sm text-[color:var(--color-secondary)] m-0" dusk="quiz-captacao-prazo">
+                                        A análise é gratuita. Nossa equipe retornará em até {{ \App\Domain\Captacao\PrazoRetorno::DIAS_UTEIS }} dias úteis após a conclusão do diagnóstico.
+                                    </p>
+                                @endif
+                            </div>
                         </div>
                     @endif
                 </div>

@@ -145,6 +145,15 @@
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-financeiro',
             ],
+            [
+                'permissao' => \App\Support\PermissaoAdmin::GerenciarCaptacao,
+                'label' => 'Captação',
+                'icon' => 'message',
+                'href' => route('backoffice.captacao'),
+                'active' => request()->routeIs('backoffice.captacao'),
+                'disabled' => false,
+                'dusk' => 'app-nav-backoffice-captacao',
+            ],
         ], fn (array $item): bool => $usuarioNav->podeUsarBackoffice($item['permissao'])));
     }
 
