@@ -18,6 +18,9 @@ use App\Http\Middleware\AuditarPersonificacao;
 use App\Livewire\Backoffice\Administradores as BackofficeAdministradores;
 use App\Livewire\Backoffice\Captacao as BackofficeCaptacao;
 use App\Livewire\Backoffice\Cupons as BackofficeCupons;
+use App\Livewire\Backoffice\Empresas as BackofficeEmpresas;
+use App\Livewire\Backoffice\FichaEmpresa as BackofficeFichaEmpresa;
+use App\Livewire\Backoffice\FichaUsuario as BackofficeFichaUsuario;
 use App\Livewire\Backoffice\Financeiro as BackofficeFinanceiro;
 use App\Livewire\Backoffice\Glossario as BackofficeGlossario;
 use App\Livewire\Backoffice\Planos as BackofficePlanos;
@@ -191,6 +194,10 @@ Route::middleware('auth')->group(function () {
 // Sem ela: 404 (IDR-009).
 Route::middleware('auth')->prefix('backoffice')->name('backoffice.')->group(function () {
     Route::get('/usuarios', BackofficeUsuarios::class)->middleware('backoffice:usuarios.ver')->name('usuarios');
+    // STORY-104 — consulta de clientes: fichas do usuário e da empresa, e a lista de empresas.
+    Route::get('/usuarios/{usuario}', BackofficeFichaUsuario::class)->whereUuid('usuario')->middleware('backoffice:usuarios.ver')->name('usuarios.ficha');
+    Route::get('/empresas', BackofficeEmpresas::class)->middleware('backoffice:usuarios.ver')->name('empresas');
+    Route::get('/empresas/{empresa}', BackofficeFichaEmpresa::class)->whereUuid('empresa')->middleware('backoffice:usuarios.ver')->name('empresas.ficha');
     Route::post('/usuarios/{usuario}/logar-como', [PersonificacaoController::class, 'iniciar'])
         ->middleware('backoffice:usuarios.logar_como')
         ->whereUuid('usuario')

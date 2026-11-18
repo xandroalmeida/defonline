@@ -2878,6 +2878,23 @@
       "title": "CRM básico das demandas de captação: quadro Kanban",
       "estimated_session_size": "M",
       "note": "Pedido do PO em 2026-11-18, continuação da STORY-102."
+    },
+    {
+      "type": "feature",
+      "target_role": "programador",
+      "status": "in_review",
+      "blocks": [],
+      "epic_id": "EPIC-011",
+      "sprint_id": null,
+      "owner_agent": "claude-opus-5-5",
+      "requires_design": false,
+      "created_at": "2026-11-18",
+      "updated_at": "2026-11-18",
+      "id": "STORY-104",
+      "slug": "consulta-de-clientes",
+      "title": "Consulta de clientes no backoffice: busca por CPF/CNPJ/WhatsApp e fichas",
+      "estimated_session_size": "M",
+      "note": "Item 7 da devolutiva do PO em 2026-11-18. CPF completo na ficha (decisão do PO)."
     }
   ],
   "sprints": [

@@ -7,6 +7,7 @@ namespace App\Livewire\Backoffice;
 use App\Livewire\Backoffice\Concerns\ExigePermissao;
 use App\Models\Usuario;
 use App\Observabilidade\AuditLogger;
+use App\Support\BuscaBackoffice;
 use App\Support\PermissaoAdmin;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
@@ -86,10 +87,20 @@ final class Usuarios extends Component
             return $query;
         }
 
-        $padrao = '%'.addcslashes($this->busca, '%_\\').'%';
+        // STORY-104 — também por CPF, telefone e pelo CNPJ/CPF de uma empresa do usuário.
+        $busca = new BuscaBackoffice($this->busca);
 
-        return $query->where(function (Builder $q) use ($padrao): void {
-            $q->where('nome', 'ilike', $padrao)->orWhere('email', 'ilike', $padrao);
+        return $query->where(function (Builder $q) use ($busca): void {
+            $q->where('nome', 'ilike', $busca->padrao)->orWhere('email', 'ilike', $busca->padrao);
+
+            if ($busca->digitos !== null) {
+                $q->orWhere('cpf', 'like', '%'.$busca->digitos.'%')
+                    ->orWhere('telefone', 'like', '%'.$busca->digitos.'%')
+                    ->orWhereExists(fn ($e) => $e->from('empresas_analisadas')
+                        ->whereColumn('empresas_analisadas.usuario_id', 'usuarios.id')
+                        ->whereNull('empresas_analisadas.deleted_at')
+                        ->where('empresas_analisadas.documento', 'like', '%'.$busca->digitos.'%'));
+            }
         });
     }
 
@@ -139,7 +150,7 @@ final class Usuarios extends Component
             ->paginate(self::POR_PAGINA);
     }
 
-    /** CA-6 — ator e termo de busca; sem PII de terceiros. */
+    /** CA-6 — ator e termo de busca; sem PII de terceiros (dígitos de CPF/CNPJ/telefone saem mascarados). */
     private function registrarAcesso(): void
     {
         $atorId = (string) Auth::id();
@@ -150,7 +161,7 @@ final class Usuarios extends Component
             actorType: 'user',
             actorId: $atorId,
             usuarioId: $atorId,
-            context: ['busca' => $this->busca === '' ? null : $this->busca],
+            context: ['busca' => (new BuscaBackoffice($this->busca))->paraAuditoria()],
         );
     }
 }

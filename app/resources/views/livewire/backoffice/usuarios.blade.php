@@ -1,22 +1,15 @@
 @php
     $data = fn ($valor) => $valor ? \App\Support\DataExibicao::dataHora($valor) : '—';
-    $telefone = function (?string $t): string {
-        $d = preg_replace('/\D+/', '', (string) $t) ?? '';
-        return match (strlen($d)) {
-            11 => sprintf('(%s) %s-%s', substr($d, 0, 2), substr($d, 2, 5), substr($d, 7)),
-            10 => sprintf('(%s) %s-%s', substr($d, 0, 2), substr($d, 2, 4), substr($d, 6)),
-            default => $d === '' ? '—' : $d,
-        };
-    };
+    $telefone = fn (?string $t): string => \App\Support\Telefone::formatar($t) ?? '—';
 @endphp
 <div>
     <x-page-header :title="'Usuários cadastrados'"
                    :subtitle="$total . ' ' . ($total === 1 ? 'usuário' : 'usuários') . ' · ' . $confirmados . ' com e-mail confirmado'" />
 
     <form wire:submit="buscar" class="flex gap-2 mb-4" role="search">
-        <label for="backoffice-busca" class="sr-only">Buscar por nome ou e-mail</label>
+        <label for="backoffice-busca" class="sr-only">Buscar por nome, e-mail, CPF, CNPJ ou telefone</label>
         <x-input type="search" id="backoffice-busca" wire:model="termo"
-                 placeholder="Buscar por nome ou e-mail"
+                 placeholder="Buscar por nome, e-mail, CPF, CNPJ ou telefone"
                  class="flex-1" dusk="backoffice-busca" />
         <x-button type="submit" variant="primary" dusk="backoffice-buscar">Buscar</x-button>
     </form>
@@ -46,7 +39,7 @@
                                 <td class="px-2 py-2" colspan="3"><span class="pill">Anonimizado</span></td>
                             @else
                                 <td class="px-2 py-2">
-                                    {{ $u->nome }}
+                                    <a href="{{ route('backoffice.usuarios.ficha', $u->id) }}" class="link" dusk="backoffice-ficha-{{ $u->id }}">{{ $u->nome }}</a>
                                     @if ($u->trashed())
                                         <span class="pill">Excluído</span>
                                     @endif
