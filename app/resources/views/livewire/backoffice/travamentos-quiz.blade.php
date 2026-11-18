@@ -2,7 +2,7 @@
     use App\Domain\Quiz\CatalogoPerguntas;
     use App\Livewire\Backoffice\TravamentosQuiz;
 
-    $perguntas = CatalogoPerguntas::todas();
+    $perguntas = \App\Support\TextosQuiz::todos();
 @endphp
 <div>
     <x-page-header :title="'Onde os clientes travam'"
@@ -40,7 +40,7 @@
                     <tbody>
                         @foreach ($porCampo as $linha)
                             <tr class="border-t border-[color:var(--color-border)]" dusk="travamento-{{ $linha->chave }}">
-                                <td class="px-3 py-2"><span class="text-xs text-[color:var(--color-secondary)] mr-1">{{ $linha->chave === 'socios' ? '' : $linha->chave }}</span>{{ CatalogoPerguntas::rotulo((string) $linha->chave) }}</td>
+                                <td class="px-3 py-2"><span class="text-xs text-[color:var(--color-secondary)] mr-1">{{ $linha->chave === 'socios' ? '' : $linha->chave }}</span>{{ \App\Support\TextosQuiz::rotulo((string) $linha->chave) }}</td>
                                 <td class="px-3 py-2">{{ $perguntas[$linha->chave]['bloco'] ?? '—' }}</td>
                                 <td class="px-3 py-2 text-right font-medium">{{ $linha->vezes }}</td>
                                 <td class="px-3 py-2 text-right">{{ $linha->quizzes }}</td>

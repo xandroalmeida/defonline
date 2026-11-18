@@ -18,6 +18,7 @@ use App\Http\Middleware\AuditarPersonificacao;
 use App\Livewire\Backoffice\Administradores as BackofficeAdministradores;
 use App\Livewire\Backoffice\Captacao as BackofficeCaptacao;
 use App\Livewire\Backoffice\Cupons as BackofficeCupons;
+use App\Livewire\Backoffice\EditarTextosQuiz as BackofficeEditarTextosQuiz;
 use App\Livewire\Backoffice\Empresas as BackofficeEmpresas;
 use App\Livewire\Backoffice\FichaEmpresa as BackofficeFichaEmpresa;
 use App\Livewire\Backoffice\FichaUsuario as BackofficeFichaUsuario;
@@ -201,6 +202,7 @@ Route::middleware('auth')->prefix('backoffice')->name('backoffice.')->group(func
     Route::get('/empresas', BackofficeEmpresas::class)->middleware('backoffice:usuarios.ver')->name('empresas');
     // STORY-105 — respostas do quiz e onde os clientes travam.
     Route::get('/diagnosticos/{diagnostico}', BackofficeRespostasDiagnostico::class)->whereUuid('diagnostico')->middleware('backoffice:quiz.ver_respostas')->name('diagnosticos.respostas');
+    Route::get('/quiz/textos', BackofficeEditarTextosQuiz::class)->middleware('backoffice:quiz.editar_textos')->name('quiz.textos');
     Route::get('/quiz/travamentos', BackofficeTravamentosQuiz::class)->middleware('backoffice:quiz.ver_respostas')->name('quiz.travamentos');
     Route::get('/empresas/{empresa}', BackofficeFichaEmpresa::class)->whereUuid('empresa')->middleware('backoffice:usuarios.ver')->name('empresas.ficha');
     Route::post('/usuarios/{usuario}/logar-como', [PersonificacaoController::class, 'iniciar'])

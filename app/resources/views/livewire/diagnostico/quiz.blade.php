@@ -113,8 +113,8 @@
                 <div class="flex flex-col gap-4" dusk="quiz-bloco-1">
                     <div>
                         <div class="flex items-center gap-1.5 mb-1">
-                            <x-label for="Q01" class="mb-0">Setor de atividade</x-label>
-                            <x-help id="Q01" :text="config('quiz.help-industria.campos.Q01')" label="Setor de atividade"/>
+                            <x-label for="Q01" class="mb-0">{{ \App\Support\TextosQuiz::rotulo('Q01') }}</x-label>
+                            <x-help id="Q01" :text="\App\Support\TextosQuiz::ajuda('Q01')" :label="\App\Support\TextosQuiz::rotulo('Q01')"/>
                         </div>
                         <x-input type="text" id="Q01" name="Q01"
                                  :value="ucfirst($Q01)" readonly disabled
@@ -136,43 +136,34 @@
                     </p>
 
                     @include('livewire.diagnostico.partials.campo-brl', [
-                        'id' => 'Q08', 'label' => 'Compras (média mensal)',
-                        'help' => 'Mercadorias, matéria-prima, insumos.',
+                        'id' => 'Q08',
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
-                        'id' => 'Q09', 'label' => 'Vendas (média mensal)',
-                        'help' => 'Receita operacional bruta.',
+                        'id' => 'Q09',
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
-                        'id' => 'Q14', 'label' => 'Custos e despesas fixas',
-                        'help' => 'Folha de Pagamento, Encargos sociais, contador, aluguel, condomínio, energia, água, telefone, internet, franquia, retirada de sócios, etc.',
+                        'id' => 'Q14',
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
-                        'id' => 'Q15', 'label' => 'Custos e despesas variáveis',
-                        'help' => 'Fretes, comissões, tributos, despesas de vendas, outras despesas variáveis, etc.',
+                        'id' => 'Q15',
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
-                        'id' => 'Q16', 'label' => 'Despesas financeiras',
-                        'help' => 'Juros pagos a bancos, antecipações de cartões e desconto de boletos.',
+                        'id' => 'Q16',
                     ])
                     @include('livewire.diagnostico.partials.campo-dias', [
-                        'id' => 'Q10', 'label' => 'PMC — prazo médio de fornecedores',
-                        'help' => 'Em quantos dias você paga seus fornecedores em média.',
+                        'id' => 'Q10',
                         'mask' => $maskDias,
                     ])
                     @include('livewire.diagnostico.partials.campo-dias', [
-                        'id' => 'Q11', 'label' => 'PME — giro de estoque',
-                        'help' => 'Quantos dias seus produtos/insumos ficam parados em estoque.',
+                        'id' => 'Q11',
                         'mask' => $maskDias,
                     ])
                     @include('livewire.diagnostico.partials.campo-dias', [
-                        'id' => 'Q12', 'label' => 'PMR — prazo médio a clientes',
-                        'help' => 'Em quantos dias seus clientes pagam você em média.',
+                        'id' => 'Q12',
                         'mask' => $maskDias,
                     ])
                     @include('livewire.diagnostico.partials.campo-pct', [
-                        'id' => 'Q13', 'label' => 'Inadimplência',
-                        'help' => 'Percentual médio de atraso dos clientes.',
+                        'id' => 'Q13',
                     ])
                 </div>
             @endif
@@ -186,28 +177,22 @@
                          duas vezes na mesma dobra. --}}
 
                     @include('livewire.diagnostico.partials.campo-brl', [
-                        'id' => 'Q02', 'label' => 'Recursos disponíveis',
-                        'help' => 'Caixa + bancos + aplicações de liquidez imediata.',
+                        'id' => 'Q02',
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
-                        'id' => 'Q03', 'label' => 'Contas a receber',
-                        'help' => 'Vendas a prazo a clientes — cheques, boletos, cartão, fiado.',
+                        'id' => 'Q03',
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
-                        'id' => 'Q04', 'label' => 'Estoque',
-                        'help' => 'Produtos, mercadorias, matéria-prima, insumos.',
+                        'id' => 'Q04',
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
-                        'id' => 'Q05', 'label' => 'Patrimônio (imobilizado)',
-                        'help' => 'Imóveis, equipamentos e veículos livres de ônus – valor estimado para venda rápida',
+                        'id' => 'Q05',
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
-                        'id' => 'Q06', 'label' => 'Dívidas financeiras',
-                        'help' => 'Empréstimos, financiamentos, dívidas não operacionais.',
+                        'id' => 'Q06',
                     ])
                     @include('livewire.diagnostico.partials.campo-brl', [
-                        'id' => 'Q07', 'label' => 'Fornecedores a pagar',
-                        'help' => 'Obrigações comerciais em aberto.',
+                        'id' => 'Q07',
                     ])
 
                     {{-- STORY-034 — validações cruzadas DRE × Balanço (§6.6). Banner inline,
@@ -249,8 +234,8 @@
                 <div class="flex flex-col gap-4" dusk="quiz-bloco-4">
                     <fieldset class="rounded-md border border-[color:var(--color-border)] p-4 flex flex-col gap-2">
                         <legend class="px-1 text-xs font-semibold uppercase tracking-wider text-[color:var(--color-secondary)]">
-                            Q17 — Necessita captar recursos?
-                            <x-help id="Q17" :text="config('quiz.help-industria.campos.Q17')" label="Necessidade de captação"/>
+                            Q17 — {{ \App\Support\TextosQuiz::rotulo('Q17') }}
+                            <x-help id="Q17" :text="\App\Support\TextosQuiz::ajuda('Q17')" :label="\App\Support\TextosQuiz::rotulo('Q17')"/>
                         </legend>
                         @foreach ([['sim', 'Sim'], ['nao', 'Não']] as [$valor, $rotulo])
                             <label class="flex gap-2.5 items-center cursor-pointer text-[color:var(--color-primary)]">
@@ -269,12 +254,10 @@
                     @if ($Q17 === 'sim')
                         <div class="flex flex-col gap-4" dusk="quiz-bloco-4-captacao">
                             @include('livewire.diagnostico.partials.campo-brl', [
-                                'id' => 'Q18', 'label' => 'Valor que precisa captar',
-                                'help' => 'Montante desejado.',
+                                'id' => 'Q18',
                             ])
                             @include('livewire.diagnostico.partials.campo-brl', [
-                                'id' => 'Q19', 'label' => 'Endividamento total no mercado',
-                                'help' => 'Bancos + particulares.',
+                                'id' => 'Q19',
                             ])
                             {{-- STORY-042 — `help` vazio de propósito: os 2 textos auxiliares do Q20
                                  saíram da UI a pedido do Edvan. O do multiplicador 3× vira regra
@@ -282,8 +265,7 @@
                                  cruzada no backend (STORY-043). O box explicativo do campo é outra
                                  superfície (config quiz.help-industria) e continua no ar. --}}
                             @include('livewire.diagnostico.partials.campo-brl', [
-                                'id' => 'Q20', 'label' => 'Venda mensal com cartão / duplicatas',
-                                'help' => '',
+                                'id' => 'Q20',
                             ])
                             @include('livewire.diagnostico.partials.socios-list', [
                                 'socios' => $socios,

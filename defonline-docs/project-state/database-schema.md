@@ -108,6 +108,9 @@ PK `id uuid`. FKs `demanda_captacao_id` (CASCADE), `autor_id → usuarios` (SET 
 | `email` | varchar(255) | nullable — vazio = nenhum e-mail sai para a equipe |
 | `alterado_por_usuario_id` | uuid | nullable |
 
+### `quiz_textos` — textos do quiz editados no backoffice (STORY-106)
+PK `campo varchar(16)` (Q01…Q20, `socios`). Colunas `rotulo`, `auxiliar`, `ajuda`, `alterado_por_usuario_id`. Só existe linha para o campo editado: sem linha, vale o original do código (`CatalogoPerguntas` + `config/quiz/help-industria.php`).
+
 ### `quiz_rascunhos` — rascunhos do quiz (23 campos, Anexo A)
 PK `id uuid`. FKs `usuario_id`, `empresa_analisada_id` (RESTRICT). **UNIQUE parcial** `(usuario_id, empresa_analisada_id) WHERE deleted_at IS NULL`.
 

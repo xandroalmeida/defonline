@@ -176,8 +176,8 @@ it('formata cada tipo de resposta', function (string $tipo, mixed $valor, string
 ]);
 
 it('o catálogo tem os 20 campos do quiz mais os sócios e os títulos das regras', function () {
-    expect(CatalogoPerguntas::todas())->toHaveCount(21)
-        ->and(CatalogoPerguntas::rotulo('Q09'))->toBe('Vendas (média mensal)')
-        ->and(CatalogoPerguntas::rotulo('Q99'))->toBe('Q99')
+    expect(CatalogoPerguntas::PADRAO)->toHaveCount(21)
+        ->and(CatalogoPerguntas::PADRAO['Q09']['rotulo'])->toBe('Vendas (média mensal)')
+        ->and(CatalogoPerguntas::regra('R1'))->toBe('Despesas financeiras altas para a dívida declarada')
         ->and(CatalogoPerguntas::regra('R9'))->toBe('R9');
 });

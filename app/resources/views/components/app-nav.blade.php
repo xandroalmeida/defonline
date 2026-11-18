@@ -137,6 +137,15 @@
                 'dusk' => 'app-nav-backoffice-travamentos',
             ],
             [
+                'permissao' => \App\Support\PermissaoAdmin::EditarTextosQuiz,
+                'label' => 'Textos do quiz',
+                'icon' => 'book',
+                'href' => route('backoffice.quiz.textos'),
+                'active' => request()->routeIs('backoffice.quiz.textos'),
+                'disabled' => false,
+                'dusk' => 'app-nav-backoffice-textos-quiz',
+            ],
+            [
                 'permissao' => \App\Support\PermissaoAdmin::GerenciarPlanos,
                 'label' => 'Planos e pacotes',
                 'icon' => 'tag',

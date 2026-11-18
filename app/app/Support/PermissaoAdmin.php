@@ -20,6 +20,7 @@ enum PermissaoAdmin: string
     case GerenciarFinanceiro = 'financeiro.gerenciar';
     case GerenciarCaptacao = 'captacao.gerenciar';
     case VerRespostasQuiz = 'quiz.ver_respostas';
+    case EditarTextosQuiz = 'quiz.editar_textos';
 
     public function rotulo(): string
     {
@@ -34,6 +35,7 @@ enum PermissaoAdmin: string
             self::GerenciarFinanceiro => 'Gerenciar assinaturas, reembolsos e notas fiscais',
             self::GerenciarCaptacao => 'Ver demandas de captação e o e-mail que as recebe',
             self::VerRespostasQuiz => 'Ver respostas do quiz e onde os clientes travam',
+            self::EditarTextosQuiz => 'Editar os textos das perguntas do quiz',
         };
     }
 }

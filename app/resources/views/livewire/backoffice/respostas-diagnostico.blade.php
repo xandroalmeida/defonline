@@ -3,7 +3,7 @@
     use App\Support\DataExibicao;
     use App\Support\RespostaQuiz;
 
-    $porBloco = collect(CatalogoPerguntas::todas())->groupBy('bloco', preserveKeys: true);
+    $porBloco = collect(\App\Support\TextosQuiz::todos())->groupBy('bloco', preserveKeys: true);
     $aceitos = (array) ($payload['alertas_aceitos'] ?? []);
     $empresa = $diagnostico->empresa;
 @endphp

@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Domain\Quiz;
 
+use App\Support\TextosQuiz;
+
 /**
  * STORY-105 — catálogo das perguntas do quiz (Indústria), na ordem em que aparecem na tela.
  *
- * É a fonte única do enunciado (`rotulo`) e do texto auxiliar que fica embaixo do campo
- * (`auxiliar`), usada pelo quiz, pela consulta de respostas e pelo relatório de travamentos.
- * O `tipo` diz como a resposta é exibida. A caixa de ajuda (?) continua em
- * `config/quiz/help-industria.php`.
+ * Guarda o texto ORIGINAL do enunciado (`rotulo`) e do texto auxiliar embaixo do campo
+ * (`auxiliar`); a ajuda (?) original está em `config/quiz/help-industria.php`. O que o cliente vê
+ * sai de {@see TextosQuiz}, que sobrepõe as edições do backoffice (STORY-106).
+ * O `tipo` diz como a resposta é exibida.
  */
 final class CatalogoPerguntas
 {
@@ -56,22 +58,6 @@ final class CatalogoPerguntas
         3 => 'Saldos atuais',
         4 => 'Contexto e Captação',
     ];
-
-    /** @return array<string, array{bloco: int, tipo: string, rotulo: string, auxiliar: string}> */
-    public static function todas(): array
-    {
-        return self::PADRAO;
-    }
-
-    public static function rotulo(string $campo): string
-    {
-        return self::todas()[$campo]['rotulo'] ?? $campo;
-    }
-
-    public static function auxiliar(string $campo): string
-    {
-        return self::todas()[$campo]['auxiliar'] ?? '';
-    }
 
     public static function regra(string $regra): string
     {

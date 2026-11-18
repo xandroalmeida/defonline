@@ -9,8 +9,8 @@
 --}}
 <div class="flex flex-col gap-3" dusk="quiz-socios">
     <div class="flex items-center gap-1.5">
-        <x-label class="mb-0">Sócios</x-label>
-        <x-help id="socios" :text="config('quiz.help-industria.campos.socios')" label="Sócios"/>
+        <x-label class="mb-0">{{ \App\Support\TextosQuiz::rotulo('socios') }}</x-label>
+        <x-help id="socios" :text="\App\Support\TextosQuiz::ajuda('socios')" :label="\App\Support\TextosQuiz::rotulo('socios')"/>
     </div>
     <p class="text-sm text-[color:var(--color-secondary)] m-0">
         Informe nome e CPF de ao menos um sócio. Use "Adicionar sócio" para incluir os demais.
