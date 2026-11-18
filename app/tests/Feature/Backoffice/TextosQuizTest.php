@@ -32,8 +32,12 @@ it('edita enunciado, auxiliar e ajuda; o quiz passa a mostrar o novo texto', fun
         ->set('rotulo', '  Quanto você vende por mês, em média? ')
         ->set('auxiliar', 'Some tudo que entrou com vendas.')
         ->set('ajuda', 'Use a média dos **últimos 12 meses**.')
-        ->assertSee('Prévia')
-        ->call('salvar')->assertHasNoErrors()->assertSet('editando', null)
+        ->assertSee('Como o cliente vê')
+        ->assertSee('Alterações não salvas.')
+        ->assertSee('Original: “Vendas (média mensal)”', false)
+        ->call('salvar')->assertHasNoErrors()->assertSet('editando', 'Q09')
+        ->assertSee('Salvo. O quiz já mostra o texto novo.')
+        ->assertDontSee('Alterações não salvas.')
         ->assertSee('Quanto você vende por mês, em média?')->assertSee('Editado');
 
     $texto = QuizTexto::query()->findOrFail('Q09');
@@ -93,12 +97,20 @@ it('recusa enunciado vazio e textos longos demais', function (string $propriedad
     'ajuda longa' => ['ajuda', str_repeat('a', 1201)],
 ]);
 
+it('abre na primeira pergunta e descartar volta ao texto salvo', function () {
+    ($this->tela)()->assertSet('editando', 'Q01')
+        ->call('editar', 'Q13')->set('rotulo', 'Rascunho')->assertSee('Alterações não salvas.')
+        ->call('descartar')->assertSet('rotulo', 'Inadimplência')->assertDontSee('Alterações não salvas.');
+
+    expect(QuizTexto::query()->count())->toBe(0);
+});
+
 it('campo inexistente responde 404', function () {
     ($this->tela)()->call('editar', 'Q99')->assertNotFound();
 });
 
 it('salvar sem nada em edição responde 404', function () {
-    ($this->tela)()->call('salvar')->assertNotFound();
+    ($this->tela)()->set('editando', null)->call('salvar')->assertNotFound();
 });
 
 it('sem a permissão, a tela responde 404', function () {

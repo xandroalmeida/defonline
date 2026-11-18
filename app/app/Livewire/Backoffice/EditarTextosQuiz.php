@@ -41,6 +41,14 @@ final class EditarTextosQuiz extends Component
 
     public string $ajuda = '';
 
+    /** Mensagem curta depois de salvar ou restaurar. */
+    public ?string $aviso = null;
+
+    public function mount(): void
+    {
+        $this->editar(array_key_first(CatalogoPerguntas::PADRAO));
+    }
+
     public function editar(string $campo): void
     {
         abort_unless(array_key_exists($campo, CatalogoPerguntas::PADRAO), 404);
@@ -50,6 +58,7 @@ final class EditarTextosQuiz extends Component
         $this->rotulo = $textos['rotulo'];
         $this->auxiliar = $textos['auxiliar'];
         $this->ajuda = $textos['ajuda'];
+        $this->aviso = null;
         $this->resetValidation();
     }
 
@@ -75,8 +84,6 @@ final class EditarTextosQuiz extends Component
         $depois = ['rotulo' => $this->rotulo, 'auxiliar' => $this->auxiliar, 'ajuda' => $this->ajuda];
 
         if ($antes === $depois) {
-            $this->cancelar();
-
             return;
         }
 
@@ -88,7 +95,8 @@ final class EditarTextosQuiz extends Component
 
         TextosQuiz::esquecer();
         $this->auditar('quiz.texto_alterado', $campo, $antes, $depois);
-        $this->cancelar();
+        $this->editar($campo);
+        $this->aviso = 'Salvo. O quiz já mostra o texto novo.';
     }
 
     public function restaurar(string $campo): void
@@ -107,14 +115,15 @@ final class EditarTextosQuiz extends Component
         $this->auditar('quiz.texto_restaurado', $campo, $antes, $original);
 
         if ($this->editando === $campo) {
-            $this->cancelar();
+            $this->editar($campo);
+            $this->aviso = 'Texto original restaurado.';
         }
     }
 
-    public function cancelar(): void
+    /** Descarta o que foi digitado e volta ao texto salvo. */
+    public function descartar(): void
     {
-        $this->reset('editando', 'rotulo', 'auxiliar', 'ajuda');
-        $this->resetValidation();
+        $this->editar($this->campoEmEdicao());
     }
 
     public function render(): View
@@ -129,8 +138,13 @@ final class EditarTextosQuiz extends Component
 
         $nomes = Usuario::withTrashed()->whereIn('id', $historico->pluck('actor_id')->filter()->unique())->pluck('nome', 'id');
 
+        $textos = TextosQuiz::todos();
+        $atual = $this->editando === null ? null : $textos[$this->editando];
+
         return view('livewire.backoffice.editar-textos-quiz', [
-            'textos' => TextosQuiz::todos(),
+            'textos' => $textos,
+            'original' => $this->editando === null ? null : TextosQuiz::original($this->editando),
+            'alterado' => $atual !== null && [trim($this->rotulo), trim($this->auxiliar), trim($this->ajuda)] !== [$atual['rotulo'], $atual['auxiliar'], $atual['ajuda']],
             'historico' => $historico,
             'nomes' => $nomes,
         ])->layoutData(['title' => 'Textos do quiz']);
