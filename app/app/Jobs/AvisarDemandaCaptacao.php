@@ -76,7 +76,7 @@ final class AvisarDemandaCaptacao extends BaseJob
                     (array) ($payload['socios'] ?? []),
                 )),
                 prazo: $prazo,
-                link: route('backoffice.captacao'),
+                link: route('backoffice.captacao', ['demanda' => $demanda->id]),
             ));
         }
 

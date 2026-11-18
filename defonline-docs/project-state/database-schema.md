@@ -95,6 +95,12 @@ PK `id uuid`. FKs `diagnostico_id` (**UNIQUE**, CASCADE), `usuario_id` e `empres
 | `valor_captar` | numeric(15,2) | nullable — Q18 |
 | `autoriza_contato` | boolean | NOT NULL — opt-out no bloco 4; false = ninguém é avisado |
 | `equipe_avisada_em` / `cliente_avisado_em` | timestamptz | nullable — hora do aviso (evita reenvio no retry) |
+| `status` | varchar(16) | default `nova`; CHECK `nova\|em_analise\|respondida\|encerrada` — etapa no quadro (STORY-103) |
+| `responsavel_id` | uuid | nullable, FK `usuarios` (SET NULL) — membro da equipe responsável |
+| `status_alterado_em` | timestamptz | nullable — última mudança de etapa |
+
+### `demanda_captacao_eventos` — linha do tempo da demanda (STORY-103, append-only)
+PK `id uuid`. FKs `demanda_captacao_id` (CASCADE), `autor_id → usuarios` (SET NULL). Índice `(demanda_captacao_id, created_at)`. Colunas: `tipo` (CHECK `nota\|status\|responsavel`), `texto`, `created_at`.
 
 ### `captacao_config` — e-mail da equipe que recebe as demandas (linha única)
 | coluna | tipo | notas |

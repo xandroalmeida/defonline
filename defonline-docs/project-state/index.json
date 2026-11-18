@@ -2861,6 +2861,23 @@
       "title": "Demanda de captação: avisos à equipe e ao cliente, prazo de 5 dias úteis",
       "estimated_session_size": "M",
       "note": "Pedido do PO em 2026-11-18. PDR-021."
+    },
+    {
+      "type": "feature",
+      "target_role": "programador",
+      "status": "in_review",
+      "blocks": [],
+      "epic_id": "EPIC-011",
+      "sprint_id": null,
+      "owner_agent": "claude-opus-5-5",
+      "requires_design": false,
+      "created_at": "2026-11-18",
+      "updated_at": "2026-11-18",
+      "id": "STORY-103",
+      "slug": "crm-de-captacao",
+      "title": "CRM básico das demandas de captação: quadro Kanban",
+      "estimated_session_size": "M",
+      "note": "Pedido do PO em 2026-11-18, continuação da STORY-102."
     }
   ],
   "sprints": [

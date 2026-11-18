@@ -24,7 +24,7 @@ final class DemandaCaptacaoBrowserTest extends DuskTestCase
 
     /** @var list<string> */
     protected array $tablesToTruncate = [
-        'demandas_captacao', 'quiz_rascunhos', 'diagnosticos', 'empresas_analisadas', 'usuarios',
+        'demanda_captacao_eventos', 'demandas_captacao', 'quiz_rascunhos', 'diagnosticos', 'empresas_analisadas', 'usuarios',
         'audit_logs', 'business_metrics', 'term_acceptances', 'sessions', 'evento_produto', 'cache',
     ];
 
@@ -58,20 +58,53 @@ final class DemandaCaptacaoBrowserTest extends DuskTestCase
                 ->assertSeeIn('@diagnostico-demanda-captacao', 'Recebemos sua demanda de captação')
                 ->assertSeeIn('@diagnostico-demanda-captacao', '5 dias úteis');
 
+            $demanda = DemandaCaptacao::query()->sole();
+            $id = $demanda->id;
+
             $browser->loginAs($admin)
                 ->visit(route('backoffice.captacao'))
-                ->waitFor('@captacao-lista')
-                ->assertSeeIn('@captacao-lista', 'Roberto Souza')
-                ->assertSeeIn('@captacao-lista', 'R$ 50.000,00')
-                ->assertSeeIn('@captacao-email-situacao', 'Sem e-mail cadastrado')
+                ->waitFor('@captacao-quadro')
+                ->assertSeeIn('@captacao-email-situacao', 'sem e-mail cadastrado')
                 ->type('@captacao-email', 'captacao@exemplo.com.br')
                 ->pause(600)
                 ->click('@captacao-salvar')
                 ->waitFor('@captacao-salvo')
-                ->assertSeeIn('@captacao-email-situacao', 'captacao@exemplo.com.br');
+                ->assertSeeIn('@captacao-email-situacao', 'captacao@exemplo.com.br')
+                ->assertSeeIn('@captacao-coluna-nova', 'Teste')
+                ->assertSeeIn('@captacao-coluna-nova', 'R$ 50.000,00');
+
+            // Arrastar e soltar (eventos HTML5 de verdade, que o WebDriver não gera sozinho).
+            $browser->script(<<<JS
+                const dt = new DataTransfer();
+                const cartao = document.querySelector('[dusk="captacao-cartao-{$id}"]');
+                const coluna = document.querySelector('[dusk="captacao-coluna-em_analise"]');
+                cartao.dispatchEvent(new DragEvent('dragstart', { dataTransfer: dt, bubbles: true }));
+                coluna.dispatchEvent(new DragEvent('dragover', { dataTransfer: dt, bubbles: true, cancelable: true }));
+                coluna.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
+                JS);
+
+            $browser->waitUsing(5, 100, fn () => $browser->element('[dusk="captacao-coluna-em_analise"] [dusk="captacao-cartao-'.$id.'"]') !== null)
+                // Sem arrastar: o botão leva para a próxima etapa.
+                ->click('@captacao-avancar-'.$id)
+                ->waitUsing(5, 100, fn () => $browser->element('[dusk="captacao-coluna-respondida"] [dusk="captacao-cartao-'.$id.'"]') !== null)
+                ->click('@captacao-abrir-'.$id)
+                ->waitFor('@captacao-detalhe')
+                ->assertSeeIn('@captacao-detalhe', 'Roberto Souza')
+                ->select('@captacao-detalhe-responsavel', $admin->id)
+                ->waitForTextIn('@captacao-historico', 'Atribuiu a')
+                ->type('@captacao-nota', 'Liguei e enviei a proposta.')
+                ->click('@captacao-nota-salvar')
+                ->waitForTextIn('@captacao-historico', 'Liguei e enviei a proposta.')
+                ->assertSeeIn('@captacao-historico', 'Moveu de Em análise para Respondida.')
+                ->assertSeeIn('@captacao-historico', 'Moveu de Nova para Em análise.')
+                ->click('@captacao-detalhe-fechar')
+                ->waitUntilMissing('@captacao-detalhe');
         });
 
-        $this->assertTrue(DemandaCaptacao::query()->sole()->autoriza_contato);
+        $demanda = DemandaCaptacao::query()->sole();
+        $this->assertTrue($demanda->autoriza_contato);
+        $this->assertSame('respondida', $demanda->status->value);
+        $this->assertSame($admin->id, $demanda->responsavel_id);
         $this->assertSame('captacao@exemplo.com.br', CaptacaoConfig::emailDaEquipe());
     }
 

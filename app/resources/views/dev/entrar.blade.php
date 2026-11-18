@@ -26,7 +26,7 @@
                                     class="w-full text-left py-2.5 px-1 flex flex-wrap gap-x-3 items-baseline cursor-pointer bg-transparent border-0 hover:bg-[color:var(--color-neutral)]">
                                 <span class="font-medium text-[color:var(--color-primary)]">{{ $usuario->nome }}</span>
                                 <span class="text-sm text-[color:var(--color-secondary)]">{{ $usuario->email }}</span>
-                                @if ($usuario->ehAdminPorConfiguracao() || ! empty($usuario->permissoes_admin))
+                                @if ($usuario->ehEquipeBackoffice())
                                     <span class="pill text-xs">admin</span>
                                 @endif
                                 @if ($atual?->id === $usuario->id)

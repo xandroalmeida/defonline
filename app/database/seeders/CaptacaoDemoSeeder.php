@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Actions\CalcularDiagnostico;
+use App\Domain\Captacao\StatusDemanda;
 use App\Jobs\AvisarDemandaCaptacao;
 use App\Models\CaptacaoConfig;
 use App\Models\DemandaCaptacao;
 use App\Models\EmpresaAnalisada;
 use App\Models\LoteCredito;
 use App\Models\Usuario;
+use App\Services\Captacao\GerirDemandaCaptacao;
 use Illuminate\Database\Seeder;
 
 /**
@@ -19,8 +21,8 @@ use Illuminate\Database\Seeder;
  *   php artisan db:seed --class=CaptacaoDemoSeeder
  *
  * Cria o usuário `captacao.demo@defonline.local` (senha `senha-de-teste-1234`) com créditos, uma
- * empresa livre para fazer o quiz na mão e quatro demandas prontas (no prazo, vencida, sem
- * autorização e valor alto). Cadastra `captacao@defonline.local` como e-mail da equipe e põe na fila
+ * empresa livre para fazer o quiz na mão e demandas em todas as etapas do quadro (no prazo, vencida,
+ * sem autorização, em análise, respondida e encerrada), com responsável e notas da equipe. Cadastra `captacao@defonline.local` como e-mail da equipe e põe na fila
  * os avisos das demandas autorizadas: os e-mails aparecem no Mailpit.
  */
 final class CaptacaoDemoSeeder extends Seeder
@@ -48,14 +50,22 @@ final class CaptacaoDemoSeeder extends Seeder
         $livre = $this->empresa($usuario, 'Metalúrgica Quiz Livre Ltda', 'Quiz Livre');
         $this->command?->info("Quiz livre: /empresas/{$livre->id}/diagnosticos/novo");
 
+        // Quem cuida das demandas no quadro: a equipe por configuração (BACKOFFICE_EMAILS).
+        $equipe = GerirDemandaCaptacao::responsaveisPossiveis();
+        $gerir = app(GerirDemandaCaptacao::class);
+
+        // [razão, fantasia, valor, autoriza, dias atrás, etapa, com responsável, nota]
         $cenarios = [
-            ['Ferragens No Prazo Ltda', 'No Prazo', '150000.00', true, 0],
-            ['Usinagem Vencida Ltda', 'Vencida', '80000.00', true, 10],
-            ['Plásticos Sem Contato Ltda', 'Sem Contato', '40000.00', false, 2],
-            ['Fundição Valor Alto S.A.', 'Valor Alto', '2500000.00', true, 1],
+            ['Ferragens No Prazo Ltda', 'No Prazo', '150000.00', true, 0, StatusDemanda::Nova, false, null],
+            ['Usinagem Vencida Ltda', 'Vencida', '80000.00', true, 10, StatusDemanda::Nova, false, null],
+            ['Plásticos Sem Contato Ltda', 'Sem Contato', '40000.00', false, 2, StatusDemanda::Nova, false, null],
+            ['Fundição Valor Alto S.A.', 'Valor Alto', '2500000.00', true, 1, StatusDemanda::EmAnalise, true, 'Liguei, pediu proposta de capital de giro até sexta.'],
+            ['Têxtil Em Análise Atrasada Ltda', 'Análise Atrasada', '300000.00', true, 12, StatusDemanda::EmAnalise, true, 'Aguardando o balanço do último ano.'],
+            ['Moveleira Respondida Ltda', 'Respondida', '120000.00', true, 6, StatusDemanda::Respondida, true, 'Enviei as opções de crédito por e-mail.'],
+            ['Gráfica Encerrada Ltda', 'Encerrada', '60000.00', true, 20, StatusDemanda::Encerrada, true, 'Cliente desistiu da captação por ora.'],
         ];
 
-        foreach ($cenarios as [$razao, $fantasia, $valor, $autoriza, $diasAtras]) {
+        foreach ($cenarios as [$razao, $fantasia, $valor, $autoriza, $diasAtras, $etapa, $comResponsavel, $nota]) {
             $empresa = $this->empresa($usuario, $razao, $fantasia);
             $diagnostico = app(CalcularDiagnostico::class)->execute($empresa, $this->payload($valor));
 
@@ -65,8 +75,27 @@ final class CaptacaoDemoSeeder extends Seeder
             ]);
             $demanda->forceFill(['created_at' => now()->subDays($diasAtras)])->save();
 
-            if ($autoriza) {
+            if ($autoriza && $etapa === StatusDemanda::Nova) {
                 AvisarDemandaCaptacao::dispatch($demanda->id);
+            }
+
+            $autor = $equipe->first();
+            if ($autor !== null) {
+                if ($comResponsavel) {
+                    $gerir->atribuir($demanda, $autor, $autor);
+                }
+                foreach (StatusDemanda::cases() as $passo) {
+                    if ($passo === StatusDemanda::Nova) {
+                        continue;
+                    }
+                    if (array_search($passo, StatusDemanda::cases(), true) > array_search($etapa, StatusDemanda::cases(), true)) {
+                        break;
+                    }
+                    $gerir->mover($demanda, $passo, $autor);
+                }
+                if ($nota !== null) {
+                    $gerir->anotar($demanda, $nota, $autor);
+                }
             }
 
             $this->command?->info("✓ {$fantasia}: /diagnosticos/{$diagnostico->id}");

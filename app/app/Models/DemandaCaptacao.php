@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Domain\Captacao\PrazoRetorno;
+use App\Domain\Captacao\StatusDemanda;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -27,15 +29,22 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $cliente_avisado_em
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property StatusDemanda $status
+ * @property string|null $responsavel_id
+ * @property Carbon|null $status_alterado_em
  * @property-read Usuario $usuario
+ * @property-read Usuario|null $responsavel
  * @property-read EmpresaAnalisada $empresa
  */
-#[Fillable(['diagnostico_id', 'usuario_id', 'empresa_analisada_id', 'valor_captar', 'autoriza_contato', 'equipe_avisada_em', 'cliente_avisado_em'])]
+#[Fillable(['diagnostico_id', 'usuario_id', 'empresa_analisada_id', 'valor_captar', 'autoriza_contato', 'equipe_avisada_em', 'cliente_avisado_em', 'status', 'responsavel_id', 'status_alterado_em'])]
 final class DemandaCaptacao extends Model
 {
     use HasUuids;
 
     protected $table = 'demandas_captacao';
+
+    /** @var array<string, mixed> */
+    protected $attributes = ['status' => 'nova'];
 
     protected function casts(): array
     {
@@ -44,6 +53,8 @@ final class DemandaCaptacao extends Model
             'autoriza_contato' => 'boolean',
             'equipe_avisada_em' => 'datetime',
             'cliente_avisado_em' => 'datetime',
+            'status' => StatusDemanda::class,
+            'status_alterado_em' => 'datetime',
         ];
     }
 
@@ -61,6 +72,26 @@ final class DemandaCaptacao extends Model
     public function empresa(): BelongsTo
     {
         return $this->belongsTo(EmpresaAnalisada::class, 'empresa_analisada_id')->withoutGlobalScopes();
+    }
+
+    /** @return BelongsTo<Usuario, $this> */
+    public function responsavel(): BelongsTo
+    {
+        return $this->belongsTo(Usuario::class, 'responsavel_id')->withTrashed();
+    }
+
+    /** @return HasMany<DemandaCaptacaoEvento, $this> */
+    public function eventos(): HasMany
+    {
+        return $this->hasMany(DemandaCaptacaoEvento::class, 'demanda_captacao_id');
+    }
+
+    /** Em aberto e com o prazo de retorno já passado (o dia limite ainda conta como no prazo). */
+    public function atrasada(?CarbonImmutable $agora = null): bool
+    {
+        $hoje = ($agora ?? CarbonImmutable::now())->setTimezone((string) config('app.display_timezone'))->startOfDay();
+
+        return $this->autoriza_contato && $this->status->emAberto() && $this->prazoRetorno()->lt($hoje);
     }
 
     public function prazoRetorno(): CarbonImmutable
