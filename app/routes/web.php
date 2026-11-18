@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\CnaeController;
 use App\Http\Controllers\DescadastroAvisoRenovacaoController;
+use App\Http\Controllers\DevLoginController;
 use App\Http\Controllers\DiagnosticoController;
 use App\Http\Controllers\DrmExportacaoController;
 use App\Http\Controllers\EmailConfirmacaoController;
@@ -60,6 +61,10 @@ Route::get('/ready', [HealthController::class, 'ready'])->name('ready');
 
 Route::get('/cadastro', Cadastro::class)->name('cadastro');
 Route::get('/login', Login::class)->middleware('throttle:login')->name('login');
+
+// Login rápido sem senha, só no ambiente local (o controller responde 404 fora dele).
+Route::get('/dev/entrar', [DevLoginController::class, 'index'])->name('dev.entrar');
+Route::post('/dev/entrar/{usuario}', [DevLoginController::class, 'entrar'])->whereUuid('usuario')->name('dev.entrar.como');
 // STORY-100 — recuperação de senha. O link leva o id, nunca o e-mail, para não pôr dado pessoal na URL.
 Route::get('/senha/esqueci', SolicitarRedefinicao::class)->name('senha.esqueci');
 Route::get('/senha/redefinir/{usuario}/{token}', RedefinirSenha::class)->whereUuid('usuario')->name('senha.redefinir');

@@ -61,6 +61,9 @@
                dusk="login-reenviar-email">
                 Reenviar email de confirmação
             </a>
+            @if (\App\Http\Controllers\DevLoginController::disponivel())
+                <a href="{{ route('dev.entrar') }}" class="link" dusk="login-dev-entrar">Entrar sem senha (só local)</a>
+            @endif
             <p class="m-0 text-[color:var(--color-secondary)]">
                 Ainda não tem conta?
                 <a href="{{ route('cadastro') }}" wire:navigate class="link">Criar conta</a>

@@ -95,6 +95,14 @@
                    dusk="app-header-conta-editar">
                     Editar perfil
                 </a>
+                @if (\App\Http\Controllers\DevLoginController::disponivel())
+                    <a href="{{ route('dev.entrar') }}"
+                       role="menuitem"
+                       class="block w-full text-left px-4 py-2.5 text-sm text-[color:var(--color-primary)] no-underline hover:bg-[color:var(--color-neutral)]"
+                       dusk="app-header-dev-trocar">
+                        Trocar de conta (local)
+                    </a>
+                @endif
                 <form method="POST" action="{{ route('logout') }}" class="m-0" dusk="app-header-conta-sair-form">
                     @csrf
                     <button type="submit"
