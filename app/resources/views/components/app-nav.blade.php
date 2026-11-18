@@ -90,6 +90,7 @@
                 'active' => request()->routeIs('backoffice.usuarios', 'backoffice.usuarios.ficha'),
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-usuarios',
+                'secao' => 'clientes',
             ],
             [
                 'permissao' => \App\Support\PermissaoAdmin::VerUsuarios,
@@ -99,15 +100,17 @@
                 'active' => request()->routeIs('backoffice.empresas', 'backoffice.empresas.ficha'),
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-empresas',
+                'secao' => 'clientes',
             ],
             [
                 'permissao' => \App\Support\PermissaoAdmin::GerenciarAdmins,
                 'label' => 'Administradores',
-                'icon' => 'user',
+                'icon' => 'shield',
                 'href' => route('backoffice.administradores'),
                 'active' => request()->routeIs('backoffice.administradores'),
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-administradores',
+                'secao' => 'equipe',
             ],
             [
                 'permissao' => \App\Support\PermissaoAdmin::EditarGlossario,
@@ -117,33 +120,37 @@
                 'active' => request()->routeIs('backoffice.glossario'),
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-glossario',
+                'secao' => 'quiz',
             ],
             [
                 'permissao' => \App\Support\PermissaoAdmin::EditarRecomendacoes,
                 'label' => 'Recomendações',
-                'icon' => 'message',
+                'icon' => 'list',
                 'href' => route('backoffice.recomendacoes'),
                 'active' => request()->routeIs('backoffice.recomendacoes'),
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-recomendacoes',
+                'secao' => 'quiz',
             ],
             [
                 'permissao' => \App\Support\PermissaoAdmin::VerRespostasQuiz,
                 'label' => 'Travamentos do quiz',
-                'icon' => 'chart',
+                'icon' => 'alert',
                 'href' => route('backoffice.quiz.travamentos'),
                 'active' => request()->routeIs('backoffice.quiz.travamentos'),
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-travamentos',
+                'secao' => 'quiz',
             ],
             [
                 'permissao' => \App\Support\PermissaoAdmin::EditarTextosQuiz,
                 'label' => 'Textos do quiz',
-                'icon' => 'book',
+                'icon' => 'pencil',
                 'href' => route('backoffice.quiz.textos'),
                 'active' => request()->routeIs('backoffice.quiz.textos'),
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-textos-quiz',
+                'secao' => 'quiz',
             ],
             [
                 'permissao' => \App\Support\PermissaoAdmin::GerenciarPlanos,
@@ -153,24 +160,27 @@
                 'active' => request()->routeIs('backoffice.planos'),
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-planos',
+                'secao' => 'comercial',
             ],
             [
                 'permissao' => \App\Support\PermissaoAdmin::GerenciarCupons,
                 'label' => 'Cupons',
-                'icon' => 'tag',
+                'icon' => 'percent',
                 'href' => route('backoffice.cupons'),
                 'active' => request()->routeIs('backoffice.cupons'),
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-cupons',
+                'secao' => 'comercial',
             ],
             [
                 'permissao' => \App\Support\PermissaoAdmin::GerenciarFinanceiro,
                 'label' => 'Financeiro',
-                'icon' => 'tag',
+                'icon' => 'card',
                 'href' => route('backoffice.financeiro'),
                 'active' => request()->routeIs('backoffice.financeiro'),
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-financeiro',
+                'secao' => 'comercial',
             ],
             [
                 'permissao' => \App\Support\PermissaoAdmin::GerenciarCaptacao,
@@ -180,8 +190,33 @@
                 'active' => request()->routeIs('backoffice.captacao'),
                 'disabled' => false,
                 'dusk' => 'app-nav-backoffice-captacao',
+                'secao' => 'clientes',
             ],
         ], fn (array $item): bool => $usuarioNav->podeUsarBackoffice($item['permissao'])));
+    }
+
+    // Administração em seções recolhíveis; a seção da página atual vem aberta.
+    $secoesAdmin = [
+        'clientes' => 'Clientes',
+        'quiz' => 'Quiz e relatório',
+        'comercial' => 'Comercial',
+        'equipe' => 'Equipe',
+    ];
+    $adminPorSecao = [];
+    foreach ($secoesAdmin as $chave => $titulo) {
+        $itensDaSecao = array_values(array_filter($itensAdmin, fn (array $i): bool => $i['secao'] === $chave));
+        if ($itensDaSecao !== []) {
+            $adminPorSecao[] = [
+                'chave' => $chave,
+                'titulo' => $titulo,
+                'itens' => $itensDaSecao,
+                'aberta' => collect($itensDaSecao)->contains('active', true),
+            ];
+        }
+    }
+    // Com uma seção só, não há o que recolher.
+    if (count($adminPorSecao) === 1) {
+        $adminPorSecao[0]['aberta'] = true;
     }
 
     $grupos = array_filter([
@@ -198,6 +233,12 @@
         'book' => '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
         'tag' => '<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8z"/><circle cx="7" cy="7" r="1.5"/>',
         'message' => '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+        'alert' => '<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17h.01"/>',
+        'pencil' => '<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>',
+        'list' => '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+        'percent' => '<path d="M19 5 5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/>',
+        'card' => '<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6.5 15h4"/>',
+        'shield' => '<path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6l-8-3z"/>',
         'users' => '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2.2.6 3.5 2.8 3.5 6"/>',
     ];
 @endphp
@@ -214,7 +255,7 @@
 {{-- Sidebar fixa em ≥ 1024px; drawer off-canvas em < 1024px. Mesmo markup, mesmo conteúdo. --}}
 <aside id="app-nav-drawer"
        data-testid="app-nav"
-       class="print:hidden fixed top-0 left-0 z-50 h-full w-[280px] max-w-[80vw] bg-[color:var(--color-surface)] border-r border-[color:var(--color-border)] transform transition-transform duration-200 ease-out lg:translate-x-0 lg:sticky lg:top-0 lg:z-auto lg:w-60 lg:h-screen lg:max-w-none lg:transform-none"
+       class="print:hidden fixed top-0 left-0 z-50 h-full w-[280px] max-w-[80vw] bg-[color:var(--color-surface)] border-r border-[color:var(--color-border)] transform transition-transform duration-200 ease-out lg:translate-x-0 lg:sticky lg:top-0 lg:z-auto lg:w-60 lg:h-screen lg:max-w-none lg:transform-none overflow-y-auto"
        :class="navOpen ? 'translate-x-0' : '-translate-x-full'"
        {{--
            STORY-059 CA-2 — drawer fechado sai da tabulação E da árvore de
@@ -254,34 +295,26 @@
                     {{ $grupo['titulo'] }}
                 </p>
             @endif
-            @foreach ($grupo['itens'] as $item)
-                @if ($item['disabled'])
-                    <span class="nav-item is-disabled"
-                          aria-disabled="true"
-                          tabindex="-1"
-                          title="{{ $item['tooltip'] }}"
-                          data-tooltip="{{ $item['tooltip'] }}"
-                          dusk="{{ $item['dusk'] }}">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            {!! $icons[$item['icon']] !!}
-                        </svg>
-                        <span>{{ $item['label'] }}</span>
-                    </span>
-                @else
-                    <a href="{{ $item['href'] }}"
-                       class="nav-item @if ($item['active']) is-active @endif"
-                       @if ($item['active']) aria-current="page" @endif
-                       dusk="{{ $item['dusk'] }}"
-                       @click="navOpen = false">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            {!! $icons[$item['icon']] !!}
-                        </svg>
-                        <span>{{ $item['label'] }}</span>
-                    </a>
-                @endif
-            @endforeach
+            @if ($grupo['dusk'] === 'app-nav-admin')
+                @foreach ($adminPorSecao as $secao)
+                    <details class="nav-secao" @if ($secao['aberta']) open @endif dusk="app-nav-secao-{{ $secao['chave'] }}">
+                        <summary class="nav-secao__titulo" dusk="app-nav-secao-{{ $secao['chave'] }}-titulo">
+                            <span>{{ $secao['titulo'] }}</span>
+                            <svg class="nav-secao__seta" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+                        </summary>
+                        <div class="flex flex-col gap-1 pb-1">
+                            @foreach ($secao['itens'] as $item)
+                                <x-nav-item :item="$item" :icone="$icons[$item['icon']]"/>
+                            @endforeach
+                        </div>
+                    </details>
+                @endforeach
+            @else
+                @foreach ($grupo['itens'] as $item)
+                    <x-nav-item :item="$item" :icone="$icons[$item['icon']]"/>
+                @endforeach
+            @endif
         </nav>
     @endforeach
 </aside>

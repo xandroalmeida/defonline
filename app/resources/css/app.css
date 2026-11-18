@@ -341,6 +341,23 @@
         background: var(--color-tertiary);
         border-radius: var(--radius-full);
     }
+    /* Seções recolhíveis da Administração no menu lateral. */
+    .nav-secao__titulo {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 12px;
+        border-radius: var(--radius-md);
+        color: var(--color-secondary);
+        font-size: var(--text-body-sm);
+        font-weight: var(--font-weight-medium);
+        cursor: pointer;
+        list-style: none;
+    }
+    .nav-secao__titulo::-webkit-details-marker { display: none; }
+    .nav-secao__titulo:hover { background: var(--color-neutral); color: var(--color-primary); }
+    .nav-secao__seta { transition: transform 150ms ease-out; }
+    .nav-secao[open] > .nav-secao__titulo .nav-secao__seta { transform: rotate(90deg); }
     .nav-item.is-disabled {
         color: var(--color-secondary);
         opacity: 0.6;

@@ -35,6 +35,8 @@ final class PermissoesAdminBrowserTest extends DuskTestCase
             $browser->loginAs($raiz)
                 ->visit('/home')
                 ->waitFor('@app-nav-admin')
+                // A Administração vem em seções recolhidas; a do item clicado abre primeiro.
+                ->click('@app-nav-secao-equipe-titulo')
                 ->click('@app-nav-backoffice-administradores')
                 ->waitForLocation('/backoffice/administradores')
                 ->type('@admin-email', 'colega@exemplo.com.br')
