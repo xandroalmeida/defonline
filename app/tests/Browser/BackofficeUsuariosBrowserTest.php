@@ -36,6 +36,8 @@ final class BackofficeUsuariosBrowserTest extends DuskTestCase
             $browser->loginAs($equipe)
                 ->visit('/home')
                 ->waitFor('@app-nav-admin')
+                // A seção Clientes do menu vem recolhida fora das telas dela.
+                ->click('@app-nav-secao-clientes-titulo')
                 ->click('@app-nav-backoffice-usuarios')
                 ->waitForLocation('/backoffice/usuarios')
                 ->waitFor('@backoffice-usuarios')
