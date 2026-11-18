@@ -21,7 +21,7 @@ Origem: pedido do PO em 2026-11-18, depois da STORY-102: a tela Captação só l
 ## Critérios de aceite
 
 - [x] **CA-1:** A tela Captação vira um quadro com as colunas Nova, Em análise, Respondida e Encerrada. Toda demanda nasce em Nova.
-- [x] **CA-2:** O cartão muda de etapa arrastando ou pelos botões de etapa anterior/próxima (teclado e celular). Também pode voltar etapa.
+- [x] **CA-2:** O cartão muda de etapa arrastando ou pela etapa no detalhe do cartão (teclado e celular). Também pode voltar etapa. Sem botões no cartão, a pedido do PO, para não poluir o quadro.
 - [x] **CA-3:** O cartão abre um detalhe com contato, valor, prazo, etapa, responsável, campo de nota e histórico.
 - [x] **CA-4:** O responsável é escolhido entre quem tem acesso à captação. Pode ficar sem responsável.
 - [x] **CA-5:** Mudanças de etapa e de responsável entram sozinhas no histórico, com autor e hora. Notas da equipe também. Nada é editado nem apagado.

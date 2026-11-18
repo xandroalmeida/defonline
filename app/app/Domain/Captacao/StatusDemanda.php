@@ -30,20 +30,4 @@ enum StatusDemanda: string
     {
         return $this === self::Nova || $this === self::EmAnalise;
     }
-
-    public function anterior(): ?self
-    {
-        $todas = self::cases();
-        $i = array_search($this, $todas, true);
-
-        return $todas[$i - 1] ?? null;
-    }
-
-    public function proxima(): ?self
-    {
-        $todas = self::cases();
-        $i = array_search($this, $todas, true);
-
-        return $todas[$i + 1] ?? null;
-    }
 }

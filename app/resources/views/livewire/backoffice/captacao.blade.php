@@ -110,19 +110,6 @@
                                 @endif
                                 <span dusk="captacao-responsavel-{{ $demanda->id }}">{{ $demanda->responsavel?->nome ?? 'Sem responsável' }}</span>
                             </div>
-                            {{-- Teclado e celular: mover sem arrastar. --}}
-                            <div class="mt-2 flex justify-between">
-                                @if ($anterior = $status->anterior())
-                                    <x-button type="button" variant="secondary" size="sm" wire:click="mover('{{ $demanda->id }}', '{{ $anterior->value }}')"
-                                              aria-label="Mover para {{ $anterior->rotulo() }}" dusk="captacao-voltar-{{ $demanda->id }}">← {{ $anterior->rotulo() }}</x-button>
-                                @else
-                                    <span></span>
-                                @endif
-                                @if ($proxima = $status->proxima())
-                                    <x-button type="button" variant="secondary" size="sm" wire:click="mover('{{ $demanda->id }}', '{{ $proxima->value }}')"
-                                              aria-label="Mover para {{ $proxima->rotulo() }}" dusk="captacao-avancar-{{ $demanda->id }}">{{ $proxima->rotulo() }} →</x-button>
-                                @endif
-                            </div>
                         </li>
                     @empty
                         <li class="text-sm text-[color:var(--color-secondary)] px-1 py-3 text-center" dusk="captacao-coluna-vazia-{{ $valor }}">Nenhuma demanda.</li>

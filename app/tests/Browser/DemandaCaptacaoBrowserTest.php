@@ -84,11 +84,11 @@ final class DemandaCaptacaoBrowserTest extends DuskTestCase
                 JS);
 
             $browser->waitUsing(5, 100, fn () => $browser->element('[dusk="captacao-coluna-em_analise"] [dusk="captacao-cartao-'.$id.'"]') !== null)
-                // Sem arrastar: o botão leva para a próxima etapa.
-                ->click('@captacao-avancar-'.$id)
-                ->waitUsing(5, 100, fn () => $browser->element('[dusk="captacao-coluna-respondida"] [dusk="captacao-cartao-'.$id.'"]') !== null)
+                // Sem arrastar (teclado, celular): a etapa muda pelo detalhe do cartão.
                 ->click('@captacao-abrir-'.$id)
                 ->waitFor('@captacao-detalhe')
+                ->select('@captacao-detalhe-status', 'respondida')
+                ->waitForTextIn('@captacao-historico', 'Moveu de Em análise para Respondida.')
                 ->assertSeeIn('@captacao-detalhe', 'Roberto Souza')
                 ->select('@captacao-detalhe-responsavel', $admin->id)
                 ->waitForTextIn('@captacao-historico', 'Atribuiu a')
